@@ -8,6 +8,9 @@
   },
   "author": "Haad",
   "license": "ISC",
+  "engines" : {
+    "node" : "^4.x.x"
+    },
   "dependencies": {
     "asyncawait": "^1.0.1",
     "bluebird": "^3.1.1",
