@@ -15,7 +15,6 @@ orbit-server uses linked lists on top of IPFS.
 - channel.setMode()
 
 ## API
-
     connect(host, username, password)
 
     channel(name, password)
@@ -25,6 +24,8 @@ orbit-server uses linked lists on top of IPFS.
         .iterator([options])
 
         .delete()
+
+        .setMode(modes) // TODO
 
 ## Usage
 ```javascript

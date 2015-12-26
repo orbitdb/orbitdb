@@ -12,7 +12,7 @@ class HashCacheItem {
 
 class EncryptedHashCacheItem extends HashCacheItem {
   constructor(sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
-    super(sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt);
+    super(sequenceNumber, targetHash, metaInfo);
     this.pubkey  = publicKey;
     this.target  = encryption.encrypt(targetHash, privateKey, publicKey);
     this.payload = this.target; // old hash-cache api compatibility
