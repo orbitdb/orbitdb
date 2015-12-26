@@ -75,9 +75,6 @@ describe('Orbit Client', () => {
     it('connects to hash-cache-server', async((done) => {
       assert.notEqual(orbit, null);
       assert.notEqual(orbit.client, null);
-      assert.equal(orbit.host, host);
-      assert.equal(orbit.credentials.username, username);
-      assert.equal(orbit.credentials.password, password);
       done();
     }));
   });

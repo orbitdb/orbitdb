@@ -1,7 +1,5 @@
 'use strict';
 
-var encryption = require('./Encryption');
-
 class MetaInfo {
   constructor(type, size, ts) {
     this.type = type;

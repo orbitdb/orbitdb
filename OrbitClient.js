@@ -10,51 +10,37 @@ var MetaInfo      = require('./MetaInfo');
 var ItemTypes     = require('./ItemTypes');
 var Keystore      = require('./Keystore');
 var Post          = require('./Post');
-var encryption    = require('./Encryption');
+var Encryption    = require('./Encryption');
 
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;
 
-class OrbitClientFactory {
-  static connect(host, username, password, ipfs) {
-    if(!ipfs) {
-      var ipfsd = await(ipfsDaemon());
-      ipfs      = ipfsd.daemon;
-    }
-
-    var client = new OrbitClient(host, username, password, ipfs);
-    await(client._connect())
-    return client;
-  }
-}
-
 class OrbitClient {
-  constructor(host, username, password, ipfs) {
-    this.host        = host;
-    this.credentials = { username: username, password: password };
-    this.channels    = {};
-    this.ipfs        = ipfs;
+  constructor(ipfs) {
+    this.sequences = {};
+    this.ipfs = ipfs;
   }
 
   channel(hash, password) {
     return {
       iterator: (options) => this._iterator(hash, password, options),
       send: (text, options) => {
-        if(!this.channels[hash]) {
-          this.channels[hash] = { seq: 0 }
-          var item = await(this.client.linkedList(hash, password).head())
-          if(item.head) {
-            var headItem        = await (ipfsAPI.getObject(this.ipfs, item.head));
-            this.channels[hash] = { seq: JSON.parse(headItem.Data)["seq"] + 1 }
-          }
-        } else {
-          this.channels[hash] = { seq: this.channels[hash].seq + 1 }
-        }
+        this.sequences[hash] = !this.sequences[hash] ? this._getChannelSequence(hash, password) : this.sequences[hash] + 1;
         return this._send(hash, password, text, options);
       },
       delete: () => this._delete(hash, password),
-      setMode: (mode) => { /* TODO */ }
+      setMode: (mode) => this._setMode(hash, modes)
     }
+  }
+
+  _getChannelSequence(channel, password) {
+    var seq = 0
+    var item = await(this.client.linkedList(channel, password).head())
+    if(item.head) {
+      var headItem = await (ipfsAPI.getObject(this.ipfs, item.head));
+      seq = JSON.parse(headItem.Data)["seq"] + 1;
+    }
+    return seq;
   }
 
   _iterator(channel, password, options) {
@@ -118,7 +104,6 @@ class OrbitClient {
       }
     }
 
-    // return Promise.resolve(iterator);
     return iterator;
   }
 
@@ -129,12 +114,12 @@ class OrbitClient {
       var data = JSON.parse(item.Data);
 
       // verify
-      var verified = encryption.verify(data.target, data.pubkey, data.sig, data.seq, password);
+      var verified = Encryption.verify(data.target, data.pubkey, data.sig, data.seq, password);
       if(!verified) throw "Item '" + hash + "' has the wrong signature"
 
       // decrypt
-      var targetDec = encryption.decrypt(data.target, privkey, 'TODO: pubkey');
-      var metaDec   = encryption.decrypt(data.meta, privkey, 'TODO: pubkey');
+      var targetDec = Encryption.decrypt(data.target, privkey, 'TODO: pubkey');
+      var metaDec   = Encryption.decrypt(data.meta, privkey, 'TODO: pubkey');
       data.target   = targetDec;
       data.meta     = JSON.parse(metaDec);
       item.Data     = data;
@@ -171,7 +156,7 @@ class OrbitClient {
   }
 
   _createMessage(channel, password, post) {
-    var seq  = this.channels[channel].seq;
+    var seq  = this.sequences[channel];
     var size = -1;
     var metaInfo = new MetaInfo(ItemTypes.Message, size, new Date().getTime());
     var hcItem   = new HashCacheItem(seq, post.Hash, metaInfo, pubkey, privkey, password);
@@ -191,7 +176,7 @@ class OrbitClient {
 
   _send(channel, password, text, options) {
     // TODO: check options for what type to publish as (text, snippet, file, etc.)
-    var post    = this._publish(text);
+    var post = this._publish(text);
     var message = this._createMessage(channel, password, post);
     await(this.client.linkedList(channel, password).add(message.Hash))
     return message.Hash;
@@ -199,15 +184,32 @@ class OrbitClient {
 
   _delete(channel, password) {
     await(this.client.linkedList(channel, password).delete())
-    delete this.channels[channel];
+    delete this.sequences[channel];
     return true;
   }
 
-  _connect() {
-    this.client = await(HashCache.connect(this.host, this.credentials.username, this.credentials.password));
+  _setMode(channel, modes) {
+    /* TODO */
+  }
+
+  _connect(host, username, password) {
+    this.client = await(HashCache.connect(host, username, password));
     return;
   }
 
+}
+
+class OrbitClientFactory {
+  static connect(host, username, password, ipfs) {
+    if(!ipfs) {
+      var ipfsd = await(ipfsDaemon());
+      ipfs = ipfsd.daemon;
+    }
+
+    var client = new OrbitClient(ipfs);
+    await(client._connect(host, username, password))
+    return client;
+  }
 }
 
 module.exports = OrbitClientFactory;
