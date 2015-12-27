@@ -3,9 +3,10 @@
 var request = require('./BetterRequest');
 
 class HashCacheClient {
-  constructor(host, credentials) {
+  constructor(host, credentials, info) {
     this.host        = host
     this.credentials = credentials
+    this.info        = info;
     this.linkedList  = this.linkedList.bind(this)
   }
 
