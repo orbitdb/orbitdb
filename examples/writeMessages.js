@@ -23,7 +23,7 @@ let run = (async(() => {
     while(i < messages) {
       var timer = new Timer(true);
       // Send a message
-      var head = orbit.channel(channel, '').send('hello');
+      var head = orbit.channel(channel, '').send(JSON.stringify({ omg: "hello" }));
       console.log(i, head, timer.stop() + "ms");
       i ++;
     }
