@@ -35,7 +35,7 @@ describe('Orbit Client', () => {
   let head   = '';
   let second = '';
   let items  = [];
-  let channel = 'abc';
+  let channel = 'abc1';
 
   before(function(done) {
     // logger.setLevel('ERROR');
@@ -58,6 +58,7 @@ describe('Orbit Client', () => {
     // }
     var start = () => new Promise(async((resolve, reject) => {
       orbit = OrbitClient.connect(host, username, password);
+      orbit.channel(channel, 'hello').setMode({ mode: "-r" })
       resolve();
     }));
     start().then(done);
@@ -75,12 +76,17 @@ describe('Orbit Client', () => {
     it('connects to hash-cache-server', async((done) => {
       assert.notEqual(orbit, null);
       assert.notEqual(orbit.client, null);
+      assert.equal(orbit.user.id, 'QmcLzfQBKuvBYLsmgt4nkaUM7i7LNL37dPtnBZWgGpjPRW');
+      assert.equal(orbit.network.id, 'anon-test');
+      assert.equal(orbit.network.name, 'Anonymous Networks TEST');
+      assert.notEqual(orbit.network.config.SupernodeRouting, null);
+      assert.equal(orbit.network.config.Bootstrap.length, 3);
       done();
     }));
   });
 
-  describe('Delete channel', function() {
-    it('deletes a channel', async((done) => {
+  describe('Delete', function() {
+    it('deletes a channel from the database', async((done) => {
       var result = orbit.channel(channel, '').delete();
       assert.equal(result, true);
       var iter = orbit.channel(channel, '').iterator();
@@ -437,6 +443,81 @@ describe('Orbit Client', () => {
         }));
       });
     });
+
+  });
+
+
+  describe('Modes', function() {
+    var password = 'hello';
+
+    it('sets read mode', async((done) => {
+      try {
+        var mode = {
+          mode: "+r",
+          params: {
+            password: password
+          }
+        };
+        var res = orbit.channel(channel, '').setMode(mode)
+        assert.notEqual(res.modes.r, null);
+        assert.equal(res.modes.r.password, password);
+      } catch(e) {
+        assert.equal(e, null);
+      }
+      done();
+    }));
+
+    it('can\'t read with wrong password', async((done) => {
+      try {
+        var res = orbit.channel(channel, '').iterator();
+        assert.equal(true, false);
+      } catch(e) {
+        assert.equal(e, 'Unauthorized');
+      }
+      done();
+    }));
+
+    it('sets write mode', async((done) => {
+      try {
+        var mode = {
+          mode: "+w",
+          params: {
+            ops: [orbit.user.id]
+          }
+        };
+        var res = orbit.channel(channel, password).setMode(mode);
+        assert.notEqual(res.modes.w, null);
+        assert.equal(res.modes.w.ops[0], orbit.user.id);
+      } catch(e) {
+        assert.equal(e, null);
+      }
+      done();
+    }));
+
+    it('can\'t write when user not an op', async((done) => {
+      // TODO
+      done();
+    }));
+
+    it('removes write mode', async((done) => {
+      try {
+        var res = orbit.channel(channel, password).setMode({ mode: "-w" });
+        assert.equal(res.modes.w, null);
+      } catch(e) {
+        assert.equal(e, null);
+      }
+      done();
+    }));
+
+    it('removes read mode', async((done) => {
+      try {
+        var res = orbit.channel(channel, password).setMode({ mode: "-r" });
+        assert.equal(res.modes.r, null);
+      } catch(e) {
+        assert.equal(e, null);
+      }
+      done();
+    }));
 
   });
 

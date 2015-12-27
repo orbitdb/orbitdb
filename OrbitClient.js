@@ -19,6 +19,8 @@ class OrbitClient {
   constructor(ipfs) {
     this.sequences = {};
     this.ipfs = ipfs;
+    this.network = {};
+    this.user = null;
   }
 
   channel(hash, password) {
@@ -29,7 +31,7 @@ class OrbitClient {
         return this._send(hash, password, text, options);
       },
       delete: () => this._delete(hash, password),
-      setMode: (mode) => this._setMode(hash, modes)
+      setMode: (mode) => this._setMode(hash, password, mode)
     }
   }
 
@@ -43,7 +45,7 @@ class OrbitClient {
     return seq;
   }
 
-  _iterator(channel, password, options) {
+  _getMessages(channel, password, options) {
     var currentIndex  = 0;
     var messages = [];
 
@@ -69,13 +71,13 @@ class OrbitClient {
 
     if(startFromHash) {
       // Get messages
-      messages = this._fetchRecursive(startFromHash, password, limit, gte ? gte : gt, 0);
+      messages = this._fetchRecursive(startFromHash, password, limit, gte ? gte : gt);
 
       // Slice the array
       var startIndex = 0;
       var endIndex   = messages.length;
       if(limit > -1) {
-        startIndex = Math.max(messages.length - limit, 0);
+        startIndex = Math.max(0, messages.length - limit);
         endIndex   = messages.length - ((gt || lt) ? 1 : 0);
       } else if(limit === -1) {
         endIndex = messages.length - (gt ? 1 : 0);
@@ -85,6 +87,9 @@ class OrbitClient {
     }
 
     if(reverse) messages.reverse();
+
+  _iterator(channel, password, options) {
+    var messages = this._getMessages(channel, password, options);
 
     // Iterator interface implementation
     let iterator = {
@@ -129,6 +134,8 @@ class OrbitClient {
 
   _fetchRecursive(hash, password, amount, last, currentDepth) {
     var res = [];
+
+    if(!currentDepth) currentDepth = 0;
 
     if(!last && amount > -1 && currentDepth >= amount)
       return res;
@@ -188,12 +195,23 @@ class OrbitClient {
     return true;
   }
 
-  _setMode(channel, modes) {
-    /* TODO */
+  _setMode(channel, password, modes) {
+    var m = []
+    if(typeof modes !== 'Array')
+      m.push(modes);
+    else
+      m = modes;
+    return await(this.client.linkedList(channel, password).setMode(m))
   }
 
   _connect(host, username, password) {
     this.client = await(HashCache.connect(host, username, password));
+    this.user = this.client.info.user;
+    this.network = {
+      id: this.client.info.networkId,
+      name: this.client.info.name,
+      config: this.client.info.config
+    };
     return;
   }
 

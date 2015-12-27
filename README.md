@@ -63,7 +63,15 @@ async(() => {
     // for(let i of iter)
     //   console.log(i.hash, i.item.Data.seq);
 
-    // delete channel
+    // Set modes
+    var password = 'hello';
+    var channelModes;
+    channelModes = orbit.channel(channel, channelPwd).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
+    channelModes = orbit.channel(channel, password).setMode({ mode: "+w", params: { ops: [orbit.user.id] } }); // { modes: { ... } }
+    channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }
+    channelModes = orbit.channel(channel, '').setMode({ mode: "-w" }); // { modes: {} }
+
+    // Delete channel
     var result = orbit.channel(channelName, channelPwd).delete(); // true | false
 })();
 ```
