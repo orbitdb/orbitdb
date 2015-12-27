@@ -14,11 +14,11 @@ class EncryptedHashCacheItem extends HashCacheItem {
   constructor(sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
     super(sequenceNumber, targetHash, metaInfo);
     this.pubkey  = publicKey;
-    this.target  = encryption.encrypt(targetHash, privateKey, publicKey);
-    this.payload = this.target; // old hash-cache api compatibility
-    this.meta    = encryption.encrypt(JSON.stringify(metaInfo), privateKey, publicKey);
     try {
-      this.sig = encryption.sign(this.target, privateKey, this.seq, salt || "");
+      this.target  = encryption.encrypt(targetHash, privateKey, publicKey);
+      this.payload = this.target; // old hash-cache api compatibility
+      this.meta    = encryption.encrypt(JSON.stringify(metaInfo), privateKey, publicKey);
+      this.sig     = encryption.sign(this.target, privateKey, this.seq, salt || "");
     } catch(e) {
       console.log("Signing HashCacheItem failed:", e);
     }
