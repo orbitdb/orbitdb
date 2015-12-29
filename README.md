@@ -6,13 +6,17 @@
 
 Client library to interact with orbit-server. Implements the levelDOWN API without get(key, cb).
 
-orbit-server uses linked lists on top of IPFS. 
+orbit-server uses linked lists on top of IPFS. orbit-server not *yet* released, working on it.
 
 ### TODO
 - local caching of messages
 - channel.send()
-    - check options for what type to publish as (text, snippet, file, etc.)
-- channel.setMode()
+    - API for sending a file
+- use HTTPS instead of HTTP (channel password are sent in plaintext atm)
+- API for fetching message content
+- API for fetching user info
+- OrbitNetwork
+    + channel system (join, part, pub/sub)
 
 ## API
     connect(host, username, password)
@@ -25,7 +29,7 @@ orbit-server uses linked lists on top of IPFS.
 
         .delete()
 
-        .setMode(modes) // TODO
+        .setMode(modes)
 
 ## Usage
 ```javascript
