@@ -46,7 +46,6 @@ class OrbitClient {
   }
 
   _getMessages(channel, password, options) {
-    var currentIndex  = 0;
     var messages = [];
 
     if(!options) options = {};
@@ -88,10 +87,14 @@ class OrbitClient {
 
     if(reverse) messages.reverse();
 
+    return messages;
+  }
+
   _iterator(channel, password, options) {
     var messages = this._getMessages(channel, password, options);
 
     // Iterator interface implementation
+    var currentIndex = 0;
     let iterator = {
       [Symbol.iterator]() {
         return this;
