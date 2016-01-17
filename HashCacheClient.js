@@ -54,6 +54,7 @@ class HashCacheClient {
       request
         .delete(this.host + '/channel/' + hash)
         .set('Authorization', this.credentials)
+        .send({ password: password })
         .end((err, res) => { this._resolveRequest(err, res, resolve, reject) });
     })
   }
