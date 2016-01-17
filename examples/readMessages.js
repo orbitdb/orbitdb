@@ -29,7 +29,7 @@ let run = (async(() => {
     var iter = orbit.channel(channel, '').iterator(options);
 
     for(let i of iter) {
-      console.log(i.item.Data.seq, i.hash, "ts: " + i.item.Data.meta.ts);
+      console.log(i.item.Data.seq, i.item.Data.op, i.hash, "ts: " + i.item.Data.meta.ts, i.item.Payload);
     }
 
     console.log("Fetch messages took " + timer.stop() + "ms");

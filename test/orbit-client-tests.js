@@ -35,7 +35,7 @@ describe('Orbit Client', () => {
   let head   = '';
   let second = '';
   let items  = [];
-  let channel = 'abc1';
+  let channel = 'abcde';
 
   before(function(done) {
     // logger.setLevel('ERROR');
@@ -58,17 +58,21 @@ describe('Orbit Client', () => {
     // }
     var start = () => new Promise(async((resolve, reject) => {
       orbit = OrbitClient.connect(host, username, password);
-      orbit.channel(channel, 'hello').setMode({ mode: "-r" })
+      // orbit.channel(channel, 'hello').setMode({ mode: "-r" })
       resolve();
     }));
     start().then(done);
   });
 
   after(function(done) {
+    var deleteChannel = () => new Promise(async((resolve, reject) => {
+      orbit.channel(channel, '').delete();
+      resolve();
+    }));
+    deleteChannel().then(done);
     // server.shutdown();
     // httpServer.close();
     // rmDir(serverConfig.userDataPath);
-    done();
   });
 
   /* TESTS */
@@ -80,9 +84,52 @@ describe('Orbit Client', () => {
       assert.equal(orbit.network.id, 'anon-test');
       assert.equal(orbit.network.name, 'Anonymous Networks TEST');
       assert.notEqual(orbit.network.config.SupernodeRouting, null);
-      assert.equal(orbit.network.config.Bootstrap.length, 3);
+      assert.notEqual(orbit.network.config.Bootstrap.length, 0);
       done();
     }));
+  });
+
+  describe('Info', function() {
+    it('gets channel info on empty channel', async((done) => {
+      var info = orbit.channel(channel, '').info();
+      assert.notEqual(info, null);
+      assert.equal(info.head, null);
+      assert.notEqual(info.modes, null);
+      done();
+    }));
+
+    it('gets channel info on an existing channel', async((done) => {
+      var msg  = orbit.channel(channel, '').put('hello');
+      var info = orbit.channel(channel, '').info();
+      assert.notEqual(info, null);
+      assert.equal(info.head, msg);
+      assert.notEqual(info.modes, null);
+      assert.equal(info.modes.r, null);
+      done();
+    }));
+
+    it('gets channel info when channel has modes set', async((done) => {
+      try {
+        orbit.channel(channel).delete();
+        var mode = {
+          mode: "+r",
+          params: {
+            password: 'password'
+          }
+        };
+        var res = orbit.channel(channel, '').setMode(mode)
+        var info = orbit.channel(channel, 'password').info();
+        assert.notEqual(info, null);
+        assert.equal(info.head, null);
+        assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
+        orbit.channel(channel, 'password').delete();
+      } catch(e) {
+        orbit.channel(channel, 'password').delete();
+        assert.equal(e, null);
+      }
+      done();
+    }));
+
   });
 
   describe('Delete', function() {
@@ -110,7 +157,7 @@ describe('Orbit Client', () => {
   describe('Insert', function() {
     it('adds an item to an empty channel', async((done) => {
       try {
-        head  = orbit.channel(channel, '').send('hello');
+        head  = orbit.channel(channel, '').put('hello');
         assert.notEqual(head, null);
         assert.equal(head.startsWith('Qm'), true);
         assert.equal(head.length, 46);
@@ -122,7 +169,7 @@ describe('Orbit Client', () => {
 
     it('adds a new item to a channel with one item', async((done) => {
       try {
-        second  = orbit.channel(channel, '').send('hello');
+        second  = orbit.channel(channel, '').put('hello');
         assert.notEqual(second, null);
         assert.notEqual(second, head);
         assert.equal(second.startsWith('Qm'), true);
@@ -136,7 +183,7 @@ describe('Orbit Client', () => {
     it('adds five items', async((done) => {
       for(var i = 0; i < 5; i ++) {
         try {
-          var s = orbit.channel(channel, '').send('hello');
+          var s = orbit.channel(channel, '').put('hello');
           assert.notEqual(s, null);
           assert.equal(s.startsWith('Qm'), true);
           assert.equal(s.length, 46);
@@ -151,7 +198,7 @@ describe('Orbit Client', () => {
       try {
         var msg = new Buffer(512);
         msg.fill('a')
-        var s = orbit.channel(channel, '').send(msg.toString());
+        var s = orbit.channel(channel, '').put(msg.toString());
         assert.notEqual(s, null);
         assert.equal(s.startsWith('Qm'), true);
         assert.equal(s.length, 46);
@@ -172,7 +219,7 @@ describe('Orbit Client', () => {
         var result = orbit.channel(channel, '').delete();
         var iter   = orbit.channel(channel, '').iterator();
         for(var i = 0; i < itemCount; i ++) {
-          var s = orbit.channel(channel, '').send('hello');
+          var s = orbit.channel(channel, '').put('hello' + i);
           items.push(s);
         }
         resolve();
@@ -183,8 +230,15 @@ describe('Orbit Client', () => {
     describe('Defaults', function() {
       it('returns an iterator', async((done) => {
         var iter = orbit.channel(channel, '').iterator();
+        var next = iter.next().value;
         assert.notEqual(iter, null);
-        assert.notEqual(iter.next, null);
+        assert.notEqual(next, null);
+        assert.notEqual(next.item, null);
+        assert.notEqual(next.item.Links, null);
+        assert.notEqual(next.item.Data, null);
+        assert.equal(next.item.Data.seq, 4);
+        assert.notEqual(next.item.Payload, null);
+        assert.equal(next.item.Payload, 'hello4');
         done();
       }));
 
@@ -205,6 +259,7 @@ describe('Orbit Client', () => {
         var second = iter.next().value;
         assert.equal(first.hash, items[items.length - 1]);
         assert.equal(second, null);
+        assert.equal(first.item.Payload, 'hello4');
         done();
       }));
     });
@@ -214,6 +269,8 @@ describe('Orbit Client', () => {
         var iter = orbit.channel(channel, '').iterator({ limit: -1 });
         var messages = iter.collect();
         assert.equal(messages.length, items.length);
+        assert.equal(messages[messages.length - 1].item.Payload, 'hello0');
+        assert.equal(messages[0].item.Payload, 'hello4');
         done();
       }));
 
@@ -458,9 +515,9 @@ describe('Orbit Client', () => {
             password: password
           }
         };
-        var res = orbit.channel(channel, '').setMode(mode)
-        assert.notEqual(res.modes.r, null);
-        assert.equal(res.modes.r.password, password);
+        var modes = orbit.channel(channel, '').setMode(mode)
+        assert.notEqual(modes.r, null);
+        assert.equal(modes.r.password, password);
       } catch(e) {
         assert.equal(e, null);
       }
@@ -469,7 +526,7 @@ describe('Orbit Client', () => {
 
     it('can\'t read with wrong password', async((done) => {
       try {
-        var res = orbit.channel(channel, '').iterator();
+        var modes = orbit.channel(channel, '').iterator();
         assert.equal(true, false);
       } catch(e) {
         assert.equal(e, 'Unauthorized');
@@ -485,9 +542,9 @@ describe('Orbit Client', () => {
             ops: [orbit.user.id]
           }
         };
-        var res = orbit.channel(channel, password).setMode(mode);
-        assert.notEqual(res.modes.w, null);
-        assert.equal(res.modes.w.ops[0], orbit.user.id);
+        var modes = orbit.channel(channel, password).setMode(mode);
+        assert.notEqual(modes.w, null);
+        assert.equal(modes.w.ops[0], orbit.user.id);
       } catch(e) {
         assert.equal(e, null);
       }
@@ -501,8 +558,8 @@ describe('Orbit Client', () => {
 
     it('removes write mode', async((done) => {
       try {
-        var res = orbit.channel(channel, password).setMode({ mode: "-w" });
-        assert.equal(res.modes.w, null);
+        var modes = orbit.channel(channel, password).setMode({ mode: "-w" });
+        assert.equal(modes.w, null);
       } catch(e) {
         assert.equal(e, null);
       }
@@ -511,8 +568,8 @@ describe('Orbit Client', () => {
 
     it('removes read mode', async((done) => {
       try {
-        var res = orbit.channel(channel, password).setMode({ mode: "-r" });
-        assert.equal(res.modes.r, null);
+        var modes = orbit.channel(channel, password).setMode({ mode: "-r" });
+        assert.equal(modes.r, null);
       } catch(e) {
         assert.equal(e, null);
       }
