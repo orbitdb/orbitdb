@@ -64,10 +64,15 @@ async(() => {
     // Get messages
     var iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
     var next  = iter.next(); // { value: <item>, done: false|true}
+    // OR:
+    // var all = iter.collect(); // returns all elements as an array
 
     // OR:
     // for(let i of iter)
     //   console.log(i.hash, i.item.Data.seq);
+
+    // Remove element
+    orbit.channel(channelName).remove(next.hash); // remove first element iterator returns
 
     // Set modes
     var password = 'hello';
