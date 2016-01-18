@@ -72,7 +72,7 @@ async(() => {
     //   console.log(i.hash, i.item.Data.seq);
 
     // Remove element
-    orbit.channel(channelName).remove(next.hash); // remove first element iterator returns
+    orbit.channel(channelName).remove(next.value.hash); // remove first element iterator returns
 
     // Set modes
     var password = 'hello';
