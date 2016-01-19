@@ -88,7 +88,7 @@ async(() => {
 
     // Modes
     const password = 'hello';
-    const channelModes;
+    let channelModes;
     channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
     channelModes = orbit.channel(channel, password).setMode({ mode: "+w", params: { ops: [orbit.user.id] } }); // { modes: { ... } }
     channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }

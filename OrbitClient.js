@@ -43,8 +43,6 @@ class OrbitClient {
 
   _iterator(channel, password, options) {
     const messages = this._getMessages(channel, password, options);
-
-    // Iterator interface implementation
     let currentIndex = 0;
     let iterator = {
       [Symbol.iterator]() {
@@ -59,6 +57,7 @@ class OrbitClient {
         return item;
       },
       collect: () => messages
+      // TODO: add first() and last() ?
     }
 
     return iterator;
