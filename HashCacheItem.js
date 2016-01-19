@@ -1,11 +1,12 @@
 'use strict';
 
-let encryption = require('./Encryption');
+const encryption = require('./Encryption');
 
-let HashCacheOps = {
+const HashCacheOps = {
   Add: "ADD",
+  Put: "PUT",
   Delete: "DELETE"
-}
+};
 
 class HashCacheItem {
   constructor(operation, sequenceNumber, targetHash, metaInfo) {
@@ -31,8 +32,16 @@ class EncryptedHashCacheItem extends HashCacheItem {
   }
 }
 
+class KeyedEncryptedHashCacheItem extends EncryptedHashCacheItem {
+  constructor(operation, key, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
+    super(operation, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt);
+    this.key = key;
+  }
+}
+
 module.exports = {
   HashCacheOps: HashCacheOps,
   HashCacheItem: HashCacheItem,
-  EncryptedHashCacheItem: EncryptedHashCacheItem
+  EncryptedHashCacheItem: EncryptedHashCacheItem,
+  KeyedEncryptedHashCacheItem: KeyedEncryptedHashCacheItem
 };

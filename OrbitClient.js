@@ -6,6 +6,7 @@ var ipfsDaemon    = require('./ipfs-daemon');
 var ipfsAPI       = require('./ipfs-api-promised');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
+var KeyedHashCacheItem = require('./HashCacheItem').KeyedEncryptedHashCacheItem;
 var HashCacheOps  = require('./HashCacheItem').HashCacheOps;
 var MetaInfo      = require('./MetaInfo');
 var ItemTypes     = require('./ItemTypes');
@@ -29,13 +30,24 @@ class OrbitClient {
     return {
       info: (options) => this._info(hash, password),
       iterator: (options) => this._iterator(hash, password, options),
-      put: (text, options) => {
+      add: (text, options) => {
+        // TODO: create updateChannelSequence(), move the update to send() and remove()
         this.sequences[hash] = !this.sequences[hash] ? this._getChannelSequence(hash, password) : this.sequences[hash] + 1;
         return this._send(hash, password, text, options);
       },
-      remove: (targetHash) => {
+      put: (key, data, options) => {
         this.sequences[hash] = !this.sequences[hash] ? this._getChannelSequence(hash, password) : this.sequences[hash] + 1;
-        return this._remove(hash, password, targetHash);
+        return this._put(hash, password, key, data, options);
+      },
+      get: (key, options) => {
+        options = options ? Object.assign(options, { key: key }) : { key: key }
+        // console.log(JSON.stringify(this._iterator(hash, password, options).collect()));
+        const items = this._iterator(hash, password, options).collect();
+        return items[0] ? items[0].item.Payload : null;
+      },
+      remove: (options) => {
+        this.sequences[hash] = !this.sequences[hash] ? this._getChannelSequence(hash, password) : this.sequences[hash] + 1;
+        return this._remove(hash, password, options);
       },
       delete: () => this._delete(hash, password),
       setMode: (mode) => this._setMode(hash, password, mode)
@@ -52,6 +64,29 @@ class OrbitClient {
     return seq;
   }
 
+  _iterator(channel, password, options) {
+    const messages = this._getMessages(channel, password, options);
+
+    // Iterator interface implementation
+    let currentIndex = 0;
+    let iterator = {
+      [Symbol.iterator]() {
+        return this;
+      },
+      next: () => {
+        let item = { value: null, done: true };
+        if(currentIndex < messages.length) {
+          item = { value: messages[currentIndex], done: false };
+          currentIndex ++;
+        }
+        return item;
+      },
+      collect: () => messages
+    }
+
+    return iterator;
+  }
+
   _getMessages(channel, password, options) {
     var messages = [];
 
@@ -64,6 +99,7 @@ class OrbitClient {
     var lt      = options.lt ? options.lt : null;
     var lte     = options.lte ? options.lte : null;
     var reverse = options.reverse ? options.reverse : false;
+    var key     = options.key ? options.key : null;
 
     var startFromHash;
     if(lt || lte) {
@@ -77,7 +113,7 @@ class OrbitClient {
 
     if(startFromHash) {
       // Get messages
-      messages = this._fetchRecursive(startFromHash, password, limit, gte ? gte : gt);
+      messages = this._fetchRecursive(startFromHash, password, limit, gte ? gte : gt, 0, [], key);
 
       // Slice the array
       var startIndex = 0;
@@ -97,50 +133,28 @@ class OrbitClient {
     return messages;
   }
 
-  _iterator(channel, password, options) {
-    var messages = this._getMessages(channel, password, options);
-
-    // Iterator interface implementation
-    var currentIndex = 0;
-    let iterator = {
-      [Symbol.iterator]() {
-        return this;
-      },
-      next: () => {
-        var item = { value: null, done: true };
-        if(currentIndex < messages.length) {
-          item = { value: messages[currentIndex], done: false };
-          currentIndex ++;
-        }
-        return item;
-      },
-      collect: () => messages
-    }
-
-    return iterator;
-  }
-
   _fetchOne(hash, password) {
-    var item = null;
+    let item = null;
     if(hash) {
       item = await (ipfsAPI.getObject(this.ipfs, hash));
       let data = JSON.parse(item.Data);
 
-      // verify
+      // verify signature
       const verified = Encryption.verify(data.target, data.pubkey, data.sig, data.seq, password);
       if(!verified) throw "Item '" + hash + "' has the wrong signature"
 
-      // decrypt
+      // decrypt data structure
       const targetDec = Encryption.decrypt(data.target, privkey, 'TODO: pubkey');
       const metaDec   = Encryption.decrypt(data.meta, privkey, 'TODO: pubkey');
-      data.target   = targetDec;
-      data.meta     = JSON.parse(metaDec);
+      data.target     = targetDec;
+      data.meta       = JSON.parse(metaDec);
 
-      if(data.op === HashCacheOps.Add) {
-        const payload = await (ipfsAPI.getObject(this.ipfs, data.target));
+      // fetch and decrypt content
+      if(data.op === HashCacheOps.Add || data.op === HashCacheOps.Put) {
+        const payload    = await (ipfsAPI.getObject(this.ipfs, data.target));
         const contentEnc = JSON.parse(payload.Data)["content"];
         const contentDec = Encryption.decrypt(contentEnc, privkey, 'TODO: pubkey');
-        item.Payload = contentDec;
+        item.Payload     = contentDec;
       }
 
       item.Data = data;
@@ -157,7 +171,7 @@ class OrbitClient {
     return contains;
   }
 
-  _fetchRecursive(hash, password, amount, last, currentDepth, deleted) {
+  _fetchRecursive(hash, password, amount, last, currentDepth, deleted, key) {
     var res = [];
     var deletedItems = deleted ? deleted : [];
 
@@ -165,21 +179,32 @@ class OrbitClient {
 
     var message = await (this._fetchOne(hash, password));
 
+    // console.log(message);
+
     if(message.Data.op === HashCacheOps.Add && !this._contains(deletedItems, hash)) {
       res.push({ hash: hash, item: message });
       currentDepth ++;
+    } else if(message.Data.op === HashCacheOps.Put && !this._contains(deletedItems, message.Data.key)) {
+      if(!key || key && key === message.Data.key) {
+        res.push({ hash: hash, item: message });
+        currentDepth ++;
+        deletedItems.push(message.Data.key);
+      }
     } else if(message.Data.op === HashCacheOps.Delete) {
       deletedItems.push(message.Data.target);
     }
 
-    if((last && hash === last))
+    if(key && message.Data.key === key)
+      return res;
+
+    if(last && hash === last)
       return res;
 
     if(!last && amount > -1 && currentDepth >= amount)
       return res;
 
     if(message && message.Links[0]) {
-      var next = this._fetchRecursive(message.Links[0].Hash, password, amount, last, currentDepth, deletedItems);
+      var next = this._fetchRecursive(message.Links[0].Hash, password, amount, last, currentDepth, deletedItems, key);
       res = res.concat(next);
     }
 
@@ -192,11 +217,16 @@ class OrbitClient {
     return await (ipfsAPI.putObject(this.ipfs, JSON.stringify(post)));
   }
 
-  _createMessage(channel, password, target, operation) {
+  _createMessage(channel, password, key, target, operation, options) {
     var seq  = this.sequences[channel];
     var size = -1;
     var metaInfo = new MetaInfo(ItemTypes.Message, size, new Date().getTime());
-    var hcItem   = new HashCacheItem(operation, seq, target, metaInfo, pubkey, privkey, password);
+    var hcItem;
+    if(operation === HashCacheOps.Put)
+      hcItem = new KeyedHashCacheItem(operation, key, seq, target, metaInfo, pubkey, privkey, password);
+    else
+      hcItem = new HashCacheItem(operation, seq, target, metaInfo, pubkey, privkey, password);
+
     var item     = await (ipfsAPI.putObject(this.ipfs, JSON.stringify(hcItem)));
     var newHead  = { Hash: item.Hash };
 
@@ -213,13 +243,23 @@ class OrbitClient {
   _send(channel, password, text, options) {
     // TODO: check options for what type to publish as (text, snippet, file, etc.)
     var post = this._publish(text);
-    var message = this._createMessage(channel, password, post.Hash, HashCacheOps.Add);
+    var message = this._createMessage(channel, password, null, post.Hash, HashCacheOps.Add);
     await(this.client.linkedList(channel, password).add(message.Hash));
     return message.Hash;
   }
 
-  _remove(channel, password, target) {
-    var message = this._createMessage(channel, password, target, HashCacheOps.Delete);
+  // WIP
+  _put(channel, password, key, data, options) {
+    // TODO: options
+    var post = this._publish(data);
+    var message = this._createMessage(channel, password, key, post.Hash, HashCacheOps.Put);
+    await(this.client.linkedList(channel, password).add(message.Hash));
+    return message.Hash;
+  }
+
+  _remove(channel, password, options) {
+    const target  = options.key ? options.key : (options.hash ? options.hash : null);
+    const message = this._createMessage(channel, password, null, target, HashCacheOps.Delete);
     await(this.client.linkedList(channel, password).add(message.Hash))
     return message.Hash;
   }

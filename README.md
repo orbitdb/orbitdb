@@ -21,9 +21,11 @@ orbit-server uses linked lists on top of IPFS. orbit-server not *yet* released, 
 
     channel(name, password)
 
-        .put(text)
+        .add(data: String)
 
-        .remove(hash)
+        .put(key, data: String)
+
+        .remove(hash or key)
 
         .iterator([options])
 
@@ -40,18 +42,18 @@ var host = 'localhost:3006'; // orbit-server address
 
 async(() => {
     // Connect
-    var orbit = OrbitClient.connect(host, username, password); // OrbitClient
+    const orbit = OrbitClient.connect(host, username, password); // OrbitClient
 
-    var channelName = 'hello-world';
+    const channelName = 'hello-world';
 
     // Send a message
-    var head = orbit.channel(channelName).send('hello'); // <ipfs-hash>
+    const head = orbit.channel(channelName).send('hello'); // <ipfs-hash>
 
     // Delete a message
     orbit.channel(channelName).remove(head);
 
     // Iterator options
-    var options  = { limit: -1 }; // fetch all messages, default is 1
+    const options  = { limit: -1 }; // fetch all messages, default is 1
     // { 
     //   gt: <hash>, 
     //   gte: <hash>,
@@ -62,8 +64,8 @@ async(() => {
     // }
 
     // Get messages
-    var iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
-    var next  = iter.next(); // { value: <item>, done: false|true}
+    const iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
+    const next  = iter.next(); // { value: <item>, done: false|true}
     // OR:
     // var all = iter.collect(); // returns all elements as an array
 
@@ -75,14 +77,14 @@ async(() => {
     orbit.channel(channelName).remove(next.value.hash); // remove first element iterator returns
 
     // Set modes
-    var password = 'hello';
-    var channelModes;
+    const password = 'hello';
+    const channelModes;
     channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
     channelModes = orbit.channel(channel, password).setMode({ mode: "+w", params: { ops: [orbit.user.id] } }); // { modes: { ... } }
     channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }
     channelModes = orbit.channel(channel, '').setMode({ mode: "-w" }); // { modes: {} }
 
     // Delete channel
-    var result = orbit.channel(channelName, channelPwd).delete(); // true | false
+    const result = orbit.channel(channelName, channelPwd).delete(); // true | false
 })();
 ```

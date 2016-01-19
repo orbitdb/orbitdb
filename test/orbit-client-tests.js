@@ -99,7 +99,7 @@ describe('Orbit Client', () => {
     }));
 
     it('gets channel info on an existing channel', async((done) => {
-      var msg  = orbit.channel(channel, '').put('hello');
+      var msg  = orbit.channel(channel, '').add('hello');
       var info = orbit.channel(channel, '').info();
       assert.notEqual(info, null);
       assert.equal(info.head, msg);
@@ -157,7 +157,7 @@ describe('Orbit Client', () => {
   describe('Insert', function() {
     it('adds an item to an empty channel', async((done) => {
       try {
-        head  = orbit.channel(channel, '').put('hello');
+        head  = orbit.channel(channel, '').add('hello');
         assert.notEqual(head, null);
         assert.equal(head.startsWith('Qm'), true);
         assert.equal(head.length, 46);
@@ -169,7 +169,7 @@ describe('Orbit Client', () => {
 
     it('adds a new item to a channel with one item', async((done) => {
       try {
-        second  = orbit.channel(channel, '').put('hello');
+        second  = orbit.channel(channel, '').add('hello');
         assert.notEqual(second, null);
         assert.notEqual(second, head);
         assert.equal(second.startsWith('Qm'), true);
@@ -183,7 +183,7 @@ describe('Orbit Client', () => {
     it('adds five items', async((done) => {
       for(var i = 0; i < 5; i ++) {
         try {
-          var s = orbit.channel(channel, '').put('hello');
+          var s = orbit.channel(channel, '').add('hello');
           assert.notEqual(s, null);
           assert.equal(s.startsWith('Qm'), true);
           assert.equal(s.length, 46);
@@ -198,7 +198,7 @@ describe('Orbit Client', () => {
       try {
         var msg = new Buffer(512);
         msg.fill('a')
-        var s = orbit.channel(channel, '').put(msg.toString());
+        var s = orbit.channel(channel, '').add(msg.toString());
         assert.notEqual(s, null);
         assert.equal(s.startsWith('Qm'), true);
         assert.equal(s.length, 46);
@@ -219,7 +219,7 @@ describe('Orbit Client', () => {
         var result = orbit.channel(channel, '').delete();
         var iter   = orbit.channel(channel, '').iterator();
         for(var i = 0; i < itemCount; i ++) {
-          var s = orbit.channel(channel, '').put('hello' + i);
+          var s = orbit.channel(channel, '').add('hello' + i);
           items.push(s);
         }
         resolve();
