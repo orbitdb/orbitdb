@@ -2,36 +2,52 @@
 
 ## Introduction
 
-***VERY MUCH WIP! WILL NOT WORK WHEN CLONED, orbit-server REQUIRED!***
+Key-Value Store and Event Store on IPFS.
 
-Client library to interact with orbit-server. Implements the levelDOWN API without get(key, cb).
+***VERY MUCH WIP! WILL NOT WORK WHEN CLONED, orbit-server (not released yet) REQUIRED!***
 
-orbit-server uses linked lists on top of IPFS. orbit-server not *yet* released, working on it.
+## Features
+- Distributed kv-store and event log database
+- Stores all data in IPFS
+- Data encrypted on the wire and at rest
+- Per channel access rights
 
-### TODO
-- Tests for .remove(...)
-- Local caching of messages
-- Use HTTPS instead of HTTP (channel password are sent in plaintext atm)
-- API for fetching user info
-- OrbitNetwork
-    + channel system (join, part, pub/sub)
+_Channel maps to "table", "keyspace", "topic" or "feed" in similar systems_
 
 ## API
     connect(host, username, password)
 
     channel(name, password)
 
-        .add(data: String)
+        .add(data: String) // Insert an event to a channel, returns <ipfs-hash> of the event
 
-        .put(key, data: String)
+        .iterator([options]) // Returns an iterator of events
 
-        .remove(hash or key)
+            // options : { 
+            //   gt: <ipfs-hash>,   // Return events newer than <ipfs-hash>
+            //   gte: <ipfs-hash>,  // Return events newer then <ipfs-hash> (inclusive)
+            //   lt: <ipfs-hash>,   // Return events older than <ipfs-hash>
+            //   lte: <ipfs-hash>,  // Return events older than <ipfs-hash> (inclusive)
+            //   limit: -1,         // Number of events to return, -1 returns all, default 1
+            //   reverse: true      // Return items oldest first, default latest first
+            // }
 
-        .iterator([options])
+        .put(key, data: String) // Insert (key,value) to a channel
 
-        .setMode(modes)
+        .get(key) // Retrieve value
 
-        .delete()
+        .remove({ key: <key>, hash: <event's ipfs-hash> }) // Remove entry (use one option)
+
+        .setMode(modes) // Set channel modes, can be an object or an array of objects
+
+            // { mode: "+r", params: { password: password } }   // Set read mode
+            // { mode: "-r" }                                   // Remove read-mode
+            // { mode: "+w", params: { ops: [orbit.user.id] } } // Set write-mode, only users in ops can write
+            // { mode: "-w" }                                   // Remove write-mode
+
+        .info() // Returns channel's current head and modes
+
+        .delete() // Deletes the channel, all data will be "removed" (unassociated with the channel, actual data is not deleted)
 
 ## Usage
 ```javascript
@@ -42,41 +58,35 @@ var host = 'localhost:3006'; // orbit-server address
 
 async(() => {
     // Connect
-    const orbit = OrbitClient.connect(host, username, password); // OrbitClient
+    const orbit = OrbitClient.connect(host, username, password);
 
     const channelName = 'hello-world';
 
-    // Send a message
-    const head = orbit.channel(channelName).send('hello'); // <ipfs-hash>
+    // Send an event
+    const head = orbit.channel(channelName).add('hello'); // <ipfs-hash>
 
-    // Delete a message
+    // Delete an event
     orbit.channel(channelName).remove(head);
 
     // Iterator options
-    const options  = { limit: -1 }; // fetch all messages, default is 1
-    // { 
-    //   gt: <hash>, 
-    //   gte: <hash>,
-    //   lt: <hash>,
-    //   lte: <hash>,
-    //   limit: 10,
-    //   reverse: true
-    // }
+    const options  = { limit: -1 }; // fetch all messages
 
-    // Get messages
+    // Get events
     const iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
     const next  = iter.next(); // { value: <item>, done: false|true}
+
     // OR:
     // var all = iter.collect(); // returns all elements as an array
 
     // OR:
     // for(let i of iter)
-    //   console.log(i.hash, i.item.Data.seq);
+    //   console.log(i.hash, i.item);
 
-    // Remove element
-    orbit.channel(channelName).remove(next.value.hash); // remove first element iterator returns
+    // KV-store
+    orbit.channel(channelName).put("key1", "hello world");
+    orbit.channel(channelName).get("key1"); // returns "hello world"
 
-    // Set modes
+    // Modes
     const password = 'hello';
     const channelModes;
     channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
@@ -88,3 +98,9 @@ async(() => {
     const result = orbit.channel(channelName, channelPwd).delete(); // true | false
 })();
 ```
+
+### TODO
+- Tests for remove(), put() and get()
+- Local caching of messages
+- Possibility to fetch content separately from data structure
+- Use HTTPS instead of HTTP (channel password are sent in plaintext atm)

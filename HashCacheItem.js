@@ -9,8 +9,9 @@ const HashCacheOps = {
 };
 
 class HashCacheItem {
-  constructor(operation, sequenceNumber, targetHash, metaInfo) {
+  constructor(operation, key, sequenceNumber, targetHash, metaInfo) {
     this.op     = operation;
+    this.key    = key;
     this.seq    = sequenceNumber;
     this.target = targetHash;
     this.meta   = metaInfo;
@@ -18,8 +19,8 @@ class HashCacheItem {
 }
 
 class EncryptedHashCacheItem extends HashCacheItem {
-  constructor(operation, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
-    super(operation, sequenceNumber, targetHash, metaInfo);
+  constructor(operation, key, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
+    super(operation, key, sequenceNumber, targetHash, metaInfo);
     this.pubkey  = publicKey;
     try {
       this.target  = encryption.encrypt(targetHash, privateKey, publicKey);
@@ -32,16 +33,8 @@ class EncryptedHashCacheItem extends HashCacheItem {
   }
 }
 
-class KeyedEncryptedHashCacheItem extends EncryptedHashCacheItem {
-  constructor(operation, key, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt) {
-    super(operation, sequenceNumber, targetHash, metaInfo, publicKey, privateKey, salt);
-    this.key = key;
-  }
-}
-
 module.exports = {
   HashCacheOps: HashCacheOps,
   HashCacheItem: HashCacheItem,
-  EncryptedHashCacheItem: EncryptedHashCacheItem,
-  KeyedEncryptedHashCacheItem: KeyedEncryptedHashCacheItem
+  EncryptedHashCacheItem: EncryptedHashCacheItem
 };
