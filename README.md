@@ -4,7 +4,7 @@
 
 Key-Value Store and Event Store on IPFS.
 
-***VERY MUCH WIP! WILL NOT WORK WHEN CLONED, orbit-server (not released yet) REQUIRED!***
+Requires `orbit-server` to connect to. Get from https://github.com/haadcode/orbit-server.
 
 ## Features
 - Distributed kv-store and event log database
