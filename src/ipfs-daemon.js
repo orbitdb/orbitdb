@@ -1,27 +1,31 @@
 'use strict';
 
+var fs       = require('fs');
 var path     = require('path');
 var async    = require('asyncawait/async');
 var await    = require('asyncawait/await');
 var Promise  = require('bluebird');
 var ipfsdCtl = require('ipfsd-ctl');
 
-let getUserHome = () => {
+const getUserHome = () => {
   return process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 };
 
-let ipfsPath = path.resolve(getUserHome() + '/.ipfs');
+const ipfsPath = path.resolve(getUserHome() + '/.ipfs');
 
-var startIpfs = async (() => {
+if(!fs.existsSync(ipfsPath))
+  fs.mkdirSync(ipfsPath);
+
+const startIpfs = async (() => {
   let ipfs, nodeInfo;
 
   try {
-    var ipfsNode = Promise.promisify(ipfsdCtl.local.bind(ipfsPath))
-    var ipfsd    = await (ipfsNode());
-    var start    = Promise.promisify(ipfsd.startDaemon.bind(ipfsd));
-    ipfs         = await (start());
-    var getId    = Promise.promisify(ipfs.id);
-    nodeInfo     = await (getId())
+    const ipfsNode = Promise.promisify(ipfsdCtl.local.bind(ipfsPath))
+    const ipfsd    = await (ipfsNode());
+    const start    = Promise.promisify(ipfsd.startDaemon.bind(ipfsd));
+    ipfs           = await (start());
+    const getId    = Promise.promisify(ipfs.id);
+    nodeInfo       = await (getId())
   } catch(e) {
     console.log("Error initializing ipfs daemon:", e);
     return null;
