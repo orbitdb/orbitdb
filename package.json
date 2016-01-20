@@ -1,16 +1,13 @@
 {
   "name": "orbit-client",
-  "version": "1.0.0",
-  "description": "A client module to communicate with an Orbit network",
-  "main": "OrbitClient.js",
-  "scripts": {
-    "test": "mocha"
-  },
+  "version": "0.1.0",
+  "description": "Event Log and KeyValue Store on IPFS",
   "author": "Haad",
-  "license": "ISC",
+  "license": "MIT",
   "engines" : {
     "node" : "^4.x.x"
-    },
+  },
+  "main": "src/OrbitClient.js",
   "dependencies": {
     "asyncawait": "^1.0.1",
     "bluebird": "^3.1.1",
@@ -20,5 +17,8 @@
   },
   "devDependencies": {
     "mocha": "^2.3.4"
+  },
+  "scripts": {
+    "test": "mocha"
   }
 }

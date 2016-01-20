@@ -1,8 +1,8 @@
 'use strict';
 
 var async       = require('asyncawait/async');
-var OrbitClient = require('../OrbitClient');
-var Timer       = require('../Timer');
+var OrbitClient = require('../src/OrbitClient');
+var Timer       = require('../src/Timer');
 
 var host     = 'localhost:3006';
 var username = 'testrunner';

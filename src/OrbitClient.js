@@ -48,7 +48,7 @@ class OrbitClient {
       [Symbol.iterator]() {
         return this;
       },
-      next: () => {
+      next() {
         let item = { value: null, done: true };
         if(currentIndex < messages.length) {
           item = { value: messages[currentIndex], done: false };
@@ -81,7 +81,7 @@ class OrbitClient {
     if(lt || lte) {
       startFromHash = lte ? lte : lt;
     } else {
-      var channel = await (this.client.linkedList(channel, password).head())
+      var channel = await (this.client.linkedList(channel, password).head());
       startFromHash = channel.head ? channel.head : null;
     }
 

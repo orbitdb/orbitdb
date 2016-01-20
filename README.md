@@ -99,6 +99,19 @@ async(() => {
 })();
 ```
 
+### Development
+#### Run Tests
+*Note! Before running tests, make sure orbit-server is running*
+
+```
+npm test
+```
+
+Keep tests running while development:
+```
+mocha -w
+```
+
 ### TODO
 - Tests for remove(), put() and get()
 - Local caching of messages

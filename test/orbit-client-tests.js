@@ -3,8 +3,8 @@
 var assert      = require('assert');
 var async       = require('asyncawait/async');
 var await       = require('asyncawait/await');
-var encryption  = require('../Encryption');
-var OrbitClient = require('../OrbitClient');
+var encryption  = require('../src/Encryption');
+var OrbitClient = require('../src/OrbitClient');
 
 // var mockServerAddresses = [
 //   "localhost",
@@ -35,7 +35,7 @@ describe('Orbit Client', () => {
   let head   = '';
   let second = '';
   let items  = [];
-  let channel = 'abcde';
+  let channel = 'abcdefgh';
 
   before(function(done) {
     // logger.setLevel('ERROR');
@@ -58,7 +58,7 @@ describe('Orbit Client', () => {
     // }
     var start = () => new Promise(async((resolve, reject) => {
       orbit = OrbitClient.connect(host, username, password);
-      // orbit.channel(channel, 'hello').setMode({ mode: "-r" })
+      orbit.channel(channel, '').delete();
       resolve();
     }));
     start().then(done);
@@ -157,6 +157,7 @@ describe('Orbit Client', () => {
   describe('Insert', function() {
     it('adds an item to an empty channel', async((done) => {
       try {
+        orbit.channel(channel, '').delete();
         head  = orbit.channel(channel, '').add('hello');
         assert.notEqual(head, null);
         assert.equal(head.startsWith('Qm'), true);
@@ -169,6 +170,7 @@ describe('Orbit Client', () => {
 
     it('adds a new item to a channel with one item', async((done) => {
       try {
+        var v = orbit.channel(channel, '').iterator().collect();
         second  = orbit.channel(channel, '').add('hello');
         assert.notEqual(second, null);
         assert.notEqual(second, head);
@@ -526,7 +528,7 @@ describe('Orbit Client', () => {
 
     it('can\'t read with wrong password', async((done) => {
       try {
-        var modes = orbit.channel(channel, '').iterator();
+        var modes = orbit.channel(channel, 'invalidpassword').iterator();
         assert.equal(true, false);
       } catch(e) {
         assert.equal(e, 'Unauthorized');
