@@ -236,9 +236,11 @@ describe('Orbit Client', () => {
         assert.notEqual(iter, null);
         assert.notEqual(next, null);
         assert.notEqual(next.item, null);
-        assert.notEqual(next.item.Links, null);
-        assert.notEqual(next.item.Data, null);
-        assert.equal(next.item.Data.seq, 4);
+        assert.notEqual(next.item.op, null);
+        assert.equal(next.item.seq, 4);
+        assert.equal(next.item.key, null);
+        assert.notEqual(next.item.target, null);
+        assert.notEqual(next.item.next, null);
         assert.notEqual(next.item.Payload, null);
         assert.equal(next.item.Payload, 'hello4');
         done();

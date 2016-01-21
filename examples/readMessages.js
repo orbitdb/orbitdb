@@ -28,14 +28,14 @@ let run = (async(() => {
     // Get all messages
     var iter = orbit.channel(channel, '').iterator(options);
     for(let i of iter) {
-      console.log(i.item.Data.key);
-      console.log(i.item.Data.seq, i.item.Data.op, i.hash, "ts: " + i.item.Data.meta.ts, i.item.Payload);
+      console.log(i.item.key);
+      console.log(i.item.seq, i.item.op, i.hash, "ts: " + i.item.meta.ts, i.item.Payload);
     }
 
     console.log("Fetch messages took " + timer.stop() + "ms");
 
     console.log("-------- KV store -------")
-    orbit.channel(channel, '').put("key3", "this is the value you're looking for222");
+    orbit.channel(channel, '').put("key3", "this is the value you're looking for: " + new Date().getTime());
     var val = orbit.channel(channel, '').get("key3");
     console.log("key3:", val);
 

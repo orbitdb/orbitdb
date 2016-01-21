@@ -115,30 +115,18 @@ class OrbitClient {
   }
 
   _fetchOne(hash, password) {
-    let item;
-    item = await (ipfsAPI.getObject(this.ipfs, hash));
-    let data = JSON.parse(item.Data);
+    let data = await (ipfsAPI.getObject(this.ipfs, hash));
+    let item = HashCacheItem.fromEncrypted(data, pubkey, privkey, password);
 
-    // verify signature
-    const verified = Encryption.verify(data.target, data.pubkey, data.sig, data.seq, password);
-    if(!verified) throw "Item '" + hash + "' has the wrong signature"
-
-    // decrypt data structure
-    const targetDec = Encryption.decrypt(data.target, privkey, 'TODO: pubkey');
-    const metaDec   = Encryption.decrypt(data.meta, privkey, 'TODO: pubkey');
-    data.target     = targetDec;
-    data.meta       = JSON.parse(metaDec);
-
-    // fetch and decrypt content
     // TODO: add possibility to fetch content separately
-    if(data.op === HashCacheOps.Add || data.op === HashCacheOps.Put) {
-      const payload    = await (ipfsAPI.getObject(this.ipfs, data.target));
+    // fetch and decrypt content
+    if(item.op === HashCacheOps.Add || item.op === HashCacheOps.Put) {
+      const payload    = await (ipfsAPI.getObject(this.ipfs, item.target));
       const contentEnc = JSON.parse(payload.Data)["content"];
       const contentDec = Encryption.decrypt(contentEnc, privkey, 'TODO: pubkey');
       item.Payload     = contentDec;
     }
 
-    item.Data = data;
     return item;
   }
 
@@ -159,38 +147,39 @@ class OrbitClient {
     };
 
     let res = [];
-    let deletedItems = deleted ? deleted : [];
+    let handledItems = deleted ? deleted : [];
 
     if(!currentDepth) currentDepth = 0;
 
-    const message = await (this._fetchOne(hash, password));
+    const item = await (this._fetchOne(hash, password));
 
-    // TODO: test this part
-    if(message.Data.op === HashCacheOps.Delete) {
-      deletedItems.push(message.Data.target);
-    } else if(message.Data.op === HashCacheOps.Add && !this._contains(deletedItems, hash)) {
-      res.push({ hash: hash, item: message });
-      currentDepth ++;
-    } else if(message.Data.op === HashCacheOps.Put && !this._contains(deletedItems, message.Data.key)) {
-      if(!opts.key || opts.key && opts.key === message.Data.key) {
-        res.push({ hash: hash, item: message });
+    if(item) {
+      if(item.op === HashCacheOps.Delete) {
+        handledItems.push(item.target);
+      } else if(item.op === HashCacheOps.Add && !this._contains(handledItems, hash)) {
+        res.push({ hash: hash, item: item });
         currentDepth ++;
-        deletedItems.push(message.Data.key);
+      } else if(item.op === HashCacheOps.Put && !this._contains(handledItems, item.key)) {
+        if(!opts.key || opts.key && opts.key === item.key) {
+          res.push({ hash: hash, item: item });
+          currentDepth ++;
+          handledItems.push(item.key);
+        }
       }
-    }
 
-    if(opts.key && message.Data.key === opts.key)
-      return res;
+      if(opts.key && item.key === opts.key)
+        return res;
 
-    if(opts.last && hash === opts.last)
-      return res;
+      if(opts.last && hash === opts.last)
+        return res;
 
-    if(!opts.last && opts.amount > -1 && currentDepth >= opts.amount)
-      return res;
+      if(!opts.last && opts.amount > -1 && currentDepth >= opts.amount)
+        return res;
 
-    if(message && message.Links[0]) {
-      const next = this._fetchRecursive(message.Links[0].Hash, password, opts, currentDepth, deletedItems);
-      res = res.concat(next);
+      if(item.next) {
+        const next = this._fetchRecursive(item.next, password, opts, currentDepth, handledItems);
+        res = res.concat(next);
+      }
     }
 
     return res;
@@ -216,7 +205,7 @@ class OrbitClient {
     const metaInfo = new MetaInfo(ItemTypes.Message, size, new Date().getTime());
 
     // Create the hash cache item
-    const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, pubkey, privkey, password);
+    const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
 
     // Save the item to ipfs
     const data = await (ipfsAPI.putObject(this.ipfs, JSON.stringify(hcItem)));
