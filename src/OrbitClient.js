@@ -89,13 +89,13 @@ class OrbitClient {
     if((gt || lt) && limit > -1) limit += 1;
 
     if(startFromHash) {
-      // Get messages
       const opts = {
         amount: limit,
         last: gte ? gte : gt,
         key: key
       };
-      // messages = this._fetchRecursive(startFromHash, password, opts);
+
+      // Get messages
       messages = Aggregator.fetchRecursive(this.ipfs, startFromHash, password, opts);
 
       // Slice the array
