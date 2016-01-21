@@ -7,10 +7,11 @@ var ipfsAPI       = require('./ipfs-api-promised');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
 var HashCacheOps  = require('./HashCacheItem').HashCacheOps;
-var MetaInfo      = require('./MetaInfo');
 var ItemTypes     = require('./ItemTypes');
-var Keystore      = require('./Keystore');
+var MetaInfo      = require('./MetaInfo');
 var Post          = require('./Post');
+var Aggregator    = require('./Aggregator');
+var Keystore      = require('./Keystore');
 var Encryption    = require('./Encryption');
 
 var pubkey  = Keystore.getKeys().publicKey;
@@ -94,7 +95,8 @@ class OrbitClient {
         last: gte ? gte : gt,
         key: key
       };
-      messages = this._fetchRecursive(startFromHash, password, opts);
+      // messages = this._fetchRecursive(startFromHash, password, opts);
+      messages = Aggregator.fetchRecursive(this.ipfs, startFromHash, password, opts);
 
       // Slice the array
       let startIndex = 0;
@@ -112,77 +114,6 @@ class OrbitClient {
     if(reverse) messages.reverse();
 
     return messages;
-  }
-
-  _fetchOne(hash, password) {
-    let data = await (ipfsAPI.getObject(this.ipfs, hash));
-    let item = HashCacheItem.fromEncrypted(data, pubkey, privkey, password);
-
-    // TODO: add possibility to fetch content separately
-    // fetch and decrypt content
-    if(item.op === HashCacheOps.Add || item.op === HashCacheOps.Put) {
-      const payload    = await (ipfsAPI.getObject(this.ipfs, item.target));
-      const contentEnc = JSON.parse(payload.Data)["content"];
-      const contentDec = Encryption.decrypt(contentEnc, privkey, 'TODO: pubkey');
-      item.Payload     = contentDec;
-    }
-
-    return item;
-  }
-
-  // TEMP
-  _contains(src, e) {
-    let contains = false;
-    src.forEach((a) => {
-      if(a.toString() === e.toString()) contains = true;
-    });
-    return contains;
-  }
-
-  _fetchRecursive(hash, password, options, currentDepth, deleted) {
-    const opts = {
-      amount: options.amount ? options.amount : 1,
-      last:   options.last ? options.last : null,
-      key:    options.key ? options.key : null
-    };
-
-    let res = [];
-    let handledItems = deleted ? deleted : [];
-
-    if(!currentDepth) currentDepth = 0;
-
-    const item = await (this._fetchOne(hash, password));
-
-    if(item) {
-      if(item.op === HashCacheOps.Delete) {
-        handledItems.push(item.target);
-      } else if(item.op === HashCacheOps.Add && !this._contains(handledItems, hash)) {
-        res.push({ hash: hash, item: item });
-        currentDepth ++;
-      } else if(item.op === HashCacheOps.Put && !this._contains(handledItems, item.key)) {
-        if(!opts.key || opts.key && opts.key === item.key) {
-          res.push({ hash: hash, item: item });
-          currentDepth ++;
-          handledItems.push(item.key);
-        }
-      }
-
-      if(opts.key && item.key === opts.key)
-        return res;
-
-      if(opts.last && hash === opts.last)
-        return res;
-
-      if(!opts.last && opts.amount > -1 && currentDepth >= opts.amount)
-        return res;
-
-      if(item.next) {
-        const next = this._fetchRecursive(item.next, password, opts, currentDepth, handledItems);
-        res = res.concat(next);
-      }
-    }
-
-    return res;
   }
 
   _publish(data) {
