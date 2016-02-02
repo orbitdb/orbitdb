@@ -28,17 +28,14 @@ class Aggregator {
     const item = await (this._fetchOne(ipfs, hash, password));
 
     if(item) {
-      if(item.op === HashCacheOps.Delete) {
-        handledItems.push(item.target);
-      } else if(item.op === HashCacheOps.Add && !this._contains(handledItems, hash)) {
-        res.push({ hash: hash, item: item });
-        currentDepth ++;
-      } else if(item.op === HashCacheOps.Put && !this._contains(handledItems, item.key)) {
+      if((item.op === HashCacheOps.Put || item.op === HashCacheOps.Add) && !this._contains(handledItems, item.key)) {
         if(!opts.key || opts.key && opts.key === item.key) {
           res.push({ hash: hash, item: item });
           currentDepth ++;
-          handledItems.push(item.key);
+          handledItems.push(item.target);
         }
+      } else if(item.op === HashCacheOps.Delete) {
+        handledItems.push(item.target);
       }
 
       if(opts.key && item.key === opts.key)

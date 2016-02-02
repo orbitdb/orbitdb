@@ -102,7 +102,7 @@ describe('Orbit Client', () => {
       var msg  = orbit.channel(channel, '').add('hello');
       var info = orbit.channel(channel, '').info();
       assert.notEqual(info, null);
-      assert.equal(info.head, msg);
+      assert.notEqual(info.head, null);
       assert.notEqual(info.modes, null);
       assert.equal(info.modes.r, null);
       done();
@@ -154,7 +154,7 @@ describe('Orbit Client', () => {
     }));
   });
 
-  describe('Insert', function() {
+  describe('Add events', function() {
     it('adds an item to an empty channel', async((done) => {
       try {
         orbit.channel(channel, '').delete();
@@ -238,7 +238,6 @@ describe('Orbit Client', () => {
         assert.notEqual(next.item, null);
         assert.notEqual(next.item.op, null);
         assert.equal(next.item.seq, 4);
-        assert.equal(next.item.key, null);
         assert.notEqual(next.item.target, null);
         assert.notEqual(next.item.next, null);
         assert.notEqual(next.item.Payload, null);
@@ -261,7 +260,7 @@ describe('Orbit Client', () => {
         var iter = orbit.channel(channel, '').iterator();
         var first = iter.next().value;
         var second = iter.next().value;
-        assert.equal(first.hash, items[items.length - 1]);
+        assert.equal(first.item.key, items[items.length - 1]);
         assert.equal(second, null);
         assert.equal(first.item.Payload, 'hello4');
         done();
@@ -298,7 +297,7 @@ describe('Orbit Client', () => {
         var iter = orbit.channel(channel, '').iterator({ limit: 0 });
         var first = iter.next().value;
         var second = iter.next().value;
-        assert.equal(first.hash, items[items.length - 1]);
+        assert.equal(first.item.key, items[items.length - 1]);
         assert.equal(second, null);
         done();
       }));
@@ -307,7 +306,7 @@ describe('Orbit Client', () => {
         var iter = orbit.channel(channel, '').iterator({ limit: 1 });
         var first = iter.next().value;
         var second = iter.next().value;
-        assert.equal(first.hash, items[items.length - 1]);
+        assert.equal(first.item.key, items[items.length - 1]);
         assert.equal(second, null);
         done();
       }));
@@ -318,16 +317,16 @@ describe('Orbit Client', () => {
         var second = iter.next().value;
         var third = iter.next().value;
         var fourth = iter.next().value;
-        assert.equal(first.hash, items[items.length - 1]);
-        assert.equal(second.hash, items[items.length - 2]);
-        assert.equal(third.hash, items[items.length - 3]);
+        assert.equal(first.item.key, items[items.length - 1]);
+        assert.equal(second.item.key, items[items.length - 2]);
+        assert.equal(third.item.key, items[items.length - 3]);
         assert.equal(fourth, null);
         done();
       }));
 
       it('returns all items', async((done) => {
         var iter = orbit.channel(channel, '').iterator({ limit: -1 });
-        var messages = iter.collect().map((e) => e.hash);
+        var messages = iter.collect().map((e) => e.item.key);
 
         messages.reverse();
         assert.equal(messages.length, items.length);
@@ -337,17 +336,19 @@ describe('Orbit Client', () => {
 
       it('returns all items when limit is bigger than -1', async((done) => {
         var iter = orbit.channel(channel, '').iterator({ limit: -300 });
-        var messages = iter.collect().map((e) => e.hash);
+        var messages = iter.collect().map((e) => e.item.key);
 
         assert.equal(messages.length, items.length);
+        assert.equal(messages[0], items[items.length - 1]);
         done();
       }));
 
       it('returns all items when limit is bigger than number of items', async((done) => {
         var iter = orbit.channel(channel, '').iterator({ limit: 300 });
-        var messages = iter.collect().map((e) => e.hash);
+        var messages = iter.collect().map((e) => e.item.key);
 
         assert.equal(messages.length, items.length);
+        assert.equal(messages[0], items[items.length - 1]);
         done();
       }));
     });
@@ -355,7 +356,7 @@ describe('Orbit Client', () => {
     describe('Options: reverse', function() {
       it('returns all items reversed', async((done) => {
         var iter = orbit.channel(channel, '').iterator({ limit: -1, reverse: true });
-        var messages = iter.collect().map((e) => e.hash);
+        var messages = iter.collect().map((e) => e.item.key);
 
         assert.equal(messages.length, items.length);
         assert.equal(messages[0], items[0]);
@@ -364,20 +365,28 @@ describe('Orbit Client', () => {
     });
 
     describe('Options: ranges', function() {
+      var all = [];
+      var head;
+
+      before((done) => {
+        var fetchAll = () => new Promise(async((resolve, reject) => {
+          all = orbit.channel(channel, '').iterator({ limit: -1 }).collect();
+          head = all[0];
+          resolve();
+        }));
+        fetchAll().then(done);
+      });
+
       describe('gt & gte', function() {
         it('returns 0 items when gt is the head', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
-          var iter2 = orbit.channel(channel, '').iterator({ gt: head.hash });
-          var messages = iter2.collect().map((e) => e.hash);
-
+          var messages = orbit.channel(channel, '').iterator({ gt: head.hash }).collect();
           assert.equal(messages.length, 0);
           done();
         }));
 
         it('returns 1 item when gte is the head', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gte: items[items.length -1], limit: -1 });
-          var messages = iter.collect().map((e) => e.hash);
+          var iter2 = orbit.channel(channel, '').iterator({ gte: head.hash, limit: -1 });
+          var messages = iter2.collect().map((e) => e.item.key);
 
           assert.equal(messages.length, 1);
           assert.equal(messages[0], items[items.length -1]);
@@ -385,26 +394,29 @@ describe('Orbit Client', () => {
         }));
 
         it('returns 2 item when gte is defined', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gte: items[items.length - 2], limit: -1 });
+          var gte = all[1].hash;
+          var iter = orbit.channel(channel, '').iterator({ gte: gte, limit: -1 });
           var messages = iter.collect().map((e) => e.hash);
 
           assert.equal(messages.length, 2);
-          assert.equal(messages[0], items[items.length - 1]);
-          assert.equal(messages[1], items[items.length - 2]);
+          assert.equal(messages[0], all[0].hash);
+          assert.equal(messages[1], all[1].hash);
           done();
         }));
 
         it('returns all items when gte is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gte: items[0], limit: -1 });
-          var messages = iter.collect().map((e) => e.hash);
+          var iter = orbit.channel(channel, '').iterator({ gte: all[all.length -1], limit: -1 });
+          var messages = iter.collect().map((e) => e.item.key);
 
           assert.equal(messages.length, itemCount);
+          assert.equal(messages[0], items[items.length - 1]);
+          assert.equal(messages[messages.length - 1], items[0]);
           done();
         }));
 
         it('returns items when gt is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gt: items[0], limit: -1 });
-          var messages = iter.collect().map((e) => e.hash);
+          var iter = orbit.channel(channel, '').iterator({ gt: all[all.length - 1], limit: -1 });
+          var messages = iter.collect().map((e) => e.item.key);
 
           assert.equal(messages.length, itemCount - 1);
           assert.equal(messages[0], items[items.length - 1]);
@@ -429,8 +441,6 @@ describe('Orbit Client', () => {
 
       describe('lt & lte', function() {
         it('returns one item when lt is the head', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
           var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash });
           var messages = iter2.collect().map((e) => e.hash);
 
@@ -440,66 +450,58 @@ describe('Orbit Client', () => {
         }));
 
         it('returns all items when lt is head and limit is -1', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
           var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash, limit: -1 });
           var messages = iter2.collect().map((e) => e.hash);
 
           assert.equal(messages.length, itemCount);
           assert.equal(messages[0], head.hash);
-          assert.equal(messages[4], items[0]);
+          assert.equal(messages[4], all[all.length - 1].hash);
           done();
         }));
 
         it('returns 3 items when lt is head and limit is 3', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
           var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash, limit: 3 });
           var messages = iter2.collect().map((e) => e.hash);
 
           assert.equal(messages.length, 3);
           assert.equal(messages[0], head.hash);
-          assert.equal(messages[2], items[2]);
+          assert.equal(messages[2], all[2].hash);
           done();
         }));
 
         it('returns null when lt is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ lt: items[0] });
-          var messages = iter.collect();
+          var messages = orbit.channel(channel, '').iterator({ lt: all[all.length - 1].hash }).collect();
           assert.equal(messages.length, 0);
           done();
         }));
 
         it('returns one item when lte is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ lte: items[0] });
+          var iter = orbit.channel(channel, '').iterator({ lte: all[all.length - 1].hash });
           var messages = iter.collect().map((e) => e.hash);
 
           assert.equal(messages.length, 1);
-          assert.equal(messages[0], items[0]);
+          assert.equal(messages[0], all[all.length - 1].hash);
           done();
         }));
 
         it('returns all items when lte is the head', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
           var iter2 = orbit.channel(channel, '').iterator({ lte: head.hash, limit: -1 });
           var messages = iter2.collect().map((e) => e.hash);
 
           assert.equal(messages.length, itemCount);
-          assert.equal(messages[0], items[items.length - 1]);
-          assert.equal(messages[4], items[0]);
+          assert.equal(messages[0], all[0].hash);
+          assert.equal(messages[4], all[all.length - 1].hash);
           done();
         }));
 
         it('returns 3 items when lte is the head', async((done) => {
-          var iter = orbit.channel(channel, '').iterator();
-          var head = iter.next().value;
-          var iter2 = orbit.channel(channel, '').iterator({ lte: items[items.length - 2], limit: 3 });
+          var iter2 = orbit.channel(channel, '').iterator({ lte: head.hash, limit: 3 });
           var messages = iter2.collect().map((e) => e.hash);
 
           assert.equal(messages.length, 3);
-          assert.equal(messages[0], items[items.length - 2]);
-          assert.equal(messages[2], items[1]);
+          assert.equal(messages[0], all[0].hash);
+          assert.equal(messages[1], all[1].hash);
+          assert.equal(messages[2], all[2].hash);
           done();
         }));
       });

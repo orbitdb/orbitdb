@@ -10,41 +10,55 @@ var password = '';
 
 let run = (async(() => {
   try {
-    var channel = 'hello-world-test1'
-
     // Connect
     var orbit = OrbitClient.connect(host, username, password);
 
     var timer = new Timer(true);
 
-    // Iterator options
-    var options = {
-      limit: -1, // fetch all
-      reverse: false, // latest first
-      // gte: <ipfs-hash> // eg. 'QmQGa4Bsw3JxxydNNbbYnXfnW1BC54koTidHQ6Am2VM8Ep'
-      // lte: <ipfs-hash> // eg. 'QmQGa4Bsw3JxxydNNbbYnXfnW1BC54koTidHQ6Am2VM8Ep'
-    }
-
-    // Get all messages
-    var iter = orbit.channel(channel, '').iterator(options);
-    for(let i of iter) {
-      console.log(i.item.key);
-      console.log(i.item.seq, i.item.op, i.hash, "ts: " + i.item.meta.ts, i.item.Payload);
-    }
-
-    console.log("Fetch messages took " + timer.stop() + "ms");
-
     console.log("-------- KV store -------")
-    orbit.channel(channel, '').put("key3", "this is the value you're looking for: " + new Date().getTime());
-    var val = orbit.channel(channel, '').get("key3");
+    var channel = 'keyspace1'
+    // orbit.channel(channel, '').delete();
+    orbit.channel(channel).put("key3", "this is the value you're looking for: " + new Date().getTime());
+    var val = orbit.channel(channel).get("key3");
     console.log("key3:", val);
 
-    orbit.channel(channel, '').put("key4", "this will be deleted");
-    var val2 = orbit.channel(channel, '').get("key4");
+    orbit.channel(channel).put("key4", "this will be deleted");
+    var val2 = orbit.channel(channel).get("key4");
     console.log("key4:", val2);
-    orbit.channel(channel, '').remove({ key: "key4" });
-    val2 = orbit.channel(channel, '').get("key4");
+    orbit.channel(channel).remove({ key: "key4" });
+    val2 = orbit.channel(channel).get("key4");
     console.log("key4:", val2);
+
+    console.log("-------- EVENT log -------")
+    const c1 = 'c1';
+    orbit.channel(c1).delete();
+    var hash1 = orbit.channel(c1).add("hello1");
+    var hash2 = orbit.channel(c1).add("hello2");
+
+    var items = orbit.channel(c1).iterator({ limit: -1 }).collect();
+    items = items.map((e) => {
+      return { key: e.item.key, val: e.item.Payload };
+    });
+    console.log(JSON.stringify(items, null, 2));
+
+    console.log("--> remove", hash1);
+    orbit.channel(c1).remove({ key: hash1 });
+
+    items = orbit.channel(c1).iterator({ limit: -1 }).collect();
+    items = items.map((e) => {
+      return { key: e.item.key, val: e.item.Payload };
+    });
+    console.log(JSON.stringify(items, null, 2));
+
+    // You can also get the event based on its hash
+    var value = orbit.channel(c1).get(hash2);
+    console.log("key:", hash2, "value:", value);
+
+    console.log("--> remove", hash2);
+    orbit.channel(c1).remove({ key: hash2 });
+
+    items = orbit.channel(c1).iterator({ limit: -1 }).collect();
+    console.log(JSON.stringify(items, null, 2));
 
   } catch(e) {
     console.error("error:", e);

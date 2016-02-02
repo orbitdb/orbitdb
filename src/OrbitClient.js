@@ -151,9 +151,10 @@ class OrbitClient {
 
   /* DB Operations */
   _add(channel, password, data) {
-    const key = null;
     const post = this._publish(data);
-    return this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash);
+    const key = post.Hash;
+    this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash);
+    return key;
   }
 
   _put(channel, password, key, data) {
