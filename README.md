@@ -114,6 +114,7 @@ mocha -w
 
 ### TODO
 - Tests for remove(), put() and get()
+- pubsub communication (use redis to mock ipfs pubsub)
 - Local caching of messages
 - Possibility to fetch content separately from data structure
 - Use HTTPS instead of HTTP (channel password are sent in plaintext atm)
