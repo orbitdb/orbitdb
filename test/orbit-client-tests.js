@@ -25,19 +25,18 @@ const username = 'testrunner';
 const password = '';
 
 const startServer = async (() => {
-  // TODO: this should be handled by orbit-server
-  if(!fs.existsSync(serverConfig.userDataPath))
-    fs.mkdirSync(serverConfig.userDataPath);
-
   return new Promise(async((resolve, reject) => {
     logger.setLevel('ERROR');
     const ipfsd  = await(ipfsDaemon());
     const server = Server(ipfsd.daemon, ipfsd.nodeInfo, serverConfig);
     server.app.listen(port, () => {
       resolve(server);
+    }).on('error', (err) => {
+      resolve(server);
     });
   }));
 });
+
 
 describe('Orbit Client', () => {
   let server, orbit;
@@ -62,8 +61,9 @@ describe('Orbit Client', () => {
       if(orbit) orbit.channel(channel, '').delete();
       resolve();
     }));
-    deleteChannel().then(done);
     server.shutdown();
+    server = null;
+    deleteChannel().then(done);
   });
 
   /* TESTS */
