@@ -104,7 +104,7 @@ async(() => {
 
 ### Development
 #### Run Tests
-*Note! Before running tests, make sure orbit-server is running*
+**Note!** Requires Aerospike, see http://www.aerospike.com/docs/operations/install/
 
 ```
 npm test
