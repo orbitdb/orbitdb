@@ -2,12 +2,12 @@
 
 var async         = require('asyncawait/async');
 var await         = require('asyncawait/await');
-var ipfsAPI       = require('./ipfs-api-promised');
+var ipfsAPI       = require('orbit-common/lib/ipfs-api-promised');
+var Keystore      = require('orbit-common/lib/Keystore');
+var Encryption    = require('orbit-common/lib/Encryption');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
 var HashCacheOps  = require('./HashCacheItem').HashCacheOps;
-var Keystore      = require('./Keystore');
-var Encryption    = require('./Encryption');
 
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;
@@ -29,7 +29,7 @@ class Aggregator {
 
     if(item) {
       if((item.op === HashCacheOps.Put || item.op === HashCacheOps.Add) && !this._contains(handledItems, item.key)) {
-        if(!opts.key || opts.key && opts.key === item.key) {
+        if(!opts.key || (opts.key && opts.key === item.key)) {
           res.push({ hash: hash, item: item });
           currentDepth ++;
           handledItems.push(item.target);

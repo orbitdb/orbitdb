@@ -2,8 +2,10 @@
 
 var async         = require('asyncawait/async');
 var await         = require('asyncawait/await');
-var ipfsDaemon    = require('./ipfs-daemon');
-var ipfsAPI       = require('./ipfs-api-promised');
+var Keystore      = require('orbit-common/lib/Keystore');
+var Encryption    = require('orbit-common/lib/Encryption');
+var ipfsDaemon    = require('orbit-common/lib/ipfs-daemon');
+var ipfsAPI       = require('orbit-common/lib/ipfs-api-promised');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
 var HashCacheOps  = require('./HashCacheItem').HashCacheOps;
@@ -11,8 +13,6 @@ var ItemTypes     = require('./ItemTypes');
 var MetaInfo      = require('./MetaInfo');
 var Post          = require('./Post');
 var Aggregator    = require('./Aggregator');
-var Keystore      = require('./Keystore');
-var Encryption    = require('./Encryption');
 
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;

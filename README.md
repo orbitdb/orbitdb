@@ -1,10 +1,12 @@
-# orbit-client
+# OrbitDB
 
 ## Introduction
 
-Key-Value Store and Event Store on IPFS.
+Distributed, peer-to-peer* Key-Value Store and Event Log on IPFS.
 
 Requires `orbit-server` to connect to. Get from https://github.com/haadcode/orbit-server.
+
+_* Currently requires a centralized server. This will change in the future as required p2p features land in IPFS_
 
 ## Features
 - Distributed kv-store and event log database
@@ -12,9 +14,11 @@ Requires `orbit-server` to connect to. Get from https://github.com/haadcode/orbi
 - Data encrypted on the wire and at rest
 - Per channel access rights
 
-_Channel maps to "table", "keyspace", "topic" or "feed" in similar systems_
+_Channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other systems_
 
 ## API
+_See Usage below_
+
     connect(host, username, password)
 
     channel(name, password)
@@ -36,7 +40,7 @@ _Channel maps to "table", "keyspace", "topic" or "feed" in similar systems_
 
         .get(key) // Retrieve value
 
-        .remove({ key: <key>, hash: <event's ipfs-hash> }) // Remove entry (use one option)
+        .remove({ key: <key or hash> }) // Remove entry
 
         .setMode(modes) // Set channel modes, can be an object or an array of objects
 
@@ -62,11 +66,9 @@ async(() => {
 
     const channelName = 'hello-world';
 
-    // Send an event
-    const head = orbit.channel(channelName).add('hello'); // <ipfs-hash>
-
-    // Delete an event
-    orbit.channel(channelName).remove(head);
+    /* Event Log */
+    const hash = orbit.channel(channelName).add('hello'); // <ipfs-hash>
+    orbit.channel(channelName).remove({ key: hash });
 
     // Iterator options
     const options  = { limit: -1 }; // fetch all messages
@@ -82,11 +84,12 @@ async(() => {
     // for(let i of iter)
     //   console.log(i.hash, i.item);
 
-    // KV-store
+    /* KV Store */
     orbit.channel(channelName).put("key1", "hello world");
     orbit.channel(channelName).get("key1"); // returns "hello world"
+    orbit.channel(channelName).remove("key1");
 
-    // Modes
+    /* Modes */
     const password = 'hello';
     let channelModes;
     channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
@@ -94,7 +97,7 @@ async(() => {
     channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }
     channelModes = orbit.channel(channel, '').setMode({ mode: "-w" }); // { modes: {} }
 
-    // Delete channel
+    /* Delete channel */
     const result = orbit.channel(channelName, channelPwd).delete(); // true | false
 })();
 ```

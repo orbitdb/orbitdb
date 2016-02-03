@@ -1,22 +1,23 @@
 {
-  "name": "orbit-client",
+  "name": "orbit-db",
   "version": "0.1.1",
-  "description": "Event Log and KeyValue Store on IPFS",
+  "description": "Key-Value Store and Event Log on IPFS",
   "author": "Haad",
   "license": "MIT",
-  "engines" : {
-    "node" : "^4.x.x"
+  "engines": {
+    "node": "^4.x.x"
   },
   "main": "src/OrbitClient.js",
   "dependencies": {
     "asyncawait": "^1.0.1",
     "bluebird": "^3.1.1",
     "bs58": "^3.0.0",
-    "ipfsd-ctl": "^0.7.1",
+    "orbit-common": "^0.1.0",
     "unirest": "^0.4.2"
   },
   "devDependencies": {
-    "mocha": "^2.3.4"
+    "mocha": "^2.3.4",
+    "orbit-server": "^0.1.2"
   },
   "scripts": {
     "test": "mocha"

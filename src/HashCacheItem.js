@@ -1,6 +1,6 @@
 'use strict';
 
-const Encryption = require('./Encryption');
+const Encryption = require('orbit-common/lib/Encryption');
 
 const HashCacheOps = {
   Add: "ADD",

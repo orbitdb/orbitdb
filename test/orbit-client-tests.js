@@ -1,78 +1,69 @@
 'use strict';
 
+var fs          = require('fs');
+var path        = require('path');
 var assert      = require('assert');
 var async       = require('asyncawait/async');
 var await       = require('asyncawait/await');
-var encryption  = require('../src/Encryption');
+var ipfsDaemon  = require('orbit-common/lib/ipfs-daemon');
+var logger      = require('orbit-common/lib/logger');
+var Server      = require('orbit-server/src/server');
 var OrbitClient = require('../src/OrbitClient');
 
-// var mockServerAddresses = [
-//   "localhost",
-//   "127.0.0.1"
-// ];
-
-// var serverConfig = {
-//   networkId: "anon-test",
-//   networkName: "Anonymous Networks TEST",
-//   salt: "thisisthenetworksalt",
-//   userDataPath: path.resolve("/tmp/anon-server-tests"),
-//   verifyMessages: true
-// }
-
-// Create the userDataPath in case it doesn't exist
-// if(!fs.existsSync(serverConfig.userDataPath))
-//   fs.mkdirSync(serverConfig.userDataPath);
+var serverConfig = {
+  networkId: "orbitdb-test",
+  networkName: "OrbitDB Test Network",
+  salt: "hellothisisdog",
+  userDataPath: "/tmp/orbitdb-tests",
+  verifyMessages: true
+}
 
 // Orbit
-var host = 'localhost:3006';
-var username  = 'testrunner';
-var password  = '';
+const host     = 'localhost';
+const port     = 3006;
+const username = 'testrunner';
+const password = '';
+
+const startServer = async (() => {
+  // TODO: this should be handled by orbit-server
+  if(!fs.existsSync(serverConfig.userDataPath))
+    fs.mkdirSync(serverConfig.userDataPath);
+
+  return new Promise(async((resolve, reject) => {
+    logger.setLevel('ERROR');
+    const ipfsd  = await(ipfsDaemon());
+    const server = Server(ipfsd.daemon, ipfsd.nodeInfo, serverConfig);
+    server.app.listen(port, () => {
+      resolve(server);
+    });
+  }));
+});
 
 describe('Orbit Client', () => {
-  // let ipfs, server, orbit, httpServer;
-  let orbit;
+  let server, orbit;
 
-  let head   = '';
-  let second = '';
-  let items  = [];
+  let head    = '';
+  let items   = [];
   let channel = 'abcdefgh';
 
-  before(function(done) {
-    // logger.setLevel('ERROR');
-    // Start ipfs daemon
-    // if(!ipfs && !server) {
-    //   var startIpfsDaemon = new Promise(async((resolve, reject) => {
-    //     ipfs = await(ipfsd());
-    //     ipfs.nodeInfo.Addresses = mockServerAddresses;
-    //     // Start hash-cache server
-    //     server = require('../../ipfs-backend/server/server')(ipfs.daemon, ipfs.nodeInfo, serverConfig);
-    //     httpServer = server.app.listen(3006, async(() => {
-    //       logger.info('network server listening at http://localhost:%s', 3006);
-    //       orbit = await(OrbitClient.connect(host, username, password, ipfs.daemon));
-    //       resolve();
-    //     }));
-    //   }));
-    //   startIpfsDaemon.then(done);
-    // } else {
-    //   done();
-    // }
-    var start = () => new Promise(async((resolve, reject) => {
-      orbit = OrbitClient.connect(host, username, password);
+  before(async((done) => {
+    var initialize = () => new Promise(async((resolve, reject) => {
+      orbit = OrbitClient.connect(`${host}:${port}`, username, password);
       orbit.channel(channel, '').delete();
       resolve();
     }));
-    start().then(done);
-  });
+    server = await(startServer());
+    await(initialize());
+    done();
+  }));
 
   after(function(done) {
     var deleteChannel = () => new Promise(async((resolve, reject) => {
-      orbit.channel(channel, '').delete();
+      if(orbit) orbit.channel(channel, '').delete();
       resolve();
     }));
     deleteChannel().then(done);
-    // server.shutdown();
-    // httpServer.close();
-    // rmDir(serverConfig.userDataPath);
+    server.shutdown();
   });
 
   /* TESTS */
@@ -80,9 +71,9 @@ describe('Orbit Client', () => {
     it('connects to hash-cache-server', async((done) => {
       assert.notEqual(orbit, null);
       assert.notEqual(orbit.client, null);
-      assert.equal(orbit.user.id, 'QmcLzfQBKuvBYLsmgt4nkaUM7i7LNL37dPtnBZWgGpjPRW');
-      assert.equal(orbit.network.id, 'anon-test');
-      assert.equal(orbit.network.name, 'Anonymous Networks TEST');
+      assert.equal(orbit.user.id, 'Qmf5A5RSTQmcfvigT3j29Fqh2fAHRANk5ooBYKdWsPtr8U');
+      assert.equal(orbit.network.id, serverConfig.networkId);
+      assert.equal(orbit.network.name, serverConfig.networkName);
       assert.notEqual(orbit.network.config.SupernodeRouting, null);
       assert.notEqual(orbit.network.config.Bootstrap.length, 0);
       done();
@@ -158,7 +149,7 @@ describe('Orbit Client', () => {
     it('adds an item to an empty channel', async((done) => {
       try {
         orbit.channel(channel, '').delete();
-        head  = orbit.channel(channel, '').add('hello');
+        const head = orbit.channel(channel, '').add('hello');
         assert.notEqual(head, null);
         assert.equal(head.startsWith('Qm'), true);
         assert.equal(head.length, 46);
@@ -170,8 +161,8 @@ describe('Orbit Client', () => {
 
     it('adds a new item to a channel with one item', async((done) => {
       try {
-        var v = orbit.channel(channel, '').iterator().collect();
-        second  = orbit.channel(channel, '').add('hello');
+        const head = orbit.channel(channel, '').iterator().collect()[0];
+        const second = orbit.channel(channel, '').add('hello');
         assert.notEqual(second, null);
         assert.notEqual(second, head);
         assert.equal(second.startsWith('Qm'), true);
@@ -585,17 +576,3 @@ describe('Orbit Client', () => {
   });
 
 });
-
-// let rmDir = function(dirPath) {
-//   try { var files = fs.readdirSync(dirPath); }
-//   catch(e) { return; }
-//   if (files.length > 0)
-//     for (var i = 0; i < files.length; i++) {
-//       var filePath = dirPath + '/' + files[i];
-//       if (fs.statSync(filePath).isFile())
-//         fs.unlinkSync(filePath);
-//       else
-//         rmDir(filePath);
-//     }
-//   fs.rmdirSync(dirPath);
-// };

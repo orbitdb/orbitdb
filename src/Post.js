@@ -1,6 +1,6 @@
 'use strict';
 
-var encryption = require('./Encryption');
+var Encryption = require('orbit-common/lib/Encryption');
 
 class Post {
   constructor(content) {
@@ -9,7 +9,7 @@ class Post {
   }
 
   encrypt(privkey, pubkey) {
-    this.content = encryption.encrypt(this.content, privkey, pubkey);
+    this.content = Encryption.encrypt(this.content, privkey, pubkey);
   }
 }
 
