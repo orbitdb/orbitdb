@@ -2,7 +2,7 @@
 
 var async       = require('asyncawait/async');
 var OrbitClient = require('../src/OrbitClient');
-var Timer       = require('../src/Timer');
+var Timer       = require('./Timer');
 
 var host     = 'localhost:3006';
 var username = 'testrunner';
