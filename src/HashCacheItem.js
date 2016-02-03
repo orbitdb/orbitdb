@@ -2,17 +2,11 @@
 
 const Encryption = require('orbit-common/lib/Encryption');
 
-const HashCacheOps = {
-  Add: "ADD",
-  Put: "PUT",
-  Delete: "DELETE"
-};
-
 class HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next) {
     this.op     = operation;
-    this.key    = key;
     this.seq    = sequenceNumber;
+    this.key    = key;
     this.target = targetHash;
     this.meta   = metaInfo;
     this.next   = next;
@@ -33,8 +27,7 @@ class EncryptedHashCacheItem extends HashCacheItem {
   }
 
   static fromEncrypted(encryptedItem, publicKey, privateKey, salt) {
-    let data;
-    data = JSON.parse(encryptedItem.Data);
+    let data = JSON.parse(encryptedItem.Data);
 
     // verify signature
     const verified = Encryption.verify(data.target, data.pubkey, data.sig, data.seq, salt);
@@ -55,7 +48,6 @@ class EncryptedHashCacheItem extends HashCacheItem {
 }
 
 module.exports = {
-  HashCacheOps: HashCacheOps,
   HashCacheItem: HashCacheItem,
   EncryptedHashCacheItem: EncryptedHashCacheItem
 };

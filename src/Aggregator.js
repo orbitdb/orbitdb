@@ -7,31 +7,33 @@ var Keystore      = require('orbit-common/lib/Keystore');
 var Encryption    = require('orbit-common/lib/Encryption');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
-var HashCacheOps  = require('./HashCacheItem').HashCacheOps;
+var HashCacheOps  = require('./HashCacheOps');
 
-var pubkey  = Keystore.getKeys().publicKey;
-var privkey = Keystore.getKeys().privateKey;
+const pubkey  = Keystore.getKeys().publicKey;
+const privkey = Keystore.getKeys().privateKey;
+
+const DefaultAmount = 1;
 
 class Aggregator {
-  static fetchRecursive(ipfs, hash, password, options, currentDepth, deleted) {
+  static fetchRecursive(ipfs, hash, password, options, currentAmount, deleted) {
     const opts = {
-      amount: options.amount ? options.amount : 1,
+      amount: options.amount ? options.amount : DefaultAmount,
       last:   options.last ? options.last : null,
       key:    options.key ? options.key : null
     };
 
-    let res = [];
+    let result = [];
     let handledItems = deleted ? deleted : [];
 
-    if(!currentDepth) currentDepth = 0;
+    if(!currentAmount) currentAmount = 0;
 
     const item = await (this._fetchOne(ipfs, hash, password));
 
     if(item) {
       if((item.op === HashCacheOps.Put || item.op === HashCacheOps.Add) && !this._contains(handledItems, item.key)) {
         if(!opts.key || (opts.key && opts.key === item.key)) {
-          res.push({ hash: hash, item: item });
-          currentDepth ++;
+          result.push({ hash: hash, item: item });
+          currentAmount ++;
           handledItems.push(item.target);
         }
       } else if(item.op === HashCacheOps.Delete) {
@@ -39,21 +41,21 @@ class Aggregator {
       }
 
       if(opts.key && item.key === opts.key)
-        return res;
+        return result;
 
       if(opts.last && hash === opts.last)
-        return res;
+        return result;
 
-      if(!opts.last && opts.amount > -1 && currentDepth >= opts.amount)
-        return res;
+      if(!opts.last && opts.amount > -1 && currentAmount >= opts.amount)
+        return result;
 
       if(item.next) {
-        const next = this.fetchRecursive(ipfs, item.next, password, opts, currentDepth, handledItems);
-        res = res.concat(next);
+        const items = this.fetchRecursive(ipfs, item.next, password, opts, currentAmount, handledItems);
+        result = result.concat(items);
       }
     }
 
-    return res;
+    return result;
   }
 
   static _fetchOne(ipfs, hash, password) {
