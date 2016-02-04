@@ -8,6 +8,7 @@ var Encryption    = require('orbit-common/lib/Encryption');
 var HashCache     = require('./HashCacheClient');
 var HashCacheItem = require('./HashCacheItem').EncryptedHashCacheItem;
 var HashCacheOps  = require('./HashCacheOps');
+var MemoryCache   = require('./MemoryCache');
 
 const pubkey  = Keystore.getKeys().publicKey;
 const privkey = Keystore.getKeys().privateKey;
@@ -59,13 +60,29 @@ class Aggregator {
   }
 
   static _fetchOne(ipfs, hash, password) {
-    let data = await (ipfsAPI.getObject(ipfs, hash));
+    // 1. Try fetching from memory
+    let data = MemoryCache.get(hash);
+    // TODO: 2. Try fetching from local cache
+
+    // 3. Fetch from network
+    if(!data)
+      data = await (ipfsAPI.getObject(ipfs, hash));
+
+    // Cache the fetched item (encrypted)
+    MemoryCache.put(hash, data);
+
+    // Decrypt the item
     let item = HashCacheItem.fromEncrypted(data, pubkey, privkey, password);
 
     // TODO: add possibility to fetch content separately
     // fetch and decrypt content
     if(item.op === HashCacheOps.Add || item.op === HashCacheOps.Put) {
-      const payload    = await (ipfsAPI.getObject(ipfs, item.target));
+      let payload = MemoryCache.get(item.target);
+      if(!payload)
+        payload = await (ipfsAPI.getObject(ipfs, item.target));
+
+      MemoryCache.put(item.target, payload);
+
       const contentEnc = JSON.parse(payload.Data)["content"];
       const contentDec = Encryption.decrypt(contentEnc, privkey, 'TODO: pubkey');
       item.Payload     = contentDec;
