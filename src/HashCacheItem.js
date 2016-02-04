@@ -15,7 +15,11 @@ class HashCacheItem {
 
 class EncryptedHashCacheItem extends HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next, publicKey, privateKey, salt) {
+    if(key)
+      key = Encryption.encrypt(key, privateKey, publicKey);
+
     super(operation, key, sequenceNumber, targetHash, metaInfo, next);
+
     try {
       this.pubkey = publicKey;
       this.target = Encryption.encrypt(targetHash, privateKey, publicKey);
@@ -41,6 +45,9 @@ class EncryptedHashCacheItem extends HashCacheItem {
     const metaDec   = Encryption.decrypt(data.meta, privateKey, 'TODO: pubkey');
     data.target     = targetDec;
     data.meta       = JSON.parse(metaDec);
+
+    if(data.key)
+      data.key = Encryption.decrypt(data.key, privateKey, 'TODO: pubkey');
 
     const item = new HashCacheItem(data.op, data.key, data.seq, data.target, data.meta, next, publicKey, privateKey, salt);
     return item;

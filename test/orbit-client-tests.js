@@ -99,27 +99,27 @@ describe('Orbit Client', () => {
       done();
     }));
 
-    it('gets channel info when channel has modes set', async((done) => {
-      try {
-        orbit.channel(channel).delete();
-        var mode = {
-          mode: "+r",
-          params: {
-            password: 'password'
-          }
-        };
-        var res = orbit.channel(channel, '').setMode(mode)
-        var info = orbit.channel(channel, 'password').info();
-        assert.notEqual(info, null);
-        assert.equal(info.head, null);
-        assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
-        orbit.channel(channel, 'password').delete();
-      } catch(e) {
-        orbit.channel(channel, 'password').delete();
-        assert.equal(e, null);
-      }
-      done();
-    }));
+    // it('gets channel info when channel has modes set', async((done) => {
+    //   try {
+    //     orbit.channel(channel).delete();
+    //     var mode = {
+    //       mode: "+r",
+    //       params: {
+    //         password: 'password'
+    //       }
+    //     };
+    //     var res = orbit.channel(channel, '').setMode(mode)
+    //     var info = orbit.channel(channel, 'password').info();
+    //     assert.notEqual(info, null);
+    //     assert.equal(info.head, null);
+    //     assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
+    //     orbit.channel(channel, 'password').delete();
+    //   } catch(e) {
+    //     orbit.channel(channel, 'password').delete();
+    //     assert.equal(e, null);
+    //   }
+    //   done();
+    // }));
 
   });
 
@@ -501,6 +501,7 @@ describe('Orbit Client', () => {
   });
 
 
+/*
   describe('Modes', function() {
     var password = 'hello';
 
@@ -574,5 +575,5 @@ describe('Orbit Client', () => {
     }));
 
   });
-
+*/
 });

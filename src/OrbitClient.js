@@ -13,6 +13,7 @@ var ItemTypes     = require('./ItemTypes');
 var MetaInfo      = require('./MetaInfo');
 var Post          = require('./Post');
 var Aggregator    = require('./Aggregator');
+var PubSub        = require('./PubSub');
 
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;
@@ -82,7 +83,8 @@ class OrbitClient {
     if(lt || lte) {
       startFromHash = lte ? lte : lt;
     } else {
-      var channel = await (this.client.linkedList(channel, password).head());
+      // var channel = await (this.client.linkedList(channel, password).head());
+      var channel = PubSub.latest(channel);
       startFromHash = channel.head ? channel.head : null;
     }
 
@@ -125,7 +127,8 @@ class OrbitClient {
   _createMessage(channel, password, operation, key, target) {
     // Get the current channel head and bump the sequence number
     let seq = 0;
-    const currentHead = await(this.client.linkedList(channel, password).head())
+    // const currentHead = await(this.client.linkedList(channel, password).head())
+    const currentHead = PubSub.latest(channel);
     if(currentHead.head) {
       const headItem = await (ipfsAPI.getObject(this.ipfs, currentHead.head));
       seq = JSON.parse(headItem.Data)["seq"] + 1;
@@ -170,12 +173,14 @@ class OrbitClient {
 
   _createOperation(channel, password, operation, key, value) {
     const message = this._createMessage(channel, password, operation, key, value);
-    await(this.client.linkedList(channel, password).add(message.Hash));
+    // await(this.client.linkedList(channel, password).add(message.Hash));
+    PubSub.publish(channel, message.Hash)
     return message.Hash;
   }
 
   _deleteChannel(channel, password) {
-    await(this.client.linkedList(channel, password).delete());
+    // await(this.client.linkedList(channel, password).delete());
+    PubSub.delete(channel);
     return true;
   }
 
@@ -190,7 +195,9 @@ class OrbitClient {
   }
 
   _info(channel, password) {
-    return await(this.client.linkedList(channel, password).head());
+    // return await(this.client.linkedList(channel, password).head());
+    var l = PubSub.latest(channel);
+    return l;
   }
 
   _connect(host, username, password) {
