@@ -1,39 +1,68 @@
 'use strict';
 
-let messages = {};
+var async     = require('asyncawait/async');
+var await     = require('asyncawait/await');
+var HashCache = require('./HashCacheClient');
 
 class PubSub {
-  constructor() {
+  constructor(host, username, password) {
+    this._subscriptions = [];
+    this._messages      = {};
+    this._client        = await(HashCache.connect(host, username, password));
 
+    // Poll for the new head
+    setInterval(async(() => {
+      Object.keys(this._subscriptions).forEach(this._poll.bind(this));
+    }), 500);
   }
 
-  static latest(hash) {
-    return { head: messages[hash] && messages[hash].length > 0 ? messages[hash][messages[hash].length - 1] : null, modes: {} };
+  _poll(hash) {
+    const currentHead = this._subscriptions[hash].head;
+    const channel     = await(this._client.linkedList(hash, this._subscriptions[hash].password).head());
+    const newHead     = channel.head;
+    if(currentHead !== newHead) {
+      // console.log("NEW HEAD!", newHead);
+
+      this._subscriptions[hash].head = newHead;
+
+      if(!this._messages[hash])
+        this._messages[hash] = [];
+
+      this._messages[hash].push(newHead);
+
+      if(this._subscriptions[hash].callback)
+        this._subscriptions[hash].callback(hash, newHead);
+    }
   }
 
-  static publish(hash, message) {
-    if(!messages[hash]) messages[hash] = [];
-    messages[hash].push(message);
+  subscribe(channel, password, callback) {
+    if(!this._subscriptions[channel] || this._subscriptions[channel].password !== password) {
+      console.log("SUBSCRIBE:", channel);
+      this._subscriptions[channel] = {
+        channel: channel,
+        password: password,
+        head: null,
+        callback: callback
+      };
+    }
   }
 
-  static delete(hash) {
-    messages[hash] = [];
+  unsubscribe(channel) {
+    delete this._subscriptions[channel];
+    delete this._messages[channel];
   }
 
-  onNewMessage(channel, message) {
-    /*
-      // From orbit-server:
-      var hash    = req.params.hash;
-      var head    = req.body.head;
-      if(!head) throw "Invalid request";
-      var user    = authorize(req, res);
-      var channel = await(Database.getChannel(hash));
-      channel.authenticateRead(req.body.password);
-      var uid     = await (ipfsAPI.putObject(ipfs, JSON.stringify(user.get())));
-      channel.authenticateWrite(uid.Hash);
-      await(verifyMessage(head, channel));
-      await(channel.updateHead(head))
-    */
+  publish(hash, message) {
+    if(!this._messages[hash]) this._messages[hash] = [];
+    await(this._client.linkedList(hash, this._subscriptions[hash].password).add(message));
+  }
+
+  latest(hash) {
+    return { head: this._messages[hash] && this._messages[hash].length > 0 ? this._messages[hash][this._messages[hash].length - 1] : null, modes: {} };
+  }
+
+  delete(hash) {
+    this._messages[hash] = [];
   }
 }
 

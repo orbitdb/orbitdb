@@ -41,8 +41,8 @@ let run = (async(() => {
     });
     console.log(JSON.stringify(items, null, 2));
 
-    console.log("--> remove", hash1);
-    orbit.channel(c1).remove({ key: hash1 });
+    // console.log("--> remove", hash1);
+    // orbit.channel(c1).remove({ key: hash1 });
 
     items = orbit.channel(c1).iterator({ limit: -1 }).collect();
     items = items.map((e) => {
@@ -50,15 +50,21 @@ let run = (async(() => {
     });
     console.log(JSON.stringify(items, null, 2));
 
+    setInterval(async(() => {
+      orbit.channel(c1).add("hello at " + new Date().getTime());
+    }), 1234);
+/*
     // You can also get the event based on its hash
     var value = orbit.channel(c1).get(hash2);
     console.log("key:", hash2, "value:", value);
+*/
+    // console.log("--> remove", hash2);
+    // orbit.channel(c1).remove({ key: hash2 });
 
-    console.log("--> remove", hash2);
-    orbit.channel(c1).remove({ key: hash2 });
+    // items = orbit.channel(c1).iterator({ limit: -1 }).collect();
+    // console.log(JSON.stringify(items, null, 2));
 
-    items = orbit.channel(c1).iterator({ limit: -1 }).collect();
-    console.log(JSON.stringify(items, null, 2));
+    // process.exit(0);
 
   } catch(e) {
     console.error("error:", e);

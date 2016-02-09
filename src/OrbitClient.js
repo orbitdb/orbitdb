@@ -27,6 +27,16 @@ class OrbitClient {
 
   channel(hash, password) {
     if(password === undefined) password = '';
+
+    this._pubsub.subscribe(hash, password, (channel, message) => {
+      const m = this._getMessages(hash, password, { gte: message });
+      m.forEach((e) => {
+        const userData = await(ipfsAPI.getObject(this.ipfs, e.item.meta.from))
+        const user = JSON.parse(userData.Data)["user"];
+        console.log(`${user}>`, e.item.Payload, `(op: ${e.item.op}, ${e.item.key})`);
+      });
+    });
+
     return {
       info: (options) => this._info(hash, password),
       delete: () => this._deleteChannel(hash, password),
@@ -80,11 +90,13 @@ class OrbitClient {
     const key     = options.key ? options.key : null;
 
     let startFromHash;
-    if(lt || lte) {
+    if(lte || lt) {
       startFromHash = lte ? lte : lt;
+    } else if (gte || gt) {
+      startFromHash = gte ? gte : gt;
     } else {
       // var channel = await (this.client.linkedList(channel, password).head());
-      var channel = PubSub.latest(channel);
+      var channel = this._pubsub.latest(channel);
       startFromHash = channel.head ? channel.head : null;
     }
 
@@ -128,7 +140,7 @@ class OrbitClient {
     // Get the current channel head and bump the sequence number
     let seq = 0;
     // const currentHead = await(this.client.linkedList(channel, password).head())
-    const currentHead = PubSub.latest(channel);
+    const currentHead = this._pubsub.latest(channel);
     if(currentHead.head) {
       const headItem = await (ipfsAPI.getObject(this.ipfs, currentHead.head));
       seq = JSON.parse(headItem.Data)["seq"] + 1;
@@ -136,7 +148,7 @@ class OrbitClient {
 
     // Create meta info
     const size = -1;
-    const metaInfo = new MetaInfo(ItemTypes.Message, size, new Date().getTime());
+    const metaInfo = new MetaInfo(ItemTypes.Message, size, this.user.id, new Date().getTime());
 
     // Create the hash cache item
     const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
@@ -174,13 +186,13 @@ class OrbitClient {
   _createOperation(channel, password, operation, key, value) {
     const message = this._createMessage(channel, password, operation, key, value);
     // await(this.client.linkedList(channel, password).add(message.Hash));
-    PubSub.publish(channel, message.Hash)
+    this._pubsub.publish(channel, message.Hash)
     return message.Hash;
   }
 
   _deleteChannel(channel, password) {
     // await(this.client.linkedList(channel, password).delete());
-    PubSub.delete(channel);
+    this._pubsub.delete(channel);
     return true;
   }
 
@@ -196,12 +208,14 @@ class OrbitClient {
 
   _info(channel, password) {
     // return await(this.client.linkedList(channel, password).head());
-    var l = PubSub.latest(channel);
+    var l = this._pubsub.latest(channel);
     return l;
   }
 
   _connect(host, username, password) {
-    this.client = await(HashCache.connect(host, username, password));
+    this._pubsub = new PubSub(host, username, password);
+    // this.client = await(HashCache.connect(host, username, password));
+    this.client = this._pubsub._client;
     this.user = this.client.info.user;
     this.network = {
       id: this.client.info.networkId,
