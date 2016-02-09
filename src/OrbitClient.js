@@ -18,6 +18,8 @@ var PubSub        = require('./PubSub');
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;
 
+let vvv = {};
+
 class OrbitClient {
   constructor(ipfs) {
     this.ipfs = ipfs;
@@ -28,14 +30,7 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    this._pubsub.subscribe(hash, password, (channel, message) => {
-      const m = this._getMessages(hash, password, { gte: message });
-      m.forEach((e) => {
-        const userData = await(ipfsAPI.getObject(this.ipfs, e.item.meta.from))
-        const user = JSON.parse(userData.Data)["user"];
-        console.log(`${user}>`, e.item.Payload, `(op: ${e.item.op}, ${e.item.key})`);
-      });
-    });
+    this._pubsub.subscribe(hash, password);
 
     return {
       info: (options) => this._info(hash, password),
@@ -92,11 +87,8 @@ class OrbitClient {
     let startFromHash;
     if(lte || lt) {
       startFromHash = lte ? lte : lt;
-    } else if (gte || gt) {
-      startFromHash = gte ? gte : gt;
     } else {
-      // var channel = await (this.client.linkedList(channel, password).head());
-      var channel = this._pubsub.latest(channel);
+      var channel = this._info(channel, password);
       startFromHash = channel.head ? channel.head : null;
     }
 
@@ -137,18 +129,12 @@ class OrbitClient {
   }
 
   _createMessage(channel, password, operation, key, target) {
-    // Get the current channel head and bump the sequence number
-    let seq = 0;
-    // const currentHead = await(this.client.linkedList(channel, password).head())
-    const currentHead = this._pubsub.latest(channel);
-    if(currentHead.head) {
-      const headItem = await (ipfsAPI.getObject(this.ipfs, currentHead.head));
-      seq = JSON.parse(headItem.Data)["seq"] + 1;
-    }
-
     // Create meta info
     const size = -1;
     const metaInfo = new MetaInfo(ItemTypes.Message, size, this.user.id, new Date().getTime());
+
+    // Get the current channel head and bump the sequence number
+    let seq = this._info(channel, password).seq + 1;
 
     // Create the hash cache item
     const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
@@ -159,7 +145,7 @@ class OrbitClient {
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
     if(seq > 0)
-      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, currentHead.head));
+      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, this._info(channel, password).head));
 
     return newHead;
   }
@@ -168,13 +154,13 @@ class OrbitClient {
   _add(channel, password, data) {
     const post = this._publish(data);
     const key = post.Hash;
-    this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash);
+    await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash));
     return key;
   }
 
   _put(channel, password, key, data) {
     const post = this._publish(data);
-    return this._createOperation(channel, password, HashCacheOps.Put, key, post.Hash);
+    return await(this._createOperation(channel, password, HashCacheOps.Put, key, post.Hash));
   }
 
   _remove(channel, password, options) {
@@ -184,15 +170,18 @@ class OrbitClient {
   }
 
   _createOperation(channel, password, operation, key, value) {
-    const message = this._createMessage(channel, password, operation, key, value);
-    // await(this.client.linkedList(channel, password).add(message.Hash));
-    this._pubsub.publish(channel, message.Hash)
+    let message, res = false;
+    while(!res) {
+      message = this._createMessage(channel, password, operation, key, value);
+      res = await(this._pubsub.publish(channel, message));
+      if(!res) console.log("Retry <-->")
+    }
+    // console.log("Posted!")
     return message.Hash;
   }
 
   _deleteChannel(channel, password) {
-    // await(this.client.linkedList(channel, password).delete());
-    this._pubsub.delete(channel);
+    this._pubsub.delete(channel, password);
     return true;
   }
 
@@ -202,26 +191,26 @@ class OrbitClient {
       m.push(modes);
     else
       m = modes;
-    const res = await(this.client.linkedList(channel, password).setMode(m));
-    return res.modes;
+    // const res = await(this.client.linkedList(channel, password).setMode(m));
+    // return res.modes;
+    return { todo: 'TODO!' }
   }
 
   _info(channel, password) {
-    // return await(this.client.linkedList(channel, password).head());
-    var l = this._pubsub.latest(channel);
+    var l = this._pubsub.latest(channel, password);
     return l;
   }
 
   _connect(host, username, password) {
-    this._pubsub = new PubSub(host, username, password);
-    // this.client = await(HashCache.connect(host, username, password));
-    this.client = this._pubsub._client;
-    this.user = this.client.info.user;
-    this.network = {
-      id: this.client.info.networkId,
-      name: this.client.info.name,
-      config: this.client.info.config
-    };
+    this._pubsub = new PubSub(this.ipfs, host, username, password);
+    // this.client = this._pubsub._client;
+    // this.user = this.client.info.user;
+    this.user = { id: 'hello' }
+    // this.network = {
+    //   id: this.client.info.networkId,
+    //   name: this.client.info.name,
+    //   config: this.client.info.config
+    // };
   }
 }
 
