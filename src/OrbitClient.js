@@ -1,6 +1,5 @@
 'use strict';
 
-var a             = require('async');
 var async         = require('asyncawait/async');
 var await         = require('asyncawait/await');
 var Keystore      = require('orbit-common/lib/Keystore');
@@ -31,7 +30,10 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    this._pubsub.subscribe(hash, password);
+    this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
+      // let m = Aggregator._fetchOne(this.ipfs, message, password);
+      // console.log(">", message);
+    }));
 
     return {
       info: (options) => this._info(hash, password),
@@ -206,6 +208,7 @@ class OrbitClient {
     // this.client = this._pubsub._client;
     // this.user = this.client.info.user;
     this.user = { id: 'hello' }
+    console.log("Connected to redis")
     // this.network = {
     //   id: this.client.info.networkId,
     //   name: this.client.info.name,

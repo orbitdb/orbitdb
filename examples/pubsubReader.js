@@ -26,9 +26,11 @@ let run = (async(() => {
         let timer = new Timer(true);
         running = true;
 
-        channel.add(id + count);
+        // channel.add(id + count);
 
-        let items = channel.iterator({ limit: 20 }).collect();
+        console.log("Query...");
+        let items = channel.iterator({ limit: 1 }).collect();
+        console.log(`Found items ${items.length} items`);
 
         var g = items.filter((e) => e.item.Payload.startsWith(id))
         var prev = -1;

@@ -11,8 +11,8 @@ class PubSub {
     this._subscriptions = {};
     this.client1 = redis.createClient({ host: host, port: port });
     this.client2 = redis.createClient({ host: host, port: port });
-    this.publishQueue = [];
     this.client1.on("message", this._handleMessage.bind(this));
+    this.publishQueue = [];
   }
 
   subscribe(hash, password, callback) {
@@ -51,17 +51,20 @@ class PubSub {
 
   _handleMessage(hash, event) {
     if(this._subscriptions[hash]) {
-      var e = JSON.parse(event)
-      var newHead = e.hash;
-      var seq = e.seq;
+      var message = JSON.parse(event)
+      var newHead = message.hash;
+      var seq     = message.seq;
       var isNewer = seq > this._subscriptions[hash].seq;
+      var item    = this.publishQueue[this.publishQueue.length - 1];
 
-      var item = this.publishQueue[this.publishQueue.length - 1];
-      if(item && item.hash === newHead) {
-        item.callback(isNewer);
+      // console.log(".", newHead, item ? item.hash : '')
+
+      if(item) {
+        item.callback(isNewer && newHead === item.hash);
         this.publishQueue.pop();
       }
 
+      // console.log(isNewer, seq, this._subscriptions[hash].seq)
       if(isNewer)
         this._updateSubscription(hash, newHead, seq);
     }
@@ -70,6 +73,7 @@ class PubSub {
   _updateSubscription(hash, message, seq) {
     this._subscriptions[hash].seq = seq;
     this._subscriptions[hash].head = message;
+    this._subscriptions[hash].callback(hash, message, seq);
   }
 
 }
