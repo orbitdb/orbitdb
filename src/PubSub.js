@@ -36,10 +36,17 @@ class PubSub {
 
   publish(hash, message, seq, callback) {
     return new Promise((resolve, reject) => {
-      if(this.publishQueue.length === 0)
+      if(this.publishQueue.length === 0) {
         this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
         this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
-        setTimeout(() => resolve(false), 1000)
+      } else {
+        console.log("too early")
+        // resolve(false);
+      }
+      setTimeout(() => {
+        this.publishQueue.pop();
+        resolve(false);
+      }, 2000)
     });
   }
 
@@ -59,14 +66,14 @@ class PubSub {
       var isNewer = seq > this._subscriptions[hash].seq;
       var item    = this.publishQueue[this.publishQueue.length - 1];
 
-      // console.log(".", isNewer, newHead, item ? item.hash : '', seq, this._subscriptions[hash].seq, message)
-
-      if(item) {
-        item.callback(isNewer && newHead === item.hash);
-        this.publishQueue.pop();
-      }
+      // console.log(".", isNewer, newHead, item ? item.hash : '', seq, this._subscriptions[hash].seq)
 
       // console.log(isNewer, seq, this._subscriptions[hash].seq)
+      if(item) {
+        this.publishQueue.pop();
+        item.callback(isNewer && newHead === item.hash);
+      }
+
       if(isNewer)
         this._updateSubscription(hash, newHead, seq);
     }
