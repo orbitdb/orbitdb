@@ -20,7 +20,7 @@ var serverConfig = {
 
 // Orbit
 const host     = 'localhost';
-const port     = 3006;
+const port     = 6379;
 const username = 'testrunner';
 const password = '';
 
@@ -47,7 +47,7 @@ describe('Orbit Client', () => {
 
   before(async((done) => {
     var initialize = () => new Promise(async((resolve, reject) => {
-      orbit = OrbitClient.connect(`${host}:${port}`, username, password);
+      orbit = OrbitClient.connect(host, port, username, password);
       orbit.channel(channel, '').delete();
       resolve();
     }));

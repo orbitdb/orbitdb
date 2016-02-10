@@ -1,5 +1,6 @@
 'use strict';
 
+var a             = require('async');
 var async         = require('asyncawait/async');
 var await         = require('asyncawait/await');
 var Keystore      = require('orbit-common/lib/Keystore');
@@ -135,6 +136,7 @@ class OrbitClient {
 
     // Get the current channel head and bump the sequence number
     let seq = this._info(channel, password).seq + 1;
+    let head = this._info(channel, password).head;
 
     // Create the hash cache item
     const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
@@ -145,16 +147,16 @@ class OrbitClient {
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
     if(seq > 0)
-      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, this._info(channel, password).head));
+      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
 
-    return newHead;
+    return { hash: newHead, seq: seq };
   }
 
   /* DB Operations */
   _add(channel, password, data) {
     const post = this._publish(data);
     const key = post.Hash;
-    await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash));
+    await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash, data));
     return key;
   }
 
@@ -169,14 +171,12 @@ class OrbitClient {
     return this._createOperation(channel, password, HashCacheOps.Delete, key, target);
   }
 
-  _createOperation(channel, password, operation, key, value) {
+  _createOperation(channel, password, operation, key, value, data) {
     let message, res = false;
     while(!res) {
       message = this._createMessage(channel, password, operation, key, value);
-      res = await(this._pubsub.publish(channel, message));
-      if(!res) console.log("Retry <-->")
+      res = await(this._pubsub.publish(channel, message.hash, message.seq));
     }
-    // console.log("Posted!")
     return message.Hash;
   }
 
@@ -201,8 +201,8 @@ class OrbitClient {
     return l;
   }
 
-  _connect(host, username, password) {
-    this._pubsub = new PubSub(this.ipfs, host, username, password);
+  _connect(host, port, username, password) {
+    this._pubsub = new PubSub(this.ipfs, host, port, username, password);
     // this.client = this._pubsub._client;
     // this.user = this.client.info.user;
     this.user = { id: 'hello' }
@@ -215,14 +215,14 @@ class OrbitClient {
 }
 
 class OrbitClientFactory {
-  static connect(host, username, password, ipfs) {
+  static connect(host, port, username, password, ipfs) {
     if(!ipfs) {
       let ipfsd = await(ipfsDaemon());
       ipfs = ipfsd.daemon;
     }
 
     const client = new OrbitClient(ipfs);
-    await(client._connect(host, username, password))
+    await(client._connect(host, port, username, password))
     return client;
   }
 }

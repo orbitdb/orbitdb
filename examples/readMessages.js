@@ -4,24 +4,20 @@ var async       = require('asyncawait/async');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
-var host     = 'localhost:3006';
+// Redis host
+var host     = 'localhost';
+var port     = '6379'
+
 var username = 'testrunner';
 var password = '';
 
 var util = require('util');
 var exec = require('child_process').exec;
 
-function clear(cb){
-    exec('clear', function(error, stdout, stderr){
-        util.puts(stdout);
-        cb();
-    });
-}
-
 let run = (async(() => {
   try {
     // Connect
-    var orbit = OrbitClient.connect(host, username, password);
+    var orbit = OrbitClient.connect(host, port, username, password);
 
 /*    var timer = new Timer(true);
 
@@ -60,43 +56,49 @@ let run = (async(() => {
     });
     console.log(JSON.stringify(items, null, 2));
 */
-    const id = 'a';
+    const id = process.argv[2] ? process.argv[2] : 'a';
     const c1 = 'c1';
     const cc = orbit.channel(c1);
 
     let i = 0;
-    let running = false;
-    let missCount = 0;
-    setInterval(async(() => {
-      if(!running) {
-        let timer = new Timer(true);
-        running = true;
-        // orbit.channel(c1).add("hello at #" + i);
-        cc.add(id + i);
-        i ++;
-        console.log(`Insert took ${timer.stop(true)} ms`);
+    let seconds = 0;
+    let round = 0;
+    let lastTen = 0;
 
-        let timer2 = new Timer(true);
-        var items = cc.iterator({ limit: 10 }).collect();
-        console.log("Iterator took " + timer2.stop(true) + " ms");
-        items = items.map((e) => {
-          return e.item;
-        });
+    // Metrics
+    setInterval(() => {
+      seconds ++;
 
-        var g = items.filter((e) => e.Payload.startsWith(id))
-        var prev = -1;
-        g.reverse().forEach((e) => {
-          var a = parseInt(e.Payload.replace(id, ''));
-          if(prev > -1 && prev + 1 !== a) {
-            console.log("Missing message: " + id, prev + 1)
-          }
-          prev = a;
-        })
-        console.log(JSON.stringify(items.map((e) => e.seq + " - " + e.Payload), null, 2));
-        // console.log("\n\n");
-        running = false;
+      if(seconds % 10 === 0) {
+        console.log(`--> Average of ${lastTen/10} q/s in the last 10 seconds`)
+        lastTen = 0
       }
-    }), 50);
+
+      console.log(`${round} queries per second, ${i} queries in ${seconds} seconds`)
+      round = 0;
+    }, 1000);
+
+    while(true) {
+      cc.add(id + i);
+
+      i ++;
+      lastTen ++;
+      round ++;
+
+      // let items = cc.iterator({ limit: 10 }).collect();
+      // items     = items.map((e) => e.item);
+      // let g     = items.filter((e) => e.Payload.startsWith(id))
+      // let prev  = -1;
+      // g.reverse().forEach((e) => {
+      //   const a = parseInt(e.Payload.replace(id, ''));
+      //   if(prev > -1 && prev + 1 !== a) {
+      //     console.log("!! Missing message: " + id, prev + 1)
+      //     process.exit(1);
+      //   }
+      //   prev = a;
+      // })
+    }
+
 /*
     // You can also get the event based on its hash
     var value = orbit.channel(c1).get(hash2);

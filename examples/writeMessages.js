@@ -1,10 +1,13 @@
 'use strict';
 
 var async       = require('asyncawait/async');
+var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
-var host     = 'localhost:3006';
+var host     = 'localhost';
+var port     = 6379;
+
 var username = 'LambOfGod';
 var password = '';
 
@@ -53,45 +56,74 @@ let run = (async(() => {
     // orbit.channel(channel, '').remove(items[items.length - 8].hash); // 9
 */
 
-  var orbit = OrbitClient.connect(host, username, password);
+  var orbit = OrbitClient.connect(host, port, username, password);
   const c1 = 'c1';
   const cc = orbit.channel(c1);
 
-  let i = 0;
+  let i = 1;
+  let id = 'b'
   let running = false;
   setInterval(async(() => {
-    try {
-      if(!running) {
-        let timer = new Timer(true);
-        running = true;
+    if(!running) {
+      let timer = new Timer(true);
+      running = true;
 
-        cc.add("b" + i);
+      await(cc.add(id + i));
 
-        let items = cc.iterator({ limit: 10 }).collect();
+      let items = cc.iterator({ limit: 10 }).collect();
 
-          var g = items.filter((e) => e.item.Payload.startsWith('b'))
-          var prev = -1;
-          g.reverse().forEach((e) => {
-            var a = parseInt(e.item.Payload.replace('b', ''));
-            if(prev > -1 && prev + 1 !== a) {
-              console.log("MISSSS!!!", prev + 1)
-            }
-            prev = a;
-          })
+        var g = items.filter((e) => e.item.Payload.startsWith(id))
+        var prev = -1;
+        g.reverse().forEach((e) => {
+          var a = parseInt(e.item.Payload.replace(id, ''));
+          if(prev > -1 && prev + 1 !== a) {
+            console.log("MISSSS!!!", prev + 1, items)
+            process.exit(1);
+          }
+          prev = a;
+        })
 
-        items = items.map((e) => {
-          return e.item.seq + " - " + e.item.Payload;
-        });
-        console.log(JSON.stringify(items, null, 2));
-        console.log(`Query took ${timer.stop(true)} ms`);
-        running = false;
-      }
-      // console.log("\n\n");
-    } catch(e) {
-      console.error(e);
+      items = items.map((e) => {
+        return e.item.seq + " - " + e.item.Payload;
+      });
+      console.log(JSON.stringify(items, null, 2));
+      console.log(`Query ${i} took ${timer.stop(true)} ms`);
+      running = false;
+      i ++;
     }
-    i ++;
-  }), 100);
+  // while(true) {
+  // }
+  }), 1000);
+
+  // setInterval(async(() => {
+  //   if(!running) {
+  //     let timer = new Timer(true);
+  //     running = true;
+
+  //     await(cc.add(id + i));
+
+  //     let items = cc.iterator({ limit: 10 }).collect();
+
+  //       var g = items.filter((e) => e.item.Payload.startsWith(id))
+  //       var prev = -1;
+  //       g.reverse().forEach((e) => {
+  //         var a = parseInt(e.item.Payload.replace(id, ''));
+  //         if(prev > -1 && prev + 1 !== a) {
+  //           console.log("MISSSS!!!", prev + 1, items)
+  //           process.exit(1);
+  //         }
+  //         prev = a;
+  //       })
+
+  //     items = items.map((e) => {
+  //       return e.item.seq + " - " + e.item.Payload;
+  //     });
+  //     console.log(JSON.stringify(items, null, 2));
+  //     console.log(`Query took ${timer.stop(true)} ms`);
+  //     running = false;
+  //     i ++;
+  //   }
+  // }), 36);
 
   } catch(e) {
     console.error("error:", e);

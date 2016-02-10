@@ -6,35 +6,13 @@ var redis = require("redis");
 var Aggregator    = require('./Aggregator');
 
 class PubSub {
-  constructor(ipfs, host, username, password) {
+  constructor(ipfs, host, port, username, password) {
     this.ipfs = ipfs;
     this._subscriptions = {};
-    this.client1 = redis.createClient();
-    this.client2 = redis.createClient();
-    this.currentPost = null;
-
-    this.client1.on("message", async((hash, message) => {
-      const currentHead = this._subscriptions[hash] ? this._subscriptions[hash].head : null;
-      if(this._subscriptions[hash]) {
-        let item = Aggregator._fetchOne(this.ipfs, message, this._subscriptions[hash].password);
-
-        if(item.seq > this._subscriptions[hash].seq) {
-          this._subscriptions[hash].seq = item.seq;
-
-          if(currentHead !== message)
-            this._handleNewMessage(hash, message);
-
-          if(this.currentPost) {
-            if(message === this.currentPost.hash) {
-              this.currentPost.callback(true);
-              this.currentPost = null;
-            } else {
-              this.currentPost.callback(false);
-            }
-          }
-        }
-      }
-    }));
+    this.client1 = redis.createClient({ host: host, port: port });
+    this.client2 = redis.createClient({ host: host, port: port });
+    this.publishQueue = [];
+    this.client1.on("message", this._handleMessage.bind(this));
   }
 
   subscribe(hash, password, callback) {
@@ -56,10 +34,10 @@ class PubSub {
     this.client2.unsubscribe();
   }
 
-  publish(hash, message, callback) {
+  publish(hash, message, seq, callback) {
     return new Promise((resolve, reject) => {
-      this.currentPost = { hash: message.Hash, callback: resolve };
-      this.client2.publish(hash, message.Hash);
+      this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
+      this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
     });
   }
 
@@ -71,10 +49,27 @@ class PubSub {
     delete this._subscriptions[hash];
   }
 
-  _handleNewMessage(hash, newHead) {
-    this._subscriptions[hash].head = newHead;
-    if(this._subscriptions[hash].callback)
-      this._subscriptions[hash].callback(hash, newHead);
+  _handleMessage(hash, event) {
+    if(this._subscriptions[hash]) {
+      var e = JSON.parse(event)
+      var newHead = e.hash;
+      var seq = e.seq;
+      var isNewer = seq > this._subscriptions[hash].seq;
+
+      var item = this.publishQueue[this.publishQueue.length - 1];
+      if(item && item.hash === newHead) {
+        item.callback(isNewer);
+        this.publishQueue.pop();
+      }
+
+      if(isNewer)
+        this._updateSubscription(hash, newHead, seq);
+    }
+  }
+
+  _updateSubscription(hash, message, seq) {
+    this._subscriptions[hash].seq = seq;
+    this._subscriptions[hash].head = message;
   }
 
 }
