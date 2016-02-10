@@ -176,9 +176,12 @@ class OrbitClient {
   _createOperation(channel, password, operation, key, value, data) {
     let message, res = false;
     while(!res) {
+    // console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
+      // if(!res) console.log("retry")
     }
+    // console.log("posted")
     return message.Hash;
   }
 

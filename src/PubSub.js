@@ -36,8 +36,10 @@ class PubSub {
 
   publish(hash, message, seq, callback) {
     return new Promise((resolve, reject) => {
-      this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
-      this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
+      if(this.publishQueue.length === 0)
+        this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
+        this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
+        setTimeout(() => resolve(false), 1000)
     });
   }
 
@@ -57,7 +59,7 @@ class PubSub {
       var isNewer = seq > this._subscriptions[hash].seq;
       var item    = this.publishQueue[this.publishQueue.length - 1];
 
-      // console.log(".", newHead, item ? item.hash : '')
+      // console.log(".", isNewer, newHead, item ? item.hash : '', seq, this._subscriptions[hash].seq, message)
 
       if(item) {
         item.callback(isNewer && newHead === item.hash);
