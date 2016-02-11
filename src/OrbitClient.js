@@ -30,11 +30,7 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    await(this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
-      let m = await(Aggregator._fetchOne(this.ipfs, message, password));
-      // console.log(">", m.key, m.seq, m.Payload);
-    })));
-    // await(this._pubsub.subscribe(hash, password));
+    await(this._pubsub.subscribe(hash, password));
     // this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
       // let m = Aggregator._fetchOne(this.ipfs, message, password);
       // console.log(">", message);

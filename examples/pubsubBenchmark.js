@@ -39,14 +39,12 @@ let run = (async(() => {
       queriesPerSecond = 0;
     }, 1000);
 
-    setInterval(async(() => {
-    // while(true) {
+    while(true) {
       channel.add(id + totalQueries);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;
-    // }
-    }), 100);
+    }
 
   } catch(e) {
     console.error("error:", e);
