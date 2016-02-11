@@ -40,13 +40,13 @@ class PubSub {
         this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
         this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
       } else {
-        console.log("too early")
+        // console.log("too early")
         // resolve(false);
       }
-      setTimeout(() => {
-        this.publishQueue.pop();
-        resolve(false);
-      }, 2000)
+      // setTimeout(() => {
+      //   this.publishQueue.pop();
+      //   resolve(false);
+      // }, 200)
     });
   }
 

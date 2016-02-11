@@ -176,10 +176,10 @@ class OrbitClient {
   _createOperation(channel, password, operation, key, value, data) {
     let message, res = false;
     while(!res) {
-    // console.log("posting...")
+      // console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
-      // if(!res) console.log("retry")
+      // if(!res) console.log("retry", message)
     }
     // console.log("posted")
     return message.Hash;
@@ -211,7 +211,6 @@ class OrbitClient {
     // this.client = this._pubsub._client;
     // this.user = this.client.info.user;
     this.user = { id: 'hello' }
-    console.log("Connected to redis")
     // this.network = {
     //   id: this.client.info.networkId,
     //   name: this.client.info.name,
