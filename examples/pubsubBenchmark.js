@@ -5,7 +5,7 @@ var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
 // Redis host
-var host     = '188.166.73.174';
+var host     = '178.62.229.175';
 var port     = 6379;
 
 var username = 'testrunner';
