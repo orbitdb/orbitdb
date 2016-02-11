@@ -30,7 +30,11 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    await(this._pubsub.subscribe(hash, password));
+    await(this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
+      let m = await(Aggregator._fetchOne(this.ipfs, message, password));
+      // console.log(">", m.key, m.seq, m.Payload);
+    })));
+    // await(this._pubsub.subscribe(hash, password));
     // this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
       // let m = Aggregator._fetchOne(this.ipfs, message, password);
       // console.log(">", message);
@@ -149,8 +153,12 @@ class OrbitClient {
     let newHead = { Hash: data.Hash };
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
-    if(seq > 0)
-      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
+    try {
+      if(seq > 0)
+        newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
+    } catch(e) {
+      console.error("!!!!", e)
+    }
 
     return { hash: newHead, seq: seq };
   }
@@ -180,7 +188,7 @@ class OrbitClient {
       // console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
-      if(!res) console.log("retry", message)
+      if(!res) console.log("retry", message.hash, message.seq)
     }
     // console.log("posted")
     return message.Hash;

@@ -37,7 +37,7 @@ class PubSub {
       this.client3.get("orbit." + hash, (err, reply) => {
         if(reply) {
           let d = JSON.parse(reply);
-          this._subscriptions[hash].seq = d.seq + 1;
+          this._subscriptions[hash].seq = d.seq;
           this._subscriptions[hash].head = d.head;
           if(err) console.log(err);
           console.log(`head of '${hash}' is`, this._subscriptions[hash].head, "seq:", this._subscriptions[hash].seq);
@@ -62,17 +62,19 @@ class PubSub {
 
   publish(hash, message, seq, callback) {
     return new Promise((resolve, reject) => {
-      if(this.publishQueue.length === 0) {
-        this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
-        this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
-      } else {
-        // console.log("too early")
-        // resolve(false);
-      }
       // setTimeout(() => {
+      //   console.log("timeout")
       //   this.publishQueue.pop();
       //   resolve(false);
-      // }, 200)
+      // }, 2000)
+
+      // if(this.publishQueue.length === 0) {
+        this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
+        this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
+      // } else {
+      //   console.log("too early")
+      //   resolve(false);
+      // }
     });
   }
 
