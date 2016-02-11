@@ -30,10 +30,11 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
+    await(this._pubsub.subscribe(hash, password));
+    // this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
       // let m = Aggregator._fetchOne(this.ipfs, message, password);
       // console.log(">", message);
-    }));
+    // }));
 
     return {
       info: (options) => this._info(hash, password),
@@ -179,7 +180,7 @@ class OrbitClient {
       // console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
-      // if(!res) console.log("retry", message)
+      if(!res) console.log("retry", message)
     }
     // console.log("posted")
     return message.Hash;
@@ -207,15 +208,20 @@ class OrbitClient {
   }
 
   _connect(host, port, username, password) {
-    this._pubsub = new PubSub(this.ipfs, host, port, username, password);
-    // this.client = this._pubsub._client;
-    // this.user = this.client.info.user;
-    this.user = { id: 'hello' }
-    // this.network = {
-    //   id: this.client.info.networkId,
-    //   name: this.client.info.name,
-    //   config: this.client.info.config
-    // };
+    return new Promise((resolve, reject) => {
+      this._pubsub = new PubSub(this.ipfs, host, port, username, password, resolve);
+      // this.client = this._pubsub._client;
+      // this.user = this.client.info.user;
+      this.user = { id: 'hello' }
+      // this.network = {
+      //   id: this.client.info.networkId,
+      //   name: this.client.info.name,
+      //   config: this.client.info.config
+      // };
+      // setTimeout(() => {
+      //   resolve();
+      // }, 1000);
+    });
   }
 }
 
