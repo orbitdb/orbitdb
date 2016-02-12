@@ -40,7 +40,7 @@ _See Usage below_
 
         .get(key) // Retrieve value
 
-        .remove({ key: <key or hash> }) // Remove entry
+        .del({ key: <key or hash> }) // Remove entry
 
         .setMode(modes) // Set channel modes, can be an object or an array of objects
 
@@ -65,17 +65,20 @@ async(() => {
     const orbit = OrbitClient.connect(host, username, password);
 
     const channelName = 'hello-world';
+    const db = orbit.channel(channelName);
 
     /* Event Log */
-    const hash = orbit.channel(channelName).add('hello'); // <ipfs-hash>
-    orbit.channel(channelName).remove({ key: hash });
+    const hash = db.add('hello'); // <ipfs-hash>
+
+    // Remove event
+    db.remove(hash);
 
     // Iterator options
-    const options  = { limit: -1 }; // fetch all messages
+    const options = { limit: -1 }; // fetch all messages
 
     // Get events
-    const iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
-    const next  = iter.next(); // { value: <item>, done: false|true}
+    const iter = db.iterator(options); // Symbol.iterator
+    const next = iter.next(); // { value: <item>, done: false|true}
 
     // OR:
     // var all = iter.collect(); // returns all elements as an array
@@ -85,20 +88,21 @@ async(() => {
     //   console.log(i.hash, i.item);
 
     /* KV Store */
-    orbit.channel(channelName).put("key1", "hello world");
-    orbit.channel(channelName).get("key1"); // returns "hello world"
-    orbit.channel(channelName).remove("key1");
+    db.put('key1', 'hello world');
+    db.get('key1'); // returns "hello world"
+    db.remove('key1');
 
     /* Modes */
     const password = 'hello';
     let channelModes;
-    channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
-    channelModes = orbit.channel(channel, password).setMode({ mode: "+w", params: { ops: [orbit.user.id] } }); // { modes: { ... } }
-    channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }
-    channelModes = orbit.channel(channel, '').setMode({ mode: "-w" }); // { modes: {} }
+    channelModes = db.setMode({ mode: '+r', params: { password: password } }); // { modes: { r: { password: 'hello' } } }
+    const privateChannel = orbit.channel(channel, password);
+    channelModes = privateChannel.setMode({ mode: '+w', params: { ops: [orbit.user.id] } }); // { modes: { ... } }
+    channelModes = privateChannel.setMode({ mode: '-r' }); // { modes: { ... } }
+    channelModes = privateChannel.setMode({ mode: '-w' }); // { modes: {} }
 
     /* Delete channel */
-    const result = orbit.channel(channelName, channelPwd).delete(); // true | false
+    const result = db.delete(); // true | false
 })();
 ```
 
