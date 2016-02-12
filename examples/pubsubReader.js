@@ -29,7 +29,7 @@ let run = (async(() => {
         // channel.add(id + count);
 
         console.log("Query...");
-        let items = channel.iterator({ limit: 1 }).collect();
+        let items = channel.iterator({ limit: 3 }).collect();
         console.log(`Found items ${items.length} items`);
 
         var g = items.filter((e) => e.item.Payload.startsWith(id))
@@ -57,7 +57,7 @@ let run = (async(() => {
         running = false;
         count ++;
       }
-    }), 1000);
+    }), 500);
 
   } catch(e) {
     console.error("error:", e);

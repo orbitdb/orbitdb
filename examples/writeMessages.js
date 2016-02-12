@@ -24,7 +24,7 @@ let run = (async(() => {
     // Add the first message and delete it immediately
     // orbit.channel(channel, '').put("hello world!");
     // var e = orbit.channel(channel, '').iterator({ limit: -1 }).collect()[0].hash;
-    // orbit.channel(channel, '').remove(e);
+    // orbit.channel(channel, '').del(e);
     orbit.channel(channel, '').put("key two", "hello world!!!");
 
     var messages = 10;
@@ -38,7 +38,7 @@ let run = (async(() => {
 
       if(i === 4) {
         console.log("remove", head);
-        // orbit.channel(channel, '').remove(head);
+        // orbit.channel(channel, '').del(head);
       }
 
       i ++;
@@ -47,13 +47,13 @@ let run = (async(() => {
     var items = orbit.channel(channel, '').iterator({ limit: -1 }).collect();
     // console.log(items);
     var e = orbit.channel(channel, '').iterator({ limit: -1 }).collect();
-    orbit.channel(channel, '').remove({ key: "key one" });
-    // orbit.channel(channel, '').remove(items[2].hash); // 97
-    // orbit.channel(channel, '').remove(items[3].hash); // 96
-    // orbit.channel(channel, '').remove(items[66].hash); // 34
-    // orbit.channel(channel, '').remove(items[items.length - 10].hash); // 11
-    // orbit.channel(channel, '').remove(items[items.length - 9].hash); // 10
-    // orbit.channel(channel, '').remove(items[items.length - 8].hash); // 9
+    orbit.channel(channel, '').del({ key: "key one" });
+    // orbit.channel(channel, '').del(items[2].hash); // 97
+    // orbit.channel(channel, '').del(items[3].hash); // 96
+    // orbit.channel(channel, '').del(items[66].hash); // 34
+    // orbit.channel(channel, '').del(items[items.length - 10].hash); // 11
+    // orbit.channel(channel, '').del(items[items.length - 9].hash); // 10
+    // orbit.channel(channel, '').del(items[items.length - 8].hash); // 9
 */
 
   var orbit = OrbitClient.connect(host, port, username, password);

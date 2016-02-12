@@ -43,7 +43,7 @@ class OrbitClient {
       setMode: (mode) => this._setMode(hash, password, mode),
       add: (data) => this._add(hash, password, data),
       //TODO: tests
-      remove: (options) => this._remove(hash, password, options),
+      del: (options) => this._remove(hash, password, options),
       put: (key, data) => this._put(hash, password, key, data),
       get: (key, options) => {
         const items = this._iterator(hash, password, { key: key }).collect();
@@ -149,12 +149,8 @@ class OrbitClient {
     let newHead = { Hash: data.Hash };
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
-    try {
-      if(seq > 0)
-        newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
-    } catch(e) {
-      console.error("!!!!", e)
-    }
+    if(seq > 0)
+      newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
 
     return { hash: newHead, seq: seq };
   }
@@ -163,8 +159,7 @@ class OrbitClient {
   _add(channel, password, data) {
     const post = this._publish(data);
     const key = post.Hash;
-    await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash, data));
-    return key;
+    return await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash, data));
   }
 
   _put(channel, password, key, data) {
@@ -181,13 +176,13 @@ class OrbitClient {
   _createOperation(channel, password, operation, key, value, data) {
     let message, res = false;
     while(!res) {
-      // console.log("posting...")
+      console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
       if(!res) console.log("retry", message.hash, message.seq)
     }
-    // console.log("posted")
-    return message.Hash;
+    console.log("posted")
+    return message.hash.Hash;
   }
 
   _deleteChannel(channel, password) {
@@ -207,7 +202,7 @@ class OrbitClient {
   }
 
   _info(channel, password) {
-    var l = this._pubsub.latest(channel, password);
+    var l = this._pubsub.latest(channel);
     return l;
   }
 

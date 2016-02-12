@@ -25,7 +25,7 @@ class PubSub {
     });
   }
 
-  subscribe(hash, password, callback) {
+  subscribe(hash, password, head, callback) {
     if(!this._subscriptions[hash] || this._subscriptions[hash].password !== password) {
       this._subscriptions[hash] = {
         topic: hash,
@@ -34,16 +34,17 @@ class PubSub {
         callback: callback,
         seq: -1
       };
-      this.client3.get("orbit." + hash, (err, reply) => {
-        if(reply) {
-          let d = JSON.parse(reply);
-          this._subscriptions[hash].seq = d.seq;
-          this._subscriptions[hash].head = d.head;
-          if(err) console.log(err);
-          console.log(`head of '${hash}' is`, this._subscriptions[hash].head, "seq:", this._subscriptions[hash].seq);
-        }
-      });
+      // this.client3.get("orbit." + hash, (err, reply) => {
+      //   if(reply) {
+      //     let d = JSON.parse(reply);
+      //     this._subscriptions[hash].seq = d.seq;
+      //     this._subscriptions[hash].head = d.head;
+      //     if(err) console.log(err);
+      //     console.log(`head of '${hash}' is`, this._subscriptions[hash].head, "seq:", this._subscriptions[hash].seq);
+      //   }
+      // });
       this.client1.subscribe(hash);
+      this.client2.publish(hash, JSON.stringify({ r: "HEAD" }));
     }
 
     return new Promise((resolve, reject) => {
@@ -62,23 +63,16 @@ class PubSub {
 
   publish(hash, message, seq, callback) {
     return new Promise((resolve, reject) => {
-      // setTimeout(() => {
-      //   console.log("timeout")
-      //   this.publishQueue.pop();
-      //   resolve(false);
-      // }, 2000)
-
-      // if(this.publishQueue.length === 0) {
+      if(this.publishQueue.length === 0) {
         this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
         this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
-      // } else {
-      //   console.log("too early")
-      //   resolve(false);
-      // }
+      } else {
+        resolve(false);
+      }
     });
   }
 
-  latest(hash, password) {
+  latest(hash) {
     return { head: this._subscriptions[hash].head, modes: {}, seq: this._subscriptions[hash].seq };
   }
 
@@ -87,29 +81,39 @@ class PubSub {
   }
 
   _handleMessage(hash, event) {
-    // console.log(".")
     if(this._subscriptions[hash]) {
       var message = JSON.parse(event)
-      var newHead = message.hash;
-      var seq     = message.seq;
-      var isNewer = seq > this._subscriptions[hash].seq;
-      var item    = this.publishQueue[this.publishQueue.length - 1];
+      if(message.hash) {
+        var newHead = message.hash;
+        var seq     = message.seq;
+        var isNewer = seq > this._subscriptions[hash].seq;
+        var item    = this.publishQueue[this.publishQueue.length - 1];
 
-      // console.log(".", newHead, item ? item.hash : '', seq, this._subscriptions[hash].seq, isNewer)
+        // console.log(".", newHead, item ? item.hash : '', seq, this._subscriptions[hash].seq, isNewer)
 
-      // console.log(isNewer, seq, this._subscriptions[hash].seq)
-      if(item) {
-        this.publishQueue.pop();
-        item.callback(isNewer && newHead === item.hash);
+        if(item) {
+          this.publishQueue.pop();
+          item.callback(isNewer && newHead === item.hash);
+        }
+
+        if(isNewer)
+          this._updateSubscription(hash, newHead, seq);
+      } else if(message.r === 'HEAD') {
+        console.log("SEND HEAD!")
+        this.client2.publish(hash, JSON.stringify(this.latest(hash)));
+      } else {
+        console.log("GOT HEAD!", message)
+        var isNewer = message.seq > this._subscriptions[hash].seq;
+        if(isNewer) {
+          console.log("NEW HEAD!")
+          this._updateSubscription(hash, message.head, message.seq);
+        }
       }
-
-      if(isNewer)
-        this._updateSubscription(hash, newHead, seq);
     }
   }
 
   _updateSubscription(hash, message, seq) {
-    this.client3.set("orbit." + hash, JSON.stringify({ head: message, seq: seq }));
+    // this.client3.set("orbit." + hash, JSON.stringify({ head: message, seq: seq }));
     this._subscriptions[hash].seq = seq;
     this._subscriptions[hash].head = message;
 

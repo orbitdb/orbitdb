@@ -31,7 +31,7 @@ let run = (async(() => {
     orbit.channel(channel).put("key4", "this will be deleted");
     var val2 = orbit.channel(channel).get("key4");
     console.log("key4:", val2);
-    orbit.channel(channel).remove({ key: "key4" });
+    orbit.channel(channel).del({ key: "key4" });
     val2 = orbit.channel(channel).get("key4");
     console.log("key4:", val2);
 
@@ -48,7 +48,7 @@ let run = (async(() => {
     console.log(JSON.stringify(items, null, 2));
 
     // console.log("--> remove", hash1);
-    // orbit.channel(c1).remove({ key: hash1 });
+    // orbit.channel(c1).del({ key: hash1 });
 
     items = orbit.channel(c1).iterator({ limit: -1 }).collect();
     items = items.map((e) => {
