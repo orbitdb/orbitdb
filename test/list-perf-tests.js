@@ -3,8 +3,7 @@
 // var assert = require('assert');
 // var async  = require('asyncawait/async');
 // var await  = require('asyncawait/await');
-// var List   = require('../test1').List;
-// var Node   = require('../test1').Node;
+// var List   = require('../src/list/List');
 // var Timer  = require('../examples/Timer');
 
 // describe('List - Performance Measurement', function() {
@@ -23,8 +22,6 @@
 
 //       ms = timer.stop(true);
 //       console.log(`    > ${t} took ${ms} ms`)
-
-//       // assert.equal(ms < t, true);
 //     }
 
 //     assert.equal(true, true);
