@@ -30,7 +30,7 @@ let run = (async(() => {
 
         console.log("Query...");
         let items = channel.iterator({ limit: 3 }).collect();
-        console.log(`Found items ${items.length} items`);
+        console.log(`Found ${items.length} items`);
 
         var g = items.filter((e) => e.item.Payload.startsWith(id))
         var prev = -1;

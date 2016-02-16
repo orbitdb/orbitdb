@@ -65,8 +65,11 @@ class PubSub {
     return new Promise((resolve, reject) => {
       if(this.publishQueue.length === 0) {
         this.publishQueue.splice(0, 0, { hash: message.Hash, callback: resolve });
+        console.log("...")
         this.client2.publish(hash, JSON.stringify({ hash: message.Hash, seq: seq }));
+        console.log("published")
       } else {
+        console.log("queue full!")
         resolve(false);
       }
     });
@@ -106,6 +109,7 @@ class PubSub {
         var isNewer = message.seq > this._subscriptions[hash].seq;
         if(isNewer) {
           console.log("NEW HEAD!")
+          this.publishQueue.pop();
           this._updateSubscription(hash, message.head, message.seq);
         }
       }

@@ -144,14 +144,17 @@ class OrbitClient {
     // Create the hash cache item
     const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
 
+    console.log("1")
     // Save the item to ipfs
     const data = await (ipfsAPI.putObject(this.ipfs, JSON.stringify(hcItem)));
+    console.log("2", data.Hash, head)
     let newHead = { Hash: data.Hash };
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
     if(seq > 0)
       newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
 
+    console.log("3")
     return { hash: newHead, seq: seq };
   }
 
@@ -170,17 +173,19 @@ class OrbitClient {
   _remove(channel, password, options) {
     const key = null;
     const target = options.key ? options.key : (options.hash ? options.hash : null);
-    return this._createOperation(channel, password, HashCacheOps.Delete, key, target);
+    return await(this._createOperation(channel, password, HashCacheOps.Delete, key, target));
   }
 
   _createOperation(channel, password, operation, key, value, data) {
     let message, res = false;
     while(!res) {
+      this.posting = true;
       console.log("posting...")
       message = this._createMessage(channel, password, operation, key, value);
       res = await(this._pubsub.publish(channel, message.hash, message.seq));
       if(!res) console.log("retry", message.hash, message.seq)
     }
+      this.posting = false;
     console.log("posted")
     return message.hash.Hash;
   }
