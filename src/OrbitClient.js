@@ -14,6 +14,8 @@ var MetaInfo      = require('./MetaInfo');
 var Post          = require('./Post');
 var Aggregator    = require('./Aggregator');
 var PubSub        = require('./PubSub');
+const List       = require('./list/OrbitList');
+var Timer       = require('../examples/Timer');
 
 var pubkey  = Keystore.getKeys().publicKey;
 var privkey = Keystore.getKeys().privateKey;
@@ -25,16 +27,21 @@ class OrbitClient {
     this.ipfs = ipfs;
     this.network = {};
     this.user = null;
+    this.list = null; // TODO move to DataStore
   }
 
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    await(this._pubsub.subscribe(hash, password));
-    // this._pubsub.subscribe(hash, password, async((hash, message, seq) => {
-      // let m = Aggregator._fetchOne(this.ipfs, message, password);
-      // console.log(">", message);
-    // }));
+    this._pubsub.subscribe(hash, password, async((hash, message) => {
+      const other = await(List.fromIpfsHash(this.ipfs, message));
+      // console.log(">", other.id, other.seq, other.ver);
+      if(other.id !== this.user.username) {
+        let timer = new Timer(true);
+        this.list.join(other); // TODO: move to DataStore
+        console.log(`Join took ${timer.stop(true)} ms`);
+      }
+    }));
 
     return {
       info: (options) => this._info(hash, password),
@@ -49,6 +56,7 @@ class OrbitClient {
         const items = this._iterator(hash, password, { key: key }).collect();
         return items[0] ? items[0].item.Payload : null;
       },
+      leave: () => this._pubsub.unsubscribe(hash)
     }
   }
 
@@ -68,7 +76,6 @@ class OrbitClient {
         return item;
       },
       collect: () => messages
-      // TODO: add first() and last() ?
     }
 
     return iterator;
@@ -106,7 +113,8 @@ class OrbitClient {
       };
 
       // Get messages
-      messages = Aggregator.fetchRecursive(this.ipfs, startFromHash, password, opts);
+      // messages = Aggregator.fetchRecursive(this.ipfs, startFromHash, password, opts);
+      messages = this.list.items.map((f) => f.compact()); // TODO: move to DataStore
 
       // Slice the array
       let startIndex = 0;
@@ -144,17 +152,14 @@ class OrbitClient {
     // Create the hash cache item
     const hcItem = new HashCacheItem(operation, key, seq, target, metaInfo, null, pubkey, privkey, password);
 
-    console.log("1")
     // Save the item to ipfs
     const data = await (ipfsAPI.putObject(this.ipfs, JSON.stringify(hcItem)));
-    console.log("2", data.Hash, head)
     let newHead = { Hash: data.Hash };
 
     // If this is not the first item in the channel, patch with the previous (ie. link as next)
     if(seq > 0)
       newHead = await (ipfsAPI.patchObject(this.ipfs, data.Hash, head));
 
-    console.log("3")
     return { hash: newHead, seq: seq };
   }
 
@@ -177,16 +182,10 @@ class OrbitClient {
   }
 
   _createOperation(channel, password, operation, key, value, data) {
-    let message, res = false;
-    while(!res) {
-      this.posting = true;
-      console.log("posting...")
-      message = this._createMessage(channel, password, operation, key, value);
-      res = await(this._pubsub.publish(channel, message.hash, message.seq));
-      if(!res) console.log("retry", message.hash, message.seq)
-    }
-      this.posting = false;
-    console.log("posted")
+    let message = this._createMessage(channel, password, operation, key, value);
+    this.list.add(message.hash.Hash); // TODO: move to DataStore
+    const listHash = await(this.list.getIpfsHash());
+    await(this._pubsub.publish(channel, listHash));
     return message.hash.Hash;
   }
 
@@ -213,10 +212,12 @@ class OrbitClient {
 
   _connect(host, port, username, password) {
     return new Promise((resolve, reject) => {
-      this._pubsub = new PubSub(this.ipfs, host, port, username, password, resolve);
+      this._pubsub = new PubSub(this.ipfs, host, port, username, password);
       // this.client = this._pubsub._client;
       // this.user = this.client.info.user;
-      this.user = { id: 'hello' }
+      this.user = { id: 'hello-todo', username: username }
+      this.list = new List(username, this.ipfs); // TODO: move to DataStore
+      resolve();
       // this.network = {
       //   id: this.client.info.networkId,
       //   name: this.client.info.name,

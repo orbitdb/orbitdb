@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const Timer = require('./examples/Timer');
 const List = require('./src/list/List');
-// const Node = require('./src/list/Node');
 
 var run = () => {
   var redis = require("redis");

@@ -5,7 +5,8 @@ var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
-var host     = '178.62.229.175';
+// var host     = '178.62.229.175';
+var host     = 'localhost';
 var port     = 6379;
 
 var username = 'LambOfGod';
@@ -23,36 +24,21 @@ let run = (async(() => {
 
     setInterval(async(() => {
       if(!running) {
-        let timer = new Timer(true);
         running = true;
 
-        // channel.add(id + count);
+        // let timer = new Timer(true);
+        channel.add(id + count);
+        // console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
-        console.log("Query...");
-        let items = channel.iterator({ limit: 3 }).collect();
-        console.log(`Found ${items.length} items`);
-
-        var g = items.filter((e) => e.item.Payload.startsWith(id))
-        var prev = -1;
-        g.reverse().forEach((e) => {
-          var a = parseInt(e.item.Payload.replace(id, ''));
-          if(prev > -1 && prev + 1 !== a) {
-            console.log("MISSING VALUE!!!", prev + 1, items)
-            process.exit(1);
-          }
-          prev = a;
-        })
-
-        items = items.map((e) => {
-          return e.item.seq + " | " + e.item.Payload;
-        });
-
+        // console.log("Query...");
+        const c = channel.iterator({ limit: -1 }).collect().length;
+        let items = channel.iterator({ limit: 5 }).collect();
         console.log("---------------------------------------------------")
-        console.log("Seq | Payload")
+        console.log("Id | Seq | Ver | Data")
         console.log("---------------------------------------------------")
-        console.log(items.join("\n"));
+        console.log(items.map((e) => `${e.id} | ${e.seq} | ${e.ver} | ${e.data}`).join("\n"));
         console.log("---------------------------------------------------")
-        console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
+        console.log(`Found ${items.length} items from ${c}\n`);
 
         running = false;
         count ++;
