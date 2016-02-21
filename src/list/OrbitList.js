@@ -21,10 +21,23 @@ class OrbitList extends List {
     this.ver ++;
   }
 
+  clear() {
+    this._items = [];
+    this._currentBatch = [];
+  }
+
   getIpfsHash() {
     return new Promise(async((resolve, reject) => {
       const list = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(this.toJson())));
       resolve(list.Hash);
+    }));
+  }
+
+  static fromIpfsHash(ipfs, hash) {
+    return new Promise(async((resolve, reject) => {
+      const l = await(ipfsAPI.getObject(ipfs, hash));
+      const list = OrbitList.fromJson(ipfs, JSON.parse(l.Data));
+      resolve(list);
     }));
   }
 
@@ -34,14 +47,6 @@ class OrbitList extends List {
     list.ver = json.ver;
     list._items = _.uniqWith(json.items.map((f) => new Node(ipfs, f.id, f.seq, f.ver, f.data, f.next)), _.isEqual);
     return list;
-  }
-
-  static fromIpfsHash(ipfs, hash) {
-    return new Promise(async((resolve, reject) => {
-      const l = await(ipfsAPI.getObject(ipfs, hash));
-      const list = OrbitList.fromJson(ipfs, JSON.parse(l.Data));
-      resolve(list);
-    }));
   }
 }
 

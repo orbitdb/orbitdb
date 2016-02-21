@@ -2,6 +2,15 @@
 
 const Encryption = require('orbit-common/lib/Encryption');
 
+class OrbitDBItem {
+  constructor(operation, key, value, metaInfo) {
+    this.op    = operation;
+    this.key   = key;
+    this.value = value;
+    this.meta  = metaInfo;
+  }
+}
+
 class HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next) {
     this.op     = operation;
@@ -55,6 +64,7 @@ class EncryptedHashCacheItem extends HashCacheItem {
 }
 
 module.exports = {
+  OrbitDBItem: OrbitDBItem,
   HashCacheItem: HashCacheItem,
   EncryptedHashCacheItem: EncryptedHashCacheItem
 };

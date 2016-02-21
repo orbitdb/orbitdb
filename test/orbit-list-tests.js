@@ -148,9 +148,9 @@ describe('OrbitList', async(function() {
         seq: 0,
         ver: 3,
         items: [
-          { id: 'A', seq: 0, ver: 0, data: 'hello1', next: [] },
-          { id: 'A', seq: 0, ver: 1, data: 'hello2', next: ['A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt'] },
-          { id: 'A', seq: 0, ver: 2, data: 'hello3', next: ['A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK'] }
+          { id: 'A', seq: 0, ver: 0, data: 'hello1', next: [], Payload: undefined },
+          { id: 'A', seq: 0, ver: 1, data: 'hello2', next: ['A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt'], Payload: undefined },
+          { id: 'A', seq: 0, ver: 2, data: 'hello3', next: ['A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK'], Payload: undefined }
         ]
       };
       // console.log(JSON.stringify(json, null, 1))

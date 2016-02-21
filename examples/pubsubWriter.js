@@ -16,14 +16,14 @@ let run = (async(() => {
   try {
     var orbit = OrbitClient.connect(host, port, username, password);
     const c1 = 'c1';
+    let channel;
 
     let count = 1;
     let id = 'Log: Query '
-    let channel;
 
     setInterval(async(() => {
       if(channel) {
-        channel.add(id + count);
+        channel.add(username + " " + count);
         count ++;
       }
     }), process.argv[3] ? process.argv[3] : 1000);

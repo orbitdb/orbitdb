@@ -27,20 +27,15 @@ let run = (async(() => {
         running = true;
 
         // let timer = new Timer(true);
-        channel.add("Hello " + count);
+        channel.put("lamb", "of god" + count);
         // console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
+        let v = channel.get("lamb");
 
-        const c = channel.iterator({ limit: -1 }).collect().length;
-        let items = channel.iterator({ limit: 5 }).collect();
-        // console.log(items);
         console.log("---------------------------------------------------")
-        // console.log("Id | Seq | Ver | Data")
-        console.log("Key | Value")
+        console.log("Id | Seq | Ver | Data")
         console.log("---------------------------------------------------")
-        // console.log(items.map((e) => `${e.id} | ${e.seq} | ${e.ver} | ${e.data}`).join("\n"));
-        console.log(items.map((e) => `${e.payload.key} | ${e.payload.value}`).join("\n"));
+        console.log(v);
         console.log("---------------------------------------------------")
-        console.log(`Found ${items.length} items from ${c}\n`);
 
         running = false;
         count ++;
