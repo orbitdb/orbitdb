@@ -1,25 +1,22 @@
 'use strict';
 
-var async         = require('asyncawait/async');
-var await         = require('asyncawait/await');
-var Keystore      = require('orbit-common/lib/Keystore');
-var Encryption    = require('orbit-common/lib/Encryption');
-var ipfsDaemon    = require('orbit-common/lib/ipfs-daemon');
-var ipfsAPI       = require('orbit-common/lib/ipfs-api-promised');
-var HashCacheItem = require('./HashCacheItem').HashCacheItem;
-var OrbitDBItem   = require('./HashCacheItem').OrbitDBItem;
-var HashCacheOps  = require('./HashCacheOps');
-var ItemTypes     = require('./ItemTypes');
-var MetaInfo      = require('./MetaInfo');
-var Post          = require('./Post');
-var Aggregator    = require('./Aggregator');
-var PubSub        = require('./PubSub');
-var Timer       = require('../examples/Timer');
-const List = require('./list/OrbitList');
-const DataStore = require('./DataStore');
+const async        = require('asyncawait/async');
+const await        = require('asyncawait/await');
+const Keystore     = require('orbit-common/lib/Keystore');
+const Encryption   = require('orbit-common/lib/Encryption');
+const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
+const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
+const OrbitDBItem  = require('./HashCacheItem').OrbitDBItem;
+const HashCacheOps = require('./HashCacheOps');
+const ItemTypes    = require('./ItemTypes');
+const MetaInfo     = require('./MetaInfo');
+const Post         = require('./Post');
+const PubSub       = require('./Pubsub');
+const List         = require('./list/OrbitList');
+const DataStore    = require('./DataStore');
 
-var pubkey  = Keystore.getKeys().publicKey;
-var privkey = Keystore.getKeys().privateKey;
+const pubkey  = Keystore.getKeys().publicKey;
+const privkey = Keystore.getKeys().privateKey;
 
 class OrbitClient {
   constructor(ipfs) {
