@@ -5,9 +5,8 @@ var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
-// var host     = '178.62.229.175';
-var host     = 'localhost';
-var port     = 6379;
+var host = 'localhost';
+var port = 6379;
 
 var username = process.argv[2] ? process.argv[2] : 'DankoJones';
 var password = '';

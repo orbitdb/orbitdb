@@ -18,7 +18,7 @@ let run = (async(() => {
 
     const id = process.argv[2] ? process.argv[2] : 'a';
     const channelName = 'c1';
-    const channel = orbit.channel(channelName);
+    const db = orbit.channel(channelName);
 
     // Metrics
     let totalQueries = 0;
@@ -39,14 +39,12 @@ let run = (async(() => {
       queriesPerSecond = 0;
     }, 1000);
 
-    setInterval(async(() => {
-    // while(true) {
-      let g = channel.add(id + totalQueries);
+    while(true) {
+      let g = db.add(id + totalQueries);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;
-    // }
-    }), 1000)
+    }
 
   } catch(e) {
     console.error("error:", e);
