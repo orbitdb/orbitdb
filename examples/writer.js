@@ -5,6 +5,7 @@ var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
+// Redis
 var host = 'localhost';
 var port = 6379;
 

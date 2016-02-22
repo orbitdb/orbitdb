@@ -5,6 +5,7 @@ var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
+// Redis
 var host = 'localhost';
 var port = 6379;
 
@@ -31,12 +32,9 @@ let run = (async(() => {
 
         const c = channel.iterator({ limit: -1 }).collect().length;
         let items = channel.iterator({ limit: 5 }).collect();
-        // console.log(items);
         console.log("---------------------------------------------------")
-        // console.log("Id | Seq | Ver | Data")
         console.log("Key | Value")
         console.log("---------------------------------------------------")
-        // console.log(items.map((e) => `${e.id} | ${e.seq} | ${e.ver} | ${e.data}`).join("\n"));
         console.log(items.map((e) => `${e.payload.key} | ${e.payload.value}`).join("\n"));
         console.log("---------------------------------------------------")
         console.log(`Found ${items.length} items from ${c}\n`);
