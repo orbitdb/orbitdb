@@ -21,7 +21,6 @@ const privkey = Keystore.getKeys().privateKey;
 class OrbitClient {
   constructor(ipfs) {
     this._ipfs = ipfs;
-    this.network = {};
     this.user = null;
   }
 
@@ -30,16 +29,11 @@ class OrbitClient {
 
     this._pubsub.subscribe(hash, password, async((hash, message) => {
       const other = await(List.fromIpfsHash(this._ipfs, message));
-      // console.log(">", other.id, other.seq, other.ver);
-      if(other.id !== this.user.username) {
-        // let timer = new Timer(true);
+      if(other.id !== this.user.username)
         this._store.join(other);
-        // console.log(`Join took ${timer.stop(true)} ms`);
-      }
     }));
 
     return {
-      // info: (options) => this._info(hash, password),
       delete: () => this._deleteChannel(hash, password),
       iterator: (options) => this._iterator(hash, password, options),
       setMode: (mode) => this._setMode(hash, password, mode),
@@ -101,13 +95,11 @@ class OrbitClient {
 
     // Get messages
     messages = await(this._store.get(opts));
-    // console.log("M", messages)
 
     // Remove the first/last item if greater/lesser than is set
     let startIndex = lt ? 1 : 0;
     let endIndex   = gt ? messages.length - 1 : messages.length;
     messages = messages.slice(startIndex, endIndex)
-    // console.log("M2", messages)
 
     if(!reverse) messages.reverse();
 
@@ -122,7 +114,7 @@ class OrbitClient {
 
   _createMessage(channel, password, operation, key, value) {
     const size = -1;
-    const meta = new MetaInfo(ItemTypes.Message, size, this.user.id, new Date().getTime());
+    const meta = new MetaInfo(ItemTypes.Message, size, this.user.username, new Date().getTime());
     const item = new OrbitDBItem(operation, key, value, meta);
     const data = await (ipfsAPI.putObject(this._ipfs, JSON.stringify(item)));
     return data.Hash;
@@ -149,8 +141,8 @@ class OrbitClient {
     const res = await(this._store.add(hash));
     const listHash = await(this._store.list.getIpfsHash());
     await(this._pubsub.publish(channel, listHash));
-    return key;
     // return res;
+    return key;
   }
 
   _deleteChannel(channel, password) {
@@ -158,38 +150,12 @@ class OrbitClient {
     return true;
   }
 
-  // _setMode(channel, password, modes) {
-  //   let m = [];
-  //   if(typeof modes !== 'Array')
-  //     m.push(modes);
-  //   else
-  //     m = modes;
-  //   // const res = await(this.client.linkedList(channel, password).setMode(m));
-  //   // return res.modes;
-  //   return { todo: 'TODO!' }
-  // }
-
-  // _info(channel, password) {
-  //   var l = this._pubsub.latest(channel);
-  //   return l;
-  // }
-
   _connect(host, port, username, password) {
     return new Promise((resolve, reject) => {
+      this.user = { username: username, id: 'hello-todo' }
       this._pubsub = new PubSub(this._ipfs, host, port, username, password);
-      // this.client = this._pubsub._client;
-      // this.user = this.client.info.user;
-      this.user = { id: 'hello-todo', username: username }
-      this._store = new DataStore(username, this._ipfs);
+      this._store  = new DataStore(username, this._ipfs);
       resolve();
-      // this.network = {
-      //   id: this.client.info.networkId,
-      //   name: this.client.info.name,
-      //   config: this.client.info.config
-      // };
-      // setTimeout(() => {
-      //   resolve();
-      // }, 1000);
     });
   }
 }

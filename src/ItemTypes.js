@@ -1,6 +1,6 @@
 'use strict';
 
-let ItemTypes = {
+const ItemTypes = {
   Message: "text",
   Snippet: "snippet",
   File: "file",

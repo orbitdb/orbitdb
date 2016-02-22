@@ -3,11 +3,8 @@
 const _            = require('lodash');
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
-const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
 const OrbitList    = require('./list/OrbitList');
 const HashCacheOps = require('./HashCacheOps');
-
-var Timer = require('../examples/Timer');
 
 const DefaultAmount = 1;
 
@@ -44,8 +41,6 @@ class DataStore {
   }
 
   _fetchRecursive(options, currentAmount, deleted, res) {
-    // console.log("-->")
-    // console.log("opts:", options, currentAmount)
     const opts = {
       amount: options && options.amount ? options.amount : DefaultAmount,
       first:  options && options.first ? options.first : null,
@@ -59,7 +54,6 @@ class DataStore {
     if(!currentAmount) currentAmount = 0;
 
     const item = this._fetchOne(currentAmount);
-    // console.log("ITEM", item)
 
     if(item && item.payload) {
       const wasHandled = _.includes(handledItems, item.payload.key);
@@ -68,12 +62,10 @@ class DataStore {
            (!opts.first || (opts.first && (opts.first === item.payload.key && result.length === 0))
                         || (opts.first && (opts.first !== item.payload.key && result.length > 0))))
         {
-          // console.log("PUSH!", item, currentAmount, result.length);
           result.push(item);
           handledItems.push(item.payload.key);
         }
       } else if(item.payload.op === HashCacheOps.Delete) {
-        // console.log("DELETE!", item);
         handledItems.push(item.payload.key);
       }
 
@@ -82,7 +74,6 @@ class DataStore {
       if(opts.key && item.payload.key === opts.key)
         return result;
 
-      // console.log("ITEM", item.payload.key, opts.last)
       if(opts.last && item.payload.key === opts.last)
         return result;
 
@@ -92,7 +83,6 @@ class DataStore {
       if(currentAmount >= this.list.items.length)
         return result;
 
-      // console.log("RES!", result)
       result = this._fetchRecursive(opts, currentAmount, handledItems, result);
     }
 

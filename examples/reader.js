@@ -1,16 +1,16 @@
 'use strict';
 
-var async       = require('asyncawait/async');
-var await       = require('asyncawait/await');
-var OrbitClient = require('../src/OrbitClient');
-var Timer       = require('./Timer');
+const async       = require('asyncawait/async');
+const await       = require('asyncawait/await');
+const OrbitClient = require('../src/OrbitClient');
+const Timer       = require('./Timer');
 
 // Redis
-var host = 'localhost';
-var port = 6379;
+const host = 'localhost';
+const port = 6379;
 
-var username = 'LambOfGod';
-var password = '';
+const username = 'LambOfGod';
+const password = '';
 
 let run = (async(() => {
   try {
