@@ -11,7 +11,7 @@ const HashCacheOps = require('./HashCacheOps');
 const ItemTypes    = require('./ItemTypes');
 const MetaInfo     = require('./MetaInfo');
 const Post         = require('./Post');
-const PubSub       = require('./Pubsub');
+const PubSub       = require('./PubSub');
 const List         = require('./list/OrbitList');
 const DataStore    = require('./DataStore');
 

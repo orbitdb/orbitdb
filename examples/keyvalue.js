@@ -7,7 +7,7 @@ const Timer       = require('./Timer');
 
 // Redis
 const host = 'localhost';
-const port = 6379;
+const port = 3333;
 
 const username = 'LambOfGod';
 const password = '';
