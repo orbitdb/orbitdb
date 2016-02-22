@@ -10,16 +10,12 @@
   "main": "src/OrbitClient.js",
   "dependencies": {
     "asyncawait": "^1.0.1",
-    "bluebird": "^3.1.1",
-    "bs58": "^3.0.0",
     "lodash": "^4.3.0",
     "orbit-common": "^0.1.0",
-    "redis": "^2.4.2",
-    "unirest": "^0.4.2"
+    "redis": "^2.4.2"
   },
   "devDependencies": {
-    "mocha": "^2.3.4",
-    "orbit-server": "^0.1.2"
+    "mocha": "^2.3.4"
   },
   "scripts": {
     "test": "mocha"
