@@ -2,6 +2,15 @@
 
 const Encryption = require('orbit-common/lib/Encryption');
 
+class OrbitDBItem {
+  constructor(operation, key, value, metaInfo) {
+    this.op    = operation;
+    this.key   = key;
+    this.value = value;
+    this.meta  = metaInfo;
+  }
+}
+
 class HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next) {
     this.op     = operation;
@@ -15,7 +24,11 @@ class HashCacheItem {
 
 class EncryptedHashCacheItem extends HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next, publicKey, privateKey, salt) {
+    if(key)
+      key = Encryption.encrypt(key, privateKey, publicKey);
+
     super(operation, key, sequenceNumber, targetHash, metaInfo, next);
+
     try {
       this.pubkey = publicKey;
       this.target = Encryption.encrypt(targetHash, privateKey, publicKey);
@@ -42,12 +55,16 @@ class EncryptedHashCacheItem extends HashCacheItem {
     data.target     = targetDec;
     data.meta       = JSON.parse(metaDec);
 
+    if(data.key)
+      data.key = Encryption.decrypt(data.key, privateKey, 'TODO: pubkey');
+
     const item = new HashCacheItem(data.op, data.key, data.seq, data.target, data.meta, next, publicKey, privateKey, salt);
     return item;
   }
 }
 
 module.exports = {
+  OrbitDBItem: OrbitDBItem,
   HashCacheItem: HashCacheItem,
   EncryptedHashCacheItem: EncryptedHashCacheItem
 };

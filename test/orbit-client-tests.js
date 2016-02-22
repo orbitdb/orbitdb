@@ -1,244 +1,174 @@
 'use strict';
 
-var fs          = require('fs');
-var path        = require('path');
-var assert      = require('assert');
-var async       = require('asyncawait/async');
-var await       = require('asyncawait/await');
-var ipfsDaemon  = require('orbit-common/lib/ipfs-daemon');
-var logger      = require('orbit-common/lib/logger');
-var Server      = require('orbit-server/src/server');
-var OrbitClient = require('../src/OrbitClient');
-
-var serverConfig = {
-  networkId: "orbitdb-test",
-  networkName: "OrbitDB Test Network",
-  salt: "hellothisisdog",
-  userDataPath: "/tmp/orbitdb-tests",
-  verifyMessages: true
-}
+const _           = require('lodash');
+const assert      = require('assert');
+const async       = require('asyncawait/async');
+const await       = require('asyncawait/await');
+const OrbitClient = require('../src/OrbitClient');
 
 // Orbit
 const host     = 'localhost';
-const port     = 3006;
+const port     = 6379;
 const username = 'testrunner';
 const password = '';
 
-const startServer = async (() => {
-  return new Promise(async((resolve, reject) => {
-    logger.setLevel('ERROR');
-    const ipfsd  = await(ipfsDaemon());
-    const server = Server(ipfsd.daemon, ipfsd.nodeInfo, serverConfig);
-    server.app.listen(port, () => {
-      resolve(server);
-    }).on('error', (err) => {
-      resolve(server);
-    });
-  }));
-});
-
-
 describe('Orbit Client', () => {
-  let server, orbit;
+  let client, db;
+  let items = [];
 
-  let head    = '';
-  let items   = [];
   let channel = 'abcdefgh';
 
   before(async((done) => {
-    var initialize = () => new Promise(async((resolve, reject) => {
-      orbit = OrbitClient.connect(`${host}:${port}`, username, password);
-      orbit.channel(channel, '').delete();
-      resolve();
-    }));
-    server = await(startServer());
-    await(initialize());
+    client = OrbitClient.connect(host, port, username, password);
+    db = client.channel(channel);
+    db.delete();
     done();
   }));
 
-  after(function(done) {
-    var deleteChannel = () => new Promise(async((resolve, reject) => {
-      if(orbit) orbit.channel(channel, '').delete();
-      resolve();
-    }));
-    server.shutdown();
-    server = null;
-    deleteChannel().then(done);
+  after(async((done) => {
+    if(db) db.delete();
+    done();
+  }));
+
+/*
+  describe('Info', function() {    //       }
+    //     };
+    //     var res = db.setMode(mode)
+    //     var info = orbit.channel(channel, 'password').info();
+    //     assert.notEqual(info, null);
+    //     assert.equal(info.head, null);
+    //     assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
+    //     orbit.channel(channel, 'password').delete();
+    //   } catch(e) {
+    //     orbit.channel(channel, 'password').delete();
+    //     assert.equal(e, null);
+    //   }
+    //   done();
+    // }));
   });
-
-  /* TESTS */
-  describe('Connect', function() {
-    it('connects to hash-cache-server', async((done) => {
-      assert.notEqual(orbit, null);
-      assert.notEqual(orbit.client, null);
-      assert.equal(orbit.user.id, 'Qmf5A5RSTQmcfvigT3j29Fqh2fAHRANk5ooBYKdWsPtr8U');
-      assert.equal(orbit.network.id, serverConfig.networkId);
-      assert.equal(orbit.network.name, serverConfig.networkName);
-      assert.notEqual(orbit.network.config.SupernodeRouting, null);
-      assert.notEqual(orbit.network.config.Bootstrap.length, 0);
-      done();
-    }));
-  });
-
-  describe('Info', function() {
-    it('gets channel info on empty channel', async((done) => {
-      var info = orbit.channel(channel, '').info();
-      assert.notEqual(info, null);
-      assert.equal(info.head, null);
-      assert.notEqual(info.modes, null);
-      done();
-    }));
-
-    it('gets channel info on an existing channel', async((done) => {
-      var msg  = orbit.channel(channel, '').add('hello');
-      var info = orbit.channel(channel, '').info();
-      assert.notEqual(info, null);
-      assert.notEqual(info.head, null);
-      assert.notEqual(info.modes, null);
-      assert.equal(info.modes.r, null);
-      done();
-    }));
-
-    it('gets channel info when channel has modes set', async((done) => {
-      try {
-        orbit.channel(channel).delete();
-        var mode = {
-          mode: "+r",
-          params: {
-            password: 'password'
-          }
-        };
-        var res = orbit.channel(channel, '').setMode(mode)
-        var info = orbit.channel(channel, 'password').info();
-        assert.notEqual(info, null);
-        assert.equal(info.head, null);
-        assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
-        orbit.channel(channel, 'password').delete();
-      } catch(e) {
-        orbit.channel(channel, 'password').delete();
-        assert.equal(e, null);
-      }
-      done();
-    }));
-
-  });
-
-  describe('Delete', function() {
-    it('deletes a channel from the database', async((done) => {
-      var result = orbit.channel(channel, '').delete();
-      assert.equal(result, true);
-      var iter = orbit.channel(channel, '').iterator();
-      assert.equal(iter.next().value, null);
-      done();
-    }));
-
-    it('deletes a channel with a password', async((done) => {
-      done();
-    }));
-
-    it('doesn\'t delete a channel when password is wrong', async((done) => {
-      done();
-    }));
-
-    it('doesn\'t delete a channel when user is not an op', async((done) => {
-      done();
-    }));
-  });
+*/
 
   describe('Add events', function() {
     it('adds an item to an empty channel', async((done) => {
-      try {
-        orbit.channel(channel, '').delete();
-        const head = orbit.channel(channel, '').add('hello');
-        assert.notEqual(head, null);
-        assert.equal(head.startsWith('Qm'), true);
-        assert.equal(head.length, 46);
-      } catch(e) {
-        assert.equal(e, null);
-      }
+      const head = db.add('hello');
+      assert.notEqual(head, null);
+      assert.equal(head.startsWith('Qm'), true);
+      assert.equal(head.length, 46);
       done();
     }));
 
     it('adds a new item to a channel with one item', async((done) => {
-      try {
-        const head = orbit.channel(channel, '').iterator().collect()[0];
-        const second = orbit.channel(channel, '').add('hello');
-        assert.notEqual(second, null);
-        assert.notEqual(second, head);
-        assert.equal(second.startsWith('Qm'), true);
-        assert.equal(second.length, 46);
-      } catch(e) {
-        assert.equal(e, null);
-      }
+      const head = db.iterator().collect()[0];
+      const second = db.add('hello');
+      assert.notEqual(second, null);
+      assert.notEqual(second, head);
+      assert.equal(second.startsWith('Qm'), true);
+      assert.equal(second.length, 46);
       done();
     }));
 
     it('adds five items', async((done) => {
-      for(var i = 0; i < 5; i ++) {
-        try {
-          var s = orbit.channel(channel, '').add('hello');
-          assert.notEqual(s, null);
-          assert.equal(s.startsWith('Qm'), true);
-          assert.equal(s.length, 46);
-        } catch(e) {
-          assert.equal(e, null);
-        }
+      for(let i = 0; i < 5; i ++) {
+        let hash = db.add('hello');
+        // console.log(hash)
+        assert.notEqual(hash, null);
+        assert.equal(hash.startsWith('Qm'), true);
+        assert.equal(hash.length, 46);
       }
       done();
     }));
 
     it('adds an item that is > 256 bytes', async((done) => {
-      try {
-        var msg = new Buffer(512);
-        msg.fill('a')
-        var s = orbit.channel(channel, '').add(msg.toString());
-        assert.notEqual(s, null);
-        assert.equal(s.startsWith('Qm'), true);
-        assert.equal(s.length, 46);
-      } catch(e) {
-        assert.equal(e, null);
-      }
+      let msg = new Buffer(1024);
+      msg.fill('a')
+      const hash = db.add(msg.toString());
+      assert.notEqual(hash, null);
+      assert.equal(hash.startsWith('Qm'), true);
+      assert.equal(hash.length, 46);
       done();
     }));
   });
 
+  describe('Delete events', function() {
+    it('deletes an item when only one item in the database', async((done) => {
+      db.delete();
+      const head = db.add('hello1');
+      let item = db.iterator().collect();
+      const delop = db.del(head);
+      const items = db.iterator().collect();
+      assert.equal(delop.startsWith('Qm'), true);
+      assert.equal(items.length, 0);
+      done();
+    }));
+
+    it('deletes an item when two items in the database', async((done) => {
+      db.add('hello1');
+      const head = db.add('hello2');
+      db.del(head);
+      const items = db.iterator().collect();
+      assert.equal(items.length, 1);
+      assert.equal(items[0].hash.startsWith('Qm'), true);
+      assert.equal(items[0].payload.op, 'ADD');
+      assert.equal(items[0].payload.value, 'hello1');
+      assert.notEqual(items[0].payload.meta, null);
+      done();
+    }));
+
+    it('deletes an item between adds', async((done) => {
+      const head = db.add('hello1');
+      db.add('hello2');
+      db.del(head);
+      db.add('hello3');
+      const items = db.iterator().collect();
+      assert.equal(items.length, 1);
+      assert.equal(items[0].hash.startsWith('Qm'), true);
+      assert.equal(items[0].payload.op, 'ADD');
+      assert.equal(items[0].payload.value, 'hello3');
+      assert.notEqual(items[0].payload.meta, null);
+      done();
+    }));
+  });
 
   describe('Iterator', function() {
-    var items = [];
-    var itemCount = 5;
+    let items = [];
+    const itemCount = 5;
 
-    before(function(done) {
-      var addMessages = () => new Promise(async((resolve, reject) => {
-        var result = orbit.channel(channel, '').delete();
-        var iter   = orbit.channel(channel, '').iterator();
-        for(var i = 0; i < itemCount; i ++) {
-          var s = orbit.channel(channel, '').add('hello' + i);
-          items.push(s);
-        }
-        resolve();
-      }));
-      addMessages().then(done);
-    });
+    before(async((done) => {
+      db.delete();
+      for(let i = 0; i < itemCount; i ++) {
+        const hash = db.add('hello' + i);
+        items.push(hash);
+      }
+      done();
+    }));
 
     describe('Defaults', function() {
       it('returns an iterator', async((done) => {
-        var iter = orbit.channel(channel, '').iterator();
-        var next = iter.next().value;
+        const iter = db.iterator();
+        const next = iter.next().value;
         assert.notEqual(iter, null);
         assert.notEqual(next, null);
-        assert.notEqual(next.item, null);
-        assert.notEqual(next.item.op, null);
-        assert.equal(next.item.seq, 4);
-        assert.notEqual(next.item.target, null);
-        assert.notEqual(next.item.next, null);
-        assert.notEqual(next.item.Payload, null);
-        assert.equal(next.item.Payload, 'hello4');
+        done();
+      }));
+
+      it('returns an item with the correct structure', async((done) => {
+        const iter = db.iterator();
+        const next = iter.next().value;
+
+        assert.notEqual(next, null);
+        assert.notEqual(next.hash, null);
+        assert.equal(next.hash.startsWith('Qm'), true);
+        assert.notEqual(next.payload, null);
+        assert.equal(next.payload.op, 'ADD');
+        assert.equal(next.payload.key.startsWith('Qm'), true);
+        assert.equal(next.payload.value, 'hello4');
+        assert.notEqual(next.payload.meta, null);
         done();
       }));
 
       it('implements Iterator interface', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: -1 });
-        var messages = [];
+        const iter = db.iterator({ limit: -1 });
+        let messages = [];
 
         for(let i of iter)
           messages.push(i.hash);
@@ -248,36 +178,33 @@ describe('Orbit Client', () => {
       }));
 
       it('returns 1 item as default', async((done) => {
-        var iter = orbit.channel(channel, '').iterator();
-        var first = iter.next().value;
-        var second = iter.next().value;
-        assert.equal(first.item.key, items[items.length - 1]);
+        const iter = db.iterator();
+        const first = iter.next().value;
+        const second = iter.next().value;
+        assert.equal(first.payload.key, items[items.length - 1]);
         assert.equal(second, null);
-        assert.equal(first.item.Payload, 'hello4');
+        assert.equal(first.payload.value, 'hello4');
         done();
       }));
     });
 
     describe('Collect', function() {
       it('returns all items', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: -1 });
-        var messages = iter.collect();
+        const messages = db.iterator({ limit: -1 }).collect();
         assert.equal(messages.length, items.length);
-        assert.equal(messages[messages.length - 1].item.Payload, 'hello0');
-        assert.equal(messages[0].item.Payload, 'hello4');
+        assert.equal(messages[0].payload.value, 'hello0');
+        assert.equal(messages[messages.length - 1].payload.value, 'hello4');
         done();
       }));
 
       it('returns 1 item', async((done) => {
-        var iter = orbit.channel(channel, '').iterator();
-        var messages = iter.collect();
+        const messages = db.iterator().collect();
         assert.equal(messages.length, 1);
         done();
       }));
 
       it('returns 3 items', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: 3 });
-        var messages = iter.collect();
+        const messages = db.iterator({ limit: 3 }).collect();
         assert.equal(messages.length, 3);
         done();
       }));
@@ -285,222 +212,228 @@ describe('Orbit Client', () => {
 
     describe('Options: limit', function() {
       it('returns 1 item when limit is 0', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: 0 });
-        var first = iter.next().value;
-        var second = iter.next().value;
-        assert.equal(first.item.key, items[items.length - 1]);
+        const iter = db.iterator({ limit: 0 });
+        const first = iter.next().value;
+        const second = iter.next().value;
+        assert.equal(first.payload.key, items[items.length - 1]);
         assert.equal(second, null);
         done();
       }));
 
       it('returns 1 item when limit is 1', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: 1 });
-        var first = iter.next().value;
-        var second = iter.next().value;
-        assert.equal(first.item.key, items[items.length - 1]);
+        const iter = db.iterator({ limit: 1 });
+        const first = iter.next().value;
+        const second = iter.next().value;
+        assert.equal(first.payload.key, items[items.length - 1]);
         assert.equal(second, null);
         done();
       }));
 
       it('returns 3 items', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: 3 });
-        var first = iter.next().value;
-        var second = iter.next().value;
-        var third = iter.next().value;
-        var fourth = iter.next().value;
-        assert.equal(first.item.key, items[items.length - 1]);
-        assert.equal(second.item.key, items[items.length - 2]);
-        assert.equal(third.item.key, items[items.length - 3]);
+        const iter = db.iterator({ limit: 3 });
+        const first = iter.next().value;
+        const second = iter.next().value;
+        const third = iter.next().value;
+        const fourth = iter.next().value;
+        assert.equal(first.payload.key, items[items.length - 3]);
+        assert.equal(second.payload.key, items[items.length - 2]);
+        assert.equal(third.payload.key, items[items.length - 1]);
         assert.equal(fourth, null);
         done();
       }));
 
       it('returns all items', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: -1 });
-        var messages = iter.collect().map((e) => e.item.key);
+        const messages = db.iterator({ limit: -1 })
+          .collect()
+          .map((e) => e.payload.key);
 
         messages.reverse();
+        assert.equal(messages.length, items.length);
+        assert.equal(messages[0], items[items.length - 1]);
+        done();
+      }));
+
+      it('returns all items when limit is bigger than -1', async((done) => {
+        const messages = db.iterator({ limit: -300 })
+          .collect()
+          .map((e) => e.payload.key);
+
         assert.equal(messages.length, items.length);
         assert.equal(messages[0], items[0]);
         done();
       }));
 
-      it('returns all items when limit is bigger than -1', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: -300 });
-        var messages = iter.collect().map((e) => e.item.key);
-
-        assert.equal(messages.length, items.length);
-        assert.equal(messages[0], items[items.length - 1]);
-        done();
-      }));
-
       it('returns all items when limit is bigger than number of items', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: 300 });
-        var messages = iter.collect().map((e) => e.item.key);
+        const messages = db.iterator({ limit: 300 })
+          .collect()
+          .map((e) => e.payload.key);
 
         assert.equal(messages.length, items.length);
-        assert.equal(messages[0], items[items.length - 1]);
+        assert.equal(messages[0], items[0]);
         done();
       }));
     });
 
     describe('Options: reverse', function() {
       it('returns all items reversed', async((done) => {
-        var iter = orbit.channel(channel, '').iterator({ limit: -1, reverse: true });
-        var messages = iter.collect().map((e) => e.item.key);
+        const messages = db.iterator({ limit: -1, reverse: true })
+          .collect()
+          .map((e) => e.payload.key);
 
         assert.equal(messages.length, items.length);
-        assert.equal(messages[0], items[0]);
+        assert.equal(messages[0], items[items.length - 1]);
         done();
       }));
     });
 
     describe('Options: ranges', function() {
-      var all = [];
-      var head;
-
-      before((done) => {
-        var fetchAll = () => new Promise(async((resolve, reject) => {
-          all = orbit.channel(channel, '').iterator({ limit: -1 }).collect();
-          head = all[0];
-          resolve();
-        }));
-        fetchAll().then(done);
-      });
 
       describe('gt & gte', function() {
-        it('returns 0 items when gt is the head', async((done) => {
-          var messages = orbit.channel(channel, '').iterator({ gt: head.hash }).collect();
-          assert.equal(messages.length, 0);
-          done();
-        }));
-
         it('returns 1 item when gte is the head', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ gte: head.hash, limit: -1 });
-          var messages = iter2.collect().map((e) => e.item.key);
+          const messages = db.iterator({ gte: _.last(items), limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 1);
           assert.equal(messages[0], items[items.length -1]);
           done();
         }));
 
+        it('returns 0 items when gt is the head', async((done) => {
+          const messages = db.iterator({ gt: _.last(items) }).collect();
+          assert.equal(messages.length, 0);
+          done();
+        }));
+
         it('returns 2 item when gte is defined', async((done) => {
-          var gte = all[1].hash;
-          var iter = orbit.channel(channel, '').iterator({ gte: gte, limit: -1 });
-          var messages = iter.collect().map((e) => e.hash);
+          const gte = items[items.length - 2];
+          const messages = db.iterator({ gte: gte, limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 2);
-          assert.equal(messages[0], all[0].hash);
-          assert.equal(messages[1], all[1].hash);
+          assert.equal(messages[0], items[items.length - 2]);
+          assert.equal(messages[1], items[items.length - 1]);
           done();
         }));
 
         it('returns all items when gte is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gte: all[all.length -1], limit: -1 });
-          var messages = iter.collect().map((e) => e.item.key);
+          const messages = db.iterator({ gte: items[0], limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
-          assert.equal(messages.length, itemCount);
-          assert.equal(messages[0], items[items.length - 1]);
-          assert.equal(messages[messages.length - 1], items[0]);
+          assert.equal(messages.length, items.length);
+          assert.equal(messages[0], items[0]);
+          assert.equal(messages[messages.length - 1], items[items.length - 1]);
           done();
         }));
 
         it('returns items when gt is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ gt: all[all.length - 1], limit: -1 });
-          var messages = iter.collect().map((e) => e.item.key);
+          const messages = db.iterator({ gt: items[0], limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, itemCount - 1);
-          assert.equal(messages[0], items[items.length - 1]);
-          assert.equal(messages[3], items[1]);
+          assert.equal(messages[0], items[1]);
+          assert.equal(messages[3], items[items.length - 1]);
           done();
         }));
 
         it('returns items when gt is defined', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ limit: -1});
-          var messages = iter.collect().map((e) => e.hash);
+          const messages = db.iterator({ limit: -1})
+            .collect()
+            .map((e) => e.payload.key);
 
-          var gt = messages[2];
-          var iter2 = orbit.channel(channel, '').iterator({ gt: gt, limit: 100 });
-          var messages2 = iter2.collect().map((e) => e.hash);
+          const gt = messages[2];
+
+          const messages2 = db.iterator({ gt: gt, limit: 100 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages2.length, 2);
-          assert.equal(messages2[0], messages[0]);
-          assert.equal(messages2[1], messages[1]);
+          assert.equal(messages2[0], messages[messages.length - 2]);
+          assert.equal(messages2[1], messages[messages.length - 1]);
           done();
         }));
       });
 
       describe('lt & lte', function() {
-        it('returns one item when lt is the head', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash });
-          var messages = iter2.collect().map((e) => e.hash);
+        it('returns one item after head when lt is the head', async((done) => {
+          const messages = db.iterator({ lt: _.last(items) })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 1);
-          assert.equal(messages[0], head.hash);
+          assert.equal(messages[0], items[items.length - 2]);
           done();
         }));
 
         it('returns all items when lt is head and limit is -1', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash, limit: -1 });
-          var messages = iter2.collect().map((e) => e.hash);
+          const messages = db.iterator({ lt: _.last(items), limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
-          assert.equal(messages.length, itemCount);
-          assert.equal(messages[0], head.hash);
-          assert.equal(messages[4], all[all.length - 1].hash);
+          assert.equal(messages.length, items.length - 1);
+          assert.equal(messages[0], items[0]);
+          assert.equal(messages[messages.length - 1], items[items.length - 2]);
           done();
         }));
 
         it('returns 3 items when lt is head and limit is 3', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ lt: head.hash, limit: 3 });
-          var messages = iter2.collect().map((e) => e.hash);
+          const messages = db.iterator({ lt: _.last(items), limit: 3 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 3);
-          assert.equal(messages[0], head.hash);
-          assert.equal(messages[2], all[2].hash);
+          assert.equal(messages[0], items[items.length - 4]);
+          assert.equal(messages[2], items[items.length - 2]);
           done();
         }));
 
         it('returns null when lt is the root item', async((done) => {
-          var messages = orbit.channel(channel, '').iterator({ lt: all[all.length - 1].hash }).collect();
+          const messages = db.iterator({ lt: items[0] }).collect();
           assert.equal(messages.length, 0);
           done();
         }));
 
         it('returns one item when lte is the root item', async((done) => {
-          var iter = orbit.channel(channel, '').iterator({ lte: all[all.length - 1].hash });
-          var messages = iter.collect().map((e) => e.hash);
+          const messages = db.iterator({ lte: items[0] })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 1);
-          assert.equal(messages[0], all[all.length - 1].hash);
+          assert.equal(messages[0], items[0]);
           done();
         }));
 
         it('returns all items when lte is the head', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ lte: head.hash, limit: -1 });
-          var messages = iter2.collect().map((e) => e.hash);
+          const messages = db.iterator({ lte: _.last(items), limit: -1 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, itemCount);
-          assert.equal(messages[0], all[0].hash);
-          assert.equal(messages[4], all[all.length - 1].hash);
+          assert.equal(messages[0], items[0]);
+          assert.equal(messages[4], _.last(items));
           done();
         }));
 
         it('returns 3 items when lte is the head', async((done) => {
-          var iter2 = orbit.channel(channel, '').iterator({ lte: head.hash, limit: 3 });
-          var messages = iter2.collect().map((e) => e.hash);
+          const messages = db.iterator({ lte: _.last(items), limit: 3 })
+            .collect()
+            .map((e) => e.payload.key);
 
           assert.equal(messages.length, 3);
-          assert.equal(messages[0], all[0].hash);
-          assert.equal(messages[1], all[1].hash);
-          assert.equal(messages[2], all[2].hash);
+          assert.equal(messages[0], items[items.length - 3]);
+          assert.equal(messages[1], items[items.length - 2]);
+          assert.equal(messages[2], _.last(items));
           done();
         }));
       });
     });
-
   });
 
 
+/*
   describe('Modes', function() {
     var password = 'hello';
 
@@ -512,7 +445,7 @@ describe('Orbit Client', () => {
             password: password
           }
         };
-        var modes = orbit.channel(channel, '').setMode(mode)
+        var modes = db.setMode(mode)
         assert.notEqual(modes.r, null);
         assert.equal(modes.r.password, password);
       } catch(e) {
@@ -573,6 +506,108 @@ describe('Orbit Client', () => {
       done();
     }));
 
+  });
+*/
+
+  describe('Delete', function() {
+    it('deletes a channel from the database', async((done) => {
+      const result = db.delete();
+      assert.equal(result, true);
+      const iter = db.iterator();
+      assert.equal(iter.next().value, null);
+      done();
+    }));
+  });
+
+  describe('Key-Value Store', function() {
+    it('put', async((done) => {
+      db.put('key1', 'hello!');
+      let all = db.iterator().collect();
+      assert.equal(all.length, 1);
+      assert.equal(all[0].hash.startsWith('Qm'), true);
+      assert.equal(all[0].payload.key, 'key1');
+      assert.equal(all[0].payload.op, 'PUT');
+      assert.notEqual(all[0].payload.meta, null);
+      done();
+    }));
+
+    it('get', async((done) => {
+      db.put('key1', 'hello!');
+      const value = db.get('key1');
+      assert.equal(value, 'hello!');
+      done();
+    }));
+
+    it('put updates a value', async((done) => {
+      db.put('key1', 'hello!');
+      db.put('key1', 'hello again');
+      const value = db.get('key1');
+      assert.equal(value, 'hello again');
+      done();
+    }));
+
+    it('deletes a key', async((done) => {
+      db.put('key1', 'hello!');
+      db.del('key1');
+      const value = db.get('key1');
+      assert.equal(value, null);
+      done();
+    }));
+
+    it('deletes a key after multiple updates', async((done) => {
+      db.put('key1', 'hello1');
+      db.put('key1', 'hello2');
+      db.put('key1', 'hello3');
+      db.del('key1');
+      const value = db.get('key1');
+      assert.equal(value, null);
+      done();
+    }));
+
+    it('put - multiple keys', async((done) => {
+      db.put('key1', 'hello1');
+      db.put('key2', 'hello2');
+      db.put('key3', 'hello3');
+      const all = db.iterator().collect();
+      assert.equal(all.length, 1);
+      done();
+    }));
+
+    it('get - multiple keys', async((done) => {
+      db.put('key1', 'hello1');
+      db.put('key2', 'hello2');
+      db.put('key3', 'hello3');
+      const v1 = db.get('key1');
+      const v2 = db.get('key2');
+      const v3 = db.get('key3');
+      assert.equal(v1, 'hello1');
+      assert.equal(v2, 'hello2');
+      assert.equal(v3, 'hello3');
+      done();
+    }));
+
+    it('get - integer value', async((done) => {
+      db.put('key1', 123);
+      const v1 = db.get('key1');
+      assert.equal(v1, 123);
+      done();
+    }));
+
+    it('get - object value', async((done) => {
+      const val = { one: 'first', two: 2 };
+      db.put('key1', val);
+      const v1 = db.get('key1');
+      assert.equal(_.isEqual(v1, val), true);
+      done();
+    }));
+
+    it('get - array value', async((done) => {
+      const val = [1, 2, 3, 4, 5];
+      db.put('key1', val);
+      const v1 = db.get('key1');
+      assert.equal(_.isEqual(v1, val), true);
+      done();
+    }));
   });
 
 });

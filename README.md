@@ -4,22 +4,34 @@
 
 Distributed, peer-to-peer* Key-Value Store and Event Log on IPFS.
 
-Requires `orbit-server` to connect to. Get from https://github.com/haadcode/orbit-server.
-
-_* Currently requires a centralized server. This will change in the future as required p2p features land in IPFS_
+_* Currently requires a redis-server server for pubsub communication. This will change in the future as soon as IPFS provides pubsub_
 
 ## Features
 - Distributed kv-store and event log database
 - Stores all data in IPFS
-- Data encrypted on the wire and at rest
-- Per channel access rights
 
 _Channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other systems_
+
+## Example
+```
+npm install
+```
+
+Key-Value store example:
+```
+node examples/keyvalue.js
+```
+
+Event log example (run in separate shells):
+```
+node examples/reader.js
+node examples/writer.js
+```
 
 ## API
 _See Usage below_
 
-    connect(host, username, password)
+    connect(host, port, username, password)
 
     channel(name, password)
 
@@ -40,42 +52,38 @@ _See Usage below_
 
         .get(key) // Retrieve value
 
-        .remove({ key: <key or hash> }) // Remove entry
+        .del({ key: <key or hash> }) // Remove entry
 
-        .setMode(modes) // Set channel modes, can be an object or an array of objects
-
-            // { mode: "+r", params: { password: password } }   // Set read mode
-            // { mode: "-r" }                                   // Remove read-mode
-            // { mode: "+w", params: { ops: [orbit.user.id] } } // Set write-mode, only users in ops can write
-            // { mode: "-w" }                                   // Remove write-mode
-
-        .info() // Returns channel's current head and modes
-
-        .delete() // Deletes the channel, all data will be "removed" (unassociated with the channel, actual data is not deleted)
+        .delete() // Deletes the channel, all data will be "removed" (unassociated with the channel, actual data is not deleted from ipfs)
 
 ## Usage
 ```javascript
-var async       = require('asyncawait/async');
-var OrbitClient = require('./OrbitClient');
+const async       = require('asyncawait/async');
+const OrbitClient = require('./OrbitClient');
 
-var host = 'localhost:3006'; // orbit-server address
+// Redis
+const host = 'localhost';
+const port = 6379;
 
 async(() => {
     // Connect
-    const orbit = OrbitClient.connect(host, username, password);
+    const orbit = OrbitClient.connect(host, port, username, password);
 
     const channelName = 'hello-world';
+    const db = orbit.channel(channelName);
 
     /* Event Log */
-    const hash = orbit.channel(channelName).add('hello'); // <ipfs-hash>
-    orbit.channel(channelName).remove({ key: hash });
+    const hash = db.add('hello'); // <ipfs-hash>
+
+    // Remove event
+    db.remove(hash);
 
     // Iterator options
-    const options  = { limit: -1 }; // fetch all messages
+    const options = { limit: -1 }; // fetch all messages
 
     // Get events
-    const iter  = orbit.channel(channelName).iterator(options); // Symbol.iterator
-    const next  = iter.next(); // { value: <item>, done: false|true}
+    const iter = db.iterator(options); // Symbol.iterator
+    const next = iter.next(); // { value: <item>, done: false|true}
 
     // OR:
     // var all = iter.collect(); // returns all elements as an array
@@ -85,26 +93,18 @@ async(() => {
     //   console.log(i.hash, i.item);
 
     /* KV Store */
-    orbit.channel(channelName).put("key1", "hello world");
-    orbit.channel(channelName).get("key1"); // returns "hello world"
-    orbit.channel(channelName).remove("key1");
-
-    /* Modes */
-    const password = 'hello';
-    let channelModes;
-    channelModes = orbit.channel(channel).setMode({ mode: "+r", params: { password: password } }); // { modes: { r: { password: 'hello' } } }
-    channelModes = orbit.channel(channel, password).setMode({ mode: "+w", params: { ops: [orbit.user.id] } }); // { modes: { ... } }
-    channelModes = orbit.channel(channel, password).setMode({ mode: "-r" }); // { modes: { ... } }
-    channelModes = orbit.channel(channel, '').setMode({ mode: "-w" }); // { modes: {} }
+    db.put('key1', 'hello world');
+    db.get('key1'); // returns "hello world"
+    db.del('key1');
 
     /* Delete channel */
-    const result = orbit.channel(channelName, channelPwd).delete(); // true | false
+    const result = db.delete(); // true | false
 })();
 ```
 
 ### Development
 #### Run Tests
-**Note!** Requires Aerospike, see http://www.aerospike.com/docs/operations/install/
+**Note!** Requires a redis-server at `localhost:6379`
 
 ```
 npm test
@@ -116,8 +116,4 @@ mocha -w
 ```
 
 ### TODO
-- Tests for remove(), put() and get()
-- pubsub communication (use redis to mock ipfs pubsub)
-- Local caching of messages
-- Possibility to fetch content separately from data structure
-- Use HTTPS instead of HTTP (channel password are sent in plaintext atm)
+- Caching

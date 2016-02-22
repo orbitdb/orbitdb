@@ -1,6 +1,6 @@
 'use strict';
 
-var Encryption = require('orbit-common/lib/Encryption');
+const Encryption = require('orbit-common/lib/Encryption');
 
 class Post {
   constructor(content) {
