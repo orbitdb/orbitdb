@@ -1,9 +1,9 @@
 'use strict';
 
-const redis      = require("redis");
-const List       = require('./list/OrbitList');
+const redis = require("redis");
+const List  = require('./list/OrbitList');
 
-class Pubsub2 {
+class Pubsub {
   constructor(ipfs, host, port, username, password) {
     this.ipfs = ipfs;
     this._subscriptions = {};
@@ -49,4 +49,4 @@ class Pubsub2 {
   }
 }
 
-module.exports = Pubsub2;
+module.exports = Pubsub;
