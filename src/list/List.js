@@ -24,13 +24,8 @@ class List {
   }
 
   join(other) {
-    if(other.seq && other.seq > this.seq) {
-      this.seq = other.seq + 1;
-      this.ver = 0;
-    } else {
-      this.seq = this.seq + 1;
-      this.ver = 0;
-    }
+    this.seq = (other.seq && other.seq > this.seq ? other.seq : this.seq) + 1;
+    this.ver = 0;
     const current = _.differenceWith(this._currentBatch, this._items, this._equals);
     const others  = _.differenceWith(other.items, this._items, this._equals);
     const final   = _.unionWith(current, others, this._equals);

@@ -231,6 +231,30 @@ describe('OrbitList', async(function() {
 
       done();
     }));
+
+    it('commits a list after batch size was reached', async((done) => {
+      const list = new List('A', ipfs);
+
+      for(let i = 1; i <= List.batchSize; i ++) {
+        list.add("hello" + i);
+      }
+
+      assert.equal(list.id, 'A');
+      assert.equal(list.seq, 1);
+      assert.equal(list.ver, 0);
+      assert.equal(list.items.length, List.batchSize);
+      assert.equal(list._currentBatch.length, 0);
+      assert.equal(list._items.length, List.batchSize);
+
+      const item = list.items[list.items.length - 1];
+      assert.equal(item.id, 'A');
+      assert.equal(item.seq, 0);
+      assert.equal(item.ver, List.batchSize - 1);
+      assert.equal(item.data, 'hello' + List.batchSize);
+      assert.equal(item.next, 'A.0.198.QmRKrcfkejCvxTxApZACjHpxzAKKGnCtFi2rD31CT7RkBS');
+
+      done();
+    }));
   });
 
   describe('join', () => {

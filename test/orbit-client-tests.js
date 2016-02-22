@@ -70,6 +70,7 @@ describe('Orbit Client', () => {
     it('adds five items', async((done) => {
       for(let i = 0; i < 5; i ++) {
         let hash = db.add('hello');
+        // console.log(hash)
         assert.notEqual(hash, null);
         assert.equal(hash.startsWith('Qm'), true);
         assert.equal(hash.length, 46);
@@ -78,7 +79,7 @@ describe('Orbit Client', () => {
     }));
 
     it('adds an item that is > 256 bytes', async((done) => {
-      let msg = new Buffer(512);
+      let msg = new Buffer(1024);
       msg.fill('a')
       const hash = db.add(msg.toString());
       assert.notEqual(hash, null);

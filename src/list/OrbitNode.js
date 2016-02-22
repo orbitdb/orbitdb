@@ -21,19 +21,23 @@ class OrbitNode extends Node {
     return "" + this.id + "." + this.seq + "." + this.ver + "." + this.hash;
   }
 
+  get ipfsHash() {
+    if(!this.hash) {
+      const t = this.compact();
+      const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(t)));
+      this.hash = r.Hash;
+    }
+    return this.hash;
+  }
+
   getPayload() {
-    if(!this.Payload) {
-      return new Promise(async((resolve, reject) => {
-        const payload = await(ipfsAPI.getObject(this._ipfs, this.data));
-        this.Payload = JSON.parse(payload.Data);
-        if(this.Payload.value) {
-          const value = await(ipfsAPI.getObject(this._ipfs, this.Payload.value));
-          this.Payload.value = JSON.parse(value.Data)["content"];
-        }
-        resolve(this);
-      }));
-    } else {
-      return this;
+   if(!this.Payload) {
+      const payload = await(ipfsAPI.getObject(this._ipfs, this.data));
+      this.Payload = JSON.parse(payload.Data);
+      if(this.Payload.value) {
+        const value = await(ipfsAPI.getObject(this._ipfs, this.Payload.value));
+        this.Payload.value = JSON.parse(value.Data)["content"];
+      }
     }
   }
 

@@ -7,6 +7,8 @@ const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
 const OrbitList    = require('./list/OrbitList');
 const HashCacheOps = require('./HashCacheOps');
 
+var Timer = require('../examples/Timer');
+
 const DefaultAmount = 1;
 
 class DataStore {
@@ -16,7 +18,7 @@ class DataStore {
   }
 
   add(hash) {
-    this.list.add(hash);
+    return this.list.add(hash);
   }
 
   join(other) {

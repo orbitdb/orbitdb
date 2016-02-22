@@ -22,25 +22,28 @@ let run = (async(() => {
     let id = 'Log: Query '
     let running = false;
 
-    setInterval(async(() => {
-      if(!running) {
+    // setInterval(async(() => {
+    //   if(!running) {
+    while(true) {
         running = true;
 
-        // let timer = new Timer(true);
-        channel.put("lamb", "of god" + count);
-        // console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
-        let v = channel.get("lamb");
+        const key = "Lamb";
+        let timer = new Timer(true);
+        channel.put(key, "Of God " + count);
+        let v = channel.get(key);
+        console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
         console.log("---------------------------------------------------")
-        console.log("Id | Seq | Ver | Data")
+        console.log("Key | Value")
         console.log("---------------------------------------------------")
-        console.log(v);
+        console.log(`${key} | ${v}`);
         console.log("---------------------------------------------------")
 
         running = false;
         count ++;
-      }
-    }), 500);
+    }
+      // }
+    // }), 500);
 
   } catch(e) {
     console.error("error:", e);

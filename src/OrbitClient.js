@@ -124,12 +124,9 @@ class OrbitClient {
   }
 
   _createMessage(channel, password, operation, key, value) {
-    // Create meta info
     const size = -1;
-    const metaInfo = new MetaInfo(ItemTypes.Message, size, this.user.id, new Date().getTime());
-    // Create the hash cache item
-    const item = new OrbitDBItem(operation, key, value, metaInfo);
-    // Save the item to ipfs
+    const meta = new MetaInfo(ItemTypes.Message, size, this.user.id, new Date().getTime());
+    const item = new OrbitDBItem(operation, key, value, meta);
     const data = await (ipfsAPI.putObject(this._ipfs, JSON.stringify(item)));
     return data.Hash;
   }
@@ -151,11 +148,12 @@ class OrbitClient {
   }
 
   _createOperation(channel, password, operation, key, value, data) {
-    let hash = this._createMessage(channel, password, operation, key, value);
-    this._store.add(hash);
+    const hash = this._createMessage(channel, password, operation, key, value);
+    const res = await(this._store.add(hash));
     const listHash = await(this._store.list.getIpfsHash());
     await(this._pubsub.publish(channel, listHash));
     return key;
+    // return res;
   }
 
   _deleteChannel(channel, password) {
