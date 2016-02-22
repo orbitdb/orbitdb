@@ -1,7 +1,6 @@
 *sublime*
 node_modules/
 debug.log
-WIP/
 .vagrant/
 .idea/
 isolate*.log
