@@ -34,9 +34,8 @@ class OrbitClient {
     }));
 
     return {
-      delete: () => this._deleteChannel(hash, password),
       iterator: (options) => this._iterator(hash, password, options),
-      setMode: (mode) => this._setMode(hash, password, mode),
+      delete: () => this._deleteChannel(hash, password),
       add: (data) => this._add(hash, password, data),
       del: (key) => this._remove(hash, password, key),
       put: (key, data) => this._put(hash, password, key, data),
