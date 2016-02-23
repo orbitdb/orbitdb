@@ -69,55 +69,6 @@
   "items": ["<Item>"]
 }
 
-/*
-  list.add(data) {
-    this.ver ++;
-    const heads = _findHeads();
-    const i = new Item(id, this.seq, this.ver, heads)
-    outgoing.push(data)
-  }
-*/
-
-/*
-  list.join(other) {
-    // increase seq on join, reset version
-    if(other.first.seq >= this.seq)
-      this.seq = other.first.seq + 1
-      this.ver = 0
-
-    items = items.concat(outgoing.concat(other))
-    items = items.sortBy("seq", "id", "ver")
-    outgoing = []
-  }
-*/
-
-/*
-  nextHeads() {
-    referenced = []
-    heads = all.groupBy("id").map((items) => items[items.length - 1])
-    cleaned = heads.reverse().filter((e) => !isReferencedInChain(referenced, e))
-    return cleaned;
-  }
-*/
-
-/*
-  isReferencedInChain(list, other) {
-    const res = other.map((o) => {
-      const ref = list.map((e) => !(e.id == o.id && e.seq == o.seq && e.ver == o.ver))
-      if(!ref)
-        list.push(ref)
-        //return false
-
-      //list.concat(list.filter((e) => !(e.id == o.id && e.seq == o.seq && e.ver == o.ver)))
-      if(o.prev)
-        ref = isReferencedInChain(list, o.prev)
-
-      return ref
-    })
-    return res.anyEqual(true)
-  }
-*/
-
 
  A   B   C
         0.0
