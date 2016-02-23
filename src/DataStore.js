@@ -30,16 +30,6 @@ class DataStore {
     return this._fetchRecursive(options);
   }
 
-  _fetchOne(index) {
-    const item = this.list.items[this.list.items.length - index - 1];
-    if(item) {
-      await(item.getPayload());
-      const f = item.compact();
-      return { hash: f.data, payload: f.Payload };
-    }
-    return null;
-  }
-
   _fetchRecursive(options, currentAmount, deleted, res) {
     const opts = {
       amount: options && options.amount ? options.amount : DefaultAmount,
@@ -48,12 +38,18 @@ class DataStore {
       key:    options && options.key ? options.key : null
     };
 
-    let result = res ? res : [];
-    let handledItems = deleted ? deleted : [];
-
     if(!currentAmount) currentAmount = 0;
 
-    const item = this._fetchOne(currentAmount);
+    if(!opts.first && !opts.last && !opts.key && opts.amount == -1)
+      return this.list.items.map(this._fetchOne).reverse();
+
+    let result = res ? res : [];
+    let handledItems = deleted ? deleted : [];
+    let item;
+
+    const node = this.list.items[this.list.items.length - currentAmount - 1];
+    if(node)
+      item = await(this._fetchOne(node));
 
     if(item && item.payload) {
       const wasHandled = _.includes(handledItems, item.payload.key);
@@ -88,6 +84,15 @@ class DataStore {
 
     return result;
 
+  }
+
+  _fetchOne(item) {
+    return new Promise((resolve, reject) => {
+      await(item.getPayload());
+      const f = item.compact();
+      const res = { hash: f.data, payload: f.Payload };
+      resolve(res);
+    });
   }
 }
 
