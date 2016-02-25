@@ -30,6 +30,13 @@ class DataStore {
     return this._fetchRecursive(options);
   }
 
+  _fetchOne(item) {
+    return new Promise(async((resolve, reject) => {
+      await(item.getPayload());
+      resolve({ hash: item.data, payload: item.Payload });
+    }));
+  }
+
   _fetchRecursive(options, currentAmount, deleted, res) {
     const opts = {
       amount: options && options.amount ? options.amount : DefaultAmount,
@@ -47,17 +54,20 @@ class DataStore {
     let handledItems = deleted ? deleted : [];
     let item;
 
+    // Fetch the item from ipfs
     const node = this.list.items[this.list.items.length - currentAmount - 1];
-    if(node)
-      item = await(this._fetchOne(node));
+    if(node) item = await(this._fetchOne(node));
+
+    const canAdd = (firstHash, key, foundItemsCount) => {
+      return (!opts.key   || (opts.key && opts.key === item.payload.key)) &&
+             (!opts.first || (opts.first && (opts.first === item.payload.key && foundItemsCount === 0))
+                          || (opts.first && (opts.first !== item.payload.key && foundItemsCount > 0)))
+    };
 
     if(item && item.payload) {
-      const wasHandled = _.includes(handledItems, item.payload.key);
+      const wasHandled = _.includes(handledItems, item.payload.key); // Last Write Wins, if it was handled, ignore the rest
       if((item.payload.op === HashCacheOps.Put || item.payload.op === HashCacheOps.Add) && !wasHandled) {
-        if((!opts.key || (opts.key && opts.key === item.payload.key)) &&
-           (!opts.first || (opts.first && (opts.first === item.payload.key && result.length === 0))
-                        || (opts.first && (opts.first !== item.payload.key && result.length > 0))))
-        {
+        if(canAdd(opts.first, item.payload.key, result.length)) {
           result.push(item);
           handledItems.push(item.payload.key);
         }
@@ -84,15 +94,6 @@ class DataStore {
 
     return result;
 
-  }
-
-  _fetchOne(item) {
-    return new Promise((resolve, reject) => {
-      await(item.getPayload());
-      const f = item.compact();
-      const res = { hash: f.data, payload: f.Payload };
-      resolve(res);
-    });
   }
 }
 

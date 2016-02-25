@@ -5,9 +5,10 @@ var await       = require('asyncawait/await');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
-// Redis
-var host = 'localhost';
-var port = 6379;
+// orbit-server
+// const host = 'localhost';
+const host = '178.62.241.75';
+const port = 3333;
 
 var username = process.argv[2] ? process.argv[2] : 'DankoJones';
 var password = '';

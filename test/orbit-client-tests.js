@@ -70,7 +70,6 @@ describe('Orbit Client', () => {
     it('adds five items', async((done) => {
       for(let i = 0; i < 5; i ++) {
         let hash = db.add('hello');
-        // console.log(hash)
         assert.notEqual(hash, null);
         assert.equal(hash.startsWith('Qm'), true);
         assert.equal(hash.length, 46);

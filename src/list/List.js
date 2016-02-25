@@ -4,12 +4,16 @@ const _    = require('lodash');
 const Node = require('./Node');
 
 class List {
-  constructor(id) {
+  constructor(id, seq, ver, items) {
     this.id = id;
-    this.seq = 0;
-    this.ver = 0;
-    this._items = [];
+    this.seq = seq ? seq : 0;
+    this.ver = ver ? ver : 0;
+    this._items = items ? items : [];
     this._currentBatch = [];
+  }
+
+  get compactId() {
+    return "" + this.id + "." + this.seq + "." + this.ver;
   }
 
   get items() {
@@ -41,7 +45,7 @@ class List {
   }
 
   _isReferencedInChain(all, item) {
-    let isReferenced = _.findLast(all, (e) => this._references(e, item)) !== undefined;
+    const isReferenced = _.findLast(all, (e) => this._references(e, item)) !== undefined;
     return isReferenced;
   }
 
@@ -51,7 +55,7 @@ class List {
 
   _references(a, b) {
     for(let i = 0; i < a.next.length; i ++) {
-      if(b.compactId === a.next[i])
+      if(b.compactId === a.next[i].compactId)
         return true;
     }
     return false;
@@ -70,13 +74,8 @@ class List {
       id: this.id,
       seq: this.seq,
       ver: this.ver,
-      items: this._currentBatch.map((f) => f.compact())
+      items: this._currentBatch.map((f) => f.toJson())
     }
-  }
-
-  toString() {
-    const items = this.items.map((f) => JSON.stringify(f.compact())).join("\n");
-    return `id: ${this.id}, seq: ${this.seq}, ver: ${this.ver}, items:\n${items}`;
   }
 }
 

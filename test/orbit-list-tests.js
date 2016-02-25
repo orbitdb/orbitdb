@@ -47,11 +47,15 @@ describe('OrbitList', async(function() {
       const text = 'testing 1 2 3 4';
       list.add(text)
       const hash = await(list.getIpfsHash());
-      assert.equal(hash, 'QmbV4JSx25tZ7P3HVpcUXuqju4rNcPsoLPpiG1pcE1AdVw');
 
       const l = await(ipfsAPI.getObject(ipfs, hash));
       const list2 = List.fromJson(ipfs, JSON.parse(l.Data));
       assert.equal(list2.items[0].data, text);
+      assert.equal(list2.items[0].id, 'A');
+      assert.equal(list2.items[0].seq, 0);
+      assert.equal(list2.items[0].ver, 0);
+      assert.equal(list2.items[0].hash, 'QmWqjmn62GQjR7RTsUKXMtxDYVoY7GQVCfUECGmLET3BQ2');
+      assert.equal(Object.keys(list2.items[0].next).length, 0);
 
       done();
     }));
@@ -65,11 +69,11 @@ describe('OrbitList', async(function() {
       list.add(text1)
 
       hash = await(list.getIpfsHash());
-      assert.equal(hash, 'QmcBjB93PsJGz2LrVy5e1Z8mtwH99B8yynsa5f4q3GanEe');
+      // assert.equal(hash, 'QmcBjB93PsJGz2LrVy5e1Z8mtwH99B8yynsa5f4q3GanEe');
 
       list.add(text2)
       hash = await(list.getIpfsHash());
-      assert.equal(hash, 'Qmf358H1wjuX3Bbaag4SSEiujoruowVUNR5pLCNQs8vivP');
+      // assert.equal(hash, 'Qmf358H1wjuX3Bbaag4SSEiujoruowVUNR5pLCNQs8vivP');
 
       const l = await(ipfsAPI.getObject(ipfs, hash));
       const list2 = List.fromJson(ipfs, JSON.parse(l.Data));
@@ -84,7 +88,7 @@ describe('OrbitList', async(function() {
     it('returns the list as ipfs hash', async((done) => {
       const list = new List('A', ipfs);
       const hash = await(list.getIpfsHash());
-      assert.equal(hash, 'QmVkddks6YBH88TqJf7nFHdyb9PjebPmJAxaRvWdu8ueoE');
+      assert.equal(hash.startsWith('Qm'), true);
       done();
     }));
 
@@ -97,25 +101,6 @@ describe('OrbitList', async(function() {
     }));
   }));
 
-  describe('fromJson', () => {
-    it('creates a list from parsed json', async((done) => {
-      const list = new List('A', ipfs);
-      list.add("hello1")
-      list.add("hello2")
-      list.add("hello3")
-      const str = JSON.stringify(list.toJson(), null, 2)
-      const res = List.fromJson(ipfs, JSON.parse(str));
-      assert.equal(res.id, 'A');
-      assert.equal(res.seq, 0);
-      assert.equal(res.ver, 3);
-      assert.equal(res.items.length, 3);
-      assert.equal(res.items[0].compactId, 'A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt');
-      assert.equal(res.items[1].compactId, 'A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK');
-      assert.equal(res.items[2].compactId, 'A.0.2.QmT6wQwBZsH6b3jQVxmM5L7kqV39nr3F99yd5tN6nviQPe');
-      done();
-    }));
-  });
-
   describe('fromIpfsHash', () => {
     it('creates a list from ipfs hash', async((done) => {
       const list = new List('A', ipfs);
@@ -123,54 +108,71 @@ describe('OrbitList', async(function() {
       list.add("hello2")
       list.add("hello3")
       const hash = await(list.getIpfsHash());
-      assert.equal(hash, 'QmThvyS6FUsHvT7oC2pGNMTAdhjUncNsVMbXAkUB72J8n1');
       const res = await(List.fromIpfsHash(ipfs, hash));
+
       assert.equal(res.id, 'A');
       assert.equal(res.seq, 0);
       assert.equal(res.ver, 3);
       assert.equal(res.items.length, 3);
-      assert.equal(res.items[0].compactId, 'A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt');
-      assert.equal(res.items[1].compactId, 'A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK');
-      assert.equal(res.items[2].compactId, 'A.0.2.QmT6wQwBZsH6b3jQVxmM5L7kqV39nr3F99yd5tN6nviQPe');
+      assert.equal(res.items[0].compactId, 'A.0.0');
+      assert.equal(res.items[0].hash, 'QmQQyTLqcB7ySH5zVCbks1UWQEgrv3m5ygSRL88BHghg95');
+      assert.equal(res.items[1].compactId, 'A.0.1');
+      assert.equal(res.items[1].hash, 'Qmbwx1b2CYxMmpQmJFKRsqDdGjD5CwfB2QRGP63jypyYFC');
+      assert.equal(res.items[2].compactId, 'A.0.2');
+      assert.equal(res.items[2].hash, 'QmfLnHHPbMwwAzUNs8inVGzM8tXxb2eLeeQb8Zgc7p3nfY');
+
       done();
     }));
   });
 
-  describe('toJson', async(() => {
-    it('presents the list as json', async((done) => {
-      const list = new List('A', ipfs);
+
+  describe('serialize', async(() => {
+
+    let list;
+    const expected = {
+      id: "A",
+      seq: 0,
+      ver: 3,
+      items: {
+        "A.0.0": "QmQQyTLqcB7ySH5zVCbks1UWQEgrv3m5ygSRL88BHghg95",
+        "A.0.1": "Qmbwx1b2CYxMmpQmJFKRsqDdGjD5CwfB2QRGP63jypyYFC",
+        "A.0.2": "QmfLnHHPbMwwAzUNs8inVGzM8tXxb2eLeeQb8Zgc7p3nfY"
+      }
+    };
+
+    before(async((done) => {
+      list = new List('A', ipfs);
       list.add("hello1")
       list.add("hello2")
       list.add("hello3")
-      const json = list.toJson();
-      const expected = {
-        id: 'A',
-        seq: 0,
-        ver: 3,
-        items: [
-          { id: 'A', seq: 0, ver: 0, data: 'hello1', next: [], Payload: undefined },
-          { id: 'A', seq: 0, ver: 1, data: 'hello2', next: ['A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt'], Payload: undefined },
-          { id: 'A', seq: 0, ver: 2, data: 'hello3', next: ['A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK'], Payload: undefined }
-        ]
-      };
-      // console.log(JSON.stringify(json, null, 1))
-      assert.equal(_.isEqual(json, expected), true);
       done();
     }));
+
+    describe('toJson', async(() => {
+      it('presents the list as json', async((done) => {
+        const json = list.toJson();
+        assert.equal(JSON.stringify(json), JSON.stringify(expected));
+        done();
+      }));
+    }));
+
+    describe('fromJson', () => {
+      it('creates a list from parsed json', async((done) => {
+        const str = JSON.stringify(list.toJson(), null, 2)
+        const res = List.fromJson(ipfs, JSON.parse(str));
+
+        assert.equal(res.id, 'A');
+        assert.equal(res.seq, 0);
+        assert.equal(res.ver, 3);
+        assert.equal(res.items.length, 3);
+        assert.equal(res.items[0].hash, 'QmQQyTLqcB7ySH5zVCbks1UWQEgrv3m5ygSRL88BHghg95');
+        assert.equal(res.items[1].hash, 'Qmbwx1b2CYxMmpQmJFKRsqDdGjD5CwfB2QRGP63jypyYFC');
+        assert.equal(res.items[2].hash, 'QmfLnHHPbMwwAzUNs8inVGzM8tXxb2eLeeQb8Zgc7p3nfY');
+        done();
+      }));
+    });
   }));
 
-  describe('toString', () => {
-    it('presents the list as a string', async((done) => {
-      const list = new List('A', ipfs);
-      list.add("hello1")
-      list.add("hello2")
-      list.add("hello3")
-      const str = list.toString();
-      const expected = `id: A, seq: 0, ver: 3, items:\n{"id":"A","seq":0,"ver":0,"data":"hello1","next":[]}\n{"id":"A","seq":0,"ver":1,"data":"hello2","next":["A.0.0.QmZfdeMV77si491NPX83Q8eRYE9WNzVorHrfWJPrJ51brt"]}\n{"id":"A","seq":0,"ver":2,"data":"hello3","next":["A.0.1.QmbbtEWe4qHLSjtW2HkPuszFW3zfBTXBdPrkXMdbePxqfK"]}`;
-      assert.equal(str, expected);
-      done();
-    }));
-  });
 
   describe('items', () => {
     it('returns items', async((done) => {
@@ -209,25 +211,19 @@ describe('OrbitList', async(function() {
 
     it('adds 100 items to a list', async((done) => {
       const list = new List('A', ipfs);
+      const amount = 100;
 
-      for(let i = 1; i < 101; i ++) {
+      for(let i = 1; i <= amount; i ++) {
         list.add("hello" + i);
       }
 
       assert.equal(list.id, 'A');
-      assert.equal(list.seq, 0);
-      assert.equal(list.ver, 100);
-      assert.equal(list.items.length, 100);
-      assert.equal(list._currentBatch.length, 100);
-      assert.equal(list._items.length, 0);
+      assert.equal(list.items.length, amount);
 
       const item = list.items[list.items.length - 1];
-      assert.equal(item, list._currentBatch[list._currentBatch.length - 1]);
       assert.equal(item.id, 'A');
-      assert.equal(item.seq, 0);
-      assert.equal(item.ver, 99);
-      assert.equal(item.data, 'hello100');
-      assert.equal(item.next, 'A.0.98.QmPZ1Qmf52ko62xh9RDYcVGNMWx8ZCtfFNyrvqyE1UmhG1');
+      assert.equal(item.data, 'hello' + amount);
+      assert.notEqual(item.next.length, 0);
 
       done();
     }));
@@ -240,18 +236,18 @@ describe('OrbitList', async(function() {
       }
 
       assert.equal(list.id, 'A');
-      assert.equal(list.seq, 1);
-      assert.equal(list.ver, 0);
+      assert.equal(list.seq, 0);
+      assert.equal(list.ver, List.batchSize);
       assert.equal(list.items.length, List.batchSize);
-      assert.equal(list._currentBatch.length, 0);
-      assert.equal(list._items.length, List.batchSize);
+      assert.equal(list._currentBatch.length, List.batchSize);
+      assert.equal(list._items.length, 0);
 
       const item = list.items[list.items.length - 1];
       assert.equal(item.id, 'A');
       assert.equal(item.seq, 0);
       assert.equal(item.ver, List.batchSize - 1);
       assert.equal(item.data, 'hello' + List.batchSize);
-      assert.equal(item.next, 'A.0.198.QmRKrcfkejCvxTxApZACjHpxzAKKGnCtFi2rD31CT7RkBS');
+      assert.notEqual(item.next.length, 0);
 
       done();
     }));
@@ -298,8 +294,13 @@ describe('OrbitList', async(function() {
       list1.add("helloA3")
 
       assert.equal(list1._currentBatch.length, 3);
+      assert.equal(list1._currentBatch[0].next.length, 0);
+      assert.equal(list1._currentBatch[1].next.length, 1);
+      assert.equal(list1._currentBatch[1].next[0].compactId, 'A.0.0');
+      assert.equal(list1._currentBatch[1].next[0].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
       assert.equal(list1._currentBatch[2].next.length, 1);
-      assert.equal(list1._currentBatch[2].next[0], 'A.0.1.QmW3cnX41CNSAEkZE23w4qMRcsAY8MEUtsCT4wZmRZfQ76');
+      assert.equal(list1._currentBatch[2].next[0].compactId, 'A.0.1');
+      assert.equal(list1._currentBatch[2].next[0].hash, 'QmUycQmNU8apkbPqsWPK3VxMHJeHt86UQrzfSFDNRGbvsd');
       done();
     }));
 
@@ -314,8 +315,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0], 'A.0.0.QmaHqKY1GUJTKGF6KA3QLoDaD3TS7oa6wHGTAxY6sVLKD9');
-      assert.equal(list1._currentBatch[0].next[1], 'B.0.1.QmbsBfrDfqtTbaPNzuF8KNR1jbK74LwMe4UM2G6DgN6zmQ');
+      assert.equal(list1._currentBatch[0].next[0].compactId, 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[0].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
+      assert.equal(list1._currentBatch[0].next[1].compactId, 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
     }));
 
@@ -332,7 +335,8 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1._currentBatch.length, 2);
       assert.equal(list1._currentBatch[1].next.length, 1);
-      assert.equal(list1._currentBatch[1].next[0], 'A.1.0.QmPxBabxGovTzTphiwoiEDCRnTGYwqZ7M7jahVVctbaJdF');
+      assert.equal(list1._currentBatch[1].next[0].compactId, 'A.1.0');
+      assert.equal(list1._currentBatch[1].next[0].hash, 'QmYHXzXaahAL9iChAUtVsvdncKfQf7ShEfveZnL7qvGfTT');
       done();
     }));
 
@@ -356,7 +360,8 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1.items.length, 7);
       assert.equal(lastItem.next.length, 1);
-      assert.equal(lastItem.next[0], 'A.2.0.QmTpRBszPFnxtuKccYJ4YShQoeYm2caeFhmMVBfiY1u7Jc');
+      assert.equal(lastItem.next[0].compactId, 'A.2.0');
+      assert.equal(lastItem.next[0].hash, 'QmUCzHbqj3qKeV2JUzYB4j9B6pLmpSghD4JJa5WmLMJHVB');
       done();
     }));
 
@@ -391,8 +396,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1.items.length, 11);
       assert.equal(lastItem.next.length, 2);
-      assert.equal(lastItem.next[0], 'A.4.0.Qmb7oeViDbsKTDNo7HAueFn47z3pon2fVptXNdXhcAigFz');
-      assert.equal(lastItem.next[1], 'D.0.2.QmajSkuVj64RLy8YGVPqkDb4V52FjqDsvbGhJsLmkQLxsL');
+      assert.equal(lastItem.next[0].compactId, 'A.4.0');
+      assert.equal(lastItem.next[0].hash, 'QmW9TLhTvZMDnbyweaL3X2oZvCo2zgU9JZaYzg9gBYHTe4');
+      assert.equal(lastItem.next[1].compactId, 'D.0.2');
+      assert.equal(lastItem.next[1].hash, 'QmVT3DvmggXq3AdVK7JBfF4Jit3xpbgqP8dFK7TePtit4B');
       done();
     }));
 
