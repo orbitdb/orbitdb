@@ -5,8 +5,7 @@ var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
 // orbit-server
-// const host = 'localhost';
-const host = '178.62.241.75';
+const host = 'localhost';
 const port = 3333;
 
 var username = 'testrunner';
@@ -17,8 +16,8 @@ let run = (async(() => {
     // Connect
     var orbit = OrbitClient.connect(host, port, username, password);
 
-    const id = process.argv[2] ? process.argv[2] : 'a';
-    const channelName = 'c1';
+    const id = process.argv[3] ? process.argv[3] : 'a';
+    const channelName = process.argv[2] ? process.argv[2] : 'c1';
     const db = orbit.channel(channelName);
 
     // Metrics

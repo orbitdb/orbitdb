@@ -23,14 +23,14 @@ let run = (async(() => {
     while(true) {
       const key = process.argv[4] ? process.argv[4] : 'greeting';
       const value = process.argv[5] ? process.argv[5] : 'Hello world';
-      let timer = new Timer(true);
+      const timer = new Timer(true);
       db.put(key, value + " " + count);
-      let v = db.get(key);
+      const result = db.get(key);
 
       console.log("---------------------------------------------------")
       console.log("Key | Value")
       console.log("---------------------------------------------------")
-      console.log(`${key} | ${v}`);
+      console.log(`${key} | ${result}`);
       console.log("---------------------------------------------------")
       console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 

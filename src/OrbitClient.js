@@ -27,7 +27,7 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    const processMsg = async((hash, message) => {
+    const onMessage = async((hash, message) => {
       const other = await(List.fromIpfsHash(this._ipfs, message));
       if(other.id !== this.user.username) {
         this._store.join(other);
@@ -42,7 +42,7 @@ class OrbitClient {
       }
     });
 
-    this._pubsub.subscribe(hash, password, processMsg, onLatest);
+    this._pubsub.subscribe(hash, password, onMessage, onLatest);
 
     return {
       iterator: (options) => this._iterator(hash, password, options),
