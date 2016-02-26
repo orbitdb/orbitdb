@@ -15,8 +15,6 @@ const PubSub       = require('./PubSub');
 const List         = require('./list/OrbitList');
 const DataStore    = require('./DataStore');
 
-var Timer = require('../examples/Timer');
-
 const pubkey  = Keystore.getKeys().publicKey;
 const privkey = Keystore.getKeys().privateKey;
 

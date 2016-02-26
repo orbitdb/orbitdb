@@ -10,7 +10,6 @@ class Pubsub {
     this._socket = io(`http://${host}:${port}`);
     this._socket.on('connect', (socket) => console.log(`Connected to http://${host}:${port}`));
     this._socket.on('disconnect', (socket) => console.log(`Disconnected from http://${host}:${port}`));
-    this._socket.on('event', (e) => console.log('Event:', e));
     this._socket.on('error', (e) => console.log('error:', e));
     this._socket.on('message', this._handleMessage.bind(this));
     this._socket.on('latest', (hash, message) => {

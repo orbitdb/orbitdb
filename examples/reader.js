@@ -33,14 +33,12 @@ let run = (async(() => {
         console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
         let timer2 = new Timer(true);
-        // const c = channel.iterator({ limit: -1 }).collect().length;
         let items = channel.iterator({ limit: 10 }).collect();
         console.log("---------------------------------------------------")
         console.log("Key | Value")
         console.log("---------------------------------------------------")
         console.log(items.map((e) => `${e.payload.key} | ${e.payload.value}`).join("\n"));
         console.log("---------------------------------------------------")
-        // console.log(`Found ${items.length} items from ${c}\n`);
         console.log(`Query 2 #${count} took ${timer2.stop(true)} ms\n`);
 
         running = false;

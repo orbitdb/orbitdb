@@ -35,7 +35,6 @@ class OrbitList extends List {
 
     // WIP: fetch missing nodes
     let depth = 0;
-
     const isReferenced = (all, item) => _.findLast(all, (f) => f === item) !== undefined;
     const fetchRecursive = (hash) => {
       hash = hash instanceof Node === true ? hash.hash : hash;
