@@ -6,8 +6,7 @@ var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
 // orbit-server
-// const host = 'localhost';
-const host = '178.62.241.75';
+const host = 'localhost';
 const port = 3333;
 
 var username = process.argv[2] ? process.argv[2] : 'DankoJones';

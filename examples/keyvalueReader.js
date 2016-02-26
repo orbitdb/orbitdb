@@ -7,7 +7,6 @@ const Timer       = require('./Timer');
 
 // orbit-server
 const host = 'localhost';
-// const host = '178.62.241.75';
 const port = 3333;
 
 const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
@@ -25,7 +24,7 @@ let run = (async(() => {
       let count = 1;
 
       setInterval(async(() => {
-        const key = "username";
+        const key = process.argv[4] ? process.argv[4] : 'greeting';
         let timer = new Timer(true);
         let v = db.get(key);
 

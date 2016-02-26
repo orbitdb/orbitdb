@@ -7,7 +7,6 @@ const Timer       = require('./Timer');
 
 // orbit-server
 const host = 'localhost';
-// const host = '178.62.241.75';
 const port = 3333;
 
 const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
@@ -18,7 +17,7 @@ const prefix = process.argv[4] ? process.argv[4] : 'LambOfGod';
 let run = (async(() => {
   try {
     var orbit = OrbitClient.connect(host, port, username, password);
-    const c1 = process.argv[2] ? process.argv[2] : 'c1';;
+    const c1 = process.argv[2] ? process.argv[2] : 'c1';
     const channel = orbit.channel(c1);
 
     let count = 1;
@@ -35,7 +34,7 @@ let run = (async(() => {
 
         let timer2 = new Timer(true);
         // const c = channel.iterator({ limit: -1 }).collect().length;
-        let items = channel.iterator({ limit: -1 }).collect();
+        let items = channel.iterator({ limit: 10 }).collect();
         console.log("---------------------------------------------------")
         console.log("Key | Value")
         console.log("---------------------------------------------------")
@@ -47,7 +46,7 @@ let run = (async(() => {
         running = false;
         count ++;
       }
-    }), 2000);
+    }), process.argv[5] ? process.argv[5] : 1000);
 
   } catch(e) {
     console.error("error:", e);
