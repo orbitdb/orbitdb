@@ -30,14 +30,11 @@ class DataStore {
     return this._fetchRecursive(options);
   }
 
-  _fetchOne(index) {
-    const item = this.list.items[this.list.items.length - index - 1];
-    if(item) {
+  _fetchOne(item) {
+    return new Promise(async((resolve, reject) => {
       await(item.getPayload());
-      const f = item.compact();
-      return { hash: f.data, payload: f.Payload };
-    }
-    return null;
+      resolve({ hash: item.data, payload: item.Payload });
+    }));
   }
 
   _fetchRecursive(options, currentAmount, deleted, res) {
@@ -48,20 +45,29 @@ class DataStore {
       key:    options && options.key ? options.key : null
     };
 
-    let result = res ? res : [];
-    let handledItems = deleted ? deleted : [];
-
     if(!currentAmount) currentAmount = 0;
 
-    const item = this._fetchOne(currentAmount);
+    if(!opts.first && !opts.last && !opts.key && opts.amount == -1)
+      return this.list.items.map(this._fetchOne).reverse();
+
+    let result = res ? res : [];
+    let handledItems = deleted ? deleted : [];
+    let item;
+
+    // Fetch the item from ipfs
+    const node = this.list.items[this.list.items.length - currentAmount - 1];
+    if(node) item = await(this._fetchOne(node));
+
+    const canAdd = (firstHash, key, foundItemsCount) => {
+      return (!opts.key   || (opts.key && opts.key === item.payload.key)) &&
+             (!opts.first || (opts.first && (opts.first === item.payload.key && foundItemsCount === 0))
+                          || (opts.first && (opts.first !== item.payload.key && foundItemsCount > 0)))
+    };
 
     if(item && item.payload) {
-      const wasHandled = _.includes(handledItems, item.payload.key);
+      const wasHandled = _.includes(handledItems, item.payload.key); // Last Write Wins, if it was handled, ignore the rest
       if((item.payload.op === HashCacheOps.Put || item.payload.op === HashCacheOps.Add) && !wasHandled) {
-        if((!opts.key || (opts.key && opts.key === item.payload.key)) &&
-           (!opts.first || (opts.first && (opts.first === item.payload.key && result.length === 0))
-                        || (opts.first && (opts.first !== item.payload.key && result.length > 0))))
-        {
+        if(canAdd(opts.first, item.payload.key, result.length)) {
           result.push(item);
           handledItems.push(item.payload.key);
         }

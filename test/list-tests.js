@@ -60,19 +60,6 @@ describe('List', () => {
     });
   });
 
-  describe('toString', () => {
-    it('presents the list as a string', (done) => {
-      const list = new List('A');
-      list.add("hello1")
-      list.add("hello2")
-      list.add("hello3")
-      const str = list.toString();
-      const expected = `id: A, seq: 0, ver: 3, items:\n{"id":"A","seq":0,"ver":0,"data":"hello1","next":[]}\n{"id":"A","seq":0,"ver":1,"data":"hello2","next":["A.0.0"]}\n{"id":"A","seq":0,"ver":2,"data":"hello3","next":["A.0.1"]}`;
-      assert.equal(str, expected);
-      done();
-    });
-  });
-
   describe('items', () => {
     it('returns items', (done) => {
       const list = new List('A');
@@ -208,8 +195,9 @@ describe('List', () => {
       list1.add("helloA3")
 
       assert.equal(list1._currentBatch.length, 2);
-      assert.equal(list1._currentBatch[1].next.length, 1);
+      assert.equal(list1._currentBatch[1].next.length, 2);
       assert.equal(list1._currentBatch[1].next[0], 'A.1.0');
+      assert.equal(list1._currentBatch[1].next[1], 'B.0.1');
       done();
     });
 
@@ -232,8 +220,9 @@ describe('List', () => {
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(list1.items.length, 7);
-      assert.equal(lastItem.next.length, 1);
+      assert.equal(lastItem.next.length, 2);
       assert.equal(lastItem.next[0], 'A.2.0');
+      assert.equal(lastItem.next[1], 'B.0.1');
       done();
     });
 
@@ -266,10 +255,12 @@ describe('List', () => {
 
       const lastItem = list1.items[list1.items.length - 1];
 
-      assert.equal(list1.items.length, 11);
-      assert.equal(lastItem.next.length, 2);
       assert.equal(lastItem.next[0], 'A.4.0');
-      assert.equal(lastItem.next[1], 'D.0.2');
+      assert.equal(lastItem.next[1], 'B.0.1');
+      assert.equal(lastItem.next[2], 'C.0.0');
+      assert.equal(lastItem.next[3], 'D.0.2');
+      assert.equal(list1.items.length, 11);
+      assert.equal(lastItem.next.length, 4);
       done();
     });
 

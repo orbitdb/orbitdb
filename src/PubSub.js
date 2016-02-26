@@ -1,42 +1,42 @@
 'use strict';
 
-const redis = require("redis");
-const List  = require('./list/OrbitList');
+const io   = require('socket.io-client');
+const List = require('./list/OrbitList');
 
 class Pubsub {
   constructor(ipfs, host, port, username, password) {
     this.ipfs = ipfs;
     this._subscriptions = {};
-    this.client1 = redis.createClient({ host: host, port: port });
-    this.client2 = redis.createClient({ host: host, port: port });
-    this.client1.on("message", this._handleMessage.bind(this));
-    // this.client1.on('connect', () => console.log('redis connected'));
-    // this.client1.on("subscribe", (channel, count) => console.log(`subscribed to ${channel}`));
+    this._socket = io(`http://${host}:${port}`);
+    this._socket.on('connect', (socket) => console.log(`Connected to http://${host}:${port}`));
+    this._socket.on('disconnect', (socket) => console.log(`Disconnected from http://${host}:${port}`));
+    this._socket.on('error', (e) => console.log('error:', e));
+    this._socket.on('message', this._handleMessage.bind(this));
+    this._socket.on('latest', (hash, message) => {
+      console.log(">", hash, message);
+      if(this._subscriptions[hash]) {
+        this._subscriptions[hash].head = message;
+
+        if(this._subscriptions[hash].onLatest)
+          this._subscriptions[hash].onLatest(hash, message);
+      }
+    });
   }
 
-  subscribe(hash, password, callback) {
-    if(!this._subscriptions[hash] || this._subscriptions[hash].password !== password) {
-      this._subscriptions[hash] = {
-        password: password,
-        head: null,
-        callback: callback
-      };
-      this.client1.subscribe(hash);
+  subscribe(hash, password, callback, onLatest) {
+    if(!this._subscriptions[hash]) {
+      this._subscriptions[hash] = { head: null, callback: callback, onLatest: onLatest };
+      this._socket.emit('subscribe', { channel: hash });
     }
   }
 
   unsubscribe(hash) {
+    this._socket.emit('unsubscribe', { channel: hash });
     delete this._subscriptions[hash];
-    this.client1.unsubscribe();
-    this.client2.unsubscribe();
   }
 
   publish(hash, message) {
-    this.client2.publish(hash, message);
-  }
-
-  latest(hash) {
-    return { head: this._subscriptions[hash] ? this._subscriptions[hash].head : null };
+    this._socket.send({ channel: hash, message: message });
   }
 
   _handleMessage(hash, message) {

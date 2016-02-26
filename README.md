@@ -2,34 +2,36 @@
 
 ## Introduction
 
-Distributed, peer-to-peer* Key-Value Store and Event Log on IPFS.
+Distributed, peer-to-peer Key-Value Store and Event Log on IPFS.
 
-_* Currently requires a redis-server server for pubsub communication. This will change in the future as soon as IPFS provides pubsub_
+- Stores all data in IPFS, including the database index
+- Replication happens on client side and data is eventually consistent
+- Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and (sort of) Vector Clocks for partial ordering
+- Designed to work offline first and to be easily embeddable to applications
 
-## Features
-- Distributed kv-store and event log database
-- Stores all data in IPFS
+_Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
 
-_Channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other systems_
+_OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
 
-## Example
+## Examples
+Before running the examples, install dependencies with:
 ```
 npm install
 ```
 
 Key-Value store example:
 ```
-node examples/keyvalue.js
+node examples/keyvalue.js <channel> <username> <key> <value>
+node examples/keyvalueReader.js <channel> <username> <key>
 ```
 
-Event log example (run in separate shells):
+Event log example (run several in separate shells):
 ```
-node examples/reader.js
-node examples/writer.js
+node examples/reader.js <channel> <username> <data> <interval in ms>
 ```
 
 ## API
-_See Usage below_
+_See usage example below_
 
     connect(host, port, username, password)
 
@@ -61,9 +63,9 @@ _See Usage below_
 const async       = require('asyncawait/async');
 const OrbitClient = require('./OrbitClient');
 
-// Redis
+// orbit-server
 const host = 'localhost';
-const port = 6379;
+const port = 3333;
 
 async(() => {
     // Connect
@@ -104,8 +106,6 @@ async(() => {
 
 ### Development
 #### Run Tests
-**Note!** Requires a redis-server at `localhost:6379`
-
 ```
 npm test
 ```
@@ -116,4 +116,5 @@ mocha -w
 ```
 
 ### TODO
+- Fix encryption
 - Caching

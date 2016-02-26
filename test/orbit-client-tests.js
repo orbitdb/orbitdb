@@ -30,24 +30,6 @@ describe('Orbit Client', () => {
     done();
   }));
 
-/*
-  describe('Info', function() {    //       }
-    //     };
-    //     var res = db.setMode(mode)
-    //     var info = orbit.channel(channel, 'password').info();
-    //     assert.notEqual(info, null);
-    //     assert.equal(info.head, null);
-    //     assert.equal(JSON.stringify(info.modes), JSON.stringify(res));
-    //     orbit.channel(channel, 'password').delete();
-    //   } catch(e) {
-    //     orbit.channel(channel, 'password').delete();
-    //     assert.equal(e, null);
-    //   }
-    //   done();
-    // }));
-  });
-*/
-
   describe('Add events', function() {
     it('adds an item to an empty channel', async((done) => {
       const head = db.add('hello');
@@ -70,7 +52,6 @@ describe('Orbit Client', () => {
     it('adds five items', async((done) => {
       for(let i = 0; i < 5; i ++) {
         let hash = db.add('hello');
-        // console.log(hash)
         assert.notEqual(hash, null);
         assert.equal(hash.startsWith('Qm'), true);
         assert.equal(hash.length, 46);

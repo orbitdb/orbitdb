@@ -16,6 +16,10 @@ class Node {
   compact() {
     return { id: this.id, seq: this.seq, ver: this.ver, data: this.data, next: this.next }
   }
+
+  toJson() {
+    return { id: this.id, seq: this.seq, ver: this.ver, data: this.data, next: this.next }
+  }
 }
 
 module.exports = Node;

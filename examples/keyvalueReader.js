@@ -20,11 +20,9 @@ let run = (async(() => {
 
     let count = 1;
 
-    while(true) {
+    setInterval(async(() => {
       const key = process.argv[4] ? process.argv[4] : 'greeting';
-      const value = process.argv[5] ? process.argv[5] : 'Hello world';
-      const timer = new Timer(true);
-      db.put(key, value + " " + count);
+      let timer = new Timer(true);
       const result = db.get(key);
 
       console.log("---------------------------------------------------")
@@ -35,8 +33,7 @@ let run = (async(() => {
       console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
       count ++;
-    }
-
+    }), 1000);
   } catch(e) {
     console.error("error:", e);
     console.error(e.stack);

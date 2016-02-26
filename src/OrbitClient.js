@@ -11,7 +11,7 @@ const HashCacheOps = require('./HashCacheOps');
 const ItemTypes    = require('./ItemTypes');
 const MetaInfo     = require('./MetaInfo');
 const Post         = require('./Post');
-const PubSub       = require('./Pubsub');
+const PubSub       = require('./PubSub');
 const List         = require('./list/OrbitList');
 const DataStore    = require('./DataStore');
 
@@ -27,16 +27,26 @@ class OrbitClient {
   channel(hash, password) {
     if(password === undefined) password = '';
 
-    this._pubsub.subscribe(hash, password, async((hash, message) => {
+    const onMessage = async((hash, message) => {
       const other = await(List.fromIpfsHash(this._ipfs, message));
-      if(other.id !== this.user.username)
+      if(other.id !== this.user.username) {
         this._store.join(other);
-    }));
+      }
+    });
+
+    const onLatest = async((hash, message) => {
+      console.log("--> Received latest list:", message)
+      if(message) {
+        const other = await(List.fromIpfsHash(this._ipfs, message));
+        this._store.join(other);
+      }
+    });
+
+    this._pubsub.subscribe(hash, password, onMessage, onLatest);
 
     return {
-      delete: () => this._deleteChannel(hash, password),
       iterator: (options) => this._iterator(hash, password, options),
-      setMode: (mode) => this._setMode(hash, password, mode),
+      delete: () => this._deleteChannel(hash, password),
       add: (data) => this._add(hash, password, data),
       del: (key) => this._remove(hash, password, key),
       put: (key, data) => this._put(hash, password, key, data),
@@ -107,9 +117,12 @@ class OrbitClient {
   }
 
   _publish(data) {
-    let post = new Post(data);
-    // post.encrypt(privkey, pubkey);
-    return await (ipfsAPI.putObject(this._ipfs, JSON.stringify(post)));
+    return new Promise((resolve, reject) => {
+      let post = new Post(data);
+      // post.encrypt(privkey, pubkey);
+      const res = await (ipfsAPI.putObject(this._ipfs, JSON.stringify(post)));
+      resolve(res);
+    })
   }
 
   _createMessage(channel, password, operation, key, value) {
@@ -122,13 +135,13 @@ class OrbitClient {
 
   /* DB Operations */
   _add(channel, password, data) {
-    const post = this._publish(data);
+    const post = await(this._publish(data));
     const key = post.Hash;
     return await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash, data));
   }
 
   _put(channel, password, key, data) {
-    const post = this._publish(data);
+    const post = await(this._publish(data));
     return await(this._createOperation(channel, password, HashCacheOps.Put, key, post.Hash));
   }
 
@@ -137,12 +150,18 @@ class OrbitClient {
   }
 
   _createOperation(channel, password, operation, key, value, data) {
-    const hash = this._createMessage(channel, password, operation, key, value);
-    const res = await(this._store.add(hash));
-    const listHash = await(this._store.list.getIpfsHash());
-    await(this._pubsub.publish(channel, listHash));
-    // return res;
+    var create = async(() => {
+      return new Promise(async((resolve, reject) => {
+        const hash = this._createMessage(channel, password, operation, key, value);
+        const res = await(this._store.add(hash));
+        const listHash = await(this._store.list.getIpfsHash());
+        await(this._pubsub.publish(channel, listHash));
+        resolve();
+      }));
+    })
+    await(create());
     return key;
+    // return res;
   }
 
   _deleteChannel(channel, password) {

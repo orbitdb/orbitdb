@@ -1,6 +1,6 @@
 'use strict';
 
-const Encryption = require('orbit-common/lib/Encryption');
+// const Encryption = require('orbit-common/lib/Encryption');
 
 class OrbitDBItem {
   constructor(operation, key, value, metaInfo) {
@@ -11,6 +11,7 @@ class OrbitDBItem {
   }
 }
 
+/*
 class HashCacheItem {
   constructor(operation, key, sequenceNumber, targetHash, metaInfo, next) {
     this.op     = operation;
@@ -62,9 +63,9 @@ class EncryptedHashCacheItem extends HashCacheItem {
     return item;
   }
 }
-
+*/
 module.exports = {
   OrbitDBItem: OrbitDBItem,
-  HashCacheItem: HashCacheItem,
-  EncryptedHashCacheItem: EncryptedHashCacheItem
+  // HashCacheItem: HashCacheItem,
+  // EncryptedHashCacheItem: EncryptedHashCacheItem
 };
