@@ -5,7 +5,7 @@
 Distributed, peer-to-peer Key-Value Store and Event Log on IPFS.
 
 - Stores all data in IPFS, including the database index
-- Replication happens on client side and data is eventually consistent
+- Aggregation happens on client side and data is eventually consistent
 - Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and (sort of) Vector Clocks for partial ordering
 - Designed to work offline first and to be easily embeddable to applications
 
@@ -123,7 +123,7 @@ mocha -w
 
 ## Notes
 ### Data structure description
-*For future IPLD references*
+*For future [IPLD](https://github.com/ipfs/ipld-examples) references*
 
 List snapshots are posted to pubsub:
 ```
