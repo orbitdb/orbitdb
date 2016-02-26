@@ -14,10 +14,6 @@ class OrbitNode extends Node {
     this.hash = hash ? hash : this.ipfsHash;
   }
 
-  get compactId() {
-    return "" + this.id + "." + this.seq + "." + this.ver;
-  }
-
   get ipfsHash() {
     this._commit();
     return this.hash;

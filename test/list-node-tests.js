@@ -37,25 +37,4 @@ describe('Node', () => {
     });
   });
 
-  describe('compact', () => {
-    it('presents the node as a compacted object', (done) => {
-      const node1 = new Node('A', 0, 0, 'hello');
-      const node2 = new Node('B', 0, 0, 'hello', [node1]);
-      const compacted1 = node1.compact();
-      const compacted2 = node2.compact();
-
-      assert.notEqual(compacted1, null);
-      assert.equal(compacted1.id, 'A');
-      assert.equal(compacted1.seq, 0);
-      assert.equal(compacted1.ver, 0);
-      assert.equal(compacted1.data, 'hello');
-      assert.equal(compacted1.next instanceof Array, true);
-      assert.equal(compacted1.next.length, 0);
-
-      assert.equal(compacted2.id, 'B');
-      assert.equal(compacted2.next.length, 1);
-      assert.equal(compacted2.next[0], 'A.0.0');
-      done();
-    });
-  });
 });

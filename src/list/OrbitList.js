@@ -27,7 +27,6 @@ class OrbitList extends List {
     node._commit();
     this._currentBatch.push(node);
     this.ver ++;
-
   }
 
   join(other) {
