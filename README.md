@@ -118,3 +118,85 @@ mocha -w
 ### TODO
 - Fix encryption
 - Caching
+- Rename HashCacheOps
+- Refactor db operations to its own class
+
+## Notes
+### Data structure description
+*For future IPLD references*
+
+List snapshots are posted to pubsub:
+```
+> QmRzWAiFdLkdkwBDehzxhHdhfwbDKDnzqBnX53va58PuQu
+> ...
+```
+
+**Get a list snapshot**
+
+`ipfs object get QmRzWAiFdLkdkwBDehzxhHdhfwbDKDnzqBnX53va58PuQu`
+```
+{
+  Links: [],
+  Data: {
+    id: "writer",
+    seq: 1301,
+    ver: 3,
+    items: {
+      writer.1301.0: "QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn",
+      writer.1301.1: "QmQxndNEzWxKT5KRqRsty7JDGcbPVazaYPCqfB5z1mxmon",
+      writer.1301.2: "QmUN1X97M2t8MX55H8VoPGXu2fLBpr91iCAzHkXudSMvDE"
+    }
+  }
+}
+```
+
+**Get the item**
+
+`ipfs object get QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn`
+```
+{
+  Links: [],
+  Data: {
+    id: "writer",
+    seq: 1301,
+    ver: 0,
+    data: "QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ",
+    next: {
+      writer.1300.9: "QmS17ABxzFEVoHv5WEvATetNEZhN2vkNApRPcFQUaJfij3"
+    }
+  }
+}
+```
+
+**Get the item's data (operation)**
+
+`ipfs object get QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ`
+```
+{
+  Links: [],
+  Data: {
+    op: "PUT",
+    key: "default",
+    value: "QmaAPEKDdaucQZRseJmKmWwZhgftBSwj8TD1xEomgcxo1X",
+    meta:{
+      type: "text",
+      size: -1,
+      from: "writer",
+      ts: 1456494484094
+    }
+  }
+}
+```
+
+**Get the value**
+
+`ipfs object get QmaAPEKDdaucQZRseJmKmWwZhgftBSwj8TD1xEomgcxo1X`
+```
+{
+  Links: [],
+  Data: {
+    content: "LambOfGod 347",
+    ts: 1456494484089
+  }
+}
+```
