@@ -5,10 +5,10 @@ var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
 // orbit-server
-const host = 'localhost';
+const host = process.argv[2] ? process.argv[2] : 'localhost'
 const port = 3333;
 
-var username = 'testrunner';
+var username = process.argv[3] ? process.argv[3] : 'testrunner';
 var password = '';
 
 let run = (async(() => {
@@ -16,8 +16,7 @@ let run = (async(() => {
     // Connect
     var orbit = OrbitClient.connect(host, port, username, password);
 
-    const id = process.argv[3] ? process.argv[3] : 'a';
-    const channelName = process.argv[2] ? process.argv[2] : 'c1';
+    const channelName = process.argv[4] ? process.argv[4] : 'c1';
     const db = orbit.channel(channelName);
 
     // Metrics
@@ -40,7 +39,7 @@ let run = (async(() => {
     }, 1000);
 
     while(true) {
-      let g = db.add(id + totalQueries);
+      let g = db.add(username + totalQueries);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;
