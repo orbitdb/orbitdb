@@ -51,7 +51,7 @@ class OrbitList extends List {
       }
     };
 
-    // other.items.forEach((e) => e.heads.forEach(fetchRecursive));
+    other.items.forEach((e) => e.heads.forEach(fetchRecursive));
     // console.log("--> Fetched", MaxHistory, "items from the history\n");
   }
 

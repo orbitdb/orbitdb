@@ -33,7 +33,6 @@ class List {
     const current = _.differenceWith(this._currentBatch, this._items, Node.equals);
     const others  = _.differenceWith(other.items, this._items, Node.equals);
     const final   = _.unionWith(current, others, Node.equals);
-    // const final   = _.unionWith(others, current, Node.equals);
     this._items   = this._items.concat(final);
     this._currentBatch = [];
   }
