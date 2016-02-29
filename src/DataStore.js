@@ -30,13 +30,6 @@ class DataStore {
     return this._fetchRecursive(options);
   }
 
-  _fetchOne(item) {
-    return new Promise(async((resolve, reject) => {
-      await(item.getPayload());
-      resolve({ hash: item.data, payload: item.Payload });
-    }));
-  }
-
   _fetchRecursive(options, currentAmount, deleted, res) {
     const opts = {
       amount: options && options.amount ? options.amount : DefaultAmount,
@@ -48,7 +41,7 @@ class DataStore {
     if(!currentAmount) currentAmount = 0;
 
     if(!opts.first && !opts.last && !opts.key && opts.amount == -1)
-      return this.list.items.map(this._fetchOne).reverse();
+      return this.list.items.map((e) => e.fetchPayload()).reverse();
 
     let result = res ? res : [];
     let handledItems = deleted ? deleted : [];
@@ -56,7 +49,7 @@ class DataStore {
 
     // Fetch the item from ipfs
     const node = this.list.items[this.list.items.length - currentAmount - 1];
-    if(node) item = await(this._fetchOne(node));
+    if(node) item = await(node.fetchPayload());
 
     const canAdd = (firstHash, key, foundItemsCount) => {
       return (!opts.key   || (opts.key && opts.key === item.payload.key)) &&

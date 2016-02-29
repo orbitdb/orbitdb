@@ -10,7 +10,7 @@ class OrbitNode extends Node {
     super(id, seq, ver, data);
     this.hash = null;
     this._ipfs = ipfs;
-    this.next = next;
+    this.next = next || [];
     this.hash = hash ? hash : this.ipfsHash;
   }
 
@@ -22,24 +22,19 @@ class OrbitNode extends Node {
   compact() {
     let res = { id: this.id, seq: this.seq, ver: this.ver, data: this.data }
     let items = {};
-
-    if(this.next)
-      this.next.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
-
+    this.next.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
     Object.assign(res, { next: items });
-
     return res;
   }
 
-  _commit() {
-    if(!this.hash) {
-      const t = this.compact();
-      const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(t)));
-      this.hash = r.Hash;
-    }
+  fetchPayload() {
+    return new Promise(async((resolve, reject) => {
+      await(this._getPayload());
+      resolve({ hash: this.data, payload: this.Payload });
+    }));
   }
 
-  getPayload() {
+  _getPayload() {
     if(!this.Payload) {
       const payload = await(ipfsAPI.getObject(this._ipfs, this.data));
       this.Payload = JSON.parse(payload.Data);
@@ -51,8 +46,15 @@ class OrbitNode extends Node {
     return this.hash;
   }
 
+  _commit() {
+    if(!this.hash) {
+      const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(this.compact())));
+      this.hash = r.Hash;
+    }
+  }
+
   static fromIpfsHash(ipfs, hash) {
-    const create = async(() => {
+    const createNode = async(() => {
       return new Promise(async((resolve, reject) => {
         const o = await(ipfsAPI.getObject(ipfs, hash));
         const f = JSON.parse(o.Data)
@@ -60,8 +62,7 @@ class OrbitNode extends Node {
         resolve(node);
       }));
     });
-    const node = await(create());
-    return node;
+    return await(createNode());
   }
 }
 

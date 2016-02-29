@@ -32,7 +32,7 @@ describe('OrbitNode', function() {
       assert.equal(node.seq, 0);
       assert.equal(node.ver, 0);
       assert.equal(node.data, null);
-      assert.equal(node.next, undefined);
+      assert.equal(node.next.length, 0);
       assert.equal(node.hash, 'QmNcbwc5V42kkQbnBvtWsmREbUy8PB5cG3J5DTyPWqYkho');
       assert.equal(node._ipfs, ipfs);
       done();
@@ -44,7 +44,7 @@ describe('OrbitNode', function() {
       assert.equal(node.seq, 0);
       assert.equal(node.ver, 0);
       assert.equal(node.data, 'QmTnaGEpw4totXN7rhv2jPMXKfL8s65PhhCKL5pwtJfRxn');
-      assert.equal(node.next, undefined);
+      assert.equal(node.next.length, 0);
       assert.equal(node.hash, 'QmULakc8SCkz5wz3s1TDkQgZWP1yBrhdXMpHJGJY3sV33r');
       assert.equal(node._ipfs, ipfs);
       done();

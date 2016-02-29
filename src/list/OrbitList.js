@@ -24,7 +24,7 @@ class OrbitList extends List {
 
     const heads = super._findHeads(this.items);
     const node  = new Node(this._ipfs, this.id, this.seq, this.ver, data, heads);
-    node._commit();
+    node._commit(); // TODO: obsolete?
     this._currentBatch.push(node);
     this.ver ++;
   }
