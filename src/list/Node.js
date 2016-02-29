@@ -13,6 +13,10 @@ class Node {
     return "" + this.id + "." + this.seq + "." + this.ver;
   }
 
+  get heads() {
+    return Object.keys(this.next).map((e) => this.next[e]);
+  }
+
   toJson() {
     return { id: this.id, seq: this.seq, ver: this.ver, data: this.data, next: this.next }
   }

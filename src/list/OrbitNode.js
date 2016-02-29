@@ -19,10 +19,6 @@ class OrbitNode extends Node {
     return this.hash;
   }
 
-  get heads() {
-    return Object.keys(this.next).map((e) => this.next[e]);
-  }
-
   compact() {
     let res = { id: this.id, seq: this.seq, ver: this.ver, data: this.data }
     let items = {};
