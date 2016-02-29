@@ -37,4 +37,31 @@ describe('Node', () => {
     });
   });
 
+  describe('equals', () => {
+    it('check if nodes are equal', (done) => {
+      const node1 = new Node('A', 0, 0);
+      const node2 = new Node('A', 0, 0);
+      const node3 = new Node('A', 1, 1);
+      const node4 = new Node('B', 123, 456);
+      assert.equal(Node.equals(node1, node1), true);
+      assert.equal(Node.equals(node1, node2), true);
+      assert.equal(Node.equals(node1, node3), false);
+      assert.equal(Node.equals(node1, node4), false);
+      assert.equal(Node.equals(node3, node4), false);
+      done();
+    });
+  });
+
+  describe('hasChild', () => {
+    it('finds the child reference', (done) => {
+      const a = new Node('A', 0, 0);
+      const b = new Node('B', 0, 0, "hello", [a]);
+      const c = new Node('C', 0, 0, "hello", [a, b]);
+      assert.equal(Node.hasChild(b, a), true)
+      assert.equal(Node.hasChild(c, a), true)
+      assert.equal(Node.hasChild(c, b), true)
+      done();
+    });
+  });
+
 });
