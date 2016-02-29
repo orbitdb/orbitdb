@@ -5,23 +5,24 @@ const await       = require('asyncawait/await');
 const OrbitClient = require('../src/OrbitClient');
 const Timer       = require('./Timer');
 
+// usage: reader.js <host> <username> <channel> <text>
+
 // orbit-server
-const host = 'localhost';
+const host = process.argv[2] ? process.argv[2] : 'localhost'
 const port = 3333;
 
 const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
 const password = '';
 
-const prefix = process.argv[4] ? process.argv[4] : 'LambOfGod';
+const prefix = process.argv[5] ? process.argv[5] : 'Hello';
 
 let run = (async(() => {
   try {
     var orbit = OrbitClient.connect(host, port, username, password);
-    const c1 = process.argv[2] ? process.argv[2] : 'c1';
-    const channel = orbit.channel(c1);
+    const channelName = process.argv[4] ? process.argv[4] : 'test';
+    const channel = orbit.channel(channelName);
 
     let count = 1;
-    let id = 'Log: Query '
     let running = false;
 
     setInterval(async(() => {
