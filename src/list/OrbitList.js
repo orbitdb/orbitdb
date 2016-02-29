@@ -30,7 +30,6 @@ class OrbitList extends List {
   }
 
   join(other) {
-    super.join(other);
 
     // WIP: fetch missing nodes
     let depth = 0;
@@ -46,13 +45,14 @@ class OrbitList extends List {
           const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
           const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
           this._items.splice(idx, 0, item)
-          // console.log("added", item.compactId, "at", idx, item.data, depth);
+          console.log("added", item.compactId, "at", idx, item.data, depth);
         }
       }
     };
 
     other.items.forEach((e) => e.heads.forEach(fetchRecursive));
-    // console.log("--> Fetched", MaxHistory, "items from the history\n");
+    console.log("--> Fetched", MaxHistory, "items from the history\n");
+    super.join(other);
   }
 
   clear() {
