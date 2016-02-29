@@ -3,6 +3,7 @@
 const _    = require('lodash');
 var assert = require('assert');
 var List   = require('../src/list/List');
+var Node   = require('../src/list/Node');
 
 describe('List', () => {
   describe('Constructor', () => {
@@ -178,8 +179,8 @@ describe('List', () => {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0], 'A.0.0');
-      assert.equal(list1._currentBatch[0].next[1], 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[0], 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[1], 'A.0.0');
       done();
     });
 
@@ -195,9 +196,8 @@ describe('List', () => {
       list1.add("helloA3")
 
       assert.equal(list1._currentBatch.length, 2);
-      assert.equal(list1._currentBatch[1].next.length, 2);
+      assert.equal(list1._currentBatch[1].next.length, 1);
       assert.equal(list1._currentBatch[1].next[0], 'A.1.0');
-      assert.equal(list1._currentBatch[1].next[1], 'B.0.1');
       done();
     });
 
@@ -215,14 +215,12 @@ describe('List', () => {
       list1.join(list2);
 
       list1.add("helloA4")
-      list1.add("helloA5")
 
       const lastItem = list1.items[list1.items.length - 1];
 
-      assert.equal(list1.items.length, 7);
-      assert.equal(lastItem.next.length, 2);
-      assert.equal(lastItem.next[0], 'A.2.0');
-      assert.equal(lastItem.next[1], 'B.0.1');
+      assert.equal(list1.items.length, 6);
+      assert.equal(lastItem.next.length, 1);
+      assert.equal(lastItem.next[0], 'A.1.0');
       done();
     });
 
@@ -256,11 +254,9 @@ describe('List', () => {
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(lastItem.next[0], 'A.4.0');
-      assert.equal(lastItem.next[1], 'B.0.1');
-      assert.equal(lastItem.next[2], 'C.0.0');
-      assert.equal(lastItem.next[3], 'D.0.2');
+      assert.equal(lastItem.next[1], 'D.0.2');
       assert.equal(list1.items.length, 11);
-      assert.equal(lastItem.next.length, 4);
+      assert.equal(lastItem.next.length, 2);
       done();
     });
 
@@ -272,17 +268,17 @@ describe('List', () => {
       list2.add("helloB2")
       list1.join(list2);
 
-      const lastItem = list1.items[list1.items.length - 1];
+      const firstItem = list1.items[0];
 
       assert.equal(list1.id, 'A');
       assert.equal(list1.seq, 1);
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 3);
-      assert.equal(lastItem.id, 'B');
-      assert.equal(lastItem.seq, 0);
-      assert.equal(lastItem.ver, 1);
-      assert.equal(lastItem.data, 'helloB2');
+      assert.equal(firstItem.id, 'B');
+      assert.equal(firstItem.seq, 0);
+      assert.equal(firstItem.ver, 0);
+      assert.equal(firstItem.data, 'helloB1');
       done();
     });
 
@@ -296,6 +292,8 @@ describe('List', () => {
       list1.join(list2);
       list2.join(list1);
 
+      assert.equal(list1.items.map((e) => e.compactId).join(", "), list2.items.map((e) => e.compactId).join(", "))
+
       const lastItem1 = list1.items[list1.items.length - 1];
 
       assert.equal(list1.id, 'A');
@@ -303,10 +301,10 @@ describe('List', () => {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 4);
-      assert.equal(lastItem1.id, 'B');
+      assert.equal(lastItem1.id, 'A');
       assert.equal(lastItem1.seq, 0);
       assert.equal(lastItem1.ver, 1);
-      assert.equal(lastItem1.data, 'helloB2');
+      assert.equal(lastItem1.data, 'helloA2');
 
       const lastItem2 = list2.items[list2.items.length - 1];
 
@@ -334,7 +332,7 @@ describe('List', () => {
       list2.add("helloB2")
       list2.join(list1);
 
-      const secondItem = list2.items[1];
+      const secondItem = list2.items[list2.items.length - 2];
       const lastItem = list2.items[list2.items.length - 1];
 
       assert.equal(list2.id, 'B');
@@ -344,12 +342,12 @@ describe('List', () => {
       assert.equal(list2._items.length, 4);
       assert.equal(secondItem.id, 'A');
       assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 0);
-      assert.equal(secondItem.data, 'helloA1');
-      assert.equal(lastItem.id, 'A');
-      assert.equal(lastItem.seq, 0);
-      assert.equal(lastItem.ver, 1);
-      assert.equal(lastItem.data, 'helloA2');
+      assert.equal(secondItem.ver, 1);
+      assert.equal(secondItem.data, 'helloA2');
+      assert.equal(lastItem.id, 'B');
+      assert.equal(lastItem.seq, 1);
+      assert.equal(lastItem.ver, 0);
+      assert.equal(lastItem.data, 'helloB2');
       done();
     });
 
@@ -371,7 +369,7 @@ describe('List', () => {
       list1.join(list3);
       list1.join(list4);
 
-      const secondItem = list1.items[1];
+      const secondItem = list1.items[list1.items.length - 2];
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(list1.id, 'A');
@@ -379,10 +377,10 @@ describe('List', () => {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 8);
-      assert.equal(secondItem.id, 'A');
+      assert.equal(secondItem.id, 'D');
       assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 1);
-      assert.equal(secondItem.data, 'helloA2');
+      assert.equal(secondItem.ver, 0);
+      assert.equal(secondItem.data, 'helloD1');
       assert.equal(lastItem.id, 'D');
       assert.equal(lastItem.seq, 0);
       assert.equal(lastItem.ver, 1);
@@ -430,10 +428,10 @@ describe('List', () => {
       assert.equal(list4.ver, 2);
       assert.equal(list4._currentBatch.length, 2);
       assert.equal(list4._items.length, 8);
-      assert.equal(secondItem.id, 'D');
+      assert.equal(secondItem.id, 'B');
       assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 1);
-      assert.equal(secondItem.data, 'helloD2');
+      assert.equal(secondItem.ver, 0);
+      assert.equal(secondItem.data, 'helloB1');
       assert.equal(lastItem1.id, 'C');
       assert.equal(lastItem1.seq, 3);
       assert.equal(lastItem1.ver, 1);
@@ -444,6 +442,63 @@ describe('List', () => {
       assert.equal(lastItem2.data, 'helloD4');
       done();
     });
+
+    it('data is consistent after joining lists', (done) => {
+      const list1 = new List('A');
+      const list2 = new List('B');
+      const list3 = new List('C');
+
+      list1.add("helloA1")
+      list2.add("helloB1")
+      list3.add("helloC1")
+
+      list1.join(list2);
+      list2.join(list1);
+
+      list1.add("helloA2")
+      list1.add("helloA3")
+      list2.add("helloB2")
+      list2.add("helloB3")
+
+      list1.join(list2);
+      list2.join(list1);
+
+      list1.add("helloA4")
+      list1.add("helloA5")
+
+      list2.add("helloB4")
+      list2.add("helloB5")
+      list3.add("helloC2")
+      list3.add("helloC3")
+
+      list1.add("helloA6")
+      list2.join(list1);
+      list1.join(list2);
+
+      list1.add("helloA7")
+      list1.add("helloA8")
+
+      list2.join(list1);
+      list1.join(list2);
+
+      list2.add("helloB6")
+      list2.add("helloB7")
+      list2.add("helloB8")
+
+      list1.join(list2);
+      list2.join(list1);
+      list1.join(list3);
+      list2.join(list3);
+      list3.join(list2);
+      list3.join(list1);
+
+      assert.equal(list1._items.length, 19);
+      assert.equal(list1.items.map((e) => e.compactId).join(", "), "B.0.0, A.0.0, B.2.0, B.2.1, A.1.0, A.1.1, A.3.0, A.3.1, A.3.2, B.4.0, B.4.1, A.6.0, A.6.1, B.7.0, B.7.1, B.7.2, C.0.0, C.0.1, C.0.2")
+      assert.equal(list1.items.map((e) => e.compactId).join(", "), list2.items.map((e) => e.compactId).join(", "))
+      assert.equal(list1.items.map((e) => e.compactId).join(", "), list3.items.map((e) => e.compactId).join(", "))
+      done();
+    });
+
   });
 
   describe('_findHeads', () => {

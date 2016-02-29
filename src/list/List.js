@@ -30,9 +30,9 @@ class List {
   join(other) {
     this.seq = (other.seq && other.seq > this.seq ? other.seq : this.seq) + 1;
     this.ver = 0;
-    const current = _.differenceWith(this._currentBatch, this._items, this._equals);
-    const others  = _.differenceWith(other.items, this._items, this._equals);
-    const final   = _.unionWith(current, others, this._equals);
+    const current = _.differenceWith(this._currentBatch, this._items, Node.equals);
+    const others  = _.differenceWith(other.items, this._items, Node.equals);
+    const final   = _.unionWith(others, current, Node.equals);
     this._items   = this._items.concat(final);
     this._currentBatch = [];
   }
@@ -45,28 +45,8 @@ class List {
   }
 
   _isReferencedInChain(all, item) {
-    const isReferenced = _.findLast(all, (e) => this._references(e, item)) !== undefined;
+    const isReferenced = _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
     return isReferenced;
-  }
-
-  _equals(a, b) {
-    return a.id == b.id && a.seq == b.seq && a.ver == b.ver;
-  }
-
-  _references(a, b) {
-    for(let i = 0; i < a.next.length; i ++) {
-      if(b.compactId === a.next[i].compactId)
-        return true;
-    }
-    return false;
-  }
-
-  static fromJson(json) {
-    let list = new List(json.id);
-    list.seq = json.seq;
-    list.ver = json.ver;
-    list._items = _.uniqWith(json.items.map((f) => new Node(f.id, f.seq, f.ver, f.data, f.next)), _.isEqual);
-    return list;
   }
 
   toJson() {
@@ -76,6 +56,14 @@ class List {
       ver: this.ver,
       items: this._currentBatch.map((f) => f.toJson())
     }
+  }
+
+  static fromJson(json) {
+    let list = new List(json.id);
+    list.seq = json.seq;
+    list.ver = json.ver;
+    list._items = _.uniqWith(json.items.map((f) => new Node(f.id, f.seq, f.ver, f.data, f.next)), _.isEqual);
+    return list;
   }
 }
 
