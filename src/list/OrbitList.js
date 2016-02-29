@@ -30,6 +30,7 @@ class OrbitList extends List {
   }
 
   join(other) {
+    super.join(other);
 
     // WIP: fetch missing nodes
     let depth = 0;
@@ -50,9 +51,8 @@ class OrbitList extends List {
       }
     };
 
-    other.items.forEach((e) => e.heads.forEach(fetchRecursive));
-    console.log("--> Fetched", MaxHistory, "items from the history\n");
-    super.join(other);
+    // other.items.forEach((e) => e.heads.forEach(fetchRecursive));
+    // console.log("--> Fetched", MaxHistory, "items from the history\n");
   }
 
   clear() {
