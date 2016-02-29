@@ -8,7 +8,7 @@ const List     = require('./List');
 const Node     = require('./OrbitNode');
 
 const MaxBatchSize = 10; // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
-const MaxHistory = 1000; // How many items to fetch in the chain per join
+const MaxHistory   = 32; // How many items to fetch in the chain per join
 
 class OrbitList extends List {
   constructor(id, ipfs) {
