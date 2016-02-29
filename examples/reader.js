@@ -5,7 +5,7 @@ const await       = require('asyncawait/await');
 const OrbitClient = require('../src/OrbitClient');
 const Timer       = require('./Timer');
 
-// usage: reader.js <host> <username> <channel> <text>
+// usage: reader.js <host> <username> <channel> <text> <interval>
 
 // orbit-server
 const host = process.argv[2] ? process.argv[2] : 'localhost'
@@ -45,7 +45,7 @@ let run = (async(() => {
         running = false;
         count ++;
       }
-    }), process.argv[5] ? process.argv[5] : 1000);
+    }), process.argv[6] ? process.argv[6] : 1000);
 
   } catch(e) {
     console.error("error:", e);
