@@ -34,7 +34,7 @@ let run = (async(() => {
         console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
         let timer2 = new Timer(true);
-        let items = channel.iterator({ limit: 10 }).collect();
+        let items = channel.iterator({ limit: 20 }).collect();
         console.log("---------------------------------------------------")
         console.log("Key | Value")
         console.log("---------------------------------------------------")

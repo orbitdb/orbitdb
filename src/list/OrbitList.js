@@ -8,7 +8,7 @@ const List     = require('./List');
 const Node     = require('./OrbitNode');
 
 const MaxBatchSize = 10; // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
-const MaxHistory   = 32; // How many items to fetch in the chain per join
+const MaxHistory   = 8; // How many items to fetch in the chain per join
 
 class OrbitList extends List {
   constructor(id, ipfs) {
@@ -33,25 +33,86 @@ class OrbitList extends List {
     super.join(other);
 
     // WIP: fetch missing nodes
-    let depth = 0;
+    let fetchedCount = 0;
+    // let depth = 0;
     const isReferenced = (all, item) => _.findLast(all, (f) => f === item) !== undefined;
-    const fetchRecursive = (hash) => {
+    const fetchRecursive = (all, hash, amount, depth) => {
       hash = hash instanceof Node === true ? hash.hash : hash;
-      let allHashes = this._items.map((a) => a.hash);
-      depth ++;
-      if(!isReferenced(allHashes, hash)) {
+      if(!isReferenced(all, hash)) {
+        all.push(hash);
         const item = Node.fromIpfsHash(this._ipfs, hash);
-        if(item.next && depth < MaxHistory) {
-          item.heads.forEach(fetchRecursive);
+        console.log("-", item.compactId, depth, amount, item.heads.length, fetchedCount)
+        if(!item.next || fetchedCount > amount)
+          return;
+
+        // if(item.next && fetchedCount < amount) {
+          depth ++;
+          item.heads.forEach((e) => {
+            // console.log("--", e)
+            fetchRecursive(all, e, amount - 1, depth);
+            // fetchRecursive(all, e, Math.ceil((amount - 1) / item.heads.length), depth);
+            // // const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
+            // const indices = _.findIndex(this._items, (b) => b.hash === e);
+            // const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : -1;
+            // this._items.splice(idx, 0, item)
+            // console.log("added", item.compactId, "at", idx, item.data, depth);
+            // fetchedCount ++;
+          });
           const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
-          const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
+          // const indices = _.findIndex(this._items, (b) => b.hash === e);
+          const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : -1;
           this._items.splice(idx, 0, item)
           console.log("added", item.compactId, "at", idx, item.data, depth);
-        }
+        // }
+        fetchedCount ++;
+      } else {
+        console.log("was referenced", hash)
       }
     };
 
-    other.items.forEach((e) => e.heads.forEach(fetchRecursive));
+    const fetchRecursive2 = (hash, amount, currentAmount, all) => {
+      let res = [];
+      hash = hash instanceof Node === true ? hash.hash : hash;
+
+      if(currentAmount >= amount)
+        return res;
+
+      if(!isReferenced(all, hash)) {
+        currentAmount ++;
+        all.push(hash);
+        const item = Node.fromIpfsHash(this._ipfs, hash);
+        console.log("-", item.compactId, item.heads.length, amount, currentAmount);
+        res = _.flatten(item.heads.map((head) => {
+          return fetchRecursive2(head, amount, currentAmount, all);
+        }));
+        res.push(item);
+        console.log("res", res.length);
+      }
+      return _.flatten(res);
+    };
+
+    let allHashes = this._items.map((a) => a.hash);
+    let d = 0;
+      console.log("--1", other.items.length)
+    const res = _.flatten(other.items.map((e) => _.flatten(e.heads.map((f) => {
+      console.log("--2", e.heads.length, d)
+      // console.log(">", f, d)
+      // fetchRecursive(allHashes, f, Math.ceil(MaxHistory / e.heads.length), d);
+      return _.flatten(fetchRecursive2(f, Math.ceil((MaxHistory - other.items.length) / e.heads.length), d, allHashes));
+    }))));
+
+    // console.log(res)
+    res.reverse().forEach((item) => {
+      // console.log("ii", item.id)
+      const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
+      // const indices = _.findIndex(this._items, (b) => b.hash === e);
+      const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : this._items.length;
+      this._items.splice(idx, 0, item)
+      // this._items.splice(this._items.length - 1, 0, item)
+      console.log("added", item.compactId, "at", idx, item.data);
+    });
+
+    console.log(`--> Fetched ${res.length + other.items.length} items`);
     // console.log("--> Fetched", MaxHistory, "items from the history\n");
   }
 
@@ -97,6 +158,11 @@ class OrbitList extends List {
 
   static get batchSize() {
     return MaxBatchSize;
+  }
+
+  _isReferencedInChain(all, item) {
+    const isReferenced = _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
+    return isReferenced;
   }
 
   _commit() {
