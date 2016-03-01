@@ -32,117 +32,38 @@ class OrbitList extends List {
   join(other) {
     super.join(other);
 
-    // WIP: fetch missing nodes
-    let fetchedCount = 0;
-    // let depth = 0;
+    // WIP: fetch history
     const isReferenced = (all, item) => _.findLast(all, (f) => f === item) !== undefined;
-    const fetchRecursive = (all, hash, amount, depth) => {
-      hash = hash instanceof Node === true ? hash.hash : hash;
-      if(!isReferenced(all, hash)) {
-        all.push(hash);
-        const item = Node.fromIpfsHash(this._ipfs, hash);
-        console.log("-", item.compactId, depth, amount, item.heads.length, fetchedCount)
-        if(!item.next || fetchedCount > amount)
-          return;
-
-        // if(item.next && fetchedCount < amount) {
-          depth ++;
-          item.heads.forEach((e) => {
-            // console.log("--", e)
-            fetchRecursive(all, e, amount - 1, depth);
-            // fetchRecursive(all, e, Math.ceil((amount - 1) / item.heads.length), depth);
-            // // const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
-            // const indices = _.findIndex(this._items, (b) => b.hash === e);
-            // const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : -1;
-            // this._items.splice(idx, 0, item)
-            // console.log("added", item.compactId, "at", idx, item.data, depth);
-            // fetchedCount ++;
-          });
-          const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
-          // const indices = _.findIndex(this._items, (b) => b.hash === e);
-          const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : -1;
-          this._items.splice(idx, 0, item)
-          console.log("added", item.compactId, "at", idx, item.data, depth);
-        // }
-        fetchedCount ++;
-      } else {
-        console.log("was referenced", hash)
-      }
-    };
-
-    // const fetchRecursive2 = (hash, amount, currentAmount, all) => {
-    //   let res = [];
-    //   hash = hash instanceof Node === true ? hash.hash : hash;
-
-    //   if(currentAmount >= amount)
-    //     return res;
-
-    //   if(!isReferenced(all, hash)) {
-    //     currentAmount ++;
-    //     all.push(hash);
-    //     const item = Node.fromIpfsHash(this._ipfs, hash);
-    //     console.log("-", item.compactId, item.heads.length, amount, currentAmount);
-    //     res = _.flatten(item.heads.map((head) => {
-    //       return fetchRecursive2(head, amount, currentAmount, all);
-    //     }));
-    //     res.push(item);
-    //     console.log("res", res.length);
-    //   }
-    //   return _.flatten(res);
-    // };
-    const fetchRecursive2 = (hash, amount, all, res) => {
-      // console.log("--> fetch", amount)
+    const fetchRecursive = (hash, amount, all, res) => {
       let result = res ? res : [];
       hash = hash instanceof Node === true ? hash.hash : hash;
 
-      if(res.length >= amount) {
-        // console.log("------------------- exit", res.length, amount)
+      if(res.length >= amount)
         return res;
-      }
 
       if(!isReferenced(all, hash)) {
         all.push(hash);
         const item = Node.fromIpfsHash(this._ipfs, hash);
-        // console.log("-", item.compactId, item.heads.length, amount, res.length);
         res.push(item);
-        // console.log("res", res.length);
-        item.heads.map((head) => fetchRecursive2(head, amount - 1, all, res));
-        // res = _.flatten(item.heads.map((head) => fetchRecursive2(head, amount, all, res)));
-
-        // res = _.flatten(item.heads.map((head) => {
-        //   return fetchRecursive2(head, amount, currentAmount, all);
-        // }));
-        // res.push(item);
-        // console.log("res2", res.length);
+        item.heads.map((head) => fetchRecursive(head, amount - 1, all, res));
       }
+
       return res;
     };
 
     let allHashes = this._items.map((a) => a.hash);
-    // let d = 0;
-    // console.log("--> items:", other.items.length)
+
     const res = _.flatten(other.items.map((e) => _.flatten(e.heads.map((f) => {
-      // console.log("--> heads:", e.heads.length)
-      // console.log(">", f, d)
-      // fetchRecursive(allHashes, f, Math.ceil(MaxHistory / e.heads.length), d);
-      // return _.flatten(fetchRecursive2(f, Math.ceil((MaxHistory - other.items.length - e.heads.length) / e.heads.length) + (e.heads.length % 2 === 0 ? 0 : 1), allHashes, []));
       const remaining = (MaxHistory);
-      // return _.flatten(fetchRecursive2(f, Math.floor(remaining / e.heads.length) + (remaining%2 === 0 ? 0 : 1), allHashes, []));
-      return _.flatten(fetchRecursive2(f, MaxHistory, allHashes, []));
+      return _.flatten(fetchRecursive(f, MaxHistory, allHashes, []));
     }))));
 
-    // console.log("RES", res)
     res.slice(0, MaxHistory).forEach((item) => {
-      // console.log("ii", item.id)
       const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
-      // const indices = _.findIndex(this._items, (b) => b.hash === e);
       const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
       this._items.splice(idx, 0, item)
-      // this._items.splice(this._items.length - 1, 0, item)
-      // console.log("added", item.compactId, "at", idx, item.data);
     });
 
-    // console.log(`--> Fetched ${res.length} items`);
     // console.log("--> Fetched", MaxHistory, "items from the history\n");
   }
 
