@@ -8,7 +8,7 @@ const List     = require('./List');
 const Node     = require('./OrbitNode');
 
 const MaxBatchSize = 10; // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
-const MaxHistory   = 8; // How many items to fetch in the chain per join
+const MaxHistory   = 32; // How many items to fetch in the chain per join
 
 class OrbitList extends List {
   constructor(id, ipfs) {
@@ -70,49 +70,79 @@ class OrbitList extends List {
       }
     };
 
-    const fetchRecursive2 = (hash, amount, currentAmount, all) => {
-      let res = [];
+    // const fetchRecursive2 = (hash, amount, currentAmount, all) => {
+    //   let res = [];
+    //   hash = hash instanceof Node === true ? hash.hash : hash;
+
+    //   if(currentAmount >= amount)
+    //     return res;
+
+    //   if(!isReferenced(all, hash)) {
+    //     currentAmount ++;
+    //     all.push(hash);
+    //     const item = Node.fromIpfsHash(this._ipfs, hash);
+    //     console.log("-", item.compactId, item.heads.length, amount, currentAmount);
+    //     res = _.flatten(item.heads.map((head) => {
+    //       return fetchRecursive2(head, amount, currentAmount, all);
+    //     }));
+    //     res.push(item);
+    //     console.log("res", res.length);
+    //   }
+    //   return _.flatten(res);
+    // };
+    const fetchRecursive2 = (hash, amount, all, res) => {
+      // console.log("--> fetch", amount)
+      let result = res ? res : [];
       hash = hash instanceof Node === true ? hash.hash : hash;
 
-      if(currentAmount >= amount)
+      if(res.length >= amount) {
+        // console.log("------------------- exit", res.length, amount)
         return res;
+      }
 
       if(!isReferenced(all, hash)) {
-        currentAmount ++;
         all.push(hash);
         const item = Node.fromIpfsHash(this._ipfs, hash);
-        console.log("-", item.compactId, item.heads.length, amount, currentAmount);
-        res = _.flatten(item.heads.map((head) => {
-          return fetchRecursive2(head, amount, currentAmount, all);
-        }));
+        // console.log("-", item.compactId, item.heads.length, amount, res.length);
         res.push(item);
-        console.log("res", res.length);
+        // console.log("res", res.length);
+        item.heads.map((head) => fetchRecursive2(head, amount - 1, all, res));
+        // res = _.flatten(item.heads.map((head) => fetchRecursive2(head, amount, all, res)));
+
+        // res = _.flatten(item.heads.map((head) => {
+        //   return fetchRecursive2(head, amount, currentAmount, all);
+        // }));
+        // res.push(item);
+        // console.log("res2", res.length);
       }
-      return _.flatten(res);
+      return res;
     };
 
     let allHashes = this._items.map((a) => a.hash);
-    let d = 0;
-      console.log("--1", other.items.length)
+    // let d = 0;
+    // console.log("--> items:", other.items.length)
     const res = _.flatten(other.items.map((e) => _.flatten(e.heads.map((f) => {
-      console.log("--2", e.heads.length, d)
+      // console.log("--> heads:", e.heads.length)
       // console.log(">", f, d)
       // fetchRecursive(allHashes, f, Math.ceil(MaxHistory / e.heads.length), d);
-      return _.flatten(fetchRecursive2(f, Math.ceil((MaxHistory - other.items.length) / e.heads.length), d, allHashes));
+      // return _.flatten(fetchRecursive2(f, Math.ceil((MaxHistory - other.items.length - e.heads.length) / e.heads.length) + (e.heads.length % 2 === 0 ? 0 : 1), allHashes, []));
+      const remaining = (MaxHistory);
+      // return _.flatten(fetchRecursive2(f, Math.floor(remaining / e.heads.length) + (remaining%2 === 0 ? 0 : 1), allHashes, []));
+      return _.flatten(fetchRecursive2(f, MaxHistory, allHashes, []));
     }))));
 
-    // console.log(res)
-    res.reverse().forEach((item) => {
+    // console.log("RES", res)
+    res.slice(0, MaxHistory).forEach((item) => {
       // console.log("ii", item.id)
       const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
       // const indices = _.findIndex(this._items, (b) => b.hash === e);
-      const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : this._items.length;
+      const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
       this._items.splice(idx, 0, item)
       // this._items.splice(this._items.length - 1, 0, item)
-      console.log("added", item.compactId, "at", idx, item.data);
+      // console.log("added", item.compactId, "at", idx, item.data);
     });
 
-    console.log(`--> Fetched ${res.length + other.items.length} items`);
+    // console.log(`--> Fetched ${res.length} items`);
     // console.log("--> Fetched", MaxHistory, "items from the history\n");
   }
 

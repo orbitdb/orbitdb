@@ -316,10 +316,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0].compactId, 'B.0.1');
-      assert.equal(list1._currentBatch[0].next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
-      assert.equal(list1._currentBatch[0].next[1].compactId, 'A.0.0');
-      assert.equal(list1._currentBatch[0].next[1].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
+      assert.equal(list1._currentBatch[0].next[0].compactId, 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[0].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
+      assert.equal(list1._currentBatch[0].next[1].compactId, 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
     }));
 
@@ -336,8 +336,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1._currentBatch.length, 2);
       assert.equal(list1._currentBatch[1].next.length, 2);
-      assert.equal(list1._currentBatch[1].next[0].compactId, 'B.0.1');
-      assert.equal(list1._currentBatch[1].next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(list1._currentBatch[1].next[0].compactId, 'A.1.0');
+      assert.equal(list1._currentBatch[1].next[0].hash, 'QmYHXzXaahAL9iChAUtVsvdncKfQf7ShEfveZnL7qvGfTT');
+      assert.equal(list1._currentBatch[1].next[1].compactId, 'B.0.1');
+      assert.equal(list1._currentBatch[1].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
     }));
 
@@ -361,8 +363,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1.items.length, 7);
       assert.equal(lastItem.next.length, 2);
-      assert.equal(lastItem.next[0].compactId, 'B.0.1');
-      assert.equal(lastItem.next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(lastItem.next[0].compactId, 'A.2.0');
+      assert.equal(lastItem.next[0].hash, 'QmTB6p2opEHV9LqKCH5vBBnXxYMa9EFbVuu5pDQNsKJVEN');
+      assert.equal(lastItem.next[1].compactId, 'B.0.1');
+      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
     }));
 
@@ -397,10 +401,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1.items.length, 11);
       assert.equal(lastItem.next.length, 4);
-      assert.equal(lastItem.next[0].compactId, 'B.0.1');
-      assert.equal(lastItem.next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
-      assert.equal(lastItem.next[1].compactId, 'A.4.0');
-      assert.equal(lastItem.next[1].hash, 'QmSb6XTHZqptcndhgyDgqyifyBJNhic8XZh4vLmBiuK5VP');
+      assert.equal(lastItem.next[0].compactId, 'A.4.0');
+      assert.equal(lastItem.next[0].hash, 'QmShaXLSPmoVmzNineHRmS68gE7eajDjNdjtkV1fddob7w');
+      assert.equal(lastItem.next[1].compactId, 'B.0.1');
+      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       assert.equal(lastItem.next[2].compactId, 'C.0.0');
       assert.equal(lastItem.next[2].hash, 'QmTPfJRsLKPmxYrd82p16mry6vYTMoMFTH2jSbYVR8KvgD');
       assert.equal(lastItem.next[3].compactId, 'D.0.2');
@@ -423,10 +427,10 @@ describe('OrbitList', async(function() {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 3);
-      assert.equal(lastItem.id, 'A');
+      assert.equal(lastItem.id, 'B');
       assert.equal(lastItem.seq, 0);
-      assert.equal(lastItem.ver, 0);
-      assert.equal(lastItem.data, 'helloA1');
+      assert.equal(lastItem.ver, 1);
+      assert.equal(lastItem.data, 'helloB2');
       done();
     }));
 
@@ -447,10 +451,10 @@ describe('OrbitList', async(function() {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 4);
-      assert.equal(lastItem1.id, 'A');
+      assert.equal(lastItem1.id, 'B');
       assert.equal(lastItem1.seq, 0);
       assert.equal(lastItem1.ver, 1);
-      assert.equal(lastItem1.data, 'helloA2');
+      assert.equal(lastItem1.data, 'helloB2');
 
       const lastItem2 = list2.items[list2.items.length - 1];
 
@@ -486,14 +490,14 @@ describe('OrbitList', async(function() {
       assert.equal(list2.ver, 0);
       assert.equal(list2._currentBatch.length, 0);
       assert.equal(list2._items.length, 4);
-      assert.equal(secondItem.id, 'B');
+      assert.equal(secondItem.id, 'A');
       assert.equal(secondItem.seq, 0);
       assert.equal(secondItem.ver, 0);
-      assert.equal(secondItem.data, 'helloB1');
-      assert.equal(lastItem.id, 'B');
-      assert.equal(lastItem.seq, 1);
-      assert.equal(lastItem.ver, 0);
-      assert.equal(lastItem.data, 'helloB2');
+      assert.equal(secondItem.data, 'helloA1');
+      assert.equal(lastItem.id, 'A');
+      assert.equal(lastItem.seq, 0);
+      assert.equal(lastItem.ver, 1);
+      assert.equal(lastItem.data, 'helloA2');
       done();
     }));
 
@@ -523,10 +527,10 @@ describe('OrbitList', async(function() {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 8);
-      assert.equal(secondItem.id, 'B');
+      assert.equal(secondItem.id, 'A');
       assert.equal(secondItem.seq, 0);
       assert.equal(secondItem.ver, 1);
-      assert.equal(secondItem.data, 'helloB2');
+      assert.equal(secondItem.data, 'helloA2');
       assert.equal(lastItem.id, 'D');
       assert.equal(lastItem.seq, 0);
       assert.equal(lastItem.ver, 1);
@@ -574,10 +578,10 @@ describe('OrbitList', async(function() {
       assert.equal(list4.ver, 2);
       assert.equal(list4._currentBatch.length, 2);
       assert.equal(list4._items.length, 8);
-      assert.equal(secondItem.id, 'B');
+      assert.equal(secondItem.id, 'D');
       assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 0);
-      assert.equal(secondItem.data, 'helloB1');
+      assert.equal(secondItem.ver, 1);
+      assert.equal(secondItem.data, 'helloD2');
       assert.equal(lastItem1.id, 'C');
       assert.equal(lastItem1.seq, 3);
       assert.equal(lastItem1.ver, 1);

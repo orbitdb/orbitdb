@@ -179,8 +179,8 @@ describe('List', () => {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0], 'B.0.1');
-      assert.equal(list1._currentBatch[0].next[1], 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[0], 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[1], 'B.0.1');
       done();
     });
 
@@ -275,10 +275,10 @@ describe('List', () => {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 3);
-      assert.equal(firstItem.id, 'B');
+      assert.equal(firstItem.id, 'A');
       assert.equal(firstItem.seq, 0);
       assert.equal(firstItem.ver, 0);
-      assert.equal(firstItem.data, 'helloB1');
+      assert.equal(firstItem.data, 'helloA1');
       done();
     });
 
@@ -292,8 +292,6 @@ describe('List', () => {
       list1.join(list2);
       list2.join(list1);
 
-      assert.equal(list1.items.map((e) => e.compactId).join(", "), list2.items.map((e) => e.compactId).join(", "))
-
       const lastItem1 = list1.items[list1.items.length - 1];
 
       assert.equal(list1.id, 'A');
@@ -301,10 +299,10 @@ describe('List', () => {
       assert.equal(list1.ver, 0);
       assert.equal(list1._currentBatch.length, 0);
       assert.equal(list1._items.length, 4);
-      assert.equal(lastItem1.id, 'A');
+      assert.equal(lastItem1.id, 'B');
       assert.equal(lastItem1.seq, 0);
       assert.equal(lastItem1.ver, 1);
-      assert.equal(lastItem1.data, 'helloA2');
+      assert.equal(lastItem1.data, 'helloB2');
 
       const lastItem2 = list2.items[list2.items.length - 1];
 
@@ -340,14 +338,14 @@ describe('List', () => {
       assert.equal(list2.ver, 0);
       assert.equal(list2._currentBatch.length, 0);
       assert.equal(list2._items.length, 4);
-      assert.equal(secondItem.id, 'A');
-      assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 1);
-      assert.equal(secondItem.data, 'helloA2');
-      assert.equal(lastItem.id, 'B');
-      assert.equal(lastItem.seq, 1);
-      assert.equal(lastItem.ver, 0);
-      assert.equal(lastItem.data, 'helloB2');
+      assert.equal(secondItem.id, 'B');
+      assert.equal(secondItem.seq, 1);
+      assert.equal(secondItem.ver, 0);
+      assert.equal(secondItem.data, 'helloB2');
+      assert.equal(lastItem.id, 'A');
+      assert.equal(lastItem.seq, 0);
+      assert.equal(lastItem.ver, 1);
+      assert.equal(lastItem.data, 'helloA2');
       done();
     });
 
@@ -428,10 +426,10 @@ describe('List', () => {
       assert.equal(list4.ver, 2);
       assert.equal(list4._currentBatch.length, 2);
       assert.equal(list4._items.length, 8);
-      assert.equal(secondItem.id, 'B');
+      assert.equal(secondItem.id, 'D');
       assert.equal(secondItem.seq, 0);
-      assert.equal(secondItem.ver, 0);
-      assert.equal(secondItem.data, 'helloB1');
+      assert.equal(secondItem.ver, 1);
+      assert.equal(secondItem.data, 'helloD2');
       assert.equal(lastItem1.id, 'C');
       assert.equal(lastItem1.seq, 3);
       assert.equal(lastItem1.ver, 1);
@@ -493,9 +491,9 @@ describe('List', () => {
       list3.join(list1);
 
       assert.equal(list1._items.length, 19);
-      assert.equal(list1.items.map((e) => e.compactId).join(", "), "B.0.0, A.0.0, B.2.0, B.2.1, A.1.0, A.1.1, A.3.0, A.3.1, A.3.2, B.4.0, B.4.1, A.6.0, A.6.1, B.7.0, B.7.1, B.7.2, C.0.0, C.0.1, C.0.2")
-      assert.equal(list1.items.map((e) => e.compactId).join(", "), list2.items.map((e) => e.compactId).join(", "))
-      assert.equal(list1.items.map((e) => e.compactId).join(", "), list3.items.map((e) => e.compactId).join(", "))
+      assert.equal(list1.items.map((e) => e.compactId).join(", "), "A.0.0, B.0.0, A.1.0, A.1.1, B.2.0, B.2.1, A.3.0, A.3.1, A.3.2, B.4.0, B.4.1, A.6.0, A.6.1, B.7.0, B.7.1, B.7.2, C.0.0, C.0.1, C.0.2")
+      assert.equal(list2.items.map((e) => e.compactId).join(", "), "B.0.0, A.0.0, B.2.0, B.2.1, A.1.0, A.1.1, B.4.0, B.4.1, A.3.0, A.3.1, A.3.2, A.6.0, A.6.1, B.7.0, B.7.1, B.7.2, C.0.0, C.0.1, C.0.2")
+      assert.equal(list3.items.map((e) => e.compactId).join(", "), "C.0.0, C.0.1, C.0.2, B.0.0, A.0.0, B.2.0, B.2.1, A.1.0, A.1.1, B.4.0, B.4.1, A.3.0, A.3.1, A.3.2, A.6.0, A.6.1, B.7.0, B.7.1, B.7.2")
       done();
     });
 
