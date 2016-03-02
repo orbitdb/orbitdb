@@ -48,8 +48,8 @@ let run = (async(() => {
     }), process.argv[6] ? process.argv[6] : 1000);
 
   } catch(e) {
-    console.error("error:", e);
     console.error(e.stack);
+    console.log("Exiting...")
     process.exit(1);
   }
 }))();
