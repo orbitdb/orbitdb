@@ -5,3 +5,4 @@ debug.log
 .idea/
 isolate*.log
 dump.rdb
+Vagrantfile
