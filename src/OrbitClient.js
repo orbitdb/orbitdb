@@ -146,6 +146,9 @@ class OrbitDB {
   }
 
   _deleteChannel(channel, password) {
+    if(!this._ipfs)
+      throw new Error("IPFS daemon not running");
+
     this._store[channel].clear();
     return true;
   }
