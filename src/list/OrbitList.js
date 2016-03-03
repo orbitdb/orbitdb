@@ -78,8 +78,7 @@ class OrbitList extends List {
     const _createLWWSet = (f) => {
       const wasHandled = Lazy(handled).indexOf(f.payload.key) > -1;
       if(!wasHandled) handled.push(f.payload.key);
-      if(Operations.isUpdate(f.payload.op) && !wasHandled)
-        return f;
+      if(Operations.isUpdate(f.payload.op) && !wasHandled) return f;
       return null;
     };
 
