@@ -1,6 +1,5 @@
 'use strict';
 
-const _    = require('lodash');
 const Lazy = require('lazy.js');
 const Node = require('./Node');
 
