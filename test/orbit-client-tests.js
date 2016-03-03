@@ -198,7 +198,7 @@ describe('Orbit Client', function() {
         const iter = db.iterator();
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.payload.key, items2[items.length - 1]);
+        assert.equal(first.payload.key, items2[items2.length - 1]);
         assert.equal(second, null);
         assert.equal(first.payload.value, 'hello4');
         done();
