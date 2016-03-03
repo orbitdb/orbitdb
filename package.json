@@ -4,6 +4,10 @@
   "description": "Key-Value Store and Event Log on IPFS",
   "author": "Haad",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haadcode/orbit-db"
+  },
   "engines": {
     "node": "^4.x.x"
   },
