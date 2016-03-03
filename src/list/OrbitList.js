@@ -106,10 +106,6 @@ class OrbitList extends List {
     return _findFrom(list.reverse(), hash, amount, opts.lte || !opts.lt).reverse().toArray();
   }
 
-  _isReferencedInChain(all, item) {
-    return Lazy(all).reverse().find((e) => Node.hasChild(e, item)) !== undefined;
-  }
-
   _commit() {
     const current = Lazy(this._currentBatch).difference(this._items).toArray();
     this._items   = this._items.concat(current);

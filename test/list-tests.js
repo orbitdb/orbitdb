@@ -178,8 +178,8 @@ describe('List', () => {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0], 'A.0.0');
-      assert.equal(list1._currentBatch[0].next[1], 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[1], 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[0], 'B.0.1');
       done();
     });
 
@@ -252,8 +252,8 @@ describe('List', () => {
 
       const lastItem = list1.items[list1.items.length - 1];
 
-      assert.equal(lastItem.next[0], 'A.4.0');
-      assert.equal(lastItem.next[1], 'D.0.2');
+      assert.equal(lastItem.next[1], 'A.4.0');
+      assert.equal(lastItem.next[0], 'D.0.2');
       assert.equal(list1.items.length, 11);
       assert.equal(lastItem.next.length, 2);
       done();

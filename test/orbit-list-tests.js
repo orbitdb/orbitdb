@@ -69,11 +69,11 @@ describe('OrbitList', async(function() {
       list.add(text1)
 
       hash = list.ipfsHash;
-      // assert.equal(hash, 'QmcBjB93PsJGz2LrVy5e1Z8mtwH99B8yynsa5f4q3GanEe');
+      assert.equal(hash, 'Qmf1Fjq7y2s7LbH3ktZfd99knCzYwP8cAE9zFQWj7LSv9x');
 
       list.add(text2)
       hash = list.ipfsHash;
-      // assert.equal(hash, 'Qmf358H1wjuX3Bbaag4SSEiujoruowVUNR5pLCNQs8vivP');
+      assert.equal(hash, 'Qmecju6aNyQF8LHUNbUrujMmXPfUit7tDkqnmLKLF22aRk');
 
       const l = await(ipfsAPI.getObject(ipfs, hash));
       const list2 = List.fromJson(ipfs, JSON.parse(l.Data));
@@ -314,10 +314,10 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1._currentBatch.length, 1);
       assert.equal(list1._currentBatch[0].next.length, 2);
-      assert.equal(list1._currentBatch[0].next[0].compactId, 'A.0.0');
-      assert.equal(list1._currentBatch[0].next[0].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
-      assert.equal(list1._currentBatch[0].next[1].compactId, 'B.0.1');
-      assert.equal(list1._currentBatch[0].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(list1._currentBatch[0].next[1].compactId, 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[1].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
+      assert.equal(list1._currentBatch[0].next[0].compactId, 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
     }));
 
@@ -335,7 +335,7 @@ describe('OrbitList', async(function() {
       assert.equal(list1._currentBatch.length, 2);
       assert.equal(list1._currentBatch[1].next.length, 2);
       assert.equal(list1._currentBatch[1].next[0].compactId, 'A.1.0');
-      assert.equal(list1._currentBatch[1].next[0].hash, 'QmYHXzXaahAL9iChAUtVsvdncKfQf7ShEfveZnL7qvGfTT');
+      assert.equal(list1._currentBatch[1].next[0].hash, 'QmcMUW2F6wqoNtsiV2gXXTvEzXGM9xexN1mgyCLH4LXJ51');
       assert.equal(list1._currentBatch[1].next[1].compactId, 'B.0.1');
       assert.equal(list1._currentBatch[1].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
@@ -362,7 +362,7 @@ describe('OrbitList', async(function() {
       assert.equal(list1.items.length, 7);
       assert.equal(lastItem.next.length, 2);
       assert.equal(lastItem.next[0].compactId, 'A.2.0');
-      assert.equal(lastItem.next[0].hash, 'QmTB6p2opEHV9LqKCH5vBBnXxYMa9EFbVuu5pDQNsKJVEN');
+      assert.equal(lastItem.next[0].hash, 'QmTS2p5VTk5WkbtjAVC5ALk6NiYinyAWAmet2EhCBCLKmf');
       assert.equal(lastItem.next[1].compactId, 'B.0.1');
       assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       done();
@@ -399,14 +399,14 @@ describe('OrbitList', async(function() {
 
       assert.equal(list1.items.length, 11);
       assert.equal(lastItem.next.length, 4);
-      assert.equal(lastItem.next[0].compactId, 'A.4.0');
-      assert.equal(lastItem.next[0].hash, 'QmShaXLSPmoVmzNineHRmS68gE7eajDjNdjtkV1fddob7w');
-      assert.equal(lastItem.next[1].compactId, 'B.0.1');
-      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(lastItem.next[1].compactId, 'A.4.0');
+      assert.equal(lastItem.next[1].hash, 'QmXXKZDrWAFPUiCdBLJ378xJDBkjdwbVhAqovo6dwChoqx');
+      assert.equal(lastItem.next[3].compactId, 'B.0.1');
+      assert.equal(lastItem.next[3].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
       assert.equal(lastItem.next[2].compactId, 'C.0.0');
       assert.equal(lastItem.next[2].hash, 'QmTPfJRsLKPmxYrd82p16mry6vYTMoMFTH2jSbYVR8KvgD');
-      assert.equal(lastItem.next[3].compactId, 'D.0.2');
-      assert.equal(lastItem.next[3].hash, 'QmVT3DvmggXq3AdVK7JBfF4Jit3xpbgqP8dFK7TePtit4B');
+      assert.equal(lastItem.next[0].compactId, 'D.0.2');
+      assert.equal(lastItem.next[0].hash, 'QmVT3DvmggXq3AdVK7JBfF4Jit3xpbgqP8dFK7TePtit4B');
       done();
     }));
 

@@ -57,9 +57,9 @@ describe('Node', () => {
       const a = new Node('A', 0, 0);
       const b = new Node('B', 0, 0, "hello", [a]);
       const c = new Node('C', 0, 0, "hello", [a, b]);
-      assert.equal(Node.hasChild(b, a), true)
-      assert.equal(Node.hasChild(c, a), true)
-      assert.equal(Node.hasChild(c, b), true)
+      assert.equal(b.hasChild(a), true)
+      assert.equal(c.hasChild(a), true)
+      assert.equal(c.hasChild(b), true)
       done();
     });
   });

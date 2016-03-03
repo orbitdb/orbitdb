@@ -25,9 +25,10 @@ class Node {
     return a.id == b.id && a.seq == b.seq && a.ver == b.ver;
   }
 
-  static hasChild(a, b) {
-    for(let i = 0; i < a.next.length; i ++) {
-      if(b.compactId === a.next[i])
+  hasChild(a) {
+    const id = a.compactId;
+    for(let i = 0; i < this.next.length; i ++) {
+      if(this.next[i] === id)
         return true;
     }
     return false;

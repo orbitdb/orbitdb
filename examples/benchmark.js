@@ -4,6 +4,8 @@ var async       = require('asyncawait/async');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
 
+// usage: benchmark.js <host> <username> <channel>;
+
 // orbit-server
 const host = process.argv[2] ? process.argv[2] : 'localhost'
 const port = 3333;
@@ -38,8 +40,11 @@ let run = (async(() => {
       queriesPerSecond = 0;
     }, 1000);
 
+    // let timer = new Timer();
     while(true) {
+      // timer.start();
       let g = db.add(username + totalQueries);
+      // console.log(`${timer.stop(true)} ms`);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;

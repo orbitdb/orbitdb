@@ -38,15 +38,16 @@ class List {
 
   _findHeads(list) {
     return Lazy(list)
-      .groupBy((f) => f.id)
+      .reverse()
+      .indexBy((f) => f.id)
       .pairs()
-      .map((f) => Lazy(f[1]).last())
+      .map((f) => f[1])
       .filter((f) => !this._isReferencedInChain(list, f))
       .toArray();
   }
 
   _isReferencedInChain(all, item) {
-    return Lazy(all).reverse().find((e) => Node.hasChild(e, item)) !== undefined;
+    return Lazy(all).find((e) => e.hasChild(item)) !== undefined;
   }
 
   get items() {
