@@ -150,23 +150,28 @@ class OrbitDB {
     return true;
   }
 
-  _connect(host, port, username, password) {
-    this._pubsub = new PubSub(this._ipfs);
-    await(this._pubsub.connect(host, port, username, password));
+  _connect(host, port, username, password, allowOffline) {
+    if(allowOffline === undefined) allowOffline = false;
+    try {
+      this._pubsub = new PubSub(this._ipfs);
+      await(this._pubsub.connect(host, port, username, password));
+    } catch(e) {
+      if(!allowOffline) throw e;
+    }
     this.user = { username: username, id: 'TODO: user id' }
     this.network = { host: host, port: port, name: 'TODO: network name' }
   }
 }
 
 class OrbitClientFactory {
-  static connect(host, port, username, password, ipfs) {
+  static connect(host, port, username, password, allowOffline, ipfs) {
     if(!ipfs) {
       let ipfsd = await(ipfsDaemon());
       ipfs = ipfsd.ipfs;
     }
 
     const client = new OrbitDB(ipfs);
-    await(client._connect(host, port, username, password))
+    await(client._connect(host, port, username, password, allowOffline))
     return client;
   }
 }
