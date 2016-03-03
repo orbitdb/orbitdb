@@ -31,7 +31,6 @@ class OrbitNode extends Node {
     return new Promise(async((resolve, reject) => {
       await(this._getPayload());
       resolve({ hash: this.data, payload: this.Payload });
-      // resolve(this);
     }));
   }
 

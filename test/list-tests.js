@@ -26,7 +26,7 @@ describe('List', () => {
       list.add("hello1")
       list.add("hello2")
       list.add("hello3")
-      const str = JSON.stringify(list.toJson(), null, 2)
+      const str = JSON.stringify(list.asJson, null, 2)
       const res = List.fromJson(JSON.parse(str));
       assert.equal(res.id, 'A');
       assert.equal(res.seq, 0);
@@ -39,13 +39,12 @@ describe('List', () => {
     });
   });
 
-  describe('toJson', () => {
+  describe('asJson', () => {
     it('presents the list as json', (done) => {
       const list = new List('A');
       list.add("hello1")
       list.add("hello2")
       list.add("hello3")
-      const json = list.toJson();
       const expected = {
         id: 'A',
         seq: 0,
@@ -56,7 +55,7 @@ describe('List', () => {
           { id: 'A', seq: 0, ver: 2, data: 'hello3', next: ['A.0.1'] }
         ]
       };
-      assert.equal(_.isEqual(json, expected), true);
+      assert.equal(_.isEqual(list.asJson, expected), true);
       done();
     });
   });

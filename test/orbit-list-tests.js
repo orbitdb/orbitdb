@@ -148,17 +148,16 @@ describe('OrbitList', async(function() {
       done();
     }));
 
-    describe('toJson', async(() => {
+    describe('asJson', async(() => {
       it('presents the list as json', async((done) => {
-        const json = list.toJson();
-        assert.equal(JSON.stringify(json), JSON.stringify(expected));
+        assert.equal(JSON.stringify(list.asJson), JSON.stringify(expected));
         done();
       }));
     }));
 
     describe('fromJson', () => {
       it('creates a list from parsed json', async((done) => {
-        const str = JSON.stringify(list.toJson(), null, 2)
+        const str = JSON.stringify(list.asJson, null, 2)
         const res = List.fromJson(ipfs, JSON.parse(str));
 
         assert.equal(res.id, 'A');

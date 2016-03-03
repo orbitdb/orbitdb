@@ -76,7 +76,7 @@ class OrbitList extends List {
     // Last-Write-Wins set
     let handled = [];
     const _createLWWSet = (f) => {
-      const wasHandled = _.findIndex(handled, (b) => b === f.payload.key) > -1;
+      const wasHandled = Lazy(handled).indexOf(f.payload.key) > -1;
       if(!wasHandled) handled.push(f.payload.key);
       if(Operations.isUpdate(f.payload.op) && !wasHandled)
         return f;
@@ -106,15 +106,38 @@ class OrbitList extends List {
     return _findFrom(list.reverse(), hash, amount, opts.lte || opts.gte || (!opts.lt && !opts.gt)).reverse().toArray();
   }
 
+  _isReferencedInChain(all, item) {
+    return Lazy(all).reverse().find((e) => Node.hasChild(e, item)) !== undefined;
+  }
+
+  _commit() {
+    const current = Lazy(this._currentBatch).difference(this._items).toArray();
+    this._items   = this._items.concat(current);
+    this._currentBatch = [];
+    this.ver = 0;
+    this.seq ++;
+  }
+
   get ipfsHash() {
     const toIpfs = async(() => {
       return new Promise(async((resolve, reject) => {
-        var data = await(this.toJson())
+        var data = await(this.asJson)
         const list = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(data)));
         resolve(list.Hash);
       }));
     });
     return await(toIpfs());
+  }
+
+  get asJson() {
+    let items = {};
+    this._currentBatch.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
+    return {
+      id: this.id,
+      seq: this.seq,
+      ver: this.ver,
+      items: items
+    }
   }
 
   static fromIpfsHash(ipfs, hash) {
@@ -128,17 +151,6 @@ class OrbitList extends List {
     return await(fromIpfs());
   }
 
-  toJson() {
-    let items = {};
-    this._currentBatch.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
-    return {
-      id: this.id,
-      seq: this.seq,
-      ver: this.ver,
-      items: items
-    }
-  }
-
   static fromJson(ipfs, json) {
     const items = Object.keys(json.items).map((f) => Node.fromIpfsHash(ipfs, json.items[f]));
     return new OrbitList(ipfs, json.id, json.seq, json.ver, items);
@@ -146,18 +158,6 @@ class OrbitList extends List {
 
   static get batchSize() {
     return MaxBatchSize;
-  }
-
-  _isReferencedInChain(all, item) {
-    return _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
-  }
-
-  _commit() {
-    const current = _.differenceWith(this._currentBatch, this._items, this._equals);
-    this._items   = this._items.concat(current);
-    this._currentBatch = [];
-    this.ver = 0;
-    this.seq ++;
   }
 }
 

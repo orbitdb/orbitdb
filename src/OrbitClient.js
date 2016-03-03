@@ -34,15 +34,6 @@ class OrbitDB {
 
     this._store[hash] = new List(this._ipfs, this.user.username);
 
-    // const onMessage = async((hash, message) => {
-    //   // console.log("--> New head:", message)
-    //   const other = List.fromIpfsHash(this._ipfs, message);
-    //   // if(other.id !== this.user.username) {
-    //     this._store[hash].join(other);
-    //   // }
-    //   this.events.emit('data', hash, message);
-    // });
-
     const onMessage = async((hash, message) => {
       // console.log("--> Head:", message)
       if(message && this._store[hash]) {

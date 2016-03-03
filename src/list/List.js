@@ -1,30 +1,16 @@
 'use strict';
 
 const _    = require('lodash');
+const Lazy = require('lazy.js');
 const Node = require('./Node');
 
 class List {
   constructor(id, seq, ver, items) {
     this.id = id;
-    this.seq = seq ? seq : 0;
-    this.ver = ver ? ver : 0;
-    this._items = items ? items : [];
+    this.seq = seq || 0;
+    this.ver = ver || 0;
+    this._items = items || [];
     this._currentBatch = [];
-  }
-
-  clear() {
-    this._items = [];
-    this._currentBatch = [];
-    this.seq = 0;
-    this.ver = 0;
-  }
-
-  get compactId() {
-    return "" + this.id + "." + this.seq + "." + this.ver;
-  }
-
-  get items() {
-    return this._items.concat(this._currentBatch);
   }
 
   add(data) {
@@ -37,30 +23,47 @@ class List {
   join(other) {
     this.seq = (other.seq && other.seq > this.seq ? other.seq : this.seq) + 1;
     this.ver = 0;
-    const current = _.differenceWith(this._currentBatch, this._items, Node.equals);
-    const others  = _.differenceWith(other.items, this._items, Node.equals);
-    const final   = _.unionWith(current, others, Node.equals);
-    this._items   = this._items.concat(final);
+    const current = Lazy(this._currentBatch).difference(this._items);
+    const others  = Lazy(other.items).difference(this._items);
+    const final   = current.union(others);
+    this._items   = Lazy(this._items).concat(final).toArray();
     this._currentBatch = [];
   }
 
+  clear() {
+    this._items = [];
+    this._currentBatch = [];
+    this.seq = 0;
+    this.ver = 0;
+  }
+
   _findHeads(list) {
-    const grouped = _.groupBy(list, 'id');
-    const heads   = Object.keys(grouped).map((g) => _.last(grouped[g]));
-    const cleaned = heads.filter((e) => !this._isReferencedInChain(list, e));
-    return cleaned;
+    return Lazy(list)
+      .groupBy((f) => f.id)
+      .pairs()
+      .map((f) => Lazy(f[1]).last())
+      .filter((f) => !this._isReferencedInChain(list, f))
+      .toArray();
   }
 
   _isReferencedInChain(all, item) {
-    return _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
+    return Lazy(all).reverse().find((e) => Node.hasChild(e, item)) !== undefined;
   }
 
-  toJson() {
+  get items() {
+    return this._items.concat(this._currentBatch);
+  }
+
+  get compactId() {
+    return "" + this.id + "." + this.seq + "." + this.ver;
+  }
+
+  get asJson() {
     return {
       id: this.id,
       seq: this.seq,
       ver: this.ver,
-      items: this._currentBatch.map((f) => f.toJson())
+      items: this._currentBatch.map((f) => f.asJson)
     }
   }
 
@@ -68,7 +71,10 @@ class List {
     let list = new List(json.id);
     list.seq = json.seq;
     list.ver = json.ver;
-    list._items = _.uniqWith(json.items.map((f) => new Node(f.id, f.seq, f.ver, f.data, f.next)), _.isEqual);
+    list._items = Lazy(json.items)
+      .map((f) => new Node(f.id, f.seq, f.ver, f.data, f.next))
+      .unique()
+      .toArray();
     return list;
   }
 }
