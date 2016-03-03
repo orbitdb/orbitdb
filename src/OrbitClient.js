@@ -3,8 +3,6 @@
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
-const Keystore     = require('orbit-common/lib/Keystore');
-const Encryption   = require('orbit-common/lib/Encryption');
 const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
 const Operations   = require('./list/Operations');
@@ -14,9 +12,6 @@ const ItemTypes    = require('./db/ItemTypes');
 const MetaInfo     = require('./db/MetaInfo');
 const Post         = require('./db/Post');
 const PubSub       = require('./PubSub');
-
-const pubkey  = Keystore.getKeys().publicKey;
-const privkey = Keystore.getKeys().privateKey;
 
 class OrbitDB {
   constructor(ipfs, daemon) {
