@@ -12,14 +12,13 @@ const Node       = require('../src/list/OrbitNode');
 const startIpfs = async (() => {
   return new Promise(async((resolve, reject) => {
     const ipfsd  = await(ipfsDaemon());
-    resolve(ipfsd.daemon);
+    resolve(ipfsd.ipfs);
   }));
 });
 
 let ipfs;
 
 describe('OrbitList', async(function() {
-  this.timeout(5000);
 
   before(async((done) => {
     ipfs = await(startIpfs());
@@ -28,7 +27,7 @@ describe('OrbitList', async(function() {
 
   describe('Constructor', async(() => {
     it('initializes member variables', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       assert.equal(list.id, 'A');
       assert.equal(list.seq, 0);
       assert.equal(list.ver, 0);
@@ -44,10 +43,10 @@ describe('OrbitList', async(function() {
 
   describe('add', async(() => {
     it('saves the data to ipfs', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       const text = 'testing 1 2 3 4';
       list.add(text)
-      const hash = await(list.getIpfsHash());
+      const hash = list.ipfsHash;
 
       const l = await(ipfsAPI.getObject(ipfs, hash));
       const list2 = List.fromJson(ipfs, JSON.parse(l.Data));
@@ -62,18 +61,18 @@ describe('OrbitList', async(function() {
     }));
 
     it('updates the data to ipfs', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       const text1 = 'testing 1 2 3';
       const text2 = 'testing 456';
       let hash;
 
       list.add(text1)
 
-      hash = await(list.getIpfsHash());
+      hash = list.ipfsHash;
       // assert.equal(hash, 'QmcBjB93PsJGz2LrVy5e1Z8mtwH99B8yynsa5f4q3GanEe');
 
       list.add(text2)
-      hash = await(list.getIpfsHash());
+      hash = list.ipfsHash;
       // assert.equal(hash, 'Qmf358H1wjuX3Bbaag4SSEiujoruowVUNR5pLCNQs8vivP');
 
       const l = await(ipfsAPI.getObject(ipfs, hash));
@@ -85,17 +84,17 @@ describe('OrbitList', async(function() {
     }));
   }));
 
-  describe('getIpfsHash', async(() => {
+  describe('ipfsHash', async(() => {
     it('returns the list as ipfs hash', async((done) => {
-      const list = new List('A', ipfs);
-      const hash = await(list.getIpfsHash());
+      const list = new List(ipfs, 'A');
+      const hash = list.ipfsHash;
       assert.equal(hash.startsWith('Qm'), true);
       done();
     }));
 
     it('saves the list to ipfs', async((done) => {
-      const list = new List('A', ipfs);
-      const hash = await(list.getIpfsHash());
+      const list = new List(ipfs, 'A');
+      const hash = list.ipfsHash;
       const l = await(ipfsAPI.getObject(ipfs, hash));
       assert.equal(l.toString(), ({ Links: [], Data: '{"id":"A","seq":0,"ver":0,"items":[]}' }).toString());
       done();
@@ -104,12 +103,12 @@ describe('OrbitList', async(function() {
 
   describe('fromIpfsHash', () => {
     it('creates a list from ipfs hash', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       list.add("hello1")
       list.add("hello2")
       list.add("hello3")
-      const hash = await(list.getIpfsHash());
-      const res = await(List.fromIpfsHash(ipfs, hash));
+      const hash = list.ipfsHash;
+      const res = List.fromIpfsHash(ipfs, hash);
 
       assert.equal(res.id, 'A');
       assert.equal(res.seq, 0);
@@ -142,7 +141,7 @@ describe('OrbitList', async(function() {
     };
 
     before(async((done) => {
-      list = new List('A', ipfs);
+      list = new List(ipfs, 'A');
       list.add("hello1")
       list.add("hello2")
       list.add("hello3")
@@ -177,7 +176,7 @@ describe('OrbitList', async(function() {
 
   describe('items', () => {
     it('returns items', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       let items = list.items;
       assert.equal(list.items instanceof Array, true);
       assert.equal(list.items.length, 0);
@@ -193,7 +192,7 @@ describe('OrbitList', async(function() {
 
   describe('add', () => {
     it('adds an item to an empty list', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       list.add("hello1")
       const item = list.items[0];
       assert.equal(list.id, 'A');
@@ -211,7 +210,7 @@ describe('OrbitList', async(function() {
     }));
 
     it('adds 100 items to a list', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
       const amount = 100;
 
       for(let i = 1; i <= amount; i ++) {
@@ -230,7 +229,7 @@ describe('OrbitList', async(function() {
     }));
 
     it('commits a list after batch size was reached', async((done) => {
-      const list = new List('A', ipfs);
+      const list = new List(ipfs, 'A');
 
       for(let i = 1; i <= List.batchSize; i ++) {
         list.add("hello" + i);
@@ -256,8 +255,8 @@ describe('OrbitList', async(function() {
 
   describe('join', () => {
     it('increases the sequence and resets the version if other list has the same or higher sequence', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
 
       list2.seq = 7;
       list1.add("helloA1")
@@ -276,8 +275,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('increases the sequence by one if other list has lower sequence', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.seq = 4;
       list2.seq = 1;
       list2.add("helloB1")
@@ -289,7 +288,7 @@ describe('OrbitList', async(function() {
     }));
 
     it('finds the next head when adding a new element', async((done) => {
-      const list1 = new List('A', ipfs);
+      const list1 = new List(ipfs, 'A');
       list1.add("helloA1")
       list1.add("helloA2")
       list1.add("helloA3")
@@ -306,8 +305,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('finds the next heads (two) after a join', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.add("helloA1")
       list2.add("helloB1")
       list2.add("helloB2")
@@ -324,8 +323,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('finds the next head (one) after a join', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.add("helloA1")
       list2.add("helloB1")
       list2.add("helloB2")
@@ -344,8 +343,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('finds the next heads after two joins', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.add("helloA1")
       list1.add("helloA2")
       list2.add("helloB1")
@@ -371,10 +370,10 @@ describe('OrbitList', async(function() {
     }));
 
     it('finds the next heads after multiple joins', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
-      const list3 = new List('C', ipfs);
-      const list4 = new List('D', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      const list3 = new List(ipfs, 'C');
+      const list4 = new List(ipfs, 'D');
       list1.add("helloA1")
       list1.add("helloA2")
       list2.add("helloB1")
@@ -413,8 +412,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('joins list of one item with list of two items', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.add("helloA1")
       list2.add("helloB1")
       list2.add("helloB2")
@@ -435,8 +434,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('joins lists two ways', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
       list1.add("helloA1")
       list1.add("helloA2")
       list2.add("helloB1")
@@ -471,8 +470,8 @@ describe('OrbitList', async(function() {
     }));
 
     it('joins lists twice', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
 
       list1.add("helloA1")
       list2.add("helloB1")
@@ -502,10 +501,10 @@ describe('OrbitList', async(function() {
     }));
 
     it('joins 4 lists to one', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
-      const list3 = new List('C', ipfs);
-      const list4 = new List('D', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      const list3 = new List(ipfs, 'C');
+      const list4 = new List(ipfs, 'D');
 
       list1.add("helloA1")
       list2.add("helloB1")
@@ -539,10 +538,10 @@ describe('OrbitList', async(function() {
     }));
 
     it('joins lists from 4 lists', async((done) => {
-      const list1 = new List('A', ipfs);
-      const list2 = new List('B', ipfs);
-      const list3 = new List('C', ipfs);
-      const list4 = new List('D', ipfs);
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      const list3 = new List(ipfs, 'C');
+      const list4 = new List(ipfs, 'D');
 
       list1.add("helloA1")
       list1.join(list2);
@@ -590,6 +589,23 @@ describe('OrbitList', async(function() {
       assert.equal(lastItem2.seq, 7);
       assert.equal(lastItem2.ver, 1);
       assert.equal(lastItem2.data, 'helloD4');
+      done();
+    }));
+
+    it('joins itself', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list1.add("helloA3")
+      list1.join(list1);
+
+      assert.equal(list1.id, 'A');
+      assert.equal(list1.seq, 1);
+      assert.equal(list1.ver, 0);
+      assert.equal(list1.items.length, 3);
+      assert.equal(list1.items[0].ver, 0);
+      assert.equal(list1.items[1].ver, 1);
+      assert.equal(list1.items[2].ver, 2);
       done();
     }));
   });

@@ -1,21 +1,22 @@
 'use strict';
 
-const _        = require('lodash');
-const async    = require('asyncawait/async');
-const await    = require('asyncawait/await');
-const ipfsAPI  = require('orbit-common/lib/ipfs-api-promised');
-const List     = require('./List');
-const Node     = require('./OrbitNode');
+const _          = require('lodash');
+const Lazy       = require('lazy.js');
+const async      = require('asyncawait/async');
+const await      = require('asyncawait/await');
+const ipfsAPI    = require('orbit-common/lib/ipfs-api-promised');
+const List       = require('./List');
+const Node       = require('./OrbitNode');
+const Operations = require('./Operations');
 
-const MaxBatchSize = 10; // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
-const MaxHistory   = 32; // How many items to fetch in the chain per join
+const MaxBatchSize = 10;   // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
+const MaxHistory   = 1000; // How many items to fetch in the chain per join
 
+// class IPFSLWWSet extends LWWSet {
 class OrbitList extends List {
-  constructor(id, ipfs) {
-    super(id);
+  constructor(ipfs, id, seq, ver, items) {
+    super(id, seq, ver, items);
     this._ipfs = ipfs;
-    this.hash = null;
-    this.next = null;
   }
 
   add(data) {
@@ -45,7 +46,7 @@ class OrbitList extends List {
         all.push(hash);
         const item = Node.fromIpfsHash(this._ipfs, hash);
         res.push(item);
-        item.heads.map((head) => fetchRecursive(head, amount - 1, all, res));
+        item.heads.map((head) => fetchRecursive(head, amount, all, res));
       }
 
       return res;
@@ -63,29 +64,68 @@ class OrbitList extends List {
       const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
       this._items.splice(idx, 0, item)
     });
-
-    // console.log("--> Fetched", MaxHistory, "items from the history\n");
+    // console.log("--> Fetched", res.length, "items from the history\n");
   }
 
-  clear() {
-    this._items = [];
-    this._currentBatch = [];
+  // The LWW-set query interface
+  findAll(opts) {
+    let list     = Lazy(this.items);
+    const hash   = (opts.gt ? opts.gt : (opts.gte ? opts.gte : (opts.lt ? opts.lt : opts.lte)));
+    const amount = opts.amount ? (opts.amount && opts.amount > -1 ? opts.amount : this.items.length) : 1;
+
+    // Last-Write-Wins set
+    let handled = [];
+    const _createLWWSet = (f) => {
+      const wasHandled = _.findIndex(handled, (b) => b === f.payload.key) > -1;
+      if(!wasHandled) handled.push(f.payload.key);
+      if(Operations.isUpdate(f.payload.op) && !wasHandled)
+        return f;
+      return null;
+    };
+
+    // Find an item from the lazy sequence (list)
+    const _findFrom = (sequence, key, amount, inclusive) => {
+      return sequence
+        .map((f) => await(f.fetchPayload())) // IO - fetch the actual OP from ipfs. consider merging with LL.
+        .skipWhile((f) => key && f.payload.key !== key) // Drop elements until we have the first one requested
+        .drop(!inclusive ? 1 : 0) // Drop the 'gt/lt' item, include 'gte/lte' item
+        .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
+        .filter((f) => f !== null) // Make sure we don't have empty ones
+        .take(amount)
+    };
+
+    // Key-Value
+    if(opts.key)
+      return _findFrom(list.reverse(), opts.key, 1, true).toArray();
+
+    // Greater than case
+    if(opts.gt || opts.gte)
+      return _findFrom(list, hash, amount, opts.gte || opts.lte).toArray();
+
+    // Lower than and lastN case, search latest first by reversing the sequence
+    return _findFrom(list.reverse(), hash, amount, opts.lte || opts.gte || (!opts.lt && !opts.gt)).reverse().toArray();
   }
 
-  getIpfsHash() {
-    return new Promise(async((resolve, reject) => {
-      var data = await(this.toJson())
-      const list = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(data)));
-      resolve(list.Hash);
-    }));
+  get ipfsHash() {
+    const toIpfs = async(() => {
+      return new Promise(async((resolve, reject) => {
+        var data = await(this.toJson())
+        const list = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(data)));
+        resolve(list.Hash);
+      }));
+    });
+    return await(toIpfs());
   }
 
   static fromIpfsHash(ipfs, hash) {
-    return new Promise(async((resolve, reject) => {
-      const l = await(ipfsAPI.getObject(ipfs, hash));
-      const list = OrbitList.fromJson(ipfs, JSON.parse(l.Data));
-      resolve(list);
-    }));
+    const fromIpfs = async(() => {
+      return new Promise(async((resolve, reject) => {
+        const l = await(ipfsAPI.getObject(ipfs, hash));
+        const list = OrbitList.fromJson(ipfs, JSON.parse(l.Data));
+        resolve(list);
+      }));
+    });
+    return await(fromIpfs());
   }
 
   toJson() {
@@ -100,11 +140,8 @@ class OrbitList extends List {
   }
 
   static fromJson(ipfs, json) {
-    const items = Object.keys(json.items).map((f) => {
-      const hash = json.items[f];
-      return Node.fromIpfsHash(ipfs, hash);
-    });
-    return new List(json.id, json.seq, json.ver, items);
+    const items = Object.keys(json.items).map((f) => Node.fromIpfsHash(ipfs, json.items[f]));
+    return new OrbitList(ipfs, json.id, json.seq, json.ver, items);
   }
 
   static get batchSize() {
@@ -112,8 +149,7 @@ class OrbitList extends List {
   }
 
   _isReferencedInChain(all, item) {
-    const isReferenced = _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
-    return isReferenced;
+    return _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
   }
 
   _commit() {

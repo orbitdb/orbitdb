@@ -12,6 +12,13 @@ class List {
     this._currentBatch = [];
   }
 
+  clear() {
+    this._items = [];
+    this._currentBatch = [];
+    this.seq = 0;
+    this.ver = 0;
+  }
+
   get compactId() {
     return "" + this.id + "." + this.seq + "." + this.ver;
   }
@@ -45,8 +52,7 @@ class List {
   }
 
   _isReferencedInChain(all, item) {
-    const isReferenced = _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
-    return isReferenced;
+    return _.findLast(all, (e) => Node.hasChild(e, item)) !== undefined;
   }
 
   toJson() {

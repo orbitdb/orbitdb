@@ -1,48 +1,59 @@
 'use strict';
 
+const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
 const Keystore     = require('orbit-common/lib/Keystore');
 const Encryption   = require('orbit-common/lib/Encryption');
 const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
-const OrbitDBItem  = require('./HashCacheItem').OrbitDBItem;
-const HashCacheOps = require('./HashCacheOps');
-const ItemTypes    = require('./ItemTypes');
-const MetaInfo     = require('./MetaInfo');
-const Post         = require('./Post');
-const PubSub       = require('./PubSub');
+const Operations   = require('./list/Operations');
 const List         = require('./list/OrbitList');
-const DataStore    = require('./DataStore');
+const OrbitDBItem  = require('./db/OrbitDBItem');
+const ItemTypes    = require('./db/ItemTypes');
+const MetaInfo     = require('./db/MetaInfo');
+const Post         = require('./db/Post');
+const PubSub       = require('./PubSub');
 
 const pubkey  = Keystore.getKeys().publicKey;
 const privkey = Keystore.getKeys().privateKey;
 
-class OrbitClient {
-  constructor(ipfs) {
+class OrbitDB {
+  constructor(ipfs, daemon) {
     this._ipfs = ipfs;
+    this._store = {};
+    this._pubsub = null;
     this.user = null;
+    this.network = null;
+    this.events = new EventEmitter();
   }
 
-  channel(hash, password) {
+  channel(hash, password, subscribe) {
     if(password === undefined) password = '';
+    if(subscribe === undefined) subscribe = true;
+
+    this._store[hash] = new List(this._ipfs, this.user.username);
+
+    // const onMessage = async((hash, message) => {
+    //   // console.log("--> New head:", message)
+    //   const other = List.fromIpfsHash(this._ipfs, message);
+    //   // if(other.id !== this.user.username) {
+    //     this._store[hash].join(other);
+    //   // }
+    //   this.events.emit('data', hash, message);
+    // });
 
     const onMessage = async((hash, message) => {
-      const other = await(List.fromIpfsHash(this._ipfs, message));
-      if(other.id !== this.user.username) {
-        this._store.join(other);
+      // console.log("--> Head:", message)
+      if(message && this._store[hash]) {
+        const other = List.fromIpfsHash(this._ipfs, message);
+        this._store[hash].join(other);
       }
+      this.events.emit('data', hash, message);
     });
 
-    const onLatest = async((hash, message) => {
-      console.log("--> Received latest list:", message)
-      if(message) {
-        const other = await(List.fromIpfsHash(this._ipfs, message));
-        this._store.join(other);
-      }
-    });
-
-    this._pubsub.subscribe(hash, password, onMessage, onLatest);
+    if(subscribe)
+      this._pubsub.subscribe(hash, password, onMessage, onMessage);
 
     return {
       iterator: (options) => this._iterator(hash, password, options),
@@ -57,6 +68,13 @@ class OrbitClient {
       //TODO: tests
       leave: () => this._pubsub.unsubscribe(hash)
     }
+  }
+
+  disconnect() {
+    this._pubsub.disconnect();
+    this._store = {};
+    this.user = null;
+    this.network = null;
   }
 
   _iterator(channel, password, options) {
@@ -81,38 +99,10 @@ class OrbitClient {
   }
 
   _getMessages(channel, password, options) {
-    let messages = [];
-
-    if(!options) options = {};
-
-    // Options
-    let limit     = options.limit ? options.limit : 1;
-    const gt      = options.gt ? options.gt : null;
-    const gte     = options.gte ? options.gte : null;
-    const lt      = options.lt ? options.lt : null;
-    const lte     = options.lte ? options.lte : null;
-    const reverse = options.reverse ? options.reverse : false;
-    const key     = options.key ? options.key : null;
-
-    if((gt || lt) && limit > -1) limit += 1;
-
-    const opts = {
-      amount: limit,
-      first: lte ? lte : lt,
-      last: gte ? gte : gt,
-      key: key
-    };
-
-    // Get messages
-    messages = await(this._store.get(opts));
-
-    // Remove the first/last item if greater/lesser than is set
-    let startIndex = lt ? 1 : 0;
-    let endIndex   = gt ? messages.length - 1 : messages.length;
-    messages = messages.slice(startIndex, endIndex)
-
-    if(!reverse) messages.reverse();
-
+    let opts = options || {};
+    Object.assign(opts, { amount: opts.limit || 1 });
+    let messages = await(this._store[channel].findAll(opts));
+    if(opts.reverse) messages.reverse();
     return messages;
   }
 
@@ -137,45 +127,43 @@ class OrbitClient {
   _add(channel, password, data) {
     const post = await(this._publish(data));
     const key = post.Hash;
-    return await(this._createOperation(channel, password, HashCacheOps.Add, key, post.Hash, data));
+    return await(this._createOperation(channel, password, Operations.Add, key, post.Hash, data));
   }
 
   _put(channel, password, key, data) {
     const post = await(this._publish(data));
-    return await(this._createOperation(channel, password, HashCacheOps.Put, key, post.Hash));
+    return await(this._createOperation(channel, password, Operations.Put, key, post.Hash));
   }
 
   _remove(channel, password, hash) {
-    return await(this._createOperation(channel, password, HashCacheOps.Delete, hash, null));
+    return await(this._createOperation(channel, password, Operations.Delete, hash, null));
   }
 
   _createOperation(channel, password, operation, key, value, data) {
-    var create = async(() => {
+    var createOperation = async(() => {
       return new Promise(async((resolve, reject) => {
         const hash = this._createMessage(channel, password, operation, key, value);
-        const res = await(this._store.add(hash));
-        const listHash = await(this._store.list.getIpfsHash());
+        const res = await(this._store[channel].add(hash));
+        const listHash = await(this._store[channel].ipfsHash);
         await(this._pubsub.publish(channel, listHash));
         resolve();
       }));
     })
-    await(create());
+    await(createOperation());
     return key;
     // return res;
   }
 
   _deleteChannel(channel, password) {
-    this._store.clear();
+    this._store[channel].clear();
     return true;
   }
 
   _connect(host, port, username, password) {
-    return new Promise((resolve, reject) => {
-      this.user = { username: username, id: 'hello-todo' }
-      this._pubsub = new PubSub(this._ipfs, host, port, username, password);
-      this._store  = new DataStore(username, this._ipfs);
-      resolve();
-    });
+    this._pubsub = new PubSub(this._ipfs);
+    await(this._pubsub.connect(host, port, username, password));
+    this.user = { username: username, id: 'TODO: user id' }
+    this.network = { host: host, port: port, name: 'TODO: network name' }
   }
 }
 
@@ -183,10 +171,10 @@ class OrbitClientFactory {
   static connect(host, port, username, password, ipfs) {
     if(!ipfs) {
       let ipfsd = await(ipfsDaemon());
-      ipfs = ipfsd.daemon;
+      ipfs = ipfsd.ipfs;
     }
 
-    const client = new OrbitClient(ipfs);
+    const client = new OrbitDB(ipfs);
     await(client._connect(host, port, username, password))
     return client;
   }

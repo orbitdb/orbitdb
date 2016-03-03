@@ -64,8 +64,4 @@ class EncryptedHashCacheItem extends HashCacheItem {
   }
 }
 */
-module.exports = {
-  OrbitDBItem: OrbitDBItem,
-  // HashCacheItem: HashCacheItem,
-  // EncryptedHashCacheItem: EncryptedHashCacheItem
-};
+module.exports = OrbitDBItem;

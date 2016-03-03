@@ -11,7 +11,7 @@ const Node       = require('../src/list/OrbitNode');
 const startIpfs = async (() => {
   return new Promise(async((resolve, reject) => {
     const ipfsd  = await(ipfsDaemon());
-    resolve(ipfsd.daemon);
+    resolve(ipfsd.ipfs);
   }));
 });
 
