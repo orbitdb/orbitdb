@@ -103,7 +103,7 @@ class OrbitList extends List {
       return _findFrom(list, hash, amount, opts.gte || opts.lte).toArray();
 
     // Lower than and lastN case, search latest first by reversing the sequence
-    return _findFrom(list.reverse(), hash, amount, opts.lte || opts.gte || (!opts.lt && !opts.gt)).reverse().toArray();
+    return _findFrom(list.reverse(), hash, amount, opts.lte || !opts.lt).reverse().toArray();
   }
 
   _isReferencedInChain(all, item) {
