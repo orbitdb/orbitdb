@@ -13,7 +13,7 @@ const username = 'testrunner';
 const password = '';
 
 describe('Orbit Client', function() {
-  this.timeout(3000);
+  this.timeout(5000);
 
   let client, db;
   let items = [];

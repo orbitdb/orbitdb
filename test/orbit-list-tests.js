@@ -19,6 +19,7 @@ const startIpfs = async (() => {
 let ipfs;
 
 describe('OrbitList', async(function() {
+  this.timeout(5000);
 
   before(async((done) => {
     ipfs = await(startIpfs());
