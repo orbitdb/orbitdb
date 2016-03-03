@@ -5,7 +5,7 @@ const await       = require('asyncawait/await');
 const OrbitClient = require('../src/OrbitClient');
 const Timer       = require('./Timer');
 
-// usage: reader.js <host> <username> <channel> <text> <interval>
+// usage: reader.js <host> <username> <channel> <data> <interval in ms>
 
 // orbit-server
 const host = process.argv[2] ? process.argv[2] : 'localhost'

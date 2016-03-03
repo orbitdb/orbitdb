@@ -21,13 +21,18 @@ npm install
 
 Key-Value store example:
 ```
-node examples/keyvalue.js <channel> <username> <key> <value>
-node examples/keyvalueReader.js <channel> <username> <key>
+node examples/keyvalue.js <host> <username> <channel> <key> <value>
+node examples/keyvalueReader.js <host> <username> <channel> <key>
 ```
 
 Event log example (run several in separate shells):
 ```
-node examples/reader.js <channel> <username> <data> <interval in ms>
+node examples/reader.js <host> <username> <channel> <data> <interval in ms>
+```
+
+Benchmark writes:
+```
+node examples/benchmark.js <host> <username> <channel>;
 ```
 
 ## API
