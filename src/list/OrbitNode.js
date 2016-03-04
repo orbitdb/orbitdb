@@ -64,17 +64,6 @@ class OrbitNode extends Node {
     });
     return await(createNode());
   }
-
-  static hasChild(a, b) {
-    for(let i = 0; i < a.next.length; i ++) {
-      if(typeof a.next[i] instanceof OrbitNode && b.compactId === a.next[i].compactId)
-        return true;
-
-      if(b.compactId === a.next[i])
-        return true;
-    }
-    return false;
-  }
 }
 
 module.exports = OrbitNode;
