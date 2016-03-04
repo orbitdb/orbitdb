@@ -24,7 +24,7 @@ let run = (async(() => {
 
     while(true) {
       const key = process.argv[5] ? process.argv[5] : 'greeting';
-      const value = process.argv[6] ? process.argv65] : 'Hello world';
+      const value = process.argv[6] ? process.argv[6] : 'Hello world';
       const timer = new Timer(true);
       db.put(key, value + " " + count);
       const result = db.get(key);
