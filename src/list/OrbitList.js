@@ -79,14 +79,14 @@ class OrbitList extends List {
       .reverse() // Start from the latest item
       .map((f) => f.heads).flatten() // Go through all heads
       .filter((f) => !(f instanceof Node === true)) // OrbitNode vs. {}, filter out instances (we already have them in mem)
-      .map((f) => this._fetchRecursive(f, MaxHistory, allHashes)).flatten() // IO - get the data from IPFS
+      .map((f) => this._fetchRecursive(f, allHashes)).flatten() // IO - get the data from IPFS
       .map((f) => this._insert(f)) // Insert to the list
       .take(MaxHistory) // How many items from the history we should fetch
       .toArray();
     // console.log("--> Fetched", res.length, "items from the history\n");
   }
 
-  _fetchRecursive(hash, amount, all) {
+  _fetchRecursive(hash, all) {
     const isReferenced = (list, item) => Lazy(list).find((f) => f === item) !== undefined;
     let result = [];
     if(!isReferenced(all, hash)) {
@@ -94,7 +94,7 @@ class OrbitList extends List {
       const item = await(Node.fromIpfsHash(this._ipfs, hash)); // IO - get from IPFS
       result.push(item);
       result = result.concat(Lazy(item.heads)
-        .map((f) => this._fetchRecursive(f, amount, all))
+        .map((f) => this._fetchRecursive(f, all))
         .flatten()
         .toArray());
     }
