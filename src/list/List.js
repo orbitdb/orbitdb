@@ -12,8 +12,9 @@ class List {
     this._currentBatch = [];
   }
 
+  /* Methods */
   add(data) {
-    const heads = this._findHeads(this.items);
+    const heads = List.findHeads(this.items);
     const node  = new Node(this.id, this.seq, this.ver, data, heads);
     this._currentBatch.push(node);
     this.ver ++;
@@ -36,20 +37,16 @@ class List {
     this.ver = 0;
   }
 
-  _findHeads(list) {
-    return Lazy(list)
-      .reverse()
-      .indexBy((f) => f.id)
-      .pairs()
-      .map((f) => f[1])
-      .filter((f) => !this._isReferencedInChain(list, f))
-      .toArray();
+  /* Private methods */
+  _commit() {
+    const current = Lazy(this._currentBatch).difference(this._items).toArray();
+    this._items   = this._items.concat(current);
+    this._currentBatch = [];
+    this.ver = 0;
+    this.seq ++;
   }
 
-  _isReferencedInChain(all, item) {
-    return Lazy(all).find((e) => e.hasChild(item)) !== undefined;
-  }
-
+  /* Properties */
   get items() {
     return this._items.concat(this._currentBatch);
   }
@@ -67,6 +64,7 @@ class List {
     }
   }
 
+  /* Static methods */
   static fromJson(json) {
     let list = new List(json.id);
     list.seq = json.seq;
@@ -76,6 +74,20 @@ class List {
       .unique()
       .toArray();
     return list;
+  }
+
+  static findHeads(list) {
+    return Lazy(list)
+      .reverse()
+      .indexBy((f) => f.id)
+      .pairs()
+      .map((f) => f[1])
+      .filter((f) => !List.isReferencedInChain(list, f))
+      .toArray();
+  }
+
+  static isReferencedInChain(all, item) {
+    return Lazy(all).find((e) => e.hasChild(item)) !== undefined;
   }
 }
 
