@@ -25,7 +25,6 @@ class OrbitList extends List {
 
     const heads = List.findHeads(this.items);
     const node  = new Node(this._ipfs, this.id, this.seq, this.ver, data, heads);
-    // node._commit(); // TODO: obsolete?
     this._currentBatch.push(node);
     this.ver ++;
   }
@@ -36,7 +35,7 @@ class OrbitList extends List {
   }
 
   // The LWW-set query interface
-  findAll(opts) {
+  find(opts) {
     let list     = Lazy(this.items);
     const hash   = (opts.gt ? opts.gt : (opts.gte ? opts.gte : (opts.lt ? opts.lt : opts.lte)));
     const amount = opts.amount ? (opts.amount && opts.amount > -1 ? opts.amount : this.items.length) : 1;
@@ -77,7 +76,7 @@ class OrbitList extends List {
   _fetchHistory(items) {
     let allHashes = this._items.map((a) => a.hash);
     const res = Lazy(items)
-      .reverse()
+      .reverse() // Start from the latest item
       .map((f) => f.heads).flatten() // Go through all heads
       .filter((f) => !(f instanceof Node === true)) // OrbitNode vs. {}, filter out instances (we already have them in mem)
       .map((f) => this._fetchRecursive(f, MaxHistory, allHashes)).flatten() // IO - get the data from IPFS
@@ -92,7 +91,7 @@ class OrbitList extends List {
     let result = [];
     if(!isReferenced(all, hash)) {
       all.push(hash);
-      const item = await(Node.fromIpfsHash(this._ipfs, hash));
+      const item = await(Node.fromIpfsHash(this._ipfs, hash)); // IO - get from IPFS
       result.push(item);
       result = result.concat(Lazy(item.heads)
         .map((f) => this._fetchRecursive(f, amount, all))
