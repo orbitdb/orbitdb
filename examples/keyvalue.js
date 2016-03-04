@@ -40,7 +40,6 @@ let run = (async(() => {
     }
 
   } catch(e) {
-    console.error("error:", e);
     console.error(e.stack);
     process.exit(1);
   }
