@@ -76,8 +76,7 @@ describe('OrbitList', async(function() {
       hash = list.ipfsHash;
       assert.equal(hash, 'Qmecju6aNyQF8LHUNbUrujMmXPfUit7tDkqnmLKLF22aRk');
 
-      const l = await(ipfsAPI.getObject(ipfs, hash));
-      const list2 = List.fromJson(ipfs, JSON.parse(l.Data));
+      const list2 = List.fromIpfsHash(ipfs, hash);
       assert.equal(list2.items[0].data, text1);
       assert.equal(list2.items[1].data, text2);
 
@@ -608,6 +607,75 @@ describe('OrbitList', async(function() {
       assert.equal(list1.items[2].ver, 2);
       done();
     }));
+
+    it('fetches items from history', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'AAA');
+
+      const count = 10;
+      for(let i = 1; i < count + 1; i ++) {
+        list1.add("first " + i);
+        list2.add("second " + i);
+      }
+
+      const hash1 = list1.ipfsHash;
+      const hash2 = list2.ipfsHash;
+      assert.equal(hash1, 'QmaoGci9eiSYdANo63JAkvUpnyXe2uQH1BkwAiKsJHNUWp');
+      assert.equal(hash2, 'QmTXu5g5BzZW3vMBKaXnerZTGXf5XPRFB6y3DXNEmcWWtU');
+
+      const final = new List(ipfs, 'B');
+      const other1 = List.fromIpfsHash(ipfs, hash1);
+      const other2 = List.fromIpfsHash(ipfs, hash2);
+      final.join(other1);
+
+      assert.equal(final.items.length, count);
+      assert.equal(final.items[0].data, "first 1");
+      assert.equal(final.items[final.items.length - 1].data, "first 10");
+
+      final.join(other2);
+      assert.equal(final.items.length, count * 2);
+      assert.equal(final.items[0].data, "first 1");
+      assert.equal(final.items[final.items.length - 1].data, "second 10");
+      done();
+    }));
+
+    it('orders fetched items correctly', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'AAA');
+
+      const count = List.batchSize * 3;
+      for(let i = 1; i < (count * 2) + 1; i ++)
+        list1.add("first " + i);
+
+      const hash1 = list1.ipfsHash;
+      assert.equal(hash1, 'QmaJ2a1AxPBhKcis1HLRnc1UNixSmwd9XBNJzxdnqQSyYa');
+
+      const final = new List(ipfs, 'B');
+      const other1 = List.fromIpfsHash(ipfs, hash1);
+      final.join(other1);
+
+      assert.equal(final.items[0].data, "first 1");
+      assert.equal(final.items[final.items.length - 1].data, "first " + count * 2);
+      assert.equal(final.items.length, count * 2);
+
+      // Second batch
+      for(let i = 1; i < count + 1; i ++)
+        list2.add("second " + i);
+
+      const hash2 = list2.ipfsHash;
+      assert.equal(hash2, 'QmVQ55crzwWY21D7LwMLrxT7aKvCoSVtpo23WRdajSHtBN');
+
+      const other2 = List.fromIpfsHash(ipfs, hash2);
+      final.join(other2);
+
+      // console.log(final.items.map((e) => e.comptactId))
+      assert.equal(final.items.length, count + count * 2);
+      assert.equal(final.items[0].data, "second 1");
+      assert.equal(final.items[1].data, "second 2");
+      assert.equal(final.items[final.items.length - 1].data, "second " + count);
+      done();
+    }));
+
   });
 
   describe('_findHeads', () => {

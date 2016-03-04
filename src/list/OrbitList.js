@@ -32,39 +32,7 @@ class OrbitList extends List {
 
   join(other) {
     super.join(other);
-
-    // WIP: fetch history
-    const isReferenced = (all, item) => _.findLast(all, (f) => f === item) !== undefined;
-    const fetchRecursive = (hash, amount, all, res) => {
-      let result = res ? res : [];
-      hash = hash instanceof Node === true ? hash.hash : hash;
-
-      if(res.length >= amount)
-        return res;
-
-      if(!isReferenced(all, hash)) {
-        all.push(hash);
-        const item = Node.fromIpfsHash(this._ipfs, hash);
-        res.push(item);
-        item.heads.map((head) => fetchRecursive(head, amount, all, res));
-      }
-
-      return res;
-    };
-
-    let allHashes = this._items.map((a) => a.hash);
-
-    const res = _.flatten(other.items.map((e) => _.flatten(e.heads.map((f) => {
-      const remaining = (MaxHistory);
-      return _.flatten(fetchRecursive(f, MaxHistory, allHashes, []));
-    }))));
-
-    res.slice(0, MaxHistory).forEach((item) => {
-      const indices = item.heads.map((k) => _.findIndex(this._items, (b) => b.hash === k));
-      const idx = indices.length > 0 ? Math.max(_.max(indices) + 1, 0) : 0;
-      this._items.splice(idx, 0, item)
-    });
-    // console.log("--> Fetched", res.length, "items from the history\n");
+    this._fetchHistory(other.items);
   }
 
   // The LWW-set query interface
@@ -106,11 +74,45 @@ class OrbitList extends List {
   }
 
   /* Private methods */
-  // Store to IPFS
+  _fetchHistory(items) {
+    let allHashes = this._items.map((a) => a.hash);
+    const res = Lazy(items)
+      .reverse()
+      .map((f) => f.heads).flatten() // Go through all heads
+      .filter((f) => !(f instanceof Node === true)) // OrbitNode vs. {}, filter out instances (we already have them in mem)
+      .map((f) => this._fetchRecursive(f, MaxHistory, allHashes)).flatten() // IO - get the data from IPFS
+      .map((f) => this._insert(f)) // Insert to the list
+      .take(MaxHistory) // How many items from the history we should fetch
+      .toArray();
+    // console.log("--> Fetched", res.length, "items from the history\n");
+  }
+
+  _fetchRecursive(hash, amount, all) {
+    const isReferenced = (list, item) => Lazy(list).find((f) => f === item) !== undefined;
+    let result = [];
+    if(!isReferenced(all, hash)) {
+      all.push(hash);
+      const item = await(Node.fromIpfsHash(this._ipfs, hash));
+      result.push(item);
+      result = result.concat(Lazy(item.heads)
+        .map((f) => this._fetchRecursive(f, amount, all))
+        .flatten()
+        .toArray());
+    }
+    return result;
+  }
+
+  // Insert to the list right after the latest parent
+  _insert(item) {
+    const index = Lazy(item.heads)
+      .map((next) => Lazy(this._items).map((f) => f.hash).indexOf(next)) // Find the item's parent's indices
+      .reduce((max, a) => a > max ? a : max, 0); // find the largest index (latest parent)
+
+    this._items.splice(index, 0, item);
+  }
 
   /* Properties */
   get ipfsHash() {
-    // await(this._commit());
     const toIpfs = async(() => {
       return new Promise(async((resolve, reject) => {
         var data = await(this.asJson)
