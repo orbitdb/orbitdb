@@ -25,7 +25,7 @@ class OrbitList extends List {
 
     const heads = List.findHeads(this.items);
     const node  = new Node(this._ipfs, this.id, this.seq, this.ver, data, heads);
-    node._commit(); // TODO: obsolete?
+    // node._commit(); // TODO: obsolete?
     this._currentBatch.push(node);
     this.ver ++;
   }
@@ -105,15 +105,12 @@ class OrbitList extends List {
     return _findFrom(list.reverse(), hash, amount, opts.lte || !opts.lt).reverse().toArray();
   }
 
-  _commit() {
-    const current = Lazy(this._currentBatch).difference(this._items).toArray();
-    this._items   = this._items.concat(current);
-    this._currentBatch = [];
-    this.ver = 0;
-    this.seq ++;
-  }
+  /* Private methods */
+  // Store to IPFS
 
+  /* Properties */
   get ipfsHash() {
+    // await(this._commit());
     const toIpfs = async(() => {
       return new Promise(async((resolve, reject) => {
         var data = await(this.asJson)
@@ -121,7 +118,8 @@ class OrbitList extends List {
         resolve(list.Hash);
       }));
     });
-    return await(toIpfs());
+    this.hash = await(toIpfs());
+    return this.hash;
   }
 
   get asJson() {
