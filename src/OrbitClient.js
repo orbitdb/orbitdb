@@ -22,10 +22,7 @@ class OrbitClient {
     if(subscribe === undefined) subscribe = true;
 
     this.db.use(channel, this.user, password);
-    this.db.events.on('data', async((hash) => {
-      await(this._pubsub.publish(channel, hash));
-      this.events.emit('data', channel, hash);
-    }));
+    this.db.events.on('data', (hash) => this._pubsub.publish(channel, hash));
 
     if(subscribe)
       this._pubsub.subscribe(channel, password, async((channel, message) => this.db.sync(channel, message)));
