@@ -24,7 +24,7 @@ class OrbitDB {
   }
 
   sync(channel, hash) {
-    console.log("--> Head:", hash)
+    // console.log("--> Head:", hash)
     if(hash && this._logs[channel]) {
       const other = OrbitList.fromIpfsHash(this._ipfs, hash);
       this._logs[channel].join(other);
