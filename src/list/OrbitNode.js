@@ -14,43 +14,40 @@ class OrbitNode extends Node {
     this.hash = hash ? hash : this.ipfsHash;
   }
 
+  fetchPayload() {
+    return new Promise(async((resolve, reject) => {
+      if(!this.Payload) {
+        const payload = await(ipfsAPI.getObject(this._ipfs, this.data));
+        this.Payload = JSON.parse(payload.Data);
+        if(this.Payload.value) {
+          const value = await(ipfsAPI.getObject(this._ipfs, this.Payload.value));
+          this.Payload.value = JSON.parse(value.Data)["content"];
+        }
+      }
+      let res = this.Payload;
+      Object.assign(res, { hash: this.data });
+      resolve(res);
+    }));
+  }
+
+  _commit() {
+    if(!this.hash) {
+      const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(this.asJson)));
+      this.hash = r.Hash;
+    }
+  }
+
   get ipfsHash() {
-    this._commit();
+    await(this._commit());
     return this.hash;
   }
 
-  compact() {
+  get asJson() {
     let res = { id: this.id, seq: this.seq, ver: this.ver, data: this.data }
     let items = {};
     this.next.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
     Object.assign(res, { next: items });
     return res;
-  }
-
-  fetchPayload() {
-    return new Promise(async((resolve, reject) => {
-      await(this._getPayload());
-      resolve({ hash: this.data, payload: this.Payload });
-    }));
-  }
-
-  _getPayload() {
-    if(!this.Payload) {
-      const payload = await(ipfsAPI.getObject(this._ipfs, this.data));
-      this.Payload = JSON.parse(payload.Data);
-      if(this.Payload.value) {
-        const value = await(ipfsAPI.getObject(this._ipfs, this.Payload.value));
-        this.Payload.value = JSON.parse(value.Data)["content"];
-      }
-    }
-    return this.hash;
-  }
-
-  _commit() {
-    if(!this.hash) {
-      const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(this.compact())));
-      this.hash = r.Hash;
-    }
   }
 
   static fromIpfsHash(ipfs, hash) {

@@ -38,7 +38,7 @@ class OrbitClient {
       put: (key, data) => this.db.put(channel, password, key, data),
       get: (key, options) => {
         const items = this._iterator(channel, password, { key: key }).collect();
-        return items[0] ? items[0].payload.value : null;
+        return items[0] ? items[0].value : null;
       },
       leave: () => this._pubsub.unsubscribe(channel)
     }

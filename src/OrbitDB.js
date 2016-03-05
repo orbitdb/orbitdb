@@ -1,5 +1,6 @@
 'use strict';
 
+const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
@@ -33,12 +34,27 @@ class OrbitDB {
   }
 
   /* DB Operations */
-  read(channel, password, options) {
-    let opts = options || {};
-    Object.assign(opts, { amount: opts.limit || 1 });
-    let messages = await(this._logs[channel].find(opts));
-    if(opts.reverse) messages.reverse();
-    return messages;
+  read(channel, password, opts) {
+    if(!opts) opts = {};
+
+    const operations = Lazy(this._logs[channel].items);
+    const amount     = opts.limit ? (opts.limit > -1 ? opts.limit : this._logs[channel].items.length) : 1;
+
+    let result = [];
+
+    if(opts.key) {
+      // Key-Value, search latest key first
+      result = this._query(operations.reverse(), opts.key, 1, true);
+    } else if(opts.gt || opts.gte) {
+      // Greater than case
+      result = this._query(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte || opts.lte);
+    } else {
+      // Lower than and lastN case, search latest first by reversing the sequence
+      result = this._query(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse();
+    }
+
+    if(opts.reverse) result.reverse();
+    return result.toArray();
   }
 
   add(channel, password, data) {
@@ -62,6 +78,28 @@ class OrbitDB {
   }
 
   /* Private methods */
+
+  // The LWW-set
+  _query(sequence, key, amount, inclusive) {
+    // Last-Write-Wins, ie. use only the first occurance of the key
+    let handled = [];
+    const _createLWWSet = (item) => {
+      const wasHandled = Lazy(handled).indexOf(item.key) > -1;
+      if(!wasHandled) handled.push(item.key);
+      if(Operations.isUpdate(item.op) && !wasHandled) return item;
+      return null;
+    };
+
+    // Find an items from the sequence (list of operations)
+    return sequence
+      .map((f) => await(f.fetchPayload())) // IO - fetch the actual OP from ipfs. consider merging with LL.
+      .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
+      .drop(!inclusive ? 1 : 0) // Drop the 'gt/lt' item, include 'gte/lte' item
+      .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
+      .filter((f) => f !== null) // Make sure we don't have empty ones
+      .take(amount)
+  }
+
   _createOperation(channel, password, operation, key, value, data) {
     var createOperation = async(() => {
       return new Promise(async((resolve, reject) => {
