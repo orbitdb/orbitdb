@@ -110,6 +110,9 @@ async(() => {
 ```
 
 ### Development
+#### Source Code
+The entry point for the code is [src/OrbitClient.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitClient.js) and the DB implementation is [src/OrbitDB.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitDB.js)
+
 #### Run Tests
 ```
 npm test
