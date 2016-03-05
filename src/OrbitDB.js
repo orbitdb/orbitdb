@@ -5,11 +5,9 @@ const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
 const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
-const Operations   = require('./list/Operations');
-const List         = require('./list/OrbitList');
-const OrbitDBItem  = require('./db/OrbitDBItem');
-const ItemTypes    = require('./db/ItemTypes');
-const MetaInfo     = require('./db/MetaInfo');
+const OrbitList    = require('./list/OrbitList');
+const Operation    = require('./db/Operation');
+const OpTypes      = require('./db/OpTypes');
 const Post         = require('./db/Post');
 
 class OrbitDB {
@@ -22,54 +20,59 @@ class OrbitDB {
   /* Public methods */
   use(channel, user, password) {
     this.user = user;
-    this._logs[channel] = new List(this._ipfs, this.user.username);
+    this._logs[channel] = new OrbitList(this._ipfs, this.user.username);
   }
 
   sync(channel, hash) {
     console.log("--> Head:", hash)
     if(hash && this._logs[channel]) {
-      const other = List.fromIpfsHash(this._ipfs, hash);
+      const other = OrbitList.fromIpfsHash(this._ipfs, hash);
       this._logs[channel].join(other);
     }
   }
 
   /* DB Operations */
-  read(channel, password, opts) {
+
+  // Get items from the db
+  query(channel, password, opts) {
     if(!opts) opts = {};
 
     const operations = Lazy(this._logs[channel].items);
-    const amount     = opts.limit ? (opts.limit > -1 ? opts.limit : this._logs[channel].items.length) : 1;
+    const amount = opts.limit ? (opts.limit > -1 ? opts.limit : this._logs[channel].items.length) : 1; // Return 1 if no limit is provided
 
     let result = [];
 
     if(opts.key) {
       // Key-Value, search latest key first
-      result = this._query(operations.reverse(), opts.key, 1, true);
+      result = this._read(operations.reverse(), opts.key, 1, true);
     } else if(opts.gt || opts.gte) {
       // Greater than case
-      result = this._query(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte || opts.lte);
+      result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte || opts.lte);
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
-      result = this._query(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse();
+      result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse();
     }
 
     if(opts.reverse) result.reverse();
     return result.toArray();
   }
 
+  // Adds an event to the log
   add(channel, password, data) {
-    const post = await(this._publish(data));
+    const post = await(Post.publish(this._ipfs, data));
     const key = post.Hash;
-    return await(this._createOperation(channel, password, Operations.Add, key, post.Hash, data));
+    return await(this._write(channel, password, OpTypes.Add, key, post.Hash, data));
   }
 
+  // Sets a key-value pair
   put(channel, password, key, data) {
-    const post = await(this._publish(data));
-    return await(this._createOperation(channel, password, Operations.Put, key, post.Hash));
+    const post = await(Post.publish(this._ipfs, data));
+    return await(this._write(channel, password, OpTypes.Put, key, post.Hash));
   }
 
+  // Deletes an event based on hash (of the operation)
   del(channel, password, hash) {
-    return await(this._createOperation(channel, password, Operations.Delete, hash, null));
+    return await(this._write(channel, password, OpTypes.Delete, hash, null));
   }
 
   deleteChannel(channel, password) {
@@ -79,14 +82,14 @@ class OrbitDB {
 
   /* Private methods */
 
-  // The LWW-set
-  _query(sequence, key, amount, inclusive) {
+  // LWW-element-set
+  _read(sequence, key, amount, inclusive) {
     // Last-Write-Wins, ie. use only the first occurance of the key
     let handled = [];
     const _createLWWSet = (item) => {
       const wasHandled = Lazy(handled).indexOf(item.key) > -1;
       if(!wasHandled) handled.push(item.key);
-      if(Operations.isUpdate(item.op) && !wasHandled) return item;
+      if(OpTypes.isInsert(item.op) && !wasHandled) return item;
       return null;
     };
 
@@ -100,37 +103,12 @@ class OrbitDB {
       .take(amount)
   }
 
-  _createOperation(channel, password, operation, key, value, data) {
-    var createOperation = async(() => {
-      return new Promise(async((resolve, reject) => {
-        const hash = this._createMessage(channel, password, operation, key, value);
-        const res = await(this._logs[channel].add(hash));
-        const listHash = await(this._logs[channel].ipfsHash);
-        resolve(listHash);
-      }));
-    })
-    const hash = await(createOperation());
+  // Write an op to the db
+  _write(channel, password, operation, key, value, data) {
+    const hash = await(Operation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
     this.events.emit('data', hash);
     return key;
   }
-
-  _createMessage(channel, password, operation, key, value) {
-    const size = -1;
-    const meta = new MetaInfo(ItemTypes.Message, size, this.user.username, new Date().getTime());
-    const item = new OrbitDBItem(operation, key, value, meta);
-    const data = await (ipfsAPI.putObject(this._ipfs, JSON.stringify(item)));
-    return data.Hash;
-  }
-
-  _publish(data) {
-    return new Promise((resolve, reject) => {
-      let post = new Post(data);
-      // post.encrypt(privkey, pubkey);
-      const res = await (ipfsAPI.putObject(this._ipfs, JSON.stringify(post)));
-      resolve(res);
-    })
-  }
-
 }
 
 module.exports = OrbitDB;

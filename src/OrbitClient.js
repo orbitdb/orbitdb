@@ -49,11 +49,10 @@ class OrbitClient {
     this._store = {};
     this.user = null;
     this.network = null;
-    this.db = null;
   }
 
   _iterator(channel, password, options) {
-    const messages = this.db.read(channel, password, options);
+    const messages = this.db.query(channel, password, options);
     let currentIndex = 0;
     let iterator = {
       [Symbol.iterator]() {
