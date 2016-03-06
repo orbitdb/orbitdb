@@ -28,8 +28,8 @@ describe('Orbit Client', function() {
   }));
 
   after(async((done) => {
-    db.delete();
-    client.disconnect();
+    if(db) db.delete();
+    if(client) client.disconnect();
     done();
   }));
 
