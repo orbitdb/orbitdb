@@ -61,7 +61,7 @@ class List {
       seq: this.seq,
       ver: this.ver,
       items: this._currentBatch.map((f) => f.asJson)
-    }
+    };
   }
 
   /* Static methods */

@@ -18,16 +18,16 @@ class Node {
   }
 
   get asJson() {
-    return { id: this.id, seq: this.seq, ver: this.ver, data: this.data, next: this.next }
+    return { id: this.id, seq: this.seq, ver: this.ver, data: this.data, next: this.next };
   }
 
   static equals(a, b) {
-    return a.id == b.id && a.seq == b.seq && a.ver == b.ver;
+    return a.id === b.id && a.seq === b.seq && a.ver === b.ver;
   }
 
   hasChild(a) {
     const id = a.compactId;
-    for(let i = 0; i < this.next.length; i ++) {
+    for(let i = 0; i < this.next.length; i++) {
       if(this.next[i] === id)
         return true;
     }
