@@ -123,6 +123,12 @@ Keep tests running while development:
 mocha -w
 ```
 
+#### Lint
+*Work in progress! Throws an error "Parsing error: The keyword 'await' is reserved".*
+```
+npm run lint
+```
+
 ### TODO
 - Fix encryption
 - Caching

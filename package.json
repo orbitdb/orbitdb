@@ -20,9 +20,11 @@
     "socket.io-client": "1.3.7"
   },
   "devDependencies": {
+    "eslint": "^2.3.0",
     "mocha": "^2.3.4"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "$(npm bin)/eslint ./src || true"
   }
 }
