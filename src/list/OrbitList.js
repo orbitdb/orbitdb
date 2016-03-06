@@ -40,7 +40,7 @@ class OrbitList extends List {
       .reverse() // Start from the latest item
       .map((f) => f.heads).flatten() // Go through all heads
       .filter((f) => !(f instanceof OrbitNode === true)) // OrbitNode vs. {}, filter out instances (we already have them in mem)
-      .map((f) => this._fetchRecursive(f, allHashes)).flatten() // IO - get the data from IPFS
+      .map((f) => await(this._fetchRecursive(f, allHashes, MaxHistory, 0))).flatten() // IO - get the data from IPFS
       .map((f) => this._insert(f)) // Insert to the list
       .take(MaxHistory) // How many items from the history we should fetch
       .toArray();
@@ -48,27 +48,31 @@ class OrbitList extends List {
   }
 
   // Fetch items in the linked list recursively
-  _fetchRecursive(hash, all) {
+  _fetchRecursive(hash, all, amount, depth) {
     const isReferenced = (list, item) => Lazy(list).find((f) => f === item) !== undefined;
     let result = [];
+
+    if(depth >= amount)
+      return result;
+
     if(!isReferenced(all, hash)) {
+      depth ++;
       all.push(hash);
       const item = await(OrbitNode.fromIpfsHash(this._ipfs, hash)); // IO - get from IPFS
       result.push(item);
       result = result.concat(Lazy(item.heads)
-        .map((f) => this._fetchRecursive(f, all))
+        .map((f) => await(this._fetchRecursive(f, all, amount, depth)))
         .flatten()
         .toArray());
     }
+
     return result;
   }
 
   // Insert to the list right after the latest parent
   _insert(item) {
-    const index = Lazy(item.heads)
-      .map((next) => Lazy(this._items).map((f) => f.hash).indexOf(next)) // Find the item's parent's indices
-      .reduce((max, a) => a > max ? a : max, 0); // find the largest index (latest parent)
-
+    let indices = Lazy(item.heads).map((next) => Lazy(this._items).map((f) => f.hash).indexOf(next)) // Find the item's parent's indices
+    const index = indices.length > 0 ? Math.max(indices.max() + 1, 0) : 0; // find the largest index (latest parent)
     this._items.splice(index, 0, item);
   }
 
