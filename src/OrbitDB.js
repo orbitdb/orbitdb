@@ -4,7 +4,6 @@ const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
-const ipfsAPI      = require('orbit-common/lib/ipfs-api-promised');
 const OrbitList    = require('./list/OrbitList');
 const Operation    = require('./db/Operation');
 const OpTypes      = require('./db/OpTypes');
@@ -106,7 +105,7 @@ class OrbitDB {
   // Write an op to the db
   _write(channel, password, operation, key, value, data) {
     const hash = await(Operation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
-    this.events.emit('data', hash);
+    this.events.emit('write', channel, hash);
     return key;
   }
 }

@@ -22,7 +22,7 @@ class OrbitClient {
     if(subscribe === undefined) subscribe = true;
 
     this.db.use(channel, this.user, password);
-    this.db.events.on('data', (hash) => this._pubsub.publish(channel, hash));
+    this.db.events.on('write', this._onUpdated.bind(this));
 
     if(subscribe)
       this._pubsub.subscribe(channel, password, async((channel, message) => this.db.sync(channel, message)));
@@ -46,6 +46,11 @@ class OrbitClient {
     this._store = {};
     this.user = null;
     this.network = null;
+  }
+
+  _onUpdated(channel, hash) {
+    this._pubsub.publish(channel, hash)
+    this.events.emit('data', channel, hash);
   }
 
   _iterator(channel, password, options) {
