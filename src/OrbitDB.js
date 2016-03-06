@@ -23,10 +23,11 @@ class OrbitDB {
   }
 
   sync(channel, hash) {
-    // console.log("--> Head:", hash)
+    // console.log("--> Head:", hash, this._logs[channel] !== undefined)
     if(hash && this._logs[channel]) {
-      const other = OrbitList.fromIpfsHash(this._ipfs, hash);
+      const other = await(OrbitList.fromIpfsHash(this._ipfs, hash));
       this._logs[channel].join(other);
+      this.events.emit('sync', channel, hash);
     }
   }
 

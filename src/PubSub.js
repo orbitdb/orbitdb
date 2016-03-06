@@ -18,10 +18,7 @@ class Pubsub {
       this._socket.on('disconnect', (socket) => console.log(`Disconnected from http://${host}:${port}`));
       this._socket.on('error', (e) => console.log('Pubsub socket error:', e));
       this._socket.on('message', this._handleMessage.bind(this));
-      this._socket.on('latest', (hash, message) => {
-        console.log(">", hash, message);
-        this._handleMessage(hash, message);
-      });
+      this._socket.on('latest', this._handleMessage.bind(this));
     });
   }
 
@@ -32,7 +29,7 @@ class Pubsub {
 
   subscribe(hash, password, callback) {
     if(!this._subscriptions[hash]) {
-      this._subscriptions[hash] = { head: null, callback: callback };
+      this._subscriptions[hash] = { callback: callback };
       this._socket.emit('subscribe', { channel: hash });
     }
   }
@@ -47,12 +44,8 @@ class Pubsub {
   }
 
   _handleMessage(hash, message) {
-    if(this._subscriptions[hash]) {
-      this._subscriptions[hash].head = message;
-
-      if(this._subscriptions[hash].callback)
-        this._subscriptions[hash].callback(hash, message);
-    }
+    if(this._subscriptions[hash] && this._subscriptions[hash].callback)
+      this._subscriptions[hash].callback(hash, message);
   }
 }
 
