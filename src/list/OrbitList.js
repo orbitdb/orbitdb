@@ -91,7 +91,10 @@ class OrbitList extends List {
 
   get asJson() {
     let items = {};
-    this._currentBatch.forEach((f) => Object.defineProperty(items, f.compactId.toString(), { value: f.ipfsHash, enumerable: true }));
+    this._currentBatch.forEach((f) => {
+      if(!items[f.compactId.toString()])
+        Object.defineProperty(items, f.compactId.toString(), { value: await(f.ipfsHash), enumerable: true });
+    });
     return {
       id: this.id,
       seq: this.seq,
