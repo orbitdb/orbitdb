@@ -30,7 +30,7 @@ class OrbitList extends List {
 
   join(other) {
     super.join(other);
-    this._fetchHistory(other.items);
+    await(this._fetchHistory(other.items));
   }
 
   /* Private methods */
@@ -44,7 +44,8 @@ class OrbitList extends List {
       .map((f) => this._insert(f)) // Insert to the list
       .take(MaxHistory) // How many items from the history we should fetch
       .toArray();
-    // console.log("--> Fetched", res.length, "items from the history\n");
+    // console.log("--> Fetched", res.length, "items from the history");
+    return res;
   }
 
   // Fetch items in the linked list recursively

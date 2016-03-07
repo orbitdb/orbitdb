@@ -13,21 +13,27 @@ class OrbitDB {
   constructor(ipfs) {
     this._ipfs = ipfs;
     this._logs = {};
-    this.events = new EventEmitter();
+    this.events = {};
   }
 
   /* Public methods */
   use(channel, user, password) {
     this.user = user;
     this._logs[channel] = new OrbitList(this._ipfs, this.user.username);
+    this.events[channel] = new EventEmitter();
   }
 
   sync(channel, hash) {
-    // console.log("--> Head:", hash, this._logs[channel] !== undefined)
+    // console.log("--> Head:", hash)
     if(hash && this._logs[channel]) {
+      const oldCount = this._logs[channel].items.length;
       const other = await(OrbitList.fromIpfsHash(this._ipfs, hash));
       await(this._logs[channel].join(other));
-      this.events.emit('sync', channel, 'empty');
+
+      // Only emit the event if something was added
+      const joinedCount = (this._logs[channel].items.length - oldCount);
+      if(joinedCount > 0)
+        this.events[channel].emit('sync', channel, 'empty');
     }
   }
 
@@ -110,7 +116,7 @@ class OrbitDB {
   // Write an op to the db
   _write(channel, password, operation, key, value, data) {
     const hash = await(Operation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
-    this.events.emit('write', channel, hash);
+    this.events[channel].emit('write', channel, hash);
     return key;
   }
 }

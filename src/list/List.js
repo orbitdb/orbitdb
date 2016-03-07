@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const Lazy = require('lazy.js');
 const Node = require('./Node');
 
@@ -23,9 +24,14 @@ class List {
   join(other) {
     this.seq = (other.seq && other.seq > this.seq ? other.seq : this.seq) + 1;
     this.ver = 0;
-    const current = Lazy(this._currentBatch).difference(this._items);
-    const others  = Lazy(other.items).difference(this._items);
-    const final   = current.union(others);
+    // TODO: figure out how to do real equality check with Lazy.js
+    // const current = Lazy(this._currentBatch).difference(this._items);
+    // const others  = Lazy(other.items).difference(current.toA);
+    // const final   = current.union(others).uniq((f) => f.compactId);
+    const current = _.differenceWith(this._currentBatch, this._items, Node.equals);
+    const others  = _.differenceWith(other.items, this._items, Node.equals);
+    const final   = _.unionWith(current, others, Node.equals);
+
     this._items   = Lazy(this._items).concat(final).toArray();
     this._currentBatch = [];
   }

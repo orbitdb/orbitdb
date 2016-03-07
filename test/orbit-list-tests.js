@@ -286,6 +286,34 @@ describe('OrbitList', async(function() {
       done();
     }));
 
+    it('joins unique items', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.add("helloB1")
+      list2.add("helloB2")
+      list1.join(list2);
+
+      list1.add("helloA3")
+
+      list1.join(list2);
+      list1.join(list2);
+
+      list1.add("helloA4")
+      list1.add("helloA5")
+
+      const lastItem = list1.items[list1.items.length - 1];
+
+      assert.equal(list1.items.length, 7);
+      assert.equal(lastItem.next.length, 2);
+      assert.equal(lastItem.next[0].compactId, 'A.3.0');
+      assert.equal(lastItem.next[0].hash, 'QmRnSuNkgqVFMDwdCNMQ83CR3SAWEkAms3zJyP6Pw9bkx4');
+      assert.equal(lastItem.next[1].compactId, 'B.0.1');
+      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      done();
+    }));
+
     it('finds the next head when adding a new element', async((done) => {
       const list1 = new List(ipfs, 'A');
       list1.add("helloA1")

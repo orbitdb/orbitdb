@@ -22,8 +22,8 @@ class OrbitClient {
     if(subscribe === undefined) subscribe = true;
 
     this.db.use(channel, this.user, password);
-    this.db.events.on('write', this._onWrite.bind(this));
-    this.db.events.on('sync', this._onSync.bind(this));
+    this.db.events[channel].on('write', this._onWrite.bind(this));
+    this.db.events[channel].on('sync', this._onSync.bind(this));
 
     if(subscribe)
       this._pubsub.subscribe(channel, password, async((channel, message) => this.db.sync(channel, message)));
@@ -38,6 +38,8 @@ class OrbitClient {
         const items = this._iterator(channel, password, { key: key }).collect();
         return items[0] ? items[0].value : null;
       },
+      subscribe: () => {
+      },
       leave: () => this._pubsub.unsubscribe(channel)
     }
   }
@@ -50,8 +52,8 @@ class OrbitClient {
   }
 
   _onWrite(channel, hash) {
-    this._pubsub.publish(channel, hash)
-    // this.events.emit('data', channel, hash);
+    this._pubsub.publish(channel, hash);
+    this.events.emit('data', channel, hash);
   }
 
   _onSync(channel, hash) {
