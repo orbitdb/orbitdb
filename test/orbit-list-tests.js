@@ -612,7 +612,7 @@ describe('OrbitList', async(function() {
       const list1 = new List(ipfs, 'A');
       const list2 = new List(ipfs, 'AAA');
 
-      const count = 10;
+      const count = 32;
       for(let i = 1; i < count + 1; i ++) {
         list1.add("first " + i);
         list2.add("second " + i);
@@ -620,8 +620,8 @@ describe('OrbitList', async(function() {
 
       const hash1 = list1.ipfsHash;
       const hash2 = list2.ipfsHash;
-      assert.equal(hash1, 'QmaoGci9eiSYdANo63JAkvUpnyXe2uQH1BkwAiKsJHNUWp');
-      assert.equal(hash2, 'QmTXu5g5BzZW3vMBKaXnerZTGXf5XPRFB6y3DXNEmcWWtU');
+      assert.equal(hash1, 'QmWTHVjf95GSFMErzGwNRzjnEwb7Z5SUo1Qb283oRzLvAT');
+      assert.equal(hash2, 'QmVME1BiyuNZZRXZu1npPypav1jMy3XbqHjFt4xdTzUzCd');
 
       const final = new List(ipfs, 'B');
       const other1 = List.fromIpfsHash(ipfs, hash1);
@@ -630,12 +630,12 @@ describe('OrbitList', async(function() {
 
       assert.equal(final.items.length, count);
       assert.equal(final.items[0].data, "first 1");
-      assert.equal(final.items[final.items.length - 1].data, "first 10");
+      assert.equal(final.items[final.items.length - 1].data, "first " + count);
 
       final.join(other2);
       assert.equal(final.items.length, count * 2);
-      assert.equal(final.items[0].data, "first 1");
-      assert.equal(final.items[final.items.length - 1].data, "second 10");
+      assert.equal(final.items[0].data, "second 1");
+      assert.equal(final.items[final.items.length - 1].data, "second " + count);
       done();
     }));
 
