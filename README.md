@@ -131,9 +131,8 @@ npm run lint
 
 ### TODO
 - Fix encryption
+- Logging
 - Caching
-- Rename HashCacheOps
-- Refactor db operations to its own class
 
 ## Notes
 ### Data structure description
