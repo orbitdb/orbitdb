@@ -51,7 +51,7 @@ class OrbitClient {
 
   _onWrite(channel, hash) {
     this._pubsub.publish(channel, hash)
-    this.events.emit('data', channel, hash);
+    // this.events.emit('data', channel, hash);
   }
 
   _onSync(channel, hash) {
