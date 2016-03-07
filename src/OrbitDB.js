@@ -26,8 +26,8 @@ class OrbitDB {
     // console.log("--> Head:", hash, this._logs[channel] !== undefined)
     if(hash && this._logs[channel]) {
       const other = await(OrbitList.fromIpfsHash(this._ipfs, hash));
-      this._logs[channel].join(other);
-      this.events.emit('sync', channel, hash);
+      await(this._logs[channel].join(other));
+      this.events.emit('sync', channel, 'empty');
     }
   }
 
@@ -35,6 +35,8 @@ class OrbitDB {
 
   // Get items from the db
   query(channel, password, opts) {
+    console.log("--> Query:", channel, password, opts);
+
     if(!opts) opts = {};
 
     const operations = Lazy(this._logs[channel].items);
@@ -47,14 +49,16 @@ class OrbitDB {
       result = this._read(operations.reverse(), opts.key, 1, true);
     } else if(opts.gt || opts.gte) {
       // Greater than case
-      result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte || opts.lte);
+      result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false);
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
       result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse();
     }
 
     if(opts.reverse) result.reverse();
-    return result.toArray();
+    const res = result.toArray();
+    console.log("--> Found", res.length, "items");
+    return res;
   }
 
   // Adds an event to the log
@@ -97,9 +101,9 @@ class OrbitDB {
     return sequence
       .map((f) => await(f.fetchPayload())) // IO - fetch the actual OP from ipfs. consider merging with LL.
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
-      .drop(!inclusive ? 1 : 0) // Drop the 'gt/lt' item, include 'gte/lte' item
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
       .filter((f) => f !== null) // Make sure we don't have empty ones
+      .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
       .take(amount)
   }
 
