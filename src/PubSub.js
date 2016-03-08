@@ -5,6 +5,7 @@ const io = require('socket.io-client');
 class Pubsub {
   constructor(ipfs) {
     this.ipfs = ipfs;
+    this._socket = null;
     this._subscriptions = {};
     this.onConnected = null;
     this.onConnectionError = null;
@@ -12,7 +13,9 @@ class Pubsub {
 
   connect(host, port, username, password) {
     return new Promise((resolve, reject) => {
-      this._socket = io.connect(`http://${host}:${port}`, { 'forceNew': true });
+      if(!this._socket)
+        this._socket = io.connect(`http://${host}:${port}`, { 'forceNew': true });
+
       this._socket.on('connect', resolve);
       this._socket.on('connect_error', (err) => reject(new Error(`Connection refused to ${host}:${port}`)));
       this._socket.on('disconnect', (socket) => console.log(`Disconnected from http://${host}:${port}`));
@@ -30,7 +33,7 @@ class Pubsub {
   subscribe(hash, password, callback) {
     if(!this._subscriptions[hash]) {
       this._subscriptions[hash] = { callback: callback };
-      this._socket.emit('subscribe', { channel: hash }); // calls back with 'latest' message
+      this._socket.emit('subscribe', { channel: hash }); // calls back with 'subscribed' event
     }
   }
 

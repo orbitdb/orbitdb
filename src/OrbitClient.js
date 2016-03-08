@@ -89,7 +89,10 @@ class OrbitClient {
       this._pubsub = new PubSub(this._ipfs);
       await(this._pubsub.connect(host, port, username, password));
     } catch(e) {
-      if(!allowOffline) throw e;
+      if(!allowOffline) {
+        this._pubsub.disconnect();
+        throw e;
+      }
     }
     this.user = { username: username, id: 'TODO: user id' }
     this.network = { host: host, port: port, name: 'TODO: network name' }
