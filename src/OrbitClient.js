@@ -7,6 +7,8 @@ const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
 
+require('http').globalAgent.maxSockets = 10;
+
 class OrbitClient {
   constructor(ipfs, daemon) {
     this._ipfs = ipfs;
