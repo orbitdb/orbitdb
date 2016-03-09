@@ -38,7 +38,7 @@
 //   const startIpfs = async (() => {
 //     return new Promise(async((resolve, reject) => {
 //       const ipfsd  = await(ipfsDaemon());
-//       resolve(ipfsd.daemon);
+//       resolve(ipfsd.ipfs);
 //     }));
 //   });
 
@@ -55,7 +55,7 @@
 //     let ms = 0;
 
 //     for(let t = 100; t <= 1000; t += 300) {
-//       const list = new OrbitList('A', ipfs);
+//       const list = new OrbitList(ipfs, 'A');
 //       let timer = new Timer(true);
 
 //       for(let i = 0; i < t; i ++) {
