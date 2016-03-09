@@ -3,8 +3,8 @@
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
 const ipfsAPI     = require('orbit-common/lib/ipfs-api-promised');
-const OrbitDBItem = require('./OrbitDBItem');
-const ItemTypes   = require('./ItemTypes');
+const OrbitDBItem = require('../post/OrbitDBItem');
+const Post        = require('../post/Post');
 const MetaInfo    = require('./MetaInfo');
 
 class Operation {
@@ -24,10 +24,15 @@ class Operation {
     var createOperationAsync = async(() => {
       return new Promise(async((resolve, reject) => {
         const size = -1;
-        const meta = new MetaInfo(ItemTypes.Message, size, user.username, new Date().getTime());
-        const item = new OrbitDBItem(operation, key, value, meta);
-        const data = await (ipfsAPI.putObject(ipfs, JSON.stringify(item)));
-        resolve(data.Hash);
+        const meta = new MetaInfo("orbitdb-op", size, user.username, new Date().getTime());
+        const data = {
+          operation: operation,
+          key: key,
+          value: value,
+          meta: meta
+        };
+        const op = await(Post.create(ipfs, Post.Types.OrbitDBItem, data));
+        resolve(op.Hash);
       }));
     })
     return await(createOperationAsync());

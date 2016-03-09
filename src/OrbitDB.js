@@ -6,8 +6,8 @@ const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
 const OrbitList    = require('./list/OrbitList');
 const Operation    = require('./db/Operation');
-const OpTypes      = require('./db/OpTypes');
-const Post         = require('./db/Post');
+const OpTypes      = require('./db/OpTypes'); // TODO: move to Operation.Types
+const Post         = require('./post/Post');
 
 class OrbitDB {
   constructor(ipfs) {
@@ -69,14 +69,19 @@ class OrbitDB {
 
   // Adds an event to the log
   add(channel, password, data) {
-    const post = await(Post.publish(this._ipfs, data));
-    const key = post.Hash;
-    return await(this._write(channel, password, OpTypes.Add, key, post.Hash, data));
+    let post;
+    if(data instanceof Post) {
+      post = data;
+    } else {
+      // Handle everything else as a string
+      post = await(Post.create(this._ipfs, Post.Types.Message, data));
+    }
+    return await(this._write(channel, password, OpTypes.Add, post.Hash, post.Hash));
   }
 
   // Sets a key-value pair
   put(channel, password, key, data) {
-    const post = await(Post.publish(this._ipfs, data));
+    const post = await(Post.create(this._ipfs, Post.Types.Message, data));
     return await(this._write(channel, password, OpTypes.Put, key, post.Hash));
   }
 
@@ -114,7 +119,7 @@ class OrbitDB {
   }
 
   // Write an op to the db
-  _write(channel, password, operation, key, value, data) {
+  _write(channel, password, operation, key, value) {
     const hash = await(Operation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
     this.events[channel].emit('write', channel, hash);
     return key;

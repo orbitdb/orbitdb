@@ -1,7 +1,5 @@
 'use strict';
 
-// const Encryption = require('orbit-common/lib/Encryption');
-
 class OrbitDBItem {
   constructor(operation, key, value, metaInfo) {
     this.op    = operation;
