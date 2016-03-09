@@ -6,6 +6,7 @@ const Encryption = require('orbit-common/lib/Encryption');
 class TextPost {
   constructor(content) {
     this.content = content;
+    this.type = "text";
     this.ts = new Date().getTime();
   }
 

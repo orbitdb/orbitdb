@@ -41,7 +41,7 @@ class OrbitDB {
 
   // Get items from the db
   query(channel, password, opts) {
-    console.log("--> Query:", channel, password, opts);
+    console.log("--> Query:", channel, opts);
 
     if(!opts) opts = {};
 
@@ -52,7 +52,7 @@ class OrbitDB {
 
     if(opts.key) {
       // Key-Value, search latest key first
-      result = this._read(operations.reverse(), opts.key, 1, true);
+      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value);
     } else if(opts.gt || opts.gte) {
       // Greater than case
       result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false);
@@ -107,6 +107,22 @@ class OrbitDB {
       if(OpTypes.isInsert(item.op) && !wasHandled) return item;
       return null;
     };
+
+    // var _fetchAsync = async(() => {
+    //   return new Promise(async((resolve, reject) => {
+    //     const handle = sequence
+    //       .async()
+    //       .map(async((f) => await(f.fetchPayload()))) // IO - fetch the actual OP from ipfs. consider merging with LL.
+    //       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
+    //       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
+    //       // .filter((f) => f !== null) // Make sure we don't have empty ones
+    //       .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
+    //       .take(amount)
+    //       .toArray();
+    //     handle.onComplete(resolve);
+    //   }));
+    // })
+    // return await(_fetchAsync());
 
     // Find an items from the sequence (list of operations)
     return sequence

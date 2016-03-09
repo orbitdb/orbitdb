@@ -8,6 +8,7 @@ const Encryption  = require('orbit-common/lib/Encryption');
 const TextPost    = require('./TextPost');
 const FilePost    = require('./FilePost');
 const OrbitDBItem = require('./OrbitDBItem');
+const MetaInfo    = require('./MetaInfo');
 
 const PostTypes = {
   Message: TextPost,
@@ -28,8 +29,10 @@ class Posts {
       } else if(type === PostTypes.File) {
         post = new PostTypes.File(data.content, data.file, data.size);
       } else if(type == PostTypes.OrbitDBItem) {
-        post = new PostTypes.OrbitDBItem(data.operation, data.key, data.value, data.meta);
+        post = new PostTypes.OrbitDBItem(data.operation, data.key, data.value, data.meta, data.by);
       }
+      const size = data.size ? data.size : Buffer.byteLength(data, 'utf8');
+      post.meta = new MetaInfo(post.type, size, new Date().getTime());
       const res = await (ipfsAPI.putObject(ipfs, JSON.stringify(post)));
       resolve(res);
     })

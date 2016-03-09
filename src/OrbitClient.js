@@ -36,7 +36,7 @@ class OrbitClient {
       put: (key, data) => this.db.put(channel, password, key, data),
       get: (key, options) => {
         const items = this._iterator(channel, password, { key: key }).collect();
-        return items[0] ? items[0].value : null;
+        return items[0] ? items[0].content : null;
       },
       close: () => this._pubsub.unsubscribe(channel)
     }
@@ -90,7 +90,7 @@ class OrbitClient {
         throw e;
       }
     }
-    this.user = { username: username, id: 'TODO: user id' }
+    this.user = { username: username, id: username } // TODO: user id from ipfs hash
     this.network = { host: host, port: port, name: 'TODO: network name' }
   }
 }

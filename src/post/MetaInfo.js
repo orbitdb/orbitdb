@@ -1,10 +1,9 @@
 'use strict';
 
 class MetaInfo {
-  constructor(type, size, from, ts) {
+  constructor(type, size, ts) {
     this.type = type;
     this.size = size;
-    this.from = from;
     this.ts   =   ts;
   }
 }

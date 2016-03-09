@@ -6,6 +6,7 @@ const TextPost = require('./TextPost');
 class FilePost extends TextPost {
   constructor(content, file, size) {
     super(content);
+    this.type = "file";
     this.file = file;
     this.size = size;
   }

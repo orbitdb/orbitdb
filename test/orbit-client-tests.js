@@ -112,8 +112,8 @@ describe('Orbit Client', function() {
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
       assert.equal(items[0].op, 'ADD');
-      assert.equal(items[0].value, 'hello1');
-      assert.notEqual(items[0].meta, null);
+      assert.equal(items[0].value.content, 'hello1');
+      assert.notEqual(items[0].value.meta, null);
       done();
     }));
 
@@ -126,8 +126,8 @@ describe('Orbit Client', function() {
       assert.equal(items.length, 1);
       assert.equal(items[0].hash.startsWith('Qm'), true);
       assert.equal(items[0].op, 'ADD');
-      assert.equal(items[0].value, 'hello3');
-      assert.notEqual(items[0].meta, null);
+      assert.equal(items[0].value.content, 'hello3');
+      assert.notEqual(items[0].value.meta, null);
       done();
     }));
   });
@@ -171,8 +171,8 @@ describe('Orbit Client', function() {
         assert.notEqual(next, null);
         assert.equal(next.op, 'ADD');
         assert.equal(next.key.startsWith('Qm'), true);
-        assert.equal(next.value, 'hello4');
-        assert.notEqual(next.meta, null);
+        assert.equal(next.value.content, 'hello4');
+        assert.notEqual(next.value.meta, null);
         done();
       }));
 
@@ -199,7 +199,7 @@ describe('Orbit Client', function() {
         const second = iter.next().value;
         assert.equal(first.key, items2[items2.length - 1]);
         assert.equal(second, null);
-        assert.equal(first.value, 'hello4');
+        assert.equal(first.value.content, 'hello4');
         done();
       }));
     });
@@ -225,8 +225,8 @@ describe('Orbit Client', function() {
       it('returns all items', async((done) => {
         const messages = db.iterator({ limit: -1 }).collect();
         assert.equal(messages.length, items.length);
-        assert.equal(messages[0].value, 'hello0');
-        assert.equal(messages[messages.length - 1].value, 'hello4');
+        assert.equal(messages[0].value.content, 'hello0');
+        assert.equal(messages[messages.length - 1].value.content, 'hello4');
         done();
       }));
 

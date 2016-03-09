@@ -1,11 +1,13 @@
 'use strict';
 
 class OrbitDBItem {
-  constructor(operation, key, value, metaInfo) {
+  constructor(operation, key, value, metaInfo, by) {
+    this.type = "orbit-db-op";
     this.op    = operation;
     this.key   = key;
     this.value = value;
     this.meta  = metaInfo;
+    this.by    = by;
   }
 }
 

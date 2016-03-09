@@ -21,7 +21,7 @@ class OrbitNode extends Node {
         this.Payload = JSON.parse(payload.Data);
         if(this.Payload.value) {
           const value = await(ipfsAPI.getObject(this._ipfs, this.Payload.value));
-          this.Payload.value = JSON.parse(value.Data)["content"];
+          this.Payload.value = JSON.parse(value.Data);
         }
       }
       let res = this.Payload;
