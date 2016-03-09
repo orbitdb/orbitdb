@@ -656,6 +656,7 @@ describe('OrbitList', async(function() {
       const other2 = List.fromIpfsHash(ipfs, hash2);
       final.join(other1);
 
+      assert.equal(_.includes(final.items.map((a) => a.compactId), undefined), false);
       assert.equal(final.items.length, count);
       assert.equal(final.items[0].data, "first 1");
       assert.equal(final.items[final.items.length - 1].data, "first " + count);

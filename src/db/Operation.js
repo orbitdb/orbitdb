@@ -9,7 +9,7 @@ const MetaInfo    = require('./MetaInfo');
 
 class Operation {
   static create(ipfs, log, user, operation, key, value, data) {
-    var createOperation = async(() => {
+    var createAsync = async(() => {
       return new Promise(async((resolve, reject) => {
         const hash = await(Operation._createOperation(ipfs, user, operation, key, value));
         await(log.add(hash));
@@ -17,15 +17,20 @@ class Operation {
         resolve(listHash);
       }));
     })
-    return await(createOperation());
+    return await(createAsync());
   }
 
   static _createOperation(ipfs, user, operation, key, value) {
-    const size = -1;
-    const meta = new MetaInfo(ItemTypes.Message, size, user.username, new Date().getTime());
-    const item = new OrbitDBItem(operation, key, value, meta);
-    const data = await (ipfsAPI.putObject(ipfs, JSON.stringify(item)));
-    return data.Hash;
+    var createOperationAsync = async(() => {
+      return new Promise(async((resolve, reject) => {
+        const size = -1;
+        const meta = new MetaInfo(ItemTypes.Message, size, user.username, new Date().getTime());
+        const item = new OrbitDBItem(operation, key, value, meta);
+        const data = await (ipfsAPI.putObject(ipfs, JSON.stringify(item)));
+        resolve(data.Hash);
+      }));
+    })
+    return await(createOperationAsync());
   }
 }
 

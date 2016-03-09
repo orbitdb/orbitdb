@@ -93,7 +93,7 @@ class List {
   }
 
   static isReferencedInChain(all, item) {
-    return Lazy(all).find((e) => e.hasChild(item)) !== undefined;
+    return Lazy(all).reverse().find((e) => e.hasChild(item)) !== undefined;
   }
 }
 

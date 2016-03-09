@@ -1,5 +1,6 @@
 'use strict';
 
+var await       = require('asyncawait/await');
 var async       = require('asyncawait/async');
 var OrbitClient = require('../src/OrbitClient');
 var Timer       = require('./Timer');
@@ -33,22 +34,32 @@ let run = (async(() => {
 
       if(seconds % 10 === 0) {
         console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
+
+        if(lastTenSeconds === 0)
+          throw new Error("Problems!");
+
         lastTenSeconds = 0
       }
 
       console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
+
       queriesPerSecond = 0;
     }, 1000);
 
+    const query = async(() => {
     // let timer = new Timer();
-    while(true) {
+    // while(true) {
       // timer.start();
-      let g = db.add(username + totalQueries);
+      db.add(username + totalQueries);
       // console.log(`${timer.stop(true)} ms`);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;
-    }
+    // }
+      process.nextTick(query);
+    });
+
+    query();
 
   } catch(e) {
     console.error("error:", e);
