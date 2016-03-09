@@ -43,7 +43,7 @@ class Pubsub {
   }
 
   publish(hash, message) {
-    this._socket.send({ channel: hash, message: message });
+    this._socket.send(JSON.stringify({ channel: hash, message: message }));
   }
 
   _handleMessage(hash, message) {
