@@ -7,7 +7,7 @@ const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
 
-class OrbitClient {
+class Client {
   constructor(ipfs, daemon) {
     this._ipfs = ipfs;
     this._pubsub = null;
@@ -102,7 +102,7 @@ class OrbitClientFactory {
       ipfs = ipfsd.ipfs;
     }
 
-    const client = new OrbitClient(ipfs);
+    const client = new Client(ipfs);
     await(client._connect(host, port, username, password, allowOffline))
     return client;
   }

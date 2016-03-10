@@ -4,7 +4,7 @@ const _           = require('lodash');
 const assert      = require('assert');
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
-const OrbitClient = require('../src/OrbitClient');
+const OrbitClient = require('../src/Client');
 
 // Orbit
 const host     = 'localhost';
