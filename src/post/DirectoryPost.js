@@ -1,9 +1,9 @@
 'use strict';
 
 // A reference to a file
-class FilePost {
+class DirectoryPost {
   constructor(name, hash, size) {
-    this.type = "file";
+    this.type = "directory";
     this.name = name;
     this.hash = hash;
     this.size = size;
@@ -11,4 +11,4 @@ class FilePost {
   }
 }
 
-module.exports = FilePost;
+module.exports = DirectoryPost;

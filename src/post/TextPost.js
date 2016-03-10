@@ -5,8 +5,8 @@ const Encryption = require('orbit-common/lib/Encryption');
 // Simplest type of post: a string
 class TextPost {
   constructor(content) {
-    this.content = content;
     this.type = "text";
+    this.content = content;
     this.ts = new Date().getTime();
   }
 

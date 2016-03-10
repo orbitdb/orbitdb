@@ -51,7 +51,7 @@ class OrbitDB {
 
     if(opts.key) {
       // Key-Value, search latest key first
-      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value);
+      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value); // TODO: use KeyValuePost
     } else if(opts.gt || opts.gte) {
       // Greater than case
       result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false);
@@ -69,7 +69,7 @@ class OrbitDB {
   // Adds an event to the log
   add(channel, password, data) {
     let post;
-    if(data instanceof Post) {
+    if(data.Post) {
       post = data;
     } else {
       // Handle everything else as a string
@@ -84,7 +84,7 @@ class OrbitDB {
     return await(this._write(channel, password, DBOperation.Types.Put, key, post.Hash));
   }
 
-  // Deletes an event based on hash (of the operation)
+  // Deletes an event based on hash (of the operation) or 'key' of a key/val pair
   del(channel, password, hash) {
     return await(this._write(channel, password, DBOperation.Types.Delete, hash, null));
   }
