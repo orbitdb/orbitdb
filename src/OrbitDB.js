@@ -5,8 +5,7 @@ const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
 const OrbitList    = require('./list/OrbitList');
-const Operation    = require('./db/Operation');
-const OpTypes      = require('./db/OpTypes'); // TODO: move to Operation.Types
+const DBOperation  = require('./db/Operation');
 const Post         = require('./post/Post');
 
 class OrbitDB {
@@ -76,18 +75,18 @@ class OrbitDB {
       // Handle everything else as a string
       post = await(Post.create(this._ipfs, Post.Types.Message, data));
     }
-    return await(this._write(channel, password, OpTypes.Add, post.Hash, post.Hash));
+    return await(this._write(channel, password, DBOperation.Types.Add, post.Hash, post.Hash));
   }
 
   // Sets a key-value pair
   put(channel, password, key, data) {
     const post = await(Post.create(this._ipfs, Post.Types.Message, data));
-    return await(this._write(channel, password, OpTypes.Put, key, post.Hash));
+    return await(this._write(channel, password, DBOperation.Types.Put, key, post.Hash));
   }
 
   // Deletes an event based on hash (of the operation)
   del(channel, password, hash) {
-    return await(this._write(channel, password, OpTypes.Delete, hash, null));
+    return await(this._write(channel, password, DBOperation.Types.Delete, hash, null));
   }
 
   deleteChannel(channel, password) {
@@ -104,7 +103,7 @@ class OrbitDB {
     const _createLWWSet = (item) => {
       const wasHandled = Lazy(handled).indexOf(item.key) > -1;
       if(!wasHandled) handled.push(item.key);
-      if(OpTypes.isInsert(item.op) && !wasHandled) return item;
+      if(DBOperation.Types.isInsert(item.op) && !wasHandled) return item;
       return null;
     };
 
@@ -136,7 +135,7 @@ class OrbitDB {
 
   // Write an op to the db
   _write(channel, password, operation, key, value) {
-    const hash = await(Operation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
+    const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
     this.events[channel].emit('write', channel, hash);
     return key;
   }

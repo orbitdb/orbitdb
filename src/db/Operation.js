@@ -2,7 +2,7 @@
 
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
-const ipfsAPI     = require('orbit-common/lib/ipfs-api-promised');
+const OpTypes     = require('./OpTypes');
 const OrbitDBItem = require('../post/OrbitDBItem');
 const Post        = require('../post/Post');
 
@@ -33,6 +33,10 @@ class Operation {
       }));
     })
     return await(createOperationAsync());
+  }
+
+  static get Types() {
+    return OpTypes;
   }
 }
 
