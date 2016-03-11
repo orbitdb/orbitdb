@@ -36,7 +36,7 @@ class Client {
       put: (key, data) => this.db.put(channel, password, key, data),
       get: (key, options) => {
         const items = this._iterator(channel, password, { key: key }).collect();
-        return items[0] ? items[0].content : null; // TODO: use KeyValuePost, currently .content is from TextPost
+        return items[0] ? items[0] : null; // TODO: use KeyValuePost, currently .content is from TextPost
       },
       close: () => this._pubsub.unsubscribe(channel)
     }
