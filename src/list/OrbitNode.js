@@ -30,6 +30,15 @@ class OrbitNode extends Node {
     }));
   }
 
+  hasChild(a) {
+    const id = a.compactId;
+    for(let i = 0; i < this.next.length; i++) {
+      if(this.next[i].compactId === id)
+        return true;
+    }
+    return false;
+  }
+
   _commit() {
     if(!this.hash) {
       const r = await(ipfsAPI.putObject(this._ipfs, JSON.stringify(this.asJson)));

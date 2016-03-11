@@ -9,6 +9,15 @@ class Node {
     this.next = next ? next.map((f) => f.compactId ? f.compactId : f) : [];
   }
 
+  hasChild(a) {
+    const id = a.compactId;
+    for(let i = 0; i < this.next.length; i++) {
+      if(this.next[i] === id)
+        return true;
+    }
+    return false;
+  }
+
   get compactId() {
     return "" + this.id + "." + this.seq + "." + this.ver;
   }
@@ -23,15 +32,6 @@ class Node {
 
   static equals(a, b) {
     return a.id === b.id && a.seq === b.seq && a.ver === b.ver;
-  }
-
-  hasChild(a) {
-    const id = a.compactId;
-    for(let i = 0; i < this.next.length; i++) {
-      if(this.next[i] === id)
-        return true;
-    }
-    return false;
   }
 }
 
