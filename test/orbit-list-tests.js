@@ -7,6 +7,7 @@ const assert     = require('assert');
 const ipfsDaemon = require('orbit-common/lib/ipfs-daemon');
 const ipfsAPI    = require('orbit-common/lib/ipfs-api-promised');
 const List       = require('../src/list/OrbitList');
+const List2      = require('../src/list/List');
 const Node       = require('../src/list/OrbitNode');
 
 const startIpfs = async (() => {
@@ -306,11 +307,9 @@ describe('OrbitList', async(function() {
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(list1.items.length, 7);
-      assert.equal(lastItem.next.length, 2);
+      assert.equal(lastItem.next.length, 1);
       assert.equal(lastItem.next[0].compactId, 'A.3.0');
-      assert.equal(lastItem.next[0].hash, 'QmRnSuNkgqVFMDwdCNMQ83CR3SAWEkAms3zJyP6Pw9bkx4');
-      assert.equal(lastItem.next[1].compactId, 'B.0.1');
-      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(lastItem.next[0].hash, 'QmbHkdCAcDnqBmjWEttEJ96cjhXUHx7b4fR3QyE3YYpczL');
       done();
     }));
 
@@ -361,11 +360,14 @@ describe('OrbitList', async(function() {
       list1.add("helloA3")
 
       assert.equal(list1._currentBatch.length, 2);
-      assert.equal(list1._currentBatch[1].next.length, 2);
+      assert.equal(list1._currentBatch[1].next.length, 1);
       assert.equal(list1._currentBatch[1].next[0].compactId, 'A.1.0');
       assert.equal(list1._currentBatch[1].next[0].hash, 'QmcMUW2F6wqoNtsiV2gXXTvEzXGM9xexN1mgyCLH4LXJ51');
-      assert.equal(list1._currentBatch[1].next[1].compactId, 'B.0.1');
-      assert.equal(list1._currentBatch[1].next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(list1._currentBatch[0].next.length, 2);
+      assert.equal(list1._currentBatch[0].next[0].compactId, 'B.0.1');
+      assert.equal(list1._currentBatch[0].next[0].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(list1._currentBatch[0].next[1].compactId, 'A.0.0');
+      assert.equal(list1._currentBatch[0].next[1].hash, 'QmYTUeiK82guFDyB9tJgHZuBpNkUqNyFBuajYrCsaxPXvW');
       done();
     }));
 
@@ -388,11 +390,9 @@ describe('OrbitList', async(function() {
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(list1.items.length, 7);
-      assert.equal(lastItem.next.length, 2);
+      assert.equal(lastItem.next.length, 1);
       assert.equal(lastItem.next[0].compactId, 'A.2.0');
-      assert.equal(lastItem.next[0].hash, 'QmTS2p5VTk5WkbtjAVC5ALk6NiYinyAWAmet2EhCBCLKmf');
-      assert.equal(lastItem.next[1].compactId, 'B.0.1');
-      assert.equal(lastItem.next[1].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
+      assert.equal(lastItem.next[0].hash, 'QmbKQRZC9HTNSDVypeAudJbDdBuT3DAYRvyREvm6CupKrQ');
       done();
     }));
 
@@ -426,13 +426,9 @@ describe('OrbitList', async(function() {
       const lastItem = list1.items[list1.items.length - 1];
 
       assert.equal(list1.items.length, 11);
-      assert.equal(lastItem.next.length, 4);
+      assert.equal(lastItem.next.length, 2);
       assert.equal(lastItem.next[1].compactId, 'A.4.0');
-      assert.equal(lastItem.next[1].hash, 'QmXXKZDrWAFPUiCdBLJ378xJDBkjdwbVhAqovo6dwChoqx');
-      assert.equal(lastItem.next[3].compactId, 'B.0.1');
-      assert.equal(lastItem.next[3].hash, 'QmVmkwMoz4vnvHQwvFwqaoWCrjonsPpyJ6i436Zajht5ao');
-      assert.equal(lastItem.next[2].compactId, 'C.0.0');
-      assert.equal(lastItem.next[2].hash, 'QmTPfJRsLKPmxYrd82p16mry6vYTMoMFTH2jSbYVR8KvgD');
+      assert.equal(lastItem.next[1].hash, 'QmWPqc6XCK1TCVSz9rayHWQjeMFQEKWhk6VD1ZAU8Vhio7');
       assert.equal(lastItem.next[0].compactId, 'D.0.2');
       assert.equal(lastItem.next[0].hash, 'QmVT3DvmggXq3AdVK7JBfF4Jit3xpbgqP8dFK7TePtit4B');
       done();
@@ -619,24 +615,7 @@ describe('OrbitList', async(function() {
       done();
     }));
 
-    it('joins itself', async((done) => {
-      const list1 = new List(ipfs, 'A');
-      list1.add("helloA1")
-      list1.add("helloA2")
-      list1.add("helloA3")
-      list1.join(list1);
-
-      assert.equal(list1.id, 'A');
-      assert.equal(list1.seq, 1);
-      assert.equal(list1.ver, 0);
-      assert.equal(list1.items.length, 3);
-      assert.equal(list1.items[0].ver, 0);
-      assert.equal(list1.items[1].ver, 1);
-      assert.equal(list1.items[2].ver, 2);
-      done();
-    }));
-
-    it('fetches items from history', async((done) => {
+    it('fetches items from history on join', async((done) => {
       const list1 = new List(ipfs, 'A');
       const list2 = new List(ipfs, 'AAA');
 
@@ -707,16 +686,159 @@ describe('OrbitList', async(function() {
 
   });
 
-  describe('_findHeads', () => {
-    it('TODO', (done) => {
+  describe('findHeads', () => {
+    it('finds the next head', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      const list3 = new List(ipfs, 'C');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.add("helloB1")
+      list2.add("helloB2")
+      list1.join(list2);
+      list1.add("helloA3")
+      list1.add("helloA4")
+      list3.add("helloC1")
+      list3.add("helloC2")
+      list2.join(list3);
+      list2.add("helloB3")
+      list1.join(list2);
+      list1.add("helloA5")
+      list1.add("helloA6")
+
+      const heads = List2.findHeads(list1.items)
+      assert.equal(heads.length, 1);
+      assert.equal(heads[0].compactId, 'A.2.1');
       done();
-    });
+    }));
+
+    it('finds the next heads', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      const list2 = new List(ipfs, 'B');
+      const list3 = new List(ipfs, 'C');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.add("helloB1")
+      list2.add("helloB2")
+      list1.join(list2);
+      list1.add("helloA3")
+      list1.add("helloA4")
+      list3.add("helloC1")
+      list3.add("helloC2")
+      list2.join(list3);
+      list2.add("helloB3")
+      list1.join(list2);
+
+      const heads = List2.findHeads(list1.items)
+      assert.equal(heads.length, 2);
+      assert.equal(heads[0].compactId, 'B.1.0');
+      assert.equal(heads[1].compactId, 'A.1.1');
+      done();
+    }));
   });
 
   describe('_isReferencedInChain', () => {
     it('TODO', (done) => {
       done();
     });
+  });
+
+  describe('is a CRDT', () => {
+    it('join is associative', async((done) => {
+      let list1 = new List(ipfs, 'A');
+      let list2 = new List(ipfs, 'B');
+      let list3 = new List(ipfs, 'C');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.add("helloB1")
+      list2.add("helloB2")
+      list3.add("helloC1")
+      list3.add("helloC2")
+
+      // a + (b + c)
+      list2.join(list3);
+      list1.join(list2);
+
+      const res1 = list1.items.map((e) => e.compactId).join(", ");
+
+      list1 = new List(ipfs, 'A');
+      list2 = new List(ipfs, 'B');
+      list3 = new List(ipfs, 'C');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.add("helloB1")
+      list2.add("helloB2")
+      list3.add("helloC1")
+      list3.add("helloC2")
+
+      // (a + b) + c
+      list1.join(list2);
+      list1.join(list3);
+
+      const res2 = list1.items.map((e) => e.compactId).join(", ");
+
+      // associativity: a + (b + c) == (a + b) + c
+      assert.equal(res1, res2);
+      done();
+    }));
+
+    it('join is commutative', async((done) => {
+      let list1 = new List(ipfs, 'A');
+      let list2 = new List(ipfs, 'B');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.join(list1);
+      list2.add("helloB1")
+      list2.add("helloB2")
+
+      // b + a
+      list2.join(list1);
+
+      const res1 = list2.items.map((e) => e.compactId).join(", ");
+
+      list1 = new List(ipfs, 'A');
+      list2 = new List(ipfs, 'B');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list2.join(list1);
+      list2.add("helloB1")
+      list2.add("helloB2")
+
+      // a + b
+      list1.join(list2);
+
+      const res2 = list1.items.map((e) => e.compactId).join(", ");
+
+      // commutativity: a + (b + c) == (a + b) + c
+      assert.equal(res1, res2);
+      done();
+    }));
+
+
+    it('join is idempotent', async((done) => {
+      const list1 = new List(ipfs, 'A');
+      list1.add("helloA1")
+      list1.add("helloA2")
+      list1.add("helloA3")
+
+      const list2 = new List(ipfs, 'A');
+      list2.add("helloA1")
+      list2.add("helloA2")
+      list2.add("helloA3")
+
+      // idempotence: a + a = a
+      list1.join(list2);
+
+      assert.equal(list1.id, 'A');
+      assert.equal(list1.seq, 1);
+      assert.equal(list1.ver, 0);
+      assert.equal(list1.items.length, 3);
+      assert.equal(list1.items[0].ver, 0);
+      assert.equal(list1.items[1].ver, 1);
+      assert.equal(list1.items[2].ver, 2);
+      done();
+    }));
+
   });
 
 }));
