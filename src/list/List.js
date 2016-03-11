@@ -95,6 +95,18 @@ class List {
   static isReferencedInChain(all, item) {
     return Lazy(all).reverse().find((e) => e.hasChild(item)) !== undefined;
   }
+
+  printTree() {
+    const printCurrent = (f, padding) => {
+      padding += "   |";
+      let s = padding + "-" + f.compactId + " '" + f.data + "'\n";
+      if(f.next.length > 0) {
+        s += f.next.map((e) => printCurrent(e, padding)).join("");
+      }
+      return s;
+    }
+    console.log(" LIST\n" + this.items.reverse().map((e) => printCurrent(e, "")).join(""));
+  }
 }
 
 module.exports = List;
