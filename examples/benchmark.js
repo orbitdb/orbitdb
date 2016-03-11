@@ -2,7 +2,7 @@
 
 var await       = require('asyncawait/await');
 var async       = require('asyncawait/async');
-var OrbitClient = require('../src/OrbitClient');
+var OrbitClient = require('../src/Client');
 var Timer       = require('./Timer');
 
 // usage: benchmark.js <host> <username> <channel>;

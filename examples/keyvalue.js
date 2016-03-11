@@ -2,7 +2,7 @@
 
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
-const OrbitClient = require('../src/OrbitClient');
+const OrbitClient = require('../src/Client');
 const Timer       = require('./Timer');
 
 // usage: keyvalue.js <host> <username> <channel> <key> <value>
