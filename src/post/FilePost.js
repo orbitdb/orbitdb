@@ -1,13 +1,14 @@
 'use strict';
 
+const Post = require('./BasePost');
+
 // A reference to a file
-class FilePost {
+class FilePost extends Post {
   constructor(name, hash, size) {
-    this.type = "file";
+    super("file");
     this.name = name;
     this.hash = hash;
     this.size = size;
-    this.ts = new Date().getTime();
   }
 }
 

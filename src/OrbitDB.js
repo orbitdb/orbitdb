@@ -51,16 +51,13 @@ class OrbitDB {
 
     if(opts.key) {
       // Key-Value, search latest key first
-      result = this._read(operations.reverse(), opts.key, 1, true)
-        .map((f) => f.value["content"]);
+      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value.content);
     } else if(opts.gt || opts.gte) {
       // Greater than case
       result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false)
-        // .map((f) => { return { key: f.key, value: f.value["content"] } });
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
       result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
-        // .map((f) => { return { key: f.key, value: f.value["content"] } });
     }
 
     if(opts.reverse) result.reverse();
@@ -76,14 +73,14 @@ class OrbitDB {
       post = data;
     } else {
       // Handle everything else as a string
-      post = await(Post.create(this._ipfs, Post.Types.Message, data));
+      post = await(Post.create(this._ipfs, Post.Types.Message, { content: data }));
     }
     return await(this._write(channel, password, DBOperation.Types.Add, post.Hash, post.Hash));
   }
 
   // Sets a key-value pair
   put(channel, password, key, data) {
-    const post = await(Post.create(this._ipfs, Post.Types.Message, data));
+    const post = await(Post.create(this._ipfs, Post.Types.Message, { content: data }));
     return await(this._write(channel, password, DBOperation.Types.Put, key, post.Hash));
   }
 

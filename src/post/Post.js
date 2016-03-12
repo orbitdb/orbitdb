@@ -5,6 +5,7 @@ const await       = require('asyncawait/await');
 const ipfsAPI     = require('orbit-common/lib/ipfs-api-promised');
 const Encryption  = require('orbit-common/lib/Encryption');
 
+const Post          = require('./BasePost');
 const TextPost      = require('./TextPost');
 const FilePost      = require('./FilePost');
 const DirectoryPost = require('./DirectoryPost');
@@ -27,17 +28,17 @@ class Posts {
       let post;
 
       if(type === PostTypes.Message) {
-        post = new PostTypes.Message(data);
+        post = new PostTypes.Message(data.content);
       } else if(type === PostTypes.File) {
         post = new PostTypes.File(data.name, data.hash, data.size);
       } else if(type == PostTypes.Directory) {
         post = new PostTypes.Directory(data.name, data.hash, data.size);
       } else if(type == PostTypes.OrbitDBItem) {
-        post = new PostTypes.OrbitDBItem(data.operation, data.key, data.value, data.meta, data.by);
+        post = new PostTypes.OrbitDBItem(data.operation, data.key, data.value);
       }
 
       const size = data.size ? data.size : Buffer.byteLength(data, 'utf8');
-      post.meta = new MetaInfo(post.type, size, new Date().getTime());
+      post.meta = new MetaInfo(post.type, size, new Date().getTime(), data.from);
       if(post.type) delete post.type;
       const res = await (ipfsAPI.putObject(ipfs, JSON.stringify(post)));
       resolve({ Post: post, Hash: res.Hash });

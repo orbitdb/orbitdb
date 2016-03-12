@@ -1,13 +1,13 @@
 'use strict';
 
-class OrbitDBItem {
-  constructor(operation, key, value, metaInfo, by) {
-    this.type = "orbit-db-op";
-    this.op    = operation;
-    this.key   = key;
+const Post = require('./BasePost');
+
+class OrbitDBItem extends Post {
+  constructor(operation, key, value) {
+    super("orbit-db-op");
+    this.op = operation;
+    this.key = key;
     this.value = value;
-    this.meta  = metaInfo;
-    this.by    = by;
   }
 }
 
