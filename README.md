@@ -133,6 +133,10 @@ npm run lint
 - Fix encryption
 - Logging
 - Caching
+- Performance optimisations: 
+  - local caching
+  - remove asyncawait and use promises or callbacks
+  - merge POST and OP (one less object.put)
 
 ## Notes
 ### Data structure description
