@@ -20,10 +20,14 @@ const startIpfs = async (() => {
 let ipfs;
 
 describe('OrbitList', async(function() {
-  this.timeout(5000);
+  this.timeout(15000);
 
   before(async((done) => {
-    ipfs = await(startIpfs());
+    try {
+      ipfs = await(startIpfs());
+    } catch(e) {
+      assert.equals(e, null);
+    }
     done();
   }));
 
