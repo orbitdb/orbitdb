@@ -37,6 +37,11 @@ describe('Orbit Client', function() {
     let items2 = [];
     const itemCount = 5;
 
+    beforeEach(async((done) => {
+      db.delete();
+      done();
+    }));
+
     after(async((done) => {
       db.delete();
       done();
@@ -51,7 +56,7 @@ describe('Orbit Client', function() {
     }));
 
     it('adds a new item to a channel with one item', async((done) => {
-      const head = db.iterator().collect()[0];
+      const head = db.iterator().collect();
       const second = db.add('hello');
       assert.notEqual(second, null);
       assert.notEqual(second, head);
@@ -82,7 +87,7 @@ describe('Orbit Client', function() {
   });
 
   describe('Delete events', function() {
-    before(async((done) => {
+    beforeEach(async((done) => {
       db.delete();
       let items = db.iterator().collect();
       assert.equal(items.length, 0);
@@ -95,7 +100,7 @@ describe('Orbit Client', function() {
     }));
 
     it('deletes an item when only one item in the database', async((done) => {
-      const head = db.add('hello-');
+      const head = db.add('hello1');
       let item = db.iterator().collect();
       const delop = db.del(head);
       const items = db.iterator().collect();
@@ -111,9 +116,8 @@ describe('Orbit Client', function() {
       db.del(head);
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
-      assert.equal(items[0].op, 'ADD');
-      assert.equal(items[0].value.content, 'hello1');
-      assert.notEqual(items[0].value.meta, null);
+      // assert.equal(items[0].op, 'ADD');
+      assert.equal(items[0].value, 'hello1');
       done();
     }));
 
@@ -124,10 +128,10 @@ describe('Orbit Client', function() {
       db.add('hello3');
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
+      assert.equal(items[0].key.startsWith('Qm'), true);
       assert.equal(items[0].hash.startsWith('Qm'), true);
-      assert.equal(items[0].op, 'ADD');
-      assert.equal(items[0].value.content, 'hello3');
-      assert.notEqual(items[0].value.meta, null);
+      // assert.equal(items[0].op, 'ADD');
+      assert.equal(items[0].value, 'hello3');
       done();
     }));
   });
@@ -137,16 +141,17 @@ describe('Orbit Client', function() {
     let items2 = [];
     const itemCount = 5;
 
-    before(async((done) => {
+    beforeEach(async((done) => {
       db.delete();
+      items2 = [];
       for(let i = 0; i < itemCount; i ++) {
         const hash = db.add('hello' + i);
-        items.push(hash);
+        items2.push(hash);
       }
       done();
     }));
 
-    after(async((done) => {
+    afterEach(async((done) => {
       db.delete();
       done();
     }));
@@ -166,28 +171,20 @@ describe('Orbit Client', function() {
         const next = iter.next().value;
 
         assert.notEqual(next, null);
-        assert.notEqual(next.hash, null);
-        assert.equal(next.hash.startsWith('Qm'), true);
-        assert.notEqual(next, null);
-        assert.equal(next.op, 'ADD');
+        assert.notEqual(next.key, null);
+        // assert.equal(next.op, 'ADD');
         assert.equal(next.key.startsWith('Qm'), true);
-        assert.equal(next.value.content, 'hello4');
-        assert.notEqual(next.value.meta, null);
+        assert.equal(next.hash.startsWith('Qm'), true);
+        assert.equal(next.value, 'hello4');
         done();
       }));
 
       it('implements Iterator interface', async((done) => {
-        db.delete();
-        for(let i = 0; i < itemCount; i ++) {
-          const hash = db.add('hello' + i);
-          items2.push(hash);
-        }
-
         const iter = db.iterator({ limit: -1 });
         let messages = [];
 
         for(let i of iter)
-          messages.push(i.hash);
+          messages.push(i.key);
 
         assert.equal(messages.length, items2.length);
         done();
@@ -199,7 +196,7 @@ describe('Orbit Client', function() {
         const second = iter.next().value;
         assert.equal(first.key, items2[items2.length - 1]);
         assert.equal(second, null);
-        assert.equal(first.value.content, 'hello4');
+        assert.equal(first.value, 'hello4');
         done();
       }));
     });
@@ -207,8 +204,8 @@ describe('Orbit Client', function() {
     describe('Collect', function() {
       let items2;
       before(async((done) => {
-          db.delete();
-          items2 = [];
+        db.delete();
+        items2 = [];
         for(let i = 0; i < itemCount; i ++) {
           const hash = db.add('hello' + i);
           items2.push(hash);
@@ -216,17 +213,17 @@ describe('Orbit Client', function() {
         done();
       }));
 
-      after(async((done) => {
-          db.delete();
-          items2 = [];
-          done();
-      }));
+      // after(async((done) => {
+      //     db.delete();
+      //     items2 = [];
+      //     done();
+      // }));
 
       it('returns all items', async((done) => {
         const messages = db.iterator({ limit: -1 }).collect();
-        assert.equal(messages.length, items.length);
-        assert.equal(messages[0].value.content, 'hello0');
-        assert.equal(messages[messages.length - 1].value.content, 'hello4');
+        assert.equal(messages.length, items2.length);
+        assert.equal(messages[0].value, 'hello0');
+        assert.equal(messages[messages.length - 1].value, 'hello4');
         done();
       }));
 
@@ -245,27 +242,27 @@ describe('Orbit Client', function() {
 
     describe('Options: limit', function() {
       let items2;
-      before(async((done) => {
-          db.delete();
-          items2 = [];
-        for(let i = 0; i < itemCount; i ++) {
+      beforeEach(async((done) => {
+        db.delete();
+        items2 = [];
+        for(let i = 1; i <= itemCount; i ++) {
           const hash = db.add('hello' + i);
           items2.push(hash);
         }
         done();
       }));
 
-      after(async((done) => {
-          db.delete();
-          items2 = [];
-          done();
-      }));
+      // after(async((done) => {
+      //     db.delete();
+      //     items2 = [];
+      //     done();
+      // }));
 
       it('returns 1 item when limit is 0', async((done) => {
         const iter = db.iterator({ limit: 1 });
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.key, items2[items.length - 1]);
+        assert.equal(first.key, _.last(items2));
         assert.equal(second, null);
         done();
       }));
@@ -274,7 +271,7 @@ describe('Orbit Client', function() {
         const iter = db.iterator({ limit: 1 });
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.key, items2[items.length - 1]);
+        assert.equal(first.key, _.last(items2));
         assert.equal(second, null);
         done();
       }));
@@ -285,9 +282,9 @@ describe('Orbit Client', function() {
         const second = iter.next().value;
         const third = iter.next().value;
         const fourth = iter.next().value;
-        assert.equal(first.key, items2[items.length - 3]);
-        assert.equal(second.key, items2[items.length - 2]);
-        assert.equal(third.key, items2[items.length - 1]);
+        assert.equal(first.key, items2[items2.length - 3]);
+        assert.equal(second.key, items2[items2.length - 2]);
+        assert.equal(third.key, items2[items2.length - 1]);
         assert.equal(fourth, null);
         done();
       }));
@@ -326,20 +323,14 @@ describe('Orbit Client', function() {
 
     describe('Options: reverse', function() {
       let items2;
-      before(async((done) => {
-          db.delete();
-          items2 = [];
-        for(let i = 0; i < itemCount; i ++) {
+      beforeEach(async((done) => {
+        db.delete();
+        items2 = [];
+        for(let i = 1; i <= itemCount; i ++) {
           const hash = db.add('hello' + i);
           items2.push(hash);
         }
         done();
-      }));
-
-      after(async((done) => {
-          db.delete();
-          items2 = [];
-          done();
       }));
 
       it('returns all items reversed', async((done) => {
@@ -355,19 +346,13 @@ describe('Orbit Client', function() {
 
     describe('Options: ranges', function() {
       let items2;
-      before(async((done) => {
+      beforeEach(async((done) => {
         db.delete();
         items2 = [];
-        for(let i = 0; i < itemCount; i ++) {
+        for(let i = 1; i <= itemCount; i ++) {
           const hash = db.add('hello' + i);
           items2.push(hash);
         }
-        done();
-      }));
-
-      after(async((done) => {
-        db.delete();
-        items2 = [];
         done();
       }));
 
@@ -378,7 +363,7 @@ describe('Orbit Client', function() {
             .map((e) => e.key);
 
           assert.equal(messages.length, 1);
-          assert.equal(messages[0], items2[items.length -1]);
+          assert.equal(messages[0], _.last(items2));
           done();
         }));
 
@@ -407,7 +392,7 @@ describe('Orbit Client', function() {
 
           assert.equal(messages.length, items2.length);
           assert.equal(messages[0], items2[0]);
-          assert.equal(messages[messages.length - 1], items2[items2.length - 1]);
+          assert.equal(messages[messages.length - 1], _.last(items2));
           done();
         }));
 
@@ -418,7 +403,7 @@ describe('Orbit Client', function() {
 
           assert.equal(messages.length, itemCount - 1);
           assert.equal(messages[0], items2[1]);
-          assert.equal(messages[3], items2[items.length - 1]);
+          assert.equal(messages[3], _.last(items2));
           done();
         }));
 
@@ -538,7 +523,7 @@ describe('Orbit Client', function() {
       assert.equal(all.length, 1);
       assert.equal(all[0].hash.startsWith('Qm'), true);
       assert.equal(all[0].key, 'key1');
-      assert.equal(all[0].op, 'PUT');
+      // assert.equal(all[0].op, 'PUT');
       assert.notEqual(all[0].meta, null);
       done();
     }));

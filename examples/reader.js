@@ -38,7 +38,7 @@ let run = (async(() => {
         console.log("---------------------------------------------------")
         console.log("Key | Value")
         console.log("---------------------------------------------------")
-        console.log(items.map((e) => `${e.key} | ${e.value.content}`).join("\n"));
+        console.log(items.map((e) => `${e.key} | ${e.value}`).join("\n"));
         console.log("---------------------------------------------------")
         console.log(`Query 2 #${count} took ${timer2.stop(true)} ms\n`);
 

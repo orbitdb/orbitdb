@@ -25,8 +25,8 @@ DB
 
 ### CRDTs
 - orbit-db is a CmRDT and implements an LWW-element-set
-- operation-based CRDT
-- (locally biased) vector clocks for partial ordering
+- Operation-based CRDT
+- Uses Merkle Trees for partial ordering
 
 ### add/put IO:
 ==> Not expensive

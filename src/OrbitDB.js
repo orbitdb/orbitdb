@@ -41,7 +41,6 @@ class OrbitDB {
   // Get items from the db
   query(channel, password, opts) {
     // console.log("--> Query:", channel, opts);
-
     if(!opts) opts = {};
 
     const operations = Lazy(this._logs[channel].items);
@@ -51,7 +50,7 @@ class OrbitDB {
 
     if(opts.key) {
       // Key-Value, search latest key first
-      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value.content);
+      result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value);
     } else if(opts.gt || opts.gte) {
       // Greater than case
       result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false)
@@ -68,25 +67,17 @@ class OrbitDB {
 
   // Adds an event to the log
   add(channel, password, data) {
-    let post;
-    if(data.Post) {
-      post = data;
-    } else {
-      // Handle everything else as a string
-      post = await(Post.create(this._ipfs, Post.Types.Message, { content: data }));
-    }
-    return await(this._write(channel, password, DBOperation.Types.Add, post.Hash, post.Hash));
+    return await(this._write(channel, password, DBOperation.Types.Add, null, data));
   }
 
   // Sets a key-value pair
   put(channel, password, key, data) {
-    const post = await(Post.create(this._ipfs, Post.Types.Message, { content: data }));
-    return await(this._write(channel, password, DBOperation.Types.Put, key, post.Hash));
+    return await(this._write(channel, password, DBOperation.Types.Put, key, data));
   }
 
   // Deletes an event based on hash (of the operation) or 'key' of a key/val pair
-  del(channel, password, hash) {
-    return await(this._write(channel, password, DBOperation.Types.Delete, hash, null));
+  del(channel, password, key) {
+    return await(this._write(channel, password, DBOperation.Types.Delete, key));
   }
 
   deleteChannel(channel, password) {
@@ -101,9 +92,11 @@ class OrbitDB {
     // Last-Write-Wins, ie. use only the first occurance of the key
     let handled = [];
     const _createLWWSet = (item) => {
-      const wasHandled = Lazy(handled).indexOf(item.key) > -1;
-      if(!wasHandled) handled.push(item.key);
-      if(DBOperation.Types.isInsert(item.op) && !wasHandled) return item;
+      if(Lazy(handled).indexOf(item.key) === -1) {
+        handled.push(item.key);
+        if(DBOperation.Types.isInsert(item.op))
+          return item;
+      }
       return null;
     };
 
@@ -120,8 +113,9 @@ class OrbitDB {
   // Write an op to the db
   _write(channel, password, operation, key, value) {
     const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
-    this.events[channel].emit('write', channel, hash);
-    return key;
+    const listHash = await(this._logs[channel].ipfsHash);
+    this.events[channel].emit('write', channel, listHash);
+    return hash;
   }
 }
 

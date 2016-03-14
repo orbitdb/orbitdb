@@ -2,8 +2,6 @@
 
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
-const ipfsAPI     = require('orbit-common/lib/ipfs-api-promised');
-const Encryption  = require('orbit-common/lib/Encryption');
 
 const Post          = require('./BasePost');
 const TextPost      = require('./TextPost');
@@ -40,7 +38,7 @@ class Posts {
       const size = data.size ? data.size : Buffer.byteLength(data, 'utf8');
       post.meta = new MetaInfo(post.type, size, new Date().getTime(), data.from);
       if(post.type) delete post.type;
-      const res = await (ipfsAPI.putObject(ipfs, JSON.stringify(post)));
+      const res = await(ipfs.object.put(new Buffer(JSON.stringify({ Data: JSON.stringify(post) })), "json"));
       resolve({ Post: post, Hash: res.Hash });
     })
   }

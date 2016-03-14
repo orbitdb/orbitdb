@@ -12,8 +12,7 @@ class Operation {
       return new Promise(async((resolve, reject) => {
         const hash = await(Operation._createOperation(ipfs, user, operation, key, value));
         await(log.add(hash));
-        const listHash = await(log.ipfsHash);
-        resolve(listHash);
+        resolve(hash);
       }));
     })
     return await(createAsync());

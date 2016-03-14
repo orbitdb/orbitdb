@@ -18,7 +18,7 @@ const startIpfs = async (() => {
 let ipfs;
 
 describe('OrbitNode', function() {
-  this.timeout(10000);
+  this.timeout(5000);
 
   before(async((done) => {
     ipfs = await(startIpfs());
@@ -27,37 +27,72 @@ describe('OrbitNode', function() {
 
   describe('Constructor', () => {
     it('initializes member variables', async((done) => {
-      const node = new Node(ipfs, 'A', 0, 0);
+      const node = new Node(ipfs, 'A');
       assert.equal(node.id, 'A');
-      assert.equal(node.seq, 0);
-      assert.equal(node.ver, 0);
       assert.equal(node.data, null);
       assert.equal(node.next.length, 0);
-      assert.equal(node.hash, 'QmNcbwc5V42kkQbnBvtWsmREbUy8PB5cG3J5DTyPWqYkho');
+      assert.equal(node.hash, 'QmbibmqvDT4LHo6oEFRMgRhKUBw6Fn7SLCp57GKu5eY1uY');
       assert.equal(node._ipfs, ipfs);
       done();
     }));
 
     it('initializes member variables with data', async((done) => {
-      const node = new Node(ipfs, 'A', 0, 0, 'QmTnaGEpw4totXN7rhv2jPMXKfL8s65PhhCKL5pwtJfRxn');
+      const node = new Node(ipfs, 'A', 'QmbibmqvDT4LHo6oEFRMgRhKUBw6Fn7SLCp57GKu5eY1uY');
       assert.equal(node.id, 'A');
-      assert.equal(node.seq, 0);
-      assert.equal(node.ver, 0);
-      assert.equal(node.data, 'QmTnaGEpw4totXN7rhv2jPMXKfL8s65PhhCKL5pwtJfRxn');
+      assert.equal(node.data, 'QmbibmqvDT4LHo6oEFRMgRhKUBw6Fn7SLCp57GKu5eY1uY');
       assert.equal(node.next.length, 0);
-      assert.equal(node.hash, 'QmULakc8SCkz5wz3s1TDkQgZWP1yBrhdXMpHJGJY3sV33r');
+      assert.equal(node.hash, 'Qme1c5GGCtkBLZV4dVsZtJj2ZREraupAfyJXrYrzfEVKN5');
       assert.equal(node._ipfs, ipfs);
       done();
     }));
   });
 
-  describe('compactId', () => {
-    it('presents the node as a string with id, sequence, version and hash', async((done) => {
-      const node1 = new Node(ipfs, 'A', 0, 0, "QmTnaGEpw4totXN7rhv2jPMXKfL8s65PhhCKL5pwtJfRxn");
-      const node2 = new Node(ipfs, 'B', 123, 456, "QmdcCucbM2rnHHaVhAmjMxWDY5cCDwtTtjhYuS5nBHThQq");
-      assert.equal(node1.compactId, 'A.0.0');
-      assert.equal(node2.compactId, 'B.123.456');
+  describe('fetchPayload', () => {
+    it('TODO', async((done) => {
       done();
     }));
   });
+
+  describe('hasChild', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('fetchPayload', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('heads', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('ipfsHash', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('asJson', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('fromIpfsHash', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
+  describe('equals', () => {
+    it('TODO', async((done) => {
+      done();
+    }));
+  });
+
 });
