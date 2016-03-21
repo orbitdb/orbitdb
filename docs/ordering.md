@@ -88,7 +88,7 @@ A.join(B)
 ```
 listA.add("kiwi")
 
-// "B": [
+// "A": [
 //   { "id": "A", "seq": 0, "ver": 0, "prev": null}
 //   { "id": "A", "seq": 0, "ver": 1, "prev": ["A.0.0"]}
 //   { "id": "C", "seq": 0, "ver": 0, "prev": null}
