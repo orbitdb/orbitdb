@@ -61,12 +61,12 @@ class Client {
   }
 
   _onLoad(channel, hash) {
-    // console.log("LOAD!", channel, hash)
+    console.log("Loading #" + channel, hash)
     this.events.emit('load', channel, hash);
   }
 
   _onLoaded(channel, hash) {
-    // console.log("LOADED!", channel, hash)
+    console.log("Finished loading #" + channel, hash)
     this.events.emit('loaded', channel, hash);
   }
 
