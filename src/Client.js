@@ -21,7 +21,7 @@ class Client {
     if(password === undefined) password = '';
     if(subscribe === undefined) subscribe = true;
 
-    this.db.use(channel, this.user, password);
+    await(this.db.use(channel, this.user, password));
     this.db.events[channel].on('write', this._onWrite.bind(this));
     this.db.events[channel].on('sync', this._onSync.bind(this));
 
