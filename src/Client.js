@@ -24,6 +24,8 @@ class Client {
     await(this.db.use(channel, this.user, password));
     this.db.events[channel].on('write', this._onWrite.bind(this));
     this.db.events[channel].on('sync', this._onSync.bind(this));
+    this.db.events[channel].on('load', this._onLoad.bind(this));
+    this.db.events[channel].on('loaded', this._onLoaded.bind(this));
 
     if(subscribe)
       this._pubsub.subscribe(channel, password, async((channel, message) => this.db.sync(channel, message)));
@@ -56,6 +58,16 @@ class Client {
 
   _onSync(channel, hash) {
     this.events.emit('data', channel, hash);
+  }
+
+  _onLoad(channel, hash) {
+    // console.log("LOAD!", channel, hash)
+    this.events.emit('load', channel, hash);
+  }
+
+  _onLoaded(channel, hash) {
+    // console.log("LOADED!", channel, hash)
+    this.events.emit('loaded', channel, hash);
   }
 
   _iterator(channel, password, options) {
