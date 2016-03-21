@@ -9,7 +9,6 @@ const OrbitNode = require('./OrbitNode');
 const MaxBatchSize = 10;  // How many items per sequence. Saves a snapshot to ipfs in batches of this many items.
 const MaxHistory   = 256; // How many items to fetch in the chain per join
 
-// class IPFSLWWSet extends LWWSet {
 class OrbitList {
   constructor(ipfs, id, seq, ver, items) {
     this.id = id;

@@ -40,7 +40,7 @@ class Posts {
       if(post.type) delete post.type;
       const res = await(ipfs.object.put(new Buffer(JSON.stringify({ Data: JSON.stringify(post) })), "json"));
       resolve({ Post: post, Hash: res.Hash });
-    })
+    });
   }
 
   static get Types() {
