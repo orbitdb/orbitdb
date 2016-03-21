@@ -4,7 +4,7 @@ const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
-const OrbitList    = require('./list/OrbitList');
+const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
 const Post         = require('./post/Post');
 
@@ -18,7 +18,7 @@ class OrbitDB {
   /* Public methods */
   use(channel, user, password) {
     this.user = user;
-    this._logs[channel] = new OrbitList(this._ipfs, this.user.username);
+    this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
   }
 
@@ -26,7 +26,7 @@ class OrbitDB {
     // console.log("--> Head:", hash)
     if(hash && this._logs[channel]) {
       const oldCount = this._logs[channel].items.length;
-      const other = await(OrbitList.fromIpfsHash(this._ipfs, hash));
+      const other = await(Log.fromIpfsHash(this._ipfs, hash));
       await(this._logs[channel].join(other));
 
       // Only emit the event if something was added
@@ -102,7 +102,7 @@ class OrbitDB {
 
     // Find an items from the sequence (list of operations)
     return sequence
-      .map((f) => await(f.fetchPayload())) // IO - fetch the actual OP from ipfs. consider merging with LL.
+      .map((f) => await(OrbitDB.fetchPayload(this._ipfs, f.payload))) // IO - fetch the actual OP from ipfs. consider merging with LL.
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
       .compact() // Remove nulls
@@ -113,33 +113,26 @@ class OrbitDB {
   // Write an op to the db
   _write(channel, password, operation, key, value) {
     const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
-    const listHash = await(this._logs[channel].ipfsHash);
+    const listHash = await(Log.getIpfsHash(this._ipfs, this._logs[channel]));
     this.events[channel].emit('write', channel, listHash);
     return hash;
+  }
+
+  static fetchPayload(ipfs, hash) {
+    return new Promise((resolve, reject) => {
+      ipfs.object.get(hash)
+        .then((payload) => {
+          let data = JSON.parse(payload.Data);
+          Object.assign(data, { hash: hash });
+          if(data.key === null)
+            Object.assign(data, { key: hash });
+          resolve(data);
+        })
+        .catch(reject);
+    });
   }
 }
 
 // TODO: move to where this is needed
-// static fetchPayload(hash) {
-//   return new Promise(async((resolve, reject) => {
-//     if(hash) {
-//       this._ipfs.object.get(hash)
-//         .then((payload) => {
-//           this.Payload = JSON.parse(payload.Data);
-//           console.log(this.Payload, hash, this.hash)
-//           let res = this.Payload;
-//           Object.assign(res, { hash: hash });
-//           if(this.Payload.key === null)
-//             Object.assign(res, { key: hash });
-//           console.log(this.Payload)
-//           console.log(this)
-//           resolve(res);
-//         })
-//         .catch(reject);
-//     } else {
-//       resolve(this.Payload);
-//     }
-//   }));
-// }
 
 module.exports = OrbitDB;
