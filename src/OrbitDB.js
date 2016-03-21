@@ -67,17 +67,17 @@ class OrbitDB {
 
   // Adds an event to the log
   add(channel, password, data) {
-    return await(this._write(channel, password, DBOperation.Types.Add, null, data));
+    return this._write(channel, password, DBOperation.Types.Add, null, data);
   }
 
   // Sets a key-value pair
   put(channel, password, key, data) {
-    return await(this._write(channel, password, DBOperation.Types.Put, key, data));
+    return this._write(channel, password, DBOperation.Types.Put, key, data);
   }
 
   // Deletes an event based on hash (of the operation) or 'key' of a key/val pair
   del(channel, password, key) {
-    return await(this._write(channel, password, DBOperation.Types.Delete, key));
+    return this._write(channel, password, DBOperation.Types.Delete, key);
   }
 
   deleteChannel(channel, password) {
@@ -105,7 +105,7 @@ class OrbitDB {
       .map((f) => await(f.fetchPayload())) // IO - fetch the actual OP from ipfs. consider merging with LL.
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
-      .filter((f) => f !== null) // Make sure we don't have empty ones
+      .compact() // Remove nulls
       .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
       .take(amount)
   }
@@ -118,5 +118,28 @@ class OrbitDB {
     return hash;
   }
 }
+
+// TODO: move to where this is needed
+// static fetchPayload(hash) {
+//   return new Promise(async((resolve, reject) => {
+//     if(hash) {
+//       this._ipfs.object.get(hash)
+//         .then((payload) => {
+//           this.Payload = JSON.parse(payload.Data);
+//           console.log(this.Payload, hash, this.hash)
+//           let res = this.Payload;
+//           Object.assign(res, { hash: hash });
+//           if(this.Payload.key === null)
+//             Object.assign(res, { key: hash });
+//           console.log(this.Payload)
+//           console.log(this)
+//           resolve(res);
+//         })
+//         .catch(reject);
+//     } else {
+//       resolve(this.Payload);
+//     }
+//   }));
+// }
 
 module.exports = OrbitDB;
