@@ -3,15 +3,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const defaultFilename = 'orbit-db-cache.json';
+const defaultFilepath = path.resolve('./orbit-db-cache.json');
+let filePath = defaultFilepath;
 let cache = {};
 
 class Cache {
   static set(key, value) {
     cache[key] = value;
-    fs.writeFile(path.resolve(defaultFilename), JSON.stringify(cache, null, 2) + "\n", (err) => {
+    fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", (err) => {
       if (err) throw err;
-      // console.log('It\'s saved!', path.resolve(defaultFilename));
+      // console.log('It\'s saved!', filePath);
     });
   }
 
@@ -20,10 +21,10 @@ class Cache {
   }
 
   static loadCache(cacheFile) {
-    cacheFile = cacheFile ? cacheFile : defaultFilename;
-    if(fs.existsSync(path.resolve(defaultFilename))) {
-      console.log('Load cache from', path.resolve(defaultFilename));
-      cache = JSON.parse(fs.readFileSync(path.resolve(defaultFilename)));
+    filePath = cacheFile ? cacheFile : defaultFilepath;
+    if(fs.existsSync(filePath)) {
+      console.log('Load cache from', filePath);
+      cache = JSON.parse(fs.readFileSync(filePath));
     }
   }
 }
