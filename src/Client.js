@@ -8,13 +8,14 @@ const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
 
 class Client {
-  constructor(ipfs, daemon) {
+  constructor(ipfs, options) {
     this._ipfs = ipfs;
     this._pubsub = null;
     this.user = null;
     this.network = null;
     this.events = new EventEmitter();
-    this.db = new OrbitDB(this._ipfs);
+    this.options = options || {};
+    this.db = new OrbitDB(this._ipfs, this.options);
   }
 
   channel(channel, password, subscribe) {
@@ -108,14 +109,15 @@ class Client {
 }
 
 class OrbitClientFactory {
-  static connect(host, port, username, password, allowOffline, ipfs) {
+  static connect(host, port, username, password, ipfs, options) {
+    options = options ? options : {};
     if(!ipfs) {
       let ipfsd = await(ipfsDaemon());
       ipfs = ipfsd.ipfs;
     }
 
-    const client = new Client(ipfs);
-    await(client._connect(host, port, username, password, allowOffline))
+    const client = new Client(ipfs, options);
+    await(client._connect(host, port, username, password, options.allowOffline))
     return client;
   }
 }

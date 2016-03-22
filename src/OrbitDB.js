@@ -10,10 +10,11 @@ const Post         = require('./post/Post');
 const Cache        = require('./Cache');
 
 class OrbitDB {
-  constructor(ipfs) {
+  constructor(ipfs, options) {
     this._ipfs = ipfs;
     this._logs = {};
     this.events = {};
+    this.options = options || {};
   }
 
   /* Public methods */
@@ -23,7 +24,7 @@ class OrbitDB {
     this.events[channel] = new EventEmitter();
 
     this.events[channel].emit('load', channel);
-    Cache.loadCache();
+    Cache.loadCache(this.options.cacheFile);
     this.sync(channel, Cache.get(channel));
     this.events[channel].emit('loaded', channel);
   }

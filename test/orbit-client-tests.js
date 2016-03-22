@@ -21,7 +21,7 @@ describe('Orbit Client', function() {
   let channel = 'abcdefgh';
 
   before(async((done) => {
-    client = await(OrbitClient.connect(host, port, username, password, true));
+    client = await(OrbitClient.connect(host, port, username, password, null, { allowOffline: true }));
     db = client.channel(channel, '', false);
     db.delete();
     done();
