@@ -22,28 +22,26 @@ class OrbitDB {
     this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
 
+    this.events[channel].emit('load', channel);
     Cache.loadCache();
     this.sync(channel, Cache.get(channel));
+    this.events[channel].emit('loaded', channel);
   }
 
   sync(channel, hash) {
-    this.events[channel].emit('load', channel, hash);
-    // setTimeout(async(() => {
-      // console.log("--> Head:", hash)
-      if(hash && this._logs[channel]) {
-        const oldCount = this._logs[channel].items.length;
-        const other = await(Log.fromIpfsHash(this._ipfs, hash));
-        await(this._logs[channel].join(other));
+    // console.log("--> Head:", hash)
+    if(hash && this._logs[channel]) {
+      const oldCount = this._logs[channel].items.length;
+      const other = await(Log.fromIpfsHash(this._ipfs, hash));
+      await(this._logs[channel].join(other));
 
-        // Only emit the event if something was added
-        const joinedCount = (this._logs[channel].items.length - oldCount);
-        if(joinedCount > 0) {
-          this.events[channel].emit('sync', channel, hash);
-          Cache.set(channel, hash);
-        }
+      // Only emit the event if something was added
+      const joinedCount = (this._logs[channel].items.length - oldCount);
+      if(joinedCount > 0) {
+        this.events[channel].emit('sync', channel, hash);
+        Cache.set(channel, hash);
       }
-      this.events[channel].emit('loaded', channel, hash);
-    // }), 3000);
+    }
   }
 
   /* DB Operations */
