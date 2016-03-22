@@ -110,7 +110,7 @@ class OrbitDB {
       return null;
     };
 
-    // Find an items from the sequence (list of operations)
+    // Find the items from the sequence (list of operations)
     return sequence
       .map((f) => await(OrbitDB.fetchPayload(this._ipfs, f.payload))) // IO - fetch the actual OP from ipfs. consider merging with LL.
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
