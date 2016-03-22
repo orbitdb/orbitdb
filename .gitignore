@@ -6,3 +6,4 @@ debug.log
 isolate*.log
 dump.rdb
 Vagrantfile
+orbit-db-cache.json

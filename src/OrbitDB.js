@@ -7,6 +7,7 @@ const await        = require('asyncawait/await');
 const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
 const Post         = require('./post/Post');
+const Cache        = require('./Cache');
 
 class OrbitDB {
   constructor(ipfs) {
@@ -20,6 +21,9 @@ class OrbitDB {
     this.user = user;
     this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
+
+    Cache.loadCache();
+    this.sync(channel, Cache.get(channel));
   }
 
   sync(channel, hash) {
@@ -33,9 +37,10 @@ class OrbitDB {
 
         // Only emit the event if something was added
         const joinedCount = (this._logs[channel].items.length - oldCount);
-        if(joinedCount > 0)
+        if(joinedCount > 0) {
           this.events[channel].emit('sync', channel, hash);
-
+          Cache.set(channel, hash);
+        }
       }
       this.events[channel].emit('loaded', channel, hash);
     // }), 3000);
@@ -120,6 +125,7 @@ class OrbitDB {
     const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
     const listHash = await(Log.getIpfsHash(this._ipfs, this._logs[channel]));
     this.events[channel].emit('write', channel, listHash);
+    Cache.set(channel, listHash);
     return hash;
   }
 
