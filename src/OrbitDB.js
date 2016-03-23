@@ -15,6 +15,7 @@ class OrbitDB {
     this._logs = {};
     this.events = {};
     this.options = options || {};
+    this.lastWrite = null;
   }
 
   /* Public methods */
@@ -29,7 +30,7 @@ class OrbitDB {
 
   sync(channel, hash) {
     // console.log("--> Head:", hash)
-    if(hash && this._logs[channel]) {
+    if(hash && hash !== this.lastWrite && this._logs[channel]) {
       this.events[channel].emit('load', 'sync', channel);
       const oldCount = this._logs[channel].items.length;
       const other = await(Log.fromIpfsHash(this._ipfs, hash));
@@ -125,8 +126,9 @@ class OrbitDB {
   _write(channel, password, operation, key, value) {
     const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
     const listHash = await(Log.getIpfsHash(this._ipfs, this._logs[channel]));
-    this.events[channel].emit('write', channel, listHash);
+    this.lastWrite = listHash;
     Cache.set(channel, listHash);
+    this.events[channel].emit('write', channel, listHash);
     return hash;
   }
 
