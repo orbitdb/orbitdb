@@ -23,15 +23,14 @@ class OrbitDB {
     this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
 
-    this.events[channel].emit('load', channel);
     Cache.loadCache(this.options.cacheFile);
     this.sync(channel, Cache.get(channel));
-    this.events[channel].emit('loaded', channel);
   }
 
   sync(channel, hash) {
     // console.log("--> Head:", hash)
     if(hash && this._logs[channel]) {
+      this.events[channel].emit('load', 'sync', channel);
       const oldCount = this._logs[channel].items.length;
       const other = await(Log.fromIpfsHash(this._ipfs, hash));
       await(this._logs[channel].join(other));
@@ -43,12 +42,14 @@ class OrbitDB {
         Cache.set(channel, hash);
       }
     }
+    this.events[channel].emit('loaded', 'sync', channel);
   }
 
   /* DB Operations */
 
   // Get items from the db
   query(channel, password, opts) {
+    this.events[channel].emit('load', 'query', channel);
     // console.log("--> Query:", channel, opts);
     if(!opts) opts = {};
 
@@ -71,6 +72,7 @@ class OrbitDB {
     if(opts.reverse) result.reverse();
     const res = result.toArray();
     // console.log("--> Found", res.length, "items");
+    this.events[channel].emit('loaded', 'query', channel);
     return res;
   }
 
@@ -116,7 +118,7 @@ class OrbitDB {
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
       .compact() // Remove nulls
       .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
-      .take(amount)
+      .take(amount);
   }
 
   // Write an op to the db
