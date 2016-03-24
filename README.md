@@ -13,6 +13,11 @@ _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for
 
 _OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
 
+## Install
+```
+npm install orbit-db
+```
+
 ## Examples
 Before running the examples, install dependencies with:
 ```
