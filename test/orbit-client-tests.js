@@ -48,7 +48,7 @@ describe('Orbit Client', function() {
     }));
 
     it('adds an item to an empty channel', async((done) => {
-      const head = db.add('hello');
+      const head = await(db.add('hello'));
       assert.notEqual(head, null);
       assert.equal(head.startsWith('Qm'), true);
       assert.equal(head.length, 46);
@@ -57,7 +57,7 @@ describe('Orbit Client', function() {
 
     it('adds a new item to a channel with one item', async((done) => {
       const head = db.iterator().collect();
-      const second = db.add('hello');
+      const second = await(db.add('hello'));
       assert.notEqual(second, null);
       assert.notEqual(second, head);
       assert.equal(second.startsWith('Qm'), true);
@@ -67,7 +67,7 @@ describe('Orbit Client', function() {
 
     it('adds five items', async((done) => {
       for(let i = 0; i < 5; i ++) {
-        let hash = db.add('hello');
+        let hash = await(db.add('hello'));
         assert.notEqual(hash, null);
         assert.equal(hash.startsWith('Qm'), true);
         assert.equal(hash.length, 46);
@@ -100,9 +100,9 @@ describe('Orbit Client', function() {
     }));
 
     it('deletes an item when only one item in the database', async((done) => {
-      const head = db.add('hello1');
+      const head = await(db.add('hello1'));
       let item = db.iterator().collect();
-      const delop = db.del(head);
+      const delop = await(db.del(head));
       const items = db.iterator().collect();
       assert.equal(delop.startsWith('Qm'), true);
       assert.equal(items.length, 0);
@@ -111,9 +111,9 @@ describe('Orbit Client', function() {
 
     it('deletes an item when two items in the database', async((done) => {
       db.delete();
-      db.add('hello1');
-      const head = db.add('hello2');
-      db.del(head);
+      await(db.add('hello1'));
+      const head = await(db.add('hello2'));
+      await(db.del(head));
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
       // assert.equal(items[0].op, 'ADD');
@@ -122,10 +122,10 @@ describe('Orbit Client', function() {
     }));
 
     it('deletes an item between adds', async((done) => {
-      const head = db.add('hello1');
-      db.add('hello2');
+      const head = await(db.add('hello1'));
+      await(db.add('hello2'));
       db.del(head);
-      db.add('hello3');
+      await(db.add('hello3'));
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
       assert.equal(items[0].key.startsWith('Qm'), true);
@@ -145,7 +145,7 @@ describe('Orbit Client', function() {
       db.delete();
       items2 = [];
       for(let i = 0; i < itemCount; i ++) {
-        const hash = db.add('hello' + i);
+        const hash = await(db.add('hello' + i));
         items2.push(hash);
       }
       done();
@@ -207,7 +207,7 @@ describe('Orbit Client', function() {
         db.delete();
         items2 = [];
         for(let i = 0; i < itemCount; i ++) {
-          const hash = db.add('hello' + i);
+          const hash = await(db.add('hello' + i));
           items2.push(hash);
         }
         done();
@@ -246,7 +246,7 @@ describe('Orbit Client', function() {
         db.delete();
         items2 = [];
         for(let i = 1; i <= itemCount; i ++) {
-          const hash = db.add('hello' + i);
+          const hash = await(db.add('hello' + i));
           items2.push(hash);
         }
         done();
@@ -327,7 +327,7 @@ describe('Orbit Client', function() {
         db.delete();
         items2 = [];
         for(let i = 1; i <= itemCount; i ++) {
-          const hash = db.add('hello' + i);
+          const hash = await(db.add('hello' + i));
           items2.push(hash);
         }
         done();
@@ -350,7 +350,7 @@ describe('Orbit Client', function() {
         db.delete();
         items2 = [];
         for(let i = 1; i <= itemCount; i ++) {
-          const hash = db.add('hello' + i);
+          const hash = await(db.add('hello' + i));
           items2.push(hash);
         }
         done();
@@ -518,7 +518,7 @@ describe('Orbit Client', function() {
     }));
 
     it('put', async((done) => {
-      db.put('key1', 'hello!');
+      await(db.put('key1', 'hello!'));
       let all = db.iterator().collect();
       assert.equal(all.length, 1);
       assert.equal(all[0].hash.startsWith('Qm'), true);
@@ -529,51 +529,51 @@ describe('Orbit Client', function() {
     }));
 
     it('get', async((done) => {
-      db.put('key1', 'hello!');
+      await(db.put('key1', 'hello!'));
       const value = db.get('key1');
       assert.equal(value, 'hello!');
       done();
     }));
 
     it('put updates a value', async((done) => {
-      db.put('key1', 'hello!');
-      db.put('key1', 'hello again');
+      await(db.put('key1', 'hello!'));
+      await(db.put('key1', 'hello again'));
       const value = db.get('key1');
       assert.equal(value, 'hello again');
       done();
     }));
 
     it('deletes a key', async((done) => {
-      db.put('key1', 'hello!');
-      db.del('key1');
+      await(db.put('key1', 'hello!'));
+      await(db.del('key1'));
       const value = db.get('key1');
       assert.equal(value, null);
       done();
     }));
 
     it('deletes a key after multiple updates', async((done) => {
-      db.put('key1', 'hello1');
-      db.put('key1', 'hello2');
-      db.put('key1', 'hello3');
-      db.del('key1');
+      await(db.put('key1', 'hello1'));
+      await(db.put('key1', 'hello2'));
+      await(db.put('key1', 'hello3'));
+      await(db.del('key1'));
       const value = db.get('key1');
       assert.equal(value, null);
       done();
     }));
 
     it('put - multiple keys', async((done) => {
-      db.put('key1', 'hello1');
-      db.put('key2', 'hello2');
-      db.put('key3', 'hello3');
+      await(db.put('key1', 'hello1'));
+      await(db.put('key2', 'hello2'));
+      await(db.put('key3', 'hello3'));
       const all = db.iterator().collect();
       assert.equal(all.length, 1);
       done();
     }));
 
     it('get - multiple keys', async((done) => {
-      db.put('key1', 'hello1');
-      db.put('key2', 'hello2');
-      db.put('key3', 'hello3');
+      await(db.put('key1', 'hello1'));
+      await(db.put('key2', 'hello2'));
+      await(db.put('key3', 'hello3'));
       const v1 = db.get('key1');
       const v2 = db.get('key2');
       const v3 = db.get('key3');
@@ -584,7 +584,7 @@ describe('Orbit Client', function() {
     }));
 
     it('get - integer value', async((done) => {
-      db.put('key1', 123);
+      await(db.put('key1', 123));
       const v1 = db.get('key1');
       assert.equal(v1, 123);
       done();
@@ -592,7 +592,7 @@ describe('Orbit Client', function() {
 
     it('get - object value', async((done) => {
       const val = { one: 'first', two: 2 };
-      db.put('key1', val);
+      await(db.put('key1', val));
       const v1 = db.get('key1');
       assert.equal(_.isEqual(v1, val), true);
       done();
@@ -600,86 +600,10 @@ describe('Orbit Client', function() {
 
     it('get - array value', async((done) => {
       const val = [1, 2, 3, 4, 5];
-      db.put('key1', val);
+      await(db.put('key1', val));
       const v1 = db.get('key1');
       assert.equal(_.isEqual(v1, val), true);
       done();
     }));
   });
-
-/*
-  describe('Modes', function() {
-    var password = 'hello';
-
-    it('sets read mode', async((done) => {
-      try {
-        var mode = {
-          mode: "+r",
-          params: {
-            password: password
-          }
-        };
-        var modes = db.setMode(mode)
-        assert.notEqual(modes.r, null);
-        assert.equal(modes.r.password, password);
-      } catch(e) {
-        assert.equal(e, null);
-      }
-      done();
-    }));
-
-    it('can\'t read with wrong password', async((done) => {
-      try {
-        var modes = orbit.channel(channel, 'invalidpassword').iterator();
-        assert.equal(true, false);
-      } catch(e) {
-        assert.equal(e, 'Unauthorized');
-      }
-      done();
-    }));
-
-    it('sets write mode', async((done) => {
-      try {
-        var mode = {
-          mode: "+w",
-          params: {
-            ops: [orbit.user.id]
-          }
-        };
-        var modes = orbit.channel(channel, password).setMode(mode);
-        assert.notEqual(modes.w, null);
-        assert.equal(modes.w.ops[0], orbit.user.id);
-      } catch(e) {
-        assert.equal(e, null);
-      }
-      done();
-    }));
-
-    it('can\'t write when user not an op', async((done) => {
-      // TODO
-      done();
-    }));
-
-    it('removes write mode', async((done) => {
-      try {
-        var modes = orbit.channel(channel, password).setMode({ mode: "-w" });
-        assert.equal(modes.w, null);
-      } catch(e) {
-        assert.equal(e, null);
-      }
-      done();
-    }));
-
-    it('removes read mode', async((done) => {
-      try {
-        var modes = orbit.channel(channel, password).setMode({ mode: "-r" });
-        assert.equal(modes.r, null);
-      } catch(e) {
-        assert.equal(e, null);
-      }
-      done();
-    }));
-
-  });
-*/
 });

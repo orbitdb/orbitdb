@@ -21,11 +21,14 @@ class OrbitDB {
   /* Public methods */
   use(channel, user, password) {
     this.user = user;
-    this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
-
-    Cache.loadCache(this.options.cacheFile);
-    this.sync(channel, Cache.get(channel));
+    return Log.create(this._ipfs, this.user.username)
+      .then((res) => {
+        this._logs[channel] = res;
+        Cache.loadCache(this.options.cacheFile);
+        this.sync(channel, Cache.get(channel));
+        return;
+      });
   }
 
   sync(channel, hash) {
@@ -33,17 +36,20 @@ class OrbitDB {
     if(hash && hash !== this.lastWrite && this._logs[channel]) {
       this.events[channel].emit('load', 'sync', channel);
       const oldCount = this._logs[channel].items.length;
-      const other = await(Log.fromIpfsHash(this._ipfs, hash));
-      await(this._logs[channel].join(other));
-
-      // Only emit the event if something was added
-      const joinedCount = (this._logs[channel].items.length - oldCount);
-      if(joinedCount > 0) {
-        this.events[channel].emit('sync', channel, hash);
-        Cache.set(channel, hash);
-      }
+      Log.fromIpfsHash(this._ipfs, hash).then((other) => {
+        this._logs[channel].join(other).then(() => {
+          // Only emit the event if something was added
+          const joinedCount = (this._logs[channel].items.length - oldCount);
+          if(joinedCount > 0) {
+            this.events[channel].emit('sync', channel, hash);
+            Cache.set(channel, hash);
+          }
+          this.events[channel].emit('loaded', 'sync', channel);
+        });
+      });
+    } else {
+      this.events[channel].emit('loaded', 'sync', channel);
     }
-    this.events[channel].emit('loaded', 'sync', channel);
   }
 
   /* DB Operations */
@@ -93,8 +99,11 @@ class OrbitDB {
   }
 
   deleteChannel(channel, password) {
-    this._logs[channel].clear();
-    return true;
+    if(this._logs[channel]) {
+      this._logs[channel].clear();
+      return true;
+    }
+    return false;
   }
 
   /* Private methods */
@@ -124,12 +133,17 @@ class OrbitDB {
 
   // Write an op to the db
   _write(channel, password, operation, key, value) {
-    const hash = await(DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value));
-    const listHash = await(Log.getIpfsHash(this._ipfs, this._logs[channel]));
-    this.lastWrite = listHash;
-    Cache.set(channel, listHash);
-    this.events[channel].emit('write', channel, listHash);
-    return hash;
+    return new Promise((resolve, reject) => {
+      DBOperation.create(this._ipfs, this._logs[channel], this.user, operation, key, value)
+        .then((hash) => {
+          Log.getIpfsHash(this._ipfs, this._logs[channel]).then((listHash) => {
+            this.lastWrite = listHash;
+            Cache.set(channel, listHash);
+            this.events[channel].emit('write', channel, listHash);
+            resolve(hash);
+          })
+        }).catch(reject);
+    });
   }
 
   static fetchPayload(ipfs, hash) {
@@ -138,8 +152,7 @@ class OrbitDB {
         .then((payload) => {
           let data = JSON.parse(payload.Data);
           Object.assign(data, { hash: hash });
-          if(data.key === null)
-            Object.assign(data, { key: hash });
+          if(data.key === null) Object.assign(data, { key: hash });
           resolve(data);
         })
         .catch(reject);
