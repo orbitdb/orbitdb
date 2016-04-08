@@ -21,14 +21,10 @@ class OrbitDB {
   /* Public methods */
   use(channel, user, password) {
     this.user = user;
+    this._logs[channel] = await(Log.create(this._ipfs, this.user.username));
     this.events[channel] = new EventEmitter();
-    return Log.create(this._ipfs, this.user.username)
-      .then((res) => {
-        this._logs[channel] = res;
-        Cache.loadCache(this.options.cacheFile);
-        this.sync(channel, Cache.get(channel));
-        return;
-      });
+    Cache.loadCache(this.options.cacheFile);
+    this.sync(channel, Cache.get(channel));
   }
 
   sync(channel, hash) {
