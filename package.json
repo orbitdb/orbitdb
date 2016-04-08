@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "Key-Value Store and Event Log on IPFS",
   "author": "Haad",
   "license": "MIT",
