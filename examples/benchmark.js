@@ -50,7 +50,7 @@ let run = (async(() => {
     // let timer = new Timer();
     // while(true) {
       // timer.start();
-      db.add(username + totalQueries);
+      await(db.add(username + totalQueries));
       // console.log(`${timer.stop(true)} ms`);
       totalQueries ++;
       lastTenSeconds ++;
