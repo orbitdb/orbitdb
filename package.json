@@ -17,6 +17,7 @@
     "ipfs-log": "^1.1.3",
     "lazy.js": "^0.4.2",
     "lodash": "^4.3.0",
+    "log4js": "^0.6.33",
     "orbit-common": "^0.2.3",
     "socket.io-client": "^1.4.5"
   },
