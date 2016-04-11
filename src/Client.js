@@ -3,6 +3,7 @@
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
+const logger       = require('orbit-common/lib/logger')("orbit-db.Client");
 const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');

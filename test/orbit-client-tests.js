@@ -6,6 +6,9 @@ const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
 const OrbitClient = require('../src/Client');
 
+// Mute logging
+require('log4js').setGlobalLogLevel('ERROR');
+
 // Orbit
 const host     = 'localhost';
 const port     = 3333;

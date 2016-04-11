@@ -4,6 +4,7 @@ const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
 const async        = require('asyncawait/async');
 const await        = require('asyncawait/await');
+const logger       = require('orbit-common/lib/logger')("orbit-db.OrbitDB");
 const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
 const Post         = require('./post/Post');
