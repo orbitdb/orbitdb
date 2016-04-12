@@ -7,7 +7,7 @@ const await       = require('asyncawait/await');
 const OrbitClient = require('../src/Client');
 
 // Mute logging
-require('log4js').setGlobalLogLevel('ERROR');
+// require('log4js').setGlobalLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';
@@ -20,7 +20,7 @@ describe('Orbit Client', function() {
   let channel = 'abcdefgh';
 
   before(async((done) => {
-    client = await(OrbitClient.connect(null, null, username, password, null, { allowOffline: true }));
+    client = await(OrbitClient.connect('localhost', 3333, username, password, null, { allowOffline: true }));
     db = client.channel(channel, '', false);
     db.delete();
     done();

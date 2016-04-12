@@ -63,12 +63,10 @@ class Client {
   }
 
   _onLoad(channel, hash) {
-    // console.log("Loading #" + channel, hash)
     this.events.emit('load', channel, hash);
   }
 
   _onLoaded(channel, hash) {
-    // console.log("Finished loading #" + channel, hash)
     this.events.emit('loaded', channel, hash);
   }
 
@@ -94,32 +92,50 @@ class Client {
   }
 
   _connect(host, port, username, password, allowOffline) {
-    if(allowOffline === undefined) allowOffline = false;
-    try {
+    return new Promise((resolve, reject) => {
+      if(allowOffline === undefined) allowOffline = false;
+
       this._pubsub = new PubSub(this._ipfs);
-      await(this._pubsub.connect(host, port, username, password));
-    } catch(e) {
-      if(!allowOffline) {
-        this._pubsub.disconnect();
-        throw e;
-      }
-    }
-    this.user = { username: username, id: username } // TODO: user id from ipfs hash
-    this.network = { host: host, port: port, name: 'TODO: network name' }
+      this._pubsub.connect(host, port, username, password).then(() => {
+        logger.debug(`Connected to Pubsub at '${host}:${port}'`);
+        this.user = { username: username, id: username } // TODO: user id from ipfs hash
+        this.network = { host: host, port: port, name: 'TODO: network name' }
+        resolve();
+      }).catch((e) => {
+        logger.warn("Couldn't connect to Pubsub:", e.message);
+        if(!allowOffline) {
+          logger.debug("'allowOffline' set to false, terminating");
+          this._pubsub.disconnect();
+          reject(e);
+          return;
+        }
+        this.user = { username: username, id: username } // TODO: user id from ipfs hash
+        this.network = { host: host, port: port, name: 'TODO: network name' }
+        resolve();
+      });
+    });
   }
 }
 
 class OrbitClientFactory {
   static connect(host, port, username, password, ipfs, options) {
-    options = options ? options : {};
-    if(!ipfs) {
-      let ipfsd = await(ipfsDaemon());
-      ipfs = ipfsd.ipfs;
+    const createClient =(ipfs) => {
+      return new Promise((resolve, reject) => {
+        const client = new Client(ipfs, options);
+        client._connect(host, port, username, password, options.allowOffline)
+          .then(() => resolve(client))
+          .catch(reject);
+      });
     }
 
-    const client = new Client(ipfs, options);
-    await(client._connect(host, port, username, password, options.allowOffline))
-    return client;
+    options = options ? options : {};
+
+    if(!ipfs) {
+      logger.debug("IPFS instance not provided, starting one");
+      return ipfsDaemon().then((ipfsd) => createClient(ipfsd.ipfs));
+    } else {
+      return createClient(ipfs);
+    }
   }
 }
 
