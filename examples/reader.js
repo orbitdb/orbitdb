@@ -14,13 +14,13 @@ const port = 3333;
 const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
 const password = '';
 
+const channelName = process.argv[4] ? process.argv[4] : 'test';
 const prefix = process.argv[5] ? process.argv[5] : 'Hello';
 
 let run = (async(() => {
   try {
-    var orbit = OrbitClient.connect(host, port, username, password);
-    const channelName = process.argv[4] ? process.argv[4] : 'test';
-    const channel = orbit.channel(channelName);
+    const orbit = await(OrbitClient.connect(host, port, username, password));
+    const db = orbit.channel(channelName);
 
     let count = 1;
     let running = false;
@@ -30,11 +30,11 @@ let run = (async(() => {
         running = true;
 
         let timer = new Timer(true);
-        channel.add(prefix + count);
+        await(db.add(prefix + count));
         console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
 
         let timer2 = new Timer(true);
-        let items = channel.iterator({ limit: 20 }).collect();
+        let items = db.iterator({ limit: 20 }).collect();
         console.log("---------------------------------------------------")
         console.log("Key | Value")
         console.log("---------------------------------------------------")

@@ -11,15 +11,15 @@ var Timer       = require('./Timer');
 const host = process.argv[2] ? process.argv[2] : 'localhost'
 const port = 3333;
 
-var username = process.argv[3] ? process.argv[3] : 'testrunner';
-var password = '';
+const username = process.argv[3] ? process.argv[3] : 'testrunner';
+const password = '';
+
+const channelName = process.argv[4] ? process.argv[4] : 'c1';
 
 let run = (async(() => {
   try {
     // Connect
-    var orbit = OrbitClient.connect(host, port, username, password);
-
-    const channelName = process.argv[4] ? process.argv[4] : 'c1';
+    const orbit = await(OrbitClient.connect(host, port, username, password));
     const db = orbit.channel(channelName);
 
     // Metrics
@@ -47,15 +47,13 @@ let run = (async(() => {
     }, 1000);
 
     const query = async(() => {
-    // let timer = new Timer();
-    // while(true) {
+      // let timer = new Timer();
       // timer.start();
       await(db.add(username + totalQueries));
       // console.log(`${timer.stop(true)} ms`);
       totalQueries ++;
       lastTenSeconds ++;
       queriesPerSecond ++;
-    // }
       process.nextTick(query);
     });
 
