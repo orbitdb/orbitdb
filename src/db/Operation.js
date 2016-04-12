@@ -7,13 +7,14 @@ const Post        = require('../post/Post');
 class Operation {
   static create(ipfs, log, user, operation, key, value, data) {
     return new Promise((resolve, reject) => {
-      let hash;
+      let post;
       Operation._createOperation(ipfs, user, operation, key, value)
-        .then((res) => {
-          hash = res;
-          return log.add(hash);
+        .then((op) => {
+          post = op.Post;
+          // console.log(op)
+          return log.add(op.Hash);
         })
-        .then(() => resolve(hash))
+        .then((node) => resolve({ node: node, op: post }))
         .catch(reject);
     });
   }
@@ -27,7 +28,7 @@ class Operation {
         by: user.id || 'empty'
       };
       Post.create(ipfs, Post.Types.OrbitDBItem, data)
-        .then((op) => resolve(op.Hash))
+        .then(resolve)
         .catch(reject);
     });
   }

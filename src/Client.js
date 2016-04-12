@@ -23,14 +23,14 @@ class Client {
     if(password === undefined) password = '';
     if(subscribe === undefined) subscribe = true;
 
-    await(this.db.use(channel, this.user, password));
+    await(this.db.use(channel, this.user));
     this.db.events[channel].on('write', this._onWrite.bind(this));
     this.db.events[channel].on('sync', this._onSync.bind(this));
     this.db.events[channel].on('load', this._onLoad.bind(this));
     this.db.events[channel].on('loaded', this._onLoaded.bind(this));
 
     if(subscribe)
-      this._pubsub.subscribe(channel, password, async((channel, message) => this.db.sync(channel, message)));
+      this._pubsub.subscribe(channel, password, async((channel, message) => await(this.db.sync(channel, message))));
 
     return {
       iterator: (options) => this._iterator(channel, password, options),
