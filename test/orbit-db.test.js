@@ -12,7 +12,7 @@ const OrbitDB    = require('../src/OrbitDB');
 const Log        = require('ipfs-log');
 
 // Mute logging
-// require('log4js').setGlobalLogLevel('ERROR');
+require('log4js').setGlobalLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';
@@ -152,8 +152,6 @@ describe('OrbitDB', function() {
       }));
 
       it('doesn\'t emit \'sync\' event if items weren\'t merged', async((done) => {
-        const h1 = await(Log.getIpfsHash(ipfs, log));
-        console.log(h1, otherLogHash)
         db._logs[channel] = log;
         db.events[channel].on('sync', (channelName, hash) => {
           assert.equal(false, true);
@@ -165,7 +163,7 @@ describe('OrbitDB', function() {
     });
 
     describe('cache payloads', function() {
-      it('caches payloads', (done) => {
+      it('fetches payloads', (done) => {
         assert.equal(db._cached.length, 0);
         db.events[channel].on('loaded', (src, channelName) => {
           assert.equal(db._cached.length, 3);

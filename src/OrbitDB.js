@@ -3,8 +3,6 @@
 const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
 const Promise      = require('bluebird');
-const async        = require('asyncawait/async');
-const await        = require('asyncawait/await');
 const logger       = require('orbit-common/lib/logger')("orbit-db.OrbitDB");
 const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
@@ -38,30 +36,21 @@ class OrbitDB {
   }
 
   sync(channel, hash) {
-    console.log("--> Head:", hash)
+    // console.log("--> Head:", hash)
     if(hash && hash !== this.lastWrite && this._logs[channel]) {
       this.events[channel].emit('load', 'sync', channel);
       const oldCount = this._logs[channel].items.length;
       Log.fromIpfsHash(this._ipfs, hash).then((other) => {
         this._logs[channel].join(other).then(() => {
           // Only emit the event if something was added
-          const joinedCount = (this._logs[channel].items.length - oldCount);
-          console.log("JOIN", joinedCount);
+          const joinedCount = this._logs[channel].items.length - oldCount;
           if(joinedCount > 0) {
             this.events[channel].emit('sync', channel, hash);
             Cache.set(channel, hash);
-
             // Cache the payloads
-            const payloadHashes = other.items.map((f) => f.payload);
-            Promise.map(payloadHashes, (f) => {
-              return OrbitDB.fetchPayload(this._ipfs, f);
-            }, { concurrency: 1 }).then((r) => {
-              r.forEach((f) => this._cached.push(f));
-              this.events[channel].emit('loaded', 'sync', channel);
-            }).catch((e) => {
-              this.events[channel].emit('error', e.message);
-            });
-
+            this._cacheOperations(other)
+              .then(() => this.events[channel].emit('loaded', 'sync', channel))
+              .catch((e) => this.events[channel].emit('error', e.message));
           } else {
             this.events[channel].emit('loaded', 'sync', channel);
           }
@@ -82,17 +71,7 @@ class OrbitDB {
 
     if(!this._cached) this._cached = [];
 
-    const operations = Lazy(this._logs[channel].items)
-      // .map((f) => {
-      //   let res = Lazy(this._cached).findWhere({ hash: f.payload });
-      //   if(!res) {
-      //     const payload = await(OrbitDB.fetchPayload(this._ipfs, f.payload));
-      //     this._cached.push(payload);
-      //     res = payload;
-      //   }
-      //   return res;
-      // })
-
+    const operations = Lazy(this._logs[channel].items);
     const amount = opts.limit ? (opts.limit > -1 ? opts.limit : this._logs[channel].items.length) : 1; // Return 1 if no limit is provided
 
     let result = [];
@@ -101,13 +80,16 @@ class OrbitDB {
       // Key-Value, search latest key first
       result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value);
     } else if(opts.gt || opts.gte) {
+      // console.log(1)
       // Greater than case
       result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false)
     } else {
+      // console.log(2)
       // Lower than and lastN case, search latest first by reversing the sequence
       result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
     }
 
+    // console.log("++", result.toArray())
     if(opts.reverse) result.reverse();
     const res = result.toArray();
     // console.log("--> Found", res.length, "items");
@@ -145,6 +127,7 @@ class OrbitDB {
     // Last-Write-Wins, ie. use only the first occurance of the key
     let handled = [];
     const _createLWWSet = (item) => {
+      // console.log("-->", item, handled)
       if(Lazy(handled).indexOf(item.key) === -1) {
         handled.push(item.key);
         if(DBOperation.Types.isInsert(item.op))
@@ -154,9 +137,17 @@ class OrbitDB {
     };
 
     // Find the items from the sequence (list of operations)
+    // console.log("333", this._cached)
     return sequence
-      // .map((f) => await(OrbitDB.fetchPayload(this._ipfs, f.payload))) // IO - fetch the actual OP from ipfs. consider merging with LL.
+      .map((f) => Lazy(this._cached).find((e) => {
+        // console.log("e", e, f)
+        return e.hash === f.payload
+      }))
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
+      .map((f) => {
+        // console.log("f", f, "key", key);
+        return f;
+      })
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
       .compact() // Remove nulls
       .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
@@ -182,6 +173,19 @@ class OrbitDB {
             resolve(res.node.payload);
           })
         }).catch(reject);
+    });
+  }
+
+  // Cache DB operation entries in memory from a log
+  _cacheOperations(log) {
+    return new Promise((resolve, reject) => {
+      const payloadHashes = log.items.map((f) => f.payload);
+      Promise.map(payloadHashes, (f) => OrbitDB.fetchPayload(this._ipfs, f), { concurrency: 4 })
+        .then((payloads) => {
+          payloads.forEach((f) => this._cached.push(f));
+          resolve();
+        })
+        .catch(reject);
     });
   }
 
