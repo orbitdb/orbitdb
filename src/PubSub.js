@@ -1,6 +1,7 @@
 'use strict';
 
-const io = require('socket.io-client');
+const io     = require('socket.io-client');
+const logger = require('orbit-common/lib/logger')("orbit-db.Pubsub");
 
 class Pubsub {
   constructor(ipfs) {
@@ -17,9 +18,9 @@ class Pubsub {
         this._socket = io.connect(`http://${host}:${port}`, { 'forceNew': true });
 
       this._socket.on('connect', resolve);
-      this._socket.on('connect_error', (err) => reject(new Error(`Connection refused to ${host}:${port}`)));
-      this._socket.on('disconnect', (socket) => console.log(`Disconnected from http://${host}:${port}`));
-      this._socket.on('error', (e) => console.log('Pubsub socket error:', e));
+      this._socket.on('connect_error', (err) => reject(new Error(`Connection refused to Pubsub at '${host}:${port}'`)));
+      this._socket.on('disconnect', (socket) => logger.warn(`Disconnected from Pubsub at 'http://${host}:${port}'`));
+      this._socket.on('error', (e) => logger.error('Pubsub socket error:', e));
       this._socket.on('message', this._handleMessage.bind(this));
       this._socket.on('subscribed', this._handleMessage.bind(this));
     });
