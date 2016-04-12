@@ -4,7 +4,6 @@ const _          = require('lodash');
 const fs         = require('fs');
 const path       = require('path');
 const assert     = require('assert');
-const sinon      = require('sinon');
 const async      = require('asyncawait/async');
 const await      = require('asyncawait/await');
 const ipfsDaemon = require('orbit-common/lib/ipfs-daemon');
