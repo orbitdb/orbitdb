@@ -12,7 +12,7 @@ const OrbitDB    = require('../src/OrbitDB');
 const Log        = require('ipfs-log');
 
 // Mute logging
-require('log4js').setGlobalLogLevel('ERROR');
+// require('log4js').setGlobalLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';
@@ -173,11 +173,10 @@ describe('OrbitDB', function() {
       });
 
       it('throws an error if fetching went wrong', (done) => {
-        db.events[channel].once('error', (e) => {
-          assert.equal(e, 'invalid ipfs ref path');
+        db.sync(channel, otherLogHash).catch((e) => {
+          assert.equal(e.message, 'invalid ipfs ref path');
           done();
-        });
-        db.sync(channel, otherLogHash);
+        })
       });
     });
 

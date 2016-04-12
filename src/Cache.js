@@ -11,9 +11,7 @@ let cache = {};
 class Cache {
   static set(key, value) {
     cache[key] = value;
-    fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(filePath, JSON.stringify(cache, null, 2) + "\n");
   }
 
   static get(key) {
