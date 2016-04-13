@@ -19,12 +19,13 @@ const password = '';
 const user = { username: username };
 
 describe('OrbitDB', function() {
-  this.timeout(20000);
+  this.timeout(1000);
 
   let db, ipfs;
   let channel = 'orbit-db.test';
 
-  before(async((done) => {
+  before(async(function(done) {
+    this.timeout(20000);
     try {
       const daemon = await(ipfsDaemon());
       ipfs = daemon.ipfs;

@@ -15,13 +15,14 @@ const username = 'testrunner';
 const password = '';
 
 describe('Orbit Client', function() {
-  this.timeout(20000);
+  this.timeout(1000);
 
   let client, db;
   let channel = 'abcdefgh';
   const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json');
 
-  before(async((done) => {
+  before(async(function (done) {
+    this.timeout(20000);
     client = await(OrbitClient.connect('localhost', 3333, username, password, null, { allowOffline: true }));
     db = await(client.channel(channel, '', false));
     db.delete();
