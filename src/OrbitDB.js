@@ -133,12 +133,27 @@ class OrbitDB {
 
   /* Private methods */
 
+  // Cache DB operation entries in memory from a log
+  _cacheOperations(log) {
+    return new Promise((resolve, reject) => {
+      const payloadHashes = log.items
+        .map((f) => f.payload)
+        .filter((f) => Lazy(this._cached).find((e) => e.hash === f.payload) === undefined);
+
+      Promise.map(payloadHashes, (f) => OrbitDB.fetchPayload(this._ipfs, f), { concurrency: 4 })
+        .then((payloads) => {
+          payloads.forEach((f) => this._cached.push(f));
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
+
   // LWW-element-set
   _read(sequence, key, amount, inclusive) {
     // Last-Write-Wins, ie. use only the first occurance of the key
     let handled = [];
     const _createLWWSet = (item) => {
-      // console.log("-->", item, handled)
       if(Lazy(handled).indexOf(item.key) === -1) {
         handled.push(item.key);
         if(DBOperation.Types.isInsert(item.op))
@@ -148,16 +163,13 @@ class OrbitDB {
     };
 
     // Find the items from the sequence (list of operations)
-    // console.log("333", this._cached)
     return sequence
       .map((f) => Lazy(this._cached).find((e) => {
-        // console.log("e", e, f)
         return e.hash === f.payload
       }))
       .compact() // Remove nulls
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
       .map((f) => {
-        // console.log("f", f, "key", key);
         return f;
       })
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
@@ -185,22 +197,6 @@ class OrbitDB {
             resolve(res.node.payload);
           })
         }).catch(reject);
-    });
-  }
-
-  // Cache DB operation entries in memory from a log
-  _cacheOperations(log) {
-    return new Promise((resolve, reject) => {
-      const payloadHashes = log.items
-        .map((f) => f.payload)
-        .filter((f) => Lazy(this._cached).find((e) => e.hash === f.payload) === undefined);
-
-      Promise.map(payloadHashes, (f) => OrbitDB.fetchPayload(this._ipfs, f), { concurrency: 4 })
-        .then((payloads) => {
-          payloads.forEach((f) => this._cached.push(f));
-          resolve();
-        })
-        .catch(reject);
     });
   }
 
