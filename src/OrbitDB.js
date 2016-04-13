@@ -51,11 +51,11 @@ class OrbitDB {
             // Only emit the event if something was added
             const joinedCount = this._logs[channel].items.length - oldCount;
             if(joinedCount > 0) {
-              this.events[channel].emit('sync', channel, hash);
               Cache.set(channel, hash);
               // Cache the payloads
               this._cacheOperations(this._logs[channel])
                 .then(() => {
+                  this.events[channel].emit('sync', channel, hash);
                   this.events[channel].emit('loaded', 'sync', channel);
                   resolve();
                 })
