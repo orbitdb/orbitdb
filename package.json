@@ -13,7 +13,6 @@
   },
   "main": "src/Client.js",
   "dependencies": {
-    "asyncawait": "^1.0.1",
     "ipfs-log": "^1.1.4",
     "lazy.js": "^0.4.2",
     "lodash": "^4.3.0",
@@ -22,6 +21,7 @@
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
+    "asyncawait": "^1.0.1",
     "eslint": "^2.3.0",
     "mocha": "^2.3.4"
   },
