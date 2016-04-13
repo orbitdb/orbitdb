@@ -11,7 +11,6 @@ class Operation {
       Operation._createOperation(ipfs, user, operation, key, value)
         .then((op) => {
           post = op.Post;
-          // console.log(op)
           return log.add(op.Hash);
         })
         .then((node) => resolve({ node: node, op: post }))
@@ -24,8 +23,7 @@ class Operation {
       const data = {
         operation: operation,
         key: key,
-        value: value,
-        by: user.id || 'empty'
+        value: value
       };
       Post.create(ipfs, Post.Types.OrbitDBItem, data)
         .then(resolve)
