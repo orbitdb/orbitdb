@@ -1,8 +1,6 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const async        = require('asyncawait/async');
-const await        = require('asyncawait/await');
 const logger       = require('orbit-common/lib/logger')("orbit-db.Client");
 const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const PubSub       = require('./PubSub');
@@ -23,27 +21,33 @@ class Client {
     if(password === undefined) password = '';
     if(subscribe === undefined) subscribe = true;
 
-    await(this.db.use(channel, this.user));
-    this.db.events[channel].on('write', this._onWrite.bind(this));
-    this.db.events[channel].on('sync', this._onSync.bind(this));
-    this.db.events[channel].on('load', this._onLoad.bind(this));
-    this.db.events[channel].on('loaded', this._onLoaded.bind(this));
-
-    if(subscribe)
-      this._pubsub.subscribe(channel, password, async((channel, message) => await(this.db.sync(channel, message))));
-
-    return {
+    const api = {
       iterator: (options) => this._iterator(channel, password, options),
       delete: () => this.db.deleteChannel(channel, password),
       del: (key) => this.db.del(channel, password, key),
       add: (data) => this.db.add(channel, password, data),
-      put: (key, data) => this.db.put(channel, password, key, data),
+      put: (key, value) => this.db.put(channel, password, key, value),
       get: (key) => {
         const items = this._iterator(channel, password, { key: key }).collect();
         return items[0] ? items[0] : null;
       },
       close: () => this._pubsub.unsubscribe(channel)
     }
+
+    return new Promise((resolve, reject) => {
+      // Hook to the events from the db and pubsub
+      this.db.use(channel, this.user).then(() => {
+        this.db.events[channel].on('write',  this._onWrite.bind(this));
+        this.db.events[channel].on('sync',   this._onSync.bind(this));
+        this.db.events[channel].on('load',   this._onLoad.bind(this));
+        this.db.events[channel].on('loaded', this._onLoaded.bind(this));
+
+        if(subscribe)
+          this._pubsub.subscribe(channel, password, this._onMessage.bind(this));
+
+        resolve(api);
+      }).catch(reject);
+    });
   }
 
   disconnect() {
@@ -51,6 +55,10 @@ class Client {
     this._store = {};
     this.user = null;
     this.network = null;
+  }
+
+  _onMessage(channel, message) {
+    this.db.sync(channel, message);
   }
 
   _onWrite(channel, hash) {

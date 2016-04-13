@@ -15,7 +15,7 @@ const username = 'testrunner';
 const password = '';
 
 describe('Orbit Client', function() {
-  this.timeout(20000);
+  this.timeout(2000);
 
   let client, db;
   let channel = 'abcdefgh';
@@ -23,7 +23,7 @@ describe('Orbit Client', function() {
 
   before(async((done) => {
     client = await(OrbitClient.connect('localhost', 3333, username, password, null, { allowOffline: true }));
-    db = client.channel(channel, '', false);
+    db = await(client.channel(channel, '', false));
     db.delete();
     done();
   }));
@@ -31,6 +31,77 @@ describe('Orbit Client', function() {
   after(() => {
     if(db) db.delete();
     if(client) client.disconnect();
+  });
+
+  describe('API', function() {
+    let api;
+
+    const getFunctionParams = (f) => {
+      let res = f.toString().split('=>')[0].replace('(', '').replace(')', '').replace(' ', '').split(',');
+      res = res.map((f) => f.trim());
+      if(res[0] === '') res = [];
+      return res;
+    };
+
+    beforeEach(async((done) => {
+      api = await(client.channel('api'));
+      done();
+    }));
+
+    it('returns an \'iterator\' function', async((done) => {
+      assert.equal(typeof api.iterator === 'function', true);
+      const params = getFunctionParams(api.iterator);
+      assert.equal(params.length, 1);
+      assert.equal(params[0], 'options');
+      done();
+    }));
+
+    it('returns a \'delete\' function', async((done) => {
+      assert.equal(typeof api.delete === 'function', true);
+      const params = getFunctionParams(api.delete);
+      assert.equal(params.length, 0);
+      done();
+    }));
+
+    it('returns a \'del\' function', async((done) => {
+      assert.equal(typeof api.del === 'function', true);
+      const params = getFunctionParams(api.del);
+      assert.equal(params.length, 1);
+      assert.equal(params[0], 'key');
+      done();
+    }));
+
+    it('returns a \'add\' function', async((done) => {
+      assert.equal(typeof api.add === 'function', true);
+      const params = getFunctionParams(api.add);
+      assert.equal(params.length, 1);
+      assert.equal(params[0], 'data');
+      done();
+    }));
+
+    it('returns a \'put\' function', async((done) => {
+      assert.equal(typeof api.put === 'function', true);
+      const params = getFunctionParams(api.put);
+      assert.equal(params.length, 2);
+      assert.equal(params[0], 'key');
+      assert.equal(params[1], 'value');
+      done();
+    }));
+
+    it('returns a \'get\' function', async((done) => {
+      assert.equal(typeof api.get === 'function', true);
+      const params = getFunctionParams(api.get);
+      assert.equal(params.length, 1);
+      assert.equal(params[0], 'key');
+      done();
+    }));
+
+    it('returns a \'close\' function', async((done) => {
+      assert.equal(typeof api.close === 'function', true);
+      const params = getFunctionParams(api.close);
+      assert.equal(params.length, 0);
+      done();
+    }));
   });
 
   describe('Add events', function() {
