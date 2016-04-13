@@ -2,7 +2,6 @@
 
 const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
-const Promise      = require('bluebird');
 const logger       = require('orbit-common/lib/logger')("orbit-db.OrbitDB");
 const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
@@ -139,12 +138,11 @@ class OrbitDB {
         .map((f) => f.payload)
         .filter((f) => Lazy(this._cached).find((e) => e.hash === f.payload) === undefined);
 
-      Promise.map(payloadHashes, (f) => OrbitDB.fetchPayload(this._ipfs, f), { concurrency: 4 })
-        .then((payloads) => {
-          payloads.forEach((f) => this._cached.push(f));
-          resolve();
-        })
-        .catch(reject);
+      const promises = payloadHashes.map((f) => OrbitDB.fetchPayload(this._ipfs, f));
+      Promise.all(promises).then((payloads) => {
+        payloads.forEach((f) => this._cached.push(f));
+        resolve();
+      }).catch(reject);
     });
   }
 

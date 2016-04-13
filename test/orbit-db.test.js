@@ -11,7 +11,7 @@ const OrbitDB    = require('../src/OrbitDB');
 const Log        = require('ipfs-log');
 
 // Mute logging
-// require('log4js').setGlobalLogLevel('ERROR');
+require('log4js').setGlobalLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';
@@ -19,7 +19,7 @@ const password = '';
 const user = { username: username };
 
 describe('OrbitDB', function() {
-  this.timeout(2000);
+  this.timeout(20000);
 
   let db, ipfs;
   let channel = 'orbit-db.test';
