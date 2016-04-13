@@ -20,7 +20,7 @@ const prefix = process.argv[5] ? process.argv[5] : 'Hello';
 let run = (async(() => {
   try {
     const orbit = await(OrbitClient.connect(host, port, username, password));
-    const db = orbit.channel(channelName);
+    const db = await(orbit.channel(channelName));
 
     let count = 1;
     let running = false;

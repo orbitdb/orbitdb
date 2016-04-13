@@ -14,11 +14,12 @@ const port = 3333;
 const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
 const password = '';
 
+const channel = process.argv[4] ? process.argv[4] : 'testing123';
+
 let run = (async(() => {
   try {
-    const orbit = OrbitClient.connect(host, port, username, password);
-    const channel = process.argv[4] ? process.argv[4] : 'testing123';
-    const db = orbit.channel(channel);
+    const orbit = await(OrbitClient.connect(host, port, username, password));
+    const db = await(orbit.channel(channelName));
 
     let count = 1;
 

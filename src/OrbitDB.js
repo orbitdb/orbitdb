@@ -100,7 +100,6 @@ class OrbitDB {
       result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
     }
 
-    // console.log("++", result.toArray())
     if(opts.reverse) result.reverse();
     const res = result.toArray();
     // console.log("--> Found", res.length, "items", this._logs[channel].items.length);

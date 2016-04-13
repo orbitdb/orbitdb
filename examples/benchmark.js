@@ -20,7 +20,7 @@ let run = (async(() => {
   try {
     // Connect
     const orbit = await(OrbitClient.connect(host, port, username, password));
-    const db = orbit.channel(channelName);
+    const db = await(orbit.channel(channelName));
 
     // Metrics
     let totalQueries = 0;
@@ -49,11 +49,15 @@ let run = (async(() => {
     const query = async(() => {
       // let timer = new Timer();
       // timer.start();
-      await(db.add(username + totalQueries));
-      // console.log(`${timer.stop(true)} ms`);
-      totalQueries ++;
-      lastTenSeconds ++;
-      queriesPerSecond ++;
+      try {
+        await(db.add(username + totalQueries));
+        // console.log(`${timer.stop(true)} ms`);
+        totalQueries ++;
+        lastTenSeconds ++;
+        queriesPerSecond ++;
+      } catch(e) {
+        console.log(e);
+      }
       process.nextTick(query);
     });
 
