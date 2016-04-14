@@ -15,7 +15,7 @@ const username = 'testrunner';
 const password = '';
 
 describe('Orbit Client', function() {
-  this.timeout(1000);
+  this.timeout(3000);
 
   let client, db;
   let channel = 'abcdefgh';

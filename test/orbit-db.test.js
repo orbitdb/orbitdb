@@ -19,7 +19,7 @@ const password = '';
 const user = { username: username };
 
 describe('OrbitDB', function() {
-  this.timeout(1000);
+  this.timeout(3000);
 
   let db, ipfs;
   let channel = 'orbit-db.test';
