@@ -11,7 +11,7 @@ const OrbitDB    = require('../src/OrbitDB');
 const Log        = require('ipfs-log');
 
 // Mute logging
-require('log4js').setGlobalLogLevel('ERROR');
+require('logplease').setLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';

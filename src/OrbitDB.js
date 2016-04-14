@@ -2,7 +2,7 @@
 
 const Lazy         = require('lazy.js');
 const EventEmitter = require('events').EventEmitter;
-const logger       = require('orbit-common/lib/logger')("orbit-db.OrbitDB");
+const logger       = require('logplease').create("orbit-db.OrbitDB");
 const Log          = require('ipfs-log');
 const DBOperation  = require('./db/Operation');
 const Post         = require('./post/Post');

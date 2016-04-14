@@ -1,8 +1,8 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const logger       = require('orbit-common/lib/logger')("orbit-db.Client");
 const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
+const logger       = require('logplease').create("orbit-db.Client");
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
 

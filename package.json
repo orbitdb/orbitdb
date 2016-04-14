@@ -15,7 +15,7 @@
   "dependencies": {
     "ipfs-log": "^1.1.5",
     "lazy.js": "^0.4.2",
-    "log4js": "^0.6.33",
+    "logplease": "^1.2.2",
     "orbit-common": "^0.2.4",
     "socket.io-client": "^1.4.5"
   },

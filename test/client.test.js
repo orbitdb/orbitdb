@@ -8,7 +8,7 @@ const await       = require('asyncawait/await');
 const OrbitClient = require('../src/Client');
 
 // Mute logging
-require('log4js').setGlobalLogLevel('ERROR');
+require('logplease').setLogLevel('ERROR');
 
 // Orbit
 const username = 'testrunner';

@@ -1,7 +1,7 @@
 'use strict';
 
 const io     = require('socket.io-client');
-const logger = require('orbit-common/lib/logger')("orbit-db.Pubsub");
+const logger = require('logplease').create("orbit-db.Pubsub");
 
 class Pubsub {
   constructor(ipfs) {
