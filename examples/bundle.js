@@ -47,9 +47,9 @@
 	'use strict';
 
 	var ipfsAPI = __webpack_require__(1);
-	var Logger = __webpack_require__(199);
+	var Logger = __webpack_require__(192);
 	var logger = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false });
-	var OrbitDB = __webpack_require__(224);
+	var OrbitDB = __webpack_require__(193);
 
 	var host = '178.62.241.75';
 	var port = 3333;
@@ -98,8 +98,8 @@
 	const multiaddr = __webpack_require__(6)
 
 	const loadCommands = __webpack_require__(24)
-	const getConfig = __webpack_require__(173)
-	const getRequestAPI = __webpack_require__(175)
+	const getConfig = __webpack_require__(166)
+	const getRequestAPI = __webpack_require__(168)
 
 	exports = module.exports = IpfsAPI
 
@@ -6689,16 +6689,16 @@
 	    id: __webpack_require__(144),
 	    files: __webpack_require__(145),
 	    log: __webpack_require__(146),
-	    ls: __webpack_require__(163),
-	    mount: __webpack_require__(164),
-	    name: __webpack_require__(165),
-	    object: __webpack_require__(166),
-	    pin: __webpack_require__(167),
-	    ping: __webpack_require__(168),
-	    refs: __webpack_require__(169),
-	    swarm: __webpack_require__(170),
-	    update: __webpack_require__(171),
-	    version: __webpack_require__(172)
+	    ls: __webpack_require__(156),
+	    mount: __webpack_require__(157),
+	    name: __webpack_require__(158),
+	    object: __webpack_require__(159),
+	    pin: __webpack_require__(160),
+	    ping: __webpack_require__(161),
+	    refs: __webpack_require__(162),
+	    swarm: __webpack_require__(163),
+	    update: __webpack_require__(164),
+	    version: __webpack_require__(165)
 	  }
 	}
 
@@ -18839,7 +18839,7 @@
 
 	'use strict';
 
-	var through = __webpack_require__(156)
+	var through = __webpack_require__(148)
 
 	function transform(chunk, enc, cb) {
 	  var list = chunk.toString('utf8').split(this.matcher)
@@ -18910,1819 +18910,6 @@
 /* 156 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {var Transform = __webpack_require__(157)
-	  , inherits  = __webpack_require__(118).inherits
-	  , xtend     = __webpack_require__(12)
-
-	function DestroyableTransform(opts) {
-	  Transform.call(this, opts)
-	  this._destroyed = false
-	}
-
-	inherits(DestroyableTransform, Transform)
-
-	DestroyableTransform.prototype.destroy = function(err) {
-	  if (this._destroyed) return
-	  this._destroyed = true
-	  
-	  var self = this
-	  process.nextTick(function() {
-	    if (err)
-	      self.emit('error', err)
-	    self.emit('close')
-	  })
-	}
-
-	// a noop _transform function
-	function noop (chunk, enc, callback) {
-	  callback(null, chunk)
-	}
-
-
-	// create a new export function, used by both the main export and
-	// the .ctor export, contains common logic for dealing with arguments
-	function through2 (construct) {
-	  return function (options, transform, flush) {
-	    if (typeof options == 'function') {
-	      flush     = transform
-	      transform = options
-	      options   = {}
-	    }
-
-	    if (typeof transform != 'function')
-	      transform = noop
-
-	    if (typeof flush != 'function')
-	      flush = null
-
-	    return construct(options, transform, flush)
-	  }
-	}
-
-
-	// main export, just make me a transform stream!
-	module.exports = through2(function (options, transform, flush) {
-	  var t2 = new DestroyableTransform(options)
-
-	  t2._transform = transform
-
-	  if (flush)
-	    t2._flush = flush
-
-	  return t2
-	})
-
-
-	// make me a reusable prototype that I can `new`, or implicitly `new`
-	// with a constructor call
-	module.exports.ctor = through2(function (options, transform, flush) {
-	  function Through2 (override) {
-	    if (!(this instanceof Through2))
-	      return new Through2(override)
-
-	    this.options = xtend(options, override)
-
-	    DestroyableTransform.call(this, this.options)
-	  }
-
-	  inherits(Through2, DestroyableTransform)
-
-	  Through2.prototype._transform = transform
-
-	  if (flush)
-	    Through2.prototype._flush = flush
-
-	  return Through2
-	})
-
-
-	module.exports.obj = through2(function (options, transform, flush) {
-	  var t2 = new DestroyableTransform(xtend({ objectMode: true, highWaterMark: 16 }, options))
-
-	  t2._transform = transform
-
-	  if (flush)
-	    t2._flush = flush
-
-	  return t2
-	})
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
-
-/***/ },
-/* 157 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(158)
-
-
-/***/ },
-/* 158 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-	// a transform stream is a readable/writable stream where you do
-	// something with the data.  Sometimes it's called a "filter",
-	// but that's not a great name for it, since that implies a thing where
-	// some bits pass through, and others are simply ignored.  (That would
-	// be a valid example of a transform, of course.)
-	//
-	// While the output is causally related to the input, it's not a
-	// necessarily symmetric or synchronous transformation.  For example,
-	// a zlib stream might take multiple plain-text writes(), and then
-	// emit a single compressed chunk some time in the future.
-	//
-	// Here's how this works:
-	//
-	// The Transform stream has all the aspects of the readable and writable
-	// stream classes.  When you write(chunk), that calls _write(chunk,cb)
-	// internally, and returns false if there's a lot of pending writes
-	// buffered up.  When you call read(), that calls _read(n) until
-	// there's enough pending readable data buffered up.
-	//
-	// In a transform stream, the written data is placed in a buffer.  When
-	// _read(n) is called, it transforms the queued up data, calling the
-	// buffered _write cb's as it consumes chunks.  If consuming a single
-	// written chunk would result in multiple output chunks, then the first
-	// outputted bit calls the readcb, and subsequent chunks just go into
-	// the read buffer, and will cause it to emit 'readable' if necessary.
-	//
-	// This way, back-pressure is actually determined by the reading side,
-	// since _read has to be called to start processing a new chunk.  However,
-	// a pathological inflate type of transform can cause excessive buffering
-	// here.  For example, imagine a stream where every byte of input is
-	// interpreted as an integer from 0-255, and then results in that many
-	// bytes of output.  Writing the 4 bytes {ff,ff,ff,ff} would result in
-	// 1kb of data being output.  In this case, you could write a very small
-	// amount of input, and end up with a very large amount of output.  In
-	// such a pathological inflating mechanism, there'd be no way to tell
-	// the system to stop doing the transform.  A single 4MB write could
-	// cause the system to run out of memory.
-	//
-	// However, even in such a pathological case, only a single written chunk
-	// would be consumed, and then the rest would wait (un-transformed) until
-	// the results of the previous transformed chunk were consumed.
-
-	module.exports = Transform;
-
-	var Duplex = __webpack_require__(159);
-
-	/*<replacement>*/
-	var util = __webpack_require__(56);
-	util.inherits = __webpack_require__(50);
-	/*</replacement>*/
-
-	util.inherits(Transform, Duplex);
-
-
-	function TransformState(options, stream) {
-	  this.afterTransform = function(er, data) {
-	    return afterTransform(stream, er, data);
-	  };
-
-	  this.needTransform = false;
-	  this.transforming = false;
-	  this.writecb = null;
-	  this.writechunk = null;
-	}
-
-	function afterTransform(stream, er, data) {
-	  var ts = stream._transformState;
-	  ts.transforming = false;
-
-	  var cb = ts.writecb;
-
-	  if (!cb)
-	    return stream.emit('error', new Error('no writecb in Transform class'));
-
-	  ts.writechunk = null;
-	  ts.writecb = null;
-
-	  if (data !== null && data !== undefined)
-	    stream.push(data);
-
-	  if (cb)
-	    cb(er);
-
-	  var rs = stream._readableState;
-	  rs.reading = false;
-	  if (rs.needReadable || rs.length < rs.highWaterMark) {
-	    stream._read(rs.highWaterMark);
-	  }
-	}
-
-
-	function Transform(options) {
-	  if (!(this instanceof Transform))
-	    return new Transform(options);
-
-	  Duplex.call(this, options);
-
-	  var ts = this._transformState = new TransformState(options, this);
-
-	  // when the writable side finishes, then flush out anything remaining.
-	  var stream = this;
-
-	  // start out asking for a readable event once data is transformed.
-	  this._readableState.needReadable = true;
-
-	  // we have implemented the _read method, and done the other things
-	  // that Readable wants before the first _read call, so unset the
-	  // sync guard flag.
-	  this._readableState.sync = false;
-
-	  this.once('finish', function() {
-	    if ('function' === typeof this._flush)
-	      this._flush(function(er) {
-	        done(stream, er);
-	      });
-	    else
-	      done(stream);
-	  });
-	}
-
-	Transform.prototype.push = function(chunk, encoding) {
-	  this._transformState.needTransform = false;
-	  return Duplex.prototype.push.call(this, chunk, encoding);
-	};
-
-	// This is the part where you do stuff!
-	// override this function in implementation classes.
-	// 'chunk' is an input chunk.
-	//
-	// Call `push(newChunk)` to pass along transformed output
-	// to the readable side.  You may call 'push' zero or more times.
-	//
-	// Call `cb(err)` when you are done with this chunk.  If you pass
-	// an error, then that'll put the hurt on the whole operation.  If you
-	// never call cb(), then you'll never get another chunk.
-	Transform.prototype._transform = function(chunk, encoding, cb) {
-	  throw new Error('not implemented');
-	};
-
-	Transform.prototype._write = function(chunk, encoding, cb) {
-	  var ts = this._transformState;
-	  ts.writecb = cb;
-	  ts.writechunk = chunk;
-	  ts.writeencoding = encoding;
-	  if (!ts.transforming) {
-	    var rs = this._readableState;
-	    if (ts.needTransform ||
-	        rs.needReadable ||
-	        rs.length < rs.highWaterMark)
-	      this._read(rs.highWaterMark);
-	  }
-	};
-
-	// Doesn't matter what the args are here.
-	// _transform does all the work.
-	// That we got here means that the readable side wants more data.
-	Transform.prototype._read = function(n) {
-	  var ts = this._transformState;
-
-	  if (ts.writechunk !== null && ts.writecb && !ts.transforming) {
-	    ts.transforming = true;
-	    this._transform(ts.writechunk, ts.writeencoding, ts.afterTransform);
-	  } else {
-	    // mark that we need a transform, so that any data that comes in
-	    // will get processed, now that we've asked for it.
-	    ts.needTransform = true;
-	  }
-	};
-
-
-	function done(stream, er) {
-	  if (er)
-	    return stream.emit('error', er);
-
-	  // if there's nothing in the write buffer, then that means
-	  // that nothing more will ever be provided
-	  var ws = stream._writableState;
-	  var rs = stream._readableState;
-	  var ts = stream._transformState;
-
-	  if (ws.length)
-	    throw new Error('calling transform done when ws.length != 0');
-
-	  if (ts.transforming)
-	    throw new Error('calling transform done when still transforming');
-
-	  return stream.push(null);
-	}
-
-
-/***/ },
-/* 159 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	// a duplex stream is just a stream that is both readable and writable.
-	// Since JS doesn't have multiple prototypal inheritance, this class
-	// prototypally inherits from Readable, and then parasitically from
-	// Writable.
-
-	module.exports = Duplex;
-
-	/*<replacement>*/
-	var objectKeys = Object.keys || function (obj) {
-	  var keys = [];
-	  for (var key in obj) keys.push(key);
-	  return keys;
-	}
-	/*</replacement>*/
-
-
-	/*<replacement>*/
-	var util = __webpack_require__(56);
-	util.inherits = __webpack_require__(50);
-	/*</replacement>*/
-
-	var Readable = __webpack_require__(160);
-	var Writable = __webpack_require__(162);
-
-	util.inherits(Duplex, Readable);
-
-	forEach(objectKeys(Writable.prototype), function(method) {
-	  if (!Duplex.prototype[method])
-	    Duplex.prototype[method] = Writable.prototype[method];
-	});
-
-	function Duplex(options) {
-	  if (!(this instanceof Duplex))
-	    return new Duplex(options);
-
-	  Readable.call(this, options);
-	  Writable.call(this, options);
-
-	  if (options && options.readable === false)
-	    this.readable = false;
-
-	  if (options && options.writable === false)
-	    this.writable = false;
-
-	  this.allowHalfOpen = true;
-	  if (options && options.allowHalfOpen === false)
-	    this.allowHalfOpen = false;
-
-	  this.once('end', onend);
-	}
-
-	// the no-half-open enforcer
-	function onend() {
-	  // if we allow half-open state, or if the writable side ended,
-	  // then we're ok.
-	  if (this.allowHalfOpen || this._writableState.ended)
-	    return;
-
-	  // no more data can be written.
-	  // But allow more writes to happen in this tick.
-	  process.nextTick(this.end.bind(this));
-	}
-
-	function forEach (xs, f) {
-	  for (var i = 0, l = xs.length; i < l; i++) {
-	    f(xs[i], i);
-	  }
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
-
-/***/ },
-/* 160 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	module.exports = Readable;
-
-	/*<replacement>*/
-	var isArray = __webpack_require__(161);
-	/*</replacement>*/
-
-
-	/*<replacement>*/
-	var Buffer = __webpack_require__(2).Buffer;
-	/*</replacement>*/
-
-	Readable.ReadableState = ReadableState;
-
-	var EE = __webpack_require__(41).EventEmitter;
-
-	/*<replacement>*/
-	if (!EE.listenerCount) EE.listenerCount = function(emitter, type) {
-	  return emitter.listeners(type).length;
-	};
-	/*</replacement>*/
-
-	var Stream = __webpack_require__(52);
-
-	/*<replacement>*/
-	var util = __webpack_require__(56);
-	util.inherits = __webpack_require__(50);
-	/*</replacement>*/
-
-	var StringDecoder;
-
-	util.inherits(Readable, Stream);
-
-	function ReadableState(options, stream) {
-	  options = options || {};
-
-	  // the point at which it stops calling _read() to fill the buffer
-	  // Note: 0 is a valid value, means "don't call _read preemptively ever"
-	  var hwm = options.highWaterMark;
-	  this.highWaterMark = (hwm || hwm === 0) ? hwm : 16 * 1024;
-
-	  // cast to ints.
-	  this.highWaterMark = ~~this.highWaterMark;
-
-	  this.buffer = [];
-	  this.length = 0;
-	  this.pipes = null;
-	  this.pipesCount = 0;
-	  this.flowing = false;
-	  this.ended = false;
-	  this.endEmitted = false;
-	  this.reading = false;
-
-	  // In streams that never have any data, and do push(null) right away,
-	  // the consumer can miss the 'end' event if they do some I/O before
-	  // consuming the stream.  So, we don't emit('end') until some reading
-	  // happens.
-	  this.calledRead = false;
-
-	  // a flag to be able to tell if the onwrite cb is called immediately,
-	  // or on a later tick.  We set this to true at first, becuase any
-	  // actions that shouldn't happen until "later" should generally also
-	  // not happen before the first write call.
-	  this.sync = true;
-
-	  // whenever we return null, then we set a flag to say
-	  // that we're awaiting a 'readable' event emission.
-	  this.needReadable = false;
-	  this.emittedReadable = false;
-	  this.readableListening = false;
-
-
-	  // object stream flag. Used to make read(n) ignore n and to
-	  // make all the buffer merging and length checks go away
-	  this.objectMode = !!options.objectMode;
-
-	  // Crypto is kind of old and crusty.  Historically, its default string
-	  // encoding is 'binary' so we have to make this configurable.
-	  // Everything else in the universe uses 'utf8', though.
-	  this.defaultEncoding = options.defaultEncoding || 'utf8';
-
-	  // when piping, we only care about 'readable' events that happen
-	  // after read()ing all the bytes and not getting any pushback.
-	  this.ranOut = false;
-
-	  // the number of writers that are awaiting a drain event in .pipe()s
-	  this.awaitDrain = 0;
-
-	  // if true, a maybeReadMore has been scheduled
-	  this.readingMore = false;
-
-	  this.decoder = null;
-	  this.encoding = null;
-	  if (options.encoding) {
-	    if (!StringDecoder)
-	      StringDecoder = __webpack_require__(60).StringDecoder;
-	    this.decoder = new StringDecoder(options.encoding);
-	    this.encoding = options.encoding;
-	  }
-	}
-
-	function Readable(options) {
-	  if (!(this instanceof Readable))
-	    return new Readable(options);
-
-	  this._readableState = new ReadableState(options, this);
-
-	  // legacy
-	  this.readable = true;
-
-	  Stream.call(this);
-	}
-
-	// Manually shove something into the read() buffer.
-	// This returns true if the highWaterMark has not been hit yet,
-	// similar to how Writable.write() returns true if you should
-	// write() some more.
-	Readable.prototype.push = function(chunk, encoding) {
-	  var state = this._readableState;
-
-	  if (typeof chunk === 'string' && !state.objectMode) {
-	    encoding = encoding || state.defaultEncoding;
-	    if (encoding !== state.encoding) {
-	      chunk = new Buffer(chunk, encoding);
-	      encoding = '';
-	    }
-	  }
-
-	  return readableAddChunk(this, state, chunk, encoding, false);
-	};
-
-	// Unshift should *always* be something directly out of read()
-	Readable.prototype.unshift = function(chunk) {
-	  var state = this._readableState;
-	  return readableAddChunk(this, state, chunk, '', true);
-	};
-
-	function readableAddChunk(stream, state, chunk, encoding, addToFront) {
-	  var er = chunkInvalid(state, chunk);
-	  if (er) {
-	    stream.emit('error', er);
-	  } else if (chunk === null || chunk === undefined) {
-	    state.reading = false;
-	    if (!state.ended)
-	      onEofChunk(stream, state);
-	  } else if (state.objectMode || chunk && chunk.length > 0) {
-	    if (state.ended && !addToFront) {
-	      var e = new Error('stream.push() after EOF');
-	      stream.emit('error', e);
-	    } else if (state.endEmitted && addToFront) {
-	      var e = new Error('stream.unshift() after end event');
-	      stream.emit('error', e);
-	    } else {
-	      if (state.decoder && !addToFront && !encoding)
-	        chunk = state.decoder.write(chunk);
-
-	      // update the buffer info.
-	      state.length += state.objectMode ? 1 : chunk.length;
-	      if (addToFront) {
-	        state.buffer.unshift(chunk);
-	      } else {
-	        state.reading = false;
-	        state.buffer.push(chunk);
-	      }
-
-	      if (state.needReadable)
-	        emitReadable(stream);
-
-	      maybeReadMore(stream, state);
-	    }
-	  } else if (!addToFront) {
-	    state.reading = false;
-	  }
-
-	  return needMoreData(state);
-	}
-
-
-
-	// if it's past the high water mark, we can push in some more.
-	// Also, if we have no data yet, we can stand some
-	// more bytes.  This is to work around cases where hwm=0,
-	// such as the repl.  Also, if the push() triggered a
-	// readable event, and the user called read(largeNumber) such that
-	// needReadable was set, then we ought to push more, so that another
-	// 'readable' event will be triggered.
-	function needMoreData(state) {
-	  return !state.ended &&
-	         (state.needReadable ||
-	          state.length < state.highWaterMark ||
-	          state.length === 0);
-	}
-
-	// backwards compatibility.
-	Readable.prototype.setEncoding = function(enc) {
-	  if (!StringDecoder)
-	    StringDecoder = __webpack_require__(60).StringDecoder;
-	  this._readableState.decoder = new StringDecoder(enc);
-	  this._readableState.encoding = enc;
-	};
-
-	// Don't raise the hwm > 128MB
-	var MAX_HWM = 0x800000;
-	function roundUpToNextPowerOf2(n) {
-	  if (n >= MAX_HWM) {
-	    n = MAX_HWM;
-	  } else {
-	    // Get the next highest power of 2
-	    n--;
-	    for (var p = 1; p < 32; p <<= 1) n |= n >> p;
-	    n++;
-	  }
-	  return n;
-	}
-
-	function howMuchToRead(n, state) {
-	  if (state.length === 0 && state.ended)
-	    return 0;
-
-	  if (state.objectMode)
-	    return n === 0 ? 0 : 1;
-
-	  if (n === null || isNaN(n)) {
-	    // only flow one buffer at a time
-	    if (state.flowing && state.buffer.length)
-	      return state.buffer[0].length;
-	    else
-	      return state.length;
-	  }
-
-	  if (n <= 0)
-	    return 0;
-
-	  // If we're asking for more than the target buffer level,
-	  // then raise the water mark.  Bump up to the next highest
-	  // power of 2, to prevent increasing it excessively in tiny
-	  // amounts.
-	  if (n > state.highWaterMark)
-	    state.highWaterMark = roundUpToNextPowerOf2(n);
-
-	  // don't have that much.  return null, unless we've ended.
-	  if (n > state.length) {
-	    if (!state.ended) {
-	      state.needReadable = true;
-	      return 0;
-	    } else
-	      return state.length;
-	  }
-
-	  return n;
-	}
-
-	// you can override either this method, or the async _read(n) below.
-	Readable.prototype.read = function(n) {
-	  var state = this._readableState;
-	  state.calledRead = true;
-	  var nOrig = n;
-	  var ret;
-
-	  if (typeof n !== 'number' || n > 0)
-	    state.emittedReadable = false;
-
-	  // if we're doing read(0) to trigger a readable event, but we
-	  // already have a bunch of data in the buffer, then just trigger
-	  // the 'readable' event and move on.
-	  if (n === 0 &&
-	      state.needReadable &&
-	      (state.length >= state.highWaterMark || state.ended)) {
-	    emitReadable(this);
-	    return null;
-	  }
-
-	  n = howMuchToRead(n, state);
-
-	  // if we've ended, and we're now clear, then finish it up.
-	  if (n === 0 && state.ended) {
-	    ret = null;
-
-	    // In cases where the decoder did not receive enough data
-	    // to produce a full chunk, then immediately received an
-	    // EOF, state.buffer will contain [<Buffer >, <Buffer 00 ...>].
-	    // howMuchToRead will see this and coerce the amount to
-	    // read to zero (because it's looking at the length of the
-	    // first <Buffer > in state.buffer), and we'll end up here.
-	    //
-	    // This can only happen via state.decoder -- no other venue
-	    // exists for pushing a zero-length chunk into state.buffer
-	    // and triggering this behavior. In this case, we return our
-	    // remaining data and end the stream, if appropriate.
-	    if (state.length > 0 && state.decoder) {
-	      ret = fromList(n, state);
-	      state.length -= ret.length;
-	    }
-
-	    if (state.length === 0)
-	      endReadable(this);
-
-	    return ret;
-	  }
-
-	  // All the actual chunk generation logic needs to be
-	  // *below* the call to _read.  The reason is that in certain
-	  // synthetic stream cases, such as passthrough streams, _read
-	  // may be a completely synchronous operation which may change
-	  // the state of the read buffer, providing enough data when
-	  // before there was *not* enough.
-	  //
-	  // So, the steps are:
-	  // 1. Figure out what the state of things will be after we do
-	  // a read from the buffer.
-	  //
-	  // 2. If that resulting state will trigger a _read, then call _read.
-	  // Note that this may be asynchronous, or synchronous.  Yes, it is
-	  // deeply ugly to write APIs this way, but that still doesn't mean
-	  // that the Readable class should behave improperly, as streams are
-	  // designed to be sync/async agnostic.
-	  // Take note if the _read call is sync or async (ie, if the read call
-	  // has returned yet), so that we know whether or not it's safe to emit
-	  // 'readable' etc.
-	  //
-	  // 3. Actually pull the requested chunks out of the buffer and return.
-
-	  // if we need a readable event, then we need to do some reading.
-	  var doRead = state.needReadable;
-
-	  // if we currently have less than the highWaterMark, then also read some
-	  if (state.length - n <= state.highWaterMark)
-	    doRead = true;
-
-	  // however, if we've ended, then there's no point, and if we're already
-	  // reading, then it's unnecessary.
-	  if (state.ended || state.reading)
-	    doRead = false;
-
-	  if (doRead) {
-	    state.reading = true;
-	    state.sync = true;
-	    // if the length is currently zero, then we *need* a readable event.
-	    if (state.length === 0)
-	      state.needReadable = true;
-	    // call internal read method
-	    this._read(state.highWaterMark);
-	    state.sync = false;
-	  }
-
-	  // If _read called its callback synchronously, then `reading`
-	  // will be false, and we need to re-evaluate how much data we
-	  // can return to the user.
-	  if (doRead && !state.reading)
-	    n = howMuchToRead(nOrig, state);
-
-	  if (n > 0)
-	    ret = fromList(n, state);
-	  else
-	    ret = null;
-
-	  if (ret === null) {
-	    state.needReadable = true;
-	    n = 0;
-	  }
-
-	  state.length -= n;
-
-	  // If we have nothing in the buffer, then we want to know
-	  // as soon as we *do* get something into the buffer.
-	  if (state.length === 0 && !state.ended)
-	    state.needReadable = true;
-
-	  // If we happened to read() exactly the remaining amount in the
-	  // buffer, and the EOF has been seen at this point, then make sure
-	  // that we emit 'end' on the very next tick.
-	  if (state.ended && !state.endEmitted && state.length === 0)
-	    endReadable(this);
-
-	  return ret;
-	};
-
-	function chunkInvalid(state, chunk) {
-	  var er = null;
-	  if (!Buffer.isBuffer(chunk) &&
-	      'string' !== typeof chunk &&
-	      chunk !== null &&
-	      chunk !== undefined &&
-	      !state.objectMode) {
-	    er = new TypeError('Invalid non-string/buffer chunk');
-	  }
-	  return er;
-	}
-
-
-	function onEofChunk(stream, state) {
-	  if (state.decoder && !state.ended) {
-	    var chunk = state.decoder.end();
-	    if (chunk && chunk.length) {
-	      state.buffer.push(chunk);
-	      state.length += state.objectMode ? 1 : chunk.length;
-	    }
-	  }
-	  state.ended = true;
-
-	  // if we've ended and we have some data left, then emit
-	  // 'readable' now to make sure it gets picked up.
-	  if (state.length > 0)
-	    emitReadable(stream);
-	  else
-	    endReadable(stream);
-	}
-
-	// Don't emit readable right away in sync mode, because this can trigger
-	// another read() call => stack overflow.  This way, it might trigger
-	// a nextTick recursion warning, but that's not so bad.
-	function emitReadable(stream) {
-	  var state = stream._readableState;
-	  state.needReadable = false;
-	  if (state.emittedReadable)
-	    return;
-
-	  state.emittedReadable = true;
-	  if (state.sync)
-	    process.nextTick(function() {
-	      emitReadable_(stream);
-	    });
-	  else
-	    emitReadable_(stream);
-	}
-
-	function emitReadable_(stream) {
-	  stream.emit('readable');
-	}
-
-
-	// at this point, the user has presumably seen the 'readable' event,
-	// and called read() to consume some data.  that may have triggered
-	// in turn another _read(n) call, in which case reading = true if
-	// it's in progress.
-	// However, if we're not ended, or reading, and the length < hwm,
-	// then go ahead and try to read some more preemptively.
-	function maybeReadMore(stream, state) {
-	  if (!state.readingMore) {
-	    state.readingMore = true;
-	    process.nextTick(function() {
-	      maybeReadMore_(stream, state);
-	    });
-	  }
-	}
-
-	function maybeReadMore_(stream, state) {
-	  var len = state.length;
-	  while (!state.reading && !state.flowing && !state.ended &&
-	         state.length < state.highWaterMark) {
-	    stream.read(0);
-	    if (len === state.length)
-	      // didn't get any data, stop spinning.
-	      break;
-	    else
-	      len = state.length;
-	  }
-	  state.readingMore = false;
-	}
-
-	// abstract method.  to be overridden in specific implementation classes.
-	// call cb(er, data) where data is <= n in length.
-	// for virtual (non-string, non-buffer) streams, "length" is somewhat
-	// arbitrary, and perhaps not very meaningful.
-	Readable.prototype._read = function(n) {
-	  this.emit('error', new Error('not implemented'));
-	};
-
-	Readable.prototype.pipe = function(dest, pipeOpts) {
-	  var src = this;
-	  var state = this._readableState;
-
-	  switch (state.pipesCount) {
-	    case 0:
-	      state.pipes = dest;
-	      break;
-	    case 1:
-	      state.pipes = [state.pipes, dest];
-	      break;
-	    default:
-	      state.pipes.push(dest);
-	      break;
-	  }
-	  state.pipesCount += 1;
-
-	  var doEnd = (!pipeOpts || pipeOpts.end !== false) &&
-	              dest !== process.stdout &&
-	              dest !== process.stderr;
-
-	  var endFn = doEnd ? onend : cleanup;
-	  if (state.endEmitted)
-	    process.nextTick(endFn);
-	  else
-	    src.once('end', endFn);
-
-	  dest.on('unpipe', onunpipe);
-	  function onunpipe(readable) {
-	    if (readable !== src) return;
-	    cleanup();
-	  }
-
-	  function onend() {
-	    dest.end();
-	  }
-
-	  // when the dest drains, it reduces the awaitDrain counter
-	  // on the source.  This would be more elegant with a .once()
-	  // handler in flow(), but adding and removing repeatedly is
-	  // too slow.
-	  var ondrain = pipeOnDrain(src);
-	  dest.on('drain', ondrain);
-
-	  function cleanup() {
-	    // cleanup event handlers once the pipe is broken
-	    dest.removeListener('close', onclose);
-	    dest.removeListener('finish', onfinish);
-	    dest.removeListener('drain', ondrain);
-	    dest.removeListener('error', onerror);
-	    dest.removeListener('unpipe', onunpipe);
-	    src.removeListener('end', onend);
-	    src.removeListener('end', cleanup);
-
-	    // if the reader is waiting for a drain event from this
-	    // specific writer, then it would cause it to never start
-	    // flowing again.
-	    // So, if this is awaiting a drain, then we just call it now.
-	    // If we don't know, then assume that we are waiting for one.
-	    if (!dest._writableState || dest._writableState.needDrain)
-	      ondrain();
-	  }
-
-	  // if the dest has an error, then stop piping into it.
-	  // however, don't suppress the throwing behavior for this.
-	  function onerror(er) {
-	    unpipe();
-	    dest.removeListener('error', onerror);
-	    if (EE.listenerCount(dest, 'error') === 0)
-	      dest.emit('error', er);
-	  }
-	  // This is a brutally ugly hack to make sure that our error handler
-	  // is attached before any userland ones.  NEVER DO THIS.
-	  if (!dest._events || !dest._events.error)
-	    dest.on('error', onerror);
-	  else if (isArray(dest._events.error))
-	    dest._events.error.unshift(onerror);
-	  else
-	    dest._events.error = [onerror, dest._events.error];
-
-
-
-	  // Both close and finish should trigger unpipe, but only once.
-	  function onclose() {
-	    dest.removeListener('finish', onfinish);
-	    unpipe();
-	  }
-	  dest.once('close', onclose);
-	  function onfinish() {
-	    dest.removeListener('close', onclose);
-	    unpipe();
-	  }
-	  dest.once('finish', onfinish);
-
-	  function unpipe() {
-	    src.unpipe(dest);
-	  }
-
-	  // tell the dest that it's being piped to
-	  dest.emit('pipe', src);
-
-	  // start the flow if it hasn't been started already.
-	  if (!state.flowing) {
-	    // the handler that waits for readable events after all
-	    // the data gets sucked out in flow.
-	    // This would be easier to follow with a .once() handler
-	    // in flow(), but that is too slow.
-	    this.on('readable', pipeOnReadable);
-
-	    state.flowing = true;
-	    process.nextTick(function() {
-	      flow(src);
-	    });
-	  }
-
-	  return dest;
-	};
-
-	function pipeOnDrain(src) {
-	  return function() {
-	    var dest = this;
-	    var state = src._readableState;
-	    state.awaitDrain--;
-	    if (state.awaitDrain === 0)
-	      flow(src);
-	  };
-	}
-
-	function flow(src) {
-	  var state = src._readableState;
-	  var chunk;
-	  state.awaitDrain = 0;
-
-	  function write(dest, i, list) {
-	    var written = dest.write(chunk);
-	    if (false === written) {
-	      state.awaitDrain++;
-	    }
-	  }
-
-	  while (state.pipesCount && null !== (chunk = src.read())) {
-
-	    if (state.pipesCount === 1)
-	      write(state.pipes, 0, null);
-	    else
-	      forEach(state.pipes, write);
-
-	    src.emit('data', chunk);
-
-	    // if anyone needs a drain, then we have to wait for that.
-	    if (state.awaitDrain > 0)
-	      return;
-	  }
-
-	  // if every destination was unpiped, either before entering this
-	  // function, or in the while loop, then stop flowing.
-	  //
-	  // NB: This is a pretty rare edge case.
-	  if (state.pipesCount === 0) {
-	    state.flowing = false;
-
-	    // if there were data event listeners added, then switch to old mode.
-	    if (EE.listenerCount(src, 'data') > 0)
-	      emitDataEvents(src);
-	    return;
-	  }
-
-	  // at this point, no one needed a drain, so we just ran out of data
-	  // on the next readable event, start it over again.
-	  state.ranOut = true;
-	}
-
-	function pipeOnReadable() {
-	  if (this._readableState.ranOut) {
-	    this._readableState.ranOut = false;
-	    flow(this);
-	  }
-	}
-
-
-	Readable.prototype.unpipe = function(dest) {
-	  var state = this._readableState;
-
-	  // if we're not piping anywhere, then do nothing.
-	  if (state.pipesCount === 0)
-	    return this;
-
-	  // just one destination.  most common case.
-	  if (state.pipesCount === 1) {
-	    // passed in one, but it's not the right one.
-	    if (dest && dest !== state.pipes)
-	      return this;
-
-	    if (!dest)
-	      dest = state.pipes;
-
-	    // got a match.
-	    state.pipes = null;
-	    state.pipesCount = 0;
-	    this.removeListener('readable', pipeOnReadable);
-	    state.flowing = false;
-	    if (dest)
-	      dest.emit('unpipe', this);
-	    return this;
-	  }
-
-	  // slow case. multiple pipe destinations.
-
-	  if (!dest) {
-	    // remove all.
-	    var dests = state.pipes;
-	    var len = state.pipesCount;
-	    state.pipes = null;
-	    state.pipesCount = 0;
-	    this.removeListener('readable', pipeOnReadable);
-	    state.flowing = false;
-
-	    for (var i = 0; i < len; i++)
-	      dests[i].emit('unpipe', this);
-	    return this;
-	  }
-
-	  // try to find the right one.
-	  var i = indexOf(state.pipes, dest);
-	  if (i === -1)
-	    return this;
-
-	  state.pipes.splice(i, 1);
-	  state.pipesCount -= 1;
-	  if (state.pipesCount === 1)
-	    state.pipes = state.pipes[0];
-
-	  dest.emit('unpipe', this);
-
-	  return this;
-	};
-
-	// set up data events if they are asked for
-	// Ensure readable listeners eventually get something
-	Readable.prototype.on = function(ev, fn) {
-	  var res = Stream.prototype.on.call(this, ev, fn);
-
-	  if (ev === 'data' && !this._readableState.flowing)
-	    emitDataEvents(this);
-
-	  if (ev === 'readable' && this.readable) {
-	    var state = this._readableState;
-	    if (!state.readableListening) {
-	      state.readableListening = true;
-	      state.emittedReadable = false;
-	      state.needReadable = true;
-	      if (!state.reading) {
-	        this.read(0);
-	      } else if (state.length) {
-	        emitReadable(this, state);
-	      }
-	    }
-	  }
-
-	  return res;
-	};
-	Readable.prototype.addListener = Readable.prototype.on;
-
-	// pause() and resume() are remnants of the legacy readable stream API
-	// If the user uses them, then switch into old mode.
-	Readable.prototype.resume = function() {
-	  emitDataEvents(this);
-	  this.read(0);
-	  this.emit('resume');
-	};
-
-	Readable.prototype.pause = function() {
-	  emitDataEvents(this, true);
-	  this.emit('pause');
-	};
-
-	function emitDataEvents(stream, startPaused) {
-	  var state = stream._readableState;
-
-	  if (state.flowing) {
-	    // https://github.com/isaacs/readable-stream/issues/16
-	    throw new Error('Cannot switch to old mode now.');
-	  }
-
-	  var paused = startPaused || false;
-	  var readable = false;
-
-	  // convert to an old-style stream.
-	  stream.readable = true;
-	  stream.pipe = Stream.prototype.pipe;
-	  stream.on = stream.addListener = Stream.prototype.on;
-
-	  stream.on('readable', function() {
-	    readable = true;
-
-	    var c;
-	    while (!paused && (null !== (c = stream.read())))
-	      stream.emit('data', c);
-
-	    if (c === null) {
-	      readable = false;
-	      stream._readableState.needReadable = true;
-	    }
-	  });
-
-	  stream.pause = function() {
-	    paused = true;
-	    this.emit('pause');
-	  };
-
-	  stream.resume = function() {
-	    paused = false;
-	    if (readable)
-	      process.nextTick(function() {
-	        stream.emit('readable');
-	      });
-	    else
-	      this.read(0);
-	    this.emit('resume');
-	  };
-
-	  // now make it start, just in case it hadn't already.
-	  stream.emit('readable');
-	}
-
-	// wrap an old-style stream as the async data source.
-	// This is *not* part of the readable stream interface.
-	// It is an ugly unfortunate mess of history.
-	Readable.prototype.wrap = function(stream) {
-	  var state = this._readableState;
-	  var paused = false;
-
-	  var self = this;
-	  stream.on('end', function() {
-	    if (state.decoder && !state.ended) {
-	      var chunk = state.decoder.end();
-	      if (chunk && chunk.length)
-	        self.push(chunk);
-	    }
-
-	    self.push(null);
-	  });
-
-	  stream.on('data', function(chunk) {
-	    if (state.decoder)
-	      chunk = state.decoder.write(chunk);
-
-	    // don't skip over falsy values in objectMode
-	    //if (state.objectMode && util.isNullOrUndefined(chunk))
-	    if (state.objectMode && (chunk === null || chunk === undefined))
-	      return;
-	    else if (!state.objectMode && (!chunk || !chunk.length))
-	      return;
-
-	    var ret = self.push(chunk);
-	    if (!ret) {
-	      paused = true;
-	      stream.pause();
-	    }
-	  });
-
-	  // proxy all the other methods.
-	  // important when wrapping filters and duplexes.
-	  for (var i in stream) {
-	    if (typeof stream[i] === 'function' &&
-	        typeof this[i] === 'undefined') {
-	      this[i] = function(method) { return function() {
-	        return stream[method].apply(stream, arguments);
-	      }}(i);
-	    }
-	  }
-
-	  // proxy certain important events.
-	  var events = ['error', 'close', 'destroy', 'pause', 'resume'];
-	  forEach(events, function(ev) {
-	    stream.on(ev, self.emit.bind(self, ev));
-	  });
-
-	  // when we try to consume some more bytes, simply unpause the
-	  // underlying stream.
-	  self._read = function(n) {
-	    if (paused) {
-	      paused = false;
-	      stream.resume();
-	    }
-	  };
-
-	  return self;
-	};
-
-
-
-	// exposed for testing purposes only.
-	Readable._fromList = fromList;
-
-	// Pluck off n bytes from an array of buffers.
-	// Length is the combined lengths of all the buffers in the list.
-	function fromList(n, state) {
-	  var list = state.buffer;
-	  var length = state.length;
-	  var stringMode = !!state.decoder;
-	  var objectMode = !!state.objectMode;
-	  var ret;
-
-	  // nothing in the list, definitely empty.
-	  if (list.length === 0)
-	    return null;
-
-	  if (length === 0)
-	    ret = null;
-	  else if (objectMode)
-	    ret = list.shift();
-	  else if (!n || n >= length) {
-	    // read it all, truncate the array.
-	    if (stringMode)
-	      ret = list.join('');
-	    else
-	      ret = Buffer.concat(list, length);
-	    list.length = 0;
-	  } else {
-	    // read just some of it.
-	    if (n < list[0].length) {
-	      // just take a part of the first list item.
-	      // slice is the same for buffers and strings.
-	      var buf = list[0];
-	      ret = buf.slice(0, n);
-	      list[0] = buf.slice(n);
-	    } else if (n === list[0].length) {
-	      // first list is a perfect match
-	      ret = list.shift();
-	    } else {
-	      // complex case.
-	      // we have enough to cover it, but it spans past the first buffer.
-	      if (stringMode)
-	        ret = '';
-	      else
-	        ret = new Buffer(n);
-
-	      var c = 0;
-	      for (var i = 0, l = list.length; i < l && c < n; i++) {
-	        var buf = list[0];
-	        var cpy = Math.min(n - c, buf.length);
-
-	        if (stringMode)
-	          ret += buf.slice(0, cpy);
-	        else
-	          buf.copy(ret, c, 0, cpy);
-
-	        if (cpy < buf.length)
-	          list[0] = buf.slice(cpy);
-	        else
-	          list.shift();
-
-	        c += cpy;
-	      }
-	    }
-	  }
-
-	  return ret;
-	}
-
-	function endReadable(stream) {
-	  var state = stream._readableState;
-
-	  // If we get here before consuming all the bytes, then that is a
-	  // bug in node.  Should never happen.
-	  if (state.length > 0)
-	    throw new Error('endReadable called on non-empty stream');
-
-	  if (!state.endEmitted && state.calledRead) {
-	    state.ended = true;
-	    process.nextTick(function() {
-	      // Check that we didn't get one last unshift.
-	      if (!state.endEmitted && state.length === 0) {
-	        state.endEmitted = true;
-	        stream.readable = false;
-	        stream.emit('end');
-	      }
-	    });
-	  }
-	}
-
-	function forEach (xs, f) {
-	  for (var i = 0, l = xs.length; i < l; i++) {
-	    f(xs[i], i);
-	  }
-	}
-
-	function indexOf (xs, x) {
-	  for (var i = 0, l = xs.length; i < l; i++) {
-	    if (xs[i] === x) return i;
-	  }
-	  return -1;
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
-
-/***/ },
-/* 161 */
-/***/ function(module, exports) {
-
-	module.exports = Array.isArray || function (arr) {
-	  return Object.prototype.toString.call(arr) == '[object Array]';
-	};
-
-
-/***/ },
-/* 162 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(process) {// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	// A bit simpler than readable streams.
-	// Implement an async ._write(chunk, cb), and it'll handle all
-	// the drain event emission and buffering.
-
-	module.exports = Writable;
-
-	/*<replacement>*/
-	var Buffer = __webpack_require__(2).Buffer;
-	/*</replacement>*/
-
-	Writable.WritableState = WritableState;
-
-
-	/*<replacement>*/
-	var util = __webpack_require__(56);
-	util.inherits = __webpack_require__(50);
-	/*</replacement>*/
-
-	var Stream = __webpack_require__(52);
-
-	util.inherits(Writable, Stream);
-
-	function WriteReq(chunk, encoding, cb) {
-	  this.chunk = chunk;
-	  this.encoding = encoding;
-	  this.callback = cb;
-	}
-
-	function WritableState(options, stream) {
-	  options = options || {};
-
-	  // the point at which write() starts returning false
-	  // Note: 0 is a valid value, means that we always return false if
-	  // the entire buffer is not flushed immediately on write()
-	  var hwm = options.highWaterMark;
-	  this.highWaterMark = (hwm || hwm === 0) ? hwm : 16 * 1024;
-
-	  // object stream flag to indicate whether or not this stream
-	  // contains buffers or objects.
-	  this.objectMode = !!options.objectMode;
-
-	  // cast to ints.
-	  this.highWaterMark = ~~this.highWaterMark;
-
-	  this.needDrain = false;
-	  // at the start of calling end()
-	  this.ending = false;
-	  // when end() has been called, and returned
-	  this.ended = false;
-	  // when 'finish' is emitted
-	  this.finished = false;
-
-	  // should we decode strings into buffers before passing to _write?
-	  // this is here so that some node-core streams can optimize string
-	  // handling at a lower level.
-	  var noDecode = options.decodeStrings === false;
-	  this.decodeStrings = !noDecode;
-
-	  // Crypto is kind of old and crusty.  Historically, its default string
-	  // encoding is 'binary' so we have to make this configurable.
-	  // Everything else in the universe uses 'utf8', though.
-	  this.defaultEncoding = options.defaultEncoding || 'utf8';
-
-	  // not an actual buffer we keep track of, but a measurement
-	  // of how much we're waiting to get pushed to some underlying
-	  // socket or file.
-	  this.length = 0;
-
-	  // a flag to see when we're in the middle of a write.
-	  this.writing = false;
-
-	  // a flag to be able to tell if the onwrite cb is called immediately,
-	  // or on a later tick.  We set this to true at first, becuase any
-	  // actions that shouldn't happen until "later" should generally also
-	  // not happen before the first write call.
-	  this.sync = true;
-
-	  // a flag to know if we're processing previously buffered items, which
-	  // may call the _write() callback in the same tick, so that we don't
-	  // end up in an overlapped onwrite situation.
-	  this.bufferProcessing = false;
-
-	  // the callback that's passed to _write(chunk,cb)
-	  this.onwrite = function(er) {
-	    onwrite(stream, er);
-	  };
-
-	  // the callback that the user supplies to write(chunk,encoding,cb)
-	  this.writecb = null;
-
-	  // the amount that is being written when _write is called.
-	  this.writelen = 0;
-
-	  this.buffer = [];
-
-	  // True if the error was already emitted and should not be thrown again
-	  this.errorEmitted = false;
-	}
-
-	function Writable(options) {
-	  var Duplex = __webpack_require__(159);
-
-	  // Writable ctor is applied to Duplexes, though they're not
-	  // instanceof Writable, they're instanceof Readable.
-	  if (!(this instanceof Writable) && !(this instanceof Duplex))
-	    return new Writable(options);
-
-	  this._writableState = new WritableState(options, this);
-
-	  // legacy.
-	  this.writable = true;
-
-	  Stream.call(this);
-	}
-
-	// Otherwise people can pipe Writable streams, which is just wrong.
-	Writable.prototype.pipe = function() {
-	  this.emit('error', new Error('Cannot pipe. Not readable.'));
-	};
-
-
-	function writeAfterEnd(stream, state, cb) {
-	  var er = new Error('write after end');
-	  // TODO: defer error events consistently everywhere, not just the cb
-	  stream.emit('error', er);
-	  process.nextTick(function() {
-	    cb(er);
-	  });
-	}
-
-	// If we get something that is not a buffer, string, null, or undefined,
-	// and we're not in objectMode, then that's an error.
-	// Otherwise stream chunks are all considered to be of length=1, and the
-	// watermarks determine how many objects to keep in the buffer, rather than
-	// how many bytes or characters.
-	function validChunk(stream, state, chunk, cb) {
-	  var valid = true;
-	  if (!Buffer.isBuffer(chunk) &&
-	      'string' !== typeof chunk &&
-	      chunk !== null &&
-	      chunk !== undefined &&
-	      !state.objectMode) {
-	    var er = new TypeError('Invalid non-string/buffer chunk');
-	    stream.emit('error', er);
-	    process.nextTick(function() {
-	      cb(er);
-	    });
-	    valid = false;
-	  }
-	  return valid;
-	}
-
-	Writable.prototype.write = function(chunk, encoding, cb) {
-	  var state = this._writableState;
-	  var ret = false;
-
-	  if (typeof encoding === 'function') {
-	    cb = encoding;
-	    encoding = null;
-	  }
-
-	  if (Buffer.isBuffer(chunk))
-	    encoding = 'buffer';
-	  else if (!encoding)
-	    encoding = state.defaultEncoding;
-
-	  if (typeof cb !== 'function')
-	    cb = function() {};
-
-	  if (state.ended)
-	    writeAfterEnd(this, state, cb);
-	  else if (validChunk(this, state, chunk, cb))
-	    ret = writeOrBuffer(this, state, chunk, encoding, cb);
-
-	  return ret;
-	};
-
-	function decodeChunk(state, chunk, encoding) {
-	  if (!state.objectMode &&
-	      state.decodeStrings !== false &&
-	      typeof chunk === 'string') {
-	    chunk = new Buffer(chunk, encoding);
-	  }
-	  return chunk;
-	}
-
-	// if we're already writing something, then just put this
-	// in the queue, and wait our turn.  Otherwise, call _write
-	// If we return false, then we need a drain event, so set that flag.
-	function writeOrBuffer(stream, state, chunk, encoding, cb) {
-	  chunk = decodeChunk(state, chunk, encoding);
-	  if (Buffer.isBuffer(chunk))
-	    encoding = 'buffer';
-	  var len = state.objectMode ? 1 : chunk.length;
-
-	  state.length += len;
-
-	  var ret = state.length < state.highWaterMark;
-	  // we must ensure that previous needDrain will not be reset to false.
-	  if (!ret)
-	    state.needDrain = true;
-
-	  if (state.writing)
-	    state.buffer.push(new WriteReq(chunk, encoding, cb));
-	  else
-	    doWrite(stream, state, len, chunk, encoding, cb);
-
-	  return ret;
-	}
-
-	function doWrite(stream, state, len, chunk, encoding, cb) {
-	  state.writelen = len;
-	  state.writecb = cb;
-	  state.writing = true;
-	  state.sync = true;
-	  stream._write(chunk, encoding, state.onwrite);
-	  state.sync = false;
-	}
-
-	function onwriteError(stream, state, sync, er, cb) {
-	  if (sync)
-	    process.nextTick(function() {
-	      cb(er);
-	    });
-	  else
-	    cb(er);
-
-	  stream._writableState.errorEmitted = true;
-	  stream.emit('error', er);
-	}
-
-	function onwriteStateUpdate(state) {
-	  state.writing = false;
-	  state.writecb = null;
-	  state.length -= state.writelen;
-	  state.writelen = 0;
-	}
-
-	function onwrite(stream, er) {
-	  var state = stream._writableState;
-	  var sync = state.sync;
-	  var cb = state.writecb;
-
-	  onwriteStateUpdate(state);
-
-	  if (er)
-	    onwriteError(stream, state, sync, er, cb);
-	  else {
-	    // Check if we're actually ready to finish, but don't emit yet
-	    var finished = needFinish(stream, state);
-
-	    if (!finished && !state.bufferProcessing && state.buffer.length)
-	      clearBuffer(stream, state);
-
-	    if (sync) {
-	      process.nextTick(function() {
-	        afterWrite(stream, state, finished, cb);
-	      });
-	    } else {
-	      afterWrite(stream, state, finished, cb);
-	    }
-	  }
-	}
-
-	function afterWrite(stream, state, finished, cb) {
-	  if (!finished)
-	    onwriteDrain(stream, state);
-	  cb();
-	  if (finished)
-	    finishMaybe(stream, state);
-	}
-
-	// Must force callback to be called on nextTick, so that we don't
-	// emit 'drain' before the write() consumer gets the 'false' return
-	// value, and has a chance to attach a 'drain' listener.
-	function onwriteDrain(stream, state) {
-	  if (state.length === 0 && state.needDrain) {
-	    state.needDrain = false;
-	    stream.emit('drain');
-	  }
-	}
-
-
-	// if there's something in the buffer waiting, then process it
-	function clearBuffer(stream, state) {
-	  state.bufferProcessing = true;
-
-	  for (var c = 0; c < state.buffer.length; c++) {
-	    var entry = state.buffer[c];
-	    var chunk = entry.chunk;
-	    var encoding = entry.encoding;
-	    var cb = entry.callback;
-	    var len = state.objectMode ? 1 : chunk.length;
-
-	    doWrite(stream, state, len, chunk, encoding, cb);
-
-	    // if we didn't call the onwrite immediately, then
-	    // it means that we need to wait until it does.
-	    // also, that means that the chunk and cb are currently
-	    // being processed, so move the buffer counter past them.
-	    if (state.writing) {
-	      c++;
-	      break;
-	    }
-	  }
-
-	  state.bufferProcessing = false;
-	  if (c < state.buffer.length)
-	    state.buffer = state.buffer.slice(c);
-	  else
-	    state.buffer.length = 0;
-	}
-
-	Writable.prototype._write = function(chunk, encoding, cb) {
-	  cb(new Error('not implemented'));
-	};
-
-	Writable.prototype.end = function(chunk, encoding, cb) {
-	  var state = this._writableState;
-
-	  if (typeof chunk === 'function') {
-	    cb = chunk;
-	    chunk = null;
-	    encoding = null;
-	  } else if (typeof encoding === 'function') {
-	    cb = encoding;
-	    encoding = null;
-	  }
-
-	  if (typeof chunk !== 'undefined' && chunk !== null)
-	    this.write(chunk, encoding);
-
-	  // ignore unnecessary end() calls.
-	  if (!state.ending && !state.finished)
-	    endWritable(this, state, cb);
-	};
-
-
-	function needFinish(stream, state) {
-	  return (state.ending &&
-	          state.length === 0 &&
-	          !state.finished &&
-	          !state.writing);
-	}
-
-	function finishMaybe(stream, state) {
-	  var need = needFinish(stream, state);
-	  if (need) {
-	    state.finished = true;
-	    stream.emit('finish');
-	  }
-	  return need;
-	}
-
-	function endWritable(stream, state, cb) {
-	  state.ending = true;
-	  finishMaybe(stream, state);
-	  if (cb) {
-	    if (state.finished)
-	      process.nextTick(cb);
-	    else
-	      stream.once('finish', cb);
-	  }
-	  state.ended = true;
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
-
-/***/ },
-/* 163 */
-/***/ function(module, exports, __webpack_require__) {
-
 	'use strict'
 
 	const argCommand = __webpack_require__(138).argCommand
@@ -20733,7 +18920,7 @@
 
 
 /***/ },
-/* 164 */
+/* 157 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -20756,7 +18943,7 @@
 
 
 /***/ },
-/* 165 */
+/* 158 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20772,7 +18959,7 @@
 
 
 /***/ },
-/* 166 */
+/* 159 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20811,7 +18998,7 @@
 
 
 /***/ },
-/* 167 */
+/* 160 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -20856,7 +19043,7 @@
 
 
 /***/ },
-/* 168 */
+/* 161 */
 /***/ function(module, exports) {
 
 	'use strict'
@@ -20877,7 +19064,7 @@
 
 
 /***/ },
-/* 169 */
+/* 162 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20893,7 +19080,7 @@
 
 
 /***/ },
-/* 170 */
+/* 163 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20909,7 +19096,7 @@
 
 
 /***/ },
-/* 171 */
+/* 164 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20926,7 +19113,7 @@
 
 
 /***/ },
-/* 172 */
+/* 165 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
@@ -20939,12 +19126,12 @@
 
 
 /***/ },
-/* 173 */
+/* 166 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	const pkg = __webpack_require__(174)
+	const pkg = __webpack_require__(167)
 
 	exports = module.exports = () => {
 	  return {
@@ -20958,14 +19145,14 @@
 
 
 /***/ },
-/* 174 */
+/* 167 */
 /***/ function(module, exports) {
 
 	module.exports = {
 		"_args": [
 			[
 				"ipfs-api@^3.0.0",
-				"/Users/samuli/code/orbit-db/node_modules/ipfsd-ctl"
+				"/Users/samuli/code/orbit-db"
 			]
 		],
 		"_from": "ipfs-api@>=3.0.0 <4.0.0",
@@ -21000,7 +19187,7 @@
 		"_shasum": "1c8adfe4e429cfe551b1860b3a35460686c1a8ec",
 		"_shrinkwrap": null,
 		"_spec": "ipfs-api@^3.0.0",
-		"_where": "/Users/samuli/code/orbit-db/node_modules/ipfsd-ctl",
+		"_where": "/Users/samuli/code/orbit-db",
 		"author": {
 			"email": "mappum@gmail.com",
 			"name": "Matt Bell"
@@ -21145,17 +19332,17 @@
 	};
 
 /***/ },
-/* 175 */
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
 	const Wreck = __webpack_require__(26)
-	const Qs = __webpack_require__(176)
+	const Qs = __webpack_require__(169)
 	const ndjson = __webpack_require__(147)
-	const getFilesStream = __webpack_require__(180)
+	const getFilesStream = __webpack_require__(173)
 
-	const isNode = __webpack_require__(181)
+	const isNode = __webpack_require__(174)
 
 	// -- Internal
 
@@ -21280,13 +19467,13 @@
 
 
 /***/ },
-/* 176 */
+/* 169 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Stringify = __webpack_require__(177);
-	var Parse = __webpack_require__(179);
+	var Stringify = __webpack_require__(170);
+	var Parse = __webpack_require__(172);
 
 	module.exports = {
 	    stringify: Stringify,
@@ -21294,7 +19481,7 @@
 	};
 
 /***/ },
-/* 177 */
+/* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21309,7 +19496,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Utils = __webpack_require__(178);
+	var Utils = __webpack_require__(171);
 
 	var internals = {
 	    delimiter: '&',
@@ -21440,7 +19627,7 @@
 	};
 
 /***/ },
-/* 178 */
+/* 171 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21620,7 +19807,7 @@
 	};
 
 /***/ },
-/* 179 */
+/* 172 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21635,7 +19822,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Utils = __webpack_require__(178);
+	var Utils = __webpack_require__(171);
 
 	var internals = {
 	    delimiter: '&',
@@ -21789,14 +19976,14 @@
 	};
 
 /***/ },
-/* 180 */
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict'
 
-	const isNode = __webpack_require__(181)
-	const Multipart = __webpack_require__(182)
-	const flatmap = __webpack_require__(185)
+	const isNode = __webpack_require__(174)
+	const Multipart = __webpack_require__(175)
+	const flatmap = __webpack_require__(178)
 
 	function headers (file) {
 	  const name = file.path || ''
@@ -21825,8 +20012,8 @@
 
 	function loadPaths (opts, file) {
 	  const path = __webpack_require__(28)
-	  const fs = __webpack_require__(186)
-	  const glob = __webpack_require__(187)
+	  const fs = __webpack_require__(179)
+	  const glob = __webpack_require__(180)
 
 	  const followSymlinks = opts.followSymlinks != null ? opts.followSymlinks : true
 
@@ -21923,7 +20110,7 @@
 
 
 /***/ },
-/* 181 */
+/* 174 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {module.exports = false;
@@ -21936,13 +20123,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 182 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Sandwich = __webpack_require__(183).SandwichStream
+	var Sandwich = __webpack_require__(176).SandwichStream
 	var stream = __webpack_require__(52)
 	var inherits = __webpack_require__(50)
-	var isStream = __webpack_require__(184)
+	var isStream = __webpack_require__(177)
 
 	var CRNL = '\r\n'
 
@@ -22005,7 +20192,7 @@
 
 
 /***/ },
-/* 183 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Readable = __webpack_require__(52).Readable;
@@ -22117,7 +20304,7 @@
 
 
 /***/ },
-/* 184 */
+/* 177 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -22144,7 +20331,7 @@
 
 
 /***/ },
-/* 185 */
+/* 178 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22164,22 +20351,21 @@
 	};
 
 /***/ },
-/* 186 */
+/* 179 */
 /***/ function(module, exports) {
 
-	"use strict";
-
 	module.exports = {
-	  createWriteStream: function createWriteStream(filename, options) {
+	  createWriteStream: function(filename, options) {
 	    return;
 	  },
-	  writeFileSync: function writeFileSync() {
+	  writeFileSync: function() {
 	    return;
 	  }
-	};
+	}
+
 
 /***/ },
-/* 187 */
+/* 180 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {// Approach:
@@ -22224,26 +20410,26 @@
 
 	module.exports = glob
 
-	var fs = __webpack_require__(186)
-	var minimatch = __webpack_require__(188)
+	var fs = __webpack_require__(179)
+	var minimatch = __webpack_require__(181)
 	var Minimatch = minimatch.Minimatch
 	var inherits = __webpack_require__(50)
 	var EE = __webpack_require__(41).EventEmitter
 	var path = __webpack_require__(28)
-	var assert = __webpack_require__(192)
-	var isAbsolute = __webpack_require__(193)
-	var globSync = __webpack_require__(194)
-	var common = __webpack_require__(195)
+	var assert = __webpack_require__(185)
+	var isAbsolute = __webpack_require__(186)
+	var globSync = __webpack_require__(187)
+	var common = __webpack_require__(188)
 	var alphasort = common.alphasort
 	var alphasorti = common.alphasorti
 	var setopts = common.setopts
 	var ownProp = common.ownProp
-	var inflight = __webpack_require__(196)
+	var inflight = __webpack_require__(189)
 	var util = __webpack_require__(118)
 	var childrenIgnored = common.childrenIgnored
 	var isIgnored = common.isIgnored
 
-	var once = __webpack_require__(198)
+	var once = __webpack_require__(191)
 
 	function glob (pattern, options, cb) {
 	  if (typeof options === 'function') cb = options, options = {}
@@ -22968,7 +21154,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 188 */
+/* 181 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = minimatch
@@ -22980,7 +21166,7 @@
 	} catch (er) {}
 
 	var GLOBSTAR = minimatch.GLOBSTAR = Minimatch.GLOBSTAR = {}
-	var expand = __webpack_require__(189)
+	var expand = __webpack_require__(182)
 
 	// any single thing other than /
 	// don't need to escape / when using new RegExp()
@@ -23886,11 +22072,11 @@
 
 
 /***/ },
-/* 189 */
+/* 182 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var concatMap = __webpack_require__(190);
-	var balanced = __webpack_require__(191);
+	var concatMap = __webpack_require__(183);
+	var balanced = __webpack_require__(184);
 
 	module.exports = expandTop;
 
@@ -24083,7 +22269,7 @@
 
 
 /***/ },
-/* 190 */
+/* 183 */
 /***/ function(module, exports) {
 
 	module.exports = function (xs, fn) {
@@ -24102,7 +22288,7 @@
 
 
 /***/ },
-/* 191 */
+/* 184 */
 /***/ function(module, exports) {
 
 	module.exports = balanced;
@@ -24158,7 +22344,7 @@
 
 
 /***/ },
-/* 192 */
+/* 185 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -24523,7 +22709,7 @@
 
 
 /***/ },
-/* 193 */
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
@@ -24550,21 +22736,21 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 194 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {module.exports = globSync
 	globSync.GlobSync = GlobSync
 
-	var fs = __webpack_require__(186)
-	var minimatch = __webpack_require__(188)
+	var fs = __webpack_require__(179)
+	var minimatch = __webpack_require__(181)
 	var Minimatch = minimatch.Minimatch
-	var Glob = __webpack_require__(187).Glob
+	var Glob = __webpack_require__(180).Glob
 	var util = __webpack_require__(118)
 	var path = __webpack_require__(28)
-	var assert = __webpack_require__(192)
-	var isAbsolute = __webpack_require__(193)
-	var common = __webpack_require__(195)
+	var assert = __webpack_require__(185)
+	var isAbsolute = __webpack_require__(186)
+	var common = __webpack_require__(188)
 	var alphasort = common.alphasort
 	var alphasorti = common.alphasorti
 	var setopts = common.setopts
@@ -25024,7 +23210,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 195 */
+/* 188 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {exports.alphasort = alphasort
@@ -25042,8 +23228,8 @@
 	}
 
 	var path = __webpack_require__(28)
-	var minimatch = __webpack_require__(188)
-	var isAbsolute = __webpack_require__(193)
+	var minimatch = __webpack_require__(181)
+	var isAbsolute = __webpack_require__(186)
 	var Minimatch = minimatch.Minimatch
 
 	function alphasorti (a, b) {
@@ -25266,12 +23452,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 196 */
+/* 189 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(process) {var wrappy = __webpack_require__(197)
+	/* WEBPACK VAR INJECTION */(function(process) {var wrappy = __webpack_require__(190)
 	var reqs = Object.create(null)
-	var once = __webpack_require__(198)
+	var once = __webpack_require__(191)
 
 	module.exports = wrappy(inflight)
 
@@ -25317,7 +23503,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 197 */
+/* 190 */
 /***/ function(module, exports) {
 
 	// Returns a wrapper function that returns a wrapped callback
@@ -25356,10 +23542,10 @@
 
 
 /***/ },
-/* 198 */
+/* 191 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var wrappy = __webpack_require__(197)
+	var wrappy = __webpack_require__(190)
 	module.exports = wrappy(once)
 
 	once.proto = once(function () {
@@ -25383,640 +23569,263 @@
 
 
 /***/ },
-/* 199 */
+/* 192 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var _keys = __webpack_require__(200);
+	const fs = __webpack_require__(179);
 
-	var _keys2 = _interopRequireDefault(_keys);
+	const isNodejs = process.version ? true : false;
 
-	var _assign = __webpack_require__(212);
-
-	var _assign2 = _interopRequireDefault(_assign);
-
-	var _classCallCheck2 = __webpack_require__(219);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(220);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var fs = __webpack_require__(223);
-
-	var isNodejs = process.version ? true : false;
-
-	var LogLevels = {
+	const LogLevels = {
 	  'DEBUG': 'DEBUG',
-	  'INFO': 'INFO',
-	  'WARN': 'WARN',
+	  'INFO':  'INFO',
+	  'WARN':  'WARN',
 	  'ERROR': 'ERROR',
-	  'NONE': 'NONE'
+	  'NONE':  'NONE',
 	};
 
 	// Default log level
-	var GlobalLogLevel = LogLevels.DEBUG;
+	let GlobalLogLevel = LogLevels.DEBUG;
 
 	// ANSI colors
-	var Colors = {
-	  'Black': 0,
-	  'Red': 1,
-	  'Green': 2,
-	  'Yellow': 3,
-	  'Blue': 4,
+	let Colors = {
+	  'Black':   0,
+	  'Red':     1,
+	  'Green':   2,
+	  'Yellow':  3,
+	  'Blue':    4,
 	  'Magenta': 5,
-	  'Cyan': 6,
-	  'Grey': 7,
-	  'White': 9,
-	  'Default': 9
+	  'Cyan':    6,
+	  'Grey':    7,
+	  'White':   9,
+	  'Default': 9,
 	};
 
 	// CSS colors
-	if (!isNodejs) {
+	if(!isNodejs) {
 	  Colors = {
-	    'Black': 'Black',
-	    'Red': 'IndianRed',
-	    'Green': 'LimeGreen',
-	    'Yellow': 'Orange',
-	    'Blue': 'RoyalBlue',
+	    'Black':   'Black',
+	    'Red':     'IndianRed',
+	    'Green':   'LimeGreen',
+	    'Yellow':  'Orange',
+	    'Blue':    'RoyalBlue',
 	    'Magenta': 'Orchid',
-	    'Cyan': 'SkyBlue',
-	    'Grey': 'DimGrey',
-	    'White': 'White',
-	    'Default': 'Black'
+	    'Cyan':    'SkyBlue',
+	    'Grey':    'DimGrey',
+	    'White':   'White',
+	    'Default': 'Black',
 	  };
 	}
 
-	var loglevelColors = [Colors.Cyan, Colors.Green, Colors.Yellow, Colors.Red, Colors.Default];
+	const loglevelColors = [Colors.Cyan, Colors.Green, Colors.Yellow, Colors.Red, Colors.Default];
 
-	var defaultOptions = {
+	const defaultOptions = {
 	  useColors: true,
 	  color: Colors.Default,
 	  showTimestamp: true,
 	  showLevel: true,
 	  filename: null,
-	  appendFile: true
+	  appendFile: true,
 	};
 
-	var Logger = function () {
-	  function Logger(category, options) {
-	    (0, _classCallCheck3.default)(this, Logger);
-
+	class Logger {
+	  constructor(category, options) {
 	    this.category = category;
 
-	    var opts = {};
-	    (0, _assign2.default)(opts, defaultOptions);
-	    (0, _assign2.default)(opts, options);
+	    let opts = {};
+	    Object.assign(opts, defaultOptions);
+	    Object.assign(opts, options);
 	    this.options = opts;
 
-	    if (this.options.filename) {
-	      var flags = this.options.appendFile ? 'a' : 'w';
+	    if(this.options.filename) {
+	      const flags = this.options.appendFile ? 'a' : 'w'
 	      this.fileWriter = fs.createWriteStream(this.options.filename, { flags: flags });
 	    }
 	  }
 
-	  (0, _createClass3.default)(Logger, [{
-	    key: 'debug',
-	    value: function debug(text) {
-	      this._write(LogLevels.DEBUG, text);
-	    }
-	  }, {
-	    key: 'log',
-	    value: function log(text) {
-	      this.debug(text);
-	    }
-	  }, {
-	    key: 'info',
-	    value: function info(text) {
-	      this._write(LogLevels.INFO, text);
-	    }
-	  }, {
-	    key: 'warn',
-	    value: function warn(text) {
-	      this._write(LogLevels.WARN, text);
-	    }
-	  }, {
-	    key: 'error',
-	    value: function error(text) {
-	      this._write(LogLevels.ERROR, text);
-	    }
-	  }, {
-	    key: '_write',
-	    value: function _write(level, text) {
-	      if (!this._shouldLog(level)) return;
+	  debug(text) {
+	    this._write(LogLevels.DEBUG, text);
+	  }
 
-	      var format = this._format(level, text);
-	      var unformattedText = this._createLogMessage(level, text);
-	      var formattedText = this._createLogMessage(level, text, format.timestamp, format.level, format.category, format.text);
+	  log(text) {
+	    this.debug(text);
+	  }
 
-	      if (this.fileWriter) this.fileWriter.write(unformattedText + '\n');
+	  info(text) {
+	    this._write(LogLevels.INFO, text);
+	  }
 
-	      if (isNodejs) {
-	        console.log(formattedText);
+	  warn(text) {
+	    this._write(LogLevels.WARN, text);
+	  }
+
+	  error(text) {
+	    this._write(LogLevels.ERROR, text);
+	  }
+
+	  _write(level, text) {
+	    if(!this._shouldLog(level))
+	      return;
+
+	    let format = this._format(level, text);
+	    let unformattedText = this._createLogMessage(level, text);
+	    let formattedText = this._createLogMessage(level, text, format.timestamp, format.level, format.category, format.text);
+
+	    if(this.fileWriter)
+	      this.fileWriter.write(unformattedText + '\n');
+
+	    if(isNodejs) {
+	      console.log(formattedText)
+	    } else {
+	      // TODO: clean this up
+	      if(level === LogLevels.ERROR) {
+	        if(this.options.showTimestamp && this.options.showLevel) {
+	          console.error(formattedText, format.timestamp, format.level, format.category, format.text)
+	        } else if(this.options.showTimestamp && !this.options.showLevel) {
+	          console.error(formattedText, format.timestamp, format.category, format.text)
+	        } else if(!this.options.showTimestamp && this.options.showLevel) {
+	          console.error(formattedText, format.level, format.category, format.text)
+	        } else {
+	          console.error(formattedText, format.category, format.text)
+	        }
 	      } else {
-	        // TODO: clean this up
-	        if (level === LogLevels.ERROR) {
-	          if (this.options.showTimestamp && this.options.showLevel) {
-	            console.error(formattedText, format.timestamp, format.level, format.category, format.text);
-	          } else if (this.options.showTimestamp && !this.options.showLevel) {
-	            console.error(formattedText, format.timestamp, format.category, format.text);
-	          } else if (!this.options.showTimestamp && this.options.showLevel) {
-	            console.error(formattedText, format.level, format.category, format.text);
-	          } else {
-	            console.error(formattedText, format.category, format.text);
-	          }
+	        if(this.options.showTimestamp && this.options.showLevel) {
+	          console.log(formattedText, format.timestamp, format.level, format.category, format.text)
+	        } else if(this.options.showTimestamp && !this.options.showLevel) {
+	          console.log(formattedText, format.timestamp, format.category, format.text)
+	        } else if(!this.options.showTimestamp && this.options.showLevel) {
+	          console.log(formattedText, format.level, format.category, format.text)
 	        } else {
-	          if (this.options.showTimestamp && this.options.showLevel) {
-	            console.log(formattedText, format.timestamp, format.level, format.category, format.text);
-	          } else if (this.options.showTimestamp && !this.options.showLevel) {
-	            console.log(formattedText, format.timestamp, format.category, format.text);
-	          } else if (!this.options.showTimestamp && this.options.showLevel) {
-	            console.log(formattedText, format.level, format.category, format.text);
-	          } else {
-	            console.log(formattedText, format.category, format.text);
-	          }
+	          console.log(formattedText, format.category, format.text)
 	        }
 	      }
 	    }
-	  }, {
-	    key: '_format',
-	    value: function _format(level, text) {
-	      var timestampFormat = '';
-	      var levelFormat = '';
-	      var categoryFormat = '';
-	      var textFormat = ': ';
+	  }
 
-	      if (this.options.useColors) {
-	        var levelColor = (0, _keys2.default)(LogLevels).map(function (f) {
-	          return LogLevels[f];
-	        }).indexOf(level);
-	        var categoryColor = this.options.color;
+	  _format(level, text) {
+	    let timestampFormat = '';
+	    let levelFormat     = '';
+	    let categoryFormat  = '';
+	    let textFormat      = ': ';
 
-	        if (isNodejs) {
-	          if (this.options.showTimestamp) timestampFormat = '\u001b[3' + Colors.Grey + 'm';
+	    if(this.options.useColors) {
+	        const levelColor    = Object.keys(LogLevels).map((f) => LogLevels[f]).indexOf(level);
+	        const categoryColor = this.options.color;
 
-	          if (this.options.showLevel) levelFormat = '\u001b[3' + loglevelColors[levelColor] + ';22m';
+	      if(isNodejs) {
+	        if(this.options.showTimestamp)
+	          timestampFormat = '\u001b[3' + Colors.Grey + 'm';
 
-	          categoryFormat = '\u001b[3' + categoryColor + ';1m';
-	          textFormat = '\u001b[0m: ';
-	        } else {
-	          if (this.options.showTimestamp) timestampFormat = 'color:' + Colors.Grey;
+	        if(this.options.showLevel)
+	          levelFormat = '\u001b[3' + loglevelColors[levelColor] + ';22m';
 
-	          if (this.options.showLevel) levelFormat = 'color:' + loglevelColors[levelColor];
+	        categoryFormat = '\u001b[3' + categoryColor + ';1m';
+	        textFormat = '\u001b[0m: ';
+	      } else {
+	        if(this.options.showTimestamp)
+	          timestampFormat = 'color:' + Colors.Grey;
 
-	          categoryFormat = 'color:' + categoryColor + '; font-weight: bold';
-	        }
+	        if(this.options.showLevel)
+	          levelFormat = 'color:' + loglevelColors[levelColor];
+
+	        categoryFormat = 'color:' + categoryColor + '; font-weight: bold';
 	      }
-
-	      return {
-	        timestamp: timestampFormat,
-	        level: levelFormat,
-	        category: categoryFormat,
-	        text: textFormat
-	      };
 	    }
-	  }, {
-	    key: '_createLogMessage',
-	    value: function _createLogMessage(level, text, timestampFormat, levelFormat, categoryFormat, textFormat) {
-	      timestampFormat = timestampFormat || '';
-	      levelFormat = levelFormat || '';
-	      categoryFormat = categoryFormat || '';
-	      textFormat = textFormat || ': ';
 
-	      if (!isNodejs) {
-	        if (this.options.showTimestamp) timestampFormat = '%c';
+	    return {
+	      timestamp: timestampFormat,
+	      level: levelFormat,
+	      category: categoryFormat,
+	      text: textFormat
+	    };
+	  }
 
-	        if (this.options.showLevel) levelFormat = '%c';
+	  _createLogMessage(level, text, timestampFormat, levelFormat, categoryFormat, textFormat) {
+	    timestampFormat = timestampFormat || '';
+	    levelFormat     = levelFormat     || '';
+	    categoryFormat  = categoryFormat  || '';
+	    textFormat      = textFormat      || ': ';
 
-	        categoryFormat = '%c';
-	        textFormat = ': %c';
-	      }
+	    if(!isNodejs) {
+	      if(this.options.showTimestamp)
+	        timestampFormat = '%c';
 
-	      var result = '';
+	      if(this.options.showLevel)
+	        levelFormat = '%c';
 
-	      if (this.options.showTimestamp) result += '' + new Date().toISOString() + ' ';
-
-	      result = timestampFormat + result;
-
-	      if (this.options.showLevel) result += levelFormat + '[' + level + ']' + (level === LogLevels.INFO || level === LogLevels.WARN ? ' ' : '') + ' ';
-
-	      result += categoryFormat + this.category;
-	      result += textFormat + text;
-	      return result;
+	      categoryFormat  = '%c';
+	      textFormat = ': %c';
 	    }
-	  }, {
-	    key: '_shouldLog',
-	    value: function _shouldLog(level) {
-	      var levels = (0, _keys2.default)(LogLevels).map(function (f) {
-	        return LogLevels[f];
-	      });
-	      var index = levels.indexOf(level);
-	      var levelIdx = levels.indexOf(GlobalLogLevel);
-	      return index >= levelIdx;
-	    }
-	  }]);
-	  return Logger;
-	}();
 
-	;
+	    let result = '';
+
+	    if(this.options.showTimestamp)
+	      result += '' + new Date().toISOString() + ' ';
+
+	    result = timestampFormat + result;
+
+	    if(this.options.showLevel)
+	      result += levelFormat + '[' + level +']' + (level === LogLevels.INFO || level === LogLevels.WARN ? ' ' : '') + ' ';
+
+	    result += categoryFormat + this.category;
+	    result += textFormat + text;
+	    return result;
+	  }
+
+	  _shouldLog(level) {
+	    const levels   = Object.keys(LogLevels).map((f) => LogLevels[f]);
+	    const index    = levels.indexOf(level);
+	    const levelIdx = levels.indexOf(GlobalLogLevel);
+	    return index >= levelIdx;
+	  }
+	};
 
 	/* Public API */
 	module.exports = {
 	  Colors: Colors,
 	  LogLevel: LogLevels,
-	  setLogLevel: function setLogLevel(level) {
-	    GlobalLogLevel = level;
+	  setLogLevel: (level) => {
+	    GlobalLogLevel = level
 	  },
-	  create: function create(category, options) {
-	    return new Logger(category, options);
-	  }
+	  create: (category, options) => new Logger(category, options),
 	};
+
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(27)))
 
 /***/ },
-/* 200 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(201), __esModule: true };
-
-/***/ },
-/* 201 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(202);
-	module.exports = __webpack_require__(208).Object.keys;
-
-/***/ },
-/* 202 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.14 Object.keys(O)
-	var toObject = __webpack_require__(203);
-
-	__webpack_require__(205)('keys', function($keys){
-	  return function keys(it){
-	    return $keys(toObject(it));
-	  };
-	});
-
-/***/ },
-/* 203 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 7.1.13 ToObject(argument)
-	var defined = __webpack_require__(204);
-	module.exports = function(it){
-	  return Object(defined(it));
-	};
-
-/***/ },
-/* 204 */
-/***/ function(module, exports) {
-
-	// 7.2.1 RequireObjectCoercible(argument)
-	module.exports = function(it){
-	  if(it == undefined)throw TypeError("Can't call method on  " + it);
-	  return it;
-	};
-
-/***/ },
-/* 205 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// most Object methods by ES6 should accept primitives
-	var $export = __webpack_require__(206)
-	  , core    = __webpack_require__(208)
-	  , fails   = __webpack_require__(211);
-	module.exports = function(KEY, exec){
-	  var fn  = (core.Object || {})[KEY] || Object[KEY]
-	    , exp = {};
-	  exp[KEY] = exec(fn);
-	  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
-	};
-
-/***/ },
-/* 206 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var global    = __webpack_require__(207)
-	  , core      = __webpack_require__(208)
-	  , ctx       = __webpack_require__(209)
-	  , PROTOTYPE = 'prototype';
-
-	var $export = function(type, name, source){
-	  var IS_FORCED = type & $export.F
-	    , IS_GLOBAL = type & $export.G
-	    , IS_STATIC = type & $export.S
-	    , IS_PROTO  = type & $export.P
-	    , IS_BIND   = type & $export.B
-	    , IS_WRAP   = type & $export.W
-	    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
-	    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
-	    , key, own, out;
-	  if(IS_GLOBAL)source = name;
-	  for(key in source){
-	    // contains in native
-	    own = !IS_FORCED && target && key in target;
-	    if(own && key in exports)continue;
-	    // export native or passed
-	    out = own ? target[key] : source[key];
-	    // prevent global pollution for namespaces
-	    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
-	    // bind timers to global for call from export context
-	    : IS_BIND && own ? ctx(out, global)
-	    // wrap global constructors for prevent change them in library
-	    : IS_WRAP && target[key] == out ? (function(C){
-	      var F = function(param){
-	        return this instanceof C ? new C(param) : C(param);
-	      };
-	      F[PROTOTYPE] = C[PROTOTYPE];
-	      return F;
-	    // make static versions for prototype methods
-	    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-	    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
-	  }
-	};
-	// type bitmap
-	$export.F = 1;  // forced
-	$export.G = 2;  // global
-	$export.S = 4;  // static
-	$export.P = 8;  // proto
-	$export.B = 16; // bind
-	$export.W = 32; // wrap
-	module.exports = $export;
-
-/***/ },
-/* 207 */
-/***/ function(module, exports) {
-
-	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-	var global = module.exports = typeof window != 'undefined' && window.Math == Math
-	  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
-	if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-
-/***/ },
-/* 208 */
-/***/ function(module, exports) {
-
-	var core = module.exports = {version: '1.2.6'};
-	if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-
-/***/ },
-/* 209 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// optional / simple context binding
-	var aFunction = __webpack_require__(210);
-	module.exports = function(fn, that, length){
-	  aFunction(fn);
-	  if(that === undefined)return fn;
-	  switch(length){
-	    case 1: return function(a){
-	      return fn.call(that, a);
-	    };
-	    case 2: return function(a, b){
-	      return fn.call(that, a, b);
-	    };
-	    case 3: return function(a, b, c){
-	      return fn.call(that, a, b, c);
-	    };
-	  }
-	  return function(/* ...args */){
-	    return fn.apply(that, arguments);
-	  };
-	};
-
-/***/ },
-/* 210 */
-/***/ function(module, exports) {
-
-	module.exports = function(it){
-	  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
-	  return it;
-	};
-
-/***/ },
-/* 211 */
-/***/ function(module, exports) {
-
-	module.exports = function(exec){
-	  try {
-	    return !!exec();
-	  } catch(e){
-	    return true;
-	  }
-	};
-
-/***/ },
-/* 212 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(213), __esModule: true };
-
-/***/ },
-/* 213 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(214);
-	module.exports = __webpack_require__(208).Object.assign;
-
-/***/ },
-/* 214 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.3.1 Object.assign(target, source)
-	var $export = __webpack_require__(206);
-
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(215)});
-
-/***/ },
-/* 215 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.1 Object.assign(target, source, ...)
-	var $        = __webpack_require__(216)
-	  , toObject = __webpack_require__(203)
-	  , IObject  = __webpack_require__(217);
-
-	// should work with symbols and should have deterministic property order (V8 bug)
-	module.exports = __webpack_require__(211)(function(){
-	  var a = Object.assign
-	    , A = {}
-	    , B = {}
-	    , S = Symbol()
-	    , K = 'abcdefghijklmnopqrst';
-	  A[S] = 7;
-	  K.split('').forEach(function(k){ B[k] = k; });
-	  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
-	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
-	  var T     = toObject(target)
-	    , $$    = arguments
-	    , $$len = $$.length
-	    , index = 1
-	    , getKeys    = $.getKeys
-	    , getSymbols = $.getSymbols
-	    , isEnum     = $.isEnum;
-	  while($$len > index){
-	    var S      = IObject($$[index++])
-	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
-	      , length = keys.length
-	      , j      = 0
-	      , key;
-	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
-	  }
-	  return T;
-	} : Object.assign;
-
-/***/ },
-/* 216 */
-/***/ function(module, exports) {
-
-	var $Object = Object;
-	module.exports = {
-	  create:     $Object.create,
-	  getProto:   $Object.getPrototypeOf,
-	  isEnum:     {}.propertyIsEnumerable,
-	  getDesc:    $Object.getOwnPropertyDescriptor,
-	  setDesc:    $Object.defineProperty,
-	  setDescs:   $Object.defineProperties,
-	  getKeys:    $Object.keys,
-	  getNames:   $Object.getOwnPropertyNames,
-	  getSymbols: $Object.getOwnPropertySymbols,
-	  each:       [].forEach
-	};
-
-/***/ },
-/* 217 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// fallback for non-array-like ES3 and non-enumerable old V8 strings
-	var cof = __webpack_require__(218);
-	module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
-	  return cof(it) == 'String' ? it.split('') : Object(it);
-	};
-
-/***/ },
-/* 218 */
-/***/ function(module, exports) {
-
-	var toString = {}.toString;
-
-	module.exports = function(it){
-	  return toString.call(it).slice(8, -1);
-	};
-
-/***/ },
-/* 219 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	exports.default = function (instance, Constructor) {
-	  if (!(instance instanceof Constructor)) {
-	    throw new TypeError("Cannot call a class as a function");
-	  }
-	};
-
-/***/ },
-/* 220 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	var _defineProperty = __webpack_require__(221);
-
-	var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	exports.default = function () {
-	  function defineProperties(target, props) {
-	    for (var i = 0; i < props.length; i++) {
-	      var descriptor = props[i];
-	      descriptor.enumerable = descriptor.enumerable || false;
-	      descriptor.configurable = true;
-	      if ("value" in descriptor) descriptor.writable = true;
-	      (0, _defineProperty2.default)(target, descriptor.key, descriptor);
-	    }
-	  }
-
-	  return function (Constructor, protoProps, staticProps) {
-	    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-	    if (staticProps) defineProperties(Constructor, staticProps);
-	    return Constructor;
-	  };
-	}();
-
-/***/ },
-/* 221 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(222), __esModule: true };
-
-/***/ },
-/* 222 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(216);
-	module.exports = function defineProperty(it, key, desc){
-	  return $.setDesc(it, key, desc);
-	};
-
-/***/ },
-/* 223 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	module.exports = {
-	  createWriteStream: function createWriteStream(filename, options) {
-	    return;
-	  },
-	  writeFileSync: function writeFileSync() {
-	    return;
-	  }
-	};
-
-/***/ },
-/* 224 */
+/* 193 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _defineProperty2 = __webpack_require__(225);
+	var _defineProperty2 = __webpack_require__(194);
 
 	var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-	var _iterator3 = __webpack_require__(226);
+	var _iterator3 = __webpack_require__(195);
 
 	var _iterator4 = _interopRequireDefault(_iterator3);
 
-	var _promise = __webpack_require__(238);
+	var _promise = __webpack_require__(207);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var EventEmitter = __webpack_require__(41).EventEmitter;
-	var logger = __webpack_require__(199).create("orbit-db.Client");
-	var PubSub = __webpack_require__(260);
-	var OrbitDB = __webpack_require__(316);
+	var logger = __webpack_require__(192).create("orbit-db.Client");
+	var PubSub = __webpack_require__(229);
+	var OrbitDB = __webpack_require__(279);
 
 	var Client = function () {
 	  function Client(ipfs, options) {
@@ -26199,7 +24008,7 @@
 	module.exports = OrbitClientFactory;
 
 /***/ },
-/* 225 */
+/* 194 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -26228,28 +24037,28 @@
 	};
 
 /***/ },
-/* 226 */
+/* 195 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(227), __esModule: true };
+	module.exports = { "default": __webpack_require__(196), __esModule: true };
 
 /***/ },
-/* 227 */
+/* 196 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(228);
-	__webpack_require__(234);
+	__webpack_require__(197);
+	__webpack_require__(203);
 	module.exports = __webpack_require__(102)('iterator');
 
 /***/ },
-/* 228 */
+/* 197 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var $at  = __webpack_require__(229)(true);
+	var $at  = __webpack_require__(198)(true);
 
 	// 21.1.3.27 String.prototype[@@iterator]()
-	__webpack_require__(231)(String, 'String', function(iterated){
+	__webpack_require__(200)(String, 'String', function(iterated){
 	  this._t = String(iterated); // target
 	  this._i = 0;                // next index
 	// 21.1.5.2.1 %StringIteratorPrototype%.next()
@@ -26264,10 +24073,10 @@
 	});
 
 /***/ },
-/* 229 */
+/* 198 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var toInteger = __webpack_require__(230)
+	var toInteger = __webpack_require__(199)
 	  , defined   = __webpack_require__(33);
 	// true  -> String#at
 	// false -> String#codePointAt
@@ -26286,7 +24095,7 @@
 	};
 
 /***/ },
-/* 230 */
+/* 199 */
 /***/ function(module, exports) {
 
 	// 7.1.4 ToInteger
@@ -26297,7 +24106,7 @@
 	};
 
 /***/ },
-/* 231 */
+/* 200 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26306,8 +24115,8 @@
 	  , redefine       = __webpack_require__(97)
 	  , hide           = __webpack_require__(98)
 	  , has            = __webpack_require__(95)
-	  , Iterators      = __webpack_require__(232)
-	  , $iterCreate    = __webpack_require__(233)
+	  , Iterators      = __webpack_require__(201)
+	  , $iterCreate    = __webpack_require__(202)
 	  , setToStringTag = __webpack_require__(101)
 	  , getProto       = __webpack_require__(75).getProto
 	  , ITERATOR       = __webpack_require__(102)('iterator')
@@ -26368,13 +24177,13 @@
 	};
 
 /***/ },
-/* 232 */
+/* 201 */
 /***/ function(module, exports) {
 
 	module.exports = {};
 
 /***/ },
-/* 233 */
+/* 202 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26392,28 +24201,28 @@
 	};
 
 /***/ },
-/* 234 */
+/* 203 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(235);
-	var Iterators = __webpack_require__(232);
+	__webpack_require__(204);
+	var Iterators = __webpack_require__(201);
 	Iterators.NodeList = Iterators.HTMLCollection = Iterators.Array;
 
 /***/ },
-/* 235 */
+/* 204 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-	var addToUnscopables = __webpack_require__(236)
-	  , step             = __webpack_require__(237)
-	  , Iterators        = __webpack_require__(232)
+	var addToUnscopables = __webpack_require__(205)
+	  , step             = __webpack_require__(206)
+	  , Iterators        = __webpack_require__(201)
 	  , toIObject        = __webpack_require__(79);
 
 	// 22.1.3.4 Array.prototype.entries()
 	// 22.1.3.13 Array.prototype.keys()
 	// 22.1.3.29 Array.prototype.values()
 	// 22.1.3.30 Array.prototype[@@iterator]()
-	module.exports = __webpack_require__(231)(Array, 'Array', function(iterated, kind){
+	module.exports = __webpack_require__(200)(Array, 'Array', function(iterated, kind){
 	  this._t = toIObject(iterated); // target
 	  this._i = 0;                   // next index
 	  this._k = kind;                // kind
@@ -26439,13 +24248,13 @@
 	addToUnscopables('entries');
 
 /***/ },
-/* 236 */
+/* 205 */
 /***/ function(module, exports) {
 
 	module.exports = function(){ /* empty */ };
 
 /***/ },
-/* 237 */
+/* 206 */
 /***/ function(module, exports) {
 
 	module.exports = function(done, value){
@@ -26453,23 +24262,23 @@
 	};
 
 /***/ },
-/* 238 */
+/* 207 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(239), __esModule: true };
+	module.exports = { "default": __webpack_require__(208), __esModule: true };
 
 /***/ },
-/* 239 */
+/* 208 */
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(110);
-	__webpack_require__(228);
-	__webpack_require__(234);
-	__webpack_require__(240);
+	__webpack_require__(197);
+	__webpack_require__(203);
+	__webpack_require__(209);
 	module.exports = __webpack_require__(37).Promise;
 
 /***/ },
-/* 240 */
+/* 209 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -26477,18 +24286,18 @@
 	  , LIBRARY    = __webpack_require__(109)
 	  , global     = __webpack_require__(36)
 	  , ctx        = __webpack_require__(38)
-	  , classof    = __webpack_require__(241)
+	  , classof    = __webpack_require__(210)
 	  , $export    = __webpack_require__(35)
 	  , isObject   = __webpack_require__(108)
 	  , anObject   = __webpack_require__(107)
 	  , aFunction  = __webpack_require__(39)
-	  , strictNew  = __webpack_require__(242)
-	  , forOf      = __webpack_require__(243)
+	  , strictNew  = __webpack_require__(211)
+	  , forOf      = __webpack_require__(212)
 	  , setProto   = __webpack_require__(133).set
-	  , same       = __webpack_require__(248)
+	  , same       = __webpack_require__(217)
 	  , SPECIES    = __webpack_require__(102)('species')
-	  , speciesConstructor = __webpack_require__(249)
-	  , asap       = __webpack_require__(250)
+	  , speciesConstructor = __webpack_require__(218)
+	  , asap       = __webpack_require__(219)
 	  , PROMISE    = 'Promise'
 	  , process    = global.process
 	  , isNode     = classof(process) == 'process'
@@ -26673,7 +24482,7 @@
 	      $reject.call(record, err);
 	    }
 	  };
-	  __webpack_require__(255)(P.prototype, {
+	  __webpack_require__(224)(P.prototype, {
 	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
 	    then: function then(onFulfilled, onRejected){
 	      var reaction = new PromiseCapability(speciesConstructor(this, P))
@@ -26695,7 +24504,7 @@
 
 	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: P});
 	__webpack_require__(101)(P, PROMISE);
-	__webpack_require__(256)(PROMISE);
+	__webpack_require__(225)(PROMISE);
 	Wrapper = __webpack_require__(37)[PROMISE];
 
 	// statics
@@ -26719,7 +24528,7 @@
 	    return capability.promise;
 	  }
 	});
-	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(257)(function(iter){
+	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(226)(function(iter){
 	  P.all(iter)['catch'](function(){});
 	})), PROMISE, {
 	  // 25.4.4.1 Promise.all(iterable)
@@ -26763,7 +24572,7 @@
 	});
 
 /***/ },
-/* 241 */
+/* 210 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// getting tag from 19.1.3.6 Object.prototype.toString()
@@ -26784,7 +24593,7 @@
 	};
 
 /***/ },
-/* 242 */
+/* 211 */
 /***/ function(module, exports) {
 
 	module.exports = function(it, Constructor, name){
@@ -26793,15 +24602,15 @@
 	};
 
 /***/ },
-/* 243 */
+/* 212 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx         = __webpack_require__(38)
-	  , call        = __webpack_require__(244)
-	  , isArrayIter = __webpack_require__(245)
+	  , call        = __webpack_require__(213)
+	  , isArrayIter = __webpack_require__(214)
 	  , anObject    = __webpack_require__(107)
-	  , toLength    = __webpack_require__(246)
-	  , getIterFn   = __webpack_require__(247);
+	  , toLength    = __webpack_require__(215)
+	  , getIterFn   = __webpack_require__(216);
 	module.exports = function(iterable, entries, fn, that){
 	  var iterFn = getIterFn(iterable)
 	    , f      = ctx(fn, that, entries ? 2 : 1)
@@ -26817,7 +24626,7 @@
 	};
 
 /***/ },
-/* 244 */
+/* 213 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// call something on iterator step with safe closing on error
@@ -26834,11 +24643,11 @@
 	};
 
 /***/ },
-/* 245 */
+/* 214 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// check on default Array iterator
-	var Iterators  = __webpack_require__(232)
+	var Iterators  = __webpack_require__(201)
 	  , ITERATOR   = __webpack_require__(102)('iterator')
 	  , ArrayProto = Array.prototype;
 
@@ -26847,23 +24656,23 @@
 	};
 
 /***/ },
-/* 246 */
+/* 215 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 7.1.15 ToLength
-	var toInteger = __webpack_require__(230)
+	var toInteger = __webpack_require__(199)
 	  , min       = Math.min;
 	module.exports = function(it){
 	  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 	};
 
 /***/ },
-/* 247 */
+/* 216 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var classof   = __webpack_require__(241)
+	var classof   = __webpack_require__(210)
 	  , ITERATOR  = __webpack_require__(102)('iterator')
-	  , Iterators = __webpack_require__(232);
+	  , Iterators = __webpack_require__(201);
 	module.exports = __webpack_require__(37).getIteratorMethod = function(it){
 	  if(it != undefined)return it[ITERATOR]
 	    || it['@@iterator']
@@ -26871,7 +24680,7 @@
 	};
 
 /***/ },
-/* 248 */
+/* 217 */
 /***/ function(module, exports) {
 
 	// 7.2.9 SameValue(x, y)
@@ -26880,7 +24689,7 @@
 	};
 
 /***/ },
-/* 249 */
+/* 218 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
@@ -26893,11 +24702,11 @@
 	};
 
 /***/ },
-/* 250 */
+/* 219 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var global    = __webpack_require__(36)
-	  , macrotask = __webpack_require__(251).set
+	  , macrotask = __webpack_require__(220).set
 	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
 	  , process   = global.process
 	  , Promise   = global.Promise
@@ -26962,13 +24771,13 @@
 	};
 
 /***/ },
-/* 251 */
+/* 220 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ctx                = __webpack_require__(38)
-	  , invoke             = __webpack_require__(252)
-	  , html               = __webpack_require__(253)
-	  , cel                = __webpack_require__(254)
+	  , invoke             = __webpack_require__(221)
+	  , html               = __webpack_require__(222)
+	  , cel                = __webpack_require__(223)
 	  , global             = __webpack_require__(36)
 	  , process            = global.process
 	  , setTask            = global.setImmediate
@@ -27042,7 +24851,7 @@
 	};
 
 /***/ },
-/* 252 */
+/* 221 */
 /***/ function(module, exports) {
 
 	// fast apply, http://jsperf.lnkit.com/fast-apply/5
@@ -27063,13 +24872,13 @@
 	};
 
 /***/ },
-/* 253 */
+/* 222 */
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__(36).document && document.documentElement;
 
 /***/ },
-/* 254 */
+/* 223 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var isObject = __webpack_require__(108)
@@ -27081,7 +24890,7 @@
 	};
 
 /***/ },
-/* 255 */
+/* 224 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var redefine = __webpack_require__(97);
@@ -27091,7 +24900,7 @@
 	};
 
 /***/ },
-/* 256 */
+/* 225 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27109,7 +24918,7 @@
 	};
 
 /***/ },
-/* 257 */
+/* 226 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var ITERATOR     = __webpack_require__(102)('iterator')
@@ -27135,7 +24944,7 @@
 	};
 
 /***/ },
-/* 258 */
+/* 227 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -27149,7 +24958,7 @@
 	};
 
 /***/ },
-/* 259 */
+/* 228 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -27181,7 +24990,7 @@
 	}();
 
 /***/ },
-/* 260 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -27190,22 +24999,22 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
-	var _promise = __webpack_require__(238);
+	var _promise = __webpack_require__(207);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var io = __webpack_require__(261);
-	var logger = __webpack_require__(199).create("orbit-db.Pubsub");
+	var io = __webpack_require__(230);
+	var logger = __webpack_require__(192).create("orbit-db.Pubsub");
 
 	var Pubsub = function () {
 	  function Pubsub(ipfs) {
@@ -27276,7 +25085,7 @@
 	module.exports = Pubsub;
 
 /***/ },
-/* 261 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -27284,10 +25093,10 @@
 	 * Module dependencies.
 	 */
 
-	var url = __webpack_require__(262);
-	var parser = __webpack_require__(267);
-	var Manager = __webpack_require__(277);
-	var debug = __webpack_require__(264)('socket.io-client');
+	var url = __webpack_require__(231);
+	var parser = __webpack_require__(236);
+	var Manager = __webpack_require__(243);
+	var debug = __webpack_require__(233)('socket.io-client');
 
 	/**
 	 * Module exports.
@@ -27369,12 +25178,12 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(277);
-	exports.Socket = __webpack_require__(308);
+	exports.Manager = __webpack_require__(243);
+	exports.Socket = __webpack_require__(271);
 
 
 /***/ },
-/* 262 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -27382,8 +25191,8 @@
 	 * Module dependencies.
 	 */
 
-	var parseuri = __webpack_require__(263);
-	var debug = __webpack_require__(264)('socket.io-client:url');
+	var parseuri = __webpack_require__(232);
+	var debug = __webpack_require__(233)('socket.io-client:url');
 
 	/**
 	 * Module exports.
@@ -27457,7 +25266,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 263 */
+/* 232 */
 /***/ function(module, exports) {
 
 	/**
@@ -27502,7 +25311,7 @@
 
 
 /***/ },
-/* 264 */
+/* 233 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -27512,7 +25321,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(265);
+	exports = module.exports = __webpack_require__(234);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -27676,7 +25485,7 @@
 
 
 /***/ },
-/* 265 */
+/* 234 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -27692,7 +25501,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(266);
+	exports.humanize = __webpack_require__(235);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -27879,7 +25688,7 @@
 
 
 /***/ },
-/* 266 */
+/* 235 */
 /***/ function(module, exports) {
 
 	/**
@@ -28010,7 +25819,7 @@
 
 
 /***/ },
-/* 267 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -28018,12 +25827,12 @@
 	 * Module dependencies.
 	 */
 
-	var debug = __webpack_require__(268)('socket.io-parser');
-	var json = __webpack_require__(271);
-	var isArray = __webpack_require__(273);
-	var Emitter = __webpack_require__(274);
-	var binary = __webpack_require__(275);
-	var isBuf = __webpack_require__(276);
+	var debug = __webpack_require__(233)('socket.io-parser');
+	var json = __webpack_require__(237);
+	var isArray = __webpack_require__(239);
+	var Emitter = __webpack_require__(240);
+	var binary = __webpack_require__(241);
+	var isBuf = __webpack_require__(242);
 
 	/**
 	 * Protocol version.
@@ -28416,522 +26225,14 @@
 
 
 /***/ },
-/* 268 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * This is the web browser implementation of `debug()`.
-	 *
-	 * Expose `debug()` as the module.
-	 */
-
-	exports = module.exports = __webpack_require__(269);
-	exports.log = log;
-	exports.formatArgs = formatArgs;
-	exports.save = save;
-	exports.load = load;
-	exports.useColors = useColors;
-	exports.storage = 'undefined' != typeof chrome
-	               && 'undefined' != typeof chrome.storage
-	                  ? chrome.storage.local
-	                  : localstorage();
-
-	/**
-	 * Colors.
-	 */
-
-	exports.colors = [
-	  'lightseagreen',
-	  'forestgreen',
-	  'goldenrod',
-	  'dodgerblue',
-	  'darkorchid',
-	  'crimson'
-	];
-
-	/**
-	 * Currently only WebKit-based Web Inspectors, Firefox >= v31,
-	 * and the Firebug extension (any Firefox version) are known
-	 * to support "%c" CSS customizations.
-	 *
-	 * TODO: add a `localStorage` variable to explicitly enable/disable colors
-	 */
-
-	function useColors() {
-	  // is webkit? http://stackoverflow.com/a/16459606/376773
-	  return ('WebkitAppearance' in document.documentElement.style) ||
-	    // is firebug? http://stackoverflow.com/a/398120/376773
-	    (window.console && (console.firebug || (console.exception && console.table))) ||
-	    // is firefox >= v31?
-	    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-	    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-	}
-
-	/**
-	 * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
-	 */
-
-	exports.formatters.j = function(v) {
-	  return JSON.stringify(v);
-	};
-
-
-	/**
-	 * Colorize log arguments if enabled.
-	 *
-	 * @api public
-	 */
-
-	function formatArgs() {
-	  var args = arguments;
-	  var useColors = this.useColors;
-
-	  args[0] = (useColors ? '%c' : '')
-	    + this.namespace
-	    + (useColors ? ' %c' : ' ')
-	    + args[0]
-	    + (useColors ? '%c ' : ' ')
-	    + '+' + exports.humanize(this.diff);
-
-	  if (!useColors) return args;
-
-	  var c = 'color: ' + this.color;
-	  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-	  // the final "%c" is somewhat tricky, because there could be other
-	  // arguments passed either before or after the %c, so we need to
-	  // figure out the correct index to insert the CSS into
-	  var index = 0;
-	  var lastC = 0;
-	  args[0].replace(/%[a-z%]/g, function(match) {
-	    if ('%%' === match) return;
-	    index++;
-	    if ('%c' === match) {
-	      // we only are interested in the *last* %c
-	      // (the user may have provided their own)
-	      lastC = index;
-	    }
-	  });
-
-	  args.splice(lastC, 0, c);
-	  return args;
-	}
-
-	/**
-	 * Invokes `console.log()` when available.
-	 * No-op when `console.log` is not a "function".
-	 *
-	 * @api public
-	 */
-
-	function log() {
-	  // this hackery is required for IE8/9, where
-	  // the `console.log` function doesn't have 'apply'
-	  return 'object' === typeof console
-	    && console.log
-	    && Function.prototype.apply.call(console.log, console, arguments);
-	}
-
-	/**
-	 * Save `namespaces`.
-	 *
-	 * @param {String} namespaces
-	 * @api private
-	 */
-
-	function save(namespaces) {
-	  try {
-	    if (null == namespaces) {
-	      exports.storage.removeItem('debug');
-	    } else {
-	      exports.storage.debug = namespaces;
-	    }
-	  } catch(e) {}
-	}
-
-	/**
-	 * Load `namespaces`.
-	 *
-	 * @return {String} returns the previously persisted debug modes
-	 * @api private
-	 */
-
-	function load() {
-	  var r;
-	  try {
-	    r = exports.storage.debug;
-	  } catch(e) {}
-	  return r;
-	}
-
-	/**
-	 * Enable namespaces listed in `localStorage.debug` initially.
-	 */
-
-	exports.enable(load());
-
-	/**
-	 * Localstorage attempts to return the localstorage.
-	 *
-	 * This is necessary because safari throws
-	 * when a user disables cookies/localstorage
-	 * and you attempt to access it.
-	 *
-	 * @return {LocalStorage}
-	 * @api private
-	 */
-
-	function localstorage(){
-	  try {
-	    return window.localStorage;
-	  } catch (e) {}
-	}
-
-
-/***/ },
-/* 269 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * This is the common logic for both the Node.js and web browser
-	 * implementations of `debug()`.
-	 *
-	 * Expose `debug()` as the module.
-	 */
-
-	exports = module.exports = debug;
-	exports.coerce = coerce;
-	exports.disable = disable;
-	exports.enable = enable;
-	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(270);
-
-	/**
-	 * The currently active debug mode names, and names to skip.
-	 */
-
-	exports.names = [];
-	exports.skips = [];
-
-	/**
-	 * Map of special "%n" handling functions, for the debug "format" argument.
-	 *
-	 * Valid key names are a single, lowercased letter, i.e. "n".
-	 */
-
-	exports.formatters = {};
-
-	/**
-	 * Previously assigned color.
-	 */
-
-	var prevColor = 0;
-
-	/**
-	 * Previous log timestamp.
-	 */
-
-	var prevTime;
-
-	/**
-	 * Select a color.
-	 *
-	 * @return {Number}
-	 * @api private
-	 */
-
-	function selectColor() {
-	  return exports.colors[prevColor++ % exports.colors.length];
-	}
-
-	/**
-	 * Create a debugger with the given `namespace`.
-	 *
-	 * @param {String} namespace
-	 * @return {Function}
-	 * @api public
-	 */
-
-	function debug(namespace) {
-
-	  // define the `disabled` version
-	  function disabled() {
-	  }
-	  disabled.enabled = false;
-
-	  // define the `enabled` version
-	  function enabled() {
-
-	    var self = enabled;
-
-	    // set `diff` timestamp
-	    var curr = +new Date();
-	    var ms = curr - (prevTime || curr);
-	    self.diff = ms;
-	    self.prev = prevTime;
-	    self.curr = curr;
-	    prevTime = curr;
-
-	    // add the `color` if not set
-	    if (null == self.useColors) self.useColors = exports.useColors();
-	    if (null == self.color && self.useColors) self.color = selectColor();
-
-	    var args = Array.prototype.slice.call(arguments);
-
-	    args[0] = exports.coerce(args[0]);
-
-	    if ('string' !== typeof args[0]) {
-	      // anything else let's inspect with %o
-	      args = ['%o'].concat(args);
-	    }
-
-	    // apply any `formatters` transformations
-	    var index = 0;
-	    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-	      // if we encounter an escaped % then don't increase the array index
-	      if (match === '%%') return match;
-	      index++;
-	      var formatter = exports.formatters[format];
-	      if ('function' === typeof formatter) {
-	        var val = args[index];
-	        match = formatter.call(self, val);
-
-	        // now we need to remove `args[index]` since it's inlined in the `format`
-	        args.splice(index, 1);
-	        index--;
-	      }
-	      return match;
-	    });
-
-	    if ('function' === typeof exports.formatArgs) {
-	      args = exports.formatArgs.apply(self, args);
-	    }
-	    var logFn = enabled.log || exports.log || console.log.bind(console);
-	    logFn.apply(self, args);
-	  }
-	  enabled.enabled = true;
-
-	  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-	  fn.namespace = namespace;
-
-	  return fn;
-	}
-
-	/**
-	 * Enables a debug mode by namespaces. This can include modes
-	 * separated by a colon and wildcards.
-	 *
-	 * @param {String} namespaces
-	 * @api public
-	 */
-
-	function enable(namespaces) {
-	  exports.save(namespaces);
-
-	  var split = (namespaces || '').split(/[\s,]+/);
-	  var len = split.length;
-
-	  for (var i = 0; i < len; i++) {
-	    if (!split[i]) continue; // ignore empty strings
-	    namespaces = split[i].replace(/\*/g, '.*?');
-	    if (namespaces[0] === '-') {
-	      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-	    } else {
-	      exports.names.push(new RegExp('^' + namespaces + '$'));
-	    }
-	  }
-	}
-
-	/**
-	 * Disable debug output.
-	 *
-	 * @api public
-	 */
-
-	function disable() {
-	  exports.enable('');
-	}
-
-	/**
-	 * Returns true if the given mode name is enabled, false otherwise.
-	 *
-	 * @param {String} name
-	 * @return {Boolean}
-	 * @api public
-	 */
-
-	function enabled(name) {
-	  var i, len;
-	  for (i = 0, len = exports.skips.length; i < len; i++) {
-	    if (exports.skips[i].test(name)) {
-	      return false;
-	    }
-	  }
-	  for (i = 0, len = exports.names.length; i < len; i++) {
-	    if (exports.names[i].test(name)) {
-	      return true;
-	    }
-	  }
-	  return false;
-	}
-
-	/**
-	 * Coerce `val`.
-	 *
-	 * @param {Mixed} val
-	 * @return {Mixed}
-	 * @api private
-	 */
-
-	function coerce(val) {
-	  if (val instanceof Error) return val.stack || val.message;
-	  return val;
-	}
-
-
-/***/ },
-/* 270 */
-/***/ function(module, exports) {
-
-	/**
-	 * Helpers.
-	 */
-
-	var s = 1000;
-	var m = s * 60;
-	var h = m * 60;
-	var d = h * 24;
-	var y = d * 365.25;
-
-	/**
-	 * Parse or format the given `val`.
-	 *
-	 * Options:
-	 *
-	 *  - `long` verbose formatting [false]
-	 *
-	 * @param {String|Number} val
-	 * @param {Object} options
-	 * @return {String|Number}
-	 * @api public
-	 */
-
-	module.exports = function(val, options){
-	  options = options || {};
-	  if ('string' == typeof val) return parse(val);
-	  return options.long
-	    ? long(val)
-	    : short(val);
-	};
-
-	/**
-	 * Parse the given `str` and return milliseconds.
-	 *
-	 * @param {String} str
-	 * @return {Number}
-	 * @api private
-	 */
-
-	function parse(str) {
-	  str = '' + str;
-	  if (str.length > 10000) return;
-	  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-	  if (!match) return;
-	  var n = parseFloat(match[1]);
-	  var type = (match[2] || 'ms').toLowerCase();
-	  switch (type) {
-	    case 'years':
-	    case 'year':
-	    case 'yrs':
-	    case 'yr':
-	    case 'y':
-	      return n * y;
-	    case 'days':
-	    case 'day':
-	    case 'd':
-	      return n * d;
-	    case 'hours':
-	    case 'hour':
-	    case 'hrs':
-	    case 'hr':
-	    case 'h':
-	      return n * h;
-	    case 'minutes':
-	    case 'minute':
-	    case 'mins':
-	    case 'min':
-	    case 'm':
-	      return n * m;
-	    case 'seconds':
-	    case 'second':
-	    case 'secs':
-	    case 'sec':
-	    case 's':
-	      return n * s;
-	    case 'milliseconds':
-	    case 'millisecond':
-	    case 'msecs':
-	    case 'msec':
-	    case 'ms':
-	      return n;
-	  }
-	}
-
-	/**
-	 * Short format for `ms`.
-	 *
-	 * @param {Number} ms
-	 * @return {String}
-	 * @api private
-	 */
-
-	function short(ms) {
-	  if (ms >= d) return Math.round(ms / d) + 'd';
-	  if (ms >= h) return Math.round(ms / h) + 'h';
-	  if (ms >= m) return Math.round(ms / m) + 'm';
-	  if (ms >= s) return Math.round(ms / s) + 's';
-	  return ms + 'ms';
-	}
-
-	/**
-	 * Long format for `ms`.
-	 *
-	 * @param {Number} ms
-	 * @return {String}
-	 * @api private
-	 */
-
-	function long(ms) {
-	  return plural(ms, d, 'day')
-	    || plural(ms, h, 'hour')
-	    || plural(ms, m, 'minute')
-	    || plural(ms, s, 'second')
-	    || ms + ' ms';
-	}
-
-	/**
-	 * Pluralization helper.
-	 */
-
-	function plural(ms, n, name) {
-	  if (ms < n) return;
-	  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-	  return Math.ceil(ms / n) + ' ' + name + 's';
-	}
-
-
-/***/ },
-/* 271 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(272);
+	  var isLoader = "function" === "function" && __webpack_require__(238);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -29833,7 +27134,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 272 */
+/* 238 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -29841,7 +27142,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 273 */
+/* 239 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -29850,7 +27151,7 @@
 
 
 /***/ },
-/* 274 */
+/* 240 */
 /***/ function(module, exports) {
 
 	
@@ -30020,7 +27321,7 @@
 
 
 /***/ },
-/* 275 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -30029,8 +27330,8 @@
 	 * Module requirements
 	 */
 
-	var isArray = __webpack_require__(273);
-	var isBuf = __webpack_require__(276);
+	var isArray = __webpack_require__(239);
+	var isBuf = __webpack_require__(242);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -30168,7 +27469,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 276 */
+/* 242 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -30188,7 +27489,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 277 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -30196,15 +27497,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(278);
-	var Socket = __webpack_require__(308);
-	var Emitter = __webpack_require__(309);
-	var parser = __webpack_require__(267);
-	var on = __webpack_require__(311);
-	var bind = __webpack_require__(312);
-	var debug = __webpack_require__(264)('socket.io-client:manager');
-	var indexOf = __webpack_require__(306);
-	var Backoff = __webpack_require__(315);
+	var eio = __webpack_require__(244);
+	var Socket = __webpack_require__(271);
+	var Emitter = __webpack_require__(272);
+	var parser = __webpack_require__(236);
+	var on = __webpack_require__(274);
+	var bind = __webpack_require__(275);
+	var debug = __webpack_require__(233)('socket.io-client:manager');
+	var indexOf = __webpack_require__(269);
+	var Backoff = __webpack_require__(278);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -30751,19 +28052,19 @@
 
 
 /***/ },
-/* 278 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports =  __webpack_require__(279);
+	module.exports =  __webpack_require__(245);
 
 
 /***/ },
-/* 279 */
+/* 245 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(280);
+	module.exports = __webpack_require__(246);
 
 	/**
 	 * Exports parser
@@ -30771,25 +28072,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(287);
+	module.exports.parser = __webpack_require__(253);
 
 
 /***/ },
-/* 280 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(281);
-	var Emitter = __webpack_require__(296);
-	var debug = __webpack_require__(300)('engine.io-client:socket');
-	var index = __webpack_require__(306);
-	var parser = __webpack_require__(287);
-	var parseuri = __webpack_require__(263);
-	var parsejson = __webpack_require__(307);
-	var parseqs = __webpack_require__(297);
+	var transports = __webpack_require__(247);
+	var Emitter = __webpack_require__(262);
+	var debug = __webpack_require__(233)('engine.io-client:socket');
+	var index = __webpack_require__(269);
+	var parser = __webpack_require__(253);
+	var parseuri = __webpack_require__(232);
+	var parsejson = __webpack_require__(270);
+	var parseqs = __webpack_require__(263);
 
 	/**
 	 * Module exports.
@@ -30913,9 +28214,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(286);
-	Socket.transports = __webpack_require__(281);
-	Socket.parser = __webpack_require__(287);
+	Socket.Transport = __webpack_require__(252);
+	Socket.transports = __webpack_require__(247);
+	Socket.parser = __webpack_require__(253);
 
 	/**
 	 * Creates transport of the given type.
@@ -31510,17 +28811,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 281 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(282);
-	var XHR = __webpack_require__(284);
-	var JSONP = __webpack_require__(303);
-	var websocket = __webpack_require__(304);
+	var XMLHttpRequest = __webpack_require__(248);
+	var XHR = __webpack_require__(250);
+	var JSONP = __webpack_require__(266);
+	var websocket = __webpack_require__(267);
 
 	/**
 	 * Export transports.
@@ -31570,11 +28871,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 282 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// browser shim for xmlhttprequest module
-	var hasCORS = __webpack_require__(283);
+	var hasCORS = __webpack_require__(249);
 
 	module.exports = function(opts) {
 	  var xdomain = opts.xdomain;
@@ -31612,7 +28913,7 @@
 
 
 /***/ },
-/* 283 */
+/* 249 */
 /***/ function(module, exports) {
 
 	
@@ -31635,18 +28936,18 @@
 
 
 /***/ },
-/* 284 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(282);
-	var Polling = __webpack_require__(285);
-	var Emitter = __webpack_require__(296);
-	var inherit = __webpack_require__(298);
-	var debug = __webpack_require__(300)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(248);
+	var Polling = __webpack_require__(251);
+	var Emitter = __webpack_require__(262);
+	var inherit = __webpack_require__(264);
+	var debug = __webpack_require__(233)('engine.io-client:polling-xhr');
 
 	/**
 	 * Module exports.
@@ -32054,19 +29355,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 285 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(286);
-	var parseqs = __webpack_require__(297);
-	var parser = __webpack_require__(287);
-	var inherit = __webpack_require__(298);
-	var yeast = __webpack_require__(299);
-	var debug = __webpack_require__(300)('engine.io-client:polling');
+	var Transport = __webpack_require__(252);
+	var parseqs = __webpack_require__(263);
+	var parser = __webpack_require__(253);
+	var inherit = __webpack_require__(264);
+	var yeast = __webpack_require__(265);
+	var debug = __webpack_require__(233)('engine.io-client:polling');
 
 	/**
 	 * Module exports.
@@ -32079,7 +29380,7 @@
 	 */
 
 	var hasXHR2 = (function() {
-	  var XMLHttpRequest = __webpack_require__(282);
+	  var XMLHttpRequest = __webpack_require__(248);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -32307,15 +29608,15 @@
 
 
 /***/ },
-/* 286 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(287);
-	var Emitter = __webpack_require__(296);
+	var parser = __webpack_require__(253);
+	var Emitter = __webpack_require__(262);
 
 	/**
 	 * Module exports.
@@ -32468,19 +29769,19 @@
 
 
 /***/ },
-/* 287 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(288);
-	var hasBinary = __webpack_require__(289);
-	var sliceBuffer = __webpack_require__(291);
-	var base64encoder = __webpack_require__(292);
-	var after = __webpack_require__(293);
-	var utf8 = __webpack_require__(294);
+	var keys = __webpack_require__(254);
+	var hasBinary = __webpack_require__(255);
+	var sliceBuffer = __webpack_require__(257);
+	var base64encoder = __webpack_require__(258);
+	var after = __webpack_require__(259);
+	var utf8 = __webpack_require__(260);
 
 	/**
 	 * Check if we are running an android browser. That requires us to use
@@ -32537,7 +29838,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(295);
+	var Blob = __webpack_require__(261);
 
 	/**
 	 * Encodes a packet.
@@ -33069,7 +30370,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 288 */
+/* 254 */
 /***/ function(module, exports) {
 
 	
@@ -33094,7 +30395,7 @@
 
 
 /***/ },
-/* 289 */
+/* 255 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -33102,7 +30403,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(290);
+	var isArray = __webpack_require__(256);
 
 	/**
 	 * Module exports.
@@ -33159,7 +30460,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 290 */
+/* 256 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -33168,7 +30469,7 @@
 
 
 /***/ },
-/* 291 */
+/* 257 */
 /***/ function(module, exports) {
 
 	/**
@@ -33203,7 +30504,7 @@
 
 
 /***/ },
-/* 292 */
+/* 258 */
 /***/ function(module, exports) {
 
 	/*
@@ -33268,7 +30569,7 @@
 
 
 /***/ },
-/* 293 */
+/* 259 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -33302,7 +30603,7 @@
 
 
 /***/ },
-/* 294 */
+/* 260 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/utf8js v2.0.0 by @mathias */
@@ -33551,7 +30852,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 295 */
+/* 261 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -33654,7 +30955,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 296 */
+/* 262 */
 /***/ function(module, exports) {
 
 	
@@ -33824,7 +31125,7 @@
 
 
 /***/ },
-/* 297 */
+/* 263 */
 /***/ function(module, exports) {
 
 	/**
@@ -33867,7 +31168,7 @@
 
 
 /***/ },
-/* 298 */
+/* 264 */
 /***/ function(module, exports) {
 
 	
@@ -33879,7 +31180,7 @@
 	};
 
 /***/ },
-/* 299 */
+/* 265 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -33953,515 +31254,7 @@
 
 
 /***/ },
-/* 300 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * This is the web browser implementation of `debug()`.
-	 *
-	 * Expose `debug()` as the module.
-	 */
-
-	exports = module.exports = __webpack_require__(301);
-	exports.log = log;
-	exports.formatArgs = formatArgs;
-	exports.save = save;
-	exports.load = load;
-	exports.useColors = useColors;
-	exports.storage = 'undefined' != typeof chrome
-	               && 'undefined' != typeof chrome.storage
-	                  ? chrome.storage.local
-	                  : localstorage();
-
-	/**
-	 * Colors.
-	 */
-
-	exports.colors = [
-	  'lightseagreen',
-	  'forestgreen',
-	  'goldenrod',
-	  'dodgerblue',
-	  'darkorchid',
-	  'crimson'
-	];
-
-	/**
-	 * Currently only WebKit-based Web Inspectors, Firefox >= v31,
-	 * and the Firebug extension (any Firefox version) are known
-	 * to support "%c" CSS customizations.
-	 *
-	 * TODO: add a `localStorage` variable to explicitly enable/disable colors
-	 */
-
-	function useColors() {
-	  // is webkit? http://stackoverflow.com/a/16459606/376773
-	  return ('WebkitAppearance' in document.documentElement.style) ||
-	    // is firebug? http://stackoverflow.com/a/398120/376773
-	    (window.console && (console.firebug || (console.exception && console.table))) ||
-	    // is firefox >= v31?
-	    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-	    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-	}
-
-	/**
-	 * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
-	 */
-
-	exports.formatters.j = function(v) {
-	  return JSON.stringify(v);
-	};
-
-
-	/**
-	 * Colorize log arguments if enabled.
-	 *
-	 * @api public
-	 */
-
-	function formatArgs() {
-	  var args = arguments;
-	  var useColors = this.useColors;
-
-	  args[0] = (useColors ? '%c' : '')
-	    + this.namespace
-	    + (useColors ? ' %c' : ' ')
-	    + args[0]
-	    + (useColors ? '%c ' : ' ')
-	    + '+' + exports.humanize(this.diff);
-
-	  if (!useColors) return args;
-
-	  var c = 'color: ' + this.color;
-	  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-	  // the final "%c" is somewhat tricky, because there could be other
-	  // arguments passed either before or after the %c, so we need to
-	  // figure out the correct index to insert the CSS into
-	  var index = 0;
-	  var lastC = 0;
-	  args[0].replace(/%[a-z%]/g, function(match) {
-	    if ('%%' === match) return;
-	    index++;
-	    if ('%c' === match) {
-	      // we only are interested in the *last* %c
-	      // (the user may have provided their own)
-	      lastC = index;
-	    }
-	  });
-
-	  args.splice(lastC, 0, c);
-	  return args;
-	}
-
-	/**
-	 * Invokes `console.log()` when available.
-	 * No-op when `console.log` is not a "function".
-	 *
-	 * @api public
-	 */
-
-	function log() {
-	  // this hackery is required for IE8/9, where
-	  // the `console.log` function doesn't have 'apply'
-	  return 'object' === typeof console
-	    && console.log
-	    && Function.prototype.apply.call(console.log, console, arguments);
-	}
-
-	/**
-	 * Save `namespaces`.
-	 *
-	 * @param {String} namespaces
-	 * @api private
-	 */
-
-	function save(namespaces) {
-	  try {
-	    if (null == namespaces) {
-	      exports.storage.removeItem('debug');
-	    } else {
-	      exports.storage.debug = namespaces;
-	    }
-	  } catch(e) {}
-	}
-
-	/**
-	 * Load `namespaces`.
-	 *
-	 * @return {String} returns the previously persisted debug modes
-	 * @api private
-	 */
-
-	function load() {
-	  var r;
-	  try {
-	    r = exports.storage.debug;
-	  } catch(e) {}
-	  return r;
-	}
-
-	/**
-	 * Enable namespaces listed in `localStorage.debug` initially.
-	 */
-
-	exports.enable(load());
-
-	/**
-	 * Localstorage attempts to return the localstorage.
-	 *
-	 * This is necessary because safari throws
-	 * when a user disables cookies/localstorage
-	 * and you attempt to access it.
-	 *
-	 * @return {LocalStorage}
-	 * @api private
-	 */
-
-	function localstorage(){
-	  try {
-	    return window.localStorage;
-	  } catch (e) {}
-	}
-
-
-/***/ },
-/* 301 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	/**
-	 * This is the common logic for both the Node.js and web browser
-	 * implementations of `debug()`.
-	 *
-	 * Expose `debug()` as the module.
-	 */
-
-	exports = module.exports = debug;
-	exports.coerce = coerce;
-	exports.disable = disable;
-	exports.enable = enable;
-	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(302);
-
-	/**
-	 * The currently active debug mode names, and names to skip.
-	 */
-
-	exports.names = [];
-	exports.skips = [];
-
-	/**
-	 * Map of special "%n" handling functions, for the debug "format" argument.
-	 *
-	 * Valid key names are a single, lowercased letter, i.e. "n".
-	 */
-
-	exports.formatters = {};
-
-	/**
-	 * Previously assigned color.
-	 */
-
-	var prevColor = 0;
-
-	/**
-	 * Previous log timestamp.
-	 */
-
-	var prevTime;
-
-	/**
-	 * Select a color.
-	 *
-	 * @return {Number}
-	 * @api private
-	 */
-
-	function selectColor() {
-	  return exports.colors[prevColor++ % exports.colors.length];
-	}
-
-	/**
-	 * Create a debugger with the given `namespace`.
-	 *
-	 * @param {String} namespace
-	 * @return {Function}
-	 * @api public
-	 */
-
-	function debug(namespace) {
-
-	  // define the `disabled` version
-	  function disabled() {
-	  }
-	  disabled.enabled = false;
-
-	  // define the `enabled` version
-	  function enabled() {
-
-	    var self = enabled;
-
-	    // set `diff` timestamp
-	    var curr = +new Date();
-	    var ms = curr - (prevTime || curr);
-	    self.diff = ms;
-	    self.prev = prevTime;
-	    self.curr = curr;
-	    prevTime = curr;
-
-	    // add the `color` if not set
-	    if (null == self.useColors) self.useColors = exports.useColors();
-	    if (null == self.color && self.useColors) self.color = selectColor();
-
-	    var args = Array.prototype.slice.call(arguments);
-
-	    args[0] = exports.coerce(args[0]);
-
-	    if ('string' !== typeof args[0]) {
-	      // anything else let's inspect with %o
-	      args = ['%o'].concat(args);
-	    }
-
-	    // apply any `formatters` transformations
-	    var index = 0;
-	    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-	      // if we encounter an escaped % then don't increase the array index
-	      if (match === '%%') return match;
-	      index++;
-	      var formatter = exports.formatters[format];
-	      if ('function' === typeof formatter) {
-	        var val = args[index];
-	        match = formatter.call(self, val);
-
-	        // now we need to remove `args[index]` since it's inlined in the `format`
-	        args.splice(index, 1);
-	        index--;
-	      }
-	      return match;
-	    });
-
-	    if ('function' === typeof exports.formatArgs) {
-	      args = exports.formatArgs.apply(self, args);
-	    }
-	    var logFn = enabled.log || exports.log || console.log.bind(console);
-	    logFn.apply(self, args);
-	  }
-	  enabled.enabled = true;
-
-	  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-	  fn.namespace = namespace;
-
-	  return fn;
-	}
-
-	/**
-	 * Enables a debug mode by namespaces. This can include modes
-	 * separated by a colon and wildcards.
-	 *
-	 * @param {String} namespaces
-	 * @api public
-	 */
-
-	function enable(namespaces) {
-	  exports.save(namespaces);
-
-	  var split = (namespaces || '').split(/[\s,]+/);
-	  var len = split.length;
-
-	  for (var i = 0; i < len; i++) {
-	    if (!split[i]) continue; // ignore empty strings
-	    namespaces = split[i].replace(/\*/g, '.*?');
-	    if (namespaces[0] === '-') {
-	      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-	    } else {
-	      exports.names.push(new RegExp('^' + namespaces + '$'));
-	    }
-	  }
-	}
-
-	/**
-	 * Disable debug output.
-	 *
-	 * @api public
-	 */
-
-	function disable() {
-	  exports.enable('');
-	}
-
-	/**
-	 * Returns true if the given mode name is enabled, false otherwise.
-	 *
-	 * @param {String} name
-	 * @return {Boolean}
-	 * @api public
-	 */
-
-	function enabled(name) {
-	  var i, len;
-	  for (i = 0, len = exports.skips.length; i < len; i++) {
-	    if (exports.skips[i].test(name)) {
-	      return false;
-	    }
-	  }
-	  for (i = 0, len = exports.names.length; i < len; i++) {
-	    if (exports.names[i].test(name)) {
-	      return true;
-	    }
-	  }
-	  return false;
-	}
-
-	/**
-	 * Coerce `val`.
-	 *
-	 * @param {Mixed} val
-	 * @return {Mixed}
-	 * @api private
-	 */
-
-	function coerce(val) {
-	  if (val instanceof Error) return val.stack || val.message;
-	  return val;
-	}
-
-
-/***/ },
-/* 302 */
-/***/ function(module, exports) {
-
-	/**
-	 * Helpers.
-	 */
-
-	var s = 1000;
-	var m = s * 60;
-	var h = m * 60;
-	var d = h * 24;
-	var y = d * 365.25;
-
-	/**
-	 * Parse or format the given `val`.
-	 *
-	 * Options:
-	 *
-	 *  - `long` verbose formatting [false]
-	 *
-	 * @param {String|Number} val
-	 * @param {Object} options
-	 * @return {String|Number}
-	 * @api public
-	 */
-
-	module.exports = function(val, options){
-	  options = options || {};
-	  if ('string' == typeof val) return parse(val);
-	  return options.long
-	    ? long(val)
-	    : short(val);
-	};
-
-	/**
-	 * Parse the given `str` and return milliseconds.
-	 *
-	 * @param {String} str
-	 * @return {Number}
-	 * @api private
-	 */
-
-	function parse(str) {
-	  str = '' + str;
-	  if (str.length > 10000) return;
-	  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-	  if (!match) return;
-	  var n = parseFloat(match[1]);
-	  var type = (match[2] || 'ms').toLowerCase();
-	  switch (type) {
-	    case 'years':
-	    case 'year':
-	    case 'yrs':
-	    case 'yr':
-	    case 'y':
-	      return n * y;
-	    case 'days':
-	    case 'day':
-	    case 'd':
-	      return n * d;
-	    case 'hours':
-	    case 'hour':
-	    case 'hrs':
-	    case 'hr':
-	    case 'h':
-	      return n * h;
-	    case 'minutes':
-	    case 'minute':
-	    case 'mins':
-	    case 'min':
-	    case 'm':
-	      return n * m;
-	    case 'seconds':
-	    case 'second':
-	    case 'secs':
-	    case 'sec':
-	    case 's':
-	      return n * s;
-	    case 'milliseconds':
-	    case 'millisecond':
-	    case 'msecs':
-	    case 'msec':
-	    case 'ms':
-	      return n;
-	  }
-	}
-
-	/**
-	 * Short format for `ms`.
-	 *
-	 * @param {Number} ms
-	 * @return {String}
-	 * @api private
-	 */
-
-	function short(ms) {
-	  if (ms >= d) return Math.round(ms / d) + 'd';
-	  if (ms >= h) return Math.round(ms / h) + 'h';
-	  if (ms >= m) return Math.round(ms / m) + 'm';
-	  if (ms >= s) return Math.round(ms / s) + 's';
-	  return ms + 'ms';
-	}
-
-	/**
-	 * Long format for `ms`.
-	 *
-	 * @param {Number} ms
-	 * @return {String}
-	 * @api private
-	 */
-
-	function long(ms) {
-	  return plural(ms, d, 'day')
-	    || plural(ms, h, 'hour')
-	    || plural(ms, m, 'minute')
-	    || plural(ms, s, 'second')
-	    || ms + ' ms';
-	}
-
-	/**
-	 * Pluralization helper.
-	 */
-
-	function plural(ms, n, name) {
-	  if (ms < n) return;
-	  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-	  return Math.ceil(ms / n) + ' ' + name + 's';
-	}
-
-
-/***/ },
-/* 303 */
+/* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -34469,8 +31262,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(285);
-	var inherit = __webpack_require__(298);
+	var Polling = __webpack_require__(251);
+	var inherit = __webpack_require__(264);
 
 	/**
 	 * Module exports.
@@ -34706,19 +31499,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 304 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(286);
-	var parser = __webpack_require__(287);
-	var parseqs = __webpack_require__(297);
-	var inherit = __webpack_require__(298);
-	var yeast = __webpack_require__(299);
-	var debug = __webpack_require__(300)('engine.io-client:websocket');
+	var Transport = __webpack_require__(252);
+	var parser = __webpack_require__(253);
+	var parseqs = __webpack_require__(263);
+	var inherit = __webpack_require__(264);
+	var yeast = __webpack_require__(265);
+	var debug = __webpack_require__(233)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 	/**
@@ -34730,7 +31523,7 @@
 	var WebSocket = BrowserWebSocket;
 	if (!WebSocket && typeof window === 'undefined') {
 	  try {
-	    WebSocket = __webpack_require__(305);
+	    WebSocket = __webpack_require__(268);
 	  } catch (e) { }
 	}
 
@@ -35001,13 +31794,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 305 */
+/* 268 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 306 */
+/* 269 */
 /***/ function(module, exports) {
 
 	
@@ -35022,7 +31815,7 @@
 	};
 
 /***/ },
-/* 307 */
+/* 270 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -35060,7 +31853,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 308 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -35068,13 +31861,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(267);
-	var Emitter = __webpack_require__(309);
-	var toArray = __webpack_require__(310);
-	var on = __webpack_require__(311);
-	var bind = __webpack_require__(312);
-	var debug = __webpack_require__(264)('socket.io-client:socket');
-	var hasBin = __webpack_require__(313);
+	var parser = __webpack_require__(236);
+	var Emitter = __webpack_require__(272);
+	var toArray = __webpack_require__(273);
+	var on = __webpack_require__(274);
+	var bind = __webpack_require__(275);
+	var debug = __webpack_require__(233)('socket.io-client:socket');
+	var hasBin = __webpack_require__(276);
 
 	/**
 	 * Module exports.
@@ -35478,7 +32271,7 @@
 
 
 /***/ },
-/* 309 */
+/* 272 */
 /***/ function(module, exports) {
 
 	
@@ -35645,7 +32438,7 @@
 
 
 /***/ },
-/* 310 */
+/* 273 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -35664,7 +32457,7 @@
 
 
 /***/ },
-/* 311 */
+/* 274 */
 /***/ function(module, exports) {
 
 	
@@ -35694,7 +32487,7 @@
 
 
 /***/ },
-/* 312 */
+/* 275 */
 /***/ function(module, exports) {
 
 	/**
@@ -35723,7 +32516,7 @@
 
 
 /***/ },
-/* 313 */
+/* 276 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -35731,7 +32524,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(314);
+	var isArray = __webpack_require__(277);
 
 	/**
 	 * Module exports.
@@ -35789,7 +32582,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 314 */
+/* 277 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -35798,7 +32591,7 @@
 
 
 /***/ },
-/* 315 */
+/* 278 */
 /***/ function(module, exports) {
 
 	
@@ -35889,12 +32682,12 @@
 
 
 /***/ },
-/* 316 */
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _assign = __webpack_require__(317);
+	var _assign = __webpack_require__(280);
 
 	var _assign2 = _interopRequireDefault(_assign);
 
@@ -35902,27 +32695,27 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
-	var _promise = __webpack_require__(238);
+	var _promise = __webpack_require__(207);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Lazy = __webpack_require__(321);
+	var Lazy = __webpack_require__(284);
 	var EventEmitter = __webpack_require__(41).EventEmitter;
-	var logger = __webpack_require__(199).create("orbit-db.OrbitDB");
-	var Log = __webpack_require__(324);
-	var DBOperation = __webpack_require__(398);
-	var Post = __webpack_require__(404);
-	var Cache = __webpack_require__(410);
+	var logger = __webpack_require__(192).create("orbit-db.OrbitDB");
+	var Log = __webpack_require__(287);
+	var DBOperation = __webpack_require__(290);
+	var Post = __webpack_require__(296);
+	var Cache = __webpack_require__(302);
 
 	var OrbitDB = function () {
 	  function OrbitDB(ipfs, options) {
@@ -36181,29 +32974,29 @@
 	module.exports = OrbitDB;
 
 /***/ },
-/* 317 */
+/* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = { "default": __webpack_require__(318), __esModule: true };
+	module.exports = { "default": __webpack_require__(281), __esModule: true };
 
 /***/ },
-/* 318 */
+/* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(319);
+	__webpack_require__(282);
 	module.exports = __webpack_require__(37).Object.assign;
 
 /***/ },
-/* 319 */
+/* 282 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.3.1 Object.assign(target, source)
 	var $export = __webpack_require__(35);
 
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(320)});
+	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(283)});
 
 /***/ },
-/* 320 */
+/* 283 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.2.1 Object.assign(target, source, ...)
@@ -36241,7 +33034,7 @@
 	} : Object.assign;
 
 /***/ },
-/* 321 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {/*
@@ -42657,13 +39450,13 @@
 	  return Lazy;
 	});
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(322).setImmediate, __webpack_require__(322).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(285).setImmediate, __webpack_require__(285).clearImmediate))
 
 /***/ },
-/* 322 */
+/* 285 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(323).nextTick;
+	/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {var nextTick = __webpack_require__(286).nextTick;
 	var apply = Function.prototype.apply;
 	var slice = Array.prototype.slice;
 	var immediateIds = {};
@@ -42739,10 +39532,10 @@
 	exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
 	  delete immediateIds[id];
 	};
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(322).setImmediate, __webpack_require__(322).clearImmediate))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(285).setImmediate, __webpack_require__(285).clearImmediate))
 
 /***/ },
-/* 323 */
+/* 286 */
 /***/ function(module, exports) {
 
 	// shim for using process in browser
@@ -42839,3223 +39632,182 @@
 
 
 /***/ },
-/* 324 */
+/* 287 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
+	'use strict';
 
-	var _stringify = __webpack_require__(329);
+	const _       = __webpack_require__(288);
+	const Lazy    = __webpack_require__(284);
+	const Buffer  = __webpack_require__(2).Buffer
+	const Node    = __webpack_require__(289);
 
-	var _stringify2 = _interopRequireDefault(_stringify);
+	const MaxBatchSize = 10;  // How many items to keep per local batch
+	const MaxHistory   = 256; // How many items to fetch on join
 
-	var _promise = __webpack_require__(332);
-
-	var _promise2 = _interopRequireDefault(_promise);
-
-	var _classCallCheck2 = __webpack_require__(386);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(387);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var _ = __webpack_require__(390);
-	var Lazy = __webpack_require__(391);
-	var Node = __webpack_require__(392);
-
-	var MaxBatchSize = 10; // How many items to keep per local batch
-	var MaxHistory = 256; // How many items to fetch on join
-
-	var Log = function () {
-	  function Log(ipfs, id, items) {
-	    (0, _classCallCheck3.default)(this, Log);
-
+	class Log {
+	  constructor(ipfs, id, items) {
 	    this.id = id;
 	    this._ipfs = ipfs;
 	    this._items = items || [];
 	    this._currentBatch = [];
 	  }
 
-	  (0, _createClass3.default)(Log, [{
-	    key: 'add',
-	    value: function add(data) {
-	      var _this = this;
+	  get items() {
+	    return this._items.concat(this._currentBatch);
+	  }
 
-	      if (this._currentBatch.length >= MaxBatchSize) this._commit();
+	  get snapshot() {
+	    return {
+	      id: this.id,
+	      items: this._currentBatch.map((f) => f.hash)
+	    }
+	  }
 
-	      return new _promise2.default(function (resolve, reject) {
-	        var heads = Log.findHeads(_this);
-	        Node.create(_this._ipfs, data, heads).then(function (node) {
-	          _this._currentBatch.push(node);
+	  add(data) {
+	    if(this._currentBatch.length >= MaxBatchSize)
+	      this._commit();
+
+	    return new Promise((resolve, reject) => {
+	      const heads = Log.findHeads(this);
+	      Node.create(this._ipfs, data, heads)
+	        .then((node) => {
+	          this._currentBatch.push(node);
 	          resolve(node);
 	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'join',
-	    value: function join(other) {
-	      var _this2 = this;
+	    });
+	  }
 
-	      return new _promise2.default(function (resolve, reject) {
-	        var current = Lazy(_this2._currentBatch).difference(_this2._items).toArray();
-	        var others = _.differenceWith(other.items, _this2._items, Node.equals);
-	        var final = _.unionWith(current, others, Node.equals);
-	        _this2._items = _this2._items.concat(final);
-	        _this2._currentBatch = [];
+	  join(other) {
+	    return new Promise((resolve, reject) => {
+	      const current = Lazy(this._currentBatch).difference(this._items).toArray();
+	      const others  = _.differenceWith(other.items, this._items, Node.equals);
+	      const final   = _.unionWith(current, others, Node.equals);
+	      this._items   = this._items.concat(final);
+	      this._currentBatch = [];
 
-	        // Fetch history
-	        var nexts = _.flatten(other.items.map(function (f) {
-	          return f.next;
-	        }));
-	        var promises = nexts.map(function (f) {
-	          var all = _this2.items.map(function (a) {
-	            return a.hash;
-	          });
-	          return _this2._fetchRecursive(_this2._ipfs, f, all, MaxHistory, 0).then(function (history) {
-	            history.forEach(function (b) {
-	              return _this2._insert(b);
-	            });
-	            return history;
-	          });
-	        });
-	        _promise2.default.all(promises).then(function (r) {
-	          return resolve(_this2);
+	      // Fetch history
+	      const nexts = _.flatten(other.items.map((f) => f.next));
+	      const promises = nexts.map((f) => {
+	        let all = this.items.map((a) => a.hash);
+	        return this._fetchRecursive(this._ipfs, f, all, MaxHistory, 0).then((history) => {
+	          history.forEach((b) => this._insert(b));
+	          return history;
 	        });
 	      });
-	    }
-	  }, {
-	    key: 'clear',
-	    value: function clear() {
-	      this._items = [];
-	      this._currentBatch = [];
-	    }
-	  }, {
-	    key: '_insert',
-	    value: function _insert(node) {
-	      var _this3 = this;
+	      Promise.all(promises).then((r) => resolve(this));
+	    });
+	  }
 
-	      var indices = Lazy(node.next).map(function (next) {
-	        return Lazy(_this3._items).map(function (f) {
-	          return f.hash;
-	        }).indexOf(next);
-	      }); // Find the item's parent's indices
-	      var index = indices.toArray().length > 0 ? Math.max(indices.max() + 1, 0) : 0; // find the largest index (latest parent)
-	      this._items.splice(index, 0, node);
-	      return node;
-	    }
-	  }, {
-	    key: '_commit',
-	    value: function _commit() {
-	      var current = Lazy(this._currentBatch).difference(this._items).toArray();
-	      this._items = this._items.concat(current);
-	      this._currentBatch = [];
-	    }
-	  }, {
-	    key: '_fetchRecursive',
-	    value: function _fetchRecursive(ipfs, hash, all, amount, depth) {
-	      var _this4 = this;
+	  clear() {
+	    this._items = [];
+	    this._currentBatch = [];
+	  }
 
-	      var isReferenced = function isReferenced(list, item) {
-	        return Lazy(list).reverse().find(function (f) {
-	          return f === item;
-	        }) !== undefined;
-	      };
-	      return new _promise2.default(function (resolve, reject) {
-	        var result = [];
+	  _insert(node) {
+	    let indices = Lazy(node.next).map((next) => Lazy(this._items).map((f) => f.hash).indexOf(next)) // Find the item's parent's indices
+	    const index = indices.toArray().length > 0 ? Math.max(indices.max() + 1, 0) : 0; // find the largest index (latest parent)
+	    this._items.splice(index, 0, node);
+	    return node;
+	  }
 
-	        // If the given hash is in the given log (all) or if we're at maximum depth, return
-	        if (isReferenced(all, hash) || depth >= amount) {
+	  _commit() {
+	    const current = Lazy(this._currentBatch).difference(this._items).toArray();
+	    this._items = this._items.concat(current);
+	    this._currentBatch = [];
+	  }
+
+	  _fetchRecursive(ipfs, hash, all, amount, depth) {
+	    const isReferenced = (list, item) => Lazy(list).reverse().find((f) => f === item) !== undefined;
+	    return new Promise((resolve, reject) => {
+	      let result = [];
+
+	      // If the given hash is in the given log (all) or if we're at maximum depth, return
+	      if(isReferenced(all, hash) || depth >= amount) {
+	        resolve(result)
+	        return;
+	      }
+
+	      // Create the node and add it to the result
+	      Node.fromIpfsHash(ipfs, hash).then((node) => {
+	        result.push(node);
+	        all.push(hash);
+	        depth ++;
+
+	        const promises = node.next.map((f) => this._fetchRecursive(ipfs, f, all, amount, depth));
+	        Promise.all(promises).then((res) => {
+	          result = _.flatten(res.concat(result));
 	          resolve(result);
-	          return;
-	        }
-
-	        // Create the node and add it to the result
-	        Node.fromIpfsHash(ipfs, hash).then(function (node) {
-	          result.push(node);
-	          all.push(hash);
-	          depth++;
-
-	          var promises = node.next.map(function (f) {
-	            return _this4._fetchRecursive(ipfs, f, all, amount, depth);
-	          });
-	          _promise2.default.all(promises).then(function (res) {
-	            result = _.flatten(res.concat(result));
-	            resolve(result);
-	          }).catch(reject);
 	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'items',
-	    get: function get() {
-	      return this._items.concat(this._currentBatch);
-	    }
-	  }, {
-	    key: 'snapshot',
-	    get: function get() {
-	      return {
-	        id: this.id,
-	        items: this._currentBatch.map(function (f) {
-	          return f.hash;
-	        })
-	      };
-	    }
-	  }], [{
-	    key: 'create',
-	    value: function create(ipfs, id, items) {
-	      if (!ipfs) throw new Error("Ipfs instance not defined");
-	      if (!id) throw new Error("id is not defined");
-	      return new _promise2.default(function (resolve, reject) {
-	        var log = new Log(ipfs, id, items);
-	        resolve(log);
-	      });
-	    }
-	  }, {
-	    key: 'getIpfsHash',
-	    value: function getIpfsHash(ipfs, log) {
-	      if (!ipfs) throw new Error("Ipfs instance not defined");
-	      return new _promise2.default(function (resolve, reject) {
-	        ipfs.object.put(new Buffer((0, _stringify2.default)({ Data: (0, _stringify2.default)(log.snapshot) }))).then(function (res) {
-	          return resolve(res.Hash);
-	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'fromJson',
-	    value: function fromJson(ipfs, json) {
-	      return new _promise2.default(function (resolve, reject) {
-	        _promise2.default.all(json.items.map(function (f) {
-	          return Node.fromIpfsHash(ipfs, f);
-	        })).then(function (items) {
+	      }).catch(reject);
+	    });
+	  }
+
+	  static create(ipfs, id, items) {
+	    if(!ipfs) throw new Error("Ipfs instance not defined")
+	    if(!id) throw new Error("id is not defined")
+	    return new Promise((resolve, reject) => {
+	      const log = new Log(ipfs, id, items);
+	      resolve(log);
+	    });
+	  }
+
+	  static getIpfsHash(ipfs, log) {
+	    if(!ipfs) throw new Error("Ipfs instance not defined")
+	    return new Promise((resolve, reject) => {
+	      ipfs.object.put(new Buffer(JSON.stringify({ Data: JSON.stringify(log.snapshot) })))
+	        .then((res) => resolve(res.Hash))
+	        .catch(reject);
+	    });
+	  }
+
+	  static fromJson(ipfs, json) {
+	    return new Promise((resolve, reject) => {
+	      Promise.all(json.items.map((f) => Node.fromIpfsHash(ipfs, f)))
+	        .then((items) => {
 	          Log.create(ipfs, json.id, items).then(resolve).catch(reject);
-	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'fromIpfsHash',
-	    value: function fromIpfsHash(ipfs, hash) {
-	      if (!ipfs) throw new Error("Ipfs instance not defined");
-	      if (!hash) throw new Error("Invalid hash: " + hash);
-	      return new _promise2.default(function (resolve, reject) {
-	        ipfs.object.get(hash).then(function (res) {
+	        }).catch(reject)
+	    });
+	  }
+
+	  static fromIpfsHash(ipfs, hash) {
+	    if(!ipfs) throw new Error("Ipfs instance not defined")
+	    if(!hash) throw new Error("Invalid hash: " + hash)
+	    return new Promise((resolve, reject) => {
+	      ipfs.object.get(hash)
+	        .then((res) => {
 	          Log.fromJson(ipfs, JSON.parse(res.Data)).then(resolve).catch(reject);
 	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'findHeads',
-	    value: function findHeads(log) {
-	      return Lazy(log.items).reverse().filter(function (f) {
-	        return !Log.isReferencedInChain(log, f);
-	      }).map(function (f) {
-	        return f.hash;
-	      }).toArray();
-	    }
-	  }, {
-	    key: 'isReferencedInChain',
-	    value: function isReferencedInChain(log, item) {
-	      return Lazy(log.items).reverse().find(function (e) {
-	        return e.hasChild(item);
-	      }) !== undefined;
-	    }
-	  }, {
-	    key: 'batchSize',
-	    get: function get() {
-	      return MaxBatchSize;
-	    }
-	  }, {
-	    key: 'maxHistory',
-	    get: function get() {
-	      return MaxHistory;
-	    }
-	  }]);
-	  return Log;
-	}();
+	    });
+	  }
+
+	  static findHeads(log) {
+	    return Lazy(log.items)
+	      .reverse()
+	      .filter((f) => !Log.isReferencedInChain(log, f))
+	      .map((f) => f.hash)
+	      .toArray();
+	  }
+
+	  static isReferencedInChain(log, item) {
+	    return Lazy(log.items).reverse().find((e) => e.hasChild(item)) !== undefined;
+	  }
+
+	  static get batchSize() {
+	    return MaxBatchSize;
+	  }
+
+	  static get maxHistory() {
+	    return MaxHistory;
+	  }
+
+	}
 
 	module.exports = Log;
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(325).Buffer))
 
-/***/ },
-/* 325 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(Buffer, global) {/*!
-	 * The buffer module from node.js, for the browser.
-	 *
-	 * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
-	 * @license  MIT
-	 */
-	/* eslint-disable no-proto */
-
-	'use strict'
-
-	var base64 = __webpack_require__(326)
-	var ieee754 = __webpack_require__(327)
-	var isArray = __webpack_require__(328)
-
-	exports.Buffer = Buffer
-	exports.SlowBuffer = SlowBuffer
-	exports.INSPECT_MAX_BYTES = 50
-	Buffer.poolSize = 8192 // not used by this implementation
-
-	var rootParent = {}
-
-	/**
-	 * If `Buffer.TYPED_ARRAY_SUPPORT`:
-	 *   === true    Use Uint8Array implementation (fastest)
-	 *   === false   Use Object implementation (most compatible, even IE6)
-	 *
-	 * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
-	 * Opera 11.6+, iOS 4.2+.
-	 *
-	 * Due to various browser bugs, sometimes the Object implementation will be used even
-	 * when the browser supports typed arrays.
-	 *
-	 * Note:
-	 *
-	 *   - Firefox 4-29 lacks support for adding new properties to `Uint8Array` instances,
-	 *     See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
-	 *
-	 *   - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
-	 *
-	 *   - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
-	 *     incorrect length in some situations.
-
-	 * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they
-	 * get the Object implementation, which is slower but behaves correctly.
-	 */
-	Buffer.TYPED_ARRAY_SUPPORT = global.TYPED_ARRAY_SUPPORT !== undefined
-	  ? global.TYPED_ARRAY_SUPPORT
-	  : typedArraySupport()
-
-	function typedArraySupport () {
-	  try {
-	    var arr = new Uint8Array(1)
-	    arr.foo = function () { return 42 }
-	    return arr.foo() === 42 && // typed array instances can be augmented
-	        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
-	        arr.subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
-	  } catch (e) {
-	    return false
-	  }
-	}
-
-	function kMaxLength () {
-	  return Buffer.TYPED_ARRAY_SUPPORT
-	    ? 0x7fffffff
-	    : 0x3fffffff
-	}
-
-	/**
-	 * The Buffer constructor returns instances of `Uint8Array` that have their
-	 * prototype changed to `Buffer.prototype`. Furthermore, `Buffer` is a subclass of
-	 * `Uint8Array`, so the returned instances will have all the node `Buffer` methods
-	 * and the `Uint8Array` methods. Square bracket notation works as expected -- it
-	 * returns a single octet.
-	 *
-	 * The `Uint8Array` prototype remains unmodified.
-	 */
-	function Buffer (arg) {
-	  if (!(this instanceof Buffer)) {
-	    // Avoid going through an ArgumentsAdaptorTrampoline in the common case.
-	    if (arguments.length > 1) return new Buffer(arg, arguments[1])
-	    return new Buffer(arg)
-	  }
-
-	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
-	    this.length = 0
-	    this.parent = undefined
-	  }
-
-	  // Common case.
-	  if (typeof arg === 'number') {
-	    return fromNumber(this, arg)
-	  }
-
-	  // Slightly less common case.
-	  if (typeof arg === 'string') {
-	    return fromString(this, arg, arguments.length > 1 ? arguments[1] : 'utf8')
-	  }
-
-	  // Unusual.
-	  return fromObject(this, arg)
-	}
-
-	// TODO: Legacy, not needed anymore. Remove in next major version.
-	Buffer._augment = function (arr) {
-	  arr.__proto__ = Buffer.prototype
-	  return arr
-	}
-
-	function fromNumber (that, length) {
-	  that = allocate(that, length < 0 ? 0 : checked(length) | 0)
-	  if (!Buffer.TYPED_ARRAY_SUPPORT) {
-	    for (var i = 0; i < length; i++) {
-	      that[i] = 0
-	    }
-	  }
-	  return that
-	}
-
-	function fromString (that, string, encoding) {
-	  if (typeof encoding !== 'string' || encoding === '') encoding = 'utf8'
-
-	  // Assumption: byteLength() return value is always < kMaxLength.
-	  var length = byteLength(string, encoding) | 0
-	  that = allocate(that, length)
-
-	  that.write(string, encoding)
-	  return that
-	}
-
-	function fromObject (that, object) {
-	  if (Buffer.isBuffer(object)) return fromBuffer(that, object)
-
-	  if (isArray(object)) return fromArray(that, object)
-
-	  if (object == null) {
-	    throw new TypeError('must start with number, buffer, array or string')
-	  }
-
-	  if (typeof ArrayBuffer !== 'undefined') {
-	    if (object.buffer instanceof ArrayBuffer) {
-	      return fromTypedArray(that, object)
-	    }
-	    if (object instanceof ArrayBuffer) {
-	      return fromArrayBuffer(that, object)
-	    }
-	  }
-
-	  if (object.length) return fromArrayLike(that, object)
-
-	  return fromJsonObject(that, object)
-	}
-
-	function fromBuffer (that, buffer) {
-	  var length = checked(buffer.length) | 0
-	  that = allocate(that, length)
-	  buffer.copy(that, 0, 0, length)
-	  return that
-	}
-
-	function fromArray (that, array) {
-	  var length = checked(array.length) | 0
-	  that = allocate(that, length)
-	  for (var i = 0; i < length; i += 1) {
-	    that[i] = array[i] & 255
-	  }
-	  return that
-	}
-
-	// Duplicate of fromArray() to keep fromArray() monomorphic.
-	function fromTypedArray (that, array) {
-	  var length = checked(array.length) | 0
-	  that = allocate(that, length)
-	  // Truncating the elements is probably not what people expect from typed
-	  // arrays with BYTES_PER_ELEMENT > 1 but it's compatible with the behavior
-	  // of the old Buffer constructor.
-	  for (var i = 0; i < length; i += 1) {
-	    that[i] = array[i] & 255
-	  }
-	  return that
-	}
-
-	function fromArrayBuffer (that, array) {
-	  array.byteLength // this throws if `array` is not a valid ArrayBuffer
-
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    // Return an augmented `Uint8Array` instance, for best performance
-	    that = new Uint8Array(array)
-	    that.__proto__ = Buffer.prototype
-	  } else {
-	    // Fallback: Return an object instance of the Buffer class
-	    that = fromTypedArray(that, new Uint8Array(array))
-	  }
-	  return that
-	}
-
-	function fromArrayLike (that, array) {
-	  var length = checked(array.length) | 0
-	  that = allocate(that, length)
-	  for (var i = 0; i < length; i += 1) {
-	    that[i] = array[i] & 255
-	  }
-	  return that
-	}
-
-	// Deserialize { type: 'Buffer', data: [1,2,3,...] } into a Buffer object.
-	// Returns a zero-length buffer for inputs that don't conform to the spec.
-	function fromJsonObject (that, object) {
-	  var array
-	  var length = 0
-
-	  if (object.type === 'Buffer' && isArray(object.data)) {
-	    array = object.data
-	    length = checked(array.length) | 0
-	  }
-	  that = allocate(that, length)
-
-	  for (var i = 0; i < length; i += 1) {
-	    that[i] = array[i] & 255
-	  }
-	  return that
-	}
-
-	if (Buffer.TYPED_ARRAY_SUPPORT) {
-	  Buffer.prototype.__proto__ = Uint8Array.prototype
-	  Buffer.__proto__ = Uint8Array
-	  if (typeof Symbol !== 'undefined' && Symbol.species &&
-	      Buffer[Symbol.species] === Buffer) {
-	    // Fix subarray() in ES2016. See: https://github.com/feross/buffer/pull/97
-	    Object.defineProperty(Buffer, Symbol.species, {
-	      value: null,
-	      configurable: true
-	    })
-	  }
-	} else {
-	  // pre-set for values that may exist in the future
-	  Buffer.prototype.length = undefined
-	  Buffer.prototype.parent = undefined
-	}
-
-	function allocate (that, length) {
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    // Return an augmented `Uint8Array` instance, for best performance
-	    that = new Uint8Array(length)
-	    that.__proto__ = Buffer.prototype
-	  } else {
-	    // Fallback: Return an object instance of the Buffer class
-	    that.length = length
-	  }
-
-	  var fromPool = length !== 0 && length <= Buffer.poolSize >>> 1
-	  if (fromPool) that.parent = rootParent
-
-	  return that
-	}
-
-	function checked (length) {
-	  // Note: cannot use `length < kMaxLength` here because that fails when
-	  // length is NaN (which is otherwise coerced to zero.)
-	  if (length >= kMaxLength()) {
-	    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
-	                         'size: 0x' + kMaxLength().toString(16) + ' bytes')
-	  }
-	  return length | 0
-	}
-
-	function SlowBuffer (subject, encoding) {
-	  if (!(this instanceof SlowBuffer)) return new SlowBuffer(subject, encoding)
-
-	  var buf = new Buffer(subject, encoding)
-	  delete buf.parent
-	  return buf
-	}
-
-	Buffer.isBuffer = function isBuffer (b) {
-	  return !!(b != null && b._isBuffer)
-	}
-
-	Buffer.compare = function compare (a, b) {
-	  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
-	    throw new TypeError('Arguments must be Buffers')
-	  }
-
-	  if (a === b) return 0
-
-	  var x = a.length
-	  var y = b.length
-
-	  for (var i = 0, len = Math.min(x, y); i < len; ++i) {
-	    if (a[i] !== b[i]) {
-	      x = a[i]
-	      y = b[i]
-	      break
-	    }
-	  }
-
-	  if (x < y) return -1
-	  if (y < x) return 1
-	  return 0
-	}
-
-	Buffer.isEncoding = function isEncoding (encoding) {
-	  switch (String(encoding).toLowerCase()) {
-	    case 'hex':
-	    case 'utf8':
-	    case 'utf-8':
-	    case 'ascii':
-	    case 'binary':
-	    case 'base64':
-	    case 'raw':
-	    case 'ucs2':
-	    case 'ucs-2':
-	    case 'utf16le':
-	    case 'utf-16le':
-	      return true
-	    default:
-	      return false
-	  }
-	}
-
-	Buffer.concat = function concat (list, length) {
-	  if (!isArray(list)) throw new TypeError('list argument must be an Array of Buffers.')
-
-	  if (list.length === 0) {
-	    return new Buffer(0)
-	  }
-
-	  var i
-	  if (length === undefined) {
-	    length = 0
-	    for (i = 0; i < list.length; i++) {
-	      length += list[i].length
-	    }
-	  }
-
-	  var buf = new Buffer(length)
-	  var pos = 0
-	  for (i = 0; i < list.length; i++) {
-	    var item = list[i]
-	    item.copy(buf, pos)
-	    pos += item.length
-	  }
-	  return buf
-	}
-
-	function byteLength (string, encoding) {
-	  if (typeof string !== 'string') string = '' + string
-
-	  var len = string.length
-	  if (len === 0) return 0
-
-	  // Use a for loop to avoid recursion
-	  var loweredCase = false
-	  for (;;) {
-	    switch (encoding) {
-	      case 'ascii':
-	      case 'binary':
-	      // Deprecated
-	      case 'raw':
-	      case 'raws':
-	        return len
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8ToBytes(string).length
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return len * 2
-	      case 'hex':
-	        return len >>> 1
-	      case 'base64':
-	        return base64ToBytes(string).length
-	      default:
-	        if (loweredCase) return utf8ToBytes(string).length // assume utf8
-	        encoding = ('' + encoding).toLowerCase()
-	        loweredCase = true
-	    }
-	  }
-	}
-	Buffer.byteLength = byteLength
-
-	function slowToString (encoding, start, end) {
-	  var loweredCase = false
-
-	  start = start | 0
-	  end = end === undefined || end === Infinity ? this.length : end | 0
-
-	  if (!encoding) encoding = 'utf8'
-	  if (start < 0) start = 0
-	  if (end > this.length) end = this.length
-	  if (end <= start) return ''
-
-	  while (true) {
-	    switch (encoding) {
-	      case 'hex':
-	        return hexSlice(this, start, end)
-
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8Slice(this, start, end)
-
-	      case 'ascii':
-	        return asciiSlice(this, start, end)
-
-	      case 'binary':
-	        return binarySlice(this, start, end)
-
-	      case 'base64':
-	        return base64Slice(this, start, end)
-
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return utf16leSlice(this, start, end)
-
-	      default:
-	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-	        encoding = (encoding + '').toLowerCase()
-	        loweredCase = true
-	    }
-	  }
-	}
-
-	// The property is used by `Buffer.isBuffer` and `is-buffer` (in Safari 5-7) to detect
-	// Buffer instances.
-	Buffer.prototype._isBuffer = true
-
-	Buffer.prototype.toString = function toString () {
-	  var length = this.length | 0
-	  if (length === 0) return ''
-	  if (arguments.length === 0) return utf8Slice(this, 0, length)
-	  return slowToString.apply(this, arguments)
-	}
-
-	Buffer.prototype.equals = function equals (b) {
-	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-	  if (this === b) return true
-	  return Buffer.compare(this, b) === 0
-	}
-
-	Buffer.prototype.inspect = function inspect () {
-	  var str = ''
-	  var max = exports.INSPECT_MAX_BYTES
-	  if (this.length > 0) {
-	    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
-	    if (this.length > max) str += ' ... '
-	  }
-	  return '<Buffer ' + str + '>'
-	}
-
-	Buffer.prototype.compare = function compare (b) {
-	  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
-	  return Buffer.compare(this, b)
-	}
-
-	Buffer.prototype.indexOf = function indexOf (val, byteOffset) {
-	  if (byteOffset > 0x7fffffff) byteOffset = 0x7fffffff
-	  else if (byteOffset < -0x80000000) byteOffset = -0x80000000
-	  byteOffset >>= 0
-
-	  if (this.length === 0) return -1
-	  if (byteOffset >= this.length) return -1
-
-	  // Negative offsets start from the end of the buffer
-	  if (byteOffset < 0) byteOffset = Math.max(this.length + byteOffset, 0)
-
-	  if (typeof val === 'string') {
-	    if (val.length === 0) return -1 // special case: looking for empty string always fails
-	    return String.prototype.indexOf.call(this, val, byteOffset)
-	  }
-	  if (Buffer.isBuffer(val)) {
-	    return arrayIndexOf(this, val, byteOffset)
-	  }
-	  if (typeof val === 'number') {
-	    if (Buffer.TYPED_ARRAY_SUPPORT && Uint8Array.prototype.indexOf === 'function') {
-	      return Uint8Array.prototype.indexOf.call(this, val, byteOffset)
-	    }
-	    return arrayIndexOf(this, [ val ], byteOffset)
-	  }
-
-	  function arrayIndexOf (arr, val, byteOffset) {
-	    var foundIndex = -1
-	    for (var i = 0; byteOffset + i < arr.length; i++) {
-	      if (arr[byteOffset + i] === val[foundIndex === -1 ? 0 : i - foundIndex]) {
-	        if (foundIndex === -1) foundIndex = i
-	        if (i - foundIndex + 1 === val.length) return byteOffset + foundIndex
-	      } else {
-	        foundIndex = -1
-	      }
-	    }
-	    return -1
-	  }
-
-	  throw new TypeError('val must be string, number or Buffer')
-	}
-
-	function hexWrite (buf, string, offset, length) {
-	  offset = Number(offset) || 0
-	  var remaining = buf.length - offset
-	  if (!length) {
-	    length = remaining
-	  } else {
-	    length = Number(length)
-	    if (length > remaining) {
-	      length = remaining
-	    }
-	  }
-
-	  // must be an even number of digits
-	  var strLen = string.length
-	  if (strLen % 2 !== 0) throw new Error('Invalid hex string')
-
-	  if (length > strLen / 2) {
-	    length = strLen / 2
-	  }
-	  for (var i = 0; i < length; i++) {
-	    var parsed = parseInt(string.substr(i * 2, 2), 16)
-	    if (isNaN(parsed)) throw new Error('Invalid hex string')
-	    buf[offset + i] = parsed
-	  }
-	  return i
-	}
-
-	function utf8Write (buf, string, offset, length) {
-	  return blitBuffer(utf8ToBytes(string, buf.length - offset), buf, offset, length)
-	}
-
-	function asciiWrite (buf, string, offset, length) {
-	  return blitBuffer(asciiToBytes(string), buf, offset, length)
-	}
-
-	function binaryWrite (buf, string, offset, length) {
-	  return asciiWrite(buf, string, offset, length)
-	}
-
-	function base64Write (buf, string, offset, length) {
-	  return blitBuffer(base64ToBytes(string), buf, offset, length)
-	}
-
-	function ucs2Write (buf, string, offset, length) {
-	  return blitBuffer(utf16leToBytes(string, buf.length - offset), buf, offset, length)
-	}
-
-	Buffer.prototype.write = function write (string, offset, length, encoding) {
-	  // Buffer#write(string)
-	  if (offset === undefined) {
-	    encoding = 'utf8'
-	    length = this.length
-	    offset = 0
-	  // Buffer#write(string, encoding)
-	  } else if (length === undefined && typeof offset === 'string') {
-	    encoding = offset
-	    length = this.length
-	    offset = 0
-	  // Buffer#write(string, offset[, length][, encoding])
-	  } else if (isFinite(offset)) {
-	    offset = offset | 0
-	    if (isFinite(length)) {
-	      length = length | 0
-	      if (encoding === undefined) encoding = 'utf8'
-	    } else {
-	      encoding = length
-	      length = undefined
-	    }
-	  // legacy write(string, encoding, offset, length) - remove in v0.13
-	  } else {
-	    var swap = encoding
-	    encoding = offset
-	    offset = length | 0
-	    length = swap
-	  }
-
-	  var remaining = this.length - offset
-	  if (length === undefined || length > remaining) length = remaining
-
-	  if ((string.length > 0 && (length < 0 || offset < 0)) || offset > this.length) {
-	    throw new RangeError('attempt to write outside buffer bounds')
-	  }
-
-	  if (!encoding) encoding = 'utf8'
-
-	  var loweredCase = false
-	  for (;;) {
-	    switch (encoding) {
-	      case 'hex':
-	        return hexWrite(this, string, offset, length)
-
-	      case 'utf8':
-	      case 'utf-8':
-	        return utf8Write(this, string, offset, length)
-
-	      case 'ascii':
-	        return asciiWrite(this, string, offset, length)
-
-	      case 'binary':
-	        return binaryWrite(this, string, offset, length)
-
-	      case 'base64':
-	        // Warning: maxLength not taken into account in base64Write
-	        return base64Write(this, string, offset, length)
-
-	      case 'ucs2':
-	      case 'ucs-2':
-	      case 'utf16le':
-	      case 'utf-16le':
-	        return ucs2Write(this, string, offset, length)
-
-	      default:
-	        if (loweredCase) throw new TypeError('Unknown encoding: ' + encoding)
-	        encoding = ('' + encoding).toLowerCase()
-	        loweredCase = true
-	    }
-	  }
-	}
-
-	Buffer.prototype.toJSON = function toJSON () {
-	  return {
-	    type: 'Buffer',
-	    data: Array.prototype.slice.call(this._arr || this, 0)
-	  }
-	}
-
-	function base64Slice (buf, start, end) {
-	  if (start === 0 && end === buf.length) {
-	    return base64.fromByteArray(buf)
-	  } else {
-	    return base64.fromByteArray(buf.slice(start, end))
-	  }
-	}
-
-	function utf8Slice (buf, start, end) {
-	  end = Math.min(buf.length, end)
-	  var res = []
-
-	  var i = start
-	  while (i < end) {
-	    var firstByte = buf[i]
-	    var codePoint = null
-	    var bytesPerSequence = (firstByte > 0xEF) ? 4
-	      : (firstByte > 0xDF) ? 3
-	      : (firstByte > 0xBF) ? 2
-	      : 1
-
-	    if (i + bytesPerSequence <= end) {
-	      var secondByte, thirdByte, fourthByte, tempCodePoint
-
-	      switch (bytesPerSequence) {
-	        case 1:
-	          if (firstByte < 0x80) {
-	            codePoint = firstByte
-	          }
-	          break
-	        case 2:
-	          secondByte = buf[i + 1]
-	          if ((secondByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0x1F) << 0x6 | (secondByte & 0x3F)
-	            if (tempCodePoint > 0x7F) {
-	              codePoint = tempCodePoint
-	            }
-	          }
-	          break
-	        case 3:
-	          secondByte = buf[i + 1]
-	          thirdByte = buf[i + 2]
-	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0xF) << 0xC | (secondByte & 0x3F) << 0x6 | (thirdByte & 0x3F)
-	            if (tempCodePoint > 0x7FF && (tempCodePoint < 0xD800 || tempCodePoint > 0xDFFF)) {
-	              codePoint = tempCodePoint
-	            }
-	          }
-	          break
-	        case 4:
-	          secondByte = buf[i + 1]
-	          thirdByte = buf[i + 2]
-	          fourthByte = buf[i + 3]
-	          if ((secondByte & 0xC0) === 0x80 && (thirdByte & 0xC0) === 0x80 && (fourthByte & 0xC0) === 0x80) {
-	            tempCodePoint = (firstByte & 0xF) << 0x12 | (secondByte & 0x3F) << 0xC | (thirdByte & 0x3F) << 0x6 | (fourthByte & 0x3F)
-	            if (tempCodePoint > 0xFFFF && tempCodePoint < 0x110000) {
-	              codePoint = tempCodePoint
-	            }
-	          }
-	      }
-	    }
-
-	    if (codePoint === null) {
-	      // we did not generate a valid codePoint so insert a
-	      // replacement char (U+FFFD) and advance only 1 byte
-	      codePoint = 0xFFFD
-	      bytesPerSequence = 1
-	    } else if (codePoint > 0xFFFF) {
-	      // encode to utf16 (surrogate pair dance)
-	      codePoint -= 0x10000
-	      res.push(codePoint >>> 10 & 0x3FF | 0xD800)
-	      codePoint = 0xDC00 | codePoint & 0x3FF
-	    }
-
-	    res.push(codePoint)
-	    i += bytesPerSequence
-	  }
-
-	  return decodeCodePointsArray(res)
-	}
-
-	// Based on http://stackoverflow.com/a/22747272/680742, the browser with
-	// the lowest limit is Chrome, with 0x10000 args.
-	// We go 1 magnitude less, for safety
-	var MAX_ARGUMENTS_LENGTH = 0x1000
-
-	function decodeCodePointsArray (codePoints) {
-	  var len = codePoints.length
-	  if (len <= MAX_ARGUMENTS_LENGTH) {
-	    return String.fromCharCode.apply(String, codePoints) // avoid extra slice()
-	  }
-
-	  // Decode in chunks to avoid "call stack size exceeded".
-	  var res = ''
-	  var i = 0
-	  while (i < len) {
-	    res += String.fromCharCode.apply(
-	      String,
-	      codePoints.slice(i, i += MAX_ARGUMENTS_LENGTH)
-	    )
-	  }
-	  return res
-	}
-
-	function asciiSlice (buf, start, end) {
-	  var ret = ''
-	  end = Math.min(buf.length, end)
-
-	  for (var i = start; i < end; i++) {
-	    ret += String.fromCharCode(buf[i] & 0x7F)
-	  }
-	  return ret
-	}
-
-	function binarySlice (buf, start, end) {
-	  var ret = ''
-	  end = Math.min(buf.length, end)
-
-	  for (var i = start; i < end; i++) {
-	    ret += String.fromCharCode(buf[i])
-	  }
-	  return ret
-	}
-
-	function hexSlice (buf, start, end) {
-	  var len = buf.length
-
-	  if (!start || start < 0) start = 0
-	  if (!end || end < 0 || end > len) end = len
-
-	  var out = ''
-	  for (var i = start; i < end; i++) {
-	    out += toHex(buf[i])
-	  }
-	  return out
-	}
-
-	function utf16leSlice (buf, start, end) {
-	  var bytes = buf.slice(start, end)
-	  var res = ''
-	  for (var i = 0; i < bytes.length; i += 2) {
-	    res += String.fromCharCode(bytes[i] + bytes[i + 1] * 256)
-	  }
-	  return res
-	}
-
-	Buffer.prototype.slice = function slice (start, end) {
-	  var len = this.length
-	  start = ~~start
-	  end = end === undefined ? len : ~~end
-
-	  if (start < 0) {
-	    start += len
-	    if (start < 0) start = 0
-	  } else if (start > len) {
-	    start = len
-	  }
-
-	  if (end < 0) {
-	    end += len
-	    if (end < 0) end = 0
-	  } else if (end > len) {
-	    end = len
-	  }
-
-	  if (end < start) end = start
-
-	  var newBuf
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    newBuf = this.subarray(start, end)
-	    newBuf.__proto__ = Buffer.prototype
-	  } else {
-	    var sliceLen = end - start
-	    newBuf = new Buffer(sliceLen, undefined)
-	    for (var i = 0; i < sliceLen; i++) {
-	      newBuf[i] = this[i + start]
-	    }
-	  }
-
-	  if (newBuf.length) newBuf.parent = this.parent || this
-
-	  return newBuf
-	}
-
-	/*
-	 * Need to make sure that buffer isn't trying to write out of bounds.
-	 */
-	function checkOffset (offset, ext, length) {
-	  if ((offset % 1) !== 0 || offset < 0) throw new RangeError('offset is not uint')
-	  if (offset + ext > length) throw new RangeError('Trying to access beyond buffer length')
-	}
-
-	Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-	  var val = this[offset]
-	  var mul = 1
-	  var i = 0
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    val += this[offset + i] * mul
-	  }
-
-	  return val
-	}
-
-	Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) {
-	    checkOffset(offset, byteLength, this.length)
-	  }
-
-	  var val = this[offset + --byteLength]
-	  var mul = 1
-	  while (byteLength > 0 && (mul *= 0x100)) {
-	    val += this[offset + --byteLength] * mul
-	  }
-
-	  return val
-	}
-
-	Buffer.prototype.readUInt8 = function readUInt8 (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 1, this.length)
-	  return this[offset]
-	}
-
-	Buffer.prototype.readUInt16LE = function readUInt16LE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 2, this.length)
-	  return this[offset] | (this[offset + 1] << 8)
-	}
-
-	Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 2, this.length)
-	  return (this[offset] << 8) | this[offset + 1]
-	}
-
-	Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-
-	  return ((this[offset]) |
-	      (this[offset + 1] << 8) |
-	      (this[offset + 2] << 16)) +
-	      (this[offset + 3] * 0x1000000)
-	}
-
-	Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-
-	  return (this[offset] * 0x1000000) +
-	    ((this[offset + 1] << 16) |
-	    (this[offset + 2] << 8) |
-	    this[offset + 3])
-	}
-
-	Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-	  var val = this[offset]
-	  var mul = 1
-	  var i = 0
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    val += this[offset + i] * mul
-	  }
-	  mul *= 0x80
-
-	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
-
-	  return val
-	}
-
-	Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) checkOffset(offset, byteLength, this.length)
-
-	  var i = byteLength
-	  var mul = 1
-	  var val = this[offset + --i]
-	  while (i > 0 && (mul *= 0x100)) {
-	    val += this[offset + --i] * mul
-	  }
-	  mul *= 0x80
-
-	  if (val >= mul) val -= Math.pow(2, 8 * byteLength)
-
-	  return val
-	}
-
-	Buffer.prototype.readInt8 = function readInt8 (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 1, this.length)
-	  if (!(this[offset] & 0x80)) return (this[offset])
-	  return ((0xff - this[offset] + 1) * -1)
-	}
-
-	Buffer.prototype.readInt16LE = function readInt16LE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 2, this.length)
-	  var val = this[offset] | (this[offset + 1] << 8)
-	  return (val & 0x8000) ? val | 0xFFFF0000 : val
-	}
-
-	Buffer.prototype.readInt16BE = function readInt16BE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 2, this.length)
-	  var val = this[offset + 1] | (this[offset] << 8)
-	  return (val & 0x8000) ? val | 0xFFFF0000 : val
-	}
-
-	Buffer.prototype.readInt32LE = function readInt32LE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-
-	  return (this[offset]) |
-	    (this[offset + 1] << 8) |
-	    (this[offset + 2] << 16) |
-	    (this[offset + 3] << 24)
-	}
-
-	Buffer.prototype.readInt32BE = function readInt32BE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-
-	  return (this[offset] << 24) |
-	    (this[offset + 1] << 16) |
-	    (this[offset + 2] << 8) |
-	    (this[offset + 3])
-	}
-
-	Buffer.prototype.readFloatLE = function readFloatLE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-	  return ieee754.read(this, offset, true, 23, 4)
-	}
-
-	Buffer.prototype.readFloatBE = function readFloatBE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 4, this.length)
-	  return ieee754.read(this, offset, false, 23, 4)
-	}
-
-	Buffer.prototype.readDoubleLE = function readDoubleLE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 8, this.length)
-	  return ieee754.read(this, offset, true, 52, 8)
-	}
-
-	Buffer.prototype.readDoubleBE = function readDoubleBE (offset, noAssert) {
-	  if (!noAssert) checkOffset(offset, 8, this.length)
-	  return ieee754.read(this, offset, false, 52, 8)
-	}
-
-	function checkInt (buf, value, offset, ext, max, min) {
-	  if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
-	  if (value > max || value < min) throw new RangeError('value is out of bounds')
-	  if (offset + ext > buf.length) throw new RangeError('index out of range')
-	}
-
-	Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
-
-	  var mul = 1
-	  var i = 0
-	  this[offset] = value & 0xFF
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    this[offset + i] = (value / mul) & 0xFF
-	  }
-
-	  return offset + byteLength
-	}
-
-	Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  byteLength = byteLength | 0
-	  if (!noAssert) checkInt(this, value, offset, byteLength, Math.pow(2, 8 * byteLength), 0)
-
-	  var i = byteLength - 1
-	  var mul = 1
-	  this[offset + i] = value & 0xFF
-	  while (--i >= 0 && (mul *= 0x100)) {
-	    this[offset + i] = (value / mul) & 0xFF
-	  }
-
-	  return offset + byteLength
-	}
-
-	Buffer.prototype.writeUInt8 = function writeUInt8 (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 1, 0xff, 0)
-	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
-	  this[offset] = (value & 0xff)
-	  return offset + 1
-	}
-
-	function objectWriteUInt16 (buf, value, offset, littleEndian) {
-	  if (value < 0) value = 0xffff + value + 1
-	  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; i++) {
-	    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
-	      (littleEndian ? i : 1 - i) * 8
-	  }
-	}
-
-	Buffer.prototype.writeUInt16LE = function writeUInt16LE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value & 0xff)
-	    this[offset + 1] = (value >>> 8)
-	  } else {
-	    objectWriteUInt16(this, value, offset, true)
-	  }
-	  return offset + 2
-	}
-
-	Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 2, 0xffff, 0)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value >>> 8)
-	    this[offset + 1] = (value & 0xff)
-	  } else {
-	    objectWriteUInt16(this, value, offset, false)
-	  }
-	  return offset + 2
-	}
-
-	function objectWriteUInt32 (buf, value, offset, littleEndian) {
-	  if (value < 0) value = 0xffffffff + value + 1
-	  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; i++) {
-	    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
-	  }
-	}
-
-	Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset + 3] = (value >>> 24)
-	    this[offset + 2] = (value >>> 16)
-	    this[offset + 1] = (value >>> 8)
-	    this[offset] = (value & 0xff)
-	  } else {
-	    objectWriteUInt32(this, value, offset, true)
-	  }
-	  return offset + 4
-	}
-
-	Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value >>> 24)
-	    this[offset + 1] = (value >>> 16)
-	    this[offset + 2] = (value >>> 8)
-	    this[offset + 3] = (value & 0xff)
-	  } else {
-	    objectWriteUInt32(this, value, offset, false)
-	  }
-	  return offset + 4
-	}
-
-	Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) {
-	    var limit = Math.pow(2, 8 * byteLength - 1)
-
-	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
-	  }
-
-	  var i = 0
-	  var mul = 1
-	  var sub = value < 0 ? 1 : 0
-	  this[offset] = value & 0xFF
-	  while (++i < byteLength && (mul *= 0x100)) {
-	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
-	  }
-
-	  return offset + byteLength
-	}
-
-	Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) {
-	    var limit = Math.pow(2, 8 * byteLength - 1)
-
-	    checkInt(this, value, offset, byteLength, limit - 1, -limit)
-	  }
-
-	  var i = byteLength - 1
-	  var mul = 1
-	  var sub = value < 0 ? 1 : 0
-	  this[offset + i] = value & 0xFF
-	  while (--i >= 0 && (mul *= 0x100)) {
-	    this[offset + i] = ((value / mul) >> 0) - sub & 0xFF
-	  }
-
-	  return offset + byteLength
-	}
-
-	Buffer.prototype.writeInt8 = function writeInt8 (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 1, 0x7f, -0x80)
-	  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
-	  if (value < 0) value = 0xff + value + 1
-	  this[offset] = (value & 0xff)
-	  return offset + 1
-	}
-
-	Buffer.prototype.writeInt16LE = function writeInt16LE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value & 0xff)
-	    this[offset + 1] = (value >>> 8)
-	  } else {
-	    objectWriteUInt16(this, value, offset, true)
-	  }
-	  return offset + 2
-	}
-
-	Buffer.prototype.writeInt16BE = function writeInt16BE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 2, 0x7fff, -0x8000)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value >>> 8)
-	    this[offset + 1] = (value & 0xff)
-	  } else {
-	    objectWriteUInt16(this, value, offset, false)
-	  }
-	  return offset + 2
-	}
-
-	Buffer.prototype.writeInt32LE = function writeInt32LE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value & 0xff)
-	    this[offset + 1] = (value >>> 8)
-	    this[offset + 2] = (value >>> 16)
-	    this[offset + 3] = (value >>> 24)
-	  } else {
-	    objectWriteUInt32(this, value, offset, true)
-	  }
-	  return offset + 4
-	}
-
-	Buffer.prototype.writeInt32BE = function writeInt32BE (value, offset, noAssert) {
-	  value = +value
-	  offset = offset | 0
-	  if (!noAssert) checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
-	  if (value < 0) value = 0xffffffff + value + 1
-	  if (Buffer.TYPED_ARRAY_SUPPORT) {
-	    this[offset] = (value >>> 24)
-	    this[offset + 1] = (value >>> 16)
-	    this[offset + 2] = (value >>> 8)
-	    this[offset + 3] = (value & 0xff)
-	  } else {
-	    objectWriteUInt32(this, value, offset, false)
-	  }
-	  return offset + 4
-	}
-
-	function checkIEEE754 (buf, value, offset, ext, max, min) {
-	  if (offset + ext > buf.length) throw new RangeError('index out of range')
-	  if (offset < 0) throw new RangeError('index out of range')
-	}
-
-	function writeFloat (buf, value, offset, littleEndian, noAssert) {
-	  if (!noAssert) {
-	    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
-	  }
-	  ieee754.write(buf, value, offset, littleEndian, 23, 4)
-	  return offset + 4
-	}
-
-	Buffer.prototype.writeFloatLE = function writeFloatLE (value, offset, noAssert) {
-	  return writeFloat(this, value, offset, true, noAssert)
-	}
-
-	Buffer.prototype.writeFloatBE = function writeFloatBE (value, offset, noAssert) {
-	  return writeFloat(this, value, offset, false, noAssert)
-	}
-
-	function writeDouble (buf, value, offset, littleEndian, noAssert) {
-	  if (!noAssert) {
-	    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
-	  }
-	  ieee754.write(buf, value, offset, littleEndian, 52, 8)
-	  return offset + 8
-	}
-
-	Buffer.prototype.writeDoubleLE = function writeDoubleLE (value, offset, noAssert) {
-	  return writeDouble(this, value, offset, true, noAssert)
-	}
-
-	Buffer.prototype.writeDoubleBE = function writeDoubleBE (value, offset, noAssert) {
-	  return writeDouble(this, value, offset, false, noAssert)
-	}
-
-	// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-	Buffer.prototype.copy = function copy (target, targetStart, start, end) {
-	  if (!start) start = 0
-	  if (!end && end !== 0) end = this.length
-	  if (targetStart >= target.length) targetStart = target.length
-	  if (!targetStart) targetStart = 0
-	  if (end > 0 && end < start) end = start
-
-	  // Copy 0 bytes; we're done
-	  if (end === start) return 0
-	  if (target.length === 0 || this.length === 0) return 0
-
-	  // Fatal error conditions
-	  if (targetStart < 0) {
-	    throw new RangeError('targetStart out of bounds')
-	  }
-	  if (start < 0 || start >= this.length) throw new RangeError('sourceStart out of bounds')
-	  if (end < 0) throw new RangeError('sourceEnd out of bounds')
-
-	  // Are we oob?
-	  if (end > this.length) end = this.length
-	  if (target.length - targetStart < end - start) {
-	    end = target.length - targetStart + start
-	  }
-
-	  var len = end - start
-	  var i
-
-	  if (this === target && start < targetStart && targetStart < end) {
-	    // descending copy from end
-	    for (i = len - 1; i >= 0; i--) {
-	      target[i + targetStart] = this[i + start]
-	    }
-	  } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
-	    // ascending copy from start
-	    for (i = 0; i < len; i++) {
-	      target[i + targetStart] = this[i + start]
-	    }
-	  } else {
-	    Uint8Array.prototype.set.call(
-	      target,
-	      this.subarray(start, start + len),
-	      targetStart
-	    )
-	  }
-
-	  return len
-	}
-
-	// fill(value, start=0, end=buffer.length)
-	Buffer.prototype.fill = function fill (value, start, end) {
-	  if (!value) value = 0
-	  if (!start) start = 0
-	  if (!end) end = this.length
-
-	  if (end < start) throw new RangeError('end < start')
-
-	  // Fill 0 bytes; we're done
-	  if (end === start) return
-	  if (this.length === 0) return
-
-	  if (start < 0 || start >= this.length) throw new RangeError('start out of bounds')
-	  if (end < 0 || end > this.length) throw new RangeError('end out of bounds')
-
-	  var i
-	  if (typeof value === 'number') {
-	    for (i = start; i < end; i++) {
-	      this[i] = value
-	    }
-	  } else {
-	    var bytes = utf8ToBytes(value.toString())
-	    var len = bytes.length
-	    for (i = start; i < end; i++) {
-	      this[i] = bytes[i % len]
-	    }
-	  }
-
-	  return this
-	}
-
-	// HELPER FUNCTIONS
-	// ================
-
-	var INVALID_BASE64_RE = /[^+\/0-9A-Za-z-_]/g
-
-	function base64clean (str) {
-	  // Node strips out invalid characters like \n and \t from the string, base64-js does not
-	  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
-	  // Node converts strings with length < 2 to ''
-	  if (str.length < 2) return ''
-	  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
-	  while (str.length % 4 !== 0) {
-	    str = str + '='
-	  }
-	  return str
-	}
-
-	function stringtrim (str) {
-	  if (str.trim) return str.trim()
-	  return str.replace(/^\s+|\s+$/g, '')
-	}
-
-	function toHex (n) {
-	  if (n < 16) return '0' + n.toString(16)
-	  return n.toString(16)
-	}
-
-	function utf8ToBytes (string, units) {
-	  units = units || Infinity
-	  var codePoint
-	  var length = string.length
-	  var leadSurrogate = null
-	  var bytes = []
-
-	  for (var i = 0; i < length; i++) {
-	    codePoint = string.charCodeAt(i)
-
-	    // is surrogate component
-	    if (codePoint > 0xD7FF && codePoint < 0xE000) {
-	      // last char was a lead
-	      if (!leadSurrogate) {
-	        // no lead yet
-	        if (codePoint > 0xDBFF) {
-	          // unexpected trail
-	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-	          continue
-	        } else if (i + 1 === length) {
-	          // unpaired lead
-	          if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-	          continue
-	        }
-
-	        // valid lead
-	        leadSurrogate = codePoint
-
-	        continue
-	      }
-
-	      // 2 leads in a row
-	      if (codePoint < 0xDC00) {
-	        if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-	        leadSurrogate = codePoint
-	        continue
-	      }
-
-	      // valid surrogate pair
-	      codePoint = (leadSurrogate - 0xD800 << 10 | codePoint - 0xDC00) + 0x10000
-	    } else if (leadSurrogate) {
-	      // valid bmp char, but last char was a lead
-	      if ((units -= 3) > -1) bytes.push(0xEF, 0xBF, 0xBD)
-	    }
-
-	    leadSurrogate = null
-
-	    // encode utf8
-	    if (codePoint < 0x80) {
-	      if ((units -= 1) < 0) break
-	      bytes.push(codePoint)
-	    } else if (codePoint < 0x800) {
-	      if ((units -= 2) < 0) break
-	      bytes.push(
-	        codePoint >> 0x6 | 0xC0,
-	        codePoint & 0x3F | 0x80
-	      )
-	    } else if (codePoint < 0x10000) {
-	      if ((units -= 3) < 0) break
-	      bytes.push(
-	        codePoint >> 0xC | 0xE0,
-	        codePoint >> 0x6 & 0x3F | 0x80,
-	        codePoint & 0x3F | 0x80
-	      )
-	    } else if (codePoint < 0x110000) {
-	      if ((units -= 4) < 0) break
-	      bytes.push(
-	        codePoint >> 0x12 | 0xF0,
-	        codePoint >> 0xC & 0x3F | 0x80,
-	        codePoint >> 0x6 & 0x3F | 0x80,
-	        codePoint & 0x3F | 0x80
-	      )
-	    } else {
-	      throw new Error('Invalid code point')
-	    }
-	  }
-
-	  return bytes
-	}
-
-	function asciiToBytes (str) {
-	  var byteArray = []
-	  for (var i = 0; i < str.length; i++) {
-	    // Node's code seems to be doing this and not & 0x7F..
-	    byteArray.push(str.charCodeAt(i) & 0xFF)
-	  }
-	  return byteArray
-	}
-
-	function utf16leToBytes (str, units) {
-	  var c, hi, lo
-	  var byteArray = []
-	  for (var i = 0; i < str.length; i++) {
-	    if ((units -= 2) < 0) break
-
-	    c = str.charCodeAt(i)
-	    hi = c >> 8
-	    lo = c % 256
-	    byteArray.push(lo)
-	    byteArray.push(hi)
-	  }
-
-	  return byteArray
-	}
-
-	function base64ToBytes (str) {
-	  return base64.toByteArray(base64clean(str))
-	}
-
-	function blitBuffer (src, dst, offset, length) {
-	  for (var i = 0; i < length; i++) {
-	    if ((i + offset >= dst.length) || (i >= src.length)) break
-	    dst[i + offset] = src[i]
-	  }
-	  return i
-	}
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(325).Buffer, (function() { return this; }())))
-
-/***/ },
-/* 326 */
-/***/ function(module, exports) {
-
-	'use strict'
-
-	exports.toByteArray = toByteArray
-	exports.fromByteArray = fromByteArray
-
-	var lookup = []
-	var revLookup = []
-	var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
-
-	function init () {
-	  var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-	  for (var i = 0, len = code.length; i < len; ++i) {
-	    lookup[i] = code[i]
-	    revLookup[code.charCodeAt(i)] = i
-	  }
-
-	  revLookup['-'.charCodeAt(0)] = 62
-	  revLookup['_'.charCodeAt(0)] = 63
-	}
-
-	init()
-
-	function toByteArray (b64) {
-	  var i, j, l, tmp, placeHolders, arr
-	  var len = b64.length
-
-	  if (len % 4 > 0) {
-	    throw new Error('Invalid string. Length must be a multiple of 4')
-	  }
-
-	  // the number of equal signs (place holders)
-	  // if there are two placeholders, than the two characters before it
-	  // represent one byte
-	  // if there is only one, then the three characters before it represent 2 bytes
-	  // this is just a cheap hack to not do indexOf twice
-	  placeHolders = b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
-
-	  // base64 is 4/3 + up to two characters of the original data
-	  arr = new Arr(len * 3 / 4 - placeHolders)
-
-	  // if there are placeholders, only get up to the last complete 4 chars
-	  l = placeHolders > 0 ? len - 4 : len
-
-	  var L = 0
-
-	  for (i = 0, j = 0; i < l; i += 4, j += 3) {
-	    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
-	    arr[L++] = (tmp >> 16) & 0xFF
-	    arr[L++] = (tmp >> 8) & 0xFF
-	    arr[L++] = tmp & 0xFF
-	  }
-
-	  if (placeHolders === 2) {
-	    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
-	    arr[L++] = tmp & 0xFF
-	  } else if (placeHolders === 1) {
-	    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
-	    arr[L++] = (tmp >> 8) & 0xFF
-	    arr[L++] = tmp & 0xFF
-	  }
-
-	  return arr
-	}
-
-	function tripletToBase64 (num) {
-	  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
-	}
-
-	function encodeChunk (uint8, start, end) {
-	  var tmp
-	  var output = []
-	  for (var i = start; i < end; i += 3) {
-	    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
-	    output.push(tripletToBase64(tmp))
-	  }
-	  return output.join('')
-	}
-
-	function fromByteArray (uint8) {
-	  var tmp
-	  var len = uint8.length
-	  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-	  var output = ''
-	  var parts = []
-	  var maxChunkLength = 16383 // must be multiple of 3
-
-	  // go through the array every three bytes, we'll deal with trailing stuff later
-	  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-	    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
-	  }
-
-	  // pad the end with zeros, but make sure to not forget the extra bytes
-	  if (extraBytes === 1) {
-	    tmp = uint8[len - 1]
-	    output += lookup[tmp >> 2]
-	    output += lookup[(tmp << 4) & 0x3F]
-	    output += '=='
-	  } else if (extraBytes === 2) {
-	    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
-	    output += lookup[tmp >> 10]
-	    output += lookup[(tmp >> 4) & 0x3F]
-	    output += lookup[(tmp << 2) & 0x3F]
-	    output += '='
-	  }
-
-	  parts.push(output)
-
-	  return parts.join('')
-	}
-
-
-/***/ },
-/* 327 */
-/***/ function(module, exports) {
-
-	exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-	  var e, m
-	  var eLen = nBytes * 8 - mLen - 1
-	  var eMax = (1 << eLen) - 1
-	  var eBias = eMax >> 1
-	  var nBits = -7
-	  var i = isLE ? (nBytes - 1) : 0
-	  var d = isLE ? -1 : 1
-	  var s = buffer[offset + i]
-
-	  i += d
-
-	  e = s & ((1 << (-nBits)) - 1)
-	  s >>= (-nBits)
-	  nBits += eLen
-	  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-	  m = e & ((1 << (-nBits)) - 1)
-	  e >>= (-nBits)
-	  nBits += mLen
-	  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-	  if (e === 0) {
-	    e = 1 - eBias
-	  } else if (e === eMax) {
-	    return m ? NaN : ((s ? -1 : 1) * Infinity)
-	  } else {
-	    m = m + Math.pow(2, mLen)
-	    e = e - eBias
-	  }
-	  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-	}
-
-	exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-	  var e, m, c
-	  var eLen = nBytes * 8 - mLen - 1
-	  var eMax = (1 << eLen) - 1
-	  var eBias = eMax >> 1
-	  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
-	  var i = isLE ? 0 : (nBytes - 1)
-	  var d = isLE ? 1 : -1
-	  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
-
-	  value = Math.abs(value)
-
-	  if (isNaN(value) || value === Infinity) {
-	    m = isNaN(value) ? 1 : 0
-	    e = eMax
-	  } else {
-	    e = Math.floor(Math.log(value) / Math.LN2)
-	    if (value * (c = Math.pow(2, -e)) < 1) {
-	      e--
-	      c *= 2
-	    }
-	    if (e + eBias >= 1) {
-	      value += rt / c
-	    } else {
-	      value += rt * Math.pow(2, 1 - eBias)
-	    }
-	    if (value * c >= 2) {
-	      e++
-	      c /= 2
-	    }
-
-	    if (e + eBias >= eMax) {
-	      m = 0
-	      e = eMax
-	    } else if (e + eBias >= 1) {
-	      m = (value * c - 1) * Math.pow(2, mLen)
-	      e = e + eBias
-	    } else {
-	      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
-	      e = 0
-	    }
-	  }
-
-	  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
-
-	  e = (e << mLen) | m
-	  eLen += mLen
-	  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
-
-	  buffer[offset + i - d] |= s * 128
-	}
-
-
-/***/ },
-/* 328 */
-/***/ function(module, exports) {
-
-	var toString = {}.toString;
-
-	module.exports = Array.isArray || function (arr) {
-	  return toString.call(arr) == '[object Array]';
-	};
-
-
-/***/ },
-/* 329 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(330), __esModule: true };
-
-/***/ },
-/* 330 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var core = __webpack_require__(331);
-	module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
-	  return (core.JSON && core.JSON.stringify || JSON.stringify).apply(JSON, arguments);
-	};
-
-/***/ },
-/* 331 */
-/***/ function(module, exports) {
-
-	var core = module.exports = {version: '1.2.6'};
-	if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-
-/***/ },
-/* 332 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(333), __esModule: true };
-
-/***/ },
-/* 333 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(334);
-	__webpack_require__(335);
-	__webpack_require__(358);
-	__webpack_require__(365);
-	module.exports = __webpack_require__(331).Promise;
-
-/***/ },
-/* 334 */
-/***/ function(module, exports) {
-
-	
-
-/***/ },
-/* 335 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var $at  = __webpack_require__(336)(true);
-
-	// 21.1.3.27 String.prototype[@@iterator]()
-	__webpack_require__(339)(String, 'String', function(iterated){
-	  this._t = String(iterated); // target
-	  this._i = 0;                // next index
-	// 21.1.5.2.1 %StringIteratorPrototype%.next()
-	}, function(){
-	  var O     = this._t
-	    , index = this._i
-	    , point;
-	  if(index >= O.length)return {value: undefined, done: true};
-	  point = $at(O, index);
-	  this._i += point.length;
-	  return {value: point, done: false};
-	});
-
-/***/ },
-/* 336 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var toInteger = __webpack_require__(337)
-	  , defined   = __webpack_require__(338);
-	// true  -> String#at
-	// false -> String#codePointAt
-	module.exports = function(TO_STRING){
-	  return function(that, pos){
-	    var s = String(defined(that))
-	      , i = toInteger(pos)
-	      , l = s.length
-	      , a, b;
-	    if(i < 0 || i >= l)return TO_STRING ? '' : undefined;
-	    a = s.charCodeAt(i);
-	    return a < 0xd800 || a > 0xdbff || i + 1 === l || (b = s.charCodeAt(i + 1)) < 0xdc00 || b > 0xdfff
-	      ? TO_STRING ? s.charAt(i) : a
-	      : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
-	  };
-	};
-
-/***/ },
-/* 337 */
-/***/ function(module, exports) {
-
-	// 7.1.4 ToInteger
-	var ceil  = Math.ceil
-	  , floor = Math.floor;
-	module.exports = function(it){
-	  return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
-	};
-
-/***/ },
-/* 338 */
-/***/ function(module, exports) {
-
-	// 7.2.1 RequireObjectCoercible(argument)
-	module.exports = function(it){
-	  if(it == undefined)throw TypeError("Can't call method on  " + it);
-	  return it;
-	};
-
-/***/ },
-/* 339 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var LIBRARY        = __webpack_require__(340)
-	  , $export        = __webpack_require__(341)
-	  , redefine       = __webpack_require__(345)
-	  , hide           = __webpack_require__(346)
-	  , has            = __webpack_require__(351)
-	  , Iterators      = __webpack_require__(352)
-	  , $iterCreate    = __webpack_require__(353)
-	  , setToStringTag = __webpack_require__(354)
-	  , getProto       = __webpack_require__(347).getProto
-	  , ITERATOR       = __webpack_require__(355)('iterator')
-	  , BUGGY          = !([].keys && 'next' in [].keys()) // Safari has buggy iterators w/o `next`
-	  , FF_ITERATOR    = '@@iterator'
-	  , KEYS           = 'keys'
-	  , VALUES         = 'values';
-
-	var returnThis = function(){ return this; };
-
-	module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED){
-	  $iterCreate(Constructor, NAME, next);
-	  var getMethod = function(kind){
-	    if(!BUGGY && kind in proto)return proto[kind];
-	    switch(kind){
-	      case KEYS: return function keys(){ return new Constructor(this, kind); };
-	      case VALUES: return function values(){ return new Constructor(this, kind); };
-	    } return function entries(){ return new Constructor(this, kind); };
-	  };
-	  var TAG        = NAME + ' Iterator'
-	    , DEF_VALUES = DEFAULT == VALUES
-	    , VALUES_BUG = false
-	    , proto      = Base.prototype
-	    , $native    = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT]
-	    , $default   = $native || getMethod(DEFAULT)
-	    , methods, key;
-	  // Fix native
-	  if($native){
-	    var IteratorPrototype = getProto($default.call(new Base));
-	    // Set @@toStringTag to native iterators
-	    setToStringTag(IteratorPrototype, TAG, true);
-	    // FF fix
-	    if(!LIBRARY && has(proto, FF_ITERATOR))hide(IteratorPrototype, ITERATOR, returnThis);
-	    // fix Array#{values, @@iterator}.name in V8 / FF
-	    if(DEF_VALUES && $native.name !== VALUES){
-	      VALUES_BUG = true;
-	      $default = function values(){ return $native.call(this); };
-	    }
-	  }
-	  // Define iterator
-	  if((!LIBRARY || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])){
-	    hide(proto, ITERATOR, $default);
-	  }
-	  // Plug for library
-	  Iterators[NAME] = $default;
-	  Iterators[TAG]  = returnThis;
-	  if(DEFAULT){
-	    methods = {
-	      values:  DEF_VALUES  ? $default : getMethod(VALUES),
-	      keys:    IS_SET      ? $default : getMethod(KEYS),
-	      entries: !DEF_VALUES ? $default : getMethod('entries')
-	    };
-	    if(FORCED)for(key in methods){
-	      if(!(key in proto))redefine(proto, key, methods[key]);
-	    } else $export($export.P + $export.F * (BUGGY || VALUES_BUG), NAME, methods);
-	  }
-	  return methods;
-	};
-
-/***/ },
-/* 340 */
-/***/ function(module, exports) {
-
-	module.exports = true;
-
-/***/ },
-/* 341 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var global    = __webpack_require__(342)
-	  , core      = __webpack_require__(331)
-	  , ctx       = __webpack_require__(343)
-	  , PROTOTYPE = 'prototype';
-
-	var $export = function(type, name, source){
-	  var IS_FORCED = type & $export.F
-	    , IS_GLOBAL = type & $export.G
-	    , IS_STATIC = type & $export.S
-	    , IS_PROTO  = type & $export.P
-	    , IS_BIND   = type & $export.B
-	    , IS_WRAP   = type & $export.W
-	    , exports   = IS_GLOBAL ? core : core[name] || (core[name] = {})
-	    , target    = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE]
-	    , key, own, out;
-	  if(IS_GLOBAL)source = name;
-	  for(key in source){
-	    // contains in native
-	    own = !IS_FORCED && target && key in target;
-	    if(own && key in exports)continue;
-	    // export native or passed
-	    out = own ? target[key] : source[key];
-	    // prevent global pollution for namespaces
-	    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
-	    // bind timers to global for call from export context
-	    : IS_BIND && own ? ctx(out, global)
-	    // wrap global constructors for prevent change them in library
-	    : IS_WRAP && target[key] == out ? (function(C){
-	      var F = function(param){
-	        return this instanceof C ? new C(param) : C(param);
-	      };
-	      F[PROTOTYPE] = C[PROTOTYPE];
-	      return F;
-	    // make static versions for prototype methods
-	    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-	    if(IS_PROTO)(exports[PROTOTYPE] || (exports[PROTOTYPE] = {}))[key] = out;
-	  }
-	};
-	// type bitmap
-	$export.F = 1;  // forced
-	$export.G = 2;  // global
-	$export.S = 4;  // static
-	$export.P = 8;  // proto
-	$export.B = 16; // bind
-	$export.W = 32; // wrap
-	module.exports = $export;
-
-/***/ },
-/* 342 */
-/***/ function(module, exports) {
-
-	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-	var global = module.exports = typeof window != 'undefined' && window.Math == Math
-	  ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
-	if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-
-/***/ },
-/* 343 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// optional / simple context binding
-	var aFunction = __webpack_require__(344);
-	module.exports = function(fn, that, length){
-	  aFunction(fn);
-	  if(that === undefined)return fn;
-	  switch(length){
-	    case 1: return function(a){
-	      return fn.call(that, a);
-	    };
-	    case 2: return function(a, b){
-	      return fn.call(that, a, b);
-	    };
-	    case 3: return function(a, b, c){
-	      return fn.call(that, a, b, c);
-	    };
-	  }
-	  return function(/* ...args */){
-	    return fn.apply(that, arguments);
-	  };
-	};
-
-/***/ },
-/* 344 */
-/***/ function(module, exports) {
-
-	module.exports = function(it){
-	  if(typeof it != 'function')throw TypeError(it + ' is not a function!');
-	  return it;
-	};
-
-/***/ },
-/* 345 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(346);
-
-/***/ },
-/* 346 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $          = __webpack_require__(347)
-	  , createDesc = __webpack_require__(348);
-	module.exports = __webpack_require__(349) ? function(object, key, value){
-	  return $.setDesc(object, key, createDesc(1, value));
-	} : function(object, key, value){
-	  object[key] = value;
-	  return object;
-	};
-
-/***/ },
-/* 347 */
-/***/ function(module, exports) {
-
-	var $Object = Object;
-	module.exports = {
-	  create:     $Object.create,
-	  getProto:   $Object.getPrototypeOf,
-	  isEnum:     {}.propertyIsEnumerable,
-	  getDesc:    $Object.getOwnPropertyDescriptor,
-	  setDesc:    $Object.defineProperty,
-	  setDescs:   $Object.defineProperties,
-	  getKeys:    $Object.keys,
-	  getNames:   $Object.getOwnPropertyNames,
-	  getSymbols: $Object.getOwnPropertySymbols,
-	  each:       [].forEach
-	};
-
-/***/ },
-/* 348 */
-/***/ function(module, exports) {
-
-	module.exports = function(bitmap, value){
-	  return {
-	    enumerable  : !(bitmap & 1),
-	    configurable: !(bitmap & 2),
-	    writable    : !(bitmap & 4),
-	    value       : value
-	  };
-	};
-
-/***/ },
-/* 349 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Thank's IE8 for his funny defineProperty
-	module.exports = !__webpack_require__(350)(function(){
-	  return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
-	});
-
-/***/ },
-/* 350 */
-/***/ function(module, exports) {
-
-	module.exports = function(exec){
-	  try {
-	    return !!exec();
-	  } catch(e){
-	    return true;
-	  }
-	};
-
-/***/ },
-/* 351 */
-/***/ function(module, exports) {
-
-	var hasOwnProperty = {}.hasOwnProperty;
-	module.exports = function(it, key){
-	  return hasOwnProperty.call(it, key);
-	};
-
-/***/ },
-/* 352 */
-/***/ function(module, exports) {
-
-	module.exports = {};
-
-/***/ },
-/* 353 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var $              = __webpack_require__(347)
-	  , descriptor     = __webpack_require__(348)
-	  , setToStringTag = __webpack_require__(354)
-	  , IteratorPrototype = {};
-
-	// 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-	__webpack_require__(346)(IteratorPrototype, __webpack_require__(355)('iterator'), function(){ return this; });
-
-	module.exports = function(Constructor, NAME, next){
-	  Constructor.prototype = $.create(IteratorPrototype, {next: descriptor(1, next)});
-	  setToStringTag(Constructor, NAME + ' Iterator');
-	};
-
-/***/ },
-/* 354 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var def = __webpack_require__(347).setDesc
-	  , has = __webpack_require__(351)
-	  , TAG = __webpack_require__(355)('toStringTag');
-
-	module.exports = function(it, tag, stat){
-	  if(it && !has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
-	};
-
-/***/ },
-/* 355 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var store  = __webpack_require__(356)('wks')
-	  , uid    = __webpack_require__(357)
-	  , Symbol = __webpack_require__(342).Symbol;
-	module.exports = function(name){
-	  return store[name] || (store[name] =
-	    Symbol && Symbol[name] || (Symbol || uid)('Symbol.' + name));
-	};
-
-/***/ },
-/* 356 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var global = __webpack_require__(342)
-	  , SHARED = '__core-js_shared__'
-	  , store  = global[SHARED] || (global[SHARED] = {});
-	module.exports = function(key){
-	  return store[key] || (store[key] = {});
-	};
-
-/***/ },
-/* 357 */
-/***/ function(module, exports) {
-
-	var id = 0
-	  , px = Math.random();
-	module.exports = function(key){
-	  return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
-	};
-
-/***/ },
-/* 358 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(359);
-	var Iterators = __webpack_require__(352);
-	Iterators.NodeList = Iterators.HTMLCollection = Iterators.Array;
-
-/***/ },
-/* 359 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var addToUnscopables = __webpack_require__(360)
-	  , step             = __webpack_require__(361)
-	  , Iterators        = __webpack_require__(352)
-	  , toIObject        = __webpack_require__(362);
-
-	// 22.1.3.4 Array.prototype.entries()
-	// 22.1.3.13 Array.prototype.keys()
-	// 22.1.3.29 Array.prototype.values()
-	// 22.1.3.30 Array.prototype[@@iterator]()
-	module.exports = __webpack_require__(339)(Array, 'Array', function(iterated, kind){
-	  this._t = toIObject(iterated); // target
-	  this._i = 0;                   // next index
-	  this._k = kind;                // kind
-	// 22.1.5.2.1 %ArrayIteratorPrototype%.next()
-	}, function(){
-	  var O     = this._t
-	    , kind  = this._k
-	    , index = this._i++;
-	  if(!O || index >= O.length){
-	    this._t = undefined;
-	    return step(1);
-	  }
-	  if(kind == 'keys'  )return step(0, index);
-	  if(kind == 'values')return step(0, O[index]);
-	  return step(0, [index, O[index]]);
-	}, 'values');
-
-	// argumentsList[@@iterator] is %ArrayProto_values% (9.4.4.6, 9.4.4.7)
-	Iterators.Arguments = Iterators.Array;
-
-	addToUnscopables('keys');
-	addToUnscopables('values');
-	addToUnscopables('entries');
-
-/***/ },
-/* 360 */
-/***/ function(module, exports) {
-
-	module.exports = function(){ /* empty */ };
-
-/***/ },
-/* 361 */
-/***/ function(module, exports) {
-
-	module.exports = function(done, value){
-	  return {value: value, done: !!done};
-	};
-
-/***/ },
-/* 362 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// to indexed object, toObject with fallback for non-array-like ES3 strings
-	var IObject = __webpack_require__(363)
-	  , defined = __webpack_require__(338);
-	module.exports = function(it){
-	  return IObject(defined(it));
-	};
-
-/***/ },
-/* 363 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// fallback for non-array-like ES3 and non-enumerable old V8 strings
-	var cof = __webpack_require__(364);
-	module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
-	  return cof(it) == 'String' ? it.split('') : Object(it);
-	};
-
-/***/ },
-/* 364 */
-/***/ function(module, exports) {
-
-	var toString = {}.toString;
-
-	module.exports = function(it){
-	  return toString.call(it).slice(8, -1);
-	};
-
-/***/ },
-/* 365 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var $          = __webpack_require__(347)
-	  , LIBRARY    = __webpack_require__(340)
-	  , global     = __webpack_require__(342)
-	  , ctx        = __webpack_require__(343)
-	  , classof    = __webpack_require__(366)
-	  , $export    = __webpack_require__(341)
-	  , isObject   = __webpack_require__(367)
-	  , anObject   = __webpack_require__(368)
-	  , aFunction  = __webpack_require__(344)
-	  , strictNew  = __webpack_require__(369)
-	  , forOf      = __webpack_require__(370)
-	  , setProto   = __webpack_require__(375).set
-	  , same       = __webpack_require__(376)
-	  , SPECIES    = __webpack_require__(355)('species')
-	  , speciesConstructor = __webpack_require__(377)
-	  , asap       = __webpack_require__(378)
-	  , PROMISE    = 'Promise'
-	  , process    = global.process
-	  , isNode     = classof(process) == 'process'
-	  , P          = global[PROMISE]
-	  , Wrapper;
-
-	var testResolve = function(sub){
-	  var test = new P(function(){});
-	  if(sub)test.constructor = Object;
-	  return P.resolve(test) === test;
-	};
-
-	var USE_NATIVE = function(){
-	  var works = false;
-	  function P2(x){
-	    var self = new P(x);
-	    setProto(self, P2.prototype);
-	    return self;
-	  }
-	  try {
-	    works = P && P.resolve && testResolve();
-	    setProto(P2, P);
-	    P2.prototype = $.create(P.prototype, {constructor: {value: P2}});
-	    // actual Firefox has broken subclass support, test that
-	    if(!(P2.resolve(5).then(function(){}) instanceof P2)){
-	      works = false;
-	    }
-	    // actual V8 bug, https://code.google.com/p/v8/issues/detail?id=4162
-	    if(works && __webpack_require__(349)){
-	      var thenableThenGotten = false;
-	      P.resolve($.setDesc({}, 'then', {
-	        get: function(){ thenableThenGotten = true; }
-	      }));
-	      works = thenableThenGotten;
-	    }
-	  } catch(e){ works = false; }
-	  return works;
-	}();
-
-	// helpers
-	var sameConstructor = function(a, b){
-	  // library wrapper special case
-	  if(LIBRARY && a === P && b === Wrapper)return true;
-	  return same(a, b);
-	};
-	var getConstructor = function(C){
-	  var S = anObject(C)[SPECIES];
-	  return S != undefined ? S : C;
-	};
-	var isThenable = function(it){
-	  var then;
-	  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
-	};
-	var PromiseCapability = function(C){
-	  var resolve, reject;
-	  this.promise = new C(function($$resolve, $$reject){
-	    if(resolve !== undefined || reject !== undefined)throw TypeError('Bad Promise constructor');
-	    resolve = $$resolve;
-	    reject  = $$reject;
-	  });
-	  this.resolve = aFunction(resolve),
-	  this.reject  = aFunction(reject)
-	};
-	var perform = function(exec){
-	  try {
-	    exec();
-	  } catch(e){
-	    return {error: e};
-	  }
-	};
-	var notify = function(record, isReject){
-	  if(record.n)return;
-	  record.n = true;
-	  var chain = record.c;
-	  asap(function(){
-	    var value = record.v
-	      , ok    = record.s == 1
-	      , i     = 0;
-	    var run = function(reaction){
-	      var handler = ok ? reaction.ok : reaction.fail
-	        , resolve = reaction.resolve
-	        , reject  = reaction.reject
-	        , result, then;
-	      try {
-	        if(handler){
-	          if(!ok)record.h = true;
-	          result = handler === true ? value : handler(value);
-	          if(result === reaction.promise){
-	            reject(TypeError('Promise-chain cycle'));
-	          } else if(then = isThenable(result)){
-	            then.call(result, resolve, reject);
-	          } else resolve(result);
-	        } else reject(value);
-	      } catch(e){
-	        reject(e);
-	      }
-	    };
-	    while(chain.length > i)run(chain[i++]); // variable length - can't use forEach
-	    chain.length = 0;
-	    record.n = false;
-	    if(isReject)setTimeout(function(){
-	      var promise = record.p
-	        , handler, console;
-	      if(isUnhandled(promise)){
-	        if(isNode){
-	          process.emit('unhandledRejection', value, promise);
-	        } else if(handler = global.onunhandledrejection){
-	          handler({promise: promise, reason: value});
-	        } else if((console = global.console) && console.error){
-	          console.error('Unhandled promise rejection', value);
-	        }
-	      } record.a = undefined;
-	    }, 1);
-	  });
-	};
-	var isUnhandled = function(promise){
-	  var record = promise._d
-	    , chain  = record.a || record.c
-	    , i      = 0
-	    , reaction;
-	  if(record.h)return false;
-	  while(chain.length > i){
-	    reaction = chain[i++];
-	    if(reaction.fail || !isUnhandled(reaction.promise))return false;
-	  } return true;
-	};
-	var $reject = function(value){
-	  var record = this;
-	  if(record.d)return;
-	  record.d = true;
-	  record = record.r || record; // unwrap
-	  record.v = value;
-	  record.s = 2;
-	  record.a = record.c.slice();
-	  notify(record, true);
-	};
-	var $resolve = function(value){
-	  var record = this
-	    , then;
-	  if(record.d)return;
-	  record.d = true;
-	  record = record.r || record; // unwrap
-	  try {
-	    if(record.p === value)throw TypeError("Promise can't be resolved itself");
-	    if(then = isThenable(value)){
-	      asap(function(){
-	        var wrapper = {r: record, d: false}; // wrap
-	        try {
-	          then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
-	        } catch(e){
-	          $reject.call(wrapper, e);
-	        }
-	      });
-	    } else {
-	      record.v = value;
-	      record.s = 1;
-	      notify(record, false);
-	    }
-	  } catch(e){
-	    $reject.call({r: record, d: false}, e); // wrap
-	  }
-	};
-
-	// constructor polyfill
-	if(!USE_NATIVE){
-	  // 25.4.3.1 Promise(executor)
-	  P = function Promise(executor){
-	    aFunction(executor);
-	    var record = this._d = {
-	      p: strictNew(this, P, PROMISE),         // <- promise
-	      c: [],                                  // <- awaiting reactions
-	      a: undefined,                           // <- checked in isUnhandled reactions
-	      s: 0,                                   // <- state
-	      d: false,                               // <- done
-	      v: undefined,                           // <- value
-	      h: false,                               // <- handled rejection
-	      n: false                                // <- notify
-	    };
-	    try {
-	      executor(ctx($resolve, record, 1), ctx($reject, record, 1));
-	    } catch(err){
-	      $reject.call(record, err);
-	    }
-	  };
-	  __webpack_require__(383)(P.prototype, {
-	    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
-	    then: function then(onFulfilled, onRejected){
-	      var reaction = new PromiseCapability(speciesConstructor(this, P))
-	        , promise  = reaction.promise
-	        , record   = this._d;
-	      reaction.ok   = typeof onFulfilled == 'function' ? onFulfilled : true;
-	      reaction.fail = typeof onRejected == 'function' && onRejected;
-	      record.c.push(reaction);
-	      if(record.a)record.a.push(reaction);
-	      if(record.s)notify(record, false);
-	      return promise;
-	    },
-	    // 25.4.5.1 Promise.prototype.catch(onRejected)
-	    'catch': function(onRejected){
-	      return this.then(undefined, onRejected);
-	    }
-	  });
-	}
-
-	$export($export.G + $export.W + $export.F * !USE_NATIVE, {Promise: P});
-	__webpack_require__(354)(P, PROMISE);
-	__webpack_require__(384)(PROMISE);
-	Wrapper = __webpack_require__(331)[PROMISE];
-
-	// statics
-	$export($export.S + $export.F * !USE_NATIVE, PROMISE, {
-	  // 25.4.4.5 Promise.reject(r)
-	  reject: function reject(r){
-	    var capability = new PromiseCapability(this)
-	      , $$reject   = capability.reject;
-	    $$reject(r);
-	    return capability.promise;
-	  }
-	});
-	$export($export.S + $export.F * (!USE_NATIVE || testResolve(true)), PROMISE, {
-	  // 25.4.4.6 Promise.resolve(x)
-	  resolve: function resolve(x){
-	    // instanceof instead of internal slot check because we should fix it without replacement native Promise core
-	    if(x instanceof P && sameConstructor(x.constructor, this))return x;
-	    var capability = new PromiseCapability(this)
-	      , $$resolve  = capability.resolve;
-	    $$resolve(x);
-	    return capability.promise;
-	  }
-	});
-	$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(385)(function(iter){
-	  P.all(iter)['catch'](function(){});
-	})), PROMISE, {
-	  // 25.4.4.1 Promise.all(iterable)
-	  all: function all(iterable){
-	    var C          = getConstructor(this)
-	      , capability = new PromiseCapability(C)
-	      , resolve    = capability.resolve
-	      , reject     = capability.reject
-	      , values     = [];
-	    var abrupt = perform(function(){
-	      forOf(iterable, false, values.push, values);
-	      var remaining = values.length
-	        , results   = Array(remaining);
-	      if(remaining)$.each.call(values, function(promise, index){
-	        var alreadyCalled = false;
-	        C.resolve(promise).then(function(value){
-	          if(alreadyCalled)return;
-	          alreadyCalled = true;
-	          results[index] = value;
-	          --remaining || resolve(results);
-	        }, reject);
-	      });
-	      else resolve(results);
-	    });
-	    if(abrupt)reject(abrupt.error);
-	    return capability.promise;
-	  },
-	  // 25.4.4.4 Promise.race(iterable)
-	  race: function race(iterable){
-	    var C          = getConstructor(this)
-	      , capability = new PromiseCapability(C)
-	      , reject     = capability.reject;
-	    var abrupt = perform(function(){
-	      forOf(iterable, false, function(promise){
-	        C.resolve(promise).then(capability.resolve, reject);
-	      });
-	    });
-	    if(abrupt)reject(abrupt.error);
-	    return capability.promise;
-	  }
-	});
-
-/***/ },
-/* 366 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// getting tag from 19.1.3.6 Object.prototype.toString()
-	var cof = __webpack_require__(364)
-	  , TAG = __webpack_require__(355)('toStringTag')
-	  // ES3 wrong here
-	  , ARG = cof(function(){ return arguments; }()) == 'Arguments';
-
-	module.exports = function(it){
-	  var O, T, B;
-	  return it === undefined ? 'Undefined' : it === null ? 'Null'
-	    // @@toStringTag case
-	    : typeof (T = (O = Object(it))[TAG]) == 'string' ? T
-	    // builtinTag case
-	    : ARG ? cof(O)
-	    // ES3 arguments fallback
-	    : (B = cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
-	};
-
-/***/ },
-/* 367 */
-/***/ function(module, exports) {
-
-	module.exports = function(it){
-	  return typeof it === 'object' ? it !== null : typeof it === 'function';
-	};
-
-/***/ },
-/* 368 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isObject = __webpack_require__(367);
-	module.exports = function(it){
-	  if(!isObject(it))throw TypeError(it + ' is not an object!');
-	  return it;
-	};
-
-/***/ },
-/* 369 */
-/***/ function(module, exports) {
-
-	module.exports = function(it, Constructor, name){
-	  if(!(it instanceof Constructor))throw TypeError(name + ": use the 'new' operator!");
-	  return it;
-	};
-
-/***/ },
-/* 370 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ctx         = __webpack_require__(343)
-	  , call        = __webpack_require__(371)
-	  , isArrayIter = __webpack_require__(372)
-	  , anObject    = __webpack_require__(368)
-	  , toLength    = __webpack_require__(373)
-	  , getIterFn   = __webpack_require__(374);
-	module.exports = function(iterable, entries, fn, that){
-	  var iterFn = getIterFn(iterable)
-	    , f      = ctx(fn, that, entries ? 2 : 1)
-	    , index  = 0
-	    , length, step, iterator;
-	  if(typeof iterFn != 'function')throw TypeError(iterable + ' is not iterable!');
-	  // fast case for arrays with default iterator
-	  if(isArrayIter(iterFn))for(length = toLength(iterable.length); length > index; index++){
-	    entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
-	  } else for(iterator = iterFn.call(iterable); !(step = iterator.next()).done; ){
-	    call(iterator, f, step.value, entries);
-	  }
-	};
-
-/***/ },
-/* 371 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// call something on iterator step with safe closing on error
-	var anObject = __webpack_require__(368);
-	module.exports = function(iterator, fn, value, entries){
-	  try {
-	    return entries ? fn(anObject(value)[0], value[1]) : fn(value);
-	  // 7.4.6 IteratorClose(iterator, completion)
-	  } catch(e){
-	    var ret = iterator['return'];
-	    if(ret !== undefined)anObject(ret.call(iterator));
-	    throw e;
-	  }
-	};
-
-/***/ },
-/* 372 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// check on default Array iterator
-	var Iterators  = __webpack_require__(352)
-	  , ITERATOR   = __webpack_require__(355)('iterator')
-	  , ArrayProto = Array.prototype;
-
-	module.exports = function(it){
-	  return it !== undefined && (Iterators.Array === it || ArrayProto[ITERATOR] === it);
-	};
-
-/***/ },
-/* 373 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 7.1.15 ToLength
-	var toInteger = __webpack_require__(337)
-	  , min       = Math.min;
-	module.exports = function(it){
-	  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
-	};
-
-/***/ },
-/* 374 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var classof   = __webpack_require__(366)
-	  , ITERATOR  = __webpack_require__(355)('iterator')
-	  , Iterators = __webpack_require__(352);
-	module.exports = __webpack_require__(331).getIteratorMethod = function(it){
-	  if(it != undefined)return it[ITERATOR]
-	    || it['@@iterator']
-	    || Iterators[classof(it)];
-	};
-
-/***/ },
-/* 375 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// Works with __proto__ only. Old v8 can't work with null proto objects.
-	/* eslint-disable no-proto */
-	var getDesc  = __webpack_require__(347).getDesc
-	  , isObject = __webpack_require__(367)
-	  , anObject = __webpack_require__(368);
-	var check = function(O, proto){
-	  anObject(O);
-	  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
-	};
-	module.exports = {
-	  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
-	    function(test, buggy, set){
-	      try {
-	        set = __webpack_require__(343)(Function.call, getDesc(Object.prototype, '__proto__').set, 2);
-	        set(test, []);
-	        buggy = !(test instanceof Array);
-	      } catch(e){ buggy = true; }
-	      return function setPrototypeOf(O, proto){
-	        check(O, proto);
-	        if(buggy)O.__proto__ = proto;
-	        else set(O, proto);
-	        return O;
-	      };
-	    }({}, false) : undefined),
-	  check: check
-	};
-
-/***/ },
-/* 376 */
-/***/ function(module, exports) {
-
-	// 7.2.9 SameValue(x, y)
-	module.exports = Object.is || function is(x, y){
-	  return x === y ? x !== 0 || 1 / x === 1 / y : x != x && y != y;
-	};
-
-/***/ },
-/* 377 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 7.3.20 SpeciesConstructor(O, defaultConstructor)
-	var anObject  = __webpack_require__(368)
-	  , aFunction = __webpack_require__(344)
-	  , SPECIES   = __webpack_require__(355)('species');
-	module.exports = function(O, D){
-	  var C = anObject(O).constructor, S;
-	  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
-	};
-
-/***/ },
-/* 378 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var global    = __webpack_require__(342)
-	  , macrotask = __webpack_require__(379).set
-	  , Observer  = global.MutationObserver || global.WebKitMutationObserver
-	  , process   = global.process
-	  , Promise   = global.Promise
-	  , isNode    = __webpack_require__(364)(process) == 'process'
-	  , head, last, notify;
-
-	var flush = function(){
-	  var parent, domain, fn;
-	  if(isNode && (parent = process.domain)){
-	    process.domain = null;
-	    parent.exit();
-	  }
-	  while(head){
-	    domain = head.domain;
-	    fn     = head.fn;
-	    if(domain)domain.enter();
-	    fn(); // <- currently we use it only for Promise - try / catch not required
-	    if(domain)domain.exit();
-	    head = head.next;
-	  } last = undefined;
-	  if(parent)parent.enter();
-	};
-
-	// Node.js
-	if(isNode){
-	  notify = function(){
-	    process.nextTick(flush);
-	  };
-	// browsers with MutationObserver
-	} else if(Observer){
-	  var toggle = 1
-	    , node   = document.createTextNode('');
-	  new Observer(flush).observe(node, {characterData: true}); // eslint-disable-line no-new
-	  notify = function(){
-	    node.data = toggle = -toggle;
-	  };
-	// environments with maybe non-completely correct, but existent Promise
-	} else if(Promise && Promise.resolve){
-	  notify = function(){
-	    Promise.resolve().then(flush);
-	  };
-	// for other environments - macrotask based on:
-	// - setImmediate
-	// - MessageChannel
-	// - window.postMessag
-	// - onreadystatechange
-	// - setTimeout
-	} else {
-	  notify = function(){
-	    // strange IE + webpack dev server bug - use .call(global)
-	    macrotask.call(global, flush);
-	  };
-	}
-
-	module.exports = function asap(fn){
-	  var task = {fn: fn, next: undefined, domain: isNode && process.domain};
-	  if(last)last.next = task;
-	  if(!head){
-	    head = task;
-	    notify();
-	  } last = task;
-	};
-
-/***/ },
-/* 379 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ctx                = __webpack_require__(343)
-	  , invoke             = __webpack_require__(380)
-	  , html               = __webpack_require__(381)
-	  , cel                = __webpack_require__(382)
-	  , global             = __webpack_require__(342)
-	  , process            = global.process
-	  , setTask            = global.setImmediate
-	  , clearTask          = global.clearImmediate
-	  , MessageChannel     = global.MessageChannel
-	  , counter            = 0
-	  , queue              = {}
-	  , ONREADYSTATECHANGE = 'onreadystatechange'
-	  , defer, channel, port;
-	var run = function(){
-	  var id = +this;
-	  if(queue.hasOwnProperty(id)){
-	    var fn = queue[id];
-	    delete queue[id];
-	    fn();
-	  }
-	};
-	var listner = function(event){
-	  run.call(event.data);
-	};
-	// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-	if(!setTask || !clearTask){
-	  setTask = function setImmediate(fn){
-	    var args = [], i = 1;
-	    while(arguments.length > i)args.push(arguments[i++]);
-	    queue[++counter] = function(){
-	      invoke(typeof fn == 'function' ? fn : Function(fn), args);
-	    };
-	    defer(counter);
-	    return counter;
-	  };
-	  clearTask = function clearImmediate(id){
-	    delete queue[id];
-	  };
-	  // Node.js 0.8-
-	  if(__webpack_require__(364)(process) == 'process'){
-	    defer = function(id){
-	      process.nextTick(ctx(run, id, 1));
-	    };
-	  // Browsers with MessageChannel, includes WebWorkers
-	  } else if(MessageChannel){
-	    channel = new MessageChannel;
-	    port    = channel.port2;
-	    channel.port1.onmessage = listner;
-	    defer = ctx(port.postMessage, port, 1);
-	  // Browsers with postMessage, skip WebWorkers
-	  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-	  } else if(global.addEventListener && typeof postMessage == 'function' && !global.importScripts){
-	    defer = function(id){
-	      global.postMessage(id + '', '*');
-	    };
-	    global.addEventListener('message', listner, false);
-	  // IE8-
-	  } else if(ONREADYSTATECHANGE in cel('script')){
-	    defer = function(id){
-	      html.appendChild(cel('script'))[ONREADYSTATECHANGE] = function(){
-	        html.removeChild(this);
-	        run.call(id);
-	      };
-	    };
-	  // Rest old browsers
-	  } else {
-	    defer = function(id){
-	      setTimeout(ctx(run, id, 1), 0);
-	    };
-	  }
-	}
-	module.exports = {
-	  set:   setTask,
-	  clear: clearTask
-	};
-
-/***/ },
-/* 380 */
-/***/ function(module, exports) {
-
-	// fast apply, http://jsperf.lnkit.com/fast-apply/5
-	module.exports = function(fn, args, that){
-	  var un = that === undefined;
-	  switch(args.length){
-	    case 0: return un ? fn()
-	                      : fn.call(that);
-	    case 1: return un ? fn(args[0])
-	                      : fn.call(that, args[0]);
-	    case 2: return un ? fn(args[0], args[1])
-	                      : fn.call(that, args[0], args[1]);
-	    case 3: return un ? fn(args[0], args[1], args[2])
-	                      : fn.call(that, args[0], args[1], args[2]);
-	    case 4: return un ? fn(args[0], args[1], args[2], args[3])
-	                      : fn.call(that, args[0], args[1], args[2], args[3]);
-	  } return              fn.apply(that, args);
-	};
-
-/***/ },
-/* 381 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = __webpack_require__(342).document && document.documentElement;
-
-/***/ },
-/* 382 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isObject = __webpack_require__(367)
-	  , document = __webpack_require__(342).document
-	  // in old IE typeof document.createElement is 'object'
-	  , is = isObject(document) && isObject(document.createElement);
-	module.exports = function(it){
-	  return is ? document.createElement(it) : {};
-	};
-
-/***/ },
-/* 383 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var redefine = __webpack_require__(345);
-	module.exports = function(target, src){
-	  for(var key in src)redefine(target, key, src[key]);
-	  return target;
-	};
-
-/***/ },
-/* 384 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	var core        = __webpack_require__(331)
-	  , $           = __webpack_require__(347)
-	  , DESCRIPTORS = __webpack_require__(349)
-	  , SPECIES     = __webpack_require__(355)('species');
-
-	module.exports = function(KEY){
-	  var C = core[KEY];
-	  if(DESCRIPTORS && C && !C[SPECIES])$.setDesc(C, SPECIES, {
-	    configurable: true,
-	    get: function(){ return this; }
-	  });
-	};
-
-/***/ },
-/* 385 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ITERATOR     = __webpack_require__(355)('iterator')
-	  , SAFE_CLOSING = false;
-
-	try {
-	  var riter = [7][ITERATOR]();
-	  riter['return'] = function(){ SAFE_CLOSING = true; };
-	  Array.from(riter, function(){ throw 2; });
-	} catch(e){ /* empty */ }
-
-	module.exports = function(exec, skipClosing){
-	  if(!skipClosing && !SAFE_CLOSING)return false;
-	  var safe = false;
-	  try {
-	    var arr  = [7]
-	      , iter = arr[ITERATOR]();
-	    iter.next = function(){ safe = true; };
-	    arr[ITERATOR] = function(){ return iter; };
-	    exec(arr);
-	  } catch(e){ /* empty */ }
-	  return safe;
-	};
-
-/***/ },
-/* 386 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	exports.default = function (instance, Constructor) {
-	  if (!(instance instanceof Constructor)) {
-	    throw new TypeError("Cannot call a class as a function");
-	  }
-	};
-
-/***/ },
-/* 387 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	exports.__esModule = true;
-
-	var _defineProperty = __webpack_require__(388);
-
-	var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	exports.default = function () {
-	  function defineProperties(target, props) {
-	    for (var i = 0; i < props.length; i++) {
-	      var descriptor = props[i];
-	      descriptor.enumerable = descriptor.enumerable || false;
-	      descriptor.configurable = true;
-	      if ("value" in descriptor) descriptor.writable = true;
-	      (0, _defineProperty2.default)(target, descriptor.key, descriptor);
-	    }
-	  }
-
-	  return function (Constructor, protoProps, staticProps) {
-	    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-	    if (staticProps) defineProperties(Constructor, staticProps);
-	    return Constructor;
-	  };
-	}();
-
-/***/ },
-/* 388 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(389), __esModule: true };
-
-/***/ },
-/* 389 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var $ = __webpack_require__(347);
-	module.exports = function defineProperty(it, key, desc){
-	  return $.setDesc(it, key, desc);
-	};
 
 /***/ },
-/* 390 */
+/* 288 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/**
@@ -62089,6626 +55841,110 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 391 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(setImmediate, clearImmediate) {/*
-	 * @name Lazy.js
-	 *
-	 * @fileOverview
-	 * Lazy.js is a lazy evaluation library for JavaScript.
-	 *
-	 * This has been done before. For examples see:
-	 *
-	 * - [wu.js](http://fitzgen.github.io/wu.js/)
-	 * - [Linq.js](http://linqjs.codeplex.com/)
-	 * - [from.js](https://github.com/suckgamoni/fromjs/)
-	 * - [IxJS](http://rx.codeplex.com/)
-	 * - [sloth.js](http://rfw.name/sloth.js/)
-	 *
-	 * However, at least at present, Lazy.js is faster (on average) than any of
-	 * those libraries. It is also more complete, with nearly all of the
-	 * functionality of [Underscore](http://underscorejs.org/) and
-	 * [Lo-Dash](http://lodash.com/).
-	 *
-	 * Finding your way around the code
-	 * --------------------------------
-	 *
-	 * At the heart of Lazy.js is the {@link Sequence} object. You create an initial
-	 * sequence using {@link Lazy}, which can accept an array, object, or string.
-	 * You can then "chain" together methods from this sequence, creating a new
-	 * sequence with each call.
-	 *
-	 * Here's an example:
-	 *
-	 *     var data = getReallyBigArray();
-	 *
-	 *     var statistics = Lazy(data)
-	 *       .map(transform)
-	 *       .filter(validate)
-	 *       .reduce(aggregate);
-	 *
-	 * {@link Sequence} is the foundation of other, more specific sequence types.
-	 *
-	 * An {@link ArrayLikeSequence} provides indexed access to its elements.
-	 *
-	 * An {@link ObjectLikeSequence} consists of key/value pairs.
-	 *
-	 * A {@link StringLikeSequence} is like a string (duh): actually, it is an
-	 * {@link ArrayLikeSequence} whose elements happen to be characters.
-	 *
-	 * An {@link AsyncSequence} is special: it iterates over its elements
-	 * asynchronously (so calling `each` generally begins an asynchronous loop and
-	 * returns immediately).
-	 *
-	 * For more information
-	 * --------------------
-	 *
-	 * I wrote a blog post that explains a little bit more about Lazy.js, which you
-	 * can read [here](http://philosopherdeveloper.com/posts/introducing-lazy-js.html).
-	 *
-	 * You can also [create an issue on GitHub](https://github.com/dtao/lazy.js/issues)
-	 * if you have any issues with the library. I work through them eventually.
-	 *
-	 * [@dtao](https://github.com/dtao)
-	 */
-
-	(function(root, factory) {
-	  if (true) {
-	    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
-	  } else if (typeof exports === 'object') {
-	    module.exports = factory();
-	  } else {
-	    root.Lazy = factory();
-	  }
-	})(this, function(context) {
-	  /**
-	   * Wraps an object and returns a {@link Sequence}. For `null` or `undefined`,
-	   * simply returns an empty sequence (see {@link Lazy.strict} for a stricter
-	   * implementation).
-	   *
-	   * - For **arrays**, Lazy will create a sequence comprising the elements in
-	   *   the array (an {@link ArrayLikeSequence}).
-	   * - For **objects**, Lazy will create a sequence of key/value pairs
-	   *   (an {@link ObjectLikeSequence}).
-	   * - For **strings**, Lazy will create a sequence of characters (a
-	   *   {@link StringLikeSequence}).
-	   *
-	   * @public
-	   * @param {Array|Object|string} source An array, object, or string to wrap.
-	   * @returns {Sequence} The wrapped lazy object.
-	   *
-	   * @exampleHelpers
-	   * // Utility functions to provide to all examples
-	   * function increment(x) { return x + 1; }
-	   * function isEven(x) { return x % 2 === 0; }
-	   * function isPositive(x) { return x > 0; }
-	   * function isNegative(x) { return x < 0; }
-	   *
-	   * @examples
-	   * Lazy([1, 2, 4])       // instanceof Lazy.ArrayLikeSequence
-	   * Lazy({ foo: "bar" })  // instanceof Lazy.ObjectLikeSequence
-	   * Lazy("hello, world!") // instanceof Lazy.StringLikeSequence
-	   * Lazy()                // sequence: []
-	   * Lazy(null)            // sequence: []
-	   */
-	  function Lazy(source) {
-	    if (source instanceof Array) {
-	      return new ArrayWrapper(source);
-
-	    } else if (typeof source === "string") {
-	      return new StringWrapper(source);
-
-	    } else if (source instanceof Sequence) {
-	      return source;
-	    }
-
-	    if (Lazy.extensions) {
-	      var extensions = Lazy.extensions, length = extensions.length, result;
-	      while (!result && length--) {
-	        result = extensions[length](source);
-	      }
-	      if (result) {
-	        return result;
-	      }
-	    }
-
-	    return new ObjectWrapper(source);
-	  }
-
-	  Lazy.VERSION = '0.4.2';
-
-	  /*** Utility methods of questionable value ***/
-
-	  Lazy.noop = function noop() {};
-	  Lazy.identity = function identity(x) { return x; };
-
-	  /**
-	   * Provides a stricter version of {@link Lazy} which throws an error when
-	   * attempting to wrap `null`, `undefined`, or numeric or boolean values as a
-	   * sequence.
-	   *
-	   * @public
-	   * @returns {Function} A stricter version of the {@link Lazy} helper function.
-	   *
-	   * @examples
-	   * var Strict = Lazy.strict();
-	   *
-	   * Strict()                  // throws
-	   * Strict(null)              // throws
-	   * Strict(true)              // throws
-	   * Strict(5)                 // throws
-	   * Strict([1, 2, 3])         // instanceof Lazy.ArrayLikeSequence
-	   * Strict({ foo: "bar" })    // instanceof Lazy.ObjectLikeSequence
-	   * Strict("hello, world!")   // instanceof Lazy.StringLikeSequence
-	   *
-	   * // Let's also ensure the static functions are still there.
-	   * Strict.range(3)           // sequence: [0, 1, 2]
-	   * Strict.generate(Date.now) // instanceof Lazy.GeneratedSequence
-	   */
-	  Lazy.strict = function strict() {
-	    function StrictLazy(source) {
-	      if (source == null) {
-	        throw new Error("You cannot wrap null or undefined using Lazy.");
-	      }
-
-	      if (typeof source === "number" || typeof source === "boolean") {
-	        throw new Error("You cannot wrap primitive values using Lazy.");
-	      }
-
-	      return Lazy(source);
-	    };
-
-	    Lazy(Lazy).each(function(property, name) {
-	      StrictLazy[name] = property;
-	    });
-
-	    return StrictLazy;
-	  };
-
-	  /**
-	   * The `Sequence` object provides a unified API encapsulating the notion of
-	   * zero or more consecutive elements in a collection, stream, etc.
-	   *
-	   * Lazy evaluation
-	   * ---------------
-	   *
-	   * Generally speaking, creating a sequence should not be an expensive operation,
-	   * and should not iterate over an underlying source or trigger any side effects.
-	   * This means that chaining together methods that return sequences incurs only
-	   * the cost of creating the `Sequence` objects themselves and not the cost of
-	   * iterating an underlying data source multiple times.
-	   *
-	   * The following code, for example, creates 4 sequences and does nothing with
-	   * `source`:
-	   *
-	   *     var seq = Lazy(source) // 1st sequence
-	   *       .map(func)           // 2nd
-	   *       .filter(pred)        // 3rd
-	   *       .reverse();          // 4th
-	   *
-	   * Lazy's convention is to hold off on iterating or otherwise *doing* anything
-	   * (aside from creating `Sequence` objects) until you call `each`:
-	   *
-	   *     seq.each(function(x) { console.log(x); });
-	   *
-	   * Defining custom sequences
-	   * -------------------------
-	   *
-	   * Defining your own type of sequence is relatively simple:
-	   *
-	   * 1. Pass a *method name* and an object containing *function overrides* to
-	   *    {@link Sequence.define}. If the object includes a function called `init`,
-	   *    this function will be called upon initialization.
-	   * 2. The object should include at least either a `getIterator` method or an
-	   *    `each` method. The former supports both asynchronous and synchronous
-	   *    iteration, but is slightly more cumbersome to implement. The latter
-	   *    supports synchronous iteration and can be automatically implemented in
-	   *    terms of the former. You can also implement both if you want, e.g. to
-	   *    optimize performance. For more info, see {@link Iterator} and
-	   *    {@link AsyncSequence}.
-	   *
-	   * As a trivial example, the following code defines a new method, `sample`,
-	   * which randomly may or may not include each element from its parent.
-	   *
-	   *     Lazy.Sequence.define("sample", {
-	   *       each: function(fn) {
-	   *         return this.parent.each(function(e) {
-	   *           // 50/50 chance of including this element.
-	   *           if (Math.random() > 0.5) {
-	   *             return fn(e);
-	   *           }
-	   *         });
-	   *       }
-	   *     });
-	   *
-	   * (Of course, the above could also easily have been implemented using
-	   * {@link #filter} instead of creating a custom sequence. But I *did* say this
-	   * was a trivial example, to be fair.)
-	   *
-	   * Now it will be possible to create this type of sequence from any parent
-	   * sequence by calling the method name you specified. In other words, you can
-	   * now do this:
-	   *
-	   *     Lazy(arr).sample();
-	   *     Lazy(arr).map(func).sample();
-	   *     Lazy(arr).map(func).filter(pred).sample();
-	   *
-	   * Etc., etc.
-	   *
-	   * @public
-	   * @constructor
-	   */
-	  function Sequence() {}
-
-	  /**
-	   * Create a new constructor function for a type inheriting from `Sequence`.
-	   *
-	   * @public
-	   * @param {string|Array.<string>} methodName The name(s) of the method(s) to be
-	   *     used for constructing the new sequence. The method will be attached to
-	   *     the `Sequence` prototype so that it can be chained with any other
-	   *     sequence methods, like {@link #map}, {@link #filter}, etc.
-	   * @param {Object} overrides An object containing function overrides for this
-	   *     new sequence type. **Must** include either `getIterator` or `each` (or
-	   *     both). *May* include an `init` method as well. For these overrides,
-	   *     `this` will be the new sequence, and `this.parent` will be the base
-	   *     sequence from which the new sequence was constructed.
-	   * @returns {Function} A constructor for a new type inheriting from `Sequence`.
-	   *
-	   * @examples
-	   * // This sequence type logs every element to the specified logger as it
-	   * // iterates over it.
-	   * Lazy.Sequence.define("verbose", {
-	   *   init: function(logger) {
-	   *     this.logger = logger;
-	   *   },
-	   *
-	   *   each: function(fn) {
-	   *     var logger = this.logger;
-	   *     return this.parent.each(function(e, i) {
-	   *       logger(e);
-	   *       return fn(e, i);
-	   *     });
-	   *   }
-	   * });
-	   *
-	   * Lazy([1, 2, 3]).verbose(logger).each(Lazy.noop) // calls logger 3 times
-	   */
-	  Sequence.define = function define(methodName, overrides) {
-	    if (!overrides || (!overrides.getIterator && !overrides.each)) {
-	      throw new Error("A custom sequence must implement *at least* getIterator or each!");
-	    }
-
-	    return defineSequenceType(Sequence, methodName, overrides);
-	  };
-
-	  /**
-	   * Gets the number of elements in the sequence. In some cases, this may
-	   * require eagerly evaluating the sequence.
-	   *
-	   * @public
-	   * @returns {number} The number of elements in the sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).size();                 // => 3
-	   * Lazy([1, 2]).map(Lazy.identity).size(); // => 2
-	   * Lazy([1, 2, 3]).reject(isEven).size();  // => 2
-	   * Lazy([1, 2, 3]).take(1).size();         // => 1
-	   * Lazy({ foo: 1, bar: 2 }).size();        // => 2
-	   * Lazy('hello').size();                   // => 5
-	   */
-	  Sequence.prototype.size = function size() {
-	    return this.getIndex().length();
-	  };
-
-	  /**
-	   * Creates an {@link Iterator} object with two methods, `moveNext` -- returning
-	   * true or false -- and `current` -- returning the current value.
-	   *
-	   * This method is used when asynchronously iterating over sequences. Any type
-	   * inheriting from `Sequence` must implement this method or it can't support
-	   * asynchronous iteration.
-	   *
-	   * Note that **this method is not intended to be used directly by application
-	   * code.** Rather, it is intended as a means for implementors to potentially
-	   * define custom sequence types that support either synchronous or
-	   * asynchronous iteration.
-	   *
-	   * @public
-	   * @returns {Iterator} An iterator object.
-	   *
-	   * @examples
-	   * var iterator = Lazy([1, 2]).getIterator();
-	   *
-	   * iterator.moveNext(); // => true
-	   * iterator.current();  // => 1
-	   * iterator.moveNext(); // => true
-	   * iterator.current();  // => 2
-	   * iterator.moveNext(); // => false
-	   */
-	  Sequence.prototype.getIterator = function getIterator() {
-	    return new Iterator(this);
-	  };
-
-	  /**
-	   * Gets the root sequence underlying the current chain of sequences.
-	   */
-	  Sequence.prototype.root = function root() {
-	    return this.parent.root();
-	  };
-
-	  /**
-	   * Whether or not the current sequence is an asynchronous one. This is more
-	   * accurate than checking `instanceof {@link AsyncSequence}` because, for
-	   * example, `Lazy([1, 2, 3]).async().map(Lazy.identity)` returns a sequence
-	   * that iterates asynchronously even though it's not an instance of
-	   * `AsyncSequence`.
-	   *
-	   * @returns {boolean} Whether or not the current sequence is an asynchronous one.
-	   */
-	  Sequence.prototype.isAsync = function isAsync() {
-	    return this.parent ? this.parent.isAsync() : false;
-	  };
-
-	  /**
-	   * Evaluates the sequence and produces the appropriate value (an array in most
-	   * cases, an object for {@link ObjectLikeSequence}s or a string for
-	   * {@link StringLikeSequence}s).
-	   *
-	   * @returns {Array|string|Object} The value resulting from fully evaluating
-	   *     the sequence.
-	   */
-	  Sequence.prototype.value = function value() {
-	    return this.toArray();
-	  };
-
-	  /**
-	   * Applies the current transformation chain to a given source, returning the
-	   * resulting value.
-	   *
-	   * @examples
-	   * var sequence = Lazy([])
-	   *   .map(function(x) { return x * -1; })
-	   *   .filter(function(x) { return x % 2 === 0; });
-	   *
-	   * sequence.apply([1, 2, 3, 4]); // => [-2, -4]
-	   */
-	  Sequence.prototype.apply = function apply(source) {
-	    var root = this.root(),
-	        previousSource = root.source,
-	        result;
-
-	    try {
-	      root.source = source;
-	      result = this.value();
-	    } finally {
-	      root.source = previousSource;
-	    }
-
-	    return result;
-	  };
-
-	  /**
-	   * The Iterator object provides an API for iterating over a sequence.
-	   *
-	   * The purpose of the `Iterator` type is mainly to offer an agnostic way of
-	   * iterating over a sequence -- either synchronous (i.e. with a `while` loop)
-	   * or asynchronously (with recursive calls to either `setTimeout` or --- if
-	   * available --- `setImmediate`). It is not intended to be used directly by
-	   * application code.
-	   *
-	   * @public
-	   * @constructor
-	   * @param {Sequence} sequence The sequence to iterate over.
-	   */
-	  function Iterator(sequence) {
-	    this.sequence = sequence;
-	    this.index    = -1;
-	  }
-
-	  /**
-	   * Gets the current item this iterator is pointing to.
-	   *
-	   * @public
-	   * @returns {*} The current item.
-	   */
-	  Iterator.prototype.current = function current() {
-	    return this.cachedIndex && this.cachedIndex.get(this.index);
-	  };
-
-	  /**
-	   * Moves the iterator to the next item in a sequence, if possible.
-	   *
-	   * @public
-	   * @returns {boolean} True if the iterator is able to move to a new item, or else
-	   *     false.
-	   */
-	  Iterator.prototype.moveNext = function moveNext() {
-	    var cachedIndex = this.cachedIndex;
-
-	    if (!cachedIndex) {
-	      cachedIndex = this.cachedIndex = this.sequence.getIndex();
-	    }
-
-	    if (this.index >= cachedIndex.length() - 1) {
-	      return false;
-	    }
-
-	    ++this.index;
-	    return true;
-	  };
-
-	  /**
-	   * Creates an array snapshot of a sequence.
-	   *
-	   * Note that for indefinite sequences, this method may raise an exception or
-	   * (worse) cause the environment to hang.
-	   *
-	   * @public
-	   * @returns {Array} An array containing the current contents of the sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).toArray() // => [1, 2, 3]
-	   */
-	  Sequence.prototype.toArray = function toArray() {
-	    return this.reduce(function(arr, element) {
-	      arr.push(element);
-	      return arr;
-	    }, []);
-	  };
-
-	  /**
-	   * Provides an indexed view into the sequence.
-	   *
-	   * For sequences that are already indexed, this will simply return the
-	   * sequence. For non-indexed sequences, this will eagerly evaluate the
-	   * sequence.
-	   *
-	   * @returns {ArrayLikeSequence} A sequence containing the current contents of
-	   *     the sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).filter(isEven)            // instanceof Lazy.Sequence
-	   * Lazy([1, 2, 3]).filter(isEven).getIndex() // instanceof Lazy.ArrayLikeSequence
-	   */
-	  Sequence.prototype.getIndex = function getIndex() {
-	    return new ArrayWrapper(this.toArray());
-	  };
-
-	  /**
-	   * Returns the element at the specified index. Note that, for sequences that
-	   * are not {@link ArrayLikeSequence}s, this may require partially evaluating
-	   * the sequence, iterating to reach the result. (In other words for such
-	   * sequences this method is not O(1).)
-	   *
-	   * @public
-	   * @param {number} i The index to access.
-	   * @returns {*} The element.
-	   *
-	   */
-	  Sequence.prototype.get = function get(i) {
-	    var element;
-	    this.each(function(e, index) {
-	      if (index === i) {
-	        element = e;
-	        return false;
-	      }
-	    });
-	    return element;
-	  };
-
-	  /**
-	   * Provides an indexed, memoized view into the sequence. This will cache the
-	   * result whenever the sequence is first iterated, so that subsequent
-	   * iterations will access the same element objects.
-	   *
-	   * @public
-	   * @returns {ArrayLikeSequence} An indexed, memoized sequence containing this
-	   *     sequence's elements, cached after the first iteration.
-	   *
-	   * @example
-	   * function createObject() { return new Object(); }
-	   *
-	   * var plain    = Lazy.generate(createObject, 10),
-	   *     memoized = Lazy.generate(createObject, 10).memoize();
-	   *
-	   * plain.toArray()[0] === plain.toArray()[0];       // => false
-	   * memoized.toArray()[0] === memoized.toArray()[0]; // => true
-	   */
-	  Sequence.prototype.memoize = function memoize() {
-	    return new MemoizedSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MemoizedSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  // MemoizedSequence needs to have its prototype set up after ArrayLikeSequence
-
-	  /**
-	   * Creates an object from a sequence of key/value pairs.
-	   *
-	   * @public
-	   * @returns {Object} An object with keys and values corresponding to the pairs
-	   *     of elements in the sequence.
-	   *
-	   * @examples
-	   * var details = [
-	   *   ["first", "Dan"],
-	   *   ["last", "Tao"],
-	   *   ["age", 29]
-	   * ];
-	   *
-	   * Lazy(details).toObject() // => { first: "Dan", last: "Tao", age: 29 }
-	   */
-	  Sequence.prototype.toObject = function toObject() {
-	    return this.reduce(function(object, pair) {
-	      object[pair[0]] = pair[1];
-	      return object;
-	    }, {});
-	  };
-
-	  /**
-	   * Iterates over this sequence and executes a function for every element.
-	   *
-	   * @public
-	   * @aka forEach
-	   * @param {Function} fn The function to call on each element in the sequence.
-	   *     Return false from the function to end the iteration.
-	   * @returns {boolean} `true` if the iteration evaluated the entire sequence,
-	   *     or `false` if iteration was ended early.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4]).each(fn) // calls fn 4 times
-	   */
-	  Sequence.prototype.each = function each(fn) {
-	    var iterator = this.getIterator(),
-	        i = -1;
-
-	    while (iterator.moveNext()) {
-	      if (fn(iterator.current(), ++i) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  Sequence.prototype.forEach = function forEach(fn) {
-	    return this.each(fn);
-	  };
-
-	  /**
-	   * Creates a new sequence whose values are calculated by passing this sequence's
-	   * elements through some mapping function.
-	   *
-	   * @public
-	   * @aka collect
-	   * @param {Function} mapFn The mapping function used to project this sequence's
-	   *     elements onto a new sequence. This function takes up to two arguments:
-	   *     the element, and the current index.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * function addIndexToValue(e, i) { return e + i; }
-	   *
-	   * Lazy([]).map(increment)              // sequence: []
-	   * Lazy([1, 2, 3]).map(increment)       // sequence: [2, 3, 4]
-	   * Lazy([1, 2, 3]).map(addIndexToValue) // sequence: [1, 3, 5]
-	   *
-	   * @benchmarks
-	   * function increment(x) { return x + 1; }
-	   *
-	   * var smArr = Lazy.range(10).toArray(),
-	   *     lgArr = Lazy.range(100).toArray();
-	   *
-	   * Lazy(smArr).map(increment).each(Lazy.noop) // lazy - 10 elements
-	   * Lazy(lgArr).map(increment).each(Lazy.noop) // lazy - 100 elements
-	   * _.each(_.map(smArr, increment), _.noop)    // lodash - 10 elements
-	   * _.each(_.map(lgArr, increment), _.noop)    // lodash - 100 elements
-	   */
-	  Sequence.prototype.map = function map(mapFn) {
-	    return new MappedSequence(this, createCallback(mapFn));
-	  };
-
-	  Sequence.prototype.collect = function collect(mapFn) {
-	    return this.map(mapFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MappedSequence(parent, mapFn) {
-	    this.parent = parent;
-	    this.mapFn  = mapFn;
-	  }
-
-	  MappedSequence.prototype = new Sequence();
-
-	  MappedSequence.prototype.getIterator = function getIterator() {
-	    return new MappingIterator(this.parent, this.mapFn);
-	  };
-
-	  MappedSequence.prototype.each = function each(fn) {
-	    var mapFn = this.mapFn;
-	    return this.parent.each(function(e, i) {
-	      return fn(mapFn(e, i), i);
-	    });
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MappingIterator(sequence, mapFn) {
-	    this.iterator = sequence.getIterator();
-	    this.mapFn    = mapFn;
-	    this.index    = -1;
-	  }
-
-	  MappingIterator.prototype.current = function current() {
-	    return this.mapFn(this.iterator.current(), this.index);
-	  };
-
-	  MappingIterator.prototype.moveNext = function moveNext() {
-	    if (this.iterator.moveNext()) {
-	      ++this.index;
-	      return true;
-	    }
-
-	    return false;
-	  };
-
-	  /**
-	   * Creates a new sequence whose values are calculated by accessing the specified
-	   * property from each element in this sequence.
-	   *
-	   * @public
-	   * @param {string} propertyName The name of the property to access for every
-	   *     element in this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var people = [
-	   *   { first: "Dan", last: "Tao" },
-	   *   { first: "Bob", last: "Smith" }
-	   * ];
-	   *
-	   * Lazy(people).pluck("last") // sequence: ["Tao", "Smith"]
-	   */
-	  Sequence.prototype.pluck = function pluck(property) {
-	    return this.map(property);
-	  };
-
-	  /**
-	   * Creates a new sequence whose values are calculated by invoking the specified
-	   * function on each element in this sequence.
-	   *
-	   * @public
-	   * @param {string} methodName The name of the method to invoke for every element
-	   *     in this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * function Person(first, last) {
-	   *   this.fullName = function fullName() {
-	   *     return first + " " + last;
-	   *   };
-	   * }
-	   *
-	   * var people = [
-	   *   new Person("Dan", "Tao"),
-	   *   new Person("Bob", "Smith")
-	   * ];
-	   *
-	   * Lazy(people).invoke("fullName") // sequence: ["Dan Tao", "Bob Smith"]
-	   */
-	  Sequence.prototype.invoke = function invoke(methodName) {
-	    return this.map(function(e) {
-	      return e[methodName]();
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence whose values are the elements of this sequence which
-	   * satisfy the specified predicate.
-	   *
-	   * @public
-	   * @aka select
-	   * @param {Function} filterFn The predicate to call on each element in this
-	   *     sequence, which returns true if the element should be included.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var numbers = [1, 2, 3, 4, 5, 6];
-	   *
-	   * Lazy(numbers).filter(isEven) // sequence: [2, 4, 6]
-	   *
-	   * @benchmarks
-	   * function isEven(x) { return x % 2 === 0; }
-	   *
-	   * var smArr = Lazy.range(10).toArray(),
-	   *     lgArr = Lazy.range(100).toArray();
-	   *
-	   * Lazy(smArr).filter(isEven).each(Lazy.noop) // lazy - 10 elements
-	   * Lazy(lgArr).filter(isEven).each(Lazy.noop) // lazy - 100 elements
-	   * _.each(_.filter(smArr, isEven), _.noop)    // lodash - 10 elements
-	   * _.each(_.filter(lgArr, isEven), _.noop)    // lodash - 100 elements
-	   */
-	  Sequence.prototype.filter = function filter(filterFn) {
-	    return new FilteredSequence(this, createCallback(filterFn));
-	  };
-
-	  Sequence.prototype.select = function select(filterFn) {
-	    return this.filter(filterFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function FilteredSequence(parent, filterFn) {
-	    this.parent   = parent;
-	    this.filterFn = filterFn;
-	  }
-
-	  FilteredSequence.prototype = new Sequence();
-
-	  FilteredSequence.prototype.getIterator = function getIterator() {
-	    return new FilteringIterator(this.parent, this.filterFn);
-	  };
-
-	  FilteredSequence.prototype.each = function each(fn) {
-	    var filterFn = this.filterFn,
-	        j = 0;
-
-	    return this.parent.each(function(e, i) {
-	      if (filterFn(e, i)) {
-	        return fn(e, j++);
-	      }
-	    });
-	  };
-
-	  FilteredSequence.prototype.reverse = function reverse() {
-	    return this.parent.reverse().filter(this.filterFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function FilteringIterator(sequence, filterFn) {
-	    this.iterator = sequence.getIterator();
-	    this.filterFn = filterFn;
-	    this.index    = 0;
-	  }
-
-	  FilteringIterator.prototype.current = function current() {
-	    return this.value;
-	  };
-
-	  FilteringIterator.prototype.moveNext = function moveNext() {
-	    var iterator = this.iterator,
-	        filterFn = this.filterFn,
-	        value;
-
-	    while (iterator.moveNext()) {
-	      value = iterator.current();
-	      if (filterFn(value, this.index++)) {
-	        this.value = value;
-	        return true;
-	      }
-	    }
-
-	    this.value = undefined;
-	    return false;
-	  };
-
-	  /**
-	   * Creates a new sequence whose values exclude the elements of this sequence
-	   * identified by the specified predicate.
-	   *
-	   * @public
-	   * @param {Function} rejectFn The predicate to call on each element in this
-	   *     sequence, which returns true if the element should be omitted.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4, 5]).reject(isEven)              // sequence: [1, 3, 5]
-	   * Lazy([{ foo: 1 }, { bar: 2 }]).reject('foo')      // sequence: [{ bar: 2 }]
-	   * Lazy([{ foo: 1 }, { foo: 2 }]).reject({ foo: 2 }) // sequence: [{ foo: 1 }]
-	   */
-	  Sequence.prototype.reject = function reject(rejectFn) {
-	    rejectFn = createCallback(rejectFn);
-	    return this.filter(function(e) { return !rejectFn(e); });
-	  };
-
-	  /**
-	   * Creates a new sequence whose values have the specified type, as determined
-	   * by the `typeof` operator.
-	   *
-	   * @public
-	   * @param {string} type The type of elements to include from the underlying
-	   *     sequence, i.e. where `typeof [element] === [type]`.
-	   * @returns {Sequence} The new sequence, comprising elements of the specified
-	   *     type.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 'foo', 'bar']).ofType('number')  // sequence: [1, 2]
-	   * Lazy([1, 2, 'foo', 'bar']).ofType('string')  // sequence: ['foo', 'bar']
-	   * Lazy([1, 2, 'foo', 'bar']).ofType('boolean') // sequence: []
-	   */
-	  Sequence.prototype.ofType = function ofType(type) {
-	    return this.filter(function(e) { return typeof e === type; });
-	  };
-
-	  /**
-	   * Creates a new sequence whose values are the elements of this sequence with
-	   * property names and values matching those of the specified object.
-	   *
-	   * @public
-	   * @param {Object} properties The properties that should be found on every
-	   *     element that is to be included in this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var people = [
-	   *   { first: "Dan", last: "Tao" },
-	   *   { first: "Bob", last: "Smith" }
-	   * ];
-	   *
-	   * Lazy(people).where({ first: "Dan" }) // sequence: [{ first: "Dan", last: "Tao" }]
-	   *
-	   * @benchmarks
-	   * var animals = ["dog", "cat", "mouse", "horse", "pig", "snake"];
-	   *
-	   * Lazy(animals).where({ length: 3 }).each(Lazy.noop) // lazy
-	   * _.each(_.where(animals, { length: 3 }), _.noop)    // lodash
-	   */
-	  Sequence.prototype.where = function where(properties) {
-	    return this.filter(properties);
-	  };
-
-	  /**
-	   * Creates a new sequence with the same elements as this one, but to be iterated
-	   * in the opposite order.
-	   *
-	   * Note that in some (but not all) cases, the only way to create such a sequence
-	   * may require iterating the entire underlying source when `each` is called.
-	   *
-	   * @public
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).reverse() // sequence: [3, 2, 1]
-	   * Lazy([]).reverse()        // sequence: []
-	   */
-	  Sequence.prototype.reverse = function reverse() {
-	    return new ReversedSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ReversedSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  ReversedSequence.prototype = new Sequence();
-
-	  ReversedSequence.prototype.getIterator = function getIterator() {
-	    return new ReversedIterator(this.parent);
-	  };
-
-	  /**
-	   * @constuctor
-	   */
-	  function ReversedIterator(sequence) {
-	    this.sequence = sequence;
-	  }
-
-	  ReversedIterator.prototype.current = function current() {
-	    return this.getIndex().get(this.index);
-	  };
-
-	  ReversedIterator.prototype.moveNext = function moveNext() {
-	    var index  = this.getIndex(),
-	        length = index.length();
-
-	    if (typeof this.index === "undefined") {
-	      this.index = length;
-	    }
-
-	    return (--this.index >= 0);
-	  };
-
-	  ReversedIterator.prototype.getIndex = function getIndex() {
-	    if (!this.cachedIndex) {
-	      this.cachedIndex = this.sequence.getIndex();
-	    }
-
-	    return this.cachedIndex;
-	  };
-
-	  /**
-	   * Creates a new sequence with all of the elements of this one, plus those of
-	   * the given array(s).
-	   *
-	   * @public
-	   * @param {...*} var_args One or more values (or arrays of values) to use for
-	   *     additional items after this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var left  = [1, 2, 3];
-	   * var right = [4, 5, 6];
-	   *
-	   * Lazy(left).concat(right)         // sequence: [1, 2, 3, 4, 5, 6]
-	   * Lazy(left).concat(Lazy(right))   // sequence: [1, 2, 3, 4, 5, 6]
-	   * Lazy(left).concat(right, [7, 8]) // sequence: [1, 2, 3, 4, 5, 6, 7, 8]
-	   */
-	  Sequence.prototype.concat = function concat(var_args) {
-	    return new ConcatenatedSequence(this, arraySlice.call(arguments, 0));
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ConcatenatedSequence(parent, arrays) {
-	    this.parent = parent;
-	    this.arrays = arrays;
-	  }
-
-	  ConcatenatedSequence.prototype = new Sequence();
-
-	  ConcatenatedSequence.prototype.each = function each(fn) {
-	    var done = false,
-	        i = 0;
-
-	    this.parent.each(function(e) {
-	      if (fn(e, i++) === false) {
-	        done = true;
-	        return false;
-	      }
-	    });
-
-	    if (!done) {
-	      Lazy(this.arrays).flatten().each(function(e) {
-	        if (fn(e, i++) === false) {
-	          return false;
-	        }
-	      });
-	    }
-	  };
-
-	  /**
-	   * Creates a new sequence comprising the first N elements from this sequence, OR
-	   * (if N is `undefined`) simply returns the first element of this sequence.
-	   *
-	   * @public
-	   * @aka head, take
-	   * @param {number=} count The number of elements to take from this sequence. If
-	   *     this value exceeds the length of the sequence, the resulting sequence
-	   *     will be essentially the same as this one.
-	   * @returns {*} The new sequence (or the first element from this sequence if
-	   *     no count was given).
-	   *
-	   * @examples
-	   * function powerOfTwo(exp) {
-	   *   return Math.pow(2, exp);
-	   * }
-	   *
-	   * Lazy.generate(powerOfTwo).first()          // => 1
-	   * Lazy.generate(powerOfTwo).first(5)         // sequence: [1, 2, 4, 8, 16]
-	   * Lazy.generate(powerOfTwo).skip(2).first()  // => 4
-	   * Lazy.generate(powerOfTwo).skip(2).first(2) // sequence: [4, 8]
-	   */
-	  Sequence.prototype.first = function first(count) {
-	    if (typeof count === "undefined") {
-	      return getFirst(this);
-	    }
-	    return new TakeSequence(this, count);
-	  };
-
-	  Sequence.prototype.head =
-	  Sequence.prototype.take = function (count) {
-	    return this.first(count);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function TakeSequence(parent, count) {
-	    this.parent = parent;
-	    this.count  = count;
-	  }
-
-	  TakeSequence.prototype = new Sequence();
-
-	  TakeSequence.prototype.getIterator = function getIterator() {
-	    return new TakeIterator(this.parent, this.count);
-	  };
-
-	  TakeSequence.prototype.each = function each(fn) {
-	    var count = this.count,
-	        i     = 0;
-
-	    var result;
-	    var handle = this.parent.each(function(e) {
-	      if (i < count) { result = fn(e, i++); }
-	      if (i >= count) { return false; }
-	      return result;
-	    });
-
-	    if (handle instanceof AsyncHandle) {
-	      return handle;
-	    }
-
-	    return i === count && result !== false;
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function TakeIterator(sequence, count) {
-	    this.iterator = sequence.getIterator();
-	    this.count    = count;
-	  }
-
-	  TakeIterator.prototype.current = function current() {
-	    return this.iterator.current();
-	  };
-
-	  TakeIterator.prototype.moveNext = function moveNext() {
-	    return ((--this.count >= 0) && this.iterator.moveNext());
-	  };
-
-	  /**
-	   * Creates a new sequence comprising the elements from the head of this sequence
-	   * that satisfy some predicate. Once an element is encountered that doesn't
-	   * satisfy the predicate, iteration will stop.
-	   *
-	   * @public
-	   * @param {Function} predicate
-	   * @returns {Sequence} The new sequence
-	   *
-	   * @examples
-	   * function lessThan(x) {
-	   *   return function(y) {
-	   *     return y < x;
-	   *   };
-	   * }
-	   *
-	   * Lazy([1, 2, 3, 4]).takeWhile(lessThan(3)) // sequence: [1, 2]
-	   * Lazy([1, 2, 3, 4]).takeWhile(lessThan(0)) // sequence: []
-	   */
-	  Sequence.prototype.takeWhile = function takeWhile(predicate) {
-	    return new TakeWhileSequence(this, predicate);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function TakeWhileSequence(parent, predicate) {
-	    this.parent    = parent;
-	    this.predicate = predicate;
-	  }
-
-	  TakeWhileSequence.prototype = new Sequence();
-
-	  TakeWhileSequence.prototype.each = function each(fn) {
-	    var predicate = this.predicate,
-	        finished = false,
-	        j = 0;
-
-	    var result = this.parent.each(function(e, i) {
-	      if (!predicate(e, i)) {
-	        finished = true;
-	        return false;
-	      }
-
-	      return fn(e, j++);
-	    });
-
-	    if (result instanceof AsyncHandle) {
-	      return result;
-	    }
-
-	    return finished;
-	  };
-
-	  /**
-	   * Creates a new sequence comprising all but the last N elements of this
-	   * sequence.
-	   *
-	   * @public
-	   * @param {number=} count The number of items to omit from the end of the
-	   *     sequence (defaults to 1).
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4]).initial()                    // sequence: [1, 2, 3]
-	   * Lazy([1, 2, 3, 4]).initial(2)                   // sequence: [1, 2]
-	   * Lazy([1, 2, 3]).filter(Lazy.identity).initial() // sequence: [1, 2]
-	   */
-	  Sequence.prototype.initial = function initial(count) {
-	    return new InitialSequence(this, count);
-	  };
-
-	  function InitialSequence(parent, count) {
-	    this.parent = parent;
-	    this.count = typeof count === "number" ? count : 1;
-	  }
-
-	  InitialSequence.prototype = new Sequence();
-
-	  InitialSequence.prototype.each = function each(fn) {
-	    var index = this.parent.getIndex();
-	    return index.take(index.length() - this.count).each(fn);
-	  };
-
-	  /**
-	   * Creates a new sequence comprising the last N elements of this sequence, OR
-	   * (if N is `undefined`) simply returns the last element of this sequence.
-	   *
-	   * @public
-	   * @param {number=} count The number of items to take from the end of the
-	   *     sequence.
-	   * @returns {*} The new sequence (or the last element from this sequence
-	   *     if no count was given).
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).last()                 // => 3
-	   * Lazy([1, 2, 3]).last(2)                // sequence: [2, 3]
-	   * Lazy([1, 2, 3]).filter(isEven).last(2) // sequence: [2]
-	   */
-	  Sequence.prototype.last = function last(count) {
-	    if (typeof count === "undefined") {
-	      return this.reverse().first();
-	    }
-	    return this.reverse().take(count).reverse();
-	  };
-
-	  /**
-	   * Returns the first element in this sequence with property names and values
-	   * matching those of the specified object.
-	   *
-	   * @public
-	   * @param {Object} properties The properties that should be found on some
-	   *     element in this sequence.
-	   * @returns {*} The found element, or `undefined` if none exists in this
-	   *     sequence.
-	   *
-	   * @examples
-	   * var words = ["foo", "bar"];
-	   *
-	   * Lazy(words).findWhere({ 0: "f" }); // => "foo"
-	   * Lazy(words).findWhere({ 0: "z" }); // => undefined
-	   */
-	  Sequence.prototype.findWhere = function findWhere(properties) {
-	    return this.where(properties).first();
-	  };
-
-	  /**
-	   * Creates a new sequence comprising all but the first N elements of this
-	   * sequence.
-	   *
-	   * @public
-	   * @aka skip, tail, rest
-	   * @param {number=} count The number of items to omit from the beginning of the
-	   *     sequence (defaults to 1).
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4]).rest()  // sequence: [2, 3, 4]
-	   * Lazy([1, 2, 3, 4]).rest(0) // sequence: [1, 2, 3, 4]
-	   * Lazy([1, 2, 3, 4]).rest(2) // sequence: [3, 4]
-	   * Lazy([1, 2, 3, 4]).rest(5) // sequence: []
-	   */
-	  Sequence.prototype.rest = function rest(count) {
-	    return new DropSequence(this, count);
-	  };
-
-	  Sequence.prototype.skip =
-	  Sequence.prototype.tail =
-	  Sequence.prototype.drop = function drop(count) {
-	    return this.rest(count);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function DropSequence(parent, count) {
-	    this.parent = parent;
-	    this.count  = typeof count === "number" ? count : 1;
-	  }
-
-	  DropSequence.prototype = new Sequence();
-
-	  DropSequence.prototype.each = function each(fn) {
-	    var count   = this.count,
-	        dropped = 0,
-	        i       = 0;
-
-	    return this.parent.each(function(e) {
-	      if (dropped++ < count) { return; }
-	      return fn(e, i++);
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence comprising the elements from this sequence *after*
-	   * those that satisfy some predicate. The sequence starts with the first
-	   * element that does not match the predicate.
-	   *
-	   * @public
-	   * @aka skipWhile
-	   * @param {Function} predicate
-	   * @returns {Sequence} The new sequence
-	   */
-	  Sequence.prototype.dropWhile = function dropWhile(predicate) {
-	    return new DropWhileSequence(this, predicate);
-	  };
-
-	  Sequence.prototype.skipWhile = function skipWhile(predicate) {
-	    return this.dropWhile(predicate);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function DropWhileSequence(parent, predicate) {
-	    this.parent    = parent;
-	    this.predicate = predicate;
-	  }
-
-	  DropWhileSequence.prototype = new Sequence();
-
-	  DropWhileSequence.prototype.each = function each(fn) {
-	    var predicate = this.predicate,
-	        done      = false;
-
-	    return this.parent.each(function(e) {
-	      if (!done) {
-	        if (predicate(e)) {
-	          return;
-	        }
-
-	        done = true;
-	      }
-
-	      return fn(e);
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence with the same elements as this one, but ordered
-	   * using the specified comparison function.
-	   *
-	   * This has essentially the same behavior as calling
-	   * [`Array#sort`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort),
-	   * but obviously instead of modifying the collection it returns a new
-	   * {@link Sequence} object.
-	   *
-	   * @public
-	   * @param {Function=} sortFn The function used to compare elements in the
-	   *     sequence. The function will be passed two elements and should return:
-	   *     - 1 if the first is greater
-	   *     - -1 if the second is greater
-	   *     - 0 if the two values are the same
-	   * @param {boolean} descending Whether or not the resulting sequence should be
-	   *     in descending order (defaults to `false`).
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([5, 10, 1]).sort()                // sequence: [1, 5, 10]
-	   * Lazy(['foo', 'bar']).sort()            // sequence: ['bar', 'foo']
-	   * Lazy(['b', 'c', 'a']).sort(null, true) // sequence: ['c', 'b', 'a']
-	   * Lazy([5, 10, 1]).sort(null, true)      // sequence: [10, 5, 1]
-	   *
-	   * // Sorting w/ custom comparison function
-	   * Lazy(['a', 'ab', 'aa', 'ba', 'b', 'abc']).sort(function compare(x, y) {
-	   *   if (x.length && (x.length !== y.length)) { return compare(x.length, y.length); }
-	   *   if (x === y) { return 0; }
-	   *   return x > y ? 1 : -1;
-	   * });
-	   * // => sequence: ['a', 'b', 'aa', 'ab', 'ba', 'abc']
-	   */
-	  Sequence.prototype.sort = function sort(sortFn, descending) {
-	    sortFn || (sortFn = compare);
-	    if (descending) { sortFn = reverseArguments(sortFn); }
-	    return new SortedSequence(this, sortFn);
-	  };
-
-	  /**
-	   * Creates a new sequence with the same elements as this one, but ordered by
-	   * the results of the given function.
-	   *
-	   * You can pass:
-	   *
-	   * - a *string*, to sort by the named property
-	   * - a function, to sort by the result of calling the function on each element
-	   *
-	   * @public
-	   * @param {Function} sortFn The function to call on the elements in this
-	   *     sequence, in order to sort them.
-	   * @param {boolean} descending Whether or not the resulting sequence should be
-	   *     in descending order (defaults to `false`).
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * function population(country) {
-	   *   return country.pop;
-	   * }
-	   *
-	   * function area(country) {
-	   *   return country.sqkm;
-	   * }
-	   *
-	   * var countries = [
-	   *   { name: "USA", pop: 320000000, sqkm: 9600000 },
-	   *   { name: "Brazil", pop: 194000000, sqkm: 8500000 },
-	   *   { name: "Nigeria", pop: 174000000, sqkm: 924000 },
-	   *   { name: "China", pop: 1350000000, sqkm: 9700000 },
-	   *   { name: "Russia", pop: 143000000, sqkm: 17000000 },
-	   *   { name: "Australia", pop: 23000000, sqkm: 7700000 }
-	   * ];
-	   *
-	   * Lazy(countries).sortBy(population).last(3).pluck('name') // sequence: ["Brazil", "USA", "China"]
-	   * Lazy(countries).sortBy(area).last(3).pluck('name')       // sequence: ["USA", "China", "Russia"]
-	   * Lazy(countries).sortBy(area, true).first(3).pluck('name') // sequence: ["Russia", "China", "USA"]
-	   *
-	   * @benchmarks
-	   * var randoms = Lazy.generate(Math.random).take(100).toArray();
-	   *
-	   * Lazy(randoms).sortBy(Lazy.identity).each(Lazy.noop) // lazy
-	   * _.each(_.sortBy(randoms, Lazy.identity), _.noop)    // lodash
-	   */
-	  Sequence.prototype.sortBy = function sortBy(sortFn, descending) {
-	    sortFn = createComparator(sortFn);
-	    if (descending) { sortFn = reverseArguments(sortFn); }
-	    return new SortedSequence(this, sortFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SortedSequence(parent, sortFn) {
-	    this.parent = parent;
-	    this.sortFn = sortFn;
-	  }
-
-	  SortedSequence.prototype = new Sequence();
-
-	  SortedSequence.prototype.each = function each(fn) {
-	    var sortFn = this.sortFn,
-	        result = this.parent.toArray();
-
-	    result.sort(sortFn);
-
-	    return forEach(result, fn);
-	  };
-
-	  /**
-	   * @examples
-	   * var items = [{ a: 4 }, { a: 3 }, { a: 5 }];
-	   *
-	   * Lazy(items).sortBy('a').reverse();
-	   * // => sequence: [{ a: 5 }, { a: 4 }, { a: 3 }]
-	   *
-	   * Lazy(items).sortBy('a').reverse().reverse();
-	   * // => sequence: [{ a: 3 }, { a: 4 }, { a: 5 }]
-	   */
-	  SortedSequence.prototype.reverse = function reverse() {
-	    return new SortedSequence(this.parent, reverseArguments(this.sortFn));
-	  };
-
-	  /**
-	   * Creates a new {@link ObjectLikeSequence} comprising the elements in this
-	   * one, grouped together according to some key. The value associated with each
-	   * key in the resulting object-like sequence is an array containing all of
-	   * the elements in this sequence with that key.
-	   *
-	   * @public
-	   * @param {Function|string} keyFn The function to call on the elements in this
-	   *     sequence to obtain a key by which to group them, or a string representing
-	   *     a parameter to read from all the elements in this sequence.
-	   * @param {Function|string} valFn (Optional) The function to call on the elements
-	   *     in this sequence to assign to the value for each instance to appear in the
-	   *     group, or a string representing a parameter to read from all the elements
-	   *     in this sequence.
-	   * @returns {ObjectLikeSequence} The new sequence.
-	   *
-	   * @examples
-	   * function oddOrEven(x) {
-	   *   return x % 2 === 0 ? 'even' : 'odd';
-	   * }
-	   * function square(x) {
-	   *   return x*x;
-	   * }
-	   *
-	   * var numbers = [1, 2, 3, 4, 5];
-	   *
-	   * Lazy(numbers).groupBy(oddOrEven)                     // sequence: { odd: [1, 3, 5], even: [2, 4] }
-	   * Lazy(numbers).groupBy(oddOrEven).get("odd")          // => [1, 3, 5]
-	   * Lazy(numbers).groupBy(oddOrEven).get("foo")          // => undefined
-	   * Lazy(numbers).groupBy(oddOrEven, square).get("even") // => [4, 16]
-	   *
-	   * Lazy([
-	   *   { name: 'toString' },
-	   *   { name: 'toString' }
-	   * ]).groupBy('name');
-	   * // => sequence: {
-	   *   'toString': [
-	   *     { name: 'toString' },
-	   *     { name: 'toString' }
-	   *   ]
-	   * }
-	   */
-	  Sequence.prototype.groupBy = function groupBy(keyFn, valFn) {
-	    return new GroupedSequence(this, keyFn, valFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function GroupedSequence(parent, keyFn, valFn) {
-	    this.parent = parent;
-	    this.keyFn  = keyFn;
-	    this.valFn  = valFn;
-	  }
-
-	  // GroupedSequence must have its prototype set after ObjectLikeSequence has
-	  // been fully initialized.
-
-	  /**
-	   * Creates a new {@link ObjectLikeSequence} comprising the elements in this
-	   * one, indexed according to some key.
-	   *
-	   * @public
-	   * @param {Function|string} keyFn The function to call on the elements in this
-	   *     sequence to obtain a key by which to index them, or a string
-	   *     representing a property to read from all the elements in this sequence.
-	   * @param {Function|string} valFn (Optional) The function to call on the elements
-	   *     in this sequence to assign to the value of the indexed object, or a string
-	   *     representing a parameter to read from all the elements in this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var people = [
-	   *   { name: 'Bob', age: 25 },
-	   *   { name: 'Fred', age: 34 }
-	   * ];
-	   *
-	   * var bob  = people[0],
-	   *     fred = people[1];
-	   *
-	   * Lazy(people).indexBy('name')        // sequence: { 'Bob': bob, 'Fred': fred }
-	   * Lazy(people).indexBy('name', 'age') // sequence: { 'Bob': 25, 'Fred': 34 }
-	   */
-	  Sequence.prototype.indexBy = function(keyFn, valFn) {
-	    return new IndexedSequence(this, keyFn, valFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedSequence(parent, keyFn, valFn) {
-	    this.parent = parent;
-	    this.keyFn  = keyFn;
-	    this.valFn  = valFn;
-	  }
-
-	  // IndexedSequence must have its prototype set after ObjectLikeSequence has
-	  // been fully initialized.
-
-	  /**
-	   * Creates a new {@link ObjectLikeSequence} containing the unique keys of all
-	   * the elements in this sequence, each paired with the number of elements
-	   * in this sequence having that key.
-	   *
-	   * @public
-	   * @param {Function|string} keyFn The function to call on the elements in this
-	   *     sequence to obtain a key by which to count them, or a string representing
-	   *     a parameter to read from all the elements in this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * function oddOrEven(x) {
-	   *   return x % 2 === 0 ? 'even' : 'odd';
-	   * }
-	   *
-	   * var numbers = [1, 2, 3, 4, 5];
-	   *
-	   * Lazy(numbers).countBy(oddOrEven)            // sequence: { odd: 3, even: 2 }
-	   * Lazy(numbers).countBy(oddOrEven).get("odd") // => 3
-	   * Lazy(numbers).countBy(oddOrEven).get("foo") // => undefined
-	   */
-	  Sequence.prototype.countBy = function countBy(keyFn) {
-	    return new CountedSequence(this, keyFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function CountedSequence(parent, keyFn) {
-	    this.parent = parent;
-	    this.keyFn  = keyFn;
-	  }
-
-	  // CountedSequence, like GroupedSequence, must have its prototype set after
-	  // ObjectLikeSequence has been fully initialized.
-
-	  /**
-	   * Creates a new sequence with every unique element from this one appearing
-	   * exactly once (i.e., with duplicates removed).
-	   *
-	   * @public
-	   * @aka unique
-	   * @param {Function} keyFn An optional function to produce the key for each
-	   *     object. This key is then tested for uniqueness as  opposed to the
-	   *     object reference.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 2, 3, 3, 3]).uniq() // sequence: [1, 2, 3]
-	   * Lazy([{ name: 'mike' }, 
-	   * 	{ name: 'sarah' }, 
-	   * 	{ name: 'mike' }
-	   * ]).uniq('name')
-	   * // sequence: [{ name: 'mike' }, { name: 'sarah' }]
-	   *
-	   * @benchmarks
-	   * function randomOf(array) {
-	   *   return function() {
-	   *     return array[Math.floor(Math.random() * array.length)];
-	   *   };
-	   * }
-	   *
-	   * var mostUnique = Lazy.generate(randomOf(_.range(100)), 100).toArray(),
-	   *     someUnique = Lazy.generate(randomOf(_.range(50)), 100).toArray(),
-	   *     mostDupes  = Lazy.generate(randomOf(_.range(5)), 100).toArray();
-	   *
-	   * Lazy(mostUnique).uniq().each(Lazy.noop) // lazy - mostly unique elements
-	   * Lazy(someUnique).uniq().each(Lazy.noop) // lazy - some unique elements
-	   * Lazy(mostDupes).uniq().each(Lazy.noop)  // lazy - mostly duplicate elements
-	   * _.each(_.uniq(mostUnique), _.noop)      // lodash - mostly unique elements
-	   * _.each(_.uniq(someUnique), _.noop)      // lodash - some unique elements
-	   * _.each(_.uniq(mostDupes), _.noop)       // lodash - mostly duplicate elements
-	   */
-	  Sequence.prototype.uniq = function uniq(keyFn) {
-	    return new UniqueSequence(this, keyFn);
-	  };
-
-	  Sequence.prototype.unique = function unique(keyFn) {
-	    return this.uniq(keyFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function UniqueSequence(parent, keyFn) {
-	    this.parent = parent;
-	    this.keyFn  = keyFn;
-	  }
-
-	  UniqueSequence.prototype = new Sequence();
-
-	  UniqueSequence.prototype.each = function each(fn) {
-	    var cache = new Set(),
-	        keyFn = this.keyFn,
-	        i     = 0;
-
-	    if (keyFn) {
-	      keyFn = createCallback(keyFn);
-	      return this.parent.each(function(e) {
-	        if (cache.add(keyFn(e))) {
-	          return fn(e, i++);
-	        }
-	      });
-
-	    } else {
-	      return this.parent.each(function(e) {
-	        if (cache.add(e)) {
-	          return fn(e, i++);
-	        }
-	      });
-	    }
-	  };
-
-	  /**
-	   * Creates a new sequence by combining the elements from this sequence with
-	   * corresponding elements from the specified array(s).
-	   *
-	   * @public
-	   * @param {...Array} var_args One or more arrays of elements to combine with
-	   *     those of this sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2]).zip([3, 4]) // sequence: [[1, 3], [2, 4]]
-	   *
-	   * @benchmarks
-	   * var smArrL = Lazy.range(10).toArray(),
-	   *     smArrR = Lazy.range(10, 20).toArray(),
-	   *     lgArrL = Lazy.range(100).toArray(),
-	   *     lgArrR = Lazy.range(100, 200).toArray();
-	   *
-	   * Lazy(smArrL).zip(smArrR).each(Lazy.noop) // lazy - zipping 10-element arrays
-	   * Lazy(lgArrL).zip(lgArrR).each(Lazy.noop) // lazy - zipping 100-element arrays
-	   * _.each(_.zip(smArrL, smArrR), _.noop)    // lodash - zipping 10-element arrays
-	   * _.each(_.zip(lgArrL, lgArrR), _.noop)    // lodash - zipping 100-element arrays
-	   */
-	  Sequence.prototype.zip = function zip(var_args) {
-	    if (arguments.length === 1) {
-	      return new SimpleZippedSequence(this, (/** @type {Array} */ var_args));
-	    } else {
-	      return new ZippedSequence(this, arraySlice.call(arguments, 0));
-	    }
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ZippedSequence(parent, arrays) {
-	    this.parent = parent;
-	    this.arrays = arrays;
-	  }
-
-	  ZippedSequence.prototype = new Sequence();
-
-	  ZippedSequence.prototype.each = function each(fn) {
-	    var arrays = this.arrays,
-	        i = 0;
-	    this.parent.each(function(e) {
-	      var group = [e];
-	      for (var j = 0; j < arrays.length; ++j) {
-	        if (arrays[j].length > i) {
-	          group.push(arrays[j][i]);
-	        }
-	      }
-	      return fn(group, i++);
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence with the same elements as this one, in a randomized
-	   * order.
-	   *
-	   * @public
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4, 5]).shuffle().value() // =~ [1, 2, 3, 4, 5]
-	   */
-	  Sequence.prototype.shuffle = function shuffle() {
-	    return new ShuffledSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ShuffledSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  ShuffledSequence.prototype = new Sequence();
-
-	  ShuffledSequence.prototype.each = function each(fn) {
-	    var shuffled = this.parent.toArray(),
-	        floor = Math.floor,
-	        random = Math.random,
-	        j = 0;
-
-	    for (var i = shuffled.length - 1; i > 0; --i) {
-	      swap(shuffled, i, floor(random() * (i + 1)));
-	      if (fn(shuffled[i], j++) === false) {
-	        return;
-	      }
-	    }
-	    fn(shuffled[0], j);
-	  };
-
-	  /**
-	   * Creates a new sequence with every element from this sequence, and with arrays
-	   * exploded so that a sequence of arrays (of arrays) becomes a flat sequence of
-	   * values.
-	   *
-	   * @public
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, [2, 3], [4, [5]]]).flatten() // sequence: [1, 2, 3, 4, 5]
-	   * Lazy([1, Lazy([2, 3])]).flatten()     // sequence: [1, 2, 3]
-	   */
-	  Sequence.prototype.flatten = function flatten() {
-	    return new FlattenedSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function FlattenedSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  FlattenedSequence.prototype = new Sequence();
-
-	  FlattenedSequence.prototype.each = function each(fn) {
-	    var index = 0;
-
-	    return this.parent.each(function recurseVisitor(e) {
-	      if (e instanceof Array) {
-	        return forEach(e, recurseVisitor);
-	      }
-
-	      if (e instanceof Sequence) {
-	        return e.each(recurseVisitor);
-	      }
-
-	      return fn(e, index++);
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence with the same elements as this one, except for all
-	   * falsy values (`false`, `0`, `""`, `null`, and `undefined`).
-	   *
-	   * @public
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy(["foo", null, "bar", undefined]).compact() // sequence: ["foo", "bar"]
-	   */
-	  Sequence.prototype.compact = function compact() {
-	    return this.filter(function(e) { return !!e; });
-	  };
-
-	  /**
-	   * Creates a new sequence with all the elements of this sequence that are not
-	   * also among the specified arguments.
-	   *
-	   * @public
-	   * @aka difference
-	   * @param {...*} var_args The values, or array(s) of values, to be excluded from the
-	   *     resulting sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4, 5]).without(2, 3)   // sequence: [1, 4, 5]
-	   * Lazy([1, 2, 3, 4, 5]).without([4, 5]) // sequence: [1, 2, 3]
-	   */
-	  Sequence.prototype.without = function without(var_args) {
-	    return new WithoutSequence(this, arraySlice.call(arguments, 0));
-	  };
-
-	  Sequence.prototype.difference = function difference(var_args) {
-	    return this.without.apply(this, arguments);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function WithoutSequence(parent, values) {
-	    this.parent = parent;
-	    this.values = values;
-	  }
-
-	  WithoutSequence.prototype = new Sequence();
-
-	  WithoutSequence.prototype.each = function each(fn) {
-	    var set = createSet(this.values),
-	        i = 0;
-	    return this.parent.each(function(e) {
-	      if (!set.contains(e)) {
-	        return fn(e, i++);
-	      }
-	    });
-	  };
-
-	  /**
-	   * Creates a new sequence with all the unique elements either in this sequence
-	   * or among the specified arguments.
-	   *
-	   * @public
-	   * @param {...*} var_args The values, or array(s) of values, to be additionally
-	   *     included in the resulting sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy(["foo", "bar"]).union([])             // sequence: ["foo", "bar"]
-	   * Lazy(["foo", "bar"]).union(["bar", "baz"]) // sequence: ["foo", "bar", "baz"]
-	   */
-	  Sequence.prototype.union = function union(var_args) {
-	    return this.concat(var_args).uniq();
-	  };
-
-	  /**
-	   * Creates a new sequence with all the elements of this sequence that also
-	   * appear among the specified arguments.
-	   *
-	   * @public
-	   * @param {...*} var_args The values, or array(s) of values, in which elements
-	   *     from this sequence must also be included to end up in the resulting sequence.
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy(["foo", "bar"]).intersection([])             // sequence: []
-	   * Lazy(["foo", "bar"]).intersection(["bar", "baz"]) // sequence: ["bar"]
-	   */
-	  Sequence.prototype.intersection = function intersection(var_args) {
-	    if (arguments.length === 1 && arguments[0] instanceof Array) {
-	      return new SimpleIntersectionSequence(this, (/** @type {Array} */ var_args));
-	    } else {
-	      return new IntersectionSequence(this, arraySlice.call(arguments, 0));
-	    }
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IntersectionSequence(parent, arrays) {
-	    this.parent = parent;
-	    this.arrays = arrays;
-	  }
-
-	  IntersectionSequence.prototype = new Sequence();
-
-	  IntersectionSequence.prototype.each = function each(fn) {
-	    var sets = Lazy(this.arrays).map(function(values) {
-	      return new UniqueMemoizer(Lazy(values).getIterator());
-	    });
-
-	    var setIterator = new UniqueMemoizer(sets.getIterator()),
-	        i = 0;
-
-	    return this.parent.each(function(e) {
-	      var includedInAll = true;
-	      setIterator.each(function(set) {
-	        if (!set.contains(e)) {
-	          includedInAll = false;
-	          return false;
-	        }
-	      });
-
-	      if (includedInAll) {
-	        return fn(e, i++);
-	      }
-	    });
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function UniqueMemoizer(iterator) {
-	    this.iterator     = iterator;
-	    this.set          = new Set();
-	    this.memo         = [];
-	    this.currentValue = undefined;
-	  }
-
-	  UniqueMemoizer.prototype.current = function current() {
-	    return this.currentValue;
-	  };
-
-	  UniqueMemoizer.prototype.moveNext = function moveNext() {
-	    var iterator = this.iterator,
-	        set = this.set,
-	        memo = this.memo,
-	        current;
-
-	    while (iterator.moveNext()) {
-	      current = iterator.current();
-	      if (set.add(current)) {
-	        memo.push(current);
-	        this.currentValue = current;
-	        return true;
-	      }
-	    }
-	    return false;
-	  };
-
-	  UniqueMemoizer.prototype.each = function each(fn) {
-	    var memo = this.memo,
-	        length = memo.length,
-	        i = -1;
-
-	    while (++i < length) {
-	      if (fn(memo[i], i) === false) {
-	        return false;
-	      }
-	    }
-
-	    while (this.moveNext()) {
-	      if (fn(this.currentValue, i++) === false) {
-	        break;
-	      }
-	    }
-	  };
-
-	  UniqueMemoizer.prototype.contains = function contains(e) {
-	    if (this.set.contains(e)) {
-	      return true;
-	    }
-
-	    while (this.moveNext()) {
-	      if (this.currentValue === e) {
-	        return true;
-	      }
-	    }
-
-	    return false;
-	  };
-
-	  /**
-	   * Checks whether every element in this sequence satisfies a given predicate.
-	   *
-	   * @public
-	   * @aka all
-	   * @param {Function} predicate A function to call on (potentially) every element
-	   *     in this sequence.
-	   * @returns {boolean} True if `predicate` returns true for every element in the
-	   *     sequence (or the sequence is empty). False if `predicate` returns false
-	   *     for at least one element.
-	   *
-	   * @examples
-	   * var numbers = [1, 2, 3, 4, 5];
-	   *
-	   * var objects = [{ foo: true }, { foo: false, bar: true }];
-	   *
-	   * Lazy(numbers).every(isEven)     // => false
-	   * Lazy(numbers).every(isPositive) // => true
-	   * Lazy(objects).all('foo')        // => false
-	   * Lazy(objects).all('bar')        // => false
-	   */
-	  Sequence.prototype.every = function every(predicate) {
-	    predicate = createCallback(predicate);
-
-	    return this.each(function(e, i) {
-	      return !!predicate(e, i);
-	    });
-	  };
-
-	  Sequence.prototype.all = function all(predicate) {
-	    return this.every(predicate);
-	  };
-
-	  /**
-	   * Checks whether at least one element in this sequence satisfies a given
-	   * predicate (or, if no predicate is specified, whether the sequence contains at
-	   * least one element).
-	   *
-	   * @public
-	   * @aka any
-	   * @param {Function=} predicate A function to call on (potentially) every element
-	   *     in this sequence.
-	   * @returns {boolean} True if `predicate` returns true for at least one element
-	   *     in the sequence. False if `predicate` returns false for every element (or
-	   *     the sequence is empty).
-	   *
-	   * @examples
-	   * var numbers = [1, 2, 3, 4, 5];
-	   *
-	   * Lazy(numbers).some()           // => true
-	   * Lazy(numbers).some(isEven)     // => true
-	   * Lazy(numbers).some(isNegative) // => false
-	   * Lazy([]).some()                // => false
-	   */
-	  Sequence.prototype.some = function some(predicate) {
-	    predicate = createCallback(predicate, true);
-
-	    var success = false;
-	    this.each(function(e) {
-	      if (predicate(e)) {
-	        success = true;
-	        return false;
-	      }
-	    });
-	    return success;
-	  };
-
-	  Sequence.prototype.any = function any(predicate) {
-	    return this.some(predicate);
-	  };
-
-	  /**
-	   * Checks whether NO elements in this sequence satisfy the given predicate
-	   * (the opposite of {@link Sequence#all}, basically).
-	   *
-	   * @public
-	   * @param {Function=} predicate A function to call on (potentially) every element
-	   *     in this sequence.
-	   * @returns {boolean} True if `predicate` does not return true for any element
-	   *     in the sequence. False if `predicate` returns true for at least one
-	   *     element.
-	   *
-	   * @examples
-	   * var numbers = [1, 2, 3, 4, 5];
-	   *
-	   * Lazy(numbers).none()           // => false
-	   * Lazy(numbers).none(isEven)     // => false
-	   * Lazy(numbers).none(isNegative) // => true
-	   * Lazy([]).none(isEven)          // => true
-	   * Lazy([]).none(isNegative)      // => true
-	   * Lazy([]).none()                // => true
-	   */
-	  Sequence.prototype.none = function none(predicate) {
-	    return !this.any(predicate);
-	  };
-
-	  /**
-	   * Checks whether the sequence has no elements.
-	   *
-	   * @public
-	   * @returns {boolean} True if the sequence is empty, false if it contains at
-	   *     least one element.
-	   *
-	   * @examples
-	   * Lazy([]).isEmpty()        // => true
-	   * Lazy([1, 2, 3]).isEmpty() // => false
-	   */
-	  Sequence.prototype.isEmpty = function isEmpty() {
-	    return !this.any();
-	  };
-
-	  /**
-	   * Performs (at worst) a linear search from the head of this sequence,
-	   * returning the first index at which the specified value is found.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {number} The index within this sequence where the given value is
-	   *     located, or -1 if the sequence doesn't contain the value.
-	   *
-	   * @examples
-	   * function reciprocal(x) { return 1 / x; }
-	   *
-	   * Lazy(["foo", "bar", "baz"]).indexOf("bar")   // => 1
-	   * Lazy([1, 2, 3]).indexOf(4)                   // => -1
-	   * Lazy([1, 2, 3]).map(reciprocal).indexOf(0.5) // => 1
-	   */
-	  Sequence.prototype.indexOf = function indexOf(value) {
-	    var foundIndex = -1;
-	    this.each(function(e, i) {
-	      if (e === value) {
-	        foundIndex = i;
-	        return false;
-	      }
-	    });
-	    return foundIndex;
-	  };
-
-	  /**
-	   * Performs (at worst) a linear search from the tail of this sequence,
-	   * returning the last index at which the specified value is found.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {number} The last index within this sequence where the given value
-	   *     is located, or -1 if the sequence doesn't contain the value.
-	   *
-	   * @examples
-	   * Lazy(["a", "b", "c", "b", "a"]).lastIndexOf("b")    // => 3
-	   * Lazy([1, 2, 3]).lastIndexOf(0)                      // => -1
-	   * Lazy([2, 2, 1, 2, 4]).filter(isEven).lastIndexOf(2) // 2
-	   */
-	  Sequence.prototype.lastIndexOf = function lastIndexOf(value) {
-	    var reversed = this.getIndex().reverse(),
-	        index    = reversed.indexOf(value);
-	    if (index !== -1) {
-	      index = reversed.length() - index - 1;
-	    }
-	    return index;
-	  };
-
-	  /**
-	   * Performs a binary search of this sequence, returning the lowest index where
-	   * the given value is either found, or where it belongs (if it is not already
-	   * in the sequence).
-	   *
-	   * This method assumes the sequence is in sorted order and will fail otherwise.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {number} An index within this sequence where the given value is
-	   *     located, or where it belongs in sorted order.
-	   *
-	   * @examples
-	   * Lazy([1, 3, 6, 9]).sortedIndex(3)                    // => 1
-	   * Lazy([1, 3, 6, 9]).sortedIndex(7)                    // => 3
-	   * Lazy([5, 10, 15, 20]).filter(isEven).sortedIndex(10) // => 0
-	   * Lazy([5, 10, 15, 20]).filter(isEven).sortedIndex(12) // => 1
-	   */
-	  Sequence.prototype.sortedIndex = function sortedIndex(value) {
-	    var indexed = this.getIndex(),
-	        lower   = 0,
-	        upper   = indexed.length(),
-	        i;
-
-	    while (lower < upper) {
-	      i = (lower + upper) >>> 1;
-	      if (compare(indexed.get(i), value) === -1) {
-	        lower = i + 1;
-	      } else {
-	        upper = i;
-	      }
-	    }
-	    return lower;
-	  };
-
-	  /**
-	   * Checks whether the given value is in this sequence.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {boolean} True if the sequence contains the value, false if not.
-	   *
-	   * @examples
-	   * var numbers = [5, 10, 15, 20];
-	   *
-	   * Lazy(numbers).contains(15) // => true
-	   * Lazy(numbers).contains(13) // => false
-	   */
-	  Sequence.prototype.contains = function contains(value) {
-	    return this.indexOf(value) !== -1;
-	  };
-
-	  /**
-	   * Aggregates a sequence into a single value according to some accumulator
-	   * function.
-	   *
-	   * For an asynchronous sequence, instead of immediately returning a result
-	   * (which it can't, obviously), this method returns an {@link AsyncHandle}
-	   * whose `onComplete` method can be called to supply a callback to handle the
-	   * final result once iteration has completed.
-	   *
-	   * @public
-	   * @aka inject, foldl
-	   * @param {Function} aggregator The function through which to pass every element
-	   *     in the sequence. For every element, the function will be passed the total
-	   *     aggregated result thus far and the element itself, and should return a
-	   *     new aggregated result.
-	   * @param {*=} memo The starting value to use for the aggregated result
-	   *     (defaults to the first element in the sequence).
-	   * @returns {*} The result of the aggregation, or, for asynchronous sequences,
-	   *     an {@link AsyncHandle} whose `onComplete` method accepts a callback to
-	   *     handle the final result.
-	   *
-	   * @examples
-	   * function multiply(x, y) { return x * y; }
-	   *
-	   * var numbers = [1, 2, 3, 4];
-	   *
-	   * Lazy(numbers).reduce(multiply)    // => 24
-	   * Lazy(numbers).reduce(multiply, 5) // => 120
-	   */
-	  Sequence.prototype.reduce = function reduce(aggregator, memo) {
-	    if (arguments.length < 2) {
-	      return this.tail().reduce(aggregator, this.head());
-	    }
-
-	    var eachResult = this.each(function(e, i) {
-	      memo = aggregator(memo, e, i);
-	    });
-
-	    // TODO: Think of a way more efficient solution to this problem.
-	    if (eachResult instanceof AsyncHandle) {
-	      return eachResult.then(function() { return memo; });
-	    }
-
-	    return memo;
-	  };
-
-	  Sequence.prototype.inject =
-	  Sequence.prototype.foldl = function foldl(aggregator, memo) {
-	    return this.reduce(aggregator, memo);
-	  };
-
-	  /**
-	   * Aggregates a sequence, from the tail, into a single value according to some
-	   * accumulator function.
-	   *
-	   * @public
-	   * @aka foldr
-	   * @param {Function} aggregator The function through which to pass every element
-	   *     in the sequence. For every element, the function will be passed the total
-	   *     aggregated result thus far and the element itself, and should return a
-	   *     new aggregated result.
-	   * @param {*} memo The starting value to use for the aggregated result.
-	   * @returns {*} The result of the aggregation.
-	   *
-	   * @examples
-	   * function append(s1, s2) {
-	   *   return s1 + s2;
-	   * }
-	   *
-	   * function isVowel(str) {
-	   *   return "aeiou".indexOf(str) !== -1;
-	   * }
-	   *
-	   * Lazy("abcde").reduceRight(append)                 // => "edcba"
-	   * Lazy("abcde").filter(isVowel).reduceRight(append) // => "ea"
-	   */
-	  Sequence.prototype.reduceRight = function reduceRight(aggregator, memo) {
-	    if (arguments.length < 2) {
-	      return this.initial(1).reduceRight(aggregator, this.last());
-	    }
-
-	    // This bothers me... but frankly, calling reverse().reduce() is potentially
-	    // going to eagerly evaluate the sequence anyway; so it's really not an issue.
-	    var indexed = this.getIndex(),
-	        i = indexed.length() - 1;
-	    return indexed.reverse().reduce(function(m, e) {
-	      return aggregator(m, e, i--);
-	    }, memo);
-	  };
-
-	  Sequence.prototype.foldr = function foldr(aggregator, memo) {
-	    return this.reduceRight(aggregator, memo);
-	  };
-
-	  /**
-	   * Groups this sequence into consecutive (overlapping) segments of a specified
-	   * length. If the underlying sequence has fewer elements than the specfied
-	   * length, then this sequence will be empty.
-	   *
-	   * @public
-	   * @param {number} length The length of each consecutive segment.
-	   * @returns {Sequence} The resulting sequence of consecutive segments.
-	   *
-	   * @examples
-	   * Lazy([]).consecutive(2)        // => sequence: []
-	   * Lazy([1]).consecutive(2)       // => sequence: []
-	   * Lazy([1, 2]).consecutive(2)    // => sequence: [[1, 2]]
-	   * Lazy([1, 2, 3]).consecutive(2) // => sequence: [[1, 2], [2, 3]]
-	   * Lazy([1, 2, 3]).consecutive(0) // => sequence: [[]]
-	   * Lazy([1, 2, 3]).consecutive(1) // => sequence: [[1], [2], [3]]
-	   */
-	  Sequence.prototype.consecutive = function consecutive(count) {
-	    var queue    = new Queue(count);
-	    var segments = this.map(function(element) {
-	      if (queue.add(element).count === count) {
-	        return queue.toArray();
-	      }
-	    });
-	    return segments.compact();
-	  };
-
-	  /**
-	   * Breaks this sequence into chunks (arrays) of a specified length.
-	   *
-	   * @public
-	   * @param {number} size The size of each chunk.
-	   * @returns {Sequence} The resulting sequence of chunks.
-	   *
-	   * @examples
-	   * Lazy([]).chunk(2)        // sequence: []
-	   * Lazy([1, 2, 3]).chunk(2) // sequence: [[1, 2], [3]]
-	   * Lazy([1, 2, 3]).chunk(1) // sequence: [[1], [2], [3]]
-	   * Lazy([1, 2, 3]).chunk(4) // sequence: [[1, 2, 3]]
-	   * Lazy([1, 2, 3]).chunk(0) // throws
-	   */
-	  Sequence.prototype.chunk = function chunk(size) {
-	    if (size < 1) {
-	      throw new Error("You must specify a positive chunk size.");
-	    }
-
-	    return new ChunkedSequence(this, size);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ChunkedSequence(parent, size) {
-	    this.parent    = parent;
-	    this.chunkSize = size;
-	  }
-
-	  ChunkedSequence.prototype = new Sequence();
-
-	  ChunkedSequence.prototype.getIterator = function getIterator() {
-	    return new ChunkedIterator(this.parent, this.chunkSize);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ChunkedIterator(sequence, size) {
-	    this.iterator = sequence.getIterator();
-	    this.size     = size;
-	  }
-
-	  ChunkedIterator.prototype.current = function current() {
-	    return this.currentChunk;
-	  };
-
-	  ChunkedIterator.prototype.moveNext = function moveNext() {
-	    var iterator  = this.iterator,
-	        chunkSize = this.size,
-	        chunk     = [];
-
-	    while (chunk.length < chunkSize && iterator.moveNext()) {
-	      chunk.push(iterator.current());
-	    }
-
-	    if (chunk.length === 0) {
-	      return false;
-	    }
-
-	    this.currentChunk = chunk;
-	    return true;
-	  };
-
-	  /**
-	   * Passes each element in the sequence to the specified callback during
-	   * iteration. This is like {@link Sequence#each}, except that it can be
-	   * inserted anywhere in the middle of a chain of methods to "intercept" the
-	   * values in the sequence at that point.
-	   *
-	   * @public
-	   * @param {Function} callback A function to call on every element in the
-	   *     sequence during iteration. The return value of this function does not
-	   *     matter.
-	   * @returns {Sequence} A sequence comprising the same elements as this one.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).tap(fn).each(Lazy.noop); // calls fn 3 times
-	   */
-	  Sequence.prototype.tap = function tap(callback) {
-	    return new TappedSequence(this, callback);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function TappedSequence(parent, callback) {
-	    this.parent = parent;
-	    this.callback = callback;
-	  }
-
-	  TappedSequence.prototype = new Sequence();
-
-	  TappedSequence.prototype.each = function each(fn) {
-	    var callback = this.callback;
-	    return this.parent.each(function(e, i) {
-	      callback(e, i);
-	      return fn(e, i);
-	    });
-	  };
-
-	  /**
-	   * Seaches for the first element in the sequence satisfying a given predicate.
-	   *
-	   * @public
-	   * @aka detect
-	   * @param {Function} predicate A function to call on (potentially) every element
-	   *     in the sequence.
-	   * @returns {*} The first element in the sequence for which `predicate` returns
-	   *     `true`, or `undefined` if no such element is found.
-	   *
-	   * @examples
-	   * function divisibleBy3(x) {
-	   *   return x % 3 === 0;
-	   * }
-	   *
-	   * var numbers = [5, 6, 7, 8, 9, 10];
-	   *
-	   * Lazy(numbers).find(divisibleBy3) // => 6
-	   * Lazy(numbers).find(isNegative)   // => undefined
-	   */
-	  Sequence.prototype.find = function find(predicate) {
-	    return this.filter(predicate).first();
-	  };
-
-	  Sequence.prototype.detect = function detect(predicate) {
-	    return this.find(predicate);
-	  };
-
-	  /**
-	   * Gets the minimum value in the sequence.
-	   *
-	   * @public
-	   * @param {Function=} valueFn The function by which the value for comparison is
-	   *     calculated for each element in the sequence.
-	   * @returns {*} The element with the lowest value in the sequence, or
-	   *     `Infinity` if the sequence is empty.
-	   *
-	   * @examples
-	   * function negate(x) { return x * -1; }
-	   *
-	   * Lazy([]).min()                       // => Infinity
-	   * Lazy([6, 18, 2, 49, 34]).min()       // => 2
-	   * Lazy([6, 18, 2, 49, 34]).min(negate) // => 49
-	   */
-	  Sequence.prototype.min = function min(valueFn) {
-	    if (typeof valueFn !== "undefined") {
-	      return this.minBy(valueFn);
-	    }
-
-	    return this.reduce(function(x, y) { return y < x ? y : x; }, Infinity);
-	  };
-
-	  Sequence.prototype.minBy = function minBy(valueFn) {
-	    valueFn = createCallback(valueFn);
-	    return this.reduce(function(x, y) { return valueFn(y) < valueFn(x) ? y : x; });
-	  };
-
-	  /**
-	   * Gets the maximum value in the sequence.
-	   *
-	   * @public
-	   * @param {Function=} valueFn The function by which the value for comparison is
-	   *     calculated for each element in the sequence.
-	   * @returns {*} The element with the highest value in the sequence, or
-	   *     `-Infinity` if the sequence is empty.
-	   *
-	   * @examples
-	   * function reverseDigits(x) {
-	   *   return Number(String(x).split('').reverse().join(''));
-	   * }
-	   *
-	   * Lazy([]).max()                              // => -Infinity
-	   * Lazy([6, 18, 2, 48, 29]).max()              // => 48
-	   * Lazy([6, 18, 2, 48, 29]).max(reverseDigits) // => 29
-	   */
-	  Sequence.prototype.max = function max(valueFn) {
-	    if (typeof valueFn !== "undefined") {
-	      return this.maxBy(valueFn);
-	    }
-
-	    return this.reduce(function(x, y) { return y > x ? y : x; }, -Infinity);
-	  };
-
-	  Sequence.prototype.maxBy = function maxBy(valueFn) {
-	    valueFn = createCallback(valueFn);
-	    return this.reduce(function(x, y) { return valueFn(y) > valueFn(x) ? y : x; });
-	  };
-
-	  /**
-	   * Gets the sum of the values in the sequence.
-	   *
-	   * @public
-	   * @param {Function=} valueFn The function used to select the values that will
-	   *     be summed up.
-	   * @returns {*} The sum.
-	   *
-	   * @examples
-	   * Lazy([]).sum()                     // => 0
-	   * Lazy([1, 2, 3, 4]).sum()           // => 10
-	   * Lazy([1.2, 3.4]).sum(Math.floor)   // => 4
-	   * Lazy(['foo', 'bar']).sum('length') // => 6
-	   */
-	  Sequence.prototype.sum = function sum(valueFn) {
-	    if (typeof valueFn !== "undefined") {
-	      return this.sumBy(valueFn);
-	    }
-
-	    return this.reduce(function(x, y) { return x + y; }, 0);
-	  };
-
-	  Sequence.prototype.sumBy = function sumBy(valueFn) {
-	    valueFn = createCallback(valueFn);
-	    return this.reduce(function(x, y) { return x + valueFn(y); }, 0);
-	  };
-
-	  /**
-	   * Creates a string from joining together all of the elements in this sequence,
-	   * separated by the given delimiter.
-	   *
-	   * @public
-	   * @aka toString
-	   * @param {string=} delimiter The separator to insert between every element from
-	   *     this sequence in the resulting string (defaults to `","`).
-	   * @returns {string} The delimited string.
-	   *
-	   * @examples
-	   * Lazy([6, 29, 1984]).join("/")  // => "6/29/1984"
-	   * Lazy(["a", "b", "c"]).join()   // => "a,b,c"
-	   * Lazy(["a", "b", "c"]).join("") // => "abc"
-	   * Lazy([1, 2, 3]).join()         // => "1,2,3"
-	   * Lazy([1, 2, 3]).join("")       // => "123"
-	   * Lazy(["", "", ""]).join(",")   // => ",,"
-	   */
-	  Sequence.prototype.join = function join(delimiter) {
-	    delimiter = typeof delimiter === "string" ? delimiter : ",";
-
-	    return this.reduce(function(str, e, i) {
-	      if (i > 0) {
-	        str += delimiter;
-	      }
-	      return str + e;
-	    }, "");
-	  };
-
-	  Sequence.prototype.toString = function toString(delimiter) {
-	    return this.join(delimiter);
-	  };
-
-	  /**
-	   * Creates a sequence, with the same elements as this one, that will be iterated
-	   * over asynchronously when calling `each`.
-	   *
-	   * @public
-	   * @param {number=} interval The approximate period, in milliseconds, that
-	   *     should elapse between each element in the resulting sequence. Omitting
-	   *     this argument will result in the fastest possible asynchronous iteration.
-	   * @returns {AsyncSequence} The new asynchronous sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).async(100).each(fn) // calls fn 3 times asynchronously
-	   */
-	  Sequence.prototype.async = function async(interval) {
-	    return new AsyncSequence(this, interval);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SimpleIntersectionSequence(parent, array) {
-	    this.parent = parent;
-	    this.array  = array;
-	    this.each   = getEachForIntersection(array);
-	  }
-
-	  SimpleIntersectionSequence.prototype = new Sequence();
-
-	  SimpleIntersectionSequence.prototype.eachMemoizerCache = function eachMemoizerCache(fn) {
-	    var iterator = new UniqueMemoizer(Lazy(this.array).getIterator()),
-	        i = 0;
-
-	    return this.parent.each(function(e) {
-	      if (iterator.contains(e)) {
-	        return fn(e, i++);
-	      }
-	    });
-	  };
-
-	  SimpleIntersectionSequence.prototype.eachArrayCache = function eachArrayCache(fn) {
-	    var array = this.array,
-	        find  = arrayContains,
-	        i = 0;
-
-	    return this.parent.each(function(e) {
-	      if (find(array, e)) {
-	        return fn(e, i++);
-	      }
-	    });
-	  };
-
-	  function getEachForIntersection(source) {
-	    if (source.length < 40) {
-	      return SimpleIntersectionSequence.prototype.eachArrayCache;
-	    } else {
-	      return SimpleIntersectionSequence.prototype.eachMemoizerCache;
-	    }
-	  }
-
-	  /**
-	   * An optimized version of {@link ZippedSequence}, when zipping a sequence with
-	   * only one array.
-	   *
-	   * @param {Sequence} parent The underlying sequence.
-	   * @param {Array} array The array with which to zip the sequence.
-	   * @constructor
-	   */
-	  function SimpleZippedSequence(parent, array) {
-	    this.parent = parent;
-	    this.array  = array;
-	  }
-
-	  SimpleZippedSequence.prototype = new Sequence();
-
-	  SimpleZippedSequence.prototype.each = function each(fn) {
-	    var array = this.array;
-	    return this.parent.each(function(e, i) {
-	      return fn([e, array[i]], i);
-	    });
-	  };
-
-	  /**
-	   * An `ArrayLikeSequence` is a {@link Sequence} that provides random access to
-	   * its elements. This extends the API for iterating with the additional methods
-	   * {@link #get} and {@link #length}, allowing a sequence to act as a "view" into
-	   * a collection or other indexed data source.
-	   *
-	   * The initial sequence created by wrapping an array with `Lazy(array)` is an
-	   * `ArrayLikeSequence`.
-	   *
-	   * All methods of `ArrayLikeSequence` that conceptually should return
-	   * something like a array (with indexed access) return another
-	   * `ArrayLikeSequence`, for example:
-	   *
-	   * - {@link Sequence#map}
-	   * - {@link ArrayLikeSequence#slice}
-	   * - {@link Sequence#take} and {@link Sequence#drop}
-	   * - {@link Sequence#reverse}
-	   *
-	   * The above is not an exhaustive list. There are also certain other cases
-	   * where it might be possible to return an `ArrayLikeSequence` (e.g., calling
-	   * {@link Sequence#concat} with a single array argument), but this is not
-	   * guaranteed by the API.
-	   *
-	   * Note that in many cases, it is not possible to provide indexed access
-	   * without first performing at least a partial iteration of the underlying
-	   * sequence. In these cases an `ArrayLikeSequence` will not be returned:
-	   *
-	   * - {@link Sequence#filter}
-	   * - {@link Sequence#uniq}
-	   * - {@link Sequence#union}
-	   * - {@link Sequence#intersect}
-	   *
-	   * etc. The above methods only return ordinary {@link Sequence} objects.
-	   *
-	   * Defining custom array-like sequences
-	   * ------------------------------------
-	   *
-	   * Creating a custom `ArrayLikeSequence` is essentially the same as creating a
-	   * custom {@link Sequence}. You just have a couple more methods you need to
-	   * implement: `get` and (optionally) `length`.
-	   *
-	   * Here's an example. Let's define a sequence type called `OffsetSequence` that
-	   * offsets each of its parent's elements by a set distance, and circles back to
-	   * the beginning after reaching the end. **Remember**: the initialization
-	   * function you pass to {@link #define} should always accept a `parent` as its
-	   * first parameter.
-	   *
-	   *     ArrayLikeSequence.define("offset", {
-	   *       init: function(parent, offset) {
-	   *         this.offset = offset;
-	   *       },
-	   *
-	   *       get: function(i) {
-	   *         return this.parent.get((i + this.offset) % this.parent.length());
-	   *       }
-	   *     });
-	   *
-	   * It's worth noting a couple of things here.
-	   *
-	   * First, Lazy's default implementation of `length` simply returns the parent's
-	   * length. In this case, since an `OffsetSequence` will always have the same
-	   * number of elements as its parent, that implementation is fine; so we don't
-	   * need to override it.
-	   *
-	   * Second, the default implementation of `each` uses `get` and `length` to
-	   * essentially create a `for` loop, which is fine here. If you want to implement
-	   * `each` your own way, you can do that; but in most cases (as here), you can
-	   * probably just stick with the default.
-	   *
-	   * So we're already done, after only implementing `get`! Pretty easy, huh?
-	   *
-	   * Now the `offset` method will be chainable from any `ArrayLikeSequence`. So
-	   * for example:
-	   *
-	   *     Lazy([1, 2, 3]).map(mapFn).offset(3);
-	   *
-	   * ...will work, but:
-	   *
-	   *     Lazy([1, 2, 3]).filter(mapFn).offset(3);
-	   *
-	   * ...will not (because `filter` does not return an `ArrayLikeSequence`).
-	   *
-	   * (Also, as with the example provided for defining custom {@link Sequence}
-	   * types, this example really could have been implemented using a function
-	   * already available as part of Lazy.js: in this case, {@link Sequence#map}.)
-	   *
-	   * @public
-	   * @constructor
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3])                    // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2, 3]).map(Lazy.identity) // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2, 3]).take(2)            // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2, 3]).drop(2)            // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2, 3]).reverse()          // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2, 3]).slice(1, 2)        // instanceof Lazy.ArrayLikeSequence
-	   */
-	  function ArrayLikeSequence() {}
-
-	  ArrayLikeSequence.prototype = new Sequence();
-
-	  /**
-	   * Create a new constructor function for a type inheriting from
-	   * `ArrayLikeSequence`.
-	   *
-	   * @public
-	   * @param {string|Array.<string>} methodName The name(s) of the method(s) to be
-	   *     used for constructing the new sequence. The method will be attached to
-	   *     the `ArrayLikeSequence` prototype so that it can be chained with any other
-	   *     methods that return array-like sequences.
-	   * @param {Object} overrides An object containing function overrides for this
-	   *     new sequence type. **Must** include `get`. *May* include `init`,
-	   *     `length`, `getIterator`, and `each`. For each function, `this` will be
-	   *     the new sequence and `this.parent` will be the source sequence.
-	   * @returns {Function} A constructor for a new type inheriting from
-	   *     `ArrayLikeSequence`.
-	   *
-	   * @examples
-	   * Lazy.ArrayLikeSequence.define("offset", {
-	   *   init: function(offset) {
-	   *     this.offset = offset;
-	   *   },
-	   *
-	   *   get: function(i) {
-	   *     return this.parent.get((i + this.offset) % this.parent.length());
-	   *   }
-	   * });
-	   *
-	   * Lazy([1, 2, 3]).offset(1) // sequence: [2, 3, 1]
-	   */
-	  ArrayLikeSequence.define = function define(methodName, overrides) {
-	    if (!overrides || typeof overrides.get !== 'function') {
-	      throw new Error("A custom array-like sequence must implement *at least* get!");
-	    }
-
-	    return defineSequenceType(ArrayLikeSequence, methodName, overrides);
-	  };
-
-	  /**
-	   * Returns the element at the specified index.
-	   *
-	   * @public
-	   * @param {number} i The index to access.
-	   * @returns {*} The element.
-	   *
-	   * @examples
-	   * function increment(x) { return x + 1; }
-	   *
-	   * Lazy([1, 2, 3]).get(1)                // => 2
-	   * Lazy([1, 2, 3]).get(-1)               // => undefined
-	   * Lazy([1, 2, 3]).map(increment).get(1) // => 3
-	   */
-	  ArrayLikeSequence.prototype.get = function get(i) {
-	    return this.parent.get(i);
-	  };
-
-	  /**
-	   * Returns the length of the sequence.
-	   *
-	   * @public
-	   * @returns {number} The length.
-	   *
-	   * @examples
-	   * function increment(x) { return x + 1; }
-	   *
-	   * Lazy([]).length()                       // => 0
-	   * Lazy([1, 2, 3]).length()                // => 3
-	   * Lazy([1, 2, 3]).map(increment).length() // => 3
-	   */
-	  ArrayLikeSequence.prototype.length = function length() {
-	    return this.parent.length();
-	  };
-
-	  /**
-	   * Returns the current sequence (since it is already indexed).
-	   */
-	  ArrayLikeSequence.prototype.getIndex = function getIndex() {
-	    return this;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#getIterator}.
-	   */
-	  ArrayLikeSequence.prototype.getIterator = function getIterator() {
-	    return new IndexedIterator(this);
-	  };
-
-	  /**
-	   * An optimized version of {@link Iterator} meant to work with already-indexed
-	   * sequences.
-	   *
-	   * @param {ArrayLikeSequence} sequence The sequence to iterate over.
-	   * @constructor
-	   */
-	  function IndexedIterator(sequence) {
-	    this.sequence = sequence;
-	    this.index    = -1;
-	  }
-
-	  IndexedIterator.prototype.current = function current() {
-	    return this.sequence.get(this.index);
-	  };
-
-	  IndexedIterator.prototype.moveNext = function moveNext() {
-	    if (this.index >= this.sequence.length() - 1) {
-	      return false;
-	    }
-
-	    ++this.index;
-	    return true;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#each}.
-	   */
-	  ArrayLikeSequence.prototype.each = function each(fn) {
-	    var length = this.length(),
-	        i = -1;
-
-	    while (++i < length) {
-	      if (fn(this.get(i), i) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * Returns a new sequence with the same elements as this one, minus the last
-	   * element.
-	   *
-	   * @public
-	   * @returns {ArrayLikeSequence} The new array-like sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).pop() // sequence: [1, 2]
-	   * Lazy([]).pop()        // sequence: []
-	   */
-	  ArrayLikeSequence.prototype.pop = function pop() {
-	    return this.initial();
-	  };
-
-	  /**
-	   * Returns a new sequence with the same elements as this one, minus the first
-	   * element.
-	   *
-	   * @public
-	   * @returns {ArrayLikeSequence} The new array-like sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).shift() // sequence: [2, 3]
-	   * Lazy([]).shift()        // sequence: []
-	   */
-	  ArrayLikeSequence.prototype.shift = function shift() {
-	    return this.drop();
-	  };
-
-	  /**
-	   * Returns a new sequence comprising the portion of this sequence starting
-	   * from the specified starting index and continuing until the specified ending
-	   * index or to the end of the sequence.
-	   *
-	   * @public
-	   * @param {number} begin The index at which the new sequence should start.
-	   * @param {number=} end The index at which the new sequence should end.
-	   * @returns {ArrayLikeSequence} The new array-like sequence.
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3, 4, 5]).slice(0)     // sequence: [1, 2, 3, 4, 5]
-	   * Lazy([1, 2, 3, 4, 5]).slice(2)     // sequence: [3, 4, 5]
-	   * Lazy([1, 2, 3, 4, 5]).slice(2, 4)  // sequence: [3, 4]
-	   * Lazy([1, 2, 3, 4, 5]).slice(-1)    // sequence: [5]
-	   * Lazy([1, 2, 3, 4, 5]).slice(1, -1) // sequence: [2, 3, 4]
-	   * Lazy([1, 2, 3, 4, 5]).slice(0, 10) // sequence: [1, 2, 3, 4, 5]
-	   */
-	  ArrayLikeSequence.prototype.slice = function slice(begin, end) {
-	    var length = this.length();
-
-	    if (begin < 0) {
-	      begin = length + begin;
-	    }
-
-	    var result = this.drop(begin);
-
-	    if (typeof end === "number") {
-	      if (end < 0) {
-	        end = length + end;
-	      }
-	      result = result.take(end - begin);
-	    }
-
-	    return result;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#map}, which creates an
-	   * {@link ArrayLikeSequence} so that the result still provides random access.
-	   *
-	   * @public
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).map(Lazy.identity) // instanceof Lazy.ArrayLikeSequence
-	   */
-	  ArrayLikeSequence.prototype.map = function map(mapFn) {
-	    return new IndexedMappedSequence(this, createCallback(mapFn));
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedMappedSequence(parent, mapFn) {
-	    this.parent = parent;
-	    this.mapFn  = mapFn;
-	  }
-
-	  IndexedMappedSequence.prototype = new ArrayLikeSequence();
-
-	  IndexedMappedSequence.prototype.get = function get(i) {
-	    if (i < 0 || i >= this.parent.length()) {
-	      return undefined;
-	    }
-
-	    return this.mapFn(this.parent.get(i), i);
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#filter}.
-	   */
-	  ArrayLikeSequence.prototype.filter = function filter(filterFn) {
-	    return new IndexedFilteredSequence(this, createCallback(filterFn));
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedFilteredSequence(parent, filterFn) {
-	    this.parent   = parent;
-	    this.filterFn = filterFn;
-	  }
-
-	  IndexedFilteredSequence.prototype = new FilteredSequence();
-
-	  IndexedFilteredSequence.prototype.each = function each(fn) {
-	    var parent = this.parent,
-	        filterFn = this.filterFn,
-	        length = this.parent.length(),
-	        i = -1,
-	        j = 0,
-	        e;
-
-	    while (++i < length) {
-	      e = parent.get(i);
-	      if (filterFn(e, i) && fn(e, j++) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#reverse}, which creates an
-	   * {@link ArrayLikeSequence} so that the result still provides random access.
-	   *
-	   * @public
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).reverse() // instanceof Lazy.ArrayLikeSequence
-	   */
-	  ArrayLikeSequence.prototype.reverse = function reverse() {
-	    return new IndexedReversedSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedReversedSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  IndexedReversedSequence.prototype = new ArrayLikeSequence();
-
-	  IndexedReversedSequence.prototype.get = function get(i) {
-	    return this.parent.get(this.length() - i - 1);
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#first}, which creates an
-	   * {@link ArrayLikeSequence} so that the result still provides random access.
-	   *
-	   * @public
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).first(2) // instanceof Lazy.ArrayLikeSequence
-	   */
-	  ArrayLikeSequence.prototype.first = function first(count) {
-	    if (typeof count === "undefined") {
-	      return this.get(0);
-	    }
-
-	    return new IndexedTakeSequence(this, count);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedTakeSequence(parent, count) {
-	    this.parent = parent;
-	    this.count  = count;
-	  }
-
-	  IndexedTakeSequence.prototype = new ArrayLikeSequence();
-
-	  IndexedTakeSequence.prototype.length = function length() {
-	    var parentLength = this.parent.length();
-	    return this.count <= parentLength ? this.count : parentLength;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#rest}, which creates an
-	   * {@link ArrayLikeSequence} so that the result still provides random access.
-	   *
-	   * @public
-	   *
-	   * @examples
-	   * Lazy([1, 2, 3]).rest() // instanceof Lazy.ArrayLikeSequence
-	   */
-	  ArrayLikeSequence.prototype.rest = function rest(count) {
-	    return new IndexedDropSequence(this, count);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedDropSequence(parent, count) {
-	    this.parent = parent;
-	    this.count  = typeof count === "number" ? count : 1;
-	  }
-
-	  IndexedDropSequence.prototype = new ArrayLikeSequence();
-
-	  IndexedDropSequence.prototype.get = function get(i) {
-	    return this.parent.get(this.count + i);
-	  };
-
-	  IndexedDropSequence.prototype.length = function length() {
-	    var parentLength = this.parent.length();
-	    return this.count <= parentLength ? parentLength - this.count : 0;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#concat} that returns another
-	   * {@link ArrayLikeSequence} *if* the argument is an array.
-	   *
-	   * @public
-	   * @param {...*} var_args
-	   *
-	   * @examples
-	   * Lazy([1, 2]).concat([3, 4]) // instanceof Lazy.ArrayLikeSequence
-	   * Lazy([1, 2]).concat([3, 4]) // sequence: [1, 2, 3, 4]
-	   */
-	  ArrayLikeSequence.prototype.concat = function concat(var_args) {
-	    if (arguments.length === 1 && arguments[0] instanceof Array) {
-	      return new IndexedConcatenatedSequence(this, (/** @type {Array} */ var_args));
-	    } else {
-	      return Sequence.prototype.concat.apply(this, arguments);
-	    }
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function IndexedConcatenatedSequence(parent, other) {
-	    this.parent = parent;
-	    this.other  = other;
-	  }
-
-	  IndexedConcatenatedSequence.prototype = new ArrayLikeSequence();
-
-	  IndexedConcatenatedSequence.prototype.get = function get(i) {
-	    var parentLength = this.parent.length();
-	    if (i < parentLength) {
-	      return this.parent.get(i);
-	    } else {
-	      return this.other[i - parentLength];
-	    }
-	  };
-
-	  IndexedConcatenatedSequence.prototype.length = function length() {
-	    return this.parent.length() + this.other.length;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#uniq}.
-	   */
-	  ArrayLikeSequence.prototype.uniq = function uniq(keyFn) {
-	    return new IndexedUniqueSequence(this, createCallback(keyFn));
-	  };
-
-	  /**
-	   * @param {ArrayLikeSequence} parent
-	   * @constructor
-	   */
-	  function IndexedUniqueSequence(parent, keyFn) {
-	    this.parent = parent;
-	    this.each   = getEachForParent(parent);
-	    this.keyFn  = keyFn;
-	  }
-
-	  IndexedUniqueSequence.prototype = new Sequence();
-
-	  IndexedUniqueSequence.prototype.eachArrayCache = function eachArrayCache(fn) {
-	    // Basically the same implementation as w/ the set, but using an array because
-	    // it's cheaper for smaller sequences.
-	    var parent = this.parent,
-	        keyFn  = this.keyFn,
-	        length = parent.length(),
-	        cache  = [],
-	        find   = arrayContains,
-	        key, value,
-	        i = -1,
-	        j = 0;
-
-	    while (++i < length) {
-	      value = parent.get(i);
-	      key = keyFn(value);
-	      if (!find(cache, key)) {
-	        cache.push(key);
-	        if (fn(value, j++) === false) {
-	          return false;
-	        }
-	      }
-	    }
-	  };
-
-	  IndexedUniqueSequence.prototype.eachSetCache = UniqueSequence.prototype.each;
-
-	  function getEachForParent(parent) {
-	    if (parent.length() < 100) {
-	      return IndexedUniqueSequence.prototype.eachArrayCache;
-	    } else {
-	      return UniqueSequence.prototype.each;
-	    }
-	  }
-
-	  // Now that we've fully initialized the ArrayLikeSequence prototype, we can
-	  // set the prototype for MemoizedSequence.
-
-	  MemoizedSequence.prototype = new ArrayLikeSequence();
-
-	  MemoizedSequence.prototype.cache = function cache() {
-	    return this.cachedResult || (this.cachedResult = this.parent.toArray());
-	  };
-
-	  MemoizedSequence.prototype.get = function get(i) {
-	    return this.cache()[i];
-	  };
-
-	  MemoizedSequence.prototype.length = function length() {
-	    return this.cache().length;
-	  };
-
-	  MemoizedSequence.prototype.slice = function slice(begin, end) {
-	    return this.cache().slice(begin, end);
-	  };
-
-	  MemoizedSequence.prototype.toArray = function toArray() {
-	    return this.cache().slice(0);
-	  };
-
-	  /**
-	   * ArrayWrapper is the most basic {@link Sequence}. It directly wraps an array
-	   * and implements the same methods as {@link ArrayLikeSequence}, but more
-	   * efficiently.
-	   *
-	   * @constructor
-	   */
-	  function ArrayWrapper(source) {
-	    this.source = source;
-	  }
-
-	  ArrayWrapper.prototype = new ArrayLikeSequence();
-
-	  ArrayWrapper.prototype.root = function root() {
-	    return this;
-	  };
-
-	  ArrayWrapper.prototype.isAsync = function isAsync() {
-	    return false;
-	  };
-
-	  /**
-	   * Returns the element at the specified index in the source array.
-	   *
-	   * @param {number} i The index to access.
-	   * @returns {*} The element.
-	   */
-	  ArrayWrapper.prototype.get = function get(i) {
-	    return this.source[i];
-	  };
-
-	  /**
-	   * Returns the length of the source array.
-	   *
-	   * @returns {number} The length.
-	   */
-	  ArrayWrapper.prototype.length = function length() {
-	    return this.source.length;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#each}.
-	   */
-	  ArrayWrapper.prototype.each = function each(fn) {
-	    return forEach(this.source, fn);
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#map}.
-	   */
-	  ArrayWrapper.prototype.map = function map(mapFn) {
-	    return new MappedArrayWrapper(this, createCallback(mapFn));
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#filter}.
-	   */
-	  ArrayWrapper.prototype.filter = function filter(filterFn) {
-	    return new FilteredArrayWrapper(this, createCallback(filterFn));
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#uniq}.
-	   */
-	  ArrayWrapper.prototype.uniq = function uniq(keyFn) {
-	    return new UniqueArrayWrapper(this, keyFn);
-	  };
-
-	  /**
-	   * An optimized version of {@link ArrayLikeSequence#concat}.
-	   *
-	   * @param {...*} var_args
-	   */
-	  ArrayWrapper.prototype.concat = function concat(var_args) {
-	    if (arguments.length === 1 && arguments[0] instanceof Array) {
-	      return new ConcatArrayWrapper(this, (/** @type {Array} */ var_args));
-	    } else {
-	      return ArrayLikeSequence.prototype.concat.apply(this, arguments);
-	    }
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#toArray}.
-	   */
-	  ArrayWrapper.prototype.toArray = function toArray() {
-	    return this.source.slice(0);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MappedArrayWrapper(parent, mapFn) {
-	    this.parent = parent;
-	    this.mapFn  = mapFn;
-	  }
-
-	  MappedArrayWrapper.prototype = new ArrayLikeSequence();
-
-	  MappedArrayWrapper.prototype.get = function get(i) {
-	    var source = this.parent.source;
-
-	    if (i < 0 || i >= source.length) {
-	      return undefined;
-	    }
-
-	    return this.mapFn(source[i]);
-	  };
-
-	  MappedArrayWrapper.prototype.length = function length() {
-	    return this.parent.source.length;
-	  };
-
-	  MappedArrayWrapper.prototype.each = function each(fn) {
-	    var source = this.parent.source,
-	        length = source.length,
-	        mapFn  = this.mapFn,
-	        i = -1;
-
-	    while (++i < length) {
-	      if (fn(mapFn(source[i], i), i) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function FilteredArrayWrapper(parent, filterFn) {
-	    this.parent   = parent;
-	    this.filterFn = filterFn;
-	  }
-
-	  FilteredArrayWrapper.prototype = new FilteredSequence();
-
-	  FilteredArrayWrapper.prototype.each = function each(fn) {
-	    var source = this.parent.source,
-	        filterFn = this.filterFn,
-	        length = source.length,
-	        i = -1,
-	        j = 0,
-	        e;
-
-	    while (++i < length) {
-	      e = source[i];
-	      if (filterFn(e, i) && fn(e, j++) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function UniqueArrayWrapper(parent, keyFn) {
-	    this.parent = parent;
-	    this.each   = getEachForSource(parent.source);
-	    this.keyFn  = keyFn;
-	  }
-
-	  UniqueArrayWrapper.prototype = new Sequence();
-
-	  UniqueArrayWrapper.prototype.eachNoCache = function eachNoCache(fn) {
-	    var source = this.parent.source,
-	        keyFn  = this.keyFn,
-	        length = source.length,
-	        find   = arrayContainsBefore,
-	        value,
-
-	        // Yes, this is hideous.
-	        // Trying to get performance first, will refactor next!
-	        i = -1,
-	        k = 0;
-
-	    while (++i < length) {
-	      value = source[i];
-	      if (!find(source, value, i, keyFn) && fn(value, k++) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  UniqueArrayWrapper.prototype.eachArrayCache = function eachArrayCache(fn) {
-	    // Basically the same implementation as w/ the set, but using an array because
-	    // it's cheaper for smaller sequences.
-	    var source = this.parent.source,
-	        keyFn  = this.keyFn,
-	        length = source.length,
-	        cache  = [],
-	        find   = arrayContains,
-	        key, value,
-	        i = -1,
-	        j = 0;
-
-	    if (keyFn) {
-	      keyFn = createCallback(keyFn);
-	      while (++i < length) {
-	        value = source[i];
-	        key = keyFn(value);
-	        if (!find(cache, key)) {
-	          cache.push(key);
-	          if (fn(value, j++) === false) {
-	            return false;
-	          }
-	        }
-	      }
-
-	    } else {
-	      while (++i < length) {
-	        value = source[i];
-	        if (!find(cache, value)) {
-	          cache.push(value);
-	          if (fn(value, j++) === false) {
-	            return false;
-	          }
-	        }
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  UniqueArrayWrapper.prototype.eachSetCache = UniqueSequence.prototype.each;
-
-	  /**
-	   * My latest findings here...
-	   *
-	   * So I hadn't really given the set-based approach enough credit. The main issue
-	   * was that my Set implementation was totally not optimized at all. After pretty
-	   * heavily optimizing it (just take a look; it's a monstrosity now!), it now
-	   * becomes the fastest option for much smaller values of N.
-	   */
-	  function getEachForSource(source) {
-	    if (source.length < 40) {
-	      return UniqueArrayWrapper.prototype.eachNoCache;
-	    } else if (source.length < 100) {
-	      return UniqueArrayWrapper.prototype.eachArrayCache;
-	    } else {
-	      return UniqueArrayWrapper.prototype.eachSetCache;
-	    }
-	  }
-
-	  /**
-	   * @constructor
-	   */
-	  function ConcatArrayWrapper(parent, other) {
-	    this.parent = parent;
-	    this.other  = other;
-	  }
-
-	  ConcatArrayWrapper.prototype = new ArrayLikeSequence();
-
-	  ConcatArrayWrapper.prototype.get = function get(i) {
-	    var source = this.parent.source,
-	        sourceLength = source.length;
-
-	    if (i < sourceLength) {
-	      return source[i];
-	    } else {
-	      return this.other[i - sourceLength];
-	    }
-	  };
-
-	  ConcatArrayWrapper.prototype.length = function length() {
-	    return this.parent.source.length + this.other.length;
-	  };
-
-	  ConcatArrayWrapper.prototype.each = function each(fn) {
-	    var source = this.parent.source,
-	        sourceLength = source.length,
-	        other = this.other,
-	        otherLength = other.length,
-	        i = 0,
-	        j = -1;
-
-	    while (++j < sourceLength) {
-	      if (fn(source[j], i++) === false) {
-	        return false;
-	      }
-	    }
-
-	    j = -1;
-	    while (++j < otherLength) {
-	      if (fn(other[j], i++) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * An `ObjectLikeSequence` object represents a sequence of key/value pairs.
-	   *
-	   * The initial sequence you get by wrapping an object with `Lazy(object)` is
-	   * an `ObjectLikeSequence`.
-	   *
-	   * All methods of `ObjectLikeSequence` that conceptually should return
-	   * something like an object return another `ObjectLikeSequence`.
-	   *
-	   * @public
-	   * @constructor
-	   *
-	   * @examples
-	   * var obj = { foo: 'bar' };
-	   *
-	   * Lazy(obj).assign({ bar: 'baz' })   // instanceof Lazy.ObjectLikeSequence
-	   * Lazy(obj).defaults({ bar: 'baz' }) // instanceof Lazy.ObjectLikeSequence
-	   * Lazy(obj).invert()                 // instanceof Lazy.ObjectLikeSequence
-	   */
-	  function ObjectLikeSequence() {}
-
-	  ObjectLikeSequence.prototype = new Sequence();
-
-	  /**
-	   * Create a new constructor function for a type inheriting from
-	   * `ObjectLikeSequence`.
-	   *
-	   * @public
-	   * @param {string|Array.<string>} methodName The name(s) of the method(s) to be
-	   *     used for constructing the new sequence. The method will be attached to
-	   *     the `ObjectLikeSequence` prototype so that it can be chained with any other
-	   *     methods that return object-like sequences.
-	   * @param {Object} overrides An object containing function overrides for this
-	   *     new sequence type. **Must** include `each`. *May* include `init` and
-	   *     `get` (for looking up an element by key).
-	   * @returns {Function} A constructor for a new type inheriting from
-	   *     `ObjectLikeSequence`.
-	   *
-	   * @examples
-	   * function downcaseKey(value, key) {
-	   *   return [key.toLowerCase(), value];
-	   * }
-	   *
-	   * Lazy.ObjectLikeSequence.define("caseInsensitive", {
-	   *   init: function() {
-	   *     var downcased = this.parent
-	   *       .map(downcaseKey)
-	   *       .toObject();
-	   *     this.downcased = Lazy(downcased);
-	   *   },
-	   *
-	   *   get: function(key) {
-	   *     return this.downcased.get(key.toLowerCase());
-	   *   },
-	   *
-	   *   each: function(fn) {
-	   *     return this.downcased.each(fn);
-	   *   }
-	   * });
-	   *
-	   * Lazy({ Foo: 'bar' }).caseInsensitive()            // sequence: { foo: 'bar' }
-	   * Lazy({ FOO: 'bar' }).caseInsensitive().get('foo') // => 'bar'
-	   * Lazy({ FOO: 'bar' }).caseInsensitive().get('FOO') // => 'bar'
-	   */
-	  ObjectLikeSequence.define = function define(methodName, overrides) {
-	    if (!overrides || typeof overrides.each !== 'function') {
-	      throw new Error("A custom object-like sequence must implement *at least* each!");
-	    }
-
-	    return defineSequenceType(ObjectLikeSequence, methodName, overrides);
-	  };
-
-	  ObjectLikeSequence.prototype.value = function value() {
-	    return this.toObject();
-	  };
-
-	  /**
-	   * Gets the element at the specified key in this sequence.
-	   *
-	   * @public
-	   * @param {string} key The key.
-	   * @returns {*} The element.
-	   *
-	   * @examples
-	   * Lazy({ foo: "bar" }).get("foo")                          // => "bar"
-	   * Lazy({ foo: "bar" }).extend({ foo: "baz" }).get("foo")   // => "baz"
-	   * Lazy({ foo: "bar" }).defaults({ bar: "baz" }).get("bar") // => "baz"
-	   * Lazy({ foo: "bar" }).invert().get("bar")                 // => "foo"
-	   * Lazy({ foo: 1, bar: 2 }).pick(["foo"]).get("foo")        // => 1
-	   * Lazy({ foo: 1, bar: 2 }).pick(["foo"]).get("bar")        // => undefined
-	   * Lazy({ foo: 1, bar: 2 }).omit(["foo"]).get("bar")        // => 2
-	   * Lazy({ foo: 1, bar: 2 }).omit(["foo"]).get("foo")        // => undefined
-	   */
-	  ObjectLikeSequence.prototype.get = function get(key) {
-	    var pair = this.pairs().find(function(pair) {
-	      return pair[0] === key;
-	    });
-
-	    return pair ? pair[1] : undefined;
-	  };
-
-	  /**
-	   * Returns a {@link Sequence} whose elements are the keys of this object-like
-	   * sequence.
-	   *
-	   * @public
-	   * @returns {Sequence} The sequence based on this sequence's keys.
-	   *
-	   * @examples
-	   * Lazy({ hello: "hola", goodbye: "hasta luego" }).keys() // sequence: ["hello", "goodbye"]
-	   */
-	  ObjectLikeSequence.prototype.keys = function keys() {
-	    return this.map(function(v, k) { return k; });
-	  };
-
-	  /**
-	   * Returns a {@link Sequence} whose elements are the values of this object-like
-	   * sequence.
-	   *
-	   * @public
-	   * @returns {Sequence} The sequence based on this sequence's values.
-	   *
-	   * @examples
-	   * Lazy({ hello: "hola", goodbye: "hasta luego" }).values() // sequence: ["hola", "hasta luego"]
-	   */
-	  ObjectLikeSequence.prototype.values = function values() {
-	    return this.map(function(v, k) { return v; });
-	  };
-
-	  /**
-	   * Throws an exception. Asynchronous iteration over object-like sequences is
-	   * not supported.
-	   *
-	   * @public
-	   * @examples
-	   * Lazy({ foo: 'bar' }).async() // throws
-	   */
-	  ObjectLikeSequence.prototype.async = function async() {
-	    throw new Error('An ObjectLikeSequence does not support asynchronous iteration.');
-	  };
-
-	  ObjectLikeSequence.prototype.filter = function filter(filterFn) {
-	    return new FilteredObjectLikeSequence(this, createCallback(filterFn));
-	  };
-
-	  function FilteredObjectLikeSequence(parent, filterFn) {
-	    this.parent = parent;
-	    this.filterFn = filterFn;
-	  }
-
-	  FilteredObjectLikeSequence.prototype = new ObjectLikeSequence();
-
-	  FilteredObjectLikeSequence.prototype.each = function each(fn) {
-	    var filterFn = this.filterFn;
-
-	    return this.parent.each(function(v, k) {
-	      if (filterFn(v, k)) {
-	        return fn(v, k);
-	      }
-	    });
-	  };
-
-	  /**
-	   * Returns this same sequence. (Reversing an object-like sequence doesn't make
-	   * any sense.)
-	   */
-	  ObjectLikeSequence.prototype.reverse = function reverse() {
-	    return this;
-	  };
-
-	  /**
-	   * Returns an {@link ObjectLikeSequence} whose elements are the combination of
-	   * this sequence and another object. In the case of a key appearing in both this
-	   * sequence and the given object, the other object's value will override the
-	   * one in this sequence.
-	   *
-	   * @public
-	   * @aka extend
-	   * @param {Object} other The other object to assign to this sequence.
-	   * @returns {ObjectLikeSequence} A new sequence comprising elements from this
-	   *     sequence plus the contents of `other`.
-	   *
-	   * @examples
-	   * Lazy({ "uno": 1, "dos": 2 }).assign({ "tres": 3 }) // sequence: { uno: 1, dos: 2, tres: 3 }
-	   * Lazy({ foo: "bar" }).assign({ foo: "baz" });       // sequence: { foo: "baz" }
-	   */
-	  ObjectLikeSequence.prototype.assign = function assign(other) {
-	    return new AssignSequence(this, other);
-	  };
-
-	  ObjectLikeSequence.prototype.extend = function extend(other) {
-	    return this.assign(other);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function AssignSequence(parent, other) {
-	    this.parent = parent;
-	    this.other  = other;
-	  }
-
-	  AssignSequence.prototype = new ObjectLikeSequence();
-
-	  AssignSequence.prototype.get = function get(key) {
-	    return this.other[key] || this.parent.get(key);
-	  };
-
-	  AssignSequence.prototype.each = function each(fn) {
-	    var merged = new Set(),
-	        done   = false;
-
-	    Lazy(this.other).each(function(value, key) {
-	      if (fn(value, key) === false) {
-	        done = true;
-	        return false;
-	      }
-
-	      merged.add(key);
-	    });
-
-	    if (!done) {
-	      return this.parent.each(function(value, key) {
-	        if (!merged.contains(key) && fn(value, key) === false) {
-	          return false;
-	        }
-	      });
-	    }
-	  };
-
-	  /**
-	   * Returns an {@link ObjectLikeSequence} whose elements are the combination of
-	   * this sequence and a 'default' object. In the case of a key appearing in both
-	   * this sequence and the given object, this sequence's value will override the
-	   * default object's.
-	   *
-	   * @public
-	   * @param {Object} defaults The 'default' object to use for missing keys in this
-	   *     sequence.
-	   * @returns {ObjectLikeSequence} A new sequence comprising elements from this
-	   *     sequence supplemented by the contents of `defaults`.
-	   *
-	   * @examples
-	   * Lazy({ name: "Dan" }).defaults({ name: "User", password: "passw0rd" }) // sequence: { name: "Dan", password: "passw0rd" }
-	   */
-	  ObjectLikeSequence.prototype.defaults = function defaults(defaults) {
-	    return new DefaultsSequence(this, defaults);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function DefaultsSequence(parent, defaults) {
-	    this.parent   = parent;
-	    this.defaults = defaults;
-	  }
-
-	  DefaultsSequence.prototype = new ObjectLikeSequence();
-
-	  DefaultsSequence.prototype.get = function get(key) {
-	    return this.parent.get(key) || this.defaults[key];
-	  };
-
-	  DefaultsSequence.prototype.each = function each(fn) {
-	    var merged = new Set(),
-	        done   = false;
-
-	    this.parent.each(function(value, key) {
-	      if (fn(value, key) === false) {
-	        done = true;
-	        return false;
-	      }
-
-	      if (typeof value !== "undefined") {
-	        merged.add(key);
-	      }
-	    });
-
-	    if (!done) {
-	      Lazy(this.defaults).each(function(value, key) {
-	        if (!merged.contains(key) && fn(value, key) === false) {
-	          return false;
-	        }
-	      });
-	    }
-	  };
-
-	  /**
-	   * Returns an {@link ObjectLikeSequence} whose values are this sequence's keys,
-	   * and whose keys are this sequence's values.
-	   *
-	   * @public
-	   * @returns {ObjectLikeSequence} A new sequence comprising the inverted keys and
-	   *     values from this sequence.
-	   *
-	   * @examples
-	   * Lazy({ first: "Dan", last: "Tao" }).invert() // sequence: { Dan: "first", Tao: "last" }
-	   */
-	  ObjectLikeSequence.prototype.invert = function invert() {
-	    return new InvertedSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function InvertedSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  InvertedSequence.prototype = new ObjectLikeSequence();
-
-	  InvertedSequence.prototype.each = function each(fn) {
-	    this.parent.each(function(value, key) {
-	      return fn(key, value);
-	    });
-	  };
-
-	  /**
-	   * Produces an {@link ObjectLikeSequence} consisting of all the recursively
-	   * merged values from this and the given object(s) or sequence(s).
-	   *
-	   * Note that by default this method only merges "vanilla" objects (bags of
-	   * key/value pairs), not arrays or any other custom object types. To customize
-	   * how merging works, you can provide the mergeFn argument, e.g. to handling
-	   * merging arrays, strings, or other types of objects.
-	   *
-	   * @public
-	   * @param {...Object|ObjectLikeSequence} others The other object(s) or
-	   *     sequence(s) whose values will be merged into this one.
-	   * @param {Function=} mergeFn An optional function used to customize merging
-	   *     behavior. The function should take two values as parameters and return
-	   *     whatever the "merged" form of those values is. If the function returns
-	   *     undefined then the new value will simply replace the old one in the
-	   *     final result.
-	   * @returns {ObjectLikeSequence} The new sequence consisting of merged values.
-	   *
-	   * @examples
-	   * // These examples are completely stolen from Lo-Dash's documentation:
-	   * // lodash.com/docs#merge
-	   *
-	   * var names = {
-	   *   'characters': [
-	   *     { 'name': 'barney' },
-	   *     { 'name': 'fred' }
-	   *   ]
-	   * };
-	   *
-	   * var ages = {
-	   *   'characters': [
-	   *     { 'age': 36 },
-	   *     { 'age': 40 }
-	   *   ]
-	   * };
-	   *
-	   * var food = {
-	   *   'fruits': ['apple'],
-	   *   'vegetables': ['beet']
-	   * };
-	   *
-	   * var otherFood = {
-	   *   'fruits': ['banana'],
-	   *   'vegetables': ['carrot']
-	   * };
-	   *
-	   * function mergeArrays(a, b) {
-	   *   return Array.isArray(a) ? a.concat(b) : undefined;
-	   * }
-	   *
-	   * Lazy(names).merge(ages); // => sequence: { 'characters': [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred', 'age': 40 }] }
-	   * Lazy(food).merge(otherFood, mergeArrays); // => sequence: { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot'] }
-	   *
-	   * // ----- Now for my own tests: -----
-	   *
-	   * // merges objects
-	   * Lazy({ foo: 1 }).merge({ foo: 2 }); // => sequence: { foo: 2 }
-	   * Lazy({ foo: 1 }).merge({ bar: 2 }); // => sequence: { foo: 1, bar: 2 }
-	   *
-	   * // goes deep
-	   * Lazy({ foo: { bar: 1 } }).merge({ foo: { bar: 2 } }); // => sequence: { foo: { bar: 2 } }
-	   * Lazy({ foo: { bar: 1 } }).merge({ foo: { baz: 2 } }); // => sequence: { foo: { bar: 1, baz: 2 } }
-	   * Lazy({ foo: { bar: 1 } }).merge({ foo: { baz: 2 } }); // => sequence: { foo: { bar: 1, baz: 2 } }
-	   *
-	   * // gives precedence to later sources
-	   * Lazy({ foo: 1 }).merge({ bar: 2 }, { bar: 3 }); // => sequence: { foo: 1, bar: 3 }
-	   *
-	   * // undefined gets passed over
-	   * Lazy({ foo: 1 }).merge({ foo: undefined }); // => sequence: { foo: 1 }
-	   *
-	   * // null doesn't get passed over
-	   * Lazy({ foo: 1 }).merge({ foo: null }); // => sequence: { foo: null }
-	   *
-	   * // array contents get merged as well
-	   * Lazy({ foo: [{ bar: 1 }] }).merge({ foo: [{ baz: 2 }] }); // => sequence: { foo: [{ bar: 1, baz: 2}] }
-	   */
-	  ObjectLikeSequence.prototype.merge = function merge(var_args) {
-	    var mergeFn = arguments.length > 1 && typeof arguments[arguments.length - 1] === "function" ?
-	      arrayPop.call(arguments) : null;
-	    return new MergedSequence(this, arraySlice.call(arguments, 0), mergeFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MergedSequence(parent, others, mergeFn) {
-	    this.parent  = parent;
-	    this.others  = others;
-	    this.mergeFn = mergeFn;
-	  }
-
-	  MergedSequence.prototype = new ObjectLikeSequence();
-
-	  MergedSequence.prototype.each = function each(fn) {
-	    var others  = this.others,
-	        mergeFn = this.mergeFn || mergeObjects,
-	        keys    = {};
-
-	    var iteratedFullSource = this.parent.each(function(value, key) {
-	      var merged = value;
-
-	      forEach(others, function(other) {
-	        if (key in other) {
-	          merged = mergeFn(merged, other[key]);
-	        }
-	      });
-
-	      keys[key] = true;
-
-	      return fn(merged, key);
-	    });
-
-	    if (iteratedFullSource === false) {
-	      return false;
-	    }
-
-	    var remaining = {};
-
-	    forEach(others, function(other) {
-	      for (var k in other) {
-	        if (!keys[k]) {
-	          remaining[k] = mergeFn(remaining[k], other[k]);
-	        }
-	      }
-	    });
-
-	    return Lazy(remaining).each(fn);
-	  };
-
-	  /**
-	   * @private
-	   * @examples
-	   * mergeObjects({ foo: 1 }, { bar: 2 }); // => { foo: 1, bar: 2 }
-	   * mergeObjects({ foo: { bar: 1 } }, { foo: { baz: 2 } }); // => { foo: { bar: 1, baz: 2 } }
-	   * mergeObjects({ foo: { bar: 1 } }, { foo: undefined }); // => { foo: { bar: 1 } }
-	   * mergeObjects({ foo: { bar: 1 } }, { foo: null }); // => { foo: null }
-	   * mergeObjects({ array: [0, 1, 2] }, { array: [3, 4, 5] }).array; // instanceof Array
-	   * mergeObjects({ date: new Date() }, { date: new Date() }).date; // instanceof Date
-	   * mergeObjects([{ foo: 1 }], [{ bar: 2 }]); // => [{ foo: 1, bar: 2 }]
-	   */
-	  function mergeObjects(a, b) {
-	    var merged, prop;
-
-	    if (typeof b === 'undefined') {
-	      return a;
-	    }
-
-	    // Check that we're dealing with two objects or two arrays.
-	    if (isVanillaObject(a) && isVanillaObject(b)) {
-	      merged = {};
-	    } else if (a instanceof Array && b instanceof Array) {
-	      merged = [];
-	    } else {
-	      // Otherwise there's no merging to do -- just replace a w/ b.
-	      return b;
-	    }
-
-	    for (prop in a) {
-	      merged[prop] = mergeObjects(a[prop], b[prop]);
-	    }
-	    for (prop in b) {
-	      if (!merged[prop]) {
-	        merged[prop] = b[prop];
-	      }
-	    }
-	    return merged;
-	  }
-
-	  /**
-	   * Checks whether an object is a "vanilla" object, i.e. {'foo': 'bar'} as
-	   * opposed to an array, date, etc.
-	   *
-	   * @private
-	   * @examples
-	   * isVanillaObject({foo: 'bar'}); // => true
-	   * isVanillaObject(new Date());   // => false
-	   * isVanillaObject([1, 2, 3]);    // => false
-	   */
-	  function isVanillaObject(object) {
-	    return object && object.constructor === Object;
-	  }
-
-	  /**
-	   * Creates a {@link Sequence} consisting of the keys from this sequence whose
-	   *     values are functions.
-	   *
-	   * @public
-	   * @aka methods
-	   * @returns {Sequence} The new sequence.
-	   *
-	   * @examples
-	   * var dog = {
-	   *   name: "Fido",
-	   *   breed: "Golden Retriever",
-	   *   bark: function() { console.log("Woof!"); },
-	   *   wagTail: function() { console.log("TODO: implement robotic dog interface"); }
-	   * };
-	   *
-	   * Lazy(dog).functions() // sequence: ["bark", "wagTail"]
-	   */
-	  ObjectLikeSequence.prototype.functions = function functions() {
-	    return this
-	      .filter(function(v, k) { return typeof(v) === "function"; })
-	      .map(function(v, k) { return k; });
-	  };
-
-	  ObjectLikeSequence.prototype.methods = function methods() {
-	    return this.functions();
-	  };
-
-	  /**
-	   * Creates an {@link ObjectLikeSequence} consisting of the key/value pairs from
-	   * this sequence whose keys are included in the given array of property names.
-	   *
-	   * @public
-	   * @param {Array} properties An array of the properties to "pick" from this
-	   *     sequence.
-	   * @returns {ObjectLikeSequence} The new sequence.
-	   *
-	   * @examples
-	   * var players = {
-	   *   "who": "first",
-	   *   "what": "second",
-	   *   "i don't know": "third"
-	   * };
-	   *
-	   * Lazy(players).pick(["who", "what"]) // sequence: { who: "first", what: "second" }
-	   */
-	  ObjectLikeSequence.prototype.pick = function pick(properties) {
-	    return new PickSequence(this, properties);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function PickSequence(parent, properties) {
-	    this.parent     = parent;
-	    this.properties = properties;
-	  }
-
-	  PickSequence.prototype = new ObjectLikeSequence();
-
-	  PickSequence.prototype.get = function get(key) {
-	    return arrayContains(this.properties, key) ? this.parent.get(key) : undefined;
-	  };
-
-	  PickSequence.prototype.each = function each(fn) {
-	    var inArray    = arrayContains,
-	        properties = this.properties;
-
-	    return this.parent.each(function(value, key) {
-	      if (inArray(properties, key)) {
-	        return fn(value, key);
-	      }
-	    });
-	  };
-
-	  /**
-	   * Creates an {@link ObjectLikeSequence} consisting of the key/value pairs from
-	   * this sequence excluding those with the specified keys.
-	   *
-	   * @public
-	   * @param {Array} properties An array of the properties to *omit* from this
-	   *     sequence.
-	   * @returns {ObjectLikeSequence} The new sequence.
-	   *
-	   * @examples
-	   * var players = {
-	   *   "who": "first",
-	   *   "what": "second",
-	   *   "i don't know": "third"
-	   * };
-	   *
-	   * Lazy(players).omit(["who", "what"]) // sequence: { "i don't know": "third" }
-	   */
-	  ObjectLikeSequence.prototype.omit = function omit(properties) {
-	    return new OmitSequence(this, properties);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function OmitSequence(parent, properties) {
-	    this.parent     = parent;
-	    this.properties = properties;
-	  }
-
-	  OmitSequence.prototype = new ObjectLikeSequence();
-
-	  OmitSequence.prototype.get = function get(key) {
-	    return arrayContains(this.properties, key) ? undefined : this.parent.get(key);
-	  };
-
-	  OmitSequence.prototype.each = function each(fn) {
-	    var inArray    = arrayContains,
-	        properties = this.properties;
-
-	    return this.parent.each(function(value, key) {
-	      if (!inArray(properties, key)) {
-	        return fn(value, key);
-	      }
-	    });
-	  };
-
-	  /**
-	   * Maps the key/value pairs in this sequence to arrays.
-	   *
-	   * @public
-	   * @aka toArray
-	   * @returns {Sequence} An sequence of `[key, value]` pairs.
-	   *
-	   * @examples
-	   * var colorCodes = {
-	   *   red: "#f00",
-	   *   green: "#0f0",
-	   *   blue: "#00f"
-	   * };
-	   *
-	   * Lazy(colorCodes).pairs() // sequence: [["red", "#f00"], ["green", "#0f0"], ["blue", "#00f"]]
-	   */
-	  ObjectLikeSequence.prototype.pairs = function pairs() {
-	    return this.map(function(v, k) { return [k, v]; });
-	  };
-
-	  /**
-	   * Creates an array from the key/value pairs in this sequence.
-	   *
-	   * @public
-	   * @returns {Array} An array of `[key, value]` elements.
-	   *
-	   * @examples
-	   * var colorCodes = {
-	   *   red: "#f00",
-	   *   green: "#0f0",
-	   *   blue: "#00f"
-	   * };
-	   *
-	   * Lazy(colorCodes).toArray() // => [["red", "#f00"], ["green", "#0f0"], ["blue", "#00f"]]
-	   */
-	  ObjectLikeSequence.prototype.toArray = function toArray() {
-	    return this.pairs().toArray();
-	  };
-
-	  /**
-	   * Creates an object with the key/value pairs from this sequence.
-	   *
-	   * @public
-	   * @returns {Object} An object with the same key/value pairs as this sequence.
-	   *
-	   * @examples
-	   * var colorCodes = {
-	   *   red: "#f00",
-	   *   green: "#0f0",
-	   *   blue: "#00f"
-	   * };
-	   *
-	   * Lazy(colorCodes).toObject() // => { red: "#f00", green: "#0f0", blue: "#00f" }
-	   */
-	  ObjectLikeSequence.prototype.toObject = function toObject() {
-	    return this.reduce(function(object, value, key) {
-	      object[key] = value;
-	      return object;
-	    }, {});
-	  };
-
-	  // Now that we've fully initialized the ObjectLikeSequence prototype, we can
-	  // actually set the prototypes for GroupedSequence, IndexedSequence, and
-	  // CountedSequence.
-
-	  GroupedSequence.prototype = new ObjectLikeSequence();
-
-	  GroupedSequence.prototype.each = function each(fn) {
-	    var keyFn   = createCallback(this.keyFn),
-	        valFn   = createCallback(this.valFn),
-	        result;
-
-	    result = this.parent.reduce(function(grouped,e) {
-	      var key = keyFn(e),
-	          val = valFn(e);
-	      if (!(grouped[key] instanceof Array)) {
-	        grouped[key] = [val];
-	      } else {
-	        grouped[key].push(val);
-	      }
-	      return grouped;
-	    },{});
-
-	    return transform(function(grouped) {
-	      for (var key in grouped) {
-	        if (fn(grouped[key], key) === false) {
-	          return false;
-	        }
-	      }
-	    }, result);
-	  };
-
-	  IndexedSequence.prototype = new ObjectLikeSequence();
-
-	  IndexedSequence.prototype.each = function each(fn) {
-	    var keyFn   = createCallback(this.keyFn),
-	        valFn   = createCallback(this.valFn),
-	        indexed = {};
-
-	    return this.parent.each(function(e) {
-	      var key = keyFn(e),
-	          val = valFn(e);
-
-	      if (!indexed[key]) {
-	        indexed[key] = val;
-	        return fn(val, key);
-	      }
-	    });
-	  };
-
-	  CountedSequence.prototype = new ObjectLikeSequence();
-
-	  CountedSequence.prototype.each = function each(fn) {
-	    var keyFn   = createCallback(this.keyFn),
-	        counted = {};
-
-	    this.parent.each(function(e) {
-	      var key = keyFn(e);
-	      if (!counted[key]) {
-	        counted[key] = 1;
-	      } else {
-	        counted[key] += 1;
-	      }
-	    });
-
-	    for (var key in counted) {
-	      if (fn(counted[key], key) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * Watches for all changes to a specified property (or properties) of an
-	   * object and produces a sequence whose elements have the properties
-	   * `{ property, value }` indicating which property changed and what it was
-	   * changed to.
-	   *
-	   * Note that this method **only works on directly wrapped objects**; it will
-	   * *not* work on any arbitrary {@link ObjectLikeSequence}.
-	   *
-	   * @public
-	   * @param {(string|Array)=} propertyNames A property name or array of property
-	   *     names to watch. If this parameter is `undefined`, all of the object's
-	   *     current (enumerable) properties will be watched.
-	   * @returns {Sequence} A sequence comprising `{ property, value }` objects
-	   *     describing each change to the specified property/properties.
-	   *
-	   * @examples
-	   * var obj = {},
-	   *     changes = [];
-	   *
-	   * Lazy(obj).watch('foo').each(function(change) {
-	   *   changes.push(change);
-	   * });
-	   *
-	   * obj.foo = 1;
-	   * obj.bar = 2;
-	   * obj.foo = 3;
-	   *
-	   * obj.foo; // => 3
-	   * changes; // => [{ property: 'foo', value: 1 }, { property: 'foo', value: 3 }]
-	   */
-	  ObjectLikeSequence.prototype.watch = function watch(propertyNames) {
-	    throw new Error('You can only call #watch on a directly wrapped object.');
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ObjectWrapper(source) {
-	    this.source = source;
-	  }
-
-	  ObjectWrapper.prototype = new ObjectLikeSequence();
-
-	  ObjectWrapper.prototype.root = function root() {
-	    return this;
-	  };
-
-	  ObjectWrapper.prototype.isAsync = function isAsync() {
-	    return false;
-	  };
-
-	  ObjectWrapper.prototype.get = function get(key) {
-	    return this.source[key];
-	  };
-
-	  ObjectWrapper.prototype.each = function each(fn) {
-	    var source = this.source,
-	        key;
-
-	    for (key in source) {
-	      if (fn(source[key], key) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  /**
-	   * A `StringLikeSequence` represents a sequence of characters.
-	   *
-	   * The initial sequence you get by wrapping a string with `Lazy(string)` is a
-	   * `StringLikeSequence`.
-	   *
-	   * All methods of `StringLikeSequence` that conceptually should return
-	   * something like a string return another `StringLikeSequence`.
-	   *
-	   * @public
-	   * @constructor
-	   *
-	   * @examples
-	   * function upcase(str) { return str.toUpperCase(); }
-	   *
-	   * Lazy('foo')               // instanceof Lazy.StringLikeSequence
-	   * Lazy('foo').toUpperCase() // instanceof Lazy.StringLikeSequence
-	   * Lazy('foo').reverse()     // instanceof Lazy.StringLikeSequence
-	   * Lazy('foo').take(2)       // instanceof Lazy.StringLikeSequence
-	   * Lazy('foo').drop(1)       // instanceof Lazy.StringLikeSequence
-	   * Lazy('foo').substring(1)  // instanceof Lazy.StringLikeSequence
-	   *
-	   * // Note that `map` does not create a `StringLikeSequence` because there's
-	   * // no guarantee the mapping function will return characters. In the event
-	   * // you do want to map a string onto a string-like sequence, use
-	   * // `mapString`:
-	   * Lazy('foo').map(Lazy.identity)       // instanceof Lazy.ArrayLikeSequence
-	   * Lazy('foo').mapString(Lazy.identity) // instanceof Lazy.StringLikeSequence
-	   */
-	  function StringLikeSequence() {}
-
-	  StringLikeSequence.prototype = new ArrayLikeSequence();
-
-	  /**
-	   * Create a new constructor function for a type inheriting from
-	   * `StringLikeSequence`.
-	   *
-	   * @public
-	   * @param {string|Array.<string>} methodName The name(s) of the method(s) to be
-	   *     used for constructing the new sequence. The method will be attached to
-	   *     the `StringLikeSequence` prototype so that it can be chained with any other
-	   *     methods that return string-like sequences.
-	   * @param {Object} overrides An object containing function overrides for this
-	   *     new sequence type. Has the same requirements as
-	   *     {@link ArrayLikeSequence.define}.
-	   * @returns {Function} A constructor for a new type inheriting from
-	   *     `StringLikeSequence`.
-	   *
-	   * @examples
-	   * Lazy.StringLikeSequence.define("zomg", {
-	   *   length: function() {
-	   *     return this.parent.length() + "!!ZOMG!!!1".length;
-	   *   },
-	   *
-	   *   get: function(i) {
-	   *     if (i < this.parent.length()) {
-	   *       return this.parent.get(i);
-	   *     }
-	   *     return "!!ZOMG!!!1".charAt(i - this.parent.length());
-	   *   }
-	   * });
-	   *
-	   * Lazy('foo').zomg() // sequence: "foo!!ZOMG!!!1"
-	   */
-	  StringLikeSequence.define = function define(methodName, overrides) {
-	    if (!overrides || typeof overrides.get !== 'function') {
-	      throw new Error("A custom string-like sequence must implement *at least* get!");
-	    }
-
-	    return defineSequenceType(StringLikeSequence, methodName, overrides);
-	  };
-
-	  StringLikeSequence.prototype.value = function value() {
-	    return this.toString();
-	  };
-
-	  /**
-	   * Returns an {@link IndexedIterator} that will step over each character in this
-	   * sequence one by one.
-	   *
-	   * @returns {IndexedIterator} The iterator.
-	   */
-	  StringLikeSequence.prototype.getIterator = function getIterator() {
-	    return new CharIterator(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function CharIterator(source) {
-	    this.source = Lazy(source);
-	    this.index = -1;
-	  }
-
-	  CharIterator.prototype.current = function current() {
-	    return this.source.charAt(this.index);
-	  };
-
-	  CharIterator.prototype.moveNext = function moveNext() {
-	    return (++this.index < this.source.length());
-	  };
-
-	  /**
-	   * Returns the character at the given index of this sequence, or the empty
-	   * string if the specified index lies outside the bounds of the sequence.
-	   *
-	   * @public
-	   * @param {number} i The index of this sequence.
-	   * @returns {string} The character at the specified index.
-	   *
-	   * @examples
-	   * Lazy("foo").charAt(0)  // => "f"
-	   * Lazy("foo").charAt(-1) // => ""
-	   * Lazy("foo").charAt(10) // => ""
-	   */
-	  StringLikeSequence.prototype.charAt = function charAt(i) {
-	    return this.get(i);
-	  };
-
-	  /**
-	   * Returns the character code at the given index of this sequence, or `NaN` if
-	   * the index lies outside the bounds of the sequence.
-	   *
-	   * @public
-	   * @param {number} i The index of the character whose character code you want.
-	   * @returns {number} The character code.
-	   *
-	   * @examples
-	   * Lazy("abc").charCodeAt(0)  // => 97
-	   * Lazy("abc").charCodeAt(-1) // => NaN
-	   * Lazy("abc").charCodeAt(10) // => NaN
-	   */
-	  StringLikeSequence.prototype.charCodeAt = function charCodeAt(i) {
-	    var char = this.charAt(i);
-	    if (!char) { return NaN; }
-
-	    return char.charCodeAt(0);
-	  };
-
-	  /**
-	   * Returns a {@link StringLikeSequence} comprising the characters from *this*
-	   * sequence starting at `start` and ending at `stop` (exclusive), or---if
-	   * `stop` is `undefined`, including the rest of the sequence.
-	   *
-	   * @public
-	   * @param {number} start The index where this sequence should begin.
-	   * @param {number=} stop The index (exclusive) where this sequence should end.
-	   * @returns {StringLikeSequence} The new sequence.
-	   *
-	   * @examples
-	   * Lazy("foo").substring(1)      // sequence: "oo"
-	   * Lazy("foo").substring(-1)     // sequence: "foo"
-	   * Lazy("hello").substring(1, 3) // sequence: "el"
-	   * Lazy("hello").substring(1, 9) // sequence: "ello"
-	   */
-	  StringLikeSequence.prototype.substring = function substring(start, stop) {
-	    return new StringSegment(this, start, stop);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function StringSegment(parent, start, stop) {
-	    this.parent = parent;
-	    this.start  = Math.max(0, start);
-	    this.stop   = stop;
-	  }
-
-	  StringSegment.prototype = new StringLikeSequence();
-
-	  StringSegment.prototype.get = function get(i) {
-	    return this.parent.get(i + this.start);
-	  };
-
-	  StringSegment.prototype.length = function length() {
-	    return (typeof this.stop === "number" ? this.stop : this.parent.length()) - this.start;
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#first} that returns another
-	   * {@link StringLikeSequence} (or just the first character, if `count` is
-	   * undefined).
-	   *
-	   * @public
-	   * @examples
-	   * Lazy('foo').first()                // => 'f'
-	   * Lazy('fo').first(2)                // sequence: 'fo'
-	   * Lazy('foo').first(10)              // sequence: 'foo'
-	   * Lazy('foo').toUpperCase().first()  // => 'F'
-	   * Lazy('foo').toUpperCase().first(2) // sequence: 'FO'
-	   */
-	  StringLikeSequence.prototype.first = function first(count) {
-	    if (typeof count === "undefined") {
-	      return this.charAt(0);
-	    }
-
-	    return this.substring(0, count);
-	  };
-
-	  /**
-	   * An optimized version of {@link Sequence#last} that returns another
-	   * {@link StringLikeSequence} (or just the last character, if `count` is
-	   * undefined).
-	   *
-	   * @public
-	   * @examples
-	   * Lazy('foo').last()                // => 'o'
-	   * Lazy('foo').last(2)               // sequence: 'oo'
-	   * Lazy('foo').last(10)              // sequence: 'foo'
-	   * Lazy('foo').toUpperCase().last()  // => 'O'
-	   * Lazy('foo').toUpperCase().last(2) // sequence: 'OO'
-	   */
-	  StringLikeSequence.prototype.last = function last(count) {
-	    if (typeof count === "undefined") {
-	      return this.charAt(this.length() - 1);
-	    }
-
-	    return this.substring(this.length() - count);
-	  };
-
-	  StringLikeSequence.prototype.drop = function drop(count) {
-	    return this.substring(count);
-	  };
-
-	  /**
-	   * Finds the index of the first occurrence of the given substring within this
-	   * sequence, starting from the specified index (or the beginning of the
-	   * sequence).
-	   *
-	   * @public
-	   * @param {string} substring The substring to search for.
-	   * @param {number=} startIndex The index from which to start the search.
-	   * @returns {number} The first index where the given substring is found, or
-	   *     -1 if it isn't in the sequence.
-	   *
-	   * @examples
-	   * Lazy('canal').indexOf('a')    // => 1
-	   * Lazy('canal').indexOf('a', 2) // => 3
-	   * Lazy('canal').indexOf('ana')  // => 1
-	   * Lazy('canal').indexOf('andy') // => -1
-	   * Lazy('canal').indexOf('x')    // => -1
-	   */
-	  StringLikeSequence.prototype.indexOf = function indexOf(substring, startIndex) {
-	    return this.toString().indexOf(substring, startIndex);
-	  };
-
-	  /**
-	   * Finds the index of the last occurrence of the given substring within this
-	   * sequence, starting from the specified index (or the end of the sequence)
-	   * and working backwards.
-	   *
-	   * @public
-	   * @param {string} substring The substring to search for.
-	   * @param {number=} startIndex The index from which to start the search.
-	   * @returns {number} The last index where the given substring is found, or
-	   *     -1 if it isn't in the sequence.
-	   *
-	   * @examples
-	   * Lazy('canal').lastIndexOf('a')    // => 3
-	   * Lazy('canal').lastIndexOf('a', 2) // => 1
-	   * Lazy('canal').lastIndexOf('ana')  // => 1
-	   * Lazy('canal').lastIndexOf('andy') // => -1
-	   * Lazy('canal').lastIndexOf('x')    // => -1
-	   */
-	  StringLikeSequence.prototype.lastIndexOf = function lastIndexOf(substring, startIndex) {
-	    return this.toString().lastIndexOf(substring, startIndex);
-	  };
-
-	  /**
-	   * Checks if this sequence contains a given substring.
-	   *
-	   * @public
-	   * @param {string} substring The substring to check for.
-	   * @returns {boolean} Whether or not this sequence contains `substring`.
-	   *
-	   * @examples
-	   * Lazy('hello').contains('ell') // => true
-	   * Lazy('hello').contains('')    // => true
-	   * Lazy('hello').contains('abc') // => false
-	   */
-	  StringLikeSequence.prototype.contains = function contains(substring) {
-	    return this.indexOf(substring) !== -1;
-	  };
-
-	  /**
-	   * Checks if this sequence ends with a given suffix.
-	   *
-	   * @public
-	   * @param {string} suffix The suffix to check for.
-	   * @returns {boolean} Whether or not this sequence ends with `suffix`.
-	   *
-	   * @examples
-	   * Lazy('foo').endsWith('oo')  // => true
-	   * Lazy('foo').endsWith('')    // => true
-	   * Lazy('foo').endsWith('abc') // => false
-	   */
-	  StringLikeSequence.prototype.endsWith = function endsWith(suffix) {
-	    return this.substring(this.length() - suffix.length).toString() === suffix;
-	  };
-
-	  /**
-	   * Checks if this sequence starts with a given prefix.
-	   *
-	   * @public
-	   * @param {string} prefix The prefix to check for.
-	   * @returns {boolean} Whether or not this sequence starts with `prefix`.
-	   *
-	   * @examples
-	   * Lazy('foo').startsWith('fo')  // => true
-	   * Lazy('foo').startsWith('')    // => true
-	   * Lazy('foo').startsWith('abc') // => false
-	   */
-	  StringLikeSequence.prototype.startsWith = function startsWith(prefix) {
-	    return this.substring(0, prefix.length).toString() === prefix;
-	  };
-
-	  /**
-	   * Converts all of the characters in this string to uppercase.
-	   *
-	   * @public
-	   * @returns {StringLikeSequence} A new sequence with the same characters as
-	   *     this sequence, all uppercase.
-	   *
-	   * @examples
-	   * function nextLetter(a) {
-	   *   return String.fromCharCode(a.charCodeAt(0) + 1);
-	   * }
-	   *
-	   * Lazy('foo').toUpperCase()                       // sequence: 'FOO'
-	   * Lazy('foo').substring(1).toUpperCase()          // sequence: 'OO'
-	   * Lazy('abc').mapString(nextLetter).toUpperCase() // sequence: 'BCD'
-	   */
-	  StringLikeSequence.prototype.toUpperCase = function toUpperCase() {
-	    return this.mapString(function(char) { return char.toUpperCase(); });
-	  };
-
-	  /**
-	   * Converts all of the characters in this string to lowercase.
-	   *
-	   * @public
-	   * @returns {StringLikeSequence} A new sequence with the same characters as
-	   *     this sequence, all lowercase.
-	   *
-	   * @examples
-	   * function nextLetter(a) {
-	   *   return String.fromCharCode(a.charCodeAt(0) + 1);
-	   * }
-	   *
-	   * Lazy('FOO').toLowerCase()                       // sequence: 'foo'
-	   * Lazy('FOO').substring(1).toLowerCase()          // sequence: 'oo'
-	   * Lazy('ABC').mapString(nextLetter).toLowerCase() // sequence: 'bcd'
-	   */
-	  StringLikeSequence.prototype.toLowerCase = function toLowerCase() {
-	    return this.mapString(function(char) { return char.toLowerCase(); });
-	  };
-
-	  /**
-	   * Maps the characters of this sequence onto a new {@link StringLikeSequence}.
-	   *
-	   * @public
-	   * @param {Function} mapFn The function used to map characters from this
-	   *     sequence onto the new sequence.
-	   * @returns {StringLikeSequence} The new sequence.
-	   *
-	   * @examples
-	   * function upcase(char) { return char.toUpperCase(); }
-	   *
-	   * Lazy("foo").mapString(upcase)               // sequence: "FOO"
-	   * Lazy("foo").mapString(upcase).charAt(0)     // => "F"
-	   * Lazy("foo").mapString(upcase).charCodeAt(0) // => 70
-	   * Lazy("foo").mapString(upcase).substring(1)  // sequence: "OO"
-	   */
-	  StringLikeSequence.prototype.mapString = function mapString(mapFn) {
-	    return new MappedStringLikeSequence(this, mapFn);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MappedStringLikeSequence(parent, mapFn) {
-	    this.parent = parent;
-	    this.mapFn  = mapFn;
-	  }
-
-	  MappedStringLikeSequence.prototype = new StringLikeSequence();
-	  MappedStringLikeSequence.prototype.get = IndexedMappedSequence.prototype.get;
-	  MappedStringLikeSequence.prototype.length = IndexedMappedSequence.prototype.length;
-
-	  /**
-	   * Returns a copy of this sequence that reads back to front.
-	   *
-	   * @public
-	   *
-	   * @examples
-	   * Lazy("abcdefg").reverse() // sequence: "gfedcba"
-	   */
-	  StringLikeSequence.prototype.reverse = function reverse() {
-	    return new ReversedStringLikeSequence(this);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function ReversedStringLikeSequence(parent) {
-	    this.parent = parent;
-	  }
-
-	  ReversedStringLikeSequence.prototype = new StringLikeSequence();
-	  ReversedStringLikeSequence.prototype.get = IndexedReversedSequence.prototype.get;
-	  ReversedStringLikeSequence.prototype.length = IndexedReversedSequence.prototype.length;
-
-	  StringLikeSequence.prototype.toString = function toString() {
-	    return this.join("");
-	  };
-
-	  /**
-	   * Creates a {@link Sequence} comprising all of the matches for the specified
-	   * pattern in the underlying string.
-	   *
-	   * @public
-	   * @param {RegExp} pattern The pattern to match.
-	   * @returns {Sequence} A sequence of all the matches.
-	   *
-	   * @examples
-	   * Lazy("abracadabra").match(/a[bcd]/) // sequence: ["ab", "ac", "ad", "ab"]
-	   * Lazy("fee fi fo fum").match(/\w+/)  // sequence: ["fee", "fi", "fo", "fum"]
-	   * Lazy("hello").match(/xyz/)          // sequence: []
-	   */
-	  StringLikeSequence.prototype.match = function match(pattern) {
-	    return new StringMatchSequence(this, pattern);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function StringMatchSequence(parent, pattern) {
-	    this.parent = parent;
-	    this.pattern = pattern;
-	  }
-
-	  StringMatchSequence.prototype = new Sequence();
-
-	  StringMatchSequence.prototype.getIterator = function getIterator() {
-	    return new StringMatchIterator(this.parent.toString(), this.pattern);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function StringMatchIterator(source, pattern) {
-	    this.source  = source;
-	    this.pattern = cloneRegex(pattern);
-	  }
-
-	  StringMatchIterator.prototype.current = function current() {
-	    return this.match[0];
-	  };
-
-	  StringMatchIterator.prototype.moveNext = function moveNext() {
-	    return !!(this.match = this.pattern.exec(this.source));
-	  };
-
-	  /**
-	   * Creates a {@link Sequence} comprising all of the substrings of this string
-	   * separated by the given delimiter, which can be either a string or a regular
-	   * expression.
-	   *
-	   * @public
-	   * @param {string|RegExp} delimiter The delimiter to use for recognizing
-	   *     substrings.
-	   * @returns {Sequence} A sequence of all the substrings separated by the given
-	   *     delimiter.
-	   *
-	   * @examples
-	   * Lazy("foo").split("")                      // sequence: ["f", "o", "o"]
-	   * Lazy("yo dawg").split(" ")                 // sequence: ["yo", "dawg"]
-	   * Lazy("bah bah\tblack  sheep").split(/\s+/) // sequence: ["bah", "bah", "black", "sheep"]
-	   */
-	  StringLikeSequence.prototype.split = function split(delimiter) {
-	    return new SplitStringSequence(this, delimiter);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SplitStringSequence(parent, pattern) {
-	    this.parent = parent;
-	    this.pattern = pattern;
-	  }
-
-	  SplitStringSequence.prototype = new Sequence();
-
-	  SplitStringSequence.prototype.getIterator = function getIterator() {
-	    var source = this.parent.toString();
-
-	    if (this.pattern instanceof RegExp) {
-	      if (this.pattern.source === "" || this.pattern.source === "(?:)") {
-	        return new CharIterator(source);
-	      } else {
-	        return new SplitWithRegExpIterator(source, this.pattern);
-	      }
-	    } else if (this.pattern === "") {
-	      return new CharIterator(source);
-	    } else {
-	      return new SplitWithStringIterator(source, this.pattern);
-	    }
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SplitWithRegExpIterator(source, pattern) {
-	    this.source  = source;
-	    this.pattern = cloneRegex(pattern);
-	  }
-
-	  SplitWithRegExpIterator.prototype.current = function current() {
-	    return this.source.substring(this.start, this.end);
-	  };
-
-	  SplitWithRegExpIterator.prototype.moveNext = function moveNext() {
-	    if (!this.pattern) {
-	      return false;
-	    }
-
-	    var match = this.pattern.exec(this.source);
-
-	    if (match) {
-	      this.start = this.nextStart ? this.nextStart : 0;
-	      this.end = match.index;
-	      this.nextStart = match.index + match[0].length;
-	      return true;
-
-	    } else if (this.pattern) {
-	      this.start = this.nextStart;
-	      this.end = undefined;
-	      this.nextStart = undefined;
-	      this.pattern = undefined;
-	      return true;
-	    }
-
-	    return false;
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SplitWithStringIterator(source, delimiter) {
-	    this.source = source;
-	    this.delimiter = delimiter;
-	  }
-
-	  SplitWithStringIterator.prototype.current = function current() {
-	    return this.source.substring(this.leftIndex, this.rightIndex);
-	  };
-
-	  SplitWithStringIterator.prototype.moveNext = function moveNext() {
-	    if (!this.finished) {
-	      this.leftIndex = typeof this.leftIndex !== "undefined" ?
-	        this.rightIndex + this.delimiter.length :
-	        0;
-	      this.rightIndex = this.source.indexOf(this.delimiter, this.leftIndex);
-	    }
-
-	    if (this.rightIndex === -1) {
-	      this.finished = true;
-	      this.rightIndex = undefined;
-	      return true;
-	    }
-
-	    return !this.finished;
-	  };
-
-	  /**
-	   * Wraps a string exposing {@link #match} and {@link #split} methods that return
-	   * {@link Sequence} objects instead of arrays, improving on the efficiency of
-	   * JavaScript's built-in `String#split` and `String.match` methods and
-	   * supporting asynchronous iteration.
-	   *
-	   * @param {string} source The string to wrap.
-	   * @constructor
-	   */
-	  function StringWrapper(source) {
-	    this.source = source;
-	  }
-
-	  StringWrapper.prototype = new StringLikeSequence();
-
-	  StringWrapper.prototype.root = function root() {
-	    return this;
-	  };
-
-	  StringWrapper.prototype.isAsync = function isAsync() {
-	    return false;
-	  };
-
-	  StringWrapper.prototype.get = function get(i) {
-	    return this.source.charAt(i);
-	  };
-
-	  StringWrapper.prototype.length = function length() {
-	    return this.source.length;
-	  };
-
-	  StringWrapper.prototype.toString = function toString() {
-	    return this.source;
-	  };
-
-	  /**
-	   * A `GeneratedSequence` does not wrap an in-memory colllection but rather
-	   * determines its elements on-the-fly during iteration according to a generator
-	   * function.
-	   *
-	   * You create a `GeneratedSequence` by calling {@link Lazy.generate}.
-	   *
-	   * @public
-	   * @constructor
-	   * @param {function(number):*} generatorFn A function which accepts an index
-	   *     and returns a value for the element at that position in the sequence.
-	   * @param {number=} length The length of the sequence. If this argument is
-	   *     omitted, the sequence will go on forever.
-	   */
-	  function GeneratedSequence(generatorFn, length) {
-	    this.get = generatorFn;
-	    this.fixedLength = length;
-	  }
-
-	  GeneratedSequence.prototype = new Sequence();
-
-	  GeneratedSequence.prototype.isAsync = function isAsync() {
-	    return false;
-	  };
-
-	  /**
-	   * Returns the length of this sequence.
-	   *
-	   * @public
-	   * @returns {number} The length, or `undefined` if this is an indefinite
-	   *     sequence.
-	   */
-	  GeneratedSequence.prototype.length = function length() {
-	    return this.fixedLength;
-	  };
-
-	  /**
-	   * Iterates over the sequence produced by invoking this sequence's generator
-	   * function up to its specified length, or, if length is `undefined`,
-	   * indefinitely (in which case the sequence will go on forever--you would need
-	   * to call, e.g., {@link Sequence#take} to limit iteration).
-	   *
-	   * @public
-	   * @param {Function} fn The function to call on each output from the generator
-	   *     function.
-	   */
-	  GeneratedSequence.prototype.each = function each(fn) {
-	    var generatorFn = this.get,
-	        length = this.fixedLength,
-	        i = 0;
-
-	    while (typeof length === "undefined" || i < length) {
-	      if (fn(generatorFn(i), i++) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  };
-
-	  GeneratedSequence.prototype.getIterator = function getIterator() {
-	    return new GeneratedIterator(this);
-	  };
-
-	  /**
-	   * Iterates over a generated sequence. (This allows generated sequences to be
-	   * iterated asynchronously.)
-	   *
-	   * @param {GeneratedSequence} sequence The generated sequence to iterate over.
-	   * @constructor
-	   */
-	  function GeneratedIterator(sequence) {
-	    this.sequence     = sequence;
-	    this.index        = 0;
-	    this.currentValue = null;
-	  }
-
-	  GeneratedIterator.prototype.current = function current() {
-	    return this.currentValue;
-	  };
-
-	  GeneratedIterator.prototype.moveNext = function moveNext() {
-	    var sequence = this.sequence;
-
-	    if (typeof sequence.fixedLength === "number" && this.index >= sequence.fixedLength) {
-	      return false;
-	    }
-
-	    this.currentValue = sequence.get(this.index++);
-	    return true;
-	  };
-
-	  /**
-	   * An `AsyncSequence` iterates over its elements asynchronously when
-	   * {@link #each} is called.
-	   *
-	   * You get an `AsyncSequence` by calling {@link Sequence#async} on any
-	   * sequence. Note that some sequence types may not support asynchronous
-	   * iteration.
-	   *
-	   * Returning values
-	   * ----------------
-	   *
-	   * Because of its asynchronous nature, an `AsyncSequence` cannot be used in the
-	   * same way as other sequences for functions that return values directly (e.g.,
-	   * `reduce`, `max`, `any`, even `toArray`).
-	   *
-	   * Instead, these methods return an `AsyncHandle` whose `onComplete` method
-	   * accepts a callback that will be called with the final result once iteration
-	   * has finished.
-	   *
-	   * Defining custom asynchronous sequences
-	   * --------------------------------------
-	   *
-	   * There are plenty of ways to define an asynchronous sequence. Here's one.
-	   *
-	   * 1. First, implement an {@link Iterator}. This is an object whose prototype
-	   *    has the methods {@link Iterator#moveNext} (which returns a `boolean`) and
-	   *    {@link current} (which returns the current value).
-	   * 2. Next, create a simple wrapper that inherits from `AsyncSequence`, whose
-	   *    `getIterator` function returns an instance of the iterator type you just
-	   *    defined.
-	   *
-	   * The default implementation for {@link #each} on an `AsyncSequence` is to
-	   * create an iterator and then asynchronously call {@link Iterator#moveNext}
-	   * (using `setImmediate`, if available, otherwise `setTimeout`) until the iterator
-	   * can't move ahead any more.
-	   *
-	   * @public
-	   * @constructor
-	   * @param {Sequence} parent A {@link Sequence} to wrap, to expose asynchronous
-	   *     iteration.
-	   * @param {number=} interval How many milliseconds should elapse between each
-	   *     element when iterating over this sequence. If this argument is omitted,
-	   *     asynchronous iteration will be executed as fast as possible.
-	   */
-	  function AsyncSequence(parent, interval) {
-	    if (parent instanceof AsyncSequence) {
-	      throw new Error("Sequence is already asynchronous!");
-	    }
-
-	    this.parent         = parent;
-	    this.interval       = interval;
-	    this.onNextCallback = getOnNextCallback(interval);
-	    this.cancelCallback = getCancelCallback(interval);
-	  }
-
-	  AsyncSequence.prototype = new Sequence();
-
-	  AsyncSequence.prototype.isAsync = function isAsync() {
-	    return true;
-	  };
-
-	  /**
-	   * Throws an exception. You cannot manually iterate over an asynchronous
-	   * sequence.
-	   *
-	   * @public
-	   * @example
-	   * Lazy([1, 2, 3]).async().getIterator() // throws
-	   */
-	  AsyncSequence.prototype.getIterator = function getIterator() {
-	    throw new Error('An AsyncSequence does not support synchronous iteration.');
-	  };
-
-	  /**
-	   * An asynchronous version of {@link Sequence#each}.
-	   *
-	   * @public
-	   * @param {Function} fn The function to invoke asynchronously on each element in
-	   *     the sequence one by one.
-	   * @returns {AsyncHandle} An {@link AsyncHandle} providing the ability to
-	   *     cancel the asynchronous iteration (by calling `cancel()`) as well as
-	   *     supply callback(s) for when an error is encountered (`onError`) or when
-	   *     iteration is complete (`onComplete`).
-	   */
-	  AsyncSequence.prototype.each = function each(fn) {
-	    var iterator = this.parent.getIterator(),
-	        onNextCallback = this.onNextCallback,
-	        cancelCallback = this.cancelCallback,
-	        i = 0;
-
-	    var handle = new AsyncHandle(function cancel() {
-	      if (cancellationId) {
-	        cancelCallback(cancellationId);
-	      }
-	    });
-
-	    var cancellationId = onNextCallback(function iterate() {
-	      cancellationId = null;
-
-	      try {
-	        if (iterator.moveNext() && fn(iterator.current(), i++) !== false) {
-	          cancellationId = onNextCallback(iterate);
-
-	        } else {
-	          handle._resolve();
-	        }
-
-	      } catch (e) {
-	        handle._reject(e);
-	      }
-	    });
-
-	    return handle;
-	  };
-
-	  /**
-	   * An `AsyncHandle` provides a [Promises/A+](http://promises-aplus.github.io/promises-spec/)
-	   * compliant interface for an {@link AsyncSequence} that is currently (or was)
-	   * iterating over its elements.
-	   *
-	   * In addition to behaving as a promise, an `AsyncHandle` provides the ability
-	   * to {@link AsyncHandle#cancel} iteration (if `cancelFn` is provided)
-	   * and also offers convenient {@link AsyncHandle#onComplete} and
-	   * {@link AsyncHandle#onError} methods to attach listeners for when iteration
-	   * is complete or an error is thrown during iteration.
-	   *
-	   * @public
-	   * @param {Function} cancelFn A function to cancel asynchronous iteration.
-	   *     This is passed in to support different cancellation mechanisms for
-	   *     different forms of asynchronous sequences (e.g., timeout-based
-	   *     sequences, sequences based on I/O, etc.).
-	   * @constructor
-	   *
-	   * @example
-	   * // Create a sequence of 100,000 random numbers, in chunks of 100.
-	   * var sequence = Lazy.generate(Math.random)
-	   *   .chunk(100)
-	   *   .async()
-	   *   .take(1000);
-	   *
-	   * // Reduce-style operations -- i.e., operations that return a *value* (as
-	   * // opposed to a *sequence*) -- return an AsyncHandle for async sequences.
-	   * var handle = sequence.toArray();
-	   *
-	   * handle.onComplete(function(array) {
-	   *   // Do something w/ 1,000-element array.
-	   * });
-	   *
-	   * // Since an AsyncHandle is a promise, you can also use it to create
-	   * // subsequent promises using `then` (see the Promises/A+ spec for more
-	   * // info).
-	   * var flattened = handle.then(function(array) {
-	   *   return Lazy(array).flatten();
-	   * });
-	   */
-	  function AsyncHandle(cancelFn) {
-	    this.resolveListeners = [];
-	    this.rejectListeners = [];
-	    this.state = PENDING;
-	    this.cancelFn = cancelFn;
-	  }
-
-	  // Async handle states
-	  var PENDING  = 1,
-	      RESOLVED = 2,
-	      REJECTED = 3;
-
-	  AsyncHandle.prototype.then = function then(onFulfilled, onRejected) {
-	    var promise = new AsyncHandle(this.cancelFn);
-
-	    this.resolveListeners.push(function(value) {
-	      try {
-	        if (typeof onFulfilled !== 'function') {
-	          resolve(promise, value);
-	          return;
-	        }
-
-	        resolve(promise, onFulfilled(value));
-
-	      } catch (e) {
-	        promise._reject(e);
-	      }
-	    });
-
-	    this.rejectListeners.push(function(reason) {
-	      try {
-	        if (typeof onRejected !== 'function') {
-	          promise._reject(reason);
-	          return;
-	        }
-
-	        resolve(promise, onRejected(reason));
-
-	      } catch (e) {
-	        promise._reject(e);
-	      }
-	    });
-
-	    if (this.state === RESOLVED) {
-	      this._resolve(this.value);
-	    }
-
-	    if (this.state === REJECTED) {
-	      this._reject(this.reason);
-	    }
-
-	    return promise;
-	  };
-
-	  AsyncHandle.prototype._resolve = function _resolve(value) {
-	    if (this.state === REJECTED) {
-	      return;
-	    }
-
-	    if (this.state === PENDING) {
-	      this.state = RESOLVED;
-	      this.value = value;
-	    }
-
-	    consumeListeners(this.resolveListeners, this.value);
-	  };
-
-	  AsyncHandle.prototype._reject = function _reject(reason) {
-	    if (this.state === RESOLVED) {
-	      return;
-	    }
-
-	    if (this.state === PENDING) {
-	      this.state = REJECTED;
-	      this.reason = reason;
-	    }
-
-	    consumeListeners(this.rejectListeners, this.reason);
-	  };
-
-	  /**
-	   * Cancels asynchronous iteration.
-	   *
-	   * @public
-	   */
-	  AsyncHandle.prototype.cancel = function cancel() {
-	    if (this.cancelFn) {
-	      this.cancelFn();
-	      this.cancelFn = null;
-	      this._resolve(false);
-	    }
-	  };
-
-	  /**
-	   * Updates the handle with a callback to execute when iteration is completed.
-	   *
-	   * @public
-	   * @param {Function} callback The function to call when the asynchronous
-	   *     iteration is completed.
-	   * @return {AsyncHandle} A reference to the handle (for chaining).
-	   */
-	  AsyncHandle.prototype.onComplete = function onComplete(callback) {
-	    this.resolveListeners.push(callback);
-	    return this;
-	  };
-
-	  /**
-	   * Updates the handle with a callback to execute if/when any error is
-	   * encountered during asynchronous iteration.
-	   *
-	   * @public
-	   * @param {Function} callback The function to call, with any associated error
-	   *     object, when an error occurs.
-	   * @return {AsyncHandle} A reference to the handle (for chaining).
-	   */
-	  AsyncHandle.prototype.onError = function onError(callback) {
-	    this.rejectListeners.push(callback);
-	    return this;
-	  };
-
-	  /**
-	   * Promise resolution procedure:
-	   * http://promises-aplus.github.io/promises-spec/#the_promise_resolution_procedure
-	   */
-	  function resolve(promise, x) {
-	    if (promise === x) {
-	      promise._reject(new TypeError('Cannot resolve a promise to itself'));
-	      return;
-	    }
-
-	    if (x instanceof AsyncHandle) {
-	      x.then(
-	        function(value) { resolve(promise, value); },
-	        function(reason) { promise._reject(reason); }
-	      );
-	      return;
-	    }
-
-	    var then;
-	    try {
-	      then = (/function|object/).test(typeof x) && x != null && x.then;
-	    } catch (e) {
-	      promise._reject(e);
-	      return;
-	    }
-
-	    var thenableState = PENDING;
-	    if (typeof then === 'function') {
-	      try {
-	        then.call(
-	          x,
-	          function resolvePromise(value) {
-	            if (thenableState !== PENDING) {
-	              return;
-	            }
-	            thenableState = RESOLVED;
-	            resolve(promise, value);
-	          },
-	          function rejectPromise(reason) {
-	            if (thenableState !== PENDING) {
-	              return;
-	            }
-	            thenableState = REJECTED;
-	            promise._reject(reason);
-	          }
-	        );
-	      } catch (e) {
-	        if (thenableState !== PENDING) {
-	          return;
-	        }
-
-	        promise._reject(e);
-	      }
-
-	      return;
-	    }
-
-	    promise._resolve(x);
-	  }
-
-	  function consumeListeners(listeners, value, callback) {
-	    callback || (callback = getOnNextCallback());
-
-	    callback(function() {
-	      if (listeners.length > 0) {
-	        listeners.shift()(value);
-	        consumeListeners(listeners, value, callback);
-	      }
-	    });
-	  }
-
-	  function getOnNextCallback(interval) {
-	    if (typeof interval === "undefined") {
-	      if (typeof setImmediate === "function") {
-	        return setImmediate;
-	      }
-	    }
-
-	    interval = interval || 0;
-	    return function(fn) {
-	      return setTimeout(fn, interval);
-	    };
-	  }
-
-	  function getCancelCallback(interval) {
-	    if (typeof interval === "undefined") {
-	      if (typeof clearImmediate === "function") {
-	        return clearImmediate;
-	      }
-	    }
-
-	    return clearTimeout;
-	  }
-
-	  /**
-	   * Transform a value, whether the value is retrieved asynchronously or directly.
-	   *
-	   * @private
-	   * @param {Function} fn The function that transforms the value.
-	   * @param {*} value The value to be transformed. This can be an {@link AsyncHandle} when the value
-	   *     is retrieved asynchronously, otherwise it can be anything.
-	   * @returns {*} An {@link AsyncHandle} when `value` is also an {@link AsyncHandle}, otherwise
-	   *     whatever `fn` resulted in.
-	   */
-	  function transform(fn, value) {
-	    if (value instanceof AsyncHandle) {
-	      return value.then(function() { fn(value); });
-	    }
-	    return fn(value);
-	  }
-
-	  /**
-	   * An async version of {@link Sequence#reverse}.
-	   */
-	  AsyncSequence.prototype.reverse = function reverse() {
-	    return this.parent.reverse().async();
-	  };
-
-	  /**
-	   * A version of {@link Sequence#find} which returns an {@link AsyncHandle}.
-	   *
-	   * @public
-	   * @param {Function} predicate A function to call on (potentially) every element
-	   *     in the sequence.
-	   * @returns {AsyncHandle} An {@link AsyncHandle} (promise) which resolves to
-	   *     the found element, once it is detected, or else `undefined`.
-	   */
-	  AsyncSequence.prototype.find = function find(predicate) {
-	    var found;
-
-	    var handle = this.each(function(e, i) {
-	      if (predicate(e, i)) {
-	        found = e;
-	        return false;
-	      }
-	    });
-
-	    return handle.then(function() { return found; });
-	  };
-
-	  /**
-	   * A version of {@link Sequence#indexOf} which returns an {@link AsyncHandle}.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {AsyncHandle} An {@link AsyncHandle} (promise) which resolves to
-	   *     the found index, once it is detected, or -1.
-	   */
-	  AsyncSequence.prototype.indexOf = function indexOf(value) {
-	    var foundIndex = -1;
-
-	    var handle = this.each(function(e, i) {
-	      if (e === value) {
-	        foundIndex = i;
-	        return false;
-	      }
-	    });
-
-	    return handle.then(function() {
-	      return foundIndex;
-	    });
-	  };
-
-	  /**
-	   * A version of {@link Sequence#contains} which returns an {@link AsyncHandle}.
-	   *
-	   * @public
-	   * @param {*} value The element to search for in the sequence.
-	   * @returns {AsyncHandle} An {@link AsyncHandle} (promise) which resolves to
-	   *     either `true` or `false` to indicate whether the element was found.
-	   */
-	  AsyncSequence.prototype.contains = function contains(value) {
-	    var found = false;
-
-	    var handle = this.each(function(e) {
-	      if (e === value) {
-	        found = true;
-	        return false;
-	      }
-	    });
-
-	    return handle.then(function() {
-	      return found;
-	    });
-	  };
-
-	  /**
-	   * Just return the same sequence for `AsyncSequence#async` (I see no harm in this).
-	   */
-	  AsyncSequence.prototype.async = function async() {
-	    return this;
-	  };
-
-	  /**
-	   * See {@link ObjectLikeSequence#watch} for docs.
-	   */
-	  ObjectWrapper.prototype.watch = function watch(propertyNames) {
-	    return new WatchedPropertySequence(this.source, propertyNames);
-	  };
-
-	  function WatchedPropertySequence(object, propertyNames) {
-	    this.listeners = [];
-
-	    if (!propertyNames) {
-	      propertyNames = Lazy(object).keys().toArray();
-	    } else if (!(propertyNames instanceof Array)) {
-	      propertyNames = [propertyNames];
-	    }
-
-	    var listeners = this.listeners,
-	        index     = 0;
-
-	    Lazy(propertyNames).each(function(propertyName) {
-	      var propertyValue = object[propertyName];
-
-	      Object.defineProperty(object, propertyName, {
-	        get: function() {
-	          return propertyValue;
-	        },
-
-	        set: function(value) {
-	          for (var i = listeners.length - 1; i >= 0; --i) {
-	            if (listeners[i]({ property: propertyName, value: value }, index) === false) {
-	              listeners.splice(i, 1);
-	            }
-	          }
-	          propertyValue = value;
-	          ++index;
-	        }
-	      });
-	    });
-	  }
-
-	  WatchedPropertySequence.prototype = new AsyncSequence();
-
-	  WatchedPropertySequence.prototype.each = function each(fn) {
-	    this.listeners.push(fn);
-	  };
-
-	  /**
-	   * A StreamLikeSequence comprises a sequence of 'chunks' of data, which are
-	   * typically multiline strings.
-	   *
-	   * @constructor
-	   */
-	  function StreamLikeSequence() {}
-
-	  StreamLikeSequence.prototype = new AsyncSequence();
-
-	  StreamLikeSequence.prototype.isAsync = function isAsync() {
-	    return true;
-	  };
-
-	  StreamLikeSequence.prototype.split = function split(delimiter) {
-	    return new SplitStreamSequence(this, delimiter);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function SplitStreamSequence(parent, delimiter) {
-	    this.parent    = parent;
-	    this.delimiter = delimiter;
-	    this.each      = this.getEachForDelimiter(delimiter);
-	  }
-
-	  SplitStreamSequence.prototype = new Sequence();
-
-	  SplitStreamSequence.prototype.getEachForDelimiter = function getEachForDelimiter(delimiter) {
-	    if (delimiter instanceof RegExp) {
-	      return this.regexEach;
-	    }
-
-	    return this.stringEach;
-	  };
-
-	  SplitStreamSequence.prototype.regexEach = function each(fn) {
-	    var delimiter = cloneRegex(this.delimiter),
-	        buffer = '',
-	        start = 0, end,
-	        index = 0;
-
-	    var handle = this.parent.each(function(chunk) {
-	      buffer += chunk;
-
-	      var match;
-	      while (match = delimiter.exec(buffer)) {
-	        end = match.index;
-	        if (fn(buffer.substring(start, end), index++) === false) {
-	          return false;
-	        }
-	        start = end + match[0].length;
-	      }
-
-	      buffer = buffer.substring(start);
-	      start = 0;
-	    });
-
-	    handle.onComplete(function() {
-	      if (buffer.length > 0) {
-	        fn(buffer, index++);
-	      }
-	    });
-
-	    return handle;
-	  };
-
-	  SplitStreamSequence.prototype.stringEach = function each(fn) {
-	    var delimiter  = this.delimiter,
-	        pieceIndex = 0,
-	        buffer = '',
-	        bufferIndex = 0;
-
-	    var handle = this.parent.each(function(chunk) {
-	      buffer += chunk;
-	      var delimiterIndex;
-	      while ((delimiterIndex = buffer.indexOf(delimiter)) >= 0) {
-	        var piece = buffer.substr(0,delimiterIndex);
-	        buffer = buffer.substr(delimiterIndex+delimiter.length);
-	        if (fn(piece,pieceIndex++) === false) {
-	          return false;
-	        }
-	      }
-	      return true;
-	    });
-
-	    handle.onComplete(function() {
-	      fn(buffer, pieceIndex++);
-	    });
-
-	    return handle;
-	  };
-
-	  StreamLikeSequence.prototype.lines = function lines() {
-	    return this.split("\n");
-	  };
-
-	  StreamLikeSequence.prototype.match = function match(pattern) {
-	    return new MatchedStreamSequence(this, pattern);
-	  };
-
-	  /**
-	   * @constructor
-	   */
-	  function MatchedStreamSequence(parent, pattern) {
-	    this.parent  = parent;
-	    this.pattern = cloneRegex(pattern);
-	  }
-
-	  MatchedStreamSequence.prototype = new AsyncSequence();
-
-	  MatchedStreamSequence.prototype.each = function each(fn) {
-	    var pattern = this.pattern,
-	        done      = false,
-	        i         = 0;
-
-	    return this.parent.each(function(chunk) {
-	      Lazy(chunk).match(pattern).each(function(match) {
-	        if (fn(match, i++) === false) {
-	          done = true;
-	          return false;
-	        }
-	      });
-
-	      return !done;
-	    });
-	  };
-
-	  /**
-	   * Defines a wrapper for custom {@link StreamLikeSequence}s. This is useful
-	   * if you want a way to handle a stream of events as a sequence, but you can't
-	   * use Lazy's existing interface (i.e., you're wrapping an object from a
-	   * library with its own custom events).
-	   *
-	   * This method defines a *factory*: that is, it produces a function that can
-	   * be used to wrap objects and return a {@link Sequence}. Hopefully the
-	   * example will make this clear.
-	   *
-	   * @public
-	   * @param {Function} initializer An initialization function called on objects
-	   *     created by this factory. `this` will be bound to the created object,
-	   *     which is an instance of {@link StreamLikeSequence}. Use `emit` to
-	   *     generate data for the sequence.
-	   * @returns {Function} A function that creates a new {@link StreamLikeSequence},
-	   *     initializes it using the specified function, and returns it.
-	   *
-	   * @example
-	   * var factory = Lazy.createWrapper(function(eventSource) {
-	   *   var sequence = this;
-	   *
-	   *   eventSource.handleEvent(function(data) {
-	   *     sequence.emit(data);
-	   *   });
-	   * });
-	   *
-	   * var eventEmitter = {
-	   *   triggerEvent: function(data) {
-	   *     eventEmitter.eventHandler(data);
-	   *   },
-	   *   handleEvent: function(handler) {
-	   *     eventEmitter.eventHandler = handler;
-	   *   },
-	   *   eventHandler: function() {}
-	   * };
-	   *
-	   * var events = [];
-	   *
-	   * factory(eventEmitter).each(function(e) {
-	   *   events.push(e);
-	   * });
-	   *
-	   * eventEmitter.triggerEvent('foo');
-	   * eventEmitter.triggerEvent('bar');
-	   *
-	   * events // => ['foo', 'bar']
-	   */
-	  Lazy.createWrapper = function createWrapper(initializer) {
-	    var ctor = function() {
-	      this.listeners = [];
-	    };
-
-	    ctor.prototype = new StreamLikeSequence();
-
-	    ctor.prototype.each = function(listener) {
-	      this.listeners.push(listener);
-	    };
-
-	    ctor.prototype.emit = function(data) {
-	      var listeners = this.listeners;
-
-	      for (var len = listeners.length, i = len - 1; i >= 0; --i) {
-	        if (listeners[i](data) === false) {
-	          listeners.splice(i, 1);
-	        }
-	      }
-	    };
-
-	    return function() {
-	      var sequence = new ctor();
-	      initializer.apply(sequence, arguments);
-	      return sequence;
-	    };
-	  };
-
-	  /**
-	   * Creates a {@link GeneratedSequence} using the specified generator function
-	   * and (optionally) length.
-	   *
-	   * @public
-	   * @param {function(number):*} generatorFn The function used to generate the
-	   *     sequence. This function accepts an index as a parameter and should return
-	   *     a value for that index in the resulting sequence.
-	   * @param {number=} length The length of the sequence, for sequences with a
-	   *     definite length.
-	   * @returns {GeneratedSequence} The generated sequence.
-	   *
-	   * @examples
-	   * var randomNumbers = Lazy.generate(Math.random);
-	   * var countingNumbers = Lazy.generate(function(i) { return i + 1; }, 5);
-	   *
-	   * randomNumbers          // instanceof Lazy.GeneratedSequence
-	   * randomNumbers.length() // => undefined
-	   * countingNumbers          // sequence: [1, 2, 3, 4, 5]
-	   * countingNumbers.length() // => 5
-	   */
-	  Lazy.generate = function generate(generatorFn, length) {
-	    return new GeneratedSequence(generatorFn, length);
-	  };
-
-	  /**
-	   * Creates a sequence from a given starting value, up to a specified stopping
-	   * value, incrementing by a given step. Invalid values for any of these
-	   * arguments (e.g., a step of 0) result in an empty sequence.
-	   *
-	   * @public
-	   * @returns {GeneratedSequence} The sequence defined by the given ranges.
-	   *
-	   * @examples
-	   * Lazy.range(3)         // sequence: [0, 1, 2]
-	   * Lazy.range(1, 4)      // sequence: [1, 2, 3]
-	   * Lazy.range(2, 10, 2)  // sequence: [2, 4, 6, 8]
-	   * Lazy.range(5, 1, 2)   // sequence: []
-	   * Lazy.range(5, 15, -2) // sequence: []
-	   * Lazy.range(3, 10, 3)  // sequence: [3, 6, 9]
-	   * Lazy.range(5, 2)      // sequence: [5, 4, 3]
-	   * Lazy.range(7, 2, -2)  // sequence: [7, 5, 3]
-	   * Lazy.range(3, 5, 0)   // sequence: []
-	   */
-	  Lazy.range = function range() {
-	    var start = arguments.length > 1 ? arguments[0] : 0,
-	        stop  = arguments.length > 1 ? arguments[1] : arguments[0],
-	        step  = arguments.length > 2 && arguments[2];
-
-	    if (step === false) {
-	      step = stop > start ? 1 : -1;
-	    }
-
-	    if (step === 0) {
-	      return Lazy([]);
-	    }
-
-	    return Lazy.generate(function(i) { return start + (step * i); })
-	      .take(Math.ceil((stop - start) / step));
-	  };
-
-	  /**
-	   * Creates a sequence consisting of the given value repeated a specified number
-	   * of times.
-	   *
-	   * @public
-	   * @param {*} value The value to repeat.
-	   * @param {number=} count The number of times the value should be repeated in
-	   *     the sequence. If this argument is omitted, the value will repeat forever.
-	   * @returns {GeneratedSequence} The sequence containing the repeated value.
-	   *
-	   * @examples
-	   * Lazy.repeat("hi", 3)          // sequence: ["hi", "hi", "hi"]
-	   * Lazy.repeat("young")          // instanceof Lazy.GeneratedSequence
-	   * Lazy.repeat("young").length() // => undefined
-	   * Lazy.repeat("young").take(3)  // sequence: ["young", "young", "young"]
-	   */
-	  Lazy.repeat = function repeat(value, count) {
-	    return Lazy.generate(function() { return value; }, count);
-	  };
-
-	  Lazy.Sequence           = Sequence;
-	  Lazy.ArrayLikeSequence  = ArrayLikeSequence;
-	  Lazy.ObjectLikeSequence = ObjectLikeSequence;
-	  Lazy.StringLikeSequence = StringLikeSequence;
-	  Lazy.StreamLikeSequence = StreamLikeSequence;
-	  Lazy.GeneratedSequence  = GeneratedSequence;
-	  Lazy.AsyncSequence      = AsyncSequence;
-	  Lazy.AsyncHandle        = AsyncHandle;
-
-	  /*** Useful utility methods ***/
-
-	  /**
-	   * Creates a shallow copy of an array or object.
-	   *
-	   * @examples
-	   * var array  = [1, 2, 3], clonedArray,
-	   *     object = { foo: 1, bar: 2 }, clonedObject;
-	   *
-	   * clonedArray = Lazy.clone(array); // => [1, 2, 3]
-	   * clonedArray.push(4); // clonedArray == [1, 2, 3, 4]
-	   * array; // => [1, 2, 3]
-	   *
-	   * clonedObject = Lazy.clone(object); // => { foo: 1, bar: 2 }
-	   * clonedObject.baz = 3; // clonedObject == { foo: 1, bar: 2, baz: 3 }
-	   * object; // => { foo: 1, bar: 2 }
-	   */
-	  Lazy.clone = function clone(target) {
-	    return Lazy(target).value();
-	  };
-
-	  /**
-	   * Marks a method as deprecated, so calling it will issue a console warning.
-	   */
-	  Lazy.deprecate = function deprecate(message, fn) {
-	    return function() {
-	      console.warn(message);
-	      return fn.apply(this, arguments);
-	    };
-	  };
-
-	  var arrayPop   = Array.prototype.pop,
-	      arraySlice = Array.prototype.slice;
-
-	  /**
-	   * Creates a callback... you know, Lo-Dash style.
-	   *
-	   * - for functions, just returns the function
-	   * - for strings, returns a pluck-style callback
-	   * - for objects, returns a where-style callback
-	   *
-	   * @private
-	   * @param {Function|string|Object} callback A function, string, or object to
-	   *     convert to a callback.
-	   * @param {*} defaultReturn If the callback is undefined, a default return
-	   *     value to use for the function.
-	   * @returns {Function} The callback function.
-	   *
-	   * @examples
-	   * createCallback(function() {})                  // instanceof Function
-	   * createCallback('foo')                          // instanceof Function
-	   * createCallback('foo')({ foo: 'bar'})           // => 'bar'
-	   * createCallback({ foo: 'bar' })({ foo: 'bar' }) // => true
-	   * createCallback({ foo: 'bar' })({ foo: 'baz' }) // => false
-	   */
-	  function createCallback(callback, defaultValue) {
-	    switch (typeof callback) {
-	      case "function":
-	        return callback;
-
-	      case "string":
-	        return function(e) {
-	          return e[callback];
-	        };
-
-	      case "object":
-	        return function(e) {
-	          return Lazy(callback).all(function(value, key) {
-	            return e[key] === value;
-	          });
-	        };
-
-	      case "undefined":
-	        return defaultValue ?
-	          function() { return defaultValue; } :
-	          Lazy.identity;
-
-	      default:
-	        throw new Error("Don't know how to make a callback from a " + typeof callback + "!");
-	    }
-	  }
-
-	  /**
-	   * Takes a function that returns a value for one argument and produces a
-	   * function that compares two arguments.
-	   *
-	   * @private
-	   * @param {Function|string|Object} callback A function, string, or object to
-	   *     convert to a callback using `createCallback`.
-	   * @returns {Function} A function that accepts two values and returns 1 if
-	   *     the first is greater, -1 if the second is greater, or 0 if they are
-	   *     equivalent.
-	   *
-	   * @examples
-	   * createComparator('a')({ a: 1 }, { a: 2 });       // => -1
-	   * createComparator('a')({ a: 6 }, { a: 2 });       // => 1
-	   * createComparator('a')({ a: 1 }, { a: 1 });       // => 0
-	   * createComparator()(3, 5);                        // => -1
-	   * createComparator()(7, 5);                        // => 1
-	   * createComparator()(3, 3);                        // => 0
-	   */
-	  function createComparator(callback, descending) {
-	    if (!callback) { return compare; }
-
-	    callback = createCallback(callback);
-
-	    return function(x, y) {
-	      return compare(callback(x), callback(y));
-	    };
-	  }
-
-	  /**
-	   * Takes a function and returns a function with the same logic but the
-	   * arguments reversed. Only applies to functions w/ arity=2 as this is private
-	   * and I can do what I want.
-	   *
-	   * @private
-	   * @param {Function} fn The function to "reverse"
-	   * @returns {Function} The "reversed" function
-	   *
-	   * @examples
-	   * reverseArguments(function(x, y) { return x + y; })('a', 'b'); // => 'ba'
-	   */
-	  function reverseArguments(fn) {
-	    return function(x, y) { return fn(y, x); };
-	  }
-
-	  /**
-	   * Creates a Set containing the specified values.
-	   *
-	   * @param {...Array} values One or more array(s) of values used to populate the
-	   *     set.
-	   * @returns {Set} A new set containing the values passed in.
-	   */
-	  function createSet(values) {
-	    var set = new Set();
-	    Lazy(values || []).flatten().each(function(e) {
-	      set.add(e);
-	    });
-	    return set;
-	  }
-
-	  /**
-	   * Compares two elements for sorting purposes.
-	   *
-	   * @private
-	   * @param {*} x The left element to compare.
-	   * @param {*} y The right element to compare.
-	   * @returns {number} 1 if x > y, -1 if x < y, or 0 if x and y are equal.
-	   *
-	   * @examples
-	   * compare(1, 2)     // => -1
-	   * compare(1, 1)     // => 0
-	   * compare(2, 1)     // => 1
-	   * compare('a', 'b') // => -1
-	   */
-	  function compare(x, y) {
-	    if (x === y) {
-	      return 0;
-	    }
-
-	    return x > y ? 1 : -1;
-	  }
-
-	  /**
-	   * Iterates over every element in an array.
-	   *
-	   * @param {Array} array The array.
-	   * @param {Function} fn The function to call on every element, which can return
-	   *     false to stop the iteration early.
-	   * @returns {boolean} True if every element in the entire sequence was iterated,
-	   *     otherwise false.
-	   */
-	  function forEach(array, fn) {
-	    var i = -1,
-	        len = array.length;
-
-	    while (++i < len) {
-	      if (fn(array[i], i) === false) {
-	        return false;
-	      }
-	    }
-
-	    return true;
-	  }
-
-	  function getFirst(sequence) {
-	    var result;
-	    sequence.each(function(e) {
-	      result = e;
-	      return false;
-	    });
-	    return result;
-	  }
-
-	  /**
-	   * Checks if an element exists in an array.
-	   *
-	   * @private
-	   * @param {Array} array
-	   * @param {*} element
-	   * @returns {boolean} Whether or not the element exists in the array.
-	   *
-	   * @examples
-	   * arrayContains([1, 2], 2)              // => true
-	   * arrayContains([1, 2], 3)              // => false
-	   * arrayContains([undefined], undefined) // => true
-	   * arrayContains([NaN], NaN)             // => true
-	   */
-	  function arrayContains(array, element) {
-	    var i = -1,
-	        length = array.length;
-
-	    // Special handling for NaN
-	    if (element !== element) {
-	      while (++i < length) {
-	        if (array[i] !== array[i]) {
-	          return true;
-	        }
-	      }
-	      return false;
-	    }
-
-	    while (++i < length) {
-	      if (array[i] === element) {
-	        return true;
-	      }
-	    }
-	    return false;
-	  }
-
-	  /**
-	   * Checks if an element exists in an array before a given index.
-	   *
-	   * @private
-	   * @param {Array} array
-	   * @param {*} element
-	   * @param {number} index
-	   * @param {Function} keyFn
-	   * @returns {boolean}
-	   *
-	   * @examples
-	   * arrayContainsBefore([1, 2, 3], 3, 2) // => false
-	   * arrayContainsBefore([1, 2, 3], 3, 3) // => true
-	   */
-	  function arrayContainsBefore(array, element, index, keyFn) {
-	    var i = -1;
-
-	    if (keyFn) {
-	      keyFn = createCallback(keyFn);
-	      while (++i < index) {
-	        if (keyFn(array[i]) === keyFn(element)) {
-	          return true;
-	        }
-	      }
-
-	    } else {
-	      while (++i < index) {
-	        if (array[i] === element) {
-	          return true;
-	        }
-	      }
-	    }
-
-	    return false;
-	  }
-
-	  /**
-	   * Swaps the elements at two specified positions of an array.
-	   *
-	   * @private
-	   * @param {Array} array
-	   * @param {number} i
-	   * @param {number} j
-	   *
-	   * @examples
-	   * var array = [1, 2, 3, 4, 5];
-	   *
-	   * swap(array, 2, 3) // array == [1, 2, 4, 3, 5]
-	   */
-	  function swap(array, i, j) {
-	    var temp = array[i];
-	    array[i] = array[j];
-	    array[j] = temp;
-	  }
-
-	  /**
-	   * "Clones" a regular expression (but makes it always global).
-	   *
-	   * @private
-	   * @param {RegExp|string} pattern
-	   * @returns {RegExp}
-	   */
-	  function cloneRegex(pattern) {
-	    return eval("" + pattern + (!pattern.global ? "g" : ""));
-	  };
-
-	  /**
-	   * A collection of unique elements.
-	   *
-	   * @private
-	   * @constructor
-	   *
-	   * @examples
-	   * var set  = new Set(),
-	   *     obj1 = {},
-	   *     obj2 = {},
-	   *     fn1 = function fn1() {},
-	   *     fn2 = function fn2() {};
-	   *
-	   * set.add('foo')            // => true
-	   * set.add('foo')            // => false
-	   * set.add(1)                // => true
-	   * set.add(1)                // => false
-	   * set.add('1')              // => true
-	   * set.add('1')              // => false
-	   * set.add(obj1)             // => true
-	   * set.add(obj1)             // => false
-	   * set.add(obj2)             // => true
-	   * set.add(fn1)              // => true
-	   * set.add(fn2)              // => true
-	   * set.add(fn2)              // => false
-	   * set.contains('__proto__') // => false
-	   * set.add('__proto__')      // => true
-	   * set.add('__proto__')      // => false
-	   * set.contains('add')       // => false
-	   * set.add('add')            // => true
-	   * set.add('add')            // => false
-	   * set.contains(undefined)   // => false
-	   * set.add(undefined)        // => true
-	   * set.contains(undefined)   // => true
-	   * set.contains('undefined') // => false
-	   * set.add('undefined')      // => true
-	   * set.contains('undefined') // => true
-	   * set.contains(NaN)         // => false
-	   * set.add(NaN)              // => true
-	   * set.contains(NaN)         // => true
-	   * set.contains('NaN')       // => false
-	   * set.add('NaN')            // => true
-	   * set.contains('NaN')       // => true
-	   * set.contains('@foo')      // => false
-	   * set.add('@foo')           // => true
-	   * set.contains('@foo')      // => true
-	   */
-	  function Set() {
-	    this.table   = {};
-	    this.objects = [];
-	  }
-
-	  /**
-	   * Attempts to add a unique value to the set.
-	   *
-	   * @param {*} value The value to add.
-	   * @returns {boolean} True if the value was added to the set (meaning an equal
-	   *     value was not already present), or else false.
-	   */
-	  Set.prototype.add = function add(value) {
-	    var table = this.table,
-	        type  = typeof value,
-
-	        // only applies for strings
-	        firstChar,
-
-	        // only applies for objects
-	        objects;
-
-	    switch (type) {
-	      case "number":
-	      case "boolean":
-	      case "undefined":
-	        if (!table[value]) {
-	          table[value] = true;
-	          return true;
-	        }
-	        return false;
-
-	      case "string":
-	        // Essentially, escape the first character if it could possibly collide
-	        // with a number, boolean, or undefined (or a string that happens to start
-	        // with the escape character!), OR if it could override a special property
-	        // such as '__proto__' or 'constructor'.
-	        switch (value.charAt(0)) {
-	          case "_": // e.g., __proto__
-	          case "f": // for 'false'
-	          case "t": // for 'true'
-	          case "c": // for 'constructor'
-	          case "u": // for 'undefined'
-	          case "@": // escaped
-	          case "0":
-	          case "1":
-	          case "2":
-	          case "3":
-	          case "4":
-	          case "5":
-	          case "6":
-	          case "7":
-	          case "8":
-	          case "9":
-	          case "N": // for NaN
-	            value = "@" + value;
-	        }
-	        if (!table[value]) {
-	          table[value] = true;
-	          return true;
-	        }
-	        return false;
-
-	      default:
-	        // For objects and functions, we can't really do anything other than store
-	        // them in an array and do a linear search for reference equality.
-	        objects = this.objects;
-	        if (!arrayContains(objects, value)) {
-	          objects.push(value);
-	          return true;
-	        }
-	        return false;
-	    }
-	  };
-
-	  /**
-	   * Checks whether the set contains a value.
-	   *
-	   * @param {*} value The value to check for.
-	   * @returns {boolean} True if the set contains the value, or else false.
-	   */
-	  Set.prototype.contains = function contains(value) {
-	    var type = typeof value,
-
-	        // only applies for strings
-	        firstChar;
-
-	    switch (type) {
-	      case "number":
-	      case "boolean":
-	      case "undefined":
-	        return !!this.table[value];
-
-	      case "string":
-	        // Essentially, escape the first character if it could possibly collide
-	        // with a number, boolean, or undefined (or a string that happens to start
-	        // with the escape character!), OR if it could override a special property
-	        // such as '__proto__' or 'constructor'.
-	        switch (value.charAt(0)) {
-	          case "_": // e.g., __proto__
-	          case "f": // for 'false'
-	          case "t": // for 'true'
-	          case "c": // for 'constructor'
-	          case "u": // for 'undefined'
-	          case "@": // escaped
-	          case "0":
-	          case "1":
-	          case "2":
-	          case "3":
-	          case "4":
-	          case "5":
-	          case "6":
-	          case "7":
-	          case "8":
-	          case "9":
-	          case "N": // for NaN
-	            value = "@" + value;
-	        }
-	        return !!this.table[value];
-
-	      default:
-	        // For objects and functions, we can't really do anything other than store
-	        // them in an array and do a linear search for reference equality.
-	        return arrayContains(this.objects, value);
-	    }
-	  };
-
-	  /**
-	   * A "rolling" queue, with a fixed capacity. As items are added to the head,
-	   * excess items are dropped from the tail.
-	   *
-	   * @private
-	   * @constructor
-	   *
-	   * @examples
-	   * var queue = new Queue(3);
-	   *
-	   * queue.add(1).toArray()        // => [1]
-	   * queue.add(2).toArray()        // => [1, 2]
-	   * queue.add(3).toArray()        // => [1, 2, 3]
-	   * queue.add(4).toArray()        // => [2, 3, 4]
-	   * queue.add(5).add(6).toArray() // => [4, 5, 6]
-	   * queue.add(7).add(8).toArray() // => [6, 7, 8]
-	   *
-	   * // also want to check corner cases
-	   * new Queue(1).add('foo').add('bar').toArray() // => ['bar']
-	   * new Queue(0).add('foo').toArray()            // => []
-	   * new Queue(-1)                                // throws
-	   *
-	   * @benchmarks
-	   * function populateQueue(count, capacity) {
-	   *   var q = new Queue(capacity);
-	   *   for (var i = 0; i < count; ++i) {
-	   *     q.add(i);
-	   *   }
-	   * }
-	   *
-	   * function populateArray(count, capacity) {
-	   *   var arr = [];
-	   *   for (var i = 0; i < count; ++i) {
-	   *     if (arr.length === capacity) { arr.shift(); }
-	   *     arr.push(i);
-	   *   }
-	   * }
-	   *
-	   * populateQueue(100, 10); // populating a Queue
-	   * populateArray(100, 10); // populating an Array
-	   */
-	  function Queue(capacity) {
-	    this.contents = new Array(capacity);
-	    this.start    = 0;
-	    this.count    = 0;
-	  }
-
-	  /**
-	   * Adds an item to the queue, and returns the queue.
-	   */
-	  Queue.prototype.add = function add(element) {
-	    var contents = this.contents,
-	        capacity = contents.length,
-	        start    = this.start;
-
-	    if (this.count === capacity) {
-	      contents[start] = element;
-	      this.start = (start + 1) % capacity;
-
-	    } else {
-	      contents[this.count++] = element;
-	    }
-
-	    return this;
-	  };
-
-	  /**
-	   * Returns an array containing snapshot of the queue's contents.
-	   */
-	  Queue.prototype.toArray = function toArray() {
-	    var contents = this.contents,
-	        start    = this.start,
-	        count    = this.count;
-
-	    var snapshot = contents.slice(start, start + count);
-	    if (snapshot.length < count) {
-	      snapshot = snapshot.concat(contents.slice(0, count - snapshot.length));
-	    }
-
-	    return snapshot;
-	  };
-
-	  /**
-	   * Shared base method for defining new sequence types.
-	   */
-	  function defineSequenceType(base, name, overrides) {
-	    /** @constructor */
-	    var ctor = function ctor() {};
-
-	    // Make this type inherit from the specified base.
-	    ctor.prototype = new base();
-
-	    // Attach overrides to the new sequence type's prototype.
-	    for (var override in overrides) {
-	      ctor.prototype[override] = overrides[override];
-	    }
-
-	    // Define a factory method that sets the new sequence's parent to the caller
-	    // and (optionally) applies any additional initialization logic.
-	    // Expose this as a chainable method so that we can do:
-	    // Lazy(...).map(...).filter(...).blah(...);
-	    var factory = function factory() {
-	      var sequence = new ctor();
-
-	      // Every sequence needs a reference to its parent in order to work.
-	      sequence.parent = this;
-
-	      // If a custom init function was supplied, call it now.
-	      if (sequence.init) {
-	        sequence.init.apply(sequence, arguments);
-	      }
-
-	      return sequence;
-	    };
-
-	    var methodNames = typeof name === 'string' ? [name] : name;
-	    for (var i = 0; i < methodNames.length; ++i) {
-	      base.prototype[methodNames[i]] = factory;
-	    }
-
-	    return ctor;
-	  }
-
-	  return Lazy;
-	});
-
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(322).setImmediate, __webpack_require__(322).clearImmediate))
-
-/***/ },
-/* 392 */
+/* 289 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _stringify = __webpack_require__(329);
+	const Buffer = __webpack_require__(2).Buffer
 
-	var _stringify2 = _interopRequireDefault(_stringify);
-
-	var _promise = __webpack_require__(332);
-
-	var _promise2 = _interopRequireDefault(_promise);
-
-	var _assign = __webpack_require__(393);
-
-	var _assign2 = _interopRequireDefault(_assign);
-
-	var _classCallCheck2 = __webpack_require__(386);
-
-	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-	var _createClass2 = __webpack_require__(387);
-
-	var _createClass3 = _interopRequireDefault(_createClass2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var Buffer = __webpack_require__(325).Buffer;
-
-	var Node = function () {
-	  function Node(payload, next) {
-	    (0, _classCallCheck3.default)(this, Node);
-
+	class Node {
+	  constructor(payload, next) {
 	    this.payload = payload || null;
 	    this.hash = null;
-	    this.next = next ? next instanceof Array ? next : [next] : [];
+	    this.next = next ? (next instanceof Array ? next : [next]) : [];
 
 	    // Convert instances of Node to its hash
-	    this.next = this.next.map(function (f) {
-	      if (f instanceof Node) return f.hash;
+	    this.next = this.next.map((f) => {
+	      if(f instanceof Node)
+	        return f.hash;
 	      return f;
+	    })
+	  }
+
+	  get asJson() {
+	    let res = { payload: this.payload }
+	    let next = this.next.map((f) => {
+	      if(f instanceof Node)
+	        return f.hash
+	      return f;
+	    });
+	    Object.assign(res, { next: next });
+	    return res;
+	  }
+
+	  hasChild(a) {
+	    for(let i = 0; i < this.next.length; i++) {
+	      if(this.next[i] === a.hash)
+	        return true;
+	    }
+	    return false;
+	  }
+
+	  static create(ipfs, data, next) {
+	    if(!ipfs) throw new Error("Node requires ipfs instance")
+	    return new Promise((resolve, reject) => {
+	      const node = new Node(data, next);
+	      Node.getIpfsHash(ipfs, node)
+	        .then((hash) => {
+	          node.hash = hash;
+	          resolve(node);
+	        }).catch(reject)
 	    });
 	  }
 
-	  (0, _createClass3.default)(Node, [{
-	    key: 'hasChild',
-	    value: function hasChild(a) {
-	      for (var i = 0; i < this.next.length; i++) {
-	        if (this.next[i] === a.hash) return true;
-	      }
-	      return false;
-	    }
-	  }, {
-	    key: 'asJson',
-	    get: function get() {
-	      var res = { payload: this.payload };
-	      var next = this.next.map(function (f) {
-	        if (f instanceof Node) return f.hash;
-	        return f;
-	      });
-	      (0, _assign2.default)(res, { next: next });
-	      return res;
-	    }
-	  }], [{
-	    key: 'create',
-	    value: function create(ipfs, data, next) {
-	      if (!ipfs) throw new Error("Node requires ipfs instance");
-	      return new _promise2.default(function (resolve, reject) {
-	        var node = new Node(data, next);
-	        Node.getIpfsHash(ipfs, node).then(function (hash) {
-	          node.hash = hash;
-	          resolve(node);
-	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'fromIpfsHash',
-	    value: function fromIpfsHash(ipfs, hash) {
-	      if (!ipfs) throw new Error("Node requires ipfs instance");
-	      if (!hash) throw new Error("Invalid hash: " + hash);
-	      return new _promise2.default(function (resolve, reject) {
-	        ipfs.object.get(hash).then(function (obj) {
-	          var f = JSON.parse(obj.Data);
+	  static fromIpfsHash(ipfs, hash) {
+	    if(!ipfs) throw new Error("Node requires ipfs instance")
+	    if(!hash) throw new Error("Invalid hash: " + hash)
+	    return new Promise((resolve, reject) => {
+	      ipfs.object.get(hash)
+	        .then((obj) => {
+	          const f = JSON.parse(obj.Data)
 	          Node.create(ipfs, f.payload, f.next).then(resolve).catch(reject);
 	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'getIpfsHash',
-	    value: function getIpfsHash(ipfs, node) {
-	      if (!ipfs) throw new Error("Node requires ipfs instance");
-	      return new _promise2.default(function (resolve, reject) {
-	        ipfs.object.put(new Buffer((0, _stringify2.default)({ Data: (0, _stringify2.default)(node.asJson) }))).then(function (res) {
-	          return resolve(res.Hash);
-	        }).catch(reject);
-	      });
-	    }
-	  }, {
-	    key: 'equals',
-	    value: function equals(a, b) {
-	      return a.hash === b.hash;
-	    }
-	  }]);
-	  return Node;
-	}();
+	    });
+	  }
+
+	  static getIpfsHash(ipfs, node) {
+	    if(!ipfs) throw new Error("Node requires ipfs instance")
+	    return new Promise((resolve, reject) => {
+	      ipfs.object.put(new Buffer(JSON.stringify({ Data: JSON.stringify(node.asJson) })))
+	        .then((res) => resolve(res.Hash))
+	        .catch(reject);
+	    });
+	  }
+
+	  static equals(a, b) {
+	    return a.hash === b.hash;
+	  }
+	}
 
 	module.exports = Node;
 
-/***/ },
-/* 393 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(394), __esModule: true };
 
 /***/ },
-/* 394 */
-/***/ function(module, exports, __webpack_require__) {
-
-	__webpack_require__(395);
-	module.exports = __webpack_require__(331).Object.assign;
-
-/***/ },
-/* 395 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.3.1 Object.assign(target, source)
-	var $export = __webpack_require__(341);
-
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(396)});
-
-/***/ },
-/* 396 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 19.1.2.1 Object.assign(target, source, ...)
-	var $        = __webpack_require__(347)
-	  , toObject = __webpack_require__(397)
-	  , IObject  = __webpack_require__(363);
-
-	// should work with symbols and should have deterministic property order (V8 bug)
-	module.exports = __webpack_require__(350)(function(){
-	  var a = Object.assign
-	    , A = {}
-	    , B = {}
-	    , S = Symbol()
-	    , K = 'abcdefghijklmnopqrst';
-	  A[S] = 7;
-	  K.split('').forEach(function(k){ B[k] = k; });
-	  return a({}, A)[S] != 7 || Object.keys(a({}, B)).join('') != K;
-	}) ? function assign(target, source){ // eslint-disable-line no-unused-vars
-	  var T     = toObject(target)
-	    , $$    = arguments
-	    , $$len = $$.length
-	    , index = 1
-	    , getKeys    = $.getKeys
-	    , getSymbols = $.getSymbols
-	    , isEnum     = $.isEnum;
-	  while($$len > index){
-	    var S      = IObject($$[index++])
-	      , keys   = getSymbols ? getKeys(S).concat(getSymbols(S)) : getKeys(S)
-	      , length = keys.length
-	      , j      = 0
-	      , key;
-	    while(length > j)if(isEnum.call(S, key = keys[j++]))T[key] = S[key];
-	  }
-	  return T;
-	} : Object.assign;
-
-/***/ },
-/* 397 */
-/***/ function(module, exports, __webpack_require__) {
-
-	// 7.1.13 ToObject(argument)
-	var defined = __webpack_require__(338);
-	module.exports = function(it){
-	  return Object(defined(it));
-	};
-
-/***/ },
-/* 398 */
+/* 290 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _promise = __webpack_require__(238);
+	var _promise = __webpack_require__(207);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var OpTypes = __webpack_require__(399);
-	var OrbitDBItem = __webpack_require__(400);
-	var Post = __webpack_require__(404);
+	var OpTypes = __webpack_require__(291);
+	var OrbitDBItem = __webpack_require__(292);
+	var Post = __webpack_require__(296);
 
 	var Operation = function () {
 	  function Operation() {
@@ -68752,7 +55988,7 @@
 	module.exports = Operation;
 
 /***/ },
-/* 399 */
+/* 291 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -68772,7 +56008,7 @@
 	module.exports = OpTypes;
 
 /***/ },
-/* 400 */
+/* 292 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -68781,21 +56017,21 @@
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _possibleConstructorReturn2 = __webpack_require__(401);
+	var _possibleConstructorReturn2 = __webpack_require__(293);
 
 	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-	var _inherits2 = __webpack_require__(402);
+	var _inherits2 = __webpack_require__(294);
 
 	var _inherits3 = _interopRequireDefault(_inherits2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Post = __webpack_require__(403);
+	var Post = __webpack_require__(295);
 
 	var OrbitDBItem = function (_Post) {
 	  (0, _inherits3.default)(OrbitDBItem, _Post);
@@ -68872,7 +56108,7 @@
 	module.exports = OrbitDBItem;
 
 /***/ },
-/* 401 */
+/* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -68894,7 +56130,7 @@
 	};
 
 /***/ },
-/* 402 */
+/* 294 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -68922,14 +56158,14 @@
 	exports.__esModule = true;
 
 /***/ },
-/* 403 */
+/* 295 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	// Base class
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
@@ -68944,7 +56180,7 @@
 	module.exports = Post;
 
 /***/ },
-/* 404 */
+/* 296 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -68953,28 +56189,28 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
-	var _promise = __webpack_require__(238);
+	var _promise = __webpack_require__(207);
 
 	var _promise2 = _interopRequireDefault(_promise);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var Buffer = __webpack_require__(2).Buffer;
-	var Post = __webpack_require__(403);
-	var TextPost = __webpack_require__(405);
-	var FilePost = __webpack_require__(406);
-	var DirectoryPost = __webpack_require__(407);
-	var OrbitDBItem = __webpack_require__(400);
-	var MetaInfo = __webpack_require__(408);
-	var Poll = __webpack_require__(409);
+	var Post = __webpack_require__(295);
+	var TextPost = __webpack_require__(297);
+	var FilePost = __webpack_require__(298);
+	var DirectoryPost = __webpack_require__(299);
+	var OrbitDBItem = __webpack_require__(292);
+	var MetaInfo = __webpack_require__(300);
+	var Poll = __webpack_require__(301);
 
 	var PostTypes = {
 	  Message: TextPost,
@@ -69031,7 +56267,7 @@
 	module.exports = Posts;
 
 /***/ },
-/* 405 */
+/* 297 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -69040,21 +56276,21 @@
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _possibleConstructorReturn2 = __webpack_require__(401);
+	var _possibleConstructorReturn2 = __webpack_require__(293);
 
 	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-	var _inherits2 = __webpack_require__(402);
+	var _inherits2 = __webpack_require__(294);
 
 	var _inherits3 = _interopRequireDefault(_inherits2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Post = __webpack_require__(403);
+	var Post = __webpack_require__(295);
 	// const Encryption = require('orbit-common/lib/Encryption');
 
 	// Simplest type of post: a string
@@ -69082,7 +56318,7 @@
 	module.exports = TextPost;
 
 /***/ },
-/* 406 */
+/* 298 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -69091,21 +56327,21 @@
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _possibleConstructorReturn2 = __webpack_require__(401);
+	var _possibleConstructorReturn2 = __webpack_require__(293);
 
 	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-	var _inherits2 = __webpack_require__(402);
+	var _inherits2 = __webpack_require__(294);
 
 	var _inherits3 = _interopRequireDefault(_inherits2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Post = __webpack_require__(403);
+	var Post = __webpack_require__(295);
 
 	// A reference to a file
 
@@ -69129,7 +56365,7 @@
 	module.exports = FilePost;
 
 /***/ },
-/* 407 */
+/* 299 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -69138,21 +56374,21 @@
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _possibleConstructorReturn2 = __webpack_require__(401);
+	var _possibleConstructorReturn2 = __webpack_require__(293);
 
 	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-	var _inherits2 = __webpack_require__(402);
+	var _inherits2 = __webpack_require__(294);
 
 	var _inherits3 = _interopRequireDefault(_inherits2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Post = __webpack_require__(403);
+	var Post = __webpack_require__(295);
 
 	// A reference to a file
 
@@ -69176,12 +56412,12 @@
 	module.exports = DirectoryPost;
 
 /***/ },
-/* 408 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
@@ -69199,7 +56435,7 @@
 	module.exports = MetaInfo;
 
 /***/ },
-/* 409 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -69208,21 +56444,21 @@
 
 	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _possibleConstructorReturn2 = __webpack_require__(401);
+	var _possibleConstructorReturn2 = __webpack_require__(293);
 
 	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
 
-	var _inherits2 = __webpack_require__(402);
+	var _inherits2 = __webpack_require__(294);
 
 	var _inherits3 = _interopRequireDefault(_inherits2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Post = __webpack_require__(403);
+	var Post = __webpack_require__(295);
 
 	// A poll / vote
 
@@ -69245,7 +56481,7 @@
 	module.exports = Poll;
 
 /***/ },
-/* 410 */
+/* 302 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -69254,19 +56490,19 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
-	var _classCallCheck2 = __webpack_require__(258);
+	var _classCallCheck2 = __webpack_require__(227);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-	var _createClass2 = __webpack_require__(259);
+	var _createClass2 = __webpack_require__(228);
 
 	var _createClass3 = _interopRequireDefault(_createClass2);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var fs = __webpack_require__(186);
+	var fs = __webpack_require__(179);
 	var path = __webpack_require__(28);
-	var logger = __webpack_require__(199).create("orbit-db.Cache");
+	var logger = __webpack_require__(192).create("orbit-db.Cache");
 
 	var defaultFilepath = path.resolve('./orbit-db-cache.json');
 	var filePath = defaultFilepath;

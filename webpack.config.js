@@ -12,12 +12,12 @@ module.exports = {
     process: 'mock',
     Buffer: 'buffer'
   },
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      mangle: true,
-      compress: { warnings: false }
-    })
-  ],
+  // plugins: [
+  //   new webpack.optimize.UglifyJsPlugin({
+  //     mangle: false,
+  //     compress: { warnings: false }
+  //   })
+  // ],
   resolve: {
     modulesDirectories: [
       'node_modules'
