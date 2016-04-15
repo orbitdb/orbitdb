@@ -1,9 +1,10 @@
 'use strict';
 
-const async       = require('asyncawait/async');
-const await       = require('asyncawait/await');
-const OrbitClient = require('../src/Client');
-const Timer       = require('./Timer');
+const async   = require('asyncawait/async');
+const await   = require('asyncawait/await');
+const ipfsd   = require('ipfsd-ctl');
+const OrbitDB = require('../src/Client');
+const Timer   = require('./Timer');
 
 // usage: keyvalue.js <host> <username> <channel> <key> <value>
 
@@ -16,10 +17,20 @@ const password = '';
 
 const channel = process.argv[4] ? process.argv[4] : 'testing123';
 
+const startIpfs = () => {
+  return new Promise((resolve, reject) => {
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
+  });
+};
+
 let run = (async(() => {
   try {
-    const orbit = await(OrbitClient.connect(host, port, username, password));
-    const db = await(orbit.channel(channelName));
+    const ipfs = await(startIpfs());
+    const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
+    const db = await(orbit.channel(channel));
 
     let count = 1;
 
@@ -27,7 +38,7 @@ let run = (async(() => {
       const key = process.argv[5] ? process.argv[5] : 'greeting';
       const value = process.argv[6] ? process.argv[6] : 'Hello world';
       const timer = new Timer(true);
-      db.put(key, value + " " + count);
+      await(db.put(key, value + " " + count));
       const result = db.get(key);
 
       console.log("---------------------------------------------------")

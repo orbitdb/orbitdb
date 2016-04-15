@@ -2,18 +2,18 @@
 
 ## Introduction
 
-Distributed, peer-to-peer Key-Value Store and Event Log on IPFS.
+Distributed, peer-to-peer **Key-Value Store and Event Log** on IPFS.
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
 - Stores all data in IPFS, including the database index
 - Aggregation happens on client side and data is eventually consistent
-- Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and (sort of) Vector Clocks for partial ordering
+- Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and [ipfs-log](https://github.com/haadcode/ipfs-log) for partial order
 - Designed to work offline first and to be easily embeddable to applications
 
 _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
 
-_OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
+![Screenshot](https://raw.githubusercontent.com/haadcode/orbit-db/master/screenshot.png)
 
 ## Install
 ```
@@ -21,29 +21,22 @@ npm install orbit-db
 ```
 
 ## Examples
-### Browser examples
-In order to run the browser example, you need to have a local IPFS daemon running. Start it with the following command:
-```
-API_ORIGIN=* ipfs daemon
-```
-
-Then open `examples/browser.html`. See the example code [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
-
 ### Node.js examples
+*To run the examples, make sure to run a local [orbit-server](https://github.com/haadcode/orbit-server)*
+
 Before running the examples, install dependencies with:
 ```
 npm install
 ```
 
-Key-Value store example:
+Key-Value store [example](https://github.com/haadcode/orbit-db/blob/master/examples/keyvalue.js):
 ```
 node examples/keyvalue.js <host> <username> <channel> <key> <value>
-node examples/keyvalueReader.js <host> <username> <channel> <key>
 ```
 
-Event log example (run several in separate shells):
+Event log [example](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) (run several in separate shells):
 ```
-node examples/reader.js <host> <username> <channel> <data> <interval in ms>
+node examples/eventlog.js <host> <username> <channel> <data> <interval in ms>
 ```
 
 Benchmark writes:
@@ -51,8 +44,42 @@ Benchmark writes:
 node examples/benchmark.js <host> <username> <channel>;
 ```
 
+
+### Browser examples
+In order to run the browser example, you need to have a local IPFS daemon running. Start it with the following command:
+```
+API_ORIGIN=* ipfs daemon
+```
+
+Then open `examples/browser.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
+
+```html
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <script type="text/javascript" src="orbitdb.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ipfsapi.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      const ipfs = ipfsAPI();
+      OrbitDB.connect('localhost', 3333, 'user1', '', ipfs).then((orbit) => {
+        orbit.channel('test').then((db) => {
+          db.put('hello', 'world').then((res) => {
+            const result = db.get(key);
+            console.log(result);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+```
+
 ## API
 _See usage example below_
+
+_OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
 
     connect(host, port, username, password)
 

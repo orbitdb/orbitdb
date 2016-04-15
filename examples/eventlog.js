@@ -1,9 +1,10 @@
 'use strict';
 
-const async       = require('asyncawait/async');
-const await       = require('asyncawait/await');
-const OrbitClient = require('../src/Client');
-const Timer       = require('./Timer');
+const async   = require('asyncawait/async');
+const await   = require('asyncawait/await');
+const ipfsd   = require('ipfsd-ctl');
+const OrbitDB = require('../src/Client');
+const Timer   = require('./Timer');
 
 // usage: reader.js <host> <username> <channel> <data> <interval in ms>
 
@@ -17,9 +18,19 @@ const password = '';
 const channelName = process.argv[4] ? process.argv[4] : 'test';
 const prefix = process.argv[5] ? process.argv[5] : 'Hello';
 
+const startIpfs = () => {
+  return new Promise((resolve, reject) => {
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
+  });
+};
+
 let run = (async(() => {
   try {
-    const orbit = await(OrbitClient.connect(host, port, username, password));
+    const ipfs = await(startIpfs());
+    const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
     const db = await(orbit.channel(channelName));
 
     let count = 1;

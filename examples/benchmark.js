@@ -1,9 +1,10 @@
 'use strict';
 
-var await       = require('asyncawait/await');
-var async       = require('asyncawait/async');
-var OrbitClient = require('../src/Client');
-var Timer       = require('./Timer');
+const await   = require('asyncawait/await');
+const async   = require('asyncawait/async');
+const ipfsd   = require('ipfsd-ctl');
+const OrbitDB = require('../src/Client');
+const Timer   = require('./Timer');
 
 // usage: benchmark.js <host> <username> <channel>;
 
@@ -16,10 +17,20 @@ const password = '';
 
 const channelName = process.argv[4] ? process.argv[4] : 'c1';
 
+const startIpfs = () => {
+  return new Promise((resolve, reject) => {
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
+  });
+};
+
 let run = (async(() => {
   try {
     // Connect
-    const orbit = await(OrbitClient.connect(host, port, username, password));
+    const ipfs = await(startIpfs());
+    const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
     const db = await(orbit.channel(channelName));
 
     // Metrics
