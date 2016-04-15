@@ -4,6 +4,8 @@
 
 Distributed, peer-to-peer Key-Value Store and Event Log on IPFS.
 
+This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
+
 - Stores all data in IPFS, including the database index
 - Aggregation happens on client side and data is eventually consistent
 - Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and (sort of) Vector Clocks for partial ordering
@@ -19,6 +21,15 @@ npm install orbit-db
 ```
 
 ## Examples
+### Browser examples
+In order to run the browser example, you need to have a local IPFS daemon running. Start it with the following command:
+```
+API_ORIGIN=* ipfs daemon
+```
+
+Then open `examples/browser.html`. See the example code [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
+
+### Node.js examples
 Before running the examples, install dependencies with:
 ```
 npm install
@@ -71,15 +82,18 @@ _See usage example below_
 ## Usage
 ```javascript
 const async       = require('asyncawait/async');
+const ipfsAPI     = require('ipfs-api');
 const OrbitClient = require('./OrbitClient');
 
 // orbit-server
 const host = 'localhost';
 const port = 3333;
 
+const ipfs = ipfsAPI();
+
 async(() => {
     // Connect
-    const orbit = OrbitClient.connect(host, port, username, password);
+    const orbit = OrbitClient.connect(host, port, username, password, ipfs);
 
     const channelName = 'hello-world';
     const db = orbit.channel(channelName);
