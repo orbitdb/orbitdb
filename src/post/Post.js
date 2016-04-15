@@ -1,5 +1,6 @@
 'use strict';
 
+const Buffer        = require('buffer').Buffer;
 const Post          = require('./BasePost');
 const TextPost      = require('./TextPost');
 const FilePost      = require('./FilePost');
