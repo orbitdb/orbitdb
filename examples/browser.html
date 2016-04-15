@@ -16,33 +16,29 @@
       const key      = 'greeting';
       const value    = 'Hello world';
 
-      try {
-        const ipfs = ipfsAPI();
-        OrbitDB.connect(host, port, username, password, ipfs).then((orbit) => {
-          orbit.channel(channel).then((db) => {
-            let count = 1;
-            const query = () => {
-              const startTime = new Date().getTime();
-              db.put(key, value + " " + count).then((res) => {
-                const endTime = new Date().getTime();
-                logger.debug(`db.put (#${count}) took ${(endTime - startTime)} ms\n`);
-                count ++;
+      const ipfs = ipfsAPI();
+      OrbitDB.connect(host, port, username, password, ipfs).then((orbit) => {
+        orbit.channel(channel).then((db) => {
+          let count = 1;
+          const query = () => {
+            const startTime = new Date().getTime();
+            db.put(key, value + " " + count).then((res) => {
+              const endTime = new Date().getTime();
+              logger.debug(`db.put (#${count}) took ${(endTime - startTime)} ms\n`);
+              count ++;
 
-                const result = db.get(key);
-                logger.debug("---------------------------------------------------")
-                logger.debug("Key | Value")
-                logger.debug("---------------------------------------------------")
-                logger.debug(`${key} | ${result}`);
-                logger.debug("---------------------------------------------------")
-                console.log('\n');
-              }).catch((e) => logger.error(e));
-            };
-            setInterval(query, 1000);
-          });
-        });
-      } catch(e) {
-        logger.error(e.stack);
-      }
+              const result = db.get(key);
+              logger.debug("---------------------------------------------------")
+              logger.debug("Key | Value")
+              logger.debug("---------------------------------------------------")
+              logger.debug(`${key} | ${result}`);
+              logger.debug("---------------------------------------------------")
+              console.log('\n');
+            }).catch((e) => logger.error(e));
+          };
+          setInterval(query, 1000);
+        }).catch((e) => logger.error(e));
+      }).catch((e) => logger.error(e));
     </script>
   </body>
 </html>
