@@ -6,9 +6,9 @@ const path       = require('path');
 const assert     = require('assert');
 const async      = require('asyncawait/async');
 const await      = require('asyncawait/await');
-const ipfsDaemon = require('orbit-common/lib/ipfs-daemon');
-const OrbitDB    = require('../src/OrbitDB');
+const ipfsd      = require('ipfsd-ctl');
 const Log        = require('ipfs-log');
+const OrbitDB    = require('../src/OrbitDB');
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
@@ -18,23 +18,35 @@ const username = 'testrunner';
 const password = '';
 const user = { username: username };
 
+const startIpfs = () => {
+  return new Promise((resolve, reject) => {
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
+  });
+};
+
 describe('OrbitDB', function() {
   this.timeout(3000);
 
-  let db, ipfs;
+  let ipfs, db;
   let channel = 'orbit-db.test';
 
   before(async(function(done) {
     this.timeout(20000);
     try {
-      const daemon = await(ipfsDaemon());
-      ipfs = daemon.ipfs;
+      ipfs = await(startIpfs());
     } catch(e) {
       console.log(e);
       assert.equal(e, null);
     }
     done();
   }));
+
+  after(() => {
+    if(db) db.delete();
+  });
 
   describe('constructor', function() {
     it('sets defaults', async((done) => {

@@ -5,6 +5,7 @@ const path        = require('path');
 const assert      = require('assert');
 const async       = require('asyncawait/async');
 const await       = require('asyncawait/await');
+const ipfsd       = require('ipfsd-ctl');
 const OrbitClient = require('../src/Client');
 
 // Mute logging
@@ -14,18 +15,35 @@ require('logplease').setLogLevel('ERROR');
 const username = 'testrunner';
 const password = '';
 
+const startIpfs = () => {
+  return new Promise((resolve, reject) => {
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
+  });
+};
+
 describe('Orbit Client', function() {
   this.timeout(3000);
 
-  let client, db;
+  let ipfs, client, db;
   let channel = 'abcdefgh';
   const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json');
 
   before(async(function (done) {
     this.timeout(20000);
-    client = await(OrbitClient.connect('localhost', 3333, username, password, null, { allowOffline: true }));
-    db = await(client.channel(channel, '', false));
-    db.delete();
+
+    try {
+      ipfs = await(startIpfs());
+      client = await(OrbitClient.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
+      db = await(client.channel(channel, '', false));
+      db.delete();
+    } catch(e) {
+      console.log(e);
+      assert.equal(e, null);
+    }
+
     done();
   }));
 

@@ -1,7 +1,6 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const ipfsDaemon   = require('orbit-common/lib/ipfs-daemon');
 const logger       = require('logplease').create("orbit-db.Client");
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
@@ -139,11 +138,11 @@ class OrbitClientFactory {
     options = options ? options : {};
 
     if(!ipfs) {
-      logger.debug("IPFS instance not provided, starting one");
-      return ipfsDaemon().then((ipfsd) => createClient(ipfsd.ipfs));
-    } else {
-      return createClient(ipfs);
+      logger.error("IPFS instance not provided");
+      throw new Error("IPFS instance not provided");
     }
+
+    return createClient(ipfs);
   }
 }
 
