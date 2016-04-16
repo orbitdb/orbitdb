@@ -203,11 +203,11 @@ List snapshots are posted to pubsub:
   "Links": [],
   "Data": {
     "id": "user123",
-    "items": {
+    "items": [
       "QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn",
       "QmQxndNEzWxKT5KRqRsty7JDGcbPVazaYPCqfB5z1mxmon",
       "QmUN1X97M2t8MX55H8VoPGXu2fLBpr91iCAzHkXudSMvDE"
-    }
+    ]
   }
 }
 ```
@@ -221,9 +221,9 @@ List snapshots are posted to pubsub:
   "Data": {
     "id": "user123",
     "data": "QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ",
-    "next": {
+    "next": [
       "QmS17ABxzFEVoHv5WEvATetNEZhN2vkNApRPcFQUaJfij3"
-    }
+    ]
   }
 }
 ```
