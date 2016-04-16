@@ -108,28 +108,29 @@ _OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspa
 
 ## Usage
 ```javascript
-const async       = require('asyncawait/async');
-const ipfsAPI     = require('ipfs-api');
-const OrbitClient = require('./OrbitClient');
+const async   = require('asyncawait/async');
+const ipfsAPI = require('ipfs-api');
+const OrbitDB = require('orbit-db');
 
 // orbit-server
 const host = 'localhost';
 const port = 3333;
 
+// local ipfs daemon
 const ipfs = ipfsAPI();
 
 async(() => {
     // Connect
-    const orbit = OrbitClient.connect(host, port, username, password, ipfs);
+    const orbit = await(OrbitClient.connect(host, port, username, password, ipfs));
 
     const channelName = 'hello-world';
     const db = orbit.channel(channelName);
 
     /* Event Log */
-    const hash = db.add('hello'); // <ipfs-hash>
+    const hash = await(db.add('hello')); // <ipfs-hash>
 
     // Remove event
-    db.remove(hash);
+    await(db.remove(hash));
 
     // Iterator options
     const options = { limit: -1 }; // fetch all messages
@@ -146,9 +147,9 @@ async(() => {
     //   console.log(i.hash, i.item);
 
     /* KV Store */
-    db.put('key1', 'hello world');
+    await(db.put('key1', 'hello world'));
     db.get('key1'); // returns "hello world"
-    db.del('key1');
+    await(db.del('key1'));
 
     /* Delete channel */
     const result = db.delete(); // true | false
@@ -157,7 +158,7 @@ async(() => {
 
 ### Development
 #### Source Code
-The entry point for the code is [src/OrbitClient.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitClient.js) and the DB implementation is [src/OrbitDB.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitDB.js)
+The entry point for the code is [src/Client.js](https://github.com/haadcode/orbit-db/blob/master/src/Client.js) and the DB implementation is [src/OrbitDB.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitDB.js)
 
 #### Run Tests
 ```
@@ -201,13 +202,11 @@ List snapshots are posted to pubsub:
 {
   "Links": [],
   "Data": {
-    "id": "writer",
-    "seq": 1301,
-    "ver": 3,
+    "id": "user123",
     "items": {
-      "writer.1301.0": "QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn",
-      "writer.1301.1": "QmQxndNEzWxKT5KRqRsty7JDGcbPVazaYPCqfB5z1mxmon",
-      "writer.1301.2": "QmUN1X97M2t8MX55H8VoPGXu2fLBpr91iCAzHkXudSMvDE"
+      "QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn",
+      "QmQxndNEzWxKT5KRqRsty7JDGcbPVazaYPCqfB5z1mxmon",
+      "QmUN1X97M2t8MX55H8VoPGXu2fLBpr91iCAzHkXudSMvDE"
     }
   }
 }
@@ -220,12 +219,10 @@ List snapshots are posted to pubsub:
 {
   "Links": [],
   "Data": {
-    "id": "writer",
-    "seq": 1301,
-    "ver": 0,
+    "id": "user123",
     "data": "QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ",
     "next": {
-      "writer.1300.9": "QmS17ABxzFEVoHv5WEvATetNEZhN2vkNApRPcFQUaJfij3"
+      "QmS17ABxzFEVoHv5WEvATetNEZhN2vkNApRPcFQUaJfij3"
     }
   }
 }
@@ -244,7 +241,7 @@ List snapshots are posted to pubsub:
     "meta":{
       "type": "text",
       "size": -1,
-      "from": "writer",
+      "from": "user123",
       "ts": 1456494484094
     }
   }
