@@ -21,7 +21,7 @@ class Cache {
   static loadCache(cacheFile) {
     filePath = cacheFile ? cacheFile : defaultFilepath;
     if(fs.existsSync(filePath)) {
-      logger.debug('Load cache from', filePath);
+      logger.debug('Load cache from ' + filePath);
       cache = JSON.parse(fs.readFileSync(filePath));
     }
   }

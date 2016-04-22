@@ -4,6 +4,7 @@ const EventEmitter = require('events').EventEmitter;
 const logger       = require('logplease').create("orbit-db.Client");
 const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
+const OrbitCounterDB = require('./OrbitCounterDB');
 
 class Client {
   constructor(ipfs, options) {
@@ -14,6 +15,40 @@ class Client {
     this.events = new EventEmitter();
     this.options = options || {};
     this.db = new OrbitDB(this._ipfs, this.options);
+    this.counterDB = new OrbitCounterDB(this._ipfs, this.options);
+  }
+
+  /*
+    kvstore('name').set(k, v)
+    eventlog('name').add(data)
+    counter('name').inc(13)
+  */
+
+  counter(channel, subscribe) {
+    if(subscribe === undefined) subscribe = true;
+    const api = {
+      value: () => this.counterDB.query(channel),
+      inc: (amount) => this.counterDB.inc(channel, amount),
+      dec: (amount) => console.log("dec() not implemented yet"),
+      delete: () => this.counterDB.deleteChannel(channel),
+      close: () => this._pubsub.unsubscribe(channel),
+    }
+
+    // return new Promise((resolve, reject) => {
+      // Hook to the events from the counterDB and pubsub
+      return this.counterDB.use(channel, this.user).then(() => {
+        this.counterDB.events[channel].on('write',  this._onWrite.bind(this));
+        this.counterDB.events[channel].on('sync',   this._onSync.bind(this));
+        this.counterDB.events[channel].on('load',   this._onLoad.bind(this));
+        this.counterDB.events[channel].on('loaded', this._onLoaded.bind(this));
+
+        if(subscribe)
+          this._pubsub.subscribe(channel, '', this._onMessage.bind(this));
+
+        // resolve(api);
+        return api;
+      });
+    // });
   }
 
   channel(channel, password, subscribe) {
@@ -58,6 +93,7 @@ class Client {
 
   _onMessage(channel, message) {
     this.db.sync(channel, message);
+    this.counterDB.sync(channel, message);
   }
 
   _onWrite(channel, hash) {
