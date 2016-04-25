@@ -11,34 +11,32 @@ class CounterDB extends OrbitDB {
     this._counters = {};
   }
 
-  use(channel, user) {
-    this._counters[channel] = new Counter(user.username);
-    return super.use(channel, user);
+  use(dbname, user) {
+    this._counters[dbname] = new Counter(user.username);
+    return super.use(dbname, user);
   }
 
-  sync(channel, hash) {
-    // console.log("--> Head:", hash, this.user.username)
-    super.sync(channel, hash);
-    const counter = this._counters[channel];
-    const oplog = this._oplogs[channel];
-    return oplog.sync(hash)
-      .then(() => {
+  sync(dbname, hash) {
+    const counter = this._counters[dbname];
+    if(counter) {
+      return super.sync(dbname, hash).then((oplog) => {
         return Lazy(oplog.ops)
           .map((f) => Counter.from(f.value))
           .map((f) => counter.merge(f))
           .toArray();
       });
+    }
   }
 
-  query(channel) {
-    return this._counters[channel].value;
+  query(dbname) {
+    return this._counters[dbname].value;
   }
 
-  inc(channel, amount) {
-    const counter = this._counters[channel];
+  inc(dbname, amount) {
+    const counter = this._counters[dbname];
     if(counter) {
       counter.increment(amount);
-      return this._write(channel, '', OpTypes.Inc, null, counter.payload);
+      return this._write(dbname, '', OpTypes.Inc, null, counter.payload);
     }
   }
 }

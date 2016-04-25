@@ -6,6 +6,7 @@ const PubSub       = require('./PubSub');
 const OrbitDB      = require('./OrbitDB');
 const CounterDB    = require('./db/CounterDB');
 const KeyValueDB   = require('./db/KeyValueDB');
+const EventLogDB   = require('./db/EventLogDB');
 
 class Client {
   constructor(ipfs, options) {
@@ -15,7 +16,7 @@ class Client {
     this.network = null;
     this.events = new EventEmitter();
     this.options = options || {};
-    this.db = new OrbitDB(this._ipfs, this.options);
+    this.eventlogDB = new EventLogDB(this._ipfs, this.options);
     this.counterDB = new CounterDB(this._ipfs, this.options);
     this.keyvalueDB = new KeyValueDB(this._ipfs, this.options);
   }
@@ -25,7 +26,7 @@ class Client {
     const api = {
       put: (key, value) => db.put(dbname, key, value),
       set: (key, value) => db.set(dbname, key, value), // alias for put()
-      get: (key) => db.query(dbname, { key: key }),
+      get: (key) => db.get(dbname, key),
       del: (key) => db.del(dbname, key),
       delete: () => db.delete(dbname),
       close: () => this._pubsub.unsubscribe(dbname)
@@ -47,37 +48,17 @@ class Client {
     return this._subscribe(db, dbname, subscribe).then(() => api);
   }
 
-  channel(channel, password, subscribe) {
-    if(password === undefined) password = '';
-    if(subscribe === undefined) subscribe = true;
-
+  eventlog(dbname, subscribe) {
+    const db = this.eventlogDB;
     const api = {
-      iterator: (options) => this._iterator(channel, password, options),
-      delete: () => this.db.deleteChannel(channel, password),
-      del: (key) => this.db.del(channel, password, key),
-      add: (data) => this.db.add(channel, password, data),
-      put: (key, value) => this.db.put(channel, password, key, value),
-      get: (key) => {
-        const items = this._iterator(channel, password, { key: key }).collect();
-        return items[0] ? items[0] : null;
-      },
-      close: () => this._pubsub.unsubscribe(channel)
+      iterator: (options) => db.iterator(dbname, options),
+      add: (data) => db.add(dbname, data),
+      del: (hash) => db.remove(dbname, hash),
+      delete: () => db.delete(dbname),
+      close: () => this._pubsub.unsubscribe(dbname)
     }
 
-    return new Promise((resolve, reject) => {
-      // Hook to the events from the db and pubsub
-      this.db.use(channel, this.user).then(() => {
-        this.db.events[channel].on('write',  this._onWrite.bind(this));
-        this.db.events[channel].on('sync',   this._onSync.bind(this));
-        this.db.events[channel].on('load',   this._onLoad.bind(this));
-        this.db.events[channel].on('loaded', this._onLoaded.bind(this));
-
-        if(subscribe)
-          this._pubsub.subscribe(channel, password, this._onMessage.bind(this));
-
-        resolve(api);
-      }).catch(reject);
-    });
+    return this._subscribe(db, dbname, subscribe).then(() => api);
   }
 
   disconnect() {
@@ -104,8 +85,9 @@ class Client {
   }
 
   _onMessage(channel, message) {
-    this.db.sync(channel, message);
-    this.counterDB.sync(channel, message);
+    [this.eventlogDB, this.counterDB, this.keyvalueDB].forEach((db) => db.sync(channel, message))
+    // this.db.sync(channel, message);
+    // this.counterDB.sync(channel, message);
   }
 
   _onWrite(channel, hash) {
@@ -123,27 +105,6 @@ class Client {
 
   _onLoaded(channel, hash) {
     this.events.emit('loaded', channel, hash);
-  }
-
-  _iterator(channel, password, options) {
-    const messages = this.db.query(channel, password, options);
-    let currentIndex = 0;
-    let iterator = {
-      [Symbol.iterator]() {
-        return this;
-      },
-      next() {
-        let item = { value: null, done: true };
-        if(currentIndex < messages.length) {
-          item = { value: messages[currentIndex], done: false };
-          currentIndex ++;
-        }
-        return item;
-      },
-      collect: () => messages
-    }
-
-    return iterator;
   }
 
   _connect(host, port, username, password, allowOffline) {

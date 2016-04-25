@@ -1,14 +1,19 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
-const Lazy         = require('lazy.js');
-const Log          = require('ipfs-log');
+const Lazy        = require('lazy.js');
+const Log         = require('ipfs-log');
+const Cache       = require('../Cache');
+const DBOperation = require('./Operation');
+
+/*
+  Load, cache and index operations log
+*/
 
 class OperationsLog {
-  constructor(ipfs, options) {
+  constructor(ipfs, dbname, opts) {
+    this.dbname = dbname;
+    this.options = opts || { cacheFile: null };
     this.id = null;
-    this.options = options;
-    this.events = new EventEmitter();
     this.lastWrite = null;
     this._ipfs = ipfs;
     this._log = null;
@@ -21,7 +26,20 @@ class OperationsLog {
 
   create(user) {
     this.id = user.username;
-    return Log.create(this._ipfs, this.id).then((log) => this._log = log);
+    return Log.create(this._ipfs, this.id)
+      .then((log) => this._log = log)
+      .then(() => {
+        if(this.options.cacheFile)
+          return Cache.loadCache(this.options.cacheFile)
+
+        return;
+      })
+      .then(() => {
+        if(this.options.cacheFile)
+          return this.sync(Cache.get(this.dbname))
+
+        return;
+      });
   }
 
   delete() {
@@ -33,7 +51,6 @@ class OperationsLog {
     if(!hash || hash === this.lastWrite || !this._log)
       return Promise.resolve();
 
-    this.events.emit('load');
     const oldCount = this._log.items.length;
 
     return Log.fromIpfsHash(this._ipfs, hash)
@@ -43,10 +60,38 @@ class OperationsLog {
           return;
 
         return this._cacheInMemory(this._log);
-      }).then(() => {
-        this.events.emit('sync');
-        this.events.emit('loaded');
-        return;
+      })
+      .then(() => Cache.set(this.id, hash));
+  }
+
+  addOperation(dbname, operation, key, value) {
+    let post;
+    return DBOperation.create(this._ipfs, this._log, this.user, operation, key, value)
+      // .then((op) => {
+      //   post = op.Post;
+      //   return log.add(op.Hash);
+      // })
+      // .then((node) => resolve({ node: node, op: post }))
+      .then((result) => {
+        // console.log("res1", result)
+        return this._log.add(result.Hash).then((node) => {
+          return { node: node, op: result.Post };
+        });
+      })
+      .then((result) => {
+        // console.log("res2", result)
+        this._cachePayload(result.node.payload, result.op);
+        return result;
+      }).then((result) => {
+        return Log.getIpfsHash(this._ipfs, this._log)
+          .then((listHash) => {
+            this.lastWrite = listHash;
+            Cache.set(this.dbname, listHash);
+            // this.events[dbname].emit('write', this.dbname, listHash);
+            return { hash: listHash, op: result.op };
+          });
+      }).then((result) => {
+        return result;
       });
   }
 

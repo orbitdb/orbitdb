@@ -3,62 +3,77 @@
 const Lazy    = require('lazy.js');
 const OrbitDB = require('./OrbitDB');
 const OpTypes = require('./Operation').Types;
-const Counter = require('./GCounter');
+const GSet    = require('./GSet');
 
 class KeyValueDB extends OrbitDB {
   constructor(ipfs, options) {
     super(ipfs, options)
-    // this._counters = {};
+    // this._set = null;
   }
 
   use(name, user) {
-    // this._counters[name] = new Counter(user.username);
+    // this._set = new GSet(user.username);
     return super.use(name, user);
   }
 
-  sync(name, hash) {
-    // console.log("--> Head:", hash, this.user.username)
-    super.sync(name, hash);
-    // const counter = this._counters[name];
-    const oplog = this._oplogs[name];
-    return oplog.sync(hash)
-      .then(() => {
-        return Lazy(oplog.ops)
-          // .map((f) => Counter.from(f.value))
-          // .map((f) => counter.merge(f))
-          .toArray();
+  sync(dbname, hash) {
+    return super.sync(dbname, hash).then((oplog) => {
+      return Lazy(oplog.ops)
+        // .map((f) => GSet.from(f.value))
+        // .map((f) => this._set.merge(f))
+        .toArray();
+    });
+  }
+
+  put(dbname, key, data) {
+    // set.add(data);
+    const oplog = this._oplogs[dbname];
+    if(oplog) {
+      return oplog.addOperation(dbname, OpTypes.Put, key, data).then((result) => {
+        this.events[dbname].emit('write', dbname, result.hash);
+        // console.log("OP", result);
+        // this._set.add(result.op.hash, result.op.meta.ts);
+        return result.op.hash;
       });
+    }
+    // return this._write(dbname, '', OpTypes.Put, key, data).then((op) => {
+    //   console.log("OP", op);
+    //   // this._set.add(op);
+    // })
   }
 
-  put(name, key, data) {
-    return this._write(name, '', OpTypes.Put, key, data);
+  set(dbname, key, data) {
+    this.put(dbname, key, data);
   }
 
-  set(name, key, data) {
-    this.put(name, key, data);
+  del(dbname, key) {
+    const oplog = this._oplogs[dbname];
+    if(oplog) {
+      return oplog.addOperation(dbname, OpTypes.Delete, key).then((result) => {
+        // console.log("OP", op);
+        return result.op.hash;
+      });
+    }
   }
 
-  del(name, key) {
-    return this._write(name, '', OpTypes.Delete, key);
+  get(dbname, key) {
+    if(!key)
+      return;
+
+    const oplog = this._oplogs[dbname];
+    // console.log("INIT", JSON.stringify(this._set.value, null, 2), oplog.ops)
+    const items = oplog.ops.filter((f) => f.key === key)
+    console.log("ITEM", items, key)
+    let result = this._read(oplog.ops.reverse(), key, 1, true).toArray()[0];
+      // result = this._read(operations.reverse(), opts.key, 1, true).map((f) => f.value);
+    // let result = this._read(this._set.value, key).toArray()[0];
+    // let result = this._read(this._set.value, key).toArray()[0];
+    console.log("RSULT", result)
+    // result = oplog.ops.find((e) => e.hash === result).value;
+    return result ? result.value : null;
   }
 
-  query(name, opts) {
-    this.events[name].emit('load', 'query', name);
-
-    if(!opts) opts = {};
-    let result = [];
-    const oplog = this._oplogs[name];
-
-    // Key-Value, search latest key first
-    if(opts.key)
-      result = this._read(oplog, opts.key).map((f) => f.value).toArray();
-
-    this.events[name].emit('loaded', 'query', name);
-    return result.length > 0 ? result[0] : null;
-  }
-
-  _read(oplog, key) {
-    // Last-Write-Wins, ie. use only the first occurance of the key
+  _read(ops, key) {
     let handled = [];
     const _createLWWSet = (item) => {
       if(Lazy(handled).indexOf(item.key) === -1) {
@@ -70,12 +85,14 @@ class KeyValueDB extends OrbitDB {
     };
 
     // Find the items from the sequence (list of operations)
-    return Lazy(oplog.ops.reverse())
-      .compact()
+    return Lazy(ops)
       .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
       .map(_createLWWSet) // Return items as LWW (ignore values after the first found)
       .compact() // Remove nulls
       .take(1);
+    // return Lazy(ops)
+    //   .skipWhile((f) => key && f !== key) // Drop elements until we have the first one requested
+    //   .take(1);
   }
 }
 

@@ -6,16 +6,16 @@ const Post        = require('../post/Post');
 
 class Operation {
   static create(ipfs, log, user, operation, key, value, data) {
-    return new Promise((resolve, reject) => {
+    // return new Promise((resolve, reject) => {
       let post;
-      Operation._createOperation(ipfs, user, operation, key, value)
-        .then((op) => {
-          post = op.Post;
-          return log.add(op.Hash);
-        })
-        .then((node) => resolve({ node: node, op: post }))
-        .catch(reject);
-    });
+      return Operation._createOperation(ipfs, user, operation, key, value)
+        // .then((op) => {
+        //   post = op.Post;
+        //   return log.add(op.Hash);
+        // })
+        // .then((node) => resolve({ node: node, op: post }))
+        // .catch(reject);
+    // });
   }
 
   static _createOperation(ipfs, user, operation, key, value) {

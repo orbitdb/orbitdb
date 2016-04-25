@@ -31,7 +31,7 @@ let run = (async(() => {
     // Connect
     const ipfs = await(startIpfs());
     const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
-    const db = await(orbit.channel(channelName));
+    const db = await(orbit.eventlog(channelName));
 
     // Metrics
     let totalQueries = 0;

@@ -1,9 +1,8 @@
 *sublime*
 node_modules/
-debug.log
+*.log
 .vagrant/
 .idea/
-isolate*.log
 dump.rdb
 Vagrantfile
 orbit-db-cache.json

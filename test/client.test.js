@@ -14,12 +14,20 @@ require('logplease').setLogLevel('ERROR');
 // Orbit
 const username = 'testrunner';
 const password = '';
+const ipfsPath = '/tmp/orbittests';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) console.error(err);
-      resolve(ipfs);
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) console.error(err);
+    //   resolve(ipfs);
+    // });
+    ipfsd.local((err, node) => {
+      if(err) reject(err);
+      node.startDaemon((err, ipfs) => {
+        if(err) reject(err);
+        resolve(ipfs);
+      });
     });
   });
 };
@@ -37,8 +45,8 @@ describe('Orbit Client', function() {
     try {
       ipfs = await(startIpfs());
       client = await(OrbitClient.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
-      db = await(client.channel(channel, '', false));
-      db.delete();
+      // db = await(client.channel(channel, '', false));
+      // db.delete();
     } catch(e) {
       console.log(e);
       assert.equal(e, null);
@@ -52,6 +60,7 @@ describe('Orbit Client', function() {
     if(client) client.disconnect();
   });
 
+/*
   describe('API', function() {
     let api;
 
@@ -122,11 +131,13 @@ describe('Orbit Client', function() {
       done();
     }));
   });
+*/
 
   describe('Add events', function() {
-    beforeEach(() => {
+    beforeEach(async(() => {
+      db = await(client.eventlog(channel, false));
       db.delete();
-    });
+    }));
 
     it('adds an item to an empty channel', async((done) => {
       const head = await(db.add('hello'));
@@ -147,12 +158,13 @@ describe('Orbit Client', function() {
     }));
 
     it('adds five items', async((done) => {
-      for(let i = 0; i < 5; i ++) {
-        let hash = await(db.add('hello'));
-        assert.notEqual(hash, null);
-        assert.equal(hash.startsWith('Qm'), true);
-        assert.equal(hash.length, 46);
-      }
+      for(let i = 1; i <= 5; i ++)
+        await(db.add('hello' + i));
+
+      const items = db.iterator({ limit: -1 }).collect();
+      assert.equal(items.length, 5);
+      assert.equal(_.first(items.map((f) => f.value)), 'hello1');
+      assert.equal(_.last(items.map((f) => f.value)), 'hello5');
       done();
     }));
 
@@ -168,18 +180,18 @@ describe('Orbit Client', function() {
   });
 
   describe('Delete events', function() {
-    beforeEach(() => {
+    beforeEach(async(() => {
+      db = await(client.eventlog(channel, false));
       db.delete();
       // const items = db.iterator().collect();
       // assert.equal(items.length, 0);
-    });
+    }));
 
     it('deletes an item when only one item in the database', async((done) => {
       const head = await(db.add('hello1'));
-      let item = db.iterator().collect();
       const delop = await(db.del(head));
       const items = db.iterator().collect();
-
+      console.log(items);
       assert.equal(delop.startsWith('Qm'), true);
       assert.equal(items.length, 0);
       done();
@@ -189,7 +201,7 @@ describe('Orbit Client', function() {
       await(db.add('hello1'));
       const head = await(db.add('hello2'));
       await(db.del(head));
-      const items = db.iterator().collect();
+      const items = db.iterator({ limit: -1 }).collect();
       assert.equal(items.length, 1);
       assert.equal(items[0].value, 'hello1');
       done();
@@ -215,6 +227,7 @@ describe('Orbit Client', function() {
 
     beforeEach(async((done) => {
       items = [];
+      db = await(client.eventlog(channel, false));
       db.delete();
       for(let i = 0; i < itemCount; i ++) {
         const hash = await(db.add('hello' + i));
@@ -511,23 +524,29 @@ describe('Orbit Client', function() {
   describe('Delete', function() {
     it('deletes a channel from the local database', () => {
       const result = db.delete();
-      assert.equal(result, true);
+      // assert.equal(result, true);
       const iter = db.iterator();
       assert.equal(iter.next().value, null);
     });
   });
 
   describe('Key-Value Store', function() {
-    before(() => {
+    // before(() => {
+    //   db.delete();
+    // });
+
+    beforeEach(async((done) => {
+      db = await(client.kvstore(channel, '', false));
       db.delete();
-    });
+      done();
+    }));
 
     afterEach(() => {
       db.delete();
     });
 
     it('put', async((done) => {
-      db = await(client.kvstore(channel, '', false));
+      // db = await(client.kvstore(channel, '', false));
       await(db.put('key1', 'hello!'));
       const value = db.get('key1');
       // let all = db.iterator().collect();

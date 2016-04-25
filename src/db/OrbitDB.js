@@ -3,8 +3,6 @@
 const Lazy          = require('lazy.js');
 const EventEmitter  = require('events').EventEmitter;
 const Log           = require('ipfs-log');
-const Cache         = require('../Cache');
-const DBOperation   = require('./Operation');
 const OperationsLog = require('./OperationsLog');
 
 class OrbitDB {
@@ -15,46 +13,53 @@ class OrbitDB {
     this._oplogs = {};
   }
 
-  use(channel, user) {
+  use(dbname, user) {
     this.user = user;
-    this.events[channel] = new EventEmitter();
-    this._oplogs[channel] = new OperationsLog(this._ipfs, this.options);
-    return this._oplogs[channel].create(user)
-      .then(() => {
-        if(this.options.cacheFile)
-          return Cache.loadCache(this.options.cacheFile)
-      })
-      .then(() => {
-        if(this.options.cacheFile)
-          return this.sync(channel, Cache.get(channel))
-      });
+    this.events[dbname] = new EventEmitter();
+    this._oplogs[dbname] = new OperationsLog(this._ipfs, dbname);
+    this.events[dbname].emit('load');
+    return this._oplogs[dbname].create(user)
   }
 
-  sync(channel, hash) {
-    Cache.set(channel, hash);
+  sync(dbname, hash) {
+    // console.log("--> Head:", hash)
+    const oplog = this._oplogs[dbname];
+    if(oplog) {
+      this.events[dbname].emit('load');
+      return oplog.sync(hash)
+        .then(() => this.events[dbname].emit('sync'))
+        .then(() => oplog);
+    }
+
+    return Promise.resolve();
   }
 
-  query(channel) {
+  query(dbname) {
   }
 
-  delete(channel) {
-    if(this._oplogs[channel])
-      this._oplogs[channel].delete();
+  delete(dbname) {
+    if(this._oplogs[dbname])
+      this._oplogs[dbname].delete();
   }
 
-  _write(channel, password, operation, key, value) {
-    const oplog = this._oplogs[channel];
+  _write(dbname, password, operation, key, value) {
+    const oplog = this._oplogs[dbname];
     const log = oplog._log;
     return DBOperation.create(this._ipfs, log, this.user, operation, key, value)
       .then((result) => {
-          oplog._cachePayload(result.node.payload, result.op);
-          return result;
+        // console.log("res", result)
+        return log.add(result.Hash);
+      })
+      .then((result) => {
+        // console.log("res", result)
+        oplog._cachePayload(result.node.payload, result.op);
+        return result;
       }).then((result) => {
         return Log.getIpfsHash(this._ipfs, log)
           .then((listHash) => {
             oplog.lastWrite = listHash;
-            Cache.set(channel, listHash);
-            this.events[channel].emit('write', channel, listHash);
+            Cache.set(dbname, listHash);
+            this.events[dbname].emit('write', dbname, listHash);
             return result;
           });
       }).then((result) => result.node.payload);
