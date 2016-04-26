@@ -9,7 +9,7 @@ const host     = '178.62.241.75'
 const port     = 3333;
 const username = 'user1';
 const password = '';
-const channel  = 'testing123';
+const channel  = 'browsertest1';
 const key      = 'greeting';
 const value    = 'Hello world';
 

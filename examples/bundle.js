@@ -55,7 +55,7 @@
 	var port = 3333;
 	var username = 'user1';
 	var password = '';
-	var channel = 'testing123';
+	var channel = 'browsertest1';
 	var key = 'greeting';
 	var value = 'Hello world';
 
@@ -57154,7 +57154,9 @@
 	        return null;
 	      };
 
-	      this._index = oplog.ops.reverse().map(_createLWWSet).filter(function (f) {
+	      this._index = oplog.ops.reverse().filter(function (f) {
+	        return f !== undefined;
+	      }).map(_createLWWSet).filter(function (f) {
 	        return f !== null;
 	      });
 	    }

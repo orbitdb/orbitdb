@@ -24,6 +24,7 @@ class EventLogIndex {
 
     this._index = oplog.ops
       .reverse()
+      .filter((f) => f !== undefined)
       .map(_createLWWSet)
       .filter((f) => f !== null);
   }
