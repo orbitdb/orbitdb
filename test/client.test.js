@@ -18,22 +18,22 @@ const ipfsPath = '/tmp/orbittests';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    // ipfsd.disposableApi((err, ipfs) => {
-    //   if(err) console.error(err);
-    //   resolve(ipfs);
-    // });
-    ipfsd.local((err, node) => {
-      if(err) reject(err);
-      node.startDaemon((err, ipfs) => {
-        if(err) reject(err);
-        resolve(ipfs);
-      });
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
     });
+    // ipfsd.local((err, node) => {
+    //   if(err) reject(err);
+    //   node.startDaemon((err, ipfs) => {
+    //     if(err) reject(err);
+    //     resolve(ipfs);
+    //   });
+    // });
   });
 };
 
 describe('Orbit Client', function() {
-  this.timeout(20000);
+  this.timeout(30000);
 
   let ipfs, client, db;
   let channel = 'abcdefgh';
