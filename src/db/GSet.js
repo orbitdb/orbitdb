@@ -18,20 +18,16 @@ class GSet {
   }
 
   get value() {
-    // console.log("AAA", this._added, this._removed)
-    return Object.keys(this._added).map((f) => {
-      const removed = this._removed[f];
-      // console.log("--", removed, this._added[f]);
-      if(!removed || (removed && removed.ts < this._added[f].ts)) {
-        return f;
-      }
+    return Object.keys(this._added)
+      .map((f) => {
+        const removed = this._removed[f];
+        if(!removed || (removed && removed.ts < this._added[f].ts)) {
+          return f;
+        }
 
-      return null;
-    }).filter((f) => f !== null)
-    .map((f) => {
-      console.log("f", f)
-      return f;
-    });
+        return null;
+      })
+      .filter((f) => f !== null)
   }
 
   compare(other) {

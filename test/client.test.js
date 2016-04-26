@@ -191,7 +191,6 @@ describe('Orbit Client', function() {
       const head = await(db.add('hello1'));
       const delop = await(db.del(head));
       const items = db.iterator().collect();
-      console.log(items);
       assert.equal(delop.startsWith('Qm'), true);
       assert.equal(items.length, 0);
       done();

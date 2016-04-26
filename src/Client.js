@@ -3,7 +3,6 @@
 const EventEmitter = require('events').EventEmitter;
 const logger       = require('logplease').create("orbit-db.Client");
 const PubSub       = require('./PubSub');
-const OrbitDB      = require('./OrbitDB');
 const CounterDB    = require('./db/CounterDB');
 const KeyValueDB   = require('./db/KeyValueDB');
 const EventLogDB   = require('./db/EventLogDB');
@@ -15,10 +14,22 @@ class Client {
     this.user = null;
     this.network = null;
     this.events = new EventEmitter();
-    this.options = options || {};
-    this.eventlogDB = new EventLogDB(this._ipfs, this.options);
-    this.counterDB = new CounterDB(this._ipfs, this.options);
-    this.keyvalueDB = new KeyValueDB(this._ipfs, this.options);
+    this.eventlogDB = new EventLogDB(this._ipfs, options);
+    this.counterDB = new CounterDB(this._ipfs, options);
+    this.keyvalueDB = new KeyValueDB(this._ipfs, options);
+  }
+
+  eventlog(dbname, subscribe) {
+    const db = this.eventlogDB;
+    const api = {
+      iterator: (options) => db.iterator(dbname, options),
+      add: (data) => db.add(dbname, data),
+      del: (hash) => db.remove(dbname, hash),
+      delete: () => db.delete(dbname),
+      close: () => this._pubsub.unsubscribe(dbname)
+    }
+
+    return this._subscribe(db, dbname, subscribe).then(() => api);
   }
 
   kvstore(dbname, subscribe) {
@@ -48,19 +59,6 @@ class Client {
     return this._subscribe(db, dbname, subscribe).then(() => api);
   }
 
-  eventlog(dbname, subscribe) {
-    const db = this.eventlogDB;
-    const api = {
-      iterator: (options) => db.iterator(dbname, options),
-      add: (data) => db.add(dbname, data),
-      del: (hash) => db.remove(dbname, hash),
-      delete: () => db.delete(dbname),
-      close: () => this._pubsub.unsubscribe(dbname)
-    }
-
-    return this._subscribe(db, dbname, subscribe).then(() => api);
-  }
-
   disconnect() {
     this._pubsub.disconnect();
     this._store = {};
@@ -71,7 +69,7 @@ class Client {
   _subscribe(db, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    return db.use(dbname, this.user).then(() => {
+    return db.use(dbname, this.user.username).then(() => {
       db.events[dbname].on('write',  this._onWrite.bind(this));
       db.events[dbname].on('sync',   this._onSync.bind(this));
       db.events[dbname].on('load',   this._onLoad.bind(this));
@@ -85,17 +83,22 @@ class Client {
   }
 
   _onMessage(channel, message) {
-    [this.eventlogDB, this.counterDB, this.keyvalueDB].forEach((db) => db.sync(channel, message))
-    // this.db.sync(channel, message);
-    // this.counterDB.sync(channel, message);
+    console.log("<--", channel, message)
+    this.eventlogDB.sync(channel, message);
+    this.counterDB.sync(channel, message).catch((e) => {
+      logger.error(e.stack);
+    })
+    this.keyvalueDB.sync(channel, message);
   }
 
   _onWrite(channel, hash) {
+    console.log("-->", channel, hash)
     this._pubsub.publish(channel, hash);
     this.events.emit('data', channel, hash);
   }
 
   _onSync(channel, hash) {
+    console.log("synced", channel, hash)
     this.events.emit('data', channel, hash);
   }
 

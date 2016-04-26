@@ -5,12 +5,8 @@ const Log         = require('ipfs-log');
 const Cache       = require('../Cache');
 const DBOperation = require('./Operation');
 
-/*
-  Load, cache and index operations log
-*/
-
 class OperationsLog {
-  constructor(ipfs, dbname, opts) {
+  constructor(ipfs, dbname, events, opts) {
     this.dbname = dbname;
     this.options = opts || { cacheFile: null };
     this.id = null;
@@ -18,15 +14,19 @@ class OperationsLog {
     this._ipfs = ipfs;
     this._log = null;
     this._cached = {};
+    this.events = events;
   }
 
   get ops() {
-    return Lazy(this._log.items).map((f) => this._cached[f.payload]).toArray();
+    return Lazy(this._log.items)
+      .map((f) => this._cached[f.payload])
+      .toArray();
   }
 
-  create(user) {
-    this.id = user.username;
-    return Log.create(this._ipfs, this.id)
+  create(id) {
+    this.events.emit('load', this);
+    this.id = id;
+    return Log.create(this._ipfs, id)
       .then((log) => this._log = log)
       .then(() => {
         if(this.options.cacheFile)
@@ -35,11 +35,14 @@ class OperationsLog {
         return;
       })
       .then(() => {
-        if(this.options.cacheFile)
+        if(this.options.cacheFile) {
+          console.log("from cache", this.dbname)
           return this.sync(Cache.get(this.dbname))
+        }
 
         return;
-      });
+      })
+      .then(() => this)
   }
 
   delete() {
@@ -47,52 +50,54 @@ class OperationsLog {
   }
 
   sync(hash) {
-    // console.log("--> Head2:", hash, this.lastWrite)
+    console.log("0", hash, this.lastWrite)
     if(!hash || hash === this.lastWrite || !this._log)
       return Promise.resolve();
 
+    this.events.emit('load', this.dbname);
+    console.log("1")
     const oldCount = this._log.items.length;
 
     return Log.fromIpfsHash(this._ipfs, hash)
       .then((other) => this._log.join(other))
       .then((merged) => {
+        console.log("2")
         if(this._log.items.length - oldCount === 0)
           return;
 
         return this._cacheInMemory(this._log);
       })
-      .then(() => Cache.set(this.id, hash));
+      .then(() => {
+        console.log("3")
+        Cache.set(this.dbname, hash)
+        this.events.emit('sync', this.dbname, hash)
+        return this;
+      })
+      // .then(() => this.events.emit('sync', this.dbname, hash))
+      // .then(() => this)
   }
 
-  addOperation(dbname, operation, key, value) {
+  addOperation(operation, key, value) {
     let post;
     return DBOperation.create(this._ipfs, this._log, this.user, operation, key, value)
-      // .then((op) => {
-      //   post = op.Post;
-      //   return log.add(op.Hash);
-      // })
-      // .then((node) => resolve({ node: node, op: post }))
       .then((result) => {
-        // console.log("res1", result)
         return this._log.add(result.Hash).then((node) => {
           return { node: node, op: result.Post };
         });
       })
       .then((result) => {
-        // console.log("res2", result)
         this._cachePayload(result.node.payload, result.op);
         return result;
-      }).then((result) => {
-        return Log.getIpfsHash(this._ipfs, this._log)
-          .then((listHash) => {
-            this.lastWrite = listHash;
-            Cache.set(this.dbname, listHash);
-            // this.events[dbname].emit('write', this.dbname, listHash);
-            return { hash: listHash, op: result.op };
-          });
-      }).then((result) => {
-        return result;
-      });
+      })
+      .then((result) => {
+        return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
+          this.lastWrite = hash;
+          Cache.set(this.dbname, hash);
+          console.log("----------------- write ------------------", this.id, hash)
+          this.events.emit('write', this.dbname, hash);
+          return result.op.hash;
+        });
+      })
   }
 
   _cacheInMemory(log) {
