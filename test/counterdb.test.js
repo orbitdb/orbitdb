@@ -32,7 +32,7 @@ const startIpfs = () => {
   });
 };
 
-describe('Orbit Client', function() {
+describe('CounterStore', function() {
   this.timeout(20000);
 
   let ipfs, client1, client2;
