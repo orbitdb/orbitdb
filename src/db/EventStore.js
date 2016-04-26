@@ -1,11 +1,11 @@
 'use strict';
 
 const Lazy          = require('lazy.js');
-const OrbitDB       = require('./OrbitDB');
+const Store         = require('./Store');
 const OpTypes       = require('./Operation').Types;
 const EventLogIndex = require('./EventLogIndex');
 
-class EventLogDB extends OrbitDB {
+class EventStore extends Store {
   constructor(ipfs, options) {
     super(ipfs, options)
     this._index = new EventLogIndex();
@@ -72,4 +72,4 @@ class EventLogDB extends OrbitDB {
   }
 }
 
-module.exports = EventLogDB;
+module.exports = EventStore;

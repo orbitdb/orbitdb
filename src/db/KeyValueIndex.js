@@ -2,7 +2,7 @@
 
 const OpTypes = require('./Operation').Types;
 
-class KVIndex {
+class KeyValueIndex {
   constructor() {
     this._index = {};
   }
@@ -31,4 +31,4 @@ class KVIndex {
   }
 }
 
-module.exports = KVIndex;
+module.exports = KeyValueIndex;

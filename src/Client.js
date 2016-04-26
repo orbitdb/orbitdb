@@ -1,11 +1,11 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
-const logger       = require('logplease').create("orbit-db.Client");
-const PubSub       = require('./PubSub');
-const CounterDB    = require('./db/CounterDB');
-const KeyValueDB   = require('./db/KeyValueDB');
-const EventLogDB   = require('./db/EventLogDB');
+const EventEmitter  = require('events').EventEmitter;
+const logger        = require('logplease').create("orbit-db.Client");
+const PubSub        = require('./PubSub');
+const CounterStore  = require('./db/CounterStore');
+const KeyValueStore = require('./db/KeyValueStore');
+const EventStore    = require('./db/EventStore');
 
 class Client {
   constructor(ipfs, options) {
@@ -14,13 +14,13 @@ class Client {
     this.user = null;
     this.network = null;
     this.events = new EventEmitter();
-    this.eventlogDB = new EventLogDB(this._ipfs, options);
-    this.counterDB = new CounterDB(this._ipfs, options);
-    this.keyvalueDB = new KeyValueDB(this._ipfs, options);
+    this.kvStore = new KeyValueStore(this._ipfs, options);
+    this.eventStore = new EventStore(this._ipfs, options);
+    this.counterStore = new CounterStore(this._ipfs, options);
   }
 
   eventlog(dbname, subscribe) {
-    const db = this.eventlogDB;
+    const db = this.eventStore;
     const api = {
       iterator: (options) => db.iterator(dbname, options),
       add: (data) => db.add(dbname, data),
@@ -33,7 +33,7 @@ class Client {
   }
 
   kvstore(dbname, subscribe) {
-    const db = this.keyvalueDB;
+    const db = this.kvStore;
     const api = {
       put: (key, value) => db.put(dbname, key, value),
       set: (key, value) => db.set(dbname, key, value), // alias for put()
@@ -47,7 +47,7 @@ class Client {
   }
 
   counter(dbname, subscribe) {
-    const db = this.counterDB;
+    const db = this.counterStore;
     const api = {
       value: () => db.query(dbname),
       inc: (amount) => db.inc(dbname, amount),
@@ -69,11 +69,10 @@ class Client {
   _subscribe(db, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    return db.use(dbname, this.user.username).then(() => {
-      db.events[dbname].on('write',  this._onWrite.bind(this));
-      db.events[dbname].on('sync',   this._onSync.bind(this));
-      db.events[dbname].on('load',   this._onLoad.bind(this));
-      db.events[dbname].on('loaded', this._onLoaded.bind(this));
+    return db.use(dbname, this.user.username).then((events) => {
+      events.on('readable', this._onSync.bind(this));
+      events.on('data',     this._onWrite.bind(this));
+      events.on('load',     this._onLoad.bind(this));
 
       if(subscribe)
         this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
@@ -83,9 +82,9 @@ class Client {
   }
 
   _onMessage(channel, message) {
-    this.eventlogDB.sync(channel, message).catch((e) => logger.error(e.stack));
-    this.counterDB.sync(channel, message).catch((e) => logger.error(e.stack));
-    this.keyvalueDB.sync(channel, message).catch((e) => logger.error(e.stack));
+    [this.eventStore, this.kvStore, this.counterStore].forEach((db) => {
+      db.sync(channel, message).catch((e) => logger.error(e.stack));
+    })
   }
 
   _onWrite(channel, hash) {
@@ -94,15 +93,11 @@ class Client {
   }
 
   _onSync(channel, hash) {
-    this.events.emit('data', channel, hash);
+    this.events.emit('readable', channel, hash);
   }
 
   _onLoad(channel, hash) {
     this.events.emit('load', channel, hash);
-  }
-
-  _onLoaded(channel, hash) {
-    this.events.emit('loaded', channel, hash);
   }
 
   _connect(host, port, username, password, allowOffline) {

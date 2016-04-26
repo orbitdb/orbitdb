@@ -31,7 +31,7 @@ let run = (async(() => {
   try {
     const ipfs = await(startIpfs());
     const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
-    const db = await(orbit.channel(channelName));
+    const db = await(orbit.eventlog(channelName));
 
     let count = 1;
     let running = false;

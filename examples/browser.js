@@ -16,7 +16,7 @@ const value    = 'Hello world';
 try {
   const ipfs = ipfsAPI();
   OrbitDB.connect(host, port, username, password, ipfs).then((orbit) => {
-    orbit.channel(channel).then((db) => {
+    orbit.kvstore(channel).then((db) => {
       let count = 1;
       const query = () => {
         const startTime = new Date().getTime();

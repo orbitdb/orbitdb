@@ -30,7 +30,7 @@ let run = (async(() => {
   try {
     const ipfs = await(startIpfs());
     const orbit = await(OrbitDB.connect(host, port, username, password, ipfs));
-    const db = await(orbit.channel(channel));
+    const db = await(orbit.kvstore(channel));
 
     let count = 1;
 

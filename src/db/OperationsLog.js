@@ -1,6 +1,5 @@
 'use strict';
 
-const Lazy        = require('lazy.js');
 const Log         = require('ipfs-log');
 const Cache       = require('../Cache');
 const DBOperation = require('./Operation');
@@ -18,36 +17,24 @@ class OperationsLog {
   }
 
   get ops() {
-    return Lazy(this._log.items)
-      .map((f) => this._cached[f.payload])
-      .toArray();
+    return this._log.items.map((f) => this._cached[f.payload]);
   }
 
   create(id) {
-    this.events.emit('load', this);
+    this.events.emit('load', this.dbname);
     this.id = id;
     return Log.create(this._ipfs, id)
       .then((log) => this._log = log)
-      .then(() => {
-        if(this.options.cacheFile)
-          return Cache.loadCache(this.options.cacheFile)
-
-        return;
-      })
-      .then(() => {
-        if(this.options.cacheFile)
-          return this.sync(Cache.get(this.dbname))
-
-        return;
-      })
-      .then(() => this)
+      .then(() => Cache.loadCache(this.options.cacheFile))
+      .then(() => this.merge(Cache.get(this.dbname)))
+      .then(() => this);
   }
 
   delete() {
     this._log.clear();
   }
 
-  sync(hash) {
+  merge(hash) {
     if(!hash || hash === this.lastWrite || !this._log)
       return Promise.resolve();
 
@@ -64,14 +51,14 @@ class OperationsLog {
       })
       .then(() => {
         Cache.set(this.dbname, hash)
-        this.events.emit('sync', this.dbname, hash)
+        this.events.emit('readable', this.dbname, hash)
         return this;
       })
   }
 
   addOperation(operation, key, value) {
     let post;
-    return DBOperation.create(this._ipfs, this._log, this.user, operation, key, value)
+    return DBOperation.create(this._ipfs, operation, key, value)
       .then((result) => {
         return this._log.add(result.Hash).then((node) => {
           return { node: node, op: result.Post };
@@ -85,7 +72,7 @@ class OperationsLog {
         return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
           this.lastWrite = hash;
           Cache.set(this.dbname, hash);
-          this.events.emit('write', this.dbname, hash);
+          this.events.emit('data', this.dbname, hash);
           return result.op.hash;
         });
       })

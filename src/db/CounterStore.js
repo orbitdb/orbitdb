@@ -1,10 +1,10 @@
 'use strict';
 
-const OrbitDB      = require('./OrbitDB');
-const OpTypes      = require('./Operation').Types;
+const Store      = require('./Store');
 const CounterIndex = require('./CounterIndex');
+const OpTypes      = require('./Operation').Types;
 
-class CounterDB extends OrbitDB {
+class CounterStore extends Store {
   constructor(ipfs, options) {
     super(ipfs, options)
     this._index = new CounterIndex();
@@ -33,4 +33,4 @@ class CounterDB extends OrbitDB {
   }
 }
 
-module.exports = CounterDB;
+module.exports = CounterStore;

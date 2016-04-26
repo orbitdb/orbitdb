@@ -10,7 +10,7 @@ class DefaultIndex {
   }
 
   updateIndex(oplog) {
-    this._index = oplog.ops;
+    this._index = oplog.ops
   }
 }
 

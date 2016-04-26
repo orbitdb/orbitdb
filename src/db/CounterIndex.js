@@ -1,6 +1,6 @@
 'use strict';
 
-const Counter = require('./GCounter');
+const Counter = require('./crdts/GCounter');
 
 class CounterIndex {
   constructor() {

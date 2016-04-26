@@ -1,10 +1,10 @@
 'use strict';
 
-const OrbitDB = require('./OrbitDB');
+const Store   = require('./Store');
+const KVIndex = require('./KeyValueIndex');
 const OpTypes = require('./Operation').Types;
-const KVIndex = require('./KVIndex');
 
-class KeyValueDB extends OrbitDB {
+class KeyValueStore extends Store {
   constructor(ipfs, options) {
     super(ipfs, options)
     this._index = new KVIndex();
@@ -32,4 +32,4 @@ class KeyValueDB extends OrbitDB {
   }
 }
 
-module.exports = KeyValueDB;
+module.exports = KeyValueStore;
