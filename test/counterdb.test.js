@@ -80,7 +80,6 @@ describe('Orbit Client', function() {
 
     it('creates a new counter from cached data', function(done) {
       client1.counter('counter test', false).then((counter) => {
-        console.log("COUNTER", counter)
         assert.equal(counter.value(), 14);
         done();
       }).catch((e) => {

@@ -83,22 +83,17 @@ class Client {
   }
 
   _onMessage(channel, message) {
-    console.log("<--", channel, message)
-    this.eventlogDB.sync(channel, message);
-    this.counterDB.sync(channel, message).catch((e) => {
-      logger.error(e.stack);
-    })
-    this.keyvalueDB.sync(channel, message);
+    this.eventlogDB.sync(channel, message).catch((e) => logger.error(e.stack));
+    this.counterDB.sync(channel, message).catch((e) => logger.error(e.stack));
+    this.keyvalueDB.sync(channel, message).catch((e) => logger.error(e.stack));
   }
 
   _onWrite(channel, hash) {
-    console.log("-->", channel, hash)
     this._pubsub.publish(channel, hash);
     this.events.emit('data', channel, hash);
   }
 
   _onSync(channel, hash) {
-    console.log("synced", channel, hash)
     this.events.emit('data', channel, hash);
   }
 

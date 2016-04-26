@@ -53,7 +53,7 @@ class EventLogDB extends OrbitDB {
 
     if(opts.gt || opts.gte) {
       // Greater than case
-      result = this._read(this._index.get().reverse(), opts.gt ? opts.gt : opts.gte, amount, opts.gte ? opts.gte : false)
+      result = this._read(this._index.get().reverse(), opts.gt ? opts.gt : opts.gte, amount, opts.gte ? true : false)
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
       result = this._read(this._index.get(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
@@ -66,8 +66,8 @@ class EventLogDB extends OrbitDB {
 
   _read(ops, key, amount, inclusive) {
     return Lazy(ops)
-      .skipWhile((f) => key && f.key !== key) // Drop elements until we have the first one requested
-      .drop(inclusive ? 0 : 1) // Drop the 'gt/lt' item, include 'gte/lte' item
+      .skipWhile((f) => key && f.key !== key)
+      .drop(inclusive ? 0 : 1)
       .take(amount);
   }
 }

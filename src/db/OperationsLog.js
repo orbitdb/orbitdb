@@ -35,10 +35,8 @@ class OperationsLog {
         return;
       })
       .then(() => {
-        if(this.options.cacheFile) {
-          console.log("from cache", this.dbname)
+        if(this.options.cacheFile)
           return this.sync(Cache.get(this.dbname))
-        }
 
         return;
       })
@@ -50,31 +48,25 @@ class OperationsLog {
   }
 
   sync(hash) {
-    console.log("0", hash, this.lastWrite)
     if(!hash || hash === this.lastWrite || !this._log)
       return Promise.resolve();
 
     this.events.emit('load', this.dbname);
-    console.log("1")
     const oldCount = this._log.items.length;
 
     return Log.fromIpfsHash(this._ipfs, hash)
       .then((other) => this._log.join(other))
       .then((merged) => {
-        console.log("2")
         if(this._log.items.length - oldCount === 0)
           return;
 
         return this._cacheInMemory(this._log);
       })
       .then(() => {
-        console.log("3")
         Cache.set(this.dbname, hash)
         this.events.emit('sync', this.dbname, hash)
         return this;
       })
-      // .then(() => this.events.emit('sync', this.dbname, hash))
-      // .then(() => this)
   }
 
   addOperation(operation, key, value) {
@@ -93,7 +85,6 @@ class OperationsLog {
         return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
           this.lastWrite = hash;
           Cache.set(this.dbname, hash);
-          console.log("----------------- write ------------------", this.id, hash)
           this.events.emit('write', this.dbname, hash);
           return result.op.hash;
         });

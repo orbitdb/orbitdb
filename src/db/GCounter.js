@@ -32,7 +32,6 @@ class GCounter {
   }
 
   merge(other) {
-    console.log("MERGE", other, this)
     Object.keys(other._counters).forEach((f) => {
       this._counters[f] = Math.max(this._counters[f] ? this._counters[f] : 0, other._counters[f]);
     });

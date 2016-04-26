@@ -2,11 +2,12 @@
 
 const EventEmitter  = require('events').EventEmitter;
 const OperationsLog = require('./OperationsLog');
+const DefaultIndex  = require('./DefaultIndex');
 
 class OrbitDB {
   constructor(ipfs, options) {
     this._ipfs = ipfs;
-    this._index = null;
+    this._index = new DefaultIndex();;
     this._oplogs = {};
     this.events = {};
     this.options = options || {};
@@ -17,8 +18,7 @@ class OrbitDB {
     const oplog = new OperationsLog(this._ipfs, dbname, this.events[dbname], this.options);
     return oplog.create(id)
       .then(() => {
-        if(this._index)
-          this._index.updateIndex(oplog);
+        this._index.updateIndex(oplog);
         this._oplogs[dbname] = oplog;
         return this;
       });
@@ -27,13 +27,9 @@ class OrbitDB {
   sync(dbname, hash) {
     const oplog = this._oplogs[dbname];
     if(hash && oplog) {
-      console.log("sync", dbname, hash, oplog.id)
       return oplog.sync(hash)
         .then((result) => {
-          console.log("synced", dbname, hash, oplog.id)
-          console.log("res", result)
-          if(this._index)
-            this._index.updateIndex(oplog);
+          this._index.updateIndex(oplog);
           return this;
         });
     }
@@ -51,8 +47,7 @@ class OrbitDB {
     if(oplog) {
       return oplog.addOperation(type, key, data)
         .then((result) => {
-          if(this._index)
-            this._index.updateIndex(oplog);
+          this._index.updateIndex(oplog);
           return result;
         });
     }
