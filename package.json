@@ -14,7 +14,7 @@
   "main": "src/Client.js",
   "dependencies": {
     "buffer": "^4.5.1",
-    "ipfs-log": "^1.2.4",
+    "ipfs-log": "^1.2.7",
     "lazy.js": "^0.4.2",
     "logplease": "^1.2.5",
     "socket.io-client": "^1.4.5"
@@ -31,7 +31,7 @@
     "json-loader": "^0.5.4",
     "lodash": "^4.3.0",
     "mocha": "^2.4.5",
-    "orbit-common": "^0.2.5",
+    "orbit-common": "^0.2.7",
     "stream-http": "^2.2.1",
     "webpack": "^1.12.15"
   },
