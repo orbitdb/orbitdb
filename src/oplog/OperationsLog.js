@@ -16,7 +16,8 @@ class OperationsLog {
   get ops() {
     return this._log.items.map((f) => {
       Object.assign(f.payload, { hash: f.hash });
-      if(f.payload.key === null) Object.assign(f.payload, { key: f.hash });
+      if(f.payload.key === null)
+        Object.assign(f.payload, { key: f.hash });
       return f.payload;
     });
   }
@@ -41,15 +42,15 @@ class OperationsLog {
       }
     };
 
+    let opHash, logHash;
     return this._log.add(entry)
-      .then((op) => {
-        return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
-          this._lastWrite = hash;
-          Cache.set(this.dbname, hash);
-          this.events.emit('data', this.dbname, hash);
-          return op.hash;
-        });
-      });
+      .then((op) => opHash = op.hash)
+      .then(() => Log.getIpfsHash(this._ipfs, this._log))
+      .then((hash) => logHash = hash)
+      .then(() => this._lastWrite = logHash)
+      .then(() => Cache.set(this.dbname, logHash))
+      .then(() => this.events.emit('data', this.dbname, logHash))
+      .then(() => opHash)
   }
 
   merge(hash) {
