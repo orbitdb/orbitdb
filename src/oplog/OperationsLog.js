@@ -1,7 +1,7 @@
 'use strict';
 
 const Log   = require('ipfs-log');
-const Cache = require('../Cache');
+const Cache = require('./Cache');
 
 class OperationsLog {
   constructor(ipfs, dbname, events, opts) {
