@@ -14,7 +14,7 @@
   "main": "src/Client.js",
   "dependencies": {
     "buffer": "^4.5.1",
-    "ipfs-log": "^1.2.7",
+    "ipfs-log": "^1.2.8",
     "lazy.js": "^0.4.2",
     "logplease": "^1.2.5",
     "socket.io-client": "^1.4.5"
