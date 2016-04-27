@@ -6,22 +6,23 @@ const Cache = require('../Cache');
 class OperationsLog {
   constructor(ipfs, dbname, events, opts) {
     this.dbname = dbname;
+    this.events = events;
     this.options = opts || { cacheFile: null };
-    this.id = null;
-    this.lastWrite = null;
+    this._lastWrite = null;
     this._ipfs = ipfs;
     this._log = null;
-    this._cached = {};
-    this.events = events;
   }
 
   get ops() {
-    return this._log.items.map((f) => this._cached[f.hash]);
+    return this._log.items.map((f) => {
+      Object.assign(f.payload, { hash: f.hash });
+      if(f.payload.key === null) Object.assign(f.payload, { key: f.hash });
+      return f.payload;
+    });
   }
 
   create(id) {
     this.events.emit('load', this.dbname);
-    this.id = id;
     return Log.create(this._ipfs, id)
       .then((log) => this._log = log)
       .then(() => Cache.loadCache(this.options.cacheFile))
@@ -29,34 +30,8 @@ class OperationsLog {
       .then(() => this);
   }
 
-  delete() {
-    this._log.clear();
-  }
-
-  merge(hash) {
-    if(!hash || hash === this.lastWrite || !this._log)
-      return Promise.resolve();
-
-    this.events.emit('load', this.dbname);
-    const oldCount = this._log.items.length;
-
-    return Log.fromIpfsHash(this._ipfs, hash)
-      .then((other) => this._log.join(other))
-      .then((merged) => {
-        if(this._log.items.length - oldCount === 0)
-          return;
-
-        return this._cacheInMemory(this._log);
-      })
-      .then(() => {
-        Cache.set(this.dbname, hash)
-        this.events.emit('readable', this.dbname, hash)
-        return this;
-      })
-  }
-
   addOperation(operation, key, value) {
-    const post = {
+    const entry = {
       op: operation,
       key: key,
       value: value,
@@ -66,37 +41,36 @@ class OperationsLog {
       }
     };
 
-    return this._log.add(post)
-      .then((result) => this._cachePayload(result.hash, post))
-      .then((result) => {
+    return this._log.add(entry)
+      .then((op) => {
         return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
-          this.lastWrite = hash;
+          this._lastWrite = hash;
           Cache.set(this.dbname, hash);
           this.events.emit('data', this.dbname, hash);
-          return result.hash;
+          return op.hash;
         });
       });
   }
 
-  _cacheInMemory(log) {
-    const promises = log.items
-      .map((f) => f.hash)
-      .filter((f) => !this._cached[f])
-      .map((f) => {
-        return this._ipfs.object.get(f)
-          .then((obj) => this._cachePayload(f, JSON.parse(obj.Data)["payload"]))
-      });
+  merge(hash) {
+    if(!hash || hash === this._lastWrite || !this._log)
+      return Promise.resolve();
 
-    return Promise.all(promises);
+    this.events.emit('load', this.dbname);
+    const oldCount = this._log.items.length;
+
+    return Log.fromIpfsHash(this._ipfs, hash)
+      .then((other) => this._log.join(other))
+      .then(() => Cache.set(this.dbname, hash))
+      .then(() => {
+        if(this._log.items.length - oldCount === 0)
+          this.events.emit('readable', this.dbname, hash)
+      })
+      .then(() => this)
   }
 
-  _cachePayload(hash, payload) {
-    if(!this._cached[hash]) {
-      Object.assign(payload, { hash: hash });
-      if(payload.key === null) Object.assign(payload, { key: hash });
-      this._cached[hash] = payload;
-    }
-    return this._cached[hash];
+  delete() {
+    this._log.clear();
   }
 }
 
