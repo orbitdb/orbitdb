@@ -35717,13 +35717,22 @@
 	        }
 	      };
 
+	      var opHash = void 0,
+	          logHash = void 0;
 	      return this._log.add(entry).then(function (op) {
-	        return Log.getIpfsHash(_this2._ipfs, _this2._log).then(function (hash) {
-	          _this2._lastWrite = hash;
-	          Cache.set(_this2.dbname, hash);
-	          _this2.events.emit('data', _this2.dbname, hash);
-	          return op.hash;
-	        });
+	        return opHash = op.hash;
+	      }).then(function () {
+	        return Log.getIpfsHash(_this2._ipfs, _this2._log);
+	      }).then(function (hash) {
+	        return logHash = hash;
+	      }).then(function () {
+	        return _this2._lastWrite = logHash;
+	      }).then(function () {
+	        return Cache.set(_this2.dbname, logHash);
+	      }).then(function () {
+	        return _this2.events.emit('data', _this2.dbname, logHash);
+	      }).then(function () {
+	        return opHash;
 	      });
 	    }
 	  }, {
