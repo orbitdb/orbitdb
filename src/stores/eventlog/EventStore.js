@@ -2,7 +2,7 @@
 
 const Lazy          = require('lazy.js');
 const Store         = require('../Store');
-const EventLogIndex = require('./EventLogIndex');
+const EventLogIndex = require('./EventIndex');
 const OpTypes       = require('../../oplog/OpTypes');
 
 class EventStore extends Store {
