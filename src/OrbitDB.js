@@ -7,7 +7,7 @@ const CounterStore  = require('./stores/counters/CounterStore');
 const KeyValueStore = require('./stores/kvstore/KeyValueStore');
 const EventStore    = require('./stores/eventlog/EventStore');
 
-class Client {
+class OrbitDB {
   constructor(ipfs, options) {
     this._ipfs = ipfs;
     this._pubsub = null;
@@ -130,7 +130,7 @@ class OrbitClientFactory {
   static connect(host, port, username, password, ipfs, options) {
     const createClient =(ipfs) => {
       return new Promise((resolve, reject) => {
-        const client = new Client(ipfs, options);
+        const client = new OrbitDB(ipfs, options);
         client._connect(host, port, username, password, options.allowOffline)
           .then(() => resolve(client))
           .catch(reject);

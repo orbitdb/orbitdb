@@ -26524,9 +26524,9 @@
 	var KeyValueStore = __webpack_require__(397);
 	var EventStore = __webpack_require__(399);
 
-	var Client = function () {
-	  function Client(ipfs, options) {
-	    (0, _classCallCheck3.default)(this, Client);
+	var OrbitDB = function () {
+	  function OrbitDB(ipfs, options) {
+	    (0, _classCallCheck3.default)(this, OrbitDB);
 
 	    this._ipfs = ipfs;
 	    this._pubsub = null;
@@ -26538,7 +26538,7 @@
 	    this.counterStore = new CounterStore(this._ipfs, options);
 	  }
 
-	  (0, _createClass3.default)(Client, [{
+	  (0, _createClass3.default)(OrbitDB, [{
 	    key: 'eventlog',
 	    value: function eventlog(dbname, subscribe) {
 	      var _this = this;
@@ -26704,7 +26704,7 @@
 	      });
 	    }
 	  }]);
-	  return Client;
+	  return OrbitDB;
 	}();
 
 	var OrbitClientFactory = function () {
@@ -26717,7 +26717,7 @@
 	    value: function connect(host, port, username, password, ipfs, options) {
 	      var createClient = function createClient(ipfs) {
 	        return new _promise2.default(function (resolve, reject) {
-	          var client = new Client(ipfs, options);
+	          var client = new OrbitDB(ipfs, options);
 	          client._connect(host, port, username, password, options.allowOffline).then(function () {
 	            return resolve(client);
 	          }).catch(reject);
