@@ -1,12 +1,12 @@
 'use strict';
 
-const _           = require('lodash');
-const path        = require('path');
-const assert      = require('assert');
-const async       = require('asyncawait/async');
-const await       = require('asyncawait/await');
-const ipfsd       = require('ipfsd-ctl');
-const OrbitClient = require('../src/Client');
+const _       = require('lodash');
+const path    = require('path');
+const assert  = require('assert');
+const async   = require('asyncawait/async');
+const await   = require('asyncawait/await');
+const ipfsd   = require('ipfsd-ctl');
+const OrbitDB = require('../src/OrbitDB');
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
@@ -44,9 +44,7 @@ describe('Orbit Client', function() {
 
     try {
       ipfs = await(startIpfs());
-      client = await(OrbitClient.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
-      // db = await(client.channel(channel, '', false));
-      // db.delete();
+      client = await(OrbitDB.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
     } catch(e) {
       console.log(e);
       assert.equal(e, null);
@@ -134,9 +132,10 @@ describe('Orbit Client', function() {
 */
 
   describe('Add events', function() {
-    beforeEach(async(() => {
+    beforeEach(async((done) => {
       db = await(client.eventlog(channel, false));
       db.delete();
+      done();
     }));
 
     it('adds an item to an empty channel', async((done) => {
@@ -183,8 +182,6 @@ describe('Orbit Client', function() {
     beforeEach(async(() => {
       db = await(client.eventlog(channel, false));
       db.delete();
-      // const items = db.iterator().collect();
-      // assert.equal(items.length, 0);
     }));
 
     it('deletes an item when only one item in the database', async((done) => {
@@ -530,10 +527,6 @@ describe('Orbit Client', function() {
   });
 
   describe('Key-Value Store', function() {
-    // before(() => {
-    //   db.delete();
-    // });
-
     beforeEach(async((done) => {
       db = await(client.kvstore(channel, '', false));
       db.delete();
@@ -545,15 +538,9 @@ describe('Orbit Client', function() {
     });
 
     it('put', async((done) => {
-      // db = await(client.kvstore(channel, '', false));
       await(db.put('key1', 'hello!'));
       const value = db.get('key1');
-      // let all = db.iterator().collect();
       assert.equal(value, 'hello!');
-      // assert.equal(all.length, 1);
-      // assert.equal(all[0].hash.startsWith('Qm'), true);
-      // assert.equal(all[0].key, 'key1');
-      // assert.notEqual(all[0].meta, null);
       done();
     }));
 
@@ -569,6 +556,19 @@ describe('Orbit Client', function() {
       await(db.put('key1', 'hello again'));
       const value = db.get('key1');
       assert.equal(value, 'hello again');
+      done();
+    }));
+
+    it('put/get - multiple keys', async((done) => {
+      await(db.put('key1', 'hello1'));
+      await(db.put('key2', 'hello2'));
+      await(db.put('key3', 'hello3'));
+      const v1 = db.get('key1');
+      const v2 = db.get('key2');
+      const v3 = db.get('key3');
+      assert.equal(v1, 'hello1');
+      assert.equal(v2, 'hello2');
+      assert.equal(v3, 'hello3');
       done();
     }));
 
@@ -590,28 +590,6 @@ describe('Orbit Client', function() {
       done();
     }));
 
-    it('put - multiple keys', async((done) => {
-      await(db.put('key1', 'hello1'));
-      await(db.put('key2', 'hello2'));
-      await(db.put('key3', 'hello3'));
-      // const all = db.iterator().collect();
-      // assert.equal(all.length, 1);
-      done();
-    }));
-
-    it('get - multiple keys', async((done) => {
-      await(db.put('key1', 'hello1'));
-      await(db.put('key2', 'hello2'));
-      await(db.put('key3', 'hello3'));
-      const v1 = db.get('key1');
-      const v2 = db.get('key2');
-      const v3 = db.get('key3');
-      assert.equal(v1, 'hello1');
-      assert.equal(v2, 'hello2');
-      assert.equal(v3, 'hello3');
-      done();
-    }));
-
     it('get - integer value', async((done) => {
       await(db.put('key1', 123));
       const v1 = db.get('key1');
@@ -623,7 +601,6 @@ describe('Orbit Client', function() {
       const val = { one: 'first', two: 2 };
       await(db.put('key1', val));
       const v1 = db.get('key1');
-      // console.log(v1)
       assert.equal(_.isEqual(v1, val), true);
       done();
     }));

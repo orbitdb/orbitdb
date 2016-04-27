@@ -4,7 +4,7 @@ const assert      = require('assert');
 const Promise     = require('bluebird');
 const rimraf      = require('rimraf')
 const ipfsd       = require('ipfsd-ctl');
-const OrbitClient = require('../src/Client');
+const OrbitDB     = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
 
 // Mute logging
@@ -42,7 +42,7 @@ describe('CounterStore', function() {
     startIpfs().then((res) => {
       ipfs = res;
       Promise.map([username, username2], (login) => {
-        return OrbitClient.connect('localhost', 3333, login, '', ipfs, { allowOffline: false, cacheFile: './orbit-db-cache.json' });
+        return OrbitDB.connect('localhost', 3333, login, '', ipfs, { allowOffline: false, cacheFile: './orbit-db-cache.json' });
       }).then((clients) => {
         client1 = clients[0];
         client2 = clients[1];

@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter  = require('events').EventEmitter;
-const OperationsLog = require('./OperationsLog');
+const OperationsLog = require('../oplog/OperationsLog');
 const DefaultIndex  = require('./DefaultIndex');
 
 class Store {

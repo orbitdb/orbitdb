@@ -3,9 +3,9 @@
 const EventEmitter  = require('events').EventEmitter;
 const logger        = require('logplease').create("orbit-db.Client");
 const PubSub        = require('./PubSub');
-const CounterStore  = require('./db/CounterStore');
-const KeyValueStore = require('./db/KeyValueStore');
-const EventStore    = require('./db/EventStore');
+const CounterStore  = require('./stores/counters/CounterStore');
+const KeyValueStore = require('./stores/kvstore/KeyValueStore');
+const EventStore    = require('./stores/eventlog/EventStore');
 
 class Client {
   constructor(ipfs, options) {

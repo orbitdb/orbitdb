@@ -1,8 +1,7 @@
 'use strict';
 
-const Log         = require('ipfs-log');
-const Cache       = require('../Cache');
-const DBOperation = require('./Operation');
+const Log   = require('ipfs-log');
+const Cache = require('../Cache');
 
 class OperationsLog {
   constructor(ipfs, dbname, events, opts) {
@@ -17,7 +16,7 @@ class OperationsLog {
   }
 
   get ops() {
-    return this._log.items.map((f) => this._cached[f.payload]);
+    return this._log.items.map((f) => this._cached[f.hash]);
   }
 
   create(id) {
@@ -57,34 +56,35 @@ class OperationsLog {
   }
 
   addOperation(operation, key, value) {
-    let post;
-    return DBOperation.create(this._ipfs, operation, key, value)
-      .then((result) => {
-        return this._log.add(result.Hash).then((node) => {
-          return { node: node, op: result.Post };
-        });
-      })
-      .then((result) => {
-        this._cachePayload(result.node.payload, result.op);
-        return result;
-      })
+    const post = {
+      op: operation,
+      key: key,
+      value: value,
+      meta: {
+        size: Buffer.byteLength(value ? JSON.stringify(value) : '', 'utf8'),
+        ts: new Date().getTime()
+      }
+    };
+
+    return this._log.add(post)
+      .then((result) => this._cachePayload(result.hash, post))
       .then((result) => {
         return Log.getIpfsHash(this._ipfs, this._log).then((hash) => {
           this.lastWrite = hash;
           Cache.set(this.dbname, hash);
           this.events.emit('data', this.dbname, hash);
-          return result.op.hash;
+          return result.hash;
         });
-      })
+      });
   }
 
   _cacheInMemory(log) {
     const promises = log.items
-      .map((f) => f.payload)
+      .map((f) => f.hash)
       .filter((f) => !this._cached[f])
       .map((f) => {
         return this._ipfs.object.get(f)
-          .then((obj) => this._cachePayload(f, JSON.parse(obj.Data)))
+          .then((obj) => this._cachePayload(f, JSON.parse(obj.Data)["payload"]))
       });
 
     return Promise.all(promises);
@@ -96,6 +96,7 @@ class OperationsLog {
       if(payload.key === null) Object.assign(payload, { key: hash });
       this._cached[hash] = payload;
     }
+    return this._cached[hash];
   }
 }
 

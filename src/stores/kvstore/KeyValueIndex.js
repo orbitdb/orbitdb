@@ -1,6 +1,6 @@
 'use strict';
 
-const OpTypes = require('./Operation').Types;
+const OpTypes = require('../../oplog/OpTypes');
 
 class KeyValueIndex {
   constructor() {

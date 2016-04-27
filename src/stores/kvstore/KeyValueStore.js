@@ -1,8 +1,8 @@
 'use strict';
 
-const Store   = require('./Store');
+const Store   = require('../Store');
 const KVIndex = require('./KeyValueIndex');
-const OpTypes = require('./Operation').Types;
+const OpTypes = require('../../oplog/OpTypes');
 
 class KeyValueStore extends Store {
   constructor(ipfs, options) {

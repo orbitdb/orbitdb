@@ -1,9 +1,9 @@
 'use strict';
 
 const Lazy          = require('lazy.js');
-const Store         = require('./Store');
-const OpTypes       = require('./Operation').Types;
+const Store         = require('../Store');
 const EventLogIndex = require('./EventLogIndex');
+const OpTypes       = require('../../oplog/OpTypes');
 
 class EventStore extends Store {
   constructor(ipfs, options) {

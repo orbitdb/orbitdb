@@ -1,8 +1,8 @@
 'use strict';
 
-const Store      = require('./Store');
+const Store        = require('../Store');
 const CounterIndex = require('./CounterIndex');
-const OpTypes      = require('./Operation').Types;
+const OpTypes      = require('../../oplog/OpTypes');
 
 class CounterStore extends Store {
   constructor(ipfs, options) {
