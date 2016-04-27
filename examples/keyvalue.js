@@ -3,7 +3,7 @@
 const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
 const ipfsd   = require('ipfsd-ctl');
-const OrbitDB = require('../src/Client');
+const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
 // usage: keyvalue.js <host> <username> <channel> <key> <value>

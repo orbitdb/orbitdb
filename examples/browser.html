@@ -5,7 +5,7 @@
   <body>
     <script type="text/javascript" src="../dist/orbitdb.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../node_modules/ipfs-api/dist/ipfsapi.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../node_modules/ipfs-api/dist/index.min.js" charset="utf-8"></script>
     <script type="text/javascript">
       const logger   = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false });
       const host     = '178.62.241.75'
@@ -16,9 +16,9 @@
       const key      = 'greeting';
       const value    = 'Hello world';
 
-      const ipfs = ipfsAPI();
+      const ipfs = IpfsApi();
       OrbitDB.connect(host, port, username, password, ipfs).then((orbit) => {
-        orbit.channel(channel).then((db) => {
+        orbit.kvstore(channel).then((db) => {
           let count = 1;
           const query = () => {
             const startTime = new Date().getTime();

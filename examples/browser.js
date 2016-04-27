@@ -3,7 +3,7 @@
 const ipfsAPI = require('ipfs-api');
 const Logger  = require('logplease');
 const logger  = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false });
-const OrbitDB = require('../src/Client');
+const OrbitDB = require('../src/OrbitDB');
 
 const host     = '178.62.241.75'
 const port     = 3333;

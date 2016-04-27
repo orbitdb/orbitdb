@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/Client.js',
+  entry: './src/OrbitDB.js',
   output: {
     libraryTarget: 'var',
     library: 'OrbitDB',

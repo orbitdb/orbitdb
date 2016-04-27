@@ -3,7 +3,7 @@
 const await   = require('asyncawait/await');
 const async   = require('asyncawait/async');
 const ipfsd   = require('ipfsd-ctl');
-const OrbitDB = require('../src/Client');
+const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
 // usage: benchmark.js <host> <username> <channel>;
