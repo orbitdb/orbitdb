@@ -541,16 +541,6 @@ describe('Orbit Client', function() {
     });
 
     it('put', async((done) => {
-      const db2 = await(client2.kvstore(channel, false));
-      await(db.put('key1', 'hello1'));
-      await(db2.put('key1', 'hello2'));
-      await(db.sync('QmNtELU2N3heY9cFgRuLWavgov7NTXibNyZCxcTCYjw1TM'))
-      const value = db.get('key1');
-      assert.equal(value, 'hello2');
-      done();
-    }));
-
-    it('put', async((done) => {
       await(db.put('key1', 'hello!'));
       const value = db.get('key1');
       assert.equal(value, 'hello!');
@@ -623,6 +613,16 @@ describe('Orbit Client', function() {
       await(db.put('key1', val));
       const v1 = db.get('key1');
       assert.equal(_.isEqual(v1, val), true);
+      done();
+    }));
+
+    it('syncs databases', async((done) => {
+      const db2 = await(client2.kvstore(channel, false));
+      await(db.put('key1', 'hello1'));
+      await(db2.put('key1', 'hello2'));
+      await(db.sync('QmNtELU2N3heY9cFgRuLWavgov7NTXibNyZCxcTCYjw1TM'))
+      const value = db.get('key1');
+      assert.equal(value, 'hello2');
       done();
     }));
   });

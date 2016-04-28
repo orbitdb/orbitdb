@@ -28,6 +28,7 @@ class OperationsLog {
     return this._log.add(entry)
       .then((op) => node = op)
       .then(() => {
+        // Add the hash of the log entry to the payload
         Object.assign(node.payload, { hash: node.hash });
         if(node.payload.key === null)
           Object.assign(node.payload, { key: node.hash });

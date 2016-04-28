@@ -18,8 +18,7 @@ class CounterIndex {
   updateIndex(oplog, updated) {
     const counter = this._index[oplog.dbname];
     if(counter) {
-      updated
-        .filter((f) => f && f.op === 'COUNTER')
+      updated.filter((f) => f && f.op === 'COUNTER')
         .map((f) => Counter.from(f.value))
         .forEach((f) => counter.merge(f))
 
