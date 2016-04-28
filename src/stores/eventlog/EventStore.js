@@ -3,7 +3,6 @@
 const Lazy          = require('lazy.js');
 const Store         = require('../Store');
 const EventLogIndex = require('./EventIndex');
-const OpTypes       = require('../../oplog/OpTypes');
 
 class EventStore extends Store {
   constructor(ipfs, options) {
@@ -17,11 +16,11 @@ class EventStore extends Store {
   }
 
   add(dbname, data) {
-    return this._addOperation(dbname, OpTypes.Add, null, data);
+    return this._addOperation(dbname, 'ADD', null, data);
   }
 
   remove(dbname, hash) {
-    return this._addOperation(dbname, OpTypes.Delete, hash);
+    return this._addOperation(dbname, 'DELETE', hash);
   }
 
   iterator(dbname, options) {
@@ -53,10 +52,10 @@ class EventStore extends Store {
 
     if(opts.gt || opts.gte) {
       // Greater than case
-      result = this._read(this._index.get().reverse(), opts.gt ? opts.gt : opts.gte, amount, opts.gte ? true : false)
+      result = this._read(this._index.get(), opts.gt ? opts.gt : opts.gte, amount, opts.gte ? true : false)
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
-      result = this._read(this._index.get(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
+      result = this._read(this._index.get().reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
     }
 
     if(opts.reverse) result.reverse();

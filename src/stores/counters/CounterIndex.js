@@ -7,19 +7,19 @@ class CounterIndex {
     this._index = {};
   }
 
-  createCounter(key, id) {
-    this._index[key] = new Counter(id);
+  createCounter(dbname, id) {
+    this._index[dbname] = new Counter(id);
   }
 
-  get(key) {
-    return this._index[key];
+  get(dbname) {
+    return this._index[dbname];
   }
 
-  updateIndex(oplog) {
+  updateIndex(oplog, updated) {
     const counter = this._index[oplog.dbname];
     if(counter) {
-      oplog.ops
-        .filter((f) => f !== undefined)
+      updated
+        .filter((f) => f && f.op === 'COUNTER')
         .map((f) => Counter.from(f.value))
         .forEach((f) => counter.merge(f))
 

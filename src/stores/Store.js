@@ -16,21 +16,24 @@ class Store {
   use(dbname, id) {
     this.events[dbname] = new EventEmitter();
     const oplog = new OperationsLog(this._ipfs, dbname, this.events[dbname], this.options);
-    return oplog.create(id)
+    return oplog.load(id)
+      .then((merged) => this._index.updateIndex(oplog, merged))
       .then(() => this._oplogs[dbname] = oplog)
-      .then(() => this._index.updateIndex(oplog))
       .then(() => this.events[dbname]);
   }
 
   sync(dbname, hash) {
     const oplog = this._oplogs[dbname];
+    let newItems;
     if(hash && oplog) {
       return oplog.merge(hash)
-        .then(() => this._index.updateIndex(oplog))
-        .then(() => this);
+        .then((merged) => newItems = merged)
+        .then(() => this._index.updateIndex(oplog, newItems))
+        .then(() => this.events[dbname].emit('readable', dbname))
+        .then(() => newItems)
     }
 
-    return Promise.resolve(this);
+    return Promise.resolve([]);
   }
 
   delete(dbname) {
@@ -44,8 +47,8 @@ class Store {
     if(oplog) {
       return oplog.addOperation(type, key, data)
         .then((op) => result = op)
-        .then(() => this._index.updateIndex(oplog))
-        .then(() => result);
+        .then(() => this._index.updateIndex(oplog, [result]))
+        .then(() => result.hash);
     }
   }
 }

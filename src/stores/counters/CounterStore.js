@@ -2,7 +2,6 @@
 
 const Store        = require('../Store');
 const CounterIndex = require('./CounterIndex');
-const OpTypes      = require('../../oplog/OpTypes');
 
 class CounterStore extends Store {
   constructor(ipfs, options) {
@@ -28,7 +27,7 @@ class CounterStore extends Store {
     const counter = this._index.get(dbname);
     if(counter) {
       counter.increment(amount);
-      return this._addOperation(dbname, OpTypes.Inc, null, counter.payload);
+      return this._addOperation(dbname, 'COUNTER', null, counter.payload);
     }
   }
 }

@@ -1,32 +1,27 @@
 'use strict';
 
-const OpTypes = require('../../oplog/OpTypes');
-
 class EventLogIndex {
   constructor() {
-    this._index = [];
+    this._index = {};
   }
 
   get() {
-    return this._index;
+    return Object.keys(this._index).map((f) => this._index[f]);
   }
 
-  updateIndex(oplog) {
+  updateIndex(oplog, updated) {
     let handled = [];
-    const _createLWWSet = (item) => {
+
+    updated.forEach((item) => {
       if(handled.indexOf(item.key) === -1) {
         handled.push(item.key);
-        if(OpTypes.isInsert(item.op))
-          return item;
+        if(item.op === 'ADD') {
+          this._index[item.key] = item
+        } else if(item.op === 'DELETE') {
+          delete this._index[item.key];
+        }
       }
-      return null;
-    };
-
-    this._index = oplog.ops
-      .reverse()
-      .filter((f) => f !== undefined)
-      .map(_createLWWSet)
-      .filter((f) => f !== null);
+    });
   }
 }
 

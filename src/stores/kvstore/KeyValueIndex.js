@@ -1,7 +1,5 @@
 'use strict';
 
-const OpTypes = require('../../oplog/OpTypes');
-
 class KeyValueIndex {
   constructor() {
     this._index = {};
@@ -11,23 +9,18 @@ class KeyValueIndex {
     return this._index[key];
   }
 
-  updateIndex(oplog) {
+  updateIndex(oplog, updated) {
     let handled = [];
-    const _createLWWSet = (item) => {
+
+    updated.reverse().forEach((item) => {
       if(handled.indexOf(item.key) === -1) {
         handled.push(item.key);
-        if(OpTypes.isInsert(item.op))
-          return item;
+        if(item.op === 'PUT')
+          this._index[item.key] = item.value
+        else if (item.op === 'DELETE')
+          delete this._index[item.key];
       }
-      return null;
-    };
-
-    this._index = {};
-    oplog.ops
-      .reverse()
-      .map(_createLWWSet)
-      .filter((f) => f !== null)
-      .forEach((f) => this._index[f.key] = f.value);
+    });
   }
 }
 

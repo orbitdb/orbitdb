@@ -22,20 +22,20 @@ const startIpfs = () => {
       if(err) console.error(err);
       resolve(ipfs);
     });
-    // ipfsd.local((err, node) => {
-    //   if(err) reject(err);
-    //   node.startDaemon((err, ipfs) => {
-    //     if(err) reject(err);
-    //     resolve(ipfs);
-    //   });
-    // });
+    ipfsd.local((err, node) => {
+      if(err) reject(err);
+      node.startDaemon((err, ipfs) => {
+        if(err) reject(err);
+        resolve(ipfs);
+      });
+    });
   });
 };
 
 describe('Orbit Client', function() {
   this.timeout(30000);
 
-  let ipfs, client, db;
+  let ipfs, client, client2, db;
   let channel = 'abcdefgh';
   const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json');
 
@@ -45,6 +45,7 @@ describe('Orbit Client', function() {
     try {
       ipfs = await(startIpfs());
       client = await(OrbitDB.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
+      client2 = await(OrbitDB.connect('localhost', 3333, username + "2", password, ipfs, { allowOffline: true }));
     } catch(e) {
       console.log(e);
       assert.equal(e, null);
@@ -528,14 +529,26 @@ describe('Orbit Client', function() {
 
   describe('Key-Value Store', function() {
     beforeEach(async((done) => {
-      db = await(client.kvstore(channel, '', false));
+      db = await(client.kvstore(channel, false));
       db.delete();
       done();
     }));
 
-    afterEach(() => {
+    afterEach((done) => {
       db.delete();
+      db.close();
+      done();
     });
+
+    it('put', async((done) => {
+      const db2 = await(client2.kvstore(channel, false));
+      await(db.put('key1', 'hello1'));
+      await(db2.put('key1', 'hello2'));
+      await(db.sync('QmNtELU2N3heY9cFgRuLWavgov7NTXibNyZCxcTCYjw1TM'))
+      const value = db.get('key1');
+      assert.equal(value, 'hello2');
+      done();
+    }));
 
     it('put', async((done) => {
       await(db.put('key1', 'hello!'));

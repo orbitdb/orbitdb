@@ -2,7 +2,6 @@
 
 const Store   = require('../Store');
 const KVIndex = require('./KeyValueIndex');
-const OpTypes = require('../../oplog/OpTypes');
 
 class KeyValueStore extends Store {
   constructor(ipfs, options) {
@@ -24,11 +23,11 @@ class KeyValueStore extends Store {
   }
 
   put(dbname, key, data) {
-    return this._addOperation(dbname, OpTypes.Put, key, data);
+    return this._addOperation(dbname, 'PUT', key, data);
   }
 
   del(dbname, key) {
-    return this._addOperation(dbname, OpTypes.Delete, key);
+    return this._addOperation(dbname, 'DELETE', key);
   }
 }
 

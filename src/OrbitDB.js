@@ -40,7 +40,8 @@ class OrbitDB {
       get: (key) => db.get(dbname, key),
       del: (key) => db.del(dbname, key),
       delete: () => db.delete(dbname),
-      close: () => this._pubsub.unsubscribe(dbname)
+      close: () => this._pubsub.unsubscribe(dbname),
+      sync: (hash) => db.sync(dbname, hash)
     }
 
     return this._subscribe(db, dbname, subscribe).then(() => api);
@@ -66,10 +67,10 @@ class OrbitDB {
     this.network = null;
   }
 
-  _subscribe(db, dbname, subscribe, callback) {
+  _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    return db.use(dbname, this.user.username).then((events) => {
+    return store.use(dbname, this.user.username).then((events) => {
       events.on('readable', this._onSync.bind(this));
       events.on('data',     this._onWrite.bind(this));
       events.on('load',     this._onLoad.bind(this));
@@ -82,8 +83,8 @@ class OrbitDB {
   }
 
   _onMessage(channel, message) {
-    [this.eventStore, this.kvStore, this.counterStore].forEach((db) => {
-      db.sync(channel, message).catch((e) => logger.error(e.stack));
+    [this.eventStore, this.kvStore, this.counterStore].forEach((store) => {
+      store.sync(channel, message).catch((e) => logger.error(e.stack));
     })
   }
 
