@@ -4,30 +4,30 @@ const Store   = require('../Store');
 const KVIndex = require('./KeyValueIndex');
 
 class KeyValueStore extends Store {
-  constructor(ipfs, options) {
-    super(ipfs, options)
+  constructor(ipfs, dbname, options) {
+    super(ipfs, dbname, options)
     this._index = new KVIndex();
   }
 
-  delete(dbname) {
-    super.delete(dbname);
+  delete() {
+    super.delete();
     this._index = new KVIndex();
   }
 
-  get(dbname, key) {
+  get(key) {
     return this._index.get(key);
   }
 
-  set(dbname, key, data) {
-    this.put(dbname, key, data);
+  set(key, data) {
+    this.put(key, data);
   }
 
-  put(dbname, key, data) {
-    return this._addOperation(dbname, 'PUT', key, data);
+  put(key, data) {
+    return this._addOperation('PUT', key, data);
   }
 
-  del(dbname, key) {
-    return this._addOperation(dbname, 'DELETE', key);
+  del(key) {
+    return this._addOperation('DELETE', key);
   }
 }
 

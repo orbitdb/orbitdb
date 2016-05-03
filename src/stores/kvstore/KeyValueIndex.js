@@ -15,10 +15,11 @@ class KeyValueIndex {
     updated.reverse().forEach((item) => {
       if(handled.indexOf(item.key) === -1) {
         handled.push(item.key);
-        if(item.op === 'PUT')
+        if(item.op === 'PUT') {
           this._index[item.key] = item.value
-        else if (item.op === 'DELETE')
+        } else if (item.op === 'DELETE') {
           delete this._index[item.key];
+        }
       }
     });
   }

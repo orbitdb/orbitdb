@@ -17,6 +17,7 @@ const ipfsPath = '/tmp/orbittests';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
+    OrbitServer.start();
     // ipfsd.local(ipfsPath, (err, node) => {
     //   if(err) reject(err);
     //   node.startDaemon((err, ipfs) => {
@@ -24,7 +25,6 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
-    OrbitServer.start();
     ipfsd.disposableApi((err, ipfs) => {
       if(err) reject(err);
       resolve(ipfs);

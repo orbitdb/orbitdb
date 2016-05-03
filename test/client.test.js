@@ -22,13 +22,13 @@ const startIpfs = () => {
       if(err) console.error(err);
       resolve(ipfs);
     });
-    ipfsd.local((err, node) => {
-      if(err) reject(err);
-      node.startDaemon((err, ipfs) => {
-        if(err) reject(err);
-        resolve(ipfs);
-      });
-    });
+    // ipfsd.local((err, node) => {
+    //   if(err) reject(err);
+    //   node.startDaemon((err, ipfs) => {
+    //     if(err) reject(err);
+    //     resolve(ipfs);
+    //   });
+    // });
   });
 };
 
@@ -134,7 +134,7 @@ describe('Orbit Client', function() {
 
   describe('Add events', function() {
     beforeEach(async((done) => {
-      db = await(client.eventlog(channel, false));
+      db = await(client.eventlog(channel, { subscribe: false }));
       db.delete();
       done();
     }));
@@ -187,7 +187,7 @@ describe('Orbit Client', function() {
 
     it('deletes an item when only one item in the database', async((done) => {
       const head = await(db.add('hello1'));
-      const delop = await(db.del(head));
+      const delop = await(db.remove(head));
       const items = db.iterator().collect();
       assert.equal(delop.startsWith('Qm'), true);
       assert.equal(items.length, 0);
@@ -197,7 +197,7 @@ describe('Orbit Client', function() {
     it('deletes an item when two items in the database', async((done) => {
       await(db.add('hello1'));
       const head = await(db.add('hello2'));
-      await(db.del(head));
+      await(db.remove(head));
       const items = db.iterator({ limit: -1 }).collect();
       assert.equal(items.length, 1);
       assert.equal(items[0].value, 'hello1');
@@ -207,7 +207,7 @@ describe('Orbit Client', function() {
     it('deletes an item between adds', async((done) => {
       const head = await(db.add('hello1'));
       await(db.add('hello2'));
-      db.del(head);
+      db.remove(head);
       await(db.add('hello3'));
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
@@ -224,7 +224,7 @@ describe('Orbit Client', function() {
 
     beforeEach(async((done) => {
       items = [];
-      db = await(client.eventlog(channel, false));
+      db = await(client.eventlog(channel, { subscribe: false }));
       db.delete();
       for(let i = 0; i < itemCount; i ++) {
         const hash = await(db.add('hello' + i));
@@ -529,15 +529,18 @@ describe('Orbit Client', function() {
 
   describe('Key-Value Store', function() {
     beforeEach(async((done) => {
-      db = await(client.kvstore(channel, false));
+      db = await(client.kvstore(channel, { subscribe: false }));
       db.delete();
       done();
     }));
 
     afterEach((done) => {
       db.delete();
+      client.events.on('closed', (dbname) => {
+        client.events.removeAllListeners('closed')
+        done()
+      });
       db.close();
-      done();
     });
 
     it('put', async((done) => {
@@ -617,7 +620,8 @@ describe('Orbit Client', function() {
     }));
 
     it('syncs databases', async((done) => {
-      const db2 = await(client2.kvstore(channel, false));
+      const db2 = await(client2.kvstore(channel, { subscribe: false }));
+      db2.delete();
       await(db.put('key1', 'hello1'));
       await(db2.put('key1', 'hello2'));
       await(db.sync('QmNtELU2N3heY9cFgRuLWavgov7NTXibNyZCxcTCYjw1TM'))

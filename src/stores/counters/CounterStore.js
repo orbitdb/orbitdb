@@ -4,30 +4,30 @@ const Store        = require('../Store');
 const CounterIndex = require('./CounterIndex');
 
 class CounterStore extends Store {
-  constructor(ipfs, options) {
-    super(ipfs, options)
+  constructor(ipfs, dbname, options) {
+    super(ipfs, dbname, options)
     this._index = new CounterIndex();
   }
 
-  use(dbname, id) {
-    this._index.createCounter(dbname, id);
-    return super.use(dbname, id);
+  use(id) {
+    this._index.createCounter(id);
+    return super.use(id);
   }
 
-  delete(dbname) {
-    super.delete(dbname);
+  delete() {
+    super.delete();
     this._index = new CounterIndex();
   }
 
-  query(dbname) {
-    return this._index.get(dbname).value;
+  value() {
+    return this._index.get().value;
   }
 
-  inc(dbname, amount) {
-    const counter = this._index.get(dbname);
+  inc(amount) {
+    const counter = this._index.get();
     if(counter) {
       counter.increment(amount);
-      return this._addOperation(dbname, 'COUNTER', null, counter.payload);
+      return this._addOperation('COUNTER', null, counter.payload);
     }
   }
 }

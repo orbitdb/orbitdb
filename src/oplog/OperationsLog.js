@@ -57,8 +57,12 @@ class OperationsLog {
     const oldCount = this._log.items.length;
     let newItems = [];
     return Log.fromIpfsHash(this._ipfs, hash)
-      .then((other) => this._log.join(other))
-      .then((merged) => newItems = merged)
+      .then((other) => {
+        return this._log.join(other)
+      })
+      .then((merged) => {
+        newItems = merged
+      })
       .then(() => Cache.set(this.dbname, hash))
       .then(() => newItems.map((f) => f.payload))
   }

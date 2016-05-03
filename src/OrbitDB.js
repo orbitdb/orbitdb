@@ -14,50 +14,33 @@ class OrbitDB {
     this.user = null;
     this.network = null;
     this.events = new EventEmitter();
-    this.kvStore = new KeyValueStore(this._ipfs, options);
-    this.eventStore = new EventStore(this._ipfs, options);
-    this.counterStore = new CounterStore(this._ipfs, options);
+    this.stores = {};
   }
 
-  eventlog(dbname, subscribe) {
-    const db = this.eventStore;
-    const api = {
-      iterator: (options) => db.iterator(dbname, options),
-      add: (data) => db.add(dbname, data),
-      del: (hash) => db.remove(dbname, hash),
-      delete: () => db.delete(dbname),
-      close: () => this._pubsub.unsubscribe(dbname)
-    }
-
-    return this._subscribe(db, dbname, subscribe).then(() => api);
+  eventlog(dbname, options) {
+    if(!options) options = { subscribe: true };
+    const store = new EventStore(this._ipfs, dbname, options);
+    return this._subscribe(store, dbname, options.subscribe)
+      .then(() => this.stores[dbname] = store)
+      .then(() => store);
   }
 
-  kvstore(dbname, subscribe) {
-    const db = this.kvStore;
-    const api = {
-      put: (key, value) => db.put(dbname, key, value),
-      set: (key, value) => db.set(dbname, key, value), // alias for put()
-      get: (key) => db.get(dbname, key),
-      del: (key) => db.del(dbname, key),
-      delete: () => db.delete(dbname),
-      close: () => this._pubsub.unsubscribe(dbname),
-      sync: (hash) => db.sync(dbname, hash)
-    }
+  kvstore(dbname, options) {
+    if(!options) options = { subscribe: true };
+    const store = new KeyValueStore(this._ipfs, dbname, options);
+    if(this.stores[dbname]) this.stores[dbname].close();
 
-    return this._subscribe(db, dbname, subscribe).then(() => api);
+    return this._subscribe(store, dbname, options.subscribe)
+      .then(() => this.stores[dbname] = store)
+      .then(() => store);
   }
 
-  counter(dbname, subscribe) {
-    const db = this.counterStore;
-    const api = {
-      value: () => db.query(dbname),
-      inc: (amount) => db.inc(dbname, amount),
-      dec: (amount) => console.log("dec() not implemented yet"),
-      delete: () => db.delete(dbname),
-      close: () => this._pubsub.unsubscribe(dbname),
-    }
-
-    return this._subscribe(db, dbname, subscribe).then(() => api);
+  counter(dbname, options) {
+    if(!options) options = { subscribe: true };
+    const store = new CounterStore(this._ipfs, dbname, options);
+    return this._subscribe(store, dbname, options.subscribe)
+      .then(() => this.stores[dbname] = store)
+      .then(() => store);
   }
 
   disconnect() {
@@ -70,10 +53,11 @@ class OrbitDB {
   _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    return store.use(dbname, this.user.username).then((events) => {
+    return store.use(this.user.username).then((events) => {
       events.on('readable', this._onSync.bind(this));
       events.on('data',     this._onWrite.bind(this));
       events.on('load',     this._onLoad.bind(this));
+      events.on('close',    this._onClose.bind(this));
 
       if(subscribe)
         this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
@@ -82,12 +66,12 @@ class OrbitDB {
     });
   }
 
-  _onMessage(channel, message) {
-    [this.eventStore, this.kvStore, this.counterStore].forEach((store) => {
-      store.sync(channel, message).catch((e) => logger.error(e.stack));
-    })
+  _onMessage(dbname, message) {
+    const store = this.stores[dbname];
+    store.sync(message).catch((e) => logger.error(e.stack));
   }
 
+  // TODO: FIX EVENTS!!
   _onWrite(channel, hash) {
     this._pubsub.publish(channel, hash);
     this.events.emit('data', channel, hash);
@@ -99,6 +83,12 @@ class OrbitDB {
 
   _onLoad(channel, hash) {
     this.events.emit('load', channel, hash);
+  }
+
+  _onClose(dbname) {
+    this._pubsub.unsubscribe(dbname);
+    delete this.stores[dbname];
+    this.events.emit('closed', dbname);
   }
 
   _connect(host, port, username, password, allowOffline) {

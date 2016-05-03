@@ -4,25 +4,25 @@ const Counter = require('../../crdts/GCounter');
 
 class CounterIndex {
   constructor() {
-    this._index = {};
+    this._index = null;
   }
 
-  createCounter(dbname, id) {
-    this._index[dbname] = new Counter(id);
+  createCounter(id) {
+    this._index = new Counter(id);
   }
 
-  get(dbname) {
-    return this._index[dbname];
+  get() {
+    return this._index;
   }
 
   updateIndex(oplog, updated) {
-    const counter = this._index[oplog.dbname];
+    const counter = this._index;
     if(counter) {
       updated.filter((f) => f && f.op === 'COUNTER')
         .map((f) => Counter.from(f.value))
         .forEach((f) => counter.merge(f))
 
-      this._index[oplog.dbname] = counter;
+      this._index = counter;
     }
   }
 }

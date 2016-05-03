@@ -5,26 +5,26 @@ const Store         = require('../Store');
 const EventLogIndex = require('./EventIndex');
 
 class EventStore extends Store {
-  constructor(ipfs, options) {
-    super(ipfs, options)
+  constructor(ipfs, dbname, options) {
+    super(ipfs, dbname, options)
     this._index = new EventLogIndex();
   }
 
   delete(dbname) {
-    super.delete(dbname);
+    super.delete();
     this._index = new EventLogIndex();
   }
 
-  add(dbname, data) {
-    return this._addOperation(dbname, 'ADD', null, data);
+  add(data) {
+    return this._addOperation('ADD', null, data);
   }
 
-  remove(dbname, hash) {
-    return this._addOperation(dbname, 'DELETE', hash);
+  remove(hash) {
+    return this._addOperation('DELETE', hash);
   }
 
-  iterator(dbname, options) {
-    const messages = this._query(dbname, options);
+  iterator(options) {
+    const messages = this._query(this.dbname, options);
     let currentIndex = 0;
     let iterator = {
       [Symbol.iterator]() {
