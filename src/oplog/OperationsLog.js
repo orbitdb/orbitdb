@@ -20,18 +20,16 @@ class OperationsLog {
     const entry = {
       op: operation,
       key: key,
-      value: value
+      value: value,
+      meta: {
+        ts: new Date().getTime()
+      }
     };
 
     let node, logHash;
     return this._log.add(entry)
       .then((op) => node = op)
-      .then(() => {
-        // Add the hash of the log entry to the payload
-        Object.assign(node.payload, { hash: node.hash });
-        if(node.payload.key === null)
-          Object.assign(node.payload, { key: node.hash });
-      })
+      .then(() => this._padOperation(node))
       .then(() => Log.getIpfsHash(this._ipfs, this._log))
       .then((hash) => logHash = hash)
       .then(() => this._lastWrite = logHash)
@@ -58,11 +56,19 @@ class OperationsLog {
       .then((other) => this._log.join(other))
       .then((merged) => newItems = merged)
       .then(() => Cache.set(this.dbname, hash))
-      .then(() => newItems.map((f) => f.payload))
+      .then(() => newItems.map((f) => this._padOperation(f)))
+      .then((items) => items.map((f) => f.payload))
   }
 
   delete() {
     this._log.clear();
+  }
+
+  _padOperation(node) {
+    Object.assign(node.payload, { hash: node.hash });
+    if(node.payload.key === null)
+      Object.assign(node.payload, { key: node.hash });
+    return node;
   }
 }
 
