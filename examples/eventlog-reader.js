@@ -6,7 +6,7 @@ const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
-// usage: reader.js <host> <username> <channel> <data> <interval in ms>
+// usage: reader.js <host> <username> <channel> <interval in ms>
 
 // orbit-server
 const host = process.argv[2] ? process.argv[2] : 'localhost'
@@ -16,7 +16,7 @@ const username = process.argv[3] ? process.argv[3] : 'LambOfGod';
 const password = '';
 
 const channelName = process.argv[4] ? process.argv[4] : 'test';
-const prefix = process.argv[5] ? process.argv[5] : 'Hello';
+const interval = process.argv[5] ? process.argv[5] : 1000;
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
@@ -40,23 +40,19 @@ let run = (async(() => {
       if(!running) {
         running = true;
 
-        let timer = new Timer(true);
-        await(db.add(prefix + count));
-        console.log(`Query #${count} took ${timer.stop(true)} ms\n`);
-
         let timer2 = new Timer(true);
-        let items = db.iterator({ limit: -1 }).collect();
+        let items = db.iterator({ limit: 20 }).collect();
         console.log("---------------------------------------------------")
-        console.log("Key | Value")
+        console.log("Timestamp     | Value")
         console.log("---------------------------------------------------")
-        console.log(items.map((e) => `${e.key} | ${e.value}`).join("\n"));
+        console.log(items.map((e) => `${e.meta.ts} | ${e.value}`).join("\n"));
         console.log("---------------------------------------------------")
-        console.log(`Query 2 #${count} took ${timer2.stop(true)} ms\n`);
+        console.log(`Query #${count} took ${timer2.stop(true)} ms\n`);
 
         running = false;
         count ++;
       }
-    }), process.argv[6] ? process.argv[6] : 1000);
+    }), interval);
 
   } catch(e) {
     console.error(e.stack);
