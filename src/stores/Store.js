@@ -7,7 +7,7 @@ const DefaultIndex  = require('./DefaultIndex');
 class Store {
   constructor(ipfs, dbname, options) {
     this.dbname = dbname;
-    this.events = null;
+    this.events = new EventEmitter();
     this.options = options || {};
     this._index = new DefaultIndex();
     this._oplog = null;
@@ -15,11 +15,11 @@ class Store {
   }
 
   use(id) {
-    this.events = new EventEmitter();
-    const oplog = new OperationsLog(this._ipfs, this.dbname, this.events, this.options);
-    return oplog.load(id)
-      .then((merged) => this._index.updateIndex(oplog, merged))
-      .then(() => this._oplog = oplog)
+    this.events.emit('load', this.dbname);
+    this._oplog = new OperationsLog(this._ipfs, this.dbname, this.events, this.options);
+    return this._oplog.load(id)
+      .then((merged) => this._index.updateIndex(this._oplog, merged))
+      .then(() => this.events.emit('readable', this.dbname))
       .then(() => this.events);
   }
 
@@ -28,17 +28,19 @@ class Store {
   }
 
   sync(hash) {
-    const oplog = this._oplog;
-    let newItems;
-    if(hash && oplog) {
-      return oplog.merge(hash)
-        .then((merged) => newItems = merged)
-        .then(() => this._index.updateIndex(oplog, newItems))
-        .then(() => this.events.emit('readable', this.dbname))
-        .then(() => newItems)
-    }
+    if(!hash || hash === this._oplog._lastWrite || !this._oplog)
+      return Promise.resolve([]);
 
-    return Promise.resolve([]);
+    let newItems;
+    this.events.emit('load', this.dbname);
+    return this._oplog.merge(hash)
+      .then((merged) => newItems = merged)
+      .then(() => this._index.updateIndex(this._oplog, newItems))
+      .then(() => {
+        if(newItems.length > 0)
+          this.events.emit('readable', this.dbname);
+      })
+      .then(() => newItems)
   }
 
   delete() {
@@ -47,13 +49,13 @@ class Store {
   }
 
   _addOperation(type, key, data) {
-    const oplog = this._oplog;
     let result;
-    if(oplog) {
-      return oplog.addOperation(type, key, data)
+    if(this._oplog) {
+      return this._oplog.addOperation(type, key, data)
         .then((op) => result = op)
-        .then(() => this._index.updateIndex(oplog, [result]))
-        .then(() => result.hash);
+        .then(() => this._index.updateIndex(this._oplog, [result.operation]))
+        .then(() => this.events.emit('data', this.dbname, result.log))
+        .then(() => result.operation.hash);
     }
   }
 }

@@ -28,8 +28,6 @@ class OrbitDB {
   kvstore(dbname, options) {
     if(!options) options = { subscribe: true };
     const store = new KeyValueStore(this._ipfs, dbname, options);
-    if(this.stores[dbname]) this.stores[dbname].close();
-
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
       .then(() => store);
@@ -72,17 +70,17 @@ class OrbitDB {
   }
 
   // TODO: FIX EVENTS!!
-  _onWrite(channel, hash) {
-    this._pubsub.publish(channel, hash);
-    this.events.emit('data', channel, hash);
+  _onWrite(dbname, hash) {
+    this._pubsub.publish(dbname, hash);
+    this.events.emit('data', dbname, hash);
   }
 
-  _onSync(channel, hash) {
-    this.events.emit('readable', channel, hash);
+  _onSync(dbname, hash) {
+    this.events.emit('readable', dbname, hash);
   }
 
-  _onLoad(channel, hash) {
-    this.events.emit('load', channel, hash);
+  _onLoad(dbname, hash) {
+    this.events.emit('load', dbname, hash);
   }
 
   _onClose(dbname) {

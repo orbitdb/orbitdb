@@ -26533,99 +26533,46 @@
 	    this.user = null;
 	    this.network = null;
 	    this.events = new EventEmitter();
-	    this.kvStore = new KeyValueStore(this._ipfs, options);
-	    this.eventStore = new EventStore(this._ipfs, options);
-	    this.counterStore = new CounterStore(this._ipfs, options);
+	    this.stores = {};
 	  }
 
 	  (0, _createClass3.default)(OrbitDB, [{
 	    key: 'eventlog',
-	    value: function eventlog(dbname, subscribe) {
+	    value: function eventlog(dbname, options) {
 	      var _this = this;
 
-	      var db = this.eventStore;
-	      var api = {
-	        iterator: function iterator(options) {
-	          return db.iterator(dbname, options);
-	        },
-	        add: function add(data) {
-	          return db.add(dbname, data);
-	        },
-	        del: function del(hash) {
-	          return db.remove(dbname, hash);
-	        },
-	        delete: function _delete() {
-	          return db.delete(dbname);
-	        },
-	        close: function close() {
-	          return _this._pubsub.unsubscribe(dbname);
-	        }
-	      };
-
-	      return this._subscribe(db, dbname, subscribe).then(function () {
-	        return api;
+	      if (!options) options = { subscribe: true };
+	      var store = new EventStore(this._ipfs, dbname, options);
+	      return this._subscribe(store, dbname, options.subscribe).then(function () {
+	        return _this.stores[dbname] = store;
+	      }).then(function () {
+	        return store;
 	      });
 	    }
 	  }, {
 	    key: 'kvstore',
-	    value: function kvstore(dbname, subscribe) {
+	    value: function kvstore(dbname, options) {
 	      var _this2 = this;
 
-	      var db = this.kvStore;
-	      var api = {
-	        put: function put(key, value) {
-	          return db.put(dbname, key, value);
-	        },
-	        set: function set(key, value) {
-	          return db.set(dbname, key, value);
-	        }, // alias for put()
-	        get: function get(key) {
-	          return db.get(dbname, key);
-	        },
-	        del: function del(key) {
-	          return db.del(dbname, key);
-	        },
-	        delete: function _delete() {
-	          return db.delete(dbname);
-	        },
-	        close: function close() {
-	          return _this2._pubsub.unsubscribe(dbname);
-	        },
-	        sync: function sync(hash) {
-	          return db.sync(dbname, hash);
-	        }
-	      };
-
-	      return this._subscribe(db, dbname, subscribe).then(function () {
-	        return api;
+	      if (!options) options = { subscribe: true };
+	      var store = new KeyValueStore(this._ipfs, dbname, options);
+	      return this._subscribe(store, dbname, options.subscribe).then(function () {
+	        return _this2.stores[dbname] = store;
+	      }).then(function () {
+	        return store;
 	      });
 	    }
 	  }, {
 	    key: 'counter',
-	    value: function counter(dbname, subscribe) {
+	    value: function counter(dbname, options) {
 	      var _this3 = this;
 
-	      var db = this.counterStore;
-	      var api = {
-	        value: function value() {
-	          return db.query(dbname);
-	        },
-	        inc: function inc(amount) {
-	          return db.inc(dbname, amount);
-	        },
-	        dec: function dec(amount) {
-	          return console.log("dec() not implemented yet");
-	        },
-	        delete: function _delete() {
-	          return db.delete(dbname);
-	        },
-	        close: function close() {
-	          return _this3._pubsub.unsubscribe(dbname);
-	        }
-	      };
-
-	      return this._subscribe(db, dbname, subscribe).then(function () {
-	        return api;
+	      if (!options) options = { subscribe: true };
+	      var store = new CounterStore(this._ipfs, dbname, options);
+	      return this._subscribe(store, dbname, options.subscribe).then(function () {
+	        return _this3.stores[dbname] = store;
+	      }).then(function () {
+	        return store;
 	      });
 	    }
 	  }, {
@@ -26643,10 +26590,11 @@
 
 	      if (subscribe === undefined) subscribe = true;
 
-	      return store.use(dbname, this.user.username).then(function (events) {
+	      return store.use(this.user.username).then(function (events) {
 	        events.on('readable', _this4._onSync.bind(_this4));
 	        events.on('data', _this4._onWrite.bind(_this4));
 	        events.on('load', _this4._onLoad.bind(_this4));
+	        events.on('close', _this4._onClose.bind(_this4));
 
 	        if (subscribe) _this4._pubsub.subscribe(dbname, '', _this4._onMessage.bind(_this4));
 
@@ -26655,28 +26603,37 @@
 	    }
 	  }, {
 	    key: '_onMessage',
-	    value: function _onMessage(channel, message) {
-	      [this.eventStore, this.kvStore, this.counterStore].forEach(function (store) {
-	        store.sync(channel, message).catch(function (e) {
-	          return logger.error(e.stack);
-	        });
+	    value: function _onMessage(dbname, message) {
+	      var store = this.stores[dbname];
+	      store.sync(message).catch(function (e) {
+	        return logger.error(e.stack);
 	      });
 	    }
+
+	    // TODO: FIX EVENTS!!
+
 	  }, {
 	    key: '_onWrite',
-	    value: function _onWrite(channel, hash) {
-	      this._pubsub.publish(channel, hash);
-	      this.events.emit('data', channel, hash);
+	    value: function _onWrite(dbname, hash) {
+	      this._pubsub.publish(dbname, hash);
+	      this.events.emit('data', dbname, hash);
 	    }
 	  }, {
 	    key: '_onSync',
-	    value: function _onSync(channel, hash) {
-	      this.events.emit('readable', channel, hash);
+	    value: function _onSync(dbname, hash) {
+	      this.events.emit('readable', dbname, hash);
 	    }
 	  }, {
 	    key: '_onLoad',
-	    value: function _onLoad(channel, hash) {
-	      this.events.emit('load', channel, hash);
+	    value: function _onLoad(dbname, hash) {
+	      this.events.emit('load', dbname, hash);
+	    }
+	  }, {
+	    key: '_onClose',
+	    value: function _onClose(dbname) {
+	      this._pubsub.unsubscribe(dbname);
+	      delete this.stores[dbname];
+	      this.events.emit('closed', dbname);
 	    }
 	  }, {
 	    key: '_connect',
@@ -35411,10 +35368,10 @@
 	var CounterStore = function (_Store) {
 	  (0, _inherits3.default)(CounterStore, _Store);
 
-	  function CounterStore(ipfs, options) {
+	  function CounterStore(ipfs, dbname, options) {
 	    (0, _classCallCheck3.default)(this, CounterStore);
 
-	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(CounterStore).call(this, ipfs, options));
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(CounterStore).call(this, ipfs, dbname, options));
 
 	    _this._index = new CounterIndex();
 	    return _this;
@@ -35422,28 +35379,28 @@
 
 	  (0, _createClass3.default)(CounterStore, [{
 	    key: 'use',
-	    value: function use(dbname, id) {
-	      this._index.createCounter(dbname, id);
-	      return (0, _get3.default)((0, _getPrototypeOf2.default)(CounterStore.prototype), 'use', this).call(this, dbname, id);
+	    value: function use(id) {
+	      this._index.createCounter(id);
+	      return (0, _get3.default)((0, _getPrototypeOf2.default)(CounterStore.prototype), 'use', this).call(this, id);
 	    }
 	  }, {
 	    key: 'delete',
-	    value: function _delete(dbname) {
-	      (0, _get3.default)((0, _getPrototypeOf2.default)(CounterStore.prototype), 'delete', this).call(this, dbname);
+	    value: function _delete() {
+	      (0, _get3.default)((0, _getPrototypeOf2.default)(CounterStore.prototype), 'delete', this).call(this);
 	      this._index = new CounterIndex();
 	    }
 	  }, {
-	    key: 'query',
-	    value: function query(dbname) {
-	      return this._index.get(dbname).value;
+	    key: 'value',
+	    value: function value() {
+	      return this._index.get().value;
 	    }
 	  }, {
 	    key: 'inc',
-	    value: function inc(dbname, amount) {
-	      var counter = this._index.get(dbname);
+	    value: function inc(amount) {
+	      var counter = this._index.get();
 	      if (counter) {
 	        counter.increment(amount);
-	        return this._addOperation(dbname, 'COUNTER', null, counter.payload);
+	        return this._addOperation('COUNTER', null, counter.payload);
 	      }
 	    }
 	  }]);
@@ -35576,71 +35533,76 @@
 	var DefaultIndex = __webpack_require__(476);
 
 	var Store = function () {
-	  function Store(ipfs, options) {
+	  function Store(ipfs, dbname, options) {
 	    (0, _classCallCheck3.default)(this, Store);
 
-	    this._ipfs = ipfs;
-	    this._index = new DefaultIndex();
-	    this._oplogs = {};
-	    this.events = {};
+	    this.dbname = dbname;
+	    this.events = new EventEmitter();
 	    this.options = options || {};
+	    this._index = new DefaultIndex();
+	    this._oplog = null;
+	    this._ipfs = ipfs;
 	  }
 
 	  (0, _createClass3.default)(Store, [{
 	    key: 'use',
-	    value: function use(dbname, id) {
+	    value: function use(id) {
 	      var _this = this;
 
-	      this.events[dbname] = new EventEmitter();
-	      var oplog = new OperationsLog(this._ipfs, dbname, this.events[dbname], this.options);
-	      return oplog.load(id).then(function (merged) {
-	        return _this._index.updateIndex(oplog, merged);
+	      this.events.emit('load', this.dbname);
+	      this._oplog = new OperationsLog(this._ipfs, this.dbname, this.events, this.options);
+	      return this._oplog.load(id).then(function (merged) {
+	        return _this._index.updateIndex(_this._oplog, merged);
 	      }).then(function () {
-	        return _this._oplogs[dbname] = oplog;
+	        return _this.events.emit('readable', _this.dbname);
 	      }).then(function () {
-	        return _this.events[dbname];
+	        return _this.events;
 	      });
 	    }
 	  }, {
+	    key: 'close',
+	    value: function close() {
+	      this.events.emit('close', this.dbname);
+	    }
+	  }, {
 	    key: 'sync',
-	    value: function sync(dbname, hash) {
+	    value: function sync(hash) {
 	      var _this2 = this;
 
-	      var oplog = this._oplogs[dbname];
-	      var newItems = void 0;
-	      if (hash && oplog) {
-	        return oplog.merge(hash).then(function (merged) {
-	          return newItems = merged;
-	        }).then(function () {
-	          return _this2._index.updateIndex(oplog, newItems);
-	        }).then(function () {
-	          return _this2.events[dbname].emit('readable', dbname);
-	        }).then(function () {
-	          return newItems;
-	        });
-	      }
+	      if (!hash || hash === this._oplog._lastWrite || !this._oplog) return _promise2.default.resolve([]);
 
-	      return _promise2.default.resolve([]);
+	      var newItems = void 0;
+	      this.events.emit('load', this.dbname);
+	      return this._oplog.merge(hash).then(function (merged) {
+	        return newItems = merged;
+	      }).then(function () {
+	        return _this2._index.updateIndex(_this2._oplog, newItems);
+	      }).then(function () {
+	        if (newItems.length > 0) _this2.events.emit('readable', _this2.dbname);
+	      }).then(function () {
+	        return newItems;
+	      });
 	    }
 	  }, {
 	    key: 'delete',
-	    value: function _delete(dbname) {
-	      if (this._oplogs[dbname]) this._oplogs[dbname].delete();
+	    value: function _delete() {
+	      if (this._oplog) this._oplog.delete();
 	    }
 	  }, {
 	    key: '_addOperation',
-	    value: function _addOperation(dbname, type, key, data) {
+	    value: function _addOperation(type, key, data) {
 	      var _this3 = this;
 
-	      var oplog = this._oplogs[dbname];
 	      var result = void 0;
-	      if (oplog) {
-	        return oplog.addOperation(type, key, data).then(function (op) {
+	      if (this._oplog) {
+	        return this._oplog.addOperation(type, key, data).then(function (op) {
 	          return result = op;
 	        }).then(function () {
-	          return _this3._index.updateIndex(oplog, [result]);
+	          return _this3._index.updateIndex(_this3._oplog, [result.operation]);
 	        }).then(function () {
-	          return result.hash;
+	          return _this3.events.emit('data', _this3.dbname, result.log);
+	        }).then(function () {
+	          return result.operation.hash;
 	        });
 	      }
 	    }
@@ -35717,9 +35679,7 @@
 	      }).then(function () {
 	        return Cache.set(_this.dbname, logHash);
 	      }).then(function () {
-	        return _this.events.emit('data', _this.dbname, logHash);
-	      }).then(function () {
-	        return node.payload;
+	        return { operation: node.payload, log: logHash };
 	      });
 	    }
 	  }, {
@@ -35727,7 +35687,6 @@
 	    value: function load(id) {
 	      var _this2 = this;
 
-	      this.events.emit('load', this.dbname);
 	      return Log.create(this._ipfs, id).then(function (log) {
 	        return _this2._log = log;
 	      }).then(function () {
@@ -35743,7 +35702,6 @@
 
 	      if (!hash || hash === this._lastWrite || !this._log) return _promise2.default.resolve([]);
 
-	      this.events.emit('load', this.dbname);
 	      var oldCount = this._log.items.length;
 	      var newItems = [];
 	      return Log.fromIpfsHash(this._ipfs, hash).then(function (other) {
@@ -62445,33 +62403,32 @@
 	  function CounterIndex() {
 	    (0, _classCallCheck3.default)(this, CounterIndex);
 
-	    this._index = {};
+	    this._counter = null;
 	  }
 
 	  (0, _createClass3.default)(CounterIndex, [{
 	    key: 'createCounter',
-	    value: function createCounter(dbname, id) {
-	      this._index[dbname] = new Counter(id);
+	    value: function createCounter(id) {
+	      this._counter = new Counter(id);
 	    }
 	  }, {
 	    key: 'get',
-	    value: function get(dbname) {
-	      return this._index[dbname];
+	    value: function get() {
+	      return this._counter;
 	    }
 	  }, {
 	    key: 'updateIndex',
 	    value: function updateIndex(oplog, updated) {
-	      var counter = this._index[oplog.dbname];
-	      if (counter) {
+	      var _this = this;
+
+	      if (this._counter) {
 	        updated.filter(function (f) {
 	          return f && f.op === 'COUNTER';
 	        }).map(function (f) {
 	          return Counter.from(f.value);
 	        }).forEach(function (f) {
-	          return counter.merge(f);
+	          return _this._counter.merge(f);
 	        });
-
-	        this._index[oplog.dbname] = counter;
 	      }
 	    }
 	  }]);
@@ -62624,10 +62581,10 @@
 	var KeyValueStore = function (_Store) {
 	  (0, _inherits3.default)(KeyValueStore, _Store);
 
-	  function KeyValueStore(ipfs, options) {
+	  function KeyValueStore(ipfs, dbname, options) {
 	    (0, _classCallCheck3.default)(this, KeyValueStore);
 
-	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(KeyValueStore).call(this, ipfs, options));
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(KeyValueStore).call(this, ipfs, dbname, options));
 
 	    _this._index = new KVIndex();
 	    return _this;
@@ -62635,29 +62592,29 @@
 
 	  (0, _createClass3.default)(KeyValueStore, [{
 	    key: 'delete',
-	    value: function _delete(dbname) {
-	      (0, _get3.default)((0, _getPrototypeOf2.default)(KeyValueStore.prototype), 'delete', this).call(this, dbname);
+	    value: function _delete() {
+	      (0, _get3.default)((0, _getPrototypeOf2.default)(KeyValueStore.prototype), 'delete', this).call(this);
 	      this._index = new KVIndex();
 	    }
 	  }, {
 	    key: 'get',
-	    value: function get(dbname, key) {
+	    value: function get(key) {
 	      return this._index.get(key);
 	    }
 	  }, {
 	    key: 'set',
-	    value: function set(dbname, key, data) {
-	      this.put(dbname, key, data);
+	    value: function set(key, data) {
+	      this.put(key, data);
 	    }
 	  }, {
 	    key: 'put',
-	    value: function put(dbname, key, data) {
-	      return this._addOperation(dbname, 'PUT', key, data);
+	    value: function put(key, data) {
+	      return this._addOperation('PUT', key, data);
 	    }
 	  }, {
 	    key: 'del',
-	    value: function del(dbname, key) {
-	      return this._addOperation(dbname, 'DELETE', key);
+	    value: function del(key) {
+	      return this._addOperation('DELETE', key);
 	    }
 	  }]);
 	  return KeyValueStore;
@@ -62703,7 +62660,11 @@
 	      updated.reverse().forEach(function (item) {
 	        if (handled.indexOf(item.key) === -1) {
 	          handled.push(item.key);
-	          if (item.op === 'PUT') _this._index[item.key] = item.value;else if (item.op === 'DELETE') delete _this._index[item.key];
+	          if (item.op === 'PUT') {
+	            _this._index[item.key] = item.value;
+	          } else if (item.op === 'DELETE') {
+	            delete _this._index[item.key];
+	          }
 	        }
 	      });
 	    }
@@ -62760,10 +62721,10 @@
 	var EventStore = function (_Store) {
 	  (0, _inherits3.default)(EventStore, _Store);
 
-	  function EventStore(ipfs, options) {
+	  function EventStore(ipfs, dbname, options) {
 	    (0, _classCallCheck3.default)(this, EventStore);
 
-	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(EventStore).call(this, ipfs, options));
+	    var _this = (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(EventStore).call(this, ipfs, dbname, options));
 
 	    _this._index = new EventLogIndex();
 	    return _this;
@@ -62772,25 +62733,25 @@
 	  (0, _createClass3.default)(EventStore, [{
 	    key: 'delete',
 	    value: function _delete(dbname) {
-	      (0, _get3.default)((0, _getPrototypeOf2.default)(EventStore.prototype), 'delete', this).call(this, dbname);
+	      (0, _get3.default)((0, _getPrototypeOf2.default)(EventStore.prototype), 'delete', this).call(this);
 	      this._index = new EventLogIndex();
 	    }
 	  }, {
 	    key: 'add',
-	    value: function add(dbname, data) {
-	      return this._addOperation(dbname, 'ADD', null, data);
+	    value: function add(data) {
+	      return this._addOperation('ADD', null, data);
 	    }
 	  }, {
 	    key: 'remove',
-	    value: function remove(dbname, hash) {
-	      return this._addOperation(dbname, 'DELETE', hash);
+	    value: function remove(hash) {
+	      return this._addOperation('DELETE', hash);
 	    }
 	  }, {
 	    key: 'iterator',
-	    value: function iterator(dbname, options) {
+	    value: function iterator(options) {
 	      var _iterator;
 
-	      var messages = this._query(dbname, options);
+	      var messages = this._query(this.dbname, options);
 	      var currentIndex = 0;
 	      var iterator = (_iterator = {}, (0, _defineProperty3.default)(_iterator, _iterator3.default, function () {
 	        return this;
@@ -69322,14 +69283,14 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var EventLogIndex = function () {
-	  function EventLogIndex() {
-	    (0, _classCallCheck3.default)(this, EventLogIndex);
+	var EventIndex = function () {
+	  function EventIndex() {
+	    (0, _classCallCheck3.default)(this, EventIndex);
 
 	    this._index = {};
 	  }
 
-	  (0, _createClass3.default)(EventLogIndex, [{
+	  (0, _createClass3.default)(EventIndex, [{
 	    key: 'get',
 	    value: function get() {
 	      var _this = this;
@@ -69357,10 +69318,10 @@
 	      });
 	    }
 	  }]);
-	  return EventLogIndex;
+	  return EventIndex;
 	}();
 
-	module.exports = EventLogIndex;
+	module.exports = EventIndex;
 
 /***/ }
 /******/ ]);

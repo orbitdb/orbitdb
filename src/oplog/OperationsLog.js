@@ -37,12 +37,12 @@ class OperationsLog {
       .then((hash) => logHash = hash)
       .then(() => this._lastWrite = logHash)
       .then(() => Cache.set(this.dbname, logHash))
-      .then(() => this.events.emit('data', this.dbname, logHash))
-      .then(() => node.payload)
+      .then(() => {
+        return { operation: node.payload, log: logHash };
+      })
   }
 
   load(id) {
-    this.events.emit('load', this.dbname);
     return Log.create(this._ipfs, id)
       .then((log) => this._log = log)
       .then(() => Cache.loadCache(this.options.cacheFile))
@@ -53,16 +53,11 @@ class OperationsLog {
     if(!hash || hash === this._lastWrite || !this._log)
       return Promise.resolve([]);
 
-    this.events.emit('load', this.dbname);
     const oldCount = this._log.items.length;
     let newItems = [];
     return Log.fromIpfsHash(this._ipfs, hash)
-      .then((other) => {
-        return this._log.join(other)
-      })
-      .then((merged) => {
-        newItems = merged
-      })
+      .then((other) => this._log.join(other))
+      .then((merged) => newItems = merged)
       .then(() => Cache.set(this.dbname, hash))
       .then(() => newItems.map((f) => f.payload))
   }

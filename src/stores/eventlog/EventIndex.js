@@ -1,6 +1,6 @@
 'use strict';
 
-class EventLogIndex {
+class EventIndex {
   constructor() {
     this._index = {};
   }
@@ -25,4 +25,4 @@ class EventLogIndex {
   }
 }
 
-module.exports = EventLogIndex;
+module.exports = EventIndex;
