@@ -4,9 +4,8 @@ const Log   = require('ipfs-log');
 const Cache = require('./Cache');
 
 class OperationsLog {
-  constructor(ipfs, dbname, events, opts) {
+  constructor(ipfs, dbname, opts) {
     this.dbname = dbname;
-    this.events = events;
     this.options = opts || { cacheFile: null };
     this._lastWrite = null;
     this._ipfs = ipfs;

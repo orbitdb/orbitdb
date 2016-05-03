@@ -69,7 +69,6 @@ class OrbitDB {
     store.sync(message).catch((e) => logger.error(e.stack));
   }
 
-  // TODO: FIX EVENTS!!
   _onWrite(dbname, hash) {
     this._pubsub.publish(dbname, hash);
     this.events.emit('data', dbname, hash);

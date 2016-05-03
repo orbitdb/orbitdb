@@ -26609,9 +26609,6 @@
 	        return logger.error(e.stack);
 	      });
 	    }
-
-	    // TODO: FIX EVENTS!!
-
 	  }, {
 	    key: '_onWrite',
 	    value: function _onWrite(dbname, hash) {
@@ -35550,7 +35547,7 @@
 	      var _this = this;
 
 	      this.events.emit('load', this.dbname);
-	      this._oplog = new OperationsLog(this._ipfs, this.dbname, this.events, this.options);
+	      this._oplog = new OperationsLog(this._ipfs, this.dbname, this.options);
 	      return this._oplog.load(id).then(function (merged) {
 	        return _this._index.updateIndex(_this._oplog, merged);
 	      }).then(function () {
@@ -35640,11 +35637,10 @@
 	var Cache = __webpack_require__(475);
 
 	var OperationsLog = function () {
-	  function OperationsLog(ipfs, dbname, events, opts) {
+	  function OperationsLog(ipfs, dbname, opts) {
 	    (0, _classCallCheck3.default)(this, OperationsLog);
 
 	    this.dbname = dbname;
-	    this.events = events;
 	    this.options = opts || { cacheFile: null };
 	    this._lastWrite = null;
 	    this._ipfs = ipfs;
@@ -62291,6 +62287,10 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
+	var _promise = __webpack_require__(297);
+
+	var _promise2 = _interopRequireDefault(_promise);
+
 	var _classCallCheck2 = __webpack_require__(327);
 
 	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -62318,8 +62318,15 @@
 	  (0, _createClass3.default)(Cache, null, [{
 	    key: 'set',
 	    value: function set(key, value) {
-	      cache[key] = value;
-	      if (filePath) fs.writeFileSync(filePath, (0, _stringify2.default)(cache, null, 2) + "\n");
+	      return new _promise2.default(function (resolve, reject) {
+	        cache[key] = value;
+	        if (filePath) {
+	          // fs.writeFileSync(filePath, JSON.stringify(cache, null, 2) + "\n");
+	          fs.writeFile(filePath, (0, _stringify2.default)(cache, null, 2) + "\n", resolve);
+	        } else {
+	          resolve();
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'get',
@@ -62329,12 +62336,22 @@
 	  }, {
 	    key: 'loadCache',
 	    value: function loadCache(cacheFile) {
-	      // filePath = cacheFile ? cacheFile : defaultFilepath;
-	      if (cacheFile && fs.existsSync(cacheFile)) {
-	        filePath = cacheFile;
-	        logger.debug('Load cache from ' + cacheFile);
-	        cache = JSON.parse(fs.readFileSync(cacheFile));
-	      }
+	      return new _promise2.default(function (resolve, reject) {
+	        // filePath = cacheFile ? cacheFile : defaultFilepath;
+	        if (cacheFile) {
+	          fs.exists(cacheFile, function (err, res) {
+	            if (res) {
+	              filePath = cacheFile;
+	              logger.debug('Load cache from ' + cacheFile);
+	              cache = JSON.parse(fs.readFileSync(cacheFile));
+	            } else {
+	              resolve();
+	            }
+	          });
+	        } else {
+	          resolve();
+	        }
+	      });
 	    }
 	  }]);
 	  return Cache;

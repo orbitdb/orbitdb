@@ -16,7 +16,7 @@ class Store {
 
   use(id) {
     this.events.emit('load', this.dbname);
-    this._oplog = new OperationsLog(this._ipfs, this.dbname, this.events, this.options);
+    this._oplog = new OperationsLog(this._ipfs, this.dbname, this.options);
     return this._oplog.load(id)
       .then((merged) => this._index.updateIndex(this._oplog, merged))
       .then(() => this.events.emit('readable', this.dbname))

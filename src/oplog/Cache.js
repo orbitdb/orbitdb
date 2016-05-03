@@ -11,9 +11,15 @@ let cache = {};
 
 class Cache {
   static set(key, value) {
-    cache[key] = value;
-    if(filePath)
-      fs.writeFileSync(filePath, JSON.stringify(cache, null, 2) + "\n");
+    return new Promise((resolve, reject) => {
+      cache[key] = value;
+      if(filePath) {
+        // fs.writeFileSync(filePath, JSON.stringify(cache, null, 2) + "\n");
+        fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", resolve);
+      } else {
+        resolve();
+      }
+    })
   }
 
   static get(key) {
@@ -21,12 +27,22 @@ class Cache {
   }
 
   static loadCache(cacheFile) {
-    // filePath = cacheFile ? cacheFile : defaultFilepath;
-    if(cacheFile && fs.existsSync(cacheFile)) {
-      filePath = cacheFile;
-      logger.debug('Load cache from ' + cacheFile);
-      cache = JSON.parse(fs.readFileSync(cacheFile));
-    }
+    return new Promise((resolve, reject) => {
+      // filePath = cacheFile ? cacheFile : defaultFilepath;
+      if(cacheFile) {
+        fs.exists(cacheFile, (err, res) => {
+          if(res) {
+            filePath = cacheFile;
+            logger.debug('Load cache from ' + cacheFile);
+            cache = JSON.parse(fs.readFileSync(cacheFile));
+          } else {
+            resolve();
+          }
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 }
 
