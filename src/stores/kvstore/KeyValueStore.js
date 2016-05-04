@@ -27,7 +27,7 @@ class KeyValueStore extends Store {
   }
 
   del(key) {
-    return this._addOperation('DELETE', key);
+    return this._addOperation('DEL', key);
   }
 }
 

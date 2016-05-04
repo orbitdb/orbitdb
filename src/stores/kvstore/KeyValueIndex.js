@@ -17,7 +17,7 @@ class KeyValueIndex {
         handled.push(item.key);
         if(item.op === 'PUT') {
           this._index[item.key] = item.value
-        } else if (item.op === 'DELETE') {
+        } else if (item.op === 'DEL') {
           delete this._index[item.key];
         }
       }
