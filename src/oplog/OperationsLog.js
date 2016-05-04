@@ -63,11 +63,6 @@ class OperationsLog {
   delete() {
     this._log.clear();
   }
-
-  _padOperation(node) {
-    Object.assign(node.payload, { hash: node.hash });
-    return node;
-  }
 }
 
 module.exports = OperationsLog;
