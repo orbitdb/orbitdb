@@ -1,0 +1,6 @@
+{
+  "name": "localhost dev network",
+  "publishers": [
+    "localhost:3333"
+  ]
+}

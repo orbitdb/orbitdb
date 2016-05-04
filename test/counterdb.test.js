@@ -10,6 +10,7 @@ const OrbitServer = require('orbit-server/src/server');
 // Mute logging
 require('logplease').setLogLevel('ERROR');
 
+const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // network.json
 const username  = 'testrunner';
 const username2 = 'rennurtset';
 
@@ -18,6 +19,10 @@ const ipfsPath = '/tmp/orbittests';
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
     OrbitServer.start();
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) reject(err);
+      resolve(ipfs);
+    });
     // ipfsd.local(ipfsPath, (err, node) => {
     //   if(err) reject(err);
     //   node.startDaemon((err, ipfs) => {
@@ -25,10 +30,6 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) reject(err);
-      resolve(ipfs);
-    });
   });
 };
 
@@ -39,19 +40,26 @@ describe('CounterStore', function() {
 
   before((done) => {
     rimraf.sync('./orbit-db-cache.json')
-    startIpfs().then((res) => {
-      ipfs = res;
-      Promise.map([username, username2], (login) => {
-        return OrbitDB.connect('localhost', 3333, login, '', ipfs, { allowOffline: false, cacheFile: './orbit-db-cache.json' });
-      }).then((clients) => {
-        client1 = clients[0];
-        client2 = clients[1];
-        done();
-      }).catch((e) => {
-        console.log(e.stack);
-        assert.equal(e, null);
-      });
-    });
+    startIpfs()
+      .then((res) => {
+        ipfs = res;
+        return Promise.map([username, username2], (login) => {
+          return OrbitDB.connect(network, login, '', ipfs, { allowOffline: false, cacheFile: './orbit-db-cache.json' });
+        }).then((clients) => {
+          client1 = clients[0];
+          client2 = clients[1];
+          return;
+        }).catch((e) => {
+          console.log(e.stack);
+          assert.equal(e, null);
+        });
+      })
+      .then(() => ipfs.add('./test/network.json'))
+      .then((networkFile)=> {
+        assert.equal(networkFile[0].Hash, network);
+        return;
+      })
+      .then(done)
   });
 
   after((done) => {

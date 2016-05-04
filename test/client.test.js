@@ -7,17 +7,19 @@ const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
 const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
+const OrbitServer = require('orbit-server/src/server');
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
 
 // Orbit
+const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // network.json
 const username = 'testrunner';
 const password = '';
-const ipfsPath = '/tmp/orbittests';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
+    // OrbitServer.start();
     ipfsd.disposableApi((err, ipfs) => {
       if(err) console.error(err);
       resolve(ipfs);
@@ -36,7 +38,7 @@ describe('Orbit Client', function() {
   this.timeout(30000);
 
   let ipfs, client, client2, db;
-  let channel = 'abcdefgh';
+  let channel = 'abcdefghijklmn';
   const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json');
 
   before(async(function (done) {
@@ -44,10 +46,12 @@ describe('Orbit Client', function() {
 
     try {
       ipfs = await(startIpfs());
-      client = await(OrbitDB.connect('localhost', 3333, username, password, ipfs, { allowOffline: true }));
-      client2 = await(OrbitDB.connect('localhost', 3333, username + "2", password, ipfs, { allowOffline: true }));
+      const networkFile = await(ipfs.add('./test/network.json'))
+      assert.equal(networkFile[0].Hash, network);
+      client = await(OrbitDB.connect(network, username, password, ipfs, { allowOffline: true }));
+      client2 = await(OrbitDB.connect(network, username + "2", password, ipfs, { allowOffline: true }));
     } catch(e) {
-      console.log(e);
+      console.log(e.stack);
       assert.equal(e, null);
     }
 
@@ -622,12 +626,14 @@ describe('Orbit Client', function() {
     it('syncs databases', async((done) => {
       const db2 = await(client2.kvstore(channel, { subscribe: false }));
       db2.delete();
+      db2.events.on('data', async((dbname, hash) => {
+        await(db.sync(hash))
+        const value = db.get('key1');
+        assert.equal(value, 'hello2');
+        done();
+      }));
       await(db.put('key1', 'hello1'));
       await(db2.put('key1', 'hello2'));
-      await(db.sync('QmNtELU2N3heY9cFgRuLWavgov7NTXibNyZCxcTCYjw1TM'))
-      const value = db.get('key1');
-      assert.equal(value, 'hello2');
-      done();
     }));
   });
 });

@@ -88,51 +88,64 @@ class OrbitDB {
     this.events.emit('closed', dbname);
   }
 
-  _connect(host, port, username, password, allowOffline) {
-    return new Promise((resolve, reject) => {
-      if(allowOffline === undefined) allowOffline = false;
+  _connect(hash, username, password, allowOffline) {
+    if(allowOffline === undefined) allowOffline = false;
 
-      this._pubsub = new PubSub(this._ipfs);
-      this._pubsub.connect(host, port, username, password).then(() => {
+    const readNetworkInfo = (hash) => {
+      return new Promise((resolve, reject) => {
+        this._ipfs.cat(hash).then((res) => {
+          let buf = '';
+          res
+            .on('error', (err) => reject(err))
+            .on('data', (data) => buf += data)
+            .on('end', () => resolve(buf))
+        });
+      });
+    };
+
+    let host, port, name;
+    return readNetworkInfo(hash)
+      .then((network) => JSON.parse(network))
+      .then((network) => {
+        this.network = network;
+        name = network.name;
+        host = network.publishers[0].split(":")[0];
+        port = network.publishers[0].split(":")[1];
+      })
+      .then(() => {
+        this._pubsub = new PubSub();
+        return this._pubsub.connect(host, port, username, password)
+      })
+      .then(() => {
         logger.debug(`Connected to Pubsub at '${host}:${port}'`);
         this.user = { username: username, id: username } // TODO: user id from ipfs hash
-        this.network = { host: host, port: port, name: 'TODO: network name' }
-        resolve();
-      }).catch((e) => {
-        logger.warn("Couldn't connect to Pubsub:", e.message);
+        return;
+      })
+      .catch((e) => {
+        logger.warn("Couldn't connect to Pubsub: " + e.message);
         if(!allowOffline) {
           logger.debug("'allowOffline' set to false, terminating");
           this._pubsub.disconnect();
-          reject(e);
-          return;
+          throw e;
         }
         this.user = { username: username, id: username } // TODO: user id from ipfs hash
-        this.network = { host: host, port: port, name: 'TODO: network name' }
-        resolve();
+        return;
       });
-    });
   }
 }
 
 class OrbitClientFactory {
-  static connect(host, port, username, password, ipfs, options) {
-    const createClient =(ipfs) => {
-      return new Promise((resolve, reject) => {
-        const client = new OrbitDB(ipfs, options);
-        client._connect(host, port, username, password, options.allowOffline)
-          .then(() => resolve(client))
-          .catch(reject);
-      });
-    }
-
-    options = options ? options : {};
+  static connect(network, username, password, ipfs, options) {
+    if(!options) options = { allowOffline: false };
 
     if(!ipfs) {
       logger.error("IPFS instance not provided");
       throw new Error("IPFS instance not provided");
     }
 
-    return createClient(ipfs);
+    const client = new OrbitDB(ipfs, options);
+    return client._connect(network, username, password, options.allowOffline)
+      .then(() => client)
   }
 }
 
