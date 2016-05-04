@@ -10,9 +10,7 @@ class EventIndex {
   }
 
   updateIndex(oplog, updated) {
-    let handled = [];
-
-    updated.forEach((item) => {
+    updated.reduce((handled, item) => {
       if(handled.indexOf(item.hash) === -1) {
         handled.push(item.hash);
         if(item.op === 'ADD') {
@@ -21,7 +19,8 @@ class EventIndex {
           delete this._index[item.value];
         }
       }
-    });
+      return handled;
+    }, []);
   }
 }
 
