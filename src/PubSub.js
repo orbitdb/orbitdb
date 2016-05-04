@@ -4,12 +4,9 @@ const io     = require('socket.io-client');
 const logger = require('logplease').create("orbit-db.Pubsub");
 
 class Pubsub {
-  constructor(ipfs) {
-    this.ipfs = ipfs;
+  constructor() {
     this._socket = null;
     this._subscriptions = {};
-    this.onConnected = null;
-    this.onConnectionError = null;
   }
 
   connect(host, port, username, password) {
