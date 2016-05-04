@@ -20,7 +20,7 @@ class EventStore extends Store {
   }
 
   remove(hash) {
-    return this._addOperation('DELETE', hash);
+    return this._addOperation('DEL', null, hash);
   }
 
   iterator(options) {
@@ -48,14 +48,15 @@ class EventStore extends Store {
     if(!opts) opts = {};
 
     const amount = opts.limit ? (opts.limit > -1 ? opts.limit : this._index.get().length) : 1; // Return 1 if no limit is provided
+    const operations = this._index.get();
     let result = [];
 
     if(opts.gt || opts.gte) {
       // Greater than case
-      result = this._read(this._index.get(), opts.gt ? opts.gt : opts.gte, amount, opts.gte ? true : false)
+      result = this._read(operations, opts.gt ? opts.gt : opts.gte, amount, opts.gte ? true : false)
     } else {
       // Lower than and lastN case, search latest first by reversing the sequence
-      result = this._read(this._index.get().reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
+      result = this._read(operations.reverse(), opts.lt ? opts.lt : opts.lte, amount, opts.lte || !opts.lt).reverse()
     }
 
     if(opts.reverse) result.reverse();
@@ -63,9 +64,9 @@ class EventStore extends Store {
     return result.toArray();
   }
 
-  _read(ops, key, amount, inclusive) {
+  _read(ops, hash, amount, inclusive) {
     return Lazy(ops)
-      .skipWhile((f) => key && f.key !== key)
+      .skipWhile((f) => hash && f.hash !== hash)
       .drop(inclusive ? 0 : 1)
       .take(amount);
   }

@@ -215,7 +215,7 @@ describe('Orbit Client', function() {
       await(db.add('hello3'));
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
-      assert.equal(items[0].key.startsWith('Qm'), true);
+      assert.equal(items[0].key, null);
       assert.equal(items[0].hash.startsWith('Qm'), true);
       assert.equal(items[0].value, 'hello3');
       done();
@@ -250,10 +250,10 @@ describe('Orbit Client', function() {
         const iter = db.iterator();
         const next = iter.next().value;
         assert.notEqual(next, null);
-        assert.notEqual(next.key, null);
-        assert.equal(next.key.startsWith('Qm'), true);
+        assert.equal(next.key, null);
         assert.equal(next.hash.startsWith('Qm'), true);
         assert.equal(next.value, 'hello4');
+        assert.notEqual(next.meta.ts, null);
         done();
       }));
 
@@ -272,7 +272,7 @@ describe('Orbit Client', function() {
         const iter = db.iterator();
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.key, items[items.length - 1]);
+        assert.equal(first.hash, items[items.length - 1]);
         assert.equal(second, null);
         assert.equal(first.value, 'hello4');
         done();
@@ -306,7 +306,7 @@ describe('Orbit Client', function() {
         const iter = db.iterator({ limit: 1 });
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.key, _.last(items));
+        assert.equal(first.hash, _.last(items));
         assert.equal(second, null);
         done();
       }));
@@ -315,7 +315,7 @@ describe('Orbit Client', function() {
         const iter = db.iterator({ limit: 1 });
         const first = iter.next().value;
         const second = iter.next().value;
-        assert.equal(first.key, _.last(items));
+        assert.equal(first.hash, _.last(items));
         assert.equal(second, null);
         done();
       }));
@@ -326,9 +326,9 @@ describe('Orbit Client', function() {
         const second = iter.next().value;
         const third = iter.next().value;
         const fourth = iter.next().value;
-        assert.equal(first.key, items[items.length - 3]);
-        assert.equal(second.key, items[items.length - 2]);
-        assert.equal(third.key, items[items.length - 1]);
+        assert.equal(first.hash, items[items.length - 3]);
+        assert.equal(second.hash, items[items.length - 2]);
+        assert.equal(third.hash, items[items.length - 1]);
         assert.equal(fourth, null);
         done();
       }));
@@ -336,7 +336,7 @@ describe('Orbit Client', function() {
       it('returns all items', async((done) => {
         const messages = db.iterator({ limit: -1 })
           .collect()
-          .map((e) => e.key);
+          .map((e) => e.hash);
 
         messages.reverse();
         assert.equal(messages.length, items.length);
@@ -347,7 +347,7 @@ describe('Orbit Client', function() {
       it('returns all items when limit is bigger than -1', async((done) => {
         const messages = db.iterator({ limit: -300 })
           .collect()
-          .map((e) => e.key);
+          .map((e) => e.hash);
 
         assert.equal(messages.length, items.length);
         assert.equal(messages[0], items[0]);
@@ -357,7 +357,7 @@ describe('Orbit Client', function() {
       it('returns all items when limit is bigger than number of items', async((done) => {
         const messages = db.iterator({ limit: 300 })
           .collect()
-          .map((e) => e.key);
+          .map((e) => e.hash);
 
         assert.equal(messages.length, items.length);
         assert.equal(messages[0], items[0]);
@@ -369,7 +369,7 @@ describe('Orbit Client', function() {
       it('returns all items reversed', async((done) => {
         const messages = db.iterator({ limit: -1, reverse: true })
           .collect()
-          .map((e) => e.key);
+          .map((e) => e.hash);
 
         assert.equal(messages.length, items.length);
         assert.equal(messages[0], items[0]);
@@ -382,7 +382,7 @@ describe('Orbit Client', function() {
         it('returns 1 item when gte is the head', async((done) => {
           const messages = db.iterator({ gte: _.last(items), limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 1);
           assert.equal(messages[0], _.last(items));
@@ -399,7 +399,7 @@ describe('Orbit Client', function() {
           const gte = items[items.length - 2];
           const messages = db.iterator({ gte: gte, limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 2);
           assert.equal(messages[0], items[items.length - 2]);
@@ -410,7 +410,7 @@ describe('Orbit Client', function() {
         it('returns all items when gte is the root item', async((done) => {
           const messages = db.iterator({ gte: items[0], limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, items.length);
           assert.equal(messages[0], items[0]);
@@ -421,7 +421,7 @@ describe('Orbit Client', function() {
         it('returns items when gt is the root item', async((done) => {
           const messages = db.iterator({ gt: items[0], limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, itemCount - 1);
           assert.equal(messages[0], items[1]);
@@ -432,13 +432,13 @@ describe('Orbit Client', function() {
         it('returns items when gt is defined', async((done) => {
           const messages = db.iterator({ limit: -1})
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           const gt = messages[2];
 
           const messages2 = db.iterator({ gt: gt, limit: 100 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages2.length, 2);
           assert.equal(messages2[0], messages[messages.length - 2]);
@@ -451,7 +451,7 @@ describe('Orbit Client', function() {
         it('returns one item after head when lt is the head', async((done) => {
           const messages = db.iterator({ lt: _.last(items) })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 1);
           assert.equal(messages[0], items[items.length - 2]);
@@ -461,7 +461,7 @@ describe('Orbit Client', function() {
         it('returns all items when lt is head and limit is -1', async((done) => {
           const messages = db.iterator({ lt: _.last(items), limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, items.length - 1);
           assert.equal(messages[0], items[0]);
@@ -472,7 +472,7 @@ describe('Orbit Client', function() {
         it('returns 3 items when lt is head and limit is 3', async((done) => {
           const messages = db.iterator({ lt: _.last(items), limit: 3 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 3);
           assert.equal(messages[0], items[items.length - 4]);
@@ -489,7 +489,7 @@ describe('Orbit Client', function() {
         it('returns one item when lte is the root item', async((done) => {
           const messages = db.iterator({ lte: items[0] })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 1);
           assert.equal(messages[0], items[0]);
@@ -499,7 +499,7 @@ describe('Orbit Client', function() {
         it('returns all items when lte is the head', async((done) => {
           const messages = db.iterator({ lte: _.last(items), limit: -1 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, itemCount);
           assert.equal(messages[0], items[0]);
@@ -510,7 +510,7 @@ describe('Orbit Client', function() {
         it('returns 3 items when lte is the head', async((done) => {
           const messages = db.iterator({ lte: _.last(items), limit: 3 })
             .collect()
-            .map((e) => e.key);
+            .map((e) => e.hash);
 
           assert.equal(messages.length, 3);
           assert.equal(messages[0], items[items.length - 3]);

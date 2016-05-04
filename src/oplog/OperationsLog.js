@@ -29,7 +29,7 @@ class OperationsLog {
     let node, logHash;
     return this._log.add(entry)
       .then((op) => node = op)
-      .then(() => this._padOperation(node))
+      .then(() => Object.assign(node.payload, { hash: node.hash }))
       .then(() => Log.getIpfsHash(this._ipfs, this._log))
       .then((hash) => logHash = hash)
       .then(() => this._lastWrite = logHash)
@@ -56,8 +56,8 @@ class OperationsLog {
       .then((other) => this._log.join(other))
       .then((merged) => newItems = merged)
       .then(() => Cache.set(this.dbname, hash))
-      .then(() => newItems.map((f) => this._padOperation(f)))
-      .then((items) => items.map((f) => f.payload))
+      .then(() => newItems.forEach((f) => Object.assign(f.payload, { hash: f.hash })))
+      .then(() => newItems.map((f) => f.payload))
   }
 
   delete() {
@@ -66,8 +66,6 @@ class OperationsLog {
 
   _padOperation(node) {
     Object.assign(node.payload, { hash: node.hash });
-    if(node.payload.key === null)
-      Object.assign(node.payload, { key: node.hash });
     return node;
   }
 }

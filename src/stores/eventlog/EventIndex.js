@@ -13,12 +13,12 @@ class EventIndex {
     let handled = [];
 
     updated.forEach((item) => {
-      if(handled.indexOf(item.key) === -1) {
-        handled.push(item.key);
+      if(handled.indexOf(item.hash) === -1) {
+        handled.push(item.hash);
         if(item.op === 'ADD') {
-          this._index[item.key] = item
-        } else if(item.op === 'DELETE') {
-          delete this._index[item.key];
+          this._index[item.hash] = item
+        } else if(item.op === 'DEL') {
+          delete this._index[item.value];
         }
       }
     });
