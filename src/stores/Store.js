@@ -25,7 +25,6 @@ class Store {
   use() {
     this.events.emit('load', this.dbname);
     this._oplog = new Log(this._ipfs, this.id, this.dbname, this.options);
-    Cache.reset();
     return Cache.loadCache(this.options.cacheFile).then(() => {
       const cached = Cache.get(this.dbname);
       if(cached) {

@@ -26,6 +26,7 @@ class Cache {
   }
 
   static loadCache(cacheFile) {
+    cache = {};
     return new Promise((resolve, reject) => {
       if(cacheFile) {
         filePath = cacheFile;
