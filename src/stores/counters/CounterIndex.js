@@ -3,11 +3,7 @@
 const Counter = require('../../crdts/GCounter');
 
 class CounterIndex {
-  constructor() {
-    this._counter = null;
-  }
-
-  createCounter(id) {
+  constructor(id) {
     this._counter = new Counter(id);
   }
 
@@ -15,9 +11,13 @@ class CounterIndex {
     return this._counter;
   }
 
-  updateIndex(oplog, updated) {
+  updateIndex(oplog, added) {
+    // console.log("ADDED", added)
     if(this._counter) {
-      updated.filter((f) => f && f.op === 'COUNTER')
+      // added.filter((f) => f && f.payload.op === 'COUNTER')
+      //   .map((f) => Counter.from(f.payload.value))
+      //   .forEach((f) => this._counter.merge(f))
+      added.filter((f) => f && f.op === 'COUNTER')
         .map((f) => Counter.from(f.value))
         .forEach((f) => this._counter.merge(f))
     }

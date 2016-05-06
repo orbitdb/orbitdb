@@ -4,20 +4,27 @@ const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
-// usage: benchmark.js <host> <username> <channel>;
+// usage: benchmark.js <network hash> <username> <channel>;
 
 // orbit-server
-const host = process.argv[2] ? process.argv[2] : 'localhost'
-const port = 3333;
-const username = process.argv[3] ? process.argv[3] : 'testrunner';
+// const network = 'QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM'; // dev server
+const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // 'localhost:3333'
+const username = process.argv[2] ? process.argv[2] : 'testrunner';
 const password = '';
-const channelName = process.argv[4] ? process.argv[4] : 'c1';
+const channelName = process.argv[3] ? process.argv[3] : 'c1';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) console.error(err);
-      resolve(ipfs);
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) console.error(err);
+    //   resolve(ipfs);
+    // });
+    ipfsd.local((err, node) => {
+      if(err) reject(err);
+      node.startDaemon((err, ipfs) => {
+        if(err) reject(err);
+        resolve(ipfs);
+      });
     });
   });
 };
@@ -41,7 +48,7 @@ let run = (() => {
     // Connect
     console.log(`Connecting...`)
     startIpfs()
-      .then((ipfs) => OrbitDB.connect(host, port, username, password, ipfs))
+      .then((ipfs) => OrbitDB.connect(network, username, password, ipfs))
       .then((orbit) => orbit.eventlog(channelName))
       .then(queryLoop)
       .then(() => {

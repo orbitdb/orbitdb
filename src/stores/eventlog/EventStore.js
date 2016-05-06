@@ -1,26 +1,49 @@
 'use strict';
 
-const Lazy          = require('lazy.js');
-const Store         = require('../Store');
-const EventLogIndex = require('./EventIndex');
+const Lazy       = require('lazy.js');
+const Store      = require('../Store');
+const EventIndex = require('./EventIndex');
 
 class EventStore extends Store {
-  constructor(ipfs, dbname, options) {
-    super(ipfs, dbname, options)
-    this._index = new EventLogIndex();
+  constructor(ipfs, id, dbname, options) {
+    Object.assign(options || {}, { Index: EventIndex });
+    super(ipfs, id, dbname, options)
   }
 
-  delete(dbname) {
-    super.delete();
-    this._index = new EventLogIndex();
-  }
+  // constructor(ipfs, id, dbname, options) {
+  //   super(ipfs, dbname, options)
+  //   this._index = new EventLogIndex();
+  // }
+
+  // delete(dbname) {
+  //   super.delete();
+  //   this._index = new EventLogIndex();
+  // }
 
   add(data) {
-    return this._addOperation('ADD', null, data);
+      const operation = {
+        op: 'ADD',
+        key: null,
+        value: data,
+        meta: {
+          ts: new Date().getTime()
+        }
+      };
+      return this._addOperation(operation);
+    // return this._addOperation('ADD', null, data);
   }
 
   remove(hash) {
-    return this._addOperation('DEL', null, hash);
+      const operation = {
+        op: 'DEL',
+        key: null,
+        value: hash,
+        meta: {
+          ts: new Date().getTime()
+        }
+      };
+      return this._addOperation(operation);
+    // return this._addOperation('DEL', null, hash);
   }
 
   iterator(options) {

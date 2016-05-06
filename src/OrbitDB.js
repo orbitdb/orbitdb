@@ -19,7 +19,7 @@ class OrbitDB {
 
   eventlog(dbname, options) {
     if(!options) options = { subscribe: true };
-    const store = new EventStore(this._ipfs, dbname, options);
+    const store = new EventStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
       .then(() => store);
@@ -27,7 +27,7 @@ class OrbitDB {
 
   kvstore(dbname, options) {
     if(!options) options = { subscribe: true };
-    const store = new KeyValueStore(this._ipfs, dbname, options);
+    const store = new KeyValueStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
       .then(() => store);
@@ -35,7 +35,7 @@ class OrbitDB {
 
   counter(dbname, options) {
     if(!options) options = { subscribe: true };
-    const store = new CounterStore(this._ipfs, dbname, options);
+    const store = new CounterStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
       .then(() => store);
@@ -70,6 +70,7 @@ class OrbitDB {
   }
 
   _onWrite(dbname, hash) {
+    if(!hash) throw new Error("Hash can't be null!");
     this._pubsub.publish(dbname, hash);
     this.events.emit('data', dbname, hash);
   }

@@ -8,7 +8,7 @@ const OrbitDB     = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
 
 // Mute logging
-require('logplease').setLogLevel('ERROR');
+// require('logplease').setLogLevel('ERROR');
 
 const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // network.json
 const username  = 'testrunner';

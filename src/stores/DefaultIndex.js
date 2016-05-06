@@ -1,7 +1,8 @@
 'use strict';
 
 class DefaultIndex {
-  constructor() {
+  constructor(id) {
+    this.id = id;
     this._index = [];
   }
 
@@ -9,7 +10,7 @@ class DefaultIndex {
     return this._index;
   }
 
-  updateIndex(oplog) {
+  updateIndex(oplog, entries) {
     this._index = oplog.ops
   }
 }
