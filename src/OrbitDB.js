@@ -8,7 +8,7 @@ const KeyValueStore = require('./stores/kvstore/KeyValueStore');
 const EventStore    = require('./stores/eventlog/EventStore');
 
 class OrbitDB {
-  constructor(ipfs, options) {
+  constructor(ipfs) {
     this._ipfs = ipfs;
     this._pubsub = null;
     this.user = null;
@@ -18,7 +18,9 @@ class OrbitDB {
   }
 
   eventlog(dbname, options) {
-    if(!options) options = { subscribe: true };
+    if(!options) options = {};
+    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
+
     const store = new EventStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
@@ -26,7 +28,9 @@ class OrbitDB {
   }
 
   kvstore(dbname, options) {
-    if(!options) options = { subscribe: true };
+    if(!options) options = {};
+    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
+
     const store = new KeyValueStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
@@ -34,7 +38,9 @@ class OrbitDB {
   }
 
   counter(dbname, options) {
-    if(!options) options = { subscribe: true };
+    if(!options) options = {};
+    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
+
     const store = new CounterStore(this._ipfs, this.user.username, dbname, options);
     return this._subscribe(store, dbname, options.subscribe)
       .then(() => this.stores[dbname] = store)
@@ -144,7 +150,7 @@ class OrbitClientFactory {
       throw new Error("IPFS instance not provided");
     }
 
-    const client = new OrbitDB(ipfs, options);
+    const client = new OrbitDB(ipfs);
     return client._connect(network, username, password, options.allowOffline)
       .then(() => client)
   }

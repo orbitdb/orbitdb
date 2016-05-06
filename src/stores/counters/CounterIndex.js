@@ -12,14 +12,13 @@ class CounterIndex {
   }
 
   updateIndex(oplog, added) {
-    // console.log("ADDED", added)
     if(this._counter) {
-      // added.filter((f) => f && f.payload.op === 'COUNTER')
-      //   .map((f) => Counter.from(f.payload.value))
-      //   .forEach((f) => this._counter.merge(f))
-      added.filter((f) => f && f.op === 'COUNTER')
-        .map((f) => Counter.from(f.value))
+      added.filter((f) => f && f.payload.op === 'COUNTER')
+        .map((f) => Counter.from(f.payload.value))
         .forEach((f) => this._counter.merge(f))
+      // added.filter((f) => f && f.op === 'COUNTER')
+      //   .map((f) => Counter.from(f.value))
+      //   .forEach((f) => this._counter.merge(f))
     }
   }
 }

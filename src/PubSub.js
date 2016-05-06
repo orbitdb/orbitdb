@@ -41,7 +41,8 @@ class Pubsub {
   }
 
   publish(hash, message) {
-    this._socket.send(JSON.stringify({ channel: hash, message: message }));
+    if(this._subscriptions[hash])
+      this._socket.send(JSON.stringify({ channel: hash, message: message }));
   }
 
   _handleMessage(hash, message) {

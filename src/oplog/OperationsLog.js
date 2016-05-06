@@ -31,7 +31,6 @@ class OperationsLog extends Log {
     //     ts: new Date().getTime()
     //   }
     // };
-
     let node, logHash;
     return super.add(entry)
       .then((op) => node = op)
@@ -66,7 +65,7 @@ class OperationsLog extends Log {
     // if(!hash || hash === this._lastWrite)
     //   return Promise.resolve([]);
 
-    const oldCount = this.items.length;
+    // const oldCount = this.items.length;
     let newItems = [];
     // return Log.fromIpfsHash(this._ipfs, hash)
       // .then((other) => super.join(other))

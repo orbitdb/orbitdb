@@ -70,7 +70,7 @@ describe('CounterStore', function() {
 
   describe('counters', function() {
     it('increases a counter value', (done) => {
-      client1.counter('counter test', false).then((counter) => {
+      client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' }).then((counter) => {
         Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1 }).then(() => {
           assert.equal(counter.value(), 14);
           done();
@@ -87,7 +87,7 @@ describe('CounterStore', function() {
     });
 
     it('creates a new counter from cached data', function(done) {
-      client1.counter('counter test', false).then((counter) => {
+      client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' }).then((counter) => {
         assert.equal(counter.value(), 14);
         done();
       }).catch((e) => {

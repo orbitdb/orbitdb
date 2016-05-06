@@ -11,12 +11,12 @@ class KeyValueIndex {
 
   updateIndex(oplog, updated) {
     updated.reverse().reduce((handled, item) => {
-      if(handled.indexOf(item.key) === -1) {
-        handled.push(item.key);
-        if(item.op === 'PUT') {
-          this._index[item.key] = item.value
-        } else if(item.op === 'DEL') {
-          delete this._index[item.key];
+      if(handled.indexOf(item.payload.key) === -1) {
+        handled.push(item.payload.key);
+        if(item.payload.op === 'PUT') {
+          this._index[item.payload.key] = item.payload.value
+        } else if(item.payload.op === 'DEL') {
+          delete this._index[item.payload.key];
         }
       }
       return handled;

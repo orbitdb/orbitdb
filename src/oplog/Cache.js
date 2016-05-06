@@ -30,11 +30,13 @@ class Cache {
     return new Promise((resolve, reject) => {
       // filePath = cacheFile ? cacheFile : defaultFilepath;
       if(cacheFile) {
-        fs.exists(cacheFile, (err, res) => {
+        filePath = cacheFile;
+        fs.exists(cacheFile, (res) => {
+          logger.debug(res);
           if(res) {
-            filePath = cacheFile;
             logger.debug('Load cache from ' + cacheFile);
             cache = JSON.parse(fs.readFileSync(cacheFile));
+            resolve();
           } else {
             resolve();
           }
@@ -43,6 +45,10 @@ class Cache {
         resolve();
       }
     });
+  }
+
+  static reset() {
+    cache = {};
   }
 }
 
