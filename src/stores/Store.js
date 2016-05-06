@@ -13,7 +13,6 @@ class Store {
 
     if(!options) options = {};
     if(!options.Index) Object.assign(options, { Index: DefaultIndex });
-    if(!options.Log) Object.assign(options, { Log: Log });
     if(!options.cacheFile) Object.assign(options, { cacheFile: null });
 
     this.options = options;
@@ -25,12 +24,12 @@ class Store {
 
   use() {
     this.events.emit('load', this.dbname);
-    this._oplog = new this.options.Log(this._ipfs, this.id, this.dbname, this.options);
+    this._oplog = new Log(this._ipfs, this.id, this.dbname, this.options);
     Cache.reset();
     return Cache.loadCache(this.options.cacheFile).then(() => {
       const cached = Cache.get(this.dbname);
       if(cached) {
-        return this.options.Log.fromIpfsHash(this._ipfs, cached)
+        return Log.fromIpfsHash(this._ipfs, cached)
           .then((log) => this._oplog.join(log))
           .then((merged) => this._index.updateIndex(this._oplog, merged))
           .then(() => this.events.emit('readable', this.dbname))
@@ -52,7 +51,7 @@ class Store {
     const oldCount = this._oplog.items.length;
     let newItems = [];
     this.events.emit('load', this.dbname);
-    return this.options.Log.fromIpfsHash(this._ipfs, hash)
+    return Log.fromIpfsHash(this._ipfs, hash)
       .then((log) => this._oplog.join(log))
       .then((merged) => newItems = merged)
       .then(() => Log.getIpfsHash(this._ipfs, this._oplog))
@@ -80,7 +79,7 @@ class Store {
           Object.assign(result.payload, { hash: res.hash })
           return result;
         })
-        .then(() => this.options.Log.getIpfsHash(this._ipfs, this._oplog))
+        .then(() => Log.getIpfsHash(this._ipfs, this._oplog))
         .then((hash) => logHash = hash)
         .then(() => this._lastWrite = logHash)
         .then(() => Cache.set(this.dbname, logHash))
