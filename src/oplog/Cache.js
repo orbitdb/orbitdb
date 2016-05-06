@@ -14,7 +14,6 @@ class Cache {
     return new Promise((resolve, reject) => {
       cache[key] = value;
       if(filePath) {
-        // fs.writeFileSync(filePath, JSON.stringify(cache, null, 2) + "\n");
         fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", resolve);
       } else {
         resolve();
@@ -28,7 +27,6 @@ class Cache {
 
   static loadCache(cacheFile) {
     return new Promise((resolve, reject) => {
-      // filePath = cacheFile ? cacheFile : defaultFilepath;
       if(cacheFile) {
         filePath = cacheFile;
         fs.exists(cacheFile, (res) => {

@@ -9,8 +9,8 @@ class KeyValueIndex {
     return this._index[key];
   }
 
-  updateIndex(oplog, updated) {
-    updated.reverse().reduce((handled, item) => {
+  updateIndex(oplog, added) {
+    added.reverse().reduce((handled, item) => {
       if(handled.indexOf(item.payload.key) === -1) {
         handled.push(item.payload.key);
         if(item.payload.op === 'PUT') {

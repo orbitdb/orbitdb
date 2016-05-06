@@ -36,8 +36,10 @@ class Pubsub {
   }
 
   unsubscribe(hash) {
-    this._socket.emit('unsubscribe', { channel: hash });
-    delete this._subscriptions[hash];
+    if(this._subscriptions[hash]) {
+      this._socket.emit('unsubscribe', { channel: hash });
+      delete this._subscriptions[hash];
+    }
   }
 
   publish(hash, message) {

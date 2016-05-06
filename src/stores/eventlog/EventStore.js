@@ -10,40 +10,28 @@ class EventStore extends Store {
     super(ipfs, id, dbname, options)
   }
 
-  // constructor(ipfs, id, dbname, options) {
-  //   super(ipfs, dbname, options)
-  //   this._index = new EventLogIndex();
-  // }
-
-  // delete(dbname) {
-  //   super.delete();
-  //   this._index = new EventLogIndex();
-  // }
-
   add(data) {
-      const operation = {
-        op: 'ADD',
-        key: null,
-        value: data,
-        meta: {
-          ts: new Date().getTime()
-        }
-      };
-      return this._addOperation(operation);
-    // return this._addOperation('ADD', null, data);
+    const operation = {
+      op: 'ADD',
+      key: null,
+      value: data,
+      meta: {
+        ts: new Date().getTime()
+      }
+    };
+    return this._addOperation(operation);
   }
 
   remove(hash) {
-      const operation = {
-        op: 'DEL',
-        key: null,
-        value: hash,
-        meta: {
-          ts: new Date().getTime()
-        }
-      };
-      return this._addOperation(operation);
-    // return this._addOperation('DEL', null, hash);
+    const operation = {
+      op: 'DEL',
+      key: null,
+      value: hash,
+      meta: {
+        ts: new Date().getTime()
+      }
+    };
+    return this._addOperation(operation);
   }
 
   iterator(options) {
