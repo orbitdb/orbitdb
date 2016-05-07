@@ -1,12 +1,11 @@
 'use strict';
 
-const ipfsAPI = require('ipfs-api');
+const IpfsApi = require('ipfs-api');
 const Logger  = require('logplease');
 const logger  = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false });
 const OrbitDB = require('../src/OrbitDB');
 
-const host     = '178.62.241.75'
-const port     = 3333;
+const network  = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // 'localhost:3333'
 const username = 'user1';
 const password = '';
 const channel  = 'browsertest1';
@@ -14,8 +13,8 @@ const key      = 'greeting';
 const value    = 'Hello world';
 
 try {
-  const ipfs = ipfsAPI();
-  OrbitDB.connect(host, port, username, password, ipfs).then((orbit) => {
+  const ipfs = IpfsApi();
+  OrbitDB.connect(network, username, password, ipfs).then((orbit) => {
     orbit.kvstore(channel).then((db) => {
       let count = 1;
       const query = () => {

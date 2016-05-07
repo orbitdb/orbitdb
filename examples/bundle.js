@@ -46,13 +46,12 @@
 
 	'use strict';
 
-	var ipfsAPI = __webpack_require__(1);
+	var IpfsApi = __webpack_require__(1);
 	var Logger = __webpack_require__(281);
 	var logger = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false });
 	var OrbitDB = __webpack_require__(282);
 
-	var host = '178.62.241.75';
-	var port = 3333;
+	var network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // 'localhost:3333'
 	var username = 'user1';
 	var password = '';
 	var channel = 'browsertest1';
@@ -60,8 +59,8 @@
 	var value = 'Hello world';
 
 	try {
-	  var ipfs = ipfsAPI();
-	  OrbitDB.connect(host, port, username, password, ipfs).then(function (orbit) {
+	  var ipfs = IpfsApi();
+	  OrbitDB.connect(network, username, password, ipfs).then(function (orbit) {
 	    orbit.kvstore(channel).then(function (db) {
 	      var count = 1;
 	      var query = function query() {
