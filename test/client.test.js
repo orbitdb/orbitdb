@@ -185,7 +185,7 @@ describe('Orbit Client', function() {
 
   describe('Delete events (Feed)', function() {
     beforeEach(async(() => {
-      db = await(client.feed(channel, false));
+      db = await(client.feed(channel, { subscribe: false }));
       db.delete();
     }));
 
