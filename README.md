@@ -2,14 +2,16 @@
 
 ## Introduction
 
-Distributed, peer-to-peer **Key-Value Store and Event Log** on IPFS.
+Distributed, peer-to-peer database on IPFS.
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
-- Stores all data in IPFS, including the database index
+- Client-side database to be embedded in Javascript applications
+- Stores all data in IPFS
 - Aggregation happens on client side and data is eventually consistent
-- Uses a LWW-element-set [CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) and [ipfs-log](https://github.com/haadcode/ipfs-log) for partial order
-- Designed to work offline first and to be easily embeddable to applications
+- Designed to work offline first
+
+**NOTE: the README can be out of date, I'm working to get up to date. If you find a problem, please open an issue or a PR.**
 
 _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
 
@@ -62,9 +64,9 @@ Then open `examples/browser.html`. See the full example [here](https://github.co
     <script type="text/javascript" src="orbitdb.min.js" charset="utf-8"></script>
     <script type="text/javascript" src="ipfsapi.min.js" charset="utf-8"></script>
     <script type="text/javascript">
-      const ipfs = ipfsAPI();
-      OrbitDB.connect('localhost', 3333, 'user1', '', ipfs).then((orbit) => {
-        orbit.channel('test').then((db) => {
+      const ipfs = IpfsApi();
+      OrbitDB.connect('QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM', 'user1', '', ipfs).then((orbit) => {
+        orbit.kvstore('test').then((db) => {
           db.put('hello', 'world').then((res) => {
             const result = db.get(key);
             console.log(result);
@@ -77,6 +79,8 @@ Then open `examples/browser.html`. See the full example [here](https://github.co
 ```
 
 ## API
+**NOTE: the API documentation is currently out of date. It will be updated soon!**
+
 _See usage example below_
 
 _OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
@@ -112,31 +116,25 @@ const async   = require('asyncawait/async');
 const ipfsAPI = require('ipfs-api');
 const OrbitDB = require('orbit-db');
 
-// orbit-server
-const host = 'localhost';
-const port = 3333;
-
 // local ipfs daemon
 const ipfs = ipfsAPI();
 
 async(() => {
     // Connect
-    const orbit = await(OrbitClient.connect(host, port, username, password, ipfs));
-
-    const channelName = 'hello-world';
-    const db = orbit.channel(channelName);
+    const orbit = await(OrbitClient.connect('QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM', 'usernamne', '', ipfs));
 
     /* Event Log */
-    const hash = await(db.add('hello')); // <ipfs-hash>
+    const eventlog = orbit.eventlog('eventlog test');
+    const hash = await(eventlog.add('hello')); // <ipfs-hash>
 
     // Remove event
-    await(db.remove(hash));
+    await(eventlog.remove(hash));
 
     // Iterator options
     const options = { limit: -1 }; // fetch all messages
 
     // Get events
-    const iter = db.iterator(options); // Symbol.iterator
+    const iter = eventlog.iterator(options); // Symbol.iterator
     const next = iter.next(); // { value: <item>, done: false|true}
 
     // OR:
@@ -146,13 +144,14 @@ async(() => {
     // for(let i of iter)
     //   console.log(i.hash, i.item);
 
-    /* KV Store */
-    await(db.put('key1', 'hello world'));
-    db.get('key1'); // returns "hello world"
-    await(db.del('key1'));
+    /* Delete database locally */
+    eventlog.delete();
 
-    /* Delete channel */
-    const result = db.delete(); // true | false
+    /* KV Store */
+    const kvstore = orbit.kvstore('kv test');
+    await(kvstore.put('key1', 'hello world'));
+    kvstore.get('key1'); // returns "hello world"
+    await(kvstore.del('key1'));
 })();
 ```
 
@@ -177,13 +176,6 @@ npm run lint
 ```
 
 ### TODO
-- Fix encryption
-- Logging
-- Caching
-- Performance optimisations: 
-  - local caching
-  - remove asyncawait and use promises or callbacks
-  - merge POST and OP (one less object.put)
 
 ## Notes
 ### Data structure description
