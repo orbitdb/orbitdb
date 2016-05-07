@@ -2,10 +2,11 @@
 
 const EventEmitter  = require('events').EventEmitter;
 const logger        = require('logplease').create("orbit-db.Client");
+const EventStore    = require('orbit-db-eventstore');
+const FeedStore     = require('orbit-db-feedstore');
+const KeyValueStore = require('orbit-db-kvstore');
+const CounterStore  = require('orbit-db-counterstore');
 const PubSub        = require('./PubSub');
-const CounterStore  = require('./stores/counters/CounterStore');
-const KeyValueStore = require('./stores/kvstore/KeyValueStore');
-const EventStore    = require('./stores/eventlog/EventStore');
 
 class OrbitDB {
   constructor(ipfs) {
@@ -15,6 +16,16 @@ class OrbitDB {
     this.network = null;
     this.events = new EventEmitter();
     this.stores = {};
+  }
+
+  feed(dbname, options) {
+    if(!options) options = {};
+    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
+
+    const store = new FeedStore(this._ipfs, this.user.username, dbname, options);
+    return this._subscribe(store, dbname, options.subscribe)
+      .then(() => this.stores[dbname] = store)
+      .then(() => store);
   }
 
   eventlog(dbname, options) {
