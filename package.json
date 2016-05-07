@@ -14,13 +14,12 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "buffer": "^4.5.1",
-    "ipfs-log": "^1.2.9",
     "lazy.js": "^0.4.2",
     "logplease": "^1.2.6",
-    "orbit-db-counterstore": "0.0.2",
+    "orbit-db-counterstore": "0.0.3",
     "orbit-db-eventstore": "0.0.4",
-    "orbit-db-feedstore": "0.0.1",
-    "orbit-db-kvstore": "0.0.2",
+    "orbit-db-feedstore": "0.0.2",
+    "orbit-db-kvstore": "0.0.3",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
