@@ -18,51 +18,38 @@ class OrbitDB {
     this.stores = {};
   }
 
+  /* Databases */
   feed(dbname, options) {
-    if(!options) options = {};
-    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
-
-    const store = new FeedStore(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, options.subscribe)
-      .then(() => this.stores[dbname] = store)
-      .then(() => store);
+    return this._createStore(FeedStore, dbname, options);
   }
 
   eventlog(dbname, options) {
-    if(!options) options = {};
-    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
-
-    const store = new EventStore(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, options.subscribe)
-      .then(() => this.stores[dbname] = store)
-      .then(() => store);
+    return this._createStore(EventStore, dbname, options);
   }
 
   kvstore(dbname, options) {
-    if(!options) options = {};
-    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
-
-    const store = new KeyValueStore(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, options.subscribe)
-      .then(() => this.stores[dbname] = store)
-      .then(() => store);
+    return this._createStore(KeyValueStore, dbname, options);
   }
 
   counter(dbname, options) {
-    if(!options) options = {};
-    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
-
-    const store = new CounterStore(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, options.subscribe)
-      .then(() => this.stores[dbname] = store)
-      .then(() => store);
+    return this._createStore(CounterStore, dbname, options);
   }
 
   disconnect() {
     this._pubsub.disconnect();
-    this._store = {};
+    this.stores = {};
     this.user = null;
     this.network = null;
+  }
+
+  _createStore(Store, dbname, options) {
+    if(!options) options = {};
+    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
+
+    const store = new Store(this._ipfs, this.user.username, dbname, options);
+    return this._subscribe(store, dbname, options.subscribe)
+      .then(() => this.stores[dbname] = store)
+      .then(() => store);
   }
 
   _subscribe(store, dbname, subscribe, callback) {
