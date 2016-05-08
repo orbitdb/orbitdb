@@ -13,8 +13,6 @@
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "buffer": "^4.5.1",
-    "lazy.js": "^0.4.2",
     "logplease": "^1.2.6",
     "orbit-db-counterstore": "0.0.3",
     "orbit-db-eventstore": "0.0.4",
@@ -28,7 +26,6 @@
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-runtime": "^6.7.5",
     "babel-preset-es2015": "^6.6.0",
-    "eslint": "^2.3.0",
     "ipfs-api": "^3.0.2",
     "ipfsd-ctl": "^0.13.0",
     "json-loader": "^0.5.4",
@@ -40,7 +37,6 @@
   },
   "scripts": {
     "test": "mocha",
-    "lint": "$(npm bin)/eslint ./src || true",
     "build": "npm run build:dist && npm run build:examples",
     "build:dist": "./node_modules/.bin/webpack --config webpack.config.js",
     "build:examples": "./node_modules/.bin/webpack --config webpack.example.config.js"
