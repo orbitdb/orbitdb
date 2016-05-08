@@ -176,6 +176,9 @@ npm run lint
 ```
 
 ### TODO
+- make ipfs-log emit events ('data', 'load')
+  - Store: this._log.events.on('data', (log, entries) => this._index.updateIndex(log, entries))
+- merge 'readable' and 'data' events (only one)
 
 ## Notes
 ### Data structure description
