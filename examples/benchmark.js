@@ -37,6 +37,14 @@ let run = (() => {
     let lastTenSeconds = 0;
 
     const queryLoop = (db) => {
+    // const queryLoop = (ipfs) => {
+      // const data = new Buffer(JSON.stringify({ Data: JSON.stringify({ hello: "world" }) }));
+      // ipfs.object.put(data).then(() => {
+      //   totalQueries ++;
+      //   lastTenSeconds ++;
+      //   queriesPerSecond ++;
+      //   process.nextTick(() => queryLoop(ipfs));
+      // })
       db.add(username + totalQueries).then(() => {
         totalQueries ++;
         lastTenSeconds ++;
@@ -48,20 +56,30 @@ let run = (() => {
     // Connect
     console.log(`Connecting...`)
     startIpfs()
+      // .then((ipfs) => queryLoop(ipfs))
       .then((ipfs) => OrbitDB.connect(network, username, password, ipfs))
       .then((orbit) => orbit.eventlog(channelName))
-      .then(queryLoop)
+      .then((db) => {
+        return new Promise((resolve, reject) => {
+          db.events.on('load', () => console.log("loading log from history"))
+          db.events.on('readable', () => {
+            console.log("log fetched from history");
+            queryLoop(db);
+            resolve();
+          });
+        });
+      })
       .then(() => {
         // Metrics output
         setInterval(() => {
           seconds ++;
           if(seconds % 10 === 0) {
-            console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
+            console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`);
             if(lastTenSeconds === 0)
               throw new Error("Problems!");
-            lastTenSeconds = 0
+            lastTenSeconds = 0;
           }
-          console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
+          console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`);
           queriesPerSecond = 0;
         }, 1000);
       })
