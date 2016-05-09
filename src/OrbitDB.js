@@ -44,10 +44,9 @@ class OrbitDB {
 
   _createStore(Store, dbname, options) {
     if(!options) options = {};
-    if(options.subscribe === undefined) Object.assign(options, { subscribe: true });
-
+    const replicate = options.subscribe ? options.subscribe : true;
     const store = new Store(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, options.subscribe)
+    return this._subscribe(store, dbname, replicate)
       .then(() => this.stores[dbname] = store)
       .then(() => store);
   }
