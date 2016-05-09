@@ -55,17 +55,15 @@ class OrbitDB {
   _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    return store.use(this.user.username).then((events) => {
-      events.on('readable', this._onSync.bind(this));
-      events.on('data',     this._onWrite.bind(this));
-      events.on('load',     this._onLoad.bind(this));
-      events.on('close',    this._onClose.bind(this));
+    store.events.on('readable', this._onSync.bind(this));
+    store.events.on('data',     this._onWrite.bind(this));
+    store.events.on('load',     this._onLoad.bind(this));
+    store.events.on('close',    this._onClose.bind(this));
 
-      if(subscribe)
-        this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
+    if(subscribe)
+      this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
 
-      return;
-    });
+    return store.use(this.user.username);
   }
 
   _onMessage(dbname, message) {
