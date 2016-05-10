@@ -46,14 +46,14 @@ class OrbitDB {
     if(!options) options = {};
     const replicate = options.subscribe ? options.subscribe : true;
     const store = new Store(this._ipfs, this.user.username, dbname, options);
-    return this._subscribe(store, dbname, replicate)
-      .then(() => this.stores[dbname] = store)
-      .then(() => store);
+    this.stores[dbname] = store;
+    return this._subscribe(store, dbname, replicate);
   }
 
   _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
+    store.events.on('ready',    this._onReady.bind(this));
     store.events.on('readable', this._onSync.bind(this));
     store.events.on('data',     this._onWrite.bind(this));
     store.events.on('load',     this._onLoad.bind(this));
@@ -80,8 +80,12 @@ class OrbitDB {
     this.events.emit('readable', dbname, hash);
   }
 
-  _onLoad(dbname, hash) {
-    this.events.emit('load', dbname, hash);
+  _onLoad(dbname) {
+    this.events.emit('load', dbname);
+  }
+
+  _onReady(dbname) {
+    this.events.emit('ready', this.stores[dbname]);
   }
 
   _onClose(dbname) {
