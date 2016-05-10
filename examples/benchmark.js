@@ -29,47 +29,66 @@ const startIpfs = () => {
   });
 };
 
+const util = require('util');
+
+// Metrics
+let totalQueries = 0;
+let seconds = 0;
+let queriesPerSecond = 0;
+let lastTenSeconds = 0;
+let store;
+
+const queryLoop = (db) => {
+// const queryLoop = (ipfs) => {
+  // const data = new Buffer(JSON.stringify({ Data: JSON.stringify({ hello: "world" }) }));
+  // ipfs.object.put(data).then(() => {
+  //   totalQueries ++;
+  //   lastTenSeconds ++;
+  //   queriesPerSecond ++;
+  //   process.nextTick(() => queryLoop(ipfs));
+  // })
+  // let timer = new Timer();
+  // timer.start();
+  store.add(username + totalQueries).then(() => {
+    // console.log(`${timer.stop(true)} ms - ${process._getActiveRequests().length} ${process._getActiveHandles().length}`);
+    // console.log(util.inspect(process.memoryUsage()));
+    totalQueries ++;
+    lastTenSeconds ++;
+    queriesPerSecond ++;
+    process.nextTick(queryLoop);
+  });
+};
+
 let run = (() => {
-    // Metrics
-    let totalQueries = 0;
-    let seconds = 0;
-    let queriesPerSecond = 0;
-    let lastTenSeconds = 0;
-
-    const queryLoop = (db) => {
-    // const queryLoop = (ipfs) => {
-      // const data = new Buffer(JSON.stringify({ Data: JSON.stringify({ hello: "world" }) }));
-      // ipfs.object.put(data).then(() => {
-      //   totalQueries ++;
-      //   lastTenSeconds ++;
-      //   queriesPerSecond ++;
-      //   process.nextTick(() => queryLoop(ipfs));
-      // })
-      db.add(username + totalQueries).then(() => {
-        totalQueries ++;
-        lastTenSeconds ++;
-        queriesPerSecond ++;
-        process.nextTick(() => queryLoop(db));
-      });
-    };
-
     // Connect
     console.log(`Connecting...`)
     startIpfs()
       // .then((ipfs) => queryLoop(ipfs))
       .then((ipfs) => OrbitDB.connect(network, username, password, ipfs))
-      .then((orbit) => orbit.eventlog(channelName))
-      .then((db) => {
-        return new Promise((resolve, reject) => {
-          db.events.on('load', () => console.log("loading log from history"))
-          db.events.on('readable', () => {
-            console.log("log fetched from history");
-            queryLoop(db);
-            resolve();
-          });
+      .then((orbit) => {
+        console.log("OrbitDB")
+        orbit.events.on('load', () => console.log("loading log"))
+        orbit.events.on('ready', (db) => {
+          console.log("log fetched from history for", db.dbname);
+          store = db;
+          queryLoop();
         });
+        return orbit;
       })
+      .then((orbit) => orbit.eventlog(channelName))
+      // .then((db) => {
+      //   console.log("OrbitDB")
+      //   return new Promise((resolve, reject) => {
+      //     db.events.on('load', () => console.log("loading log from history"))
+      //     db.events.on('ready', (dbname) => {
+      //       console.log("log fetched from history for", dbname);
+      //       queryLoop(db);
+      //       resolve();
+      //     });
+      //   });
+      // })
       .then(() => {
+        console.log("++")
         // Metrics output
         setInterval(() => {
           seconds ++;

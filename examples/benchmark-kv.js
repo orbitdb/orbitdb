@@ -16,9 +16,16 @@ const channelName = process.argv[3] ? process.argv[3] : 'c1';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) console.error(err);
-      resolve(ipfs);
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) console.error(err);
+    //   resolve(ipfs);
+    // });
+    ipfsd.local((err, node) => {
+      if(err) reject(err);
+      node.startDaemon((err, ipfs) => {
+        if(err) reject(err);
+        resolve(ipfs);
+      });
     });
   });
 };
