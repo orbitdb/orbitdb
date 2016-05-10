@@ -1,6 +1,7 @@
 'use strict';
 
 const _       = require('lodash');
+const fs      = require('fs');
 const path    = require('path');
 const assert  = require('assert');
 const async   = require('asyncawait/async');
@@ -13,7 +14,7 @@ const OrbitServer = require('orbit-server/src/server');
 require('logplease').setLogLevel('ERROR');
 
 // Orbit
-const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // network.json
+const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj';
 const username = 'testrunner';
 const password = '';
 
@@ -46,8 +47,10 @@ describe('Orbit Client', function() {
 
     try {
       ipfs = await(startIpfs());
-      const networkFile = await(ipfs.add('./test/network.json'))
-      assert.equal(networkFile[0].Hash, network);
+      const str = fs.readFileSync('./test/network.json', 'utf-8');
+      const networkData = new Buffer(JSON.stringify({ Data: str }));
+      const networkFile = await(ipfs.object.put(networkData))
+      assert.equal(networkFile.Hash, network);
       client = await(OrbitDB.connect(network, username, password, ipfs, { allowOffline: true }));
       client2 = await(OrbitDB.connect(network, username + "2", password, ipfs, { allowOffline: true }));
     } catch(e) {

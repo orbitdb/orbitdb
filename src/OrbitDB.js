@@ -1,7 +1,8 @@
 'use strict';
 
 const EventEmitter  = require('events').EventEmitter;
-const logger        = require('logplease').create("orbit-db.Client");
+const Logger       = require('logplease');
+const logger       = Logger.create("orbit-db", { color: Logger.Colors.Magenta });
 const EventStore    = require('orbit-db-eventstore');
 const FeedStore     = require('orbit-db-feedstore');
 const KeyValueStore = require('orbit-db-kvstore');
@@ -96,22 +97,9 @@ class OrbitDB {
 
   _connect(hash, username, password, allowOffline) {
     if(allowOffline === undefined) allowOffline = false;
-
-    const readNetworkInfo = (hash) => {
-      return new Promise((resolve, reject) => {
-        this._ipfs.cat(hash).then((res) => {
-          let buf = '';
-          res
-            .on('error', (err) => reject(err))
-            .on('data', (data) => buf += data)
-            .on('end', () => resolve(buf))
-        });
-      });
-    };
-
     let host, port, name;
-    return readNetworkInfo(hash)
-      .then((network) => JSON.parse(network))
+    return this._ipfs.object.get(hash)
+      .then((object) => JSON.parse(object.Data))
       .then((network) => {
         this.network = network;
         name = network.name;
@@ -120,6 +108,7 @@ class OrbitDB {
       })
       .then(() => {
         this._pubsub = new PubSub();
+        logger.warn(`Connecting to Pubsub at '${host}:${port}'`);
         return this._pubsub.connect(host, port, username, password)
       })
       .then(() => {

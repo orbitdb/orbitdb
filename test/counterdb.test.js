@@ -1,6 +1,7 @@
 'use strict';
 
 const assert      = require('assert');
+const fs          = require('fs');
 const Promise     = require('bluebird');
 const rimraf      = require('rimraf')
 const ipfsd       = require('ipfsd-ctl');
@@ -10,7 +11,7 @@ const OrbitServer = require('orbit-server/src/server');
 // Mute logging
 require('logplease').setLogLevel('ERROR');
 
-const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // network.json
+const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj';
 const username  = 'testrunner';
 const username2 = 'rennurtset';
 
@@ -41,6 +42,11 @@ describe('CounterStore', function() {
   before((done) => {
     rimraf.sync('./orbit-db-cache.json')
     startIpfs()
+      .then((ipfs) => {
+        const str = fs.readFileSync('./test/network.json', 'utf-8');
+        const networkData = new Buffer(JSON.stringify({ Data: str }));
+        return ipfs.object.put(networkData).then(() => ipfs)
+      })
       .then((res) => {
         ipfs = res;
         return Promise.map([username, username2], (login) => {
@@ -53,11 +59,6 @@ describe('CounterStore', function() {
           console.log(e.stack);
           assert.equal(e, null);
         });
-      })
-      .then(() => ipfs.add('./test/network.json'))
-      .then((networkFile)=> {
-        assert.equal(networkFile[0].Hash, network);
-        return;
       })
       .then(done)
   });
