@@ -8,7 +8,7 @@ const Timer   = require('./Timer');
 
 // orbit-server
 // const network = 'QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM'; // dev server
-const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // 'localhost:3333'
+const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj'; // 'localhost:3333'
 const username = process.argv[2] ? process.argv[2] : 'testrunner';
 const password = '';
 const channelName = process.argv[3] ? process.argv[3] : 'c1';

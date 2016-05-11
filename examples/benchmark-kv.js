@@ -9,10 +9,10 @@ const Timer   = require('./Timer');
 // usage: benchmark.js <host> <username> <channel>;
 
 // orbit-server
-const network = 'QmYPobvobKsyoCKTw476yTui611XABf927KxUPCf4gRLRr'; // 'localhost:3333'
+const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj'; // 'localhost:3333'
 const username = process.argv[2] ? process.argv[2] : 'testrunner';
 const password = '';
-const channelName = process.argv[3] ? process.argv[3] : 'c1';
+const channelName = process.argv[3] ? process.argv[3] : 'c2';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
