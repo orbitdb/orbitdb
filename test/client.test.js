@@ -170,8 +170,8 @@ describe('Orbit Client', function() {
 
       const items = db.iterator({ limit: -1 }).collect();
       assert.equal(items.length, 5);
-      assert.equal(_.first(items.map((f) => f.value)), 'hello1');
-      assert.equal(_.last(items.map((f) => f.value)), 'hello5');
+      assert.equal(_.first(items.map((f) => f.payload.value)), 'hello1');
+      assert.equal(_.last(items.map((f) => f.payload.value)), 'hello5');
       done();
     }));
 
@@ -207,7 +207,7 @@ describe('Orbit Client', function() {
       await(db.remove(head));
       const items = db.iterator({ limit: -1 }).collect();
       assert.equal(items.length, 1);
-      assert.equal(items[0].value, 'hello1');
+      assert.equal(items[0].payload.value, 'hello1');
       done();
     }));
 
@@ -218,9 +218,9 @@ describe('Orbit Client', function() {
       await(db.add('hello3'));
       const items = db.iterator().collect();
       assert.equal(items.length, 1);
-      assert.equal(items[0].key, null);
       assert.equal(items[0].hash.startsWith('Qm'), true);
-      assert.equal(items[0].value, 'hello3');
+      assert.equal(items[0].payload.key, null);
+      assert.equal(items[0].payload.value, 'hello3');
       done();
     }));
   });
@@ -253,10 +253,10 @@ describe('Orbit Client', function() {
         const iter = db.iterator();
         const next = iter.next().value;
         assert.notEqual(next, null);
-        assert.equal(next.key, null);
         assert.equal(next.hash.startsWith('Qm'), true);
-        assert.equal(next.value, 'hello4');
-        assert.notEqual(next.meta.ts, null);
+        assert.equal(next.payload.key, null);
+        assert.equal(next.payload.value, 'hello4');
+        assert.notEqual(next.payload.meta.ts, null);
         done();
       }));
 
@@ -277,7 +277,7 @@ describe('Orbit Client', function() {
         const second = iter.next().value;
         assert.equal(first.hash, items[items.length - 1]);
         assert.equal(second, null);
-        assert.equal(first.value, 'hello4');
+        assert.equal(first.payload.value, 'hello4');
         done();
       }));
     });
@@ -286,8 +286,8 @@ describe('Orbit Client', function() {
       it('returns all items', async((done) => {
         const messages = db.iterator({ limit: -1 }).collect();
         assert.equal(messages.length, items.length);
-        assert.equal(messages[0].value, 'hello0');
-        assert.equal(messages[messages.length - 1].value, 'hello4');
+        assert.equal(messages[0].payload.value, 'hello0');
+        assert.equal(messages[messages.length - 1].payload.value, 'hello4');
         done();
       }));
 

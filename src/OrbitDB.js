@@ -54,11 +54,12 @@ class OrbitDB {
   _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    store.events.on('ready',    this._onReady.bind(this));
-    store.events.on('readable', this._onSync.bind(this));
-    store.events.on('data',     this._onWrite.bind(this));
-    store.events.on('load',     this._onLoad.bind(this));
-    store.events.on('close',    this._onClose.bind(this));
+    store.events.on('load',    this._onLoad.bind(this));
+    store.events.on('ready',   this._onReady.bind(this));
+    store.events.on('sync',    this._onSync.bind(this));
+    store.events.on('updated', this._onSynced.bind(this));
+    store.events.on('data',    this._onWrite.bind(this));
+    store.events.on('close',   this._onClose.bind(this));
 
     if(subscribe)
       this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
@@ -72,20 +73,29 @@ class OrbitDB {
   }
 
   _onWrite(dbname, hash) {
+    // console.log(".WRITE", dbname);
     if(!hash) throw new Error("Hash can't be null!");
     this._pubsub.publish(dbname, hash);
     this.events.emit('data', dbname, hash);
   }
 
-  _onSync(dbname, hash) {
-    this.events.emit('readable', dbname, hash);
+  _onSync(dbname) {
+    // console.log(".SYNC", dbname);
+    this.events.emit('sync', dbname);
+  }
+
+  _onSynced(dbname, items) {
+    // console.log(".SYNCED", dbname);
+    this.events.emit('synced', dbname, items);
   }
 
   _onLoad(dbname) {
+    // console.log(".LOAD", dbname);
     this.events.emit('load', dbname);
   }
 
   _onReady(dbname) {
+    // console.log(".READY", dbname);
     this.events.emit('ready', this.stores[dbname]);
   }
 
