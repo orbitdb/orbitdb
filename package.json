@@ -15,8 +15,8 @@
   "dependencies": {
     "logplease": "^1.2.6",
     "orbit-db-counterstore": "0.0.7",
-    "orbit-db-eventstore": "0.0.7",
-    "orbit-db-feedstore": "0.0.7",
+    "orbit-db-eventstore": "0.0.8",
+    "orbit-db-feedstore": "0.0.8",
     "orbit-db-kvstore": "0.0.7",
     "socket.io-client": "^1.4.5"
   },
