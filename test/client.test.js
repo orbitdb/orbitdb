@@ -11,10 +11,10 @@ const OrbitDB = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
 
 // Mute logging
-require('logplease').setLogLevel('ERROR');
+// require('logplease').setLogLevel('ERROR');
 
 // Orbit
-const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj';
+const network = 'Qmeh6ktQ1YFKksugJb59vBxG51xXoEvjBZXRK3DdrF3mNj';
 const username = 'testrunner';
 const password = '';
 
@@ -47,10 +47,10 @@ describe('Orbit Client', function() {
 
     try {
       ipfs = await(startIpfs());
-      const str = fs.readFileSync('./test/network.json', 'utf-8');
-      const networkData = new Buffer(JSON.stringify({ Data: str }));
-      const networkFile = await(ipfs.object.put(networkData))
-      assert.equal(networkFile.Hash, network);
+      // const str = fs.readFileSync('./test/network.json', 'utf-8');
+      // const networkData = new Buffer(JSON.stringify({ Data: str }));
+      const networkFile = await(ipfs.add(path.resolve(process.cwd(), './test/network.json')));
+      assert.equal(networkFile[0].Hash, network);
       client = await(OrbitDB.connect(network, username, password, ipfs, { allowOffline: true }));
       client2 = await(OrbitDB.connect(network, username + "2", password, ipfs, { allowOffline: true }));
     } catch(e) {

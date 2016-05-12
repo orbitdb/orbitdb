@@ -1,6 +1,7 @@
 'use strict';
 
 const assert      = require('assert');
+const path        = require('path');
 const fs          = require('fs');
 const Promise     = require('bluebird');
 const rimraf      = require('rimraf')
@@ -11,7 +12,7 @@ const OrbitServer = require('orbit-server/src/server');
 // Mute logging
 require('logplease').setLogLevel('ERROR');
 
-const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj';
+const network = 'Qmeh6ktQ1YFKksugJb59vBxG51xXoEvjBZXRK3DdrF3mNj';
 const username  = 'testrunner';
 const username2 = 'rennurtset';
 
@@ -43,9 +44,7 @@ describe('CounterStore', function() {
     rimraf.sync('./orbit-db-cache.json')
     startIpfs()
       .then((ipfs) => {
-        const str = fs.readFileSync('./test/network.json', 'utf-8');
-        const networkData = new Buffer(JSON.stringify({ Data: str }));
-        return ipfs.object.put(networkData).then(() => ipfs)
+        return ipfs.add(path.resolve(process.cwd(), './test/network.json')).then(() => ipfs)
       })
       .then((res) => {
         ipfs = res;

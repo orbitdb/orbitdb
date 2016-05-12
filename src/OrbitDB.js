@@ -107,9 +107,22 @@ class OrbitDB {
 
   _connect(hash, username, password, allowOffline) {
     if(allowOffline === undefined) allowOffline = false;
+
+    const readNetworkInfo = (hash) => {
+      return new Promise((resolve, reject) => {
+        this._ipfs.cat(hash).then((res) => {
+          let buf = '';
+          res
+            .on('error', (err) => reject(err))
+            .on('data', (data) => buf += data)
+            .on('end', () => resolve(buf))
+        });
+      });
+    };
+
     let host, port, name;
-    return this._ipfs.object.get(hash)
-      .then((object) => JSON.parse(object.Data))
+    return readNetworkInfo(hash)
+      .then((object) => JSON.parse(object))
       .then((network) => {
         this.network = network;
         name = network.name;
