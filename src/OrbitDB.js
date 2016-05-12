@@ -130,7 +130,7 @@ class OrbitDB {
         logger.warn("Couldn't connect to Pubsub: " + e.message);
         if(!allowOffline) {
           logger.debug("'allowOffline' set to false, terminating");
-          this._pubsub.disconnect();
+          if(this._pubsub) this._pubsub.disconnect();
           throw e;
         }
         this.user = { username: username, id: username } // TODO: user id from ipfs hash
