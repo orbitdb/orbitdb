@@ -122,12 +122,11 @@ class OrbitDB {
 
     let host, port, name;
     return readNetworkInfo(hash)
-      .then((object) => JSON.parse(object))
-      .then((network) => {
-        this.network = network;
-        name = network.name;
-        host = network.publishers[0].split(":")[0];
-        port = network.publishers[0].split(":")[1];
+      .then((object) => {
+        this.network = JSON.parse(object);
+        name = this.network.name;
+        host = this.network.publishers[0].split(":")[0];
+        port = this.network.publishers[0].split(":")[1];
       })
       .then(() => {
         this._pubsub = new PubSub();
