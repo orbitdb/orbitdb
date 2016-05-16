@@ -111,13 +111,17 @@ class OrbitDB {
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        this._ipfs.cat(hash).then((res) => {
-          let buf = '';
-          res
-            .on('error', (err) => reject(err))
-            .on('data', (data) => buf += data)
-            .on('end', () => resolve(buf))
-        }).catch((e) => reject(e));
+        // this._ipfs.cat(hash).then((res) => {
+        //   let buf = '';
+        //   res
+        //     .on('error', (err) => reject(err))
+        //     .on('data', (data) => buf += data)
+        //     .on('end', () => resolve(buf))
+        // }).catch((e) => reject(e));
+        resolve(JSON.stringify({
+          name: 'localhost dev network',
+          publishers: ['localhost:3333']
+        }))
       });
     };
 
