@@ -1,6 +1,7 @@
 'use strict';
 
-const ipfsd   = require('ipfsd-ctl');
+// const ipfsd   = require('ipfsd-ctl');
+const IPFS = require('ipfs')
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
@@ -19,13 +20,17 @@ const startIpfs = () => {
     //   if(err) console.error(err);
     //   resolve(ipfs);
     // });
-    ipfsd.local((err, node) => {
-      if(err) reject(err);
-      node.startDaemon((err, ipfs) => {
-        if(err) reject(err);
-        resolve(ipfs);
-      });
-    });
+    // ipfsd.local((err, node) => {
+    //   if(err) reject(err);
+    //   node.startDaemon((err, ipfs) => {
+    //     if(err) reject(err);
+    //     resolve(ipfs);
+    //   });
+    // });
+    const ipfs = new IPFS()
+    ipfs.goOnline(() => {
+      resolve(ipfs)
+    })
   });
 };
 
