@@ -68,6 +68,7 @@ class OrbitDB {
   }
 
   _onMessage(dbname, message) {
+    // console.log(".MESSAGE", dbname, message);
     const store = this.stores[dbname];
     store.sync(message).catch((e) => logger.error(e.stack));
   }
@@ -116,7 +117,7 @@ class OrbitDB {
             .on('error', (err) => reject(err))
             .on('data', (data) => buf += data)
             .on('end', () => resolve(buf))
-        });
+        }).catch((e) => reject(e));
       });
     };
 
