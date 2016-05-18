@@ -119,8 +119,8 @@ class OrbitDB {
         //     .on('end', () => resolve(buf))
         // }).catch((e) => reject(e));
         resolve(JSON.stringify({
-          name: 'localhost dev network',
-          publishers: ['localhost:3333']
+          name: 'Orbit DEV network',
+          publishers: ['178.62.241.75:3333']
         }))
       });
     };
