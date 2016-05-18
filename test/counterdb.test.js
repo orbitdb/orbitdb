@@ -5,9 +5,10 @@ const path        = require('path');
 const fs          = require('fs');
 const Promise     = require('bluebird');
 const rimraf      = require('rimraf')
-const ipfsd       = require('ipfsd-ctl');
+// const ipfsd       = require('ipfsd-ctl');
 const OrbitDB     = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
+const IPFS = require('ipfs')
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
@@ -21,10 +22,10 @@ const ipfsPath = '/tmp/orbittests';
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
     OrbitServer.start();
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) reject(err);
-      resolve(ipfs);
-    });
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) reject(err);
+    //   resolve(ipfs);
+    // });
     // ipfsd.local(ipfsPath, (err, node) => {
     //   if(err) reject(err);
     //   node.startDaemon((err, ipfs) => {
@@ -32,6 +33,10 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
+    const ipfs = new IPFS();
+    ipfs.goOnline(() => {
+      resolve(ipfs)
+    })
   });
 };
 
@@ -43,9 +48,9 @@ describe('CounterStore', function() {
   before((done) => {
     rimraf.sync('./orbit-db-cache.json')
     startIpfs()
-      .then((ipfs) => {
-        return ipfs.add(path.resolve(process.cwd(), './test/network.json')).then(() => ipfs)
-      })
+      // .then((ipfs) => {
+      //   return ipfs.add(path.resolve(process.cwd(), './test/network.json')).then(() => ipfs)
+      // })
       .then((res) => {
         ipfs = res;
         return Promise.map([username, username2], (login) => {

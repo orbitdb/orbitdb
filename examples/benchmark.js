@@ -1,7 +1,7 @@
 'use strict';
 
 // const ipfsd   = require('ipfsd-ctl');
-const IPFS = require('ipfs')
+const IPFS    = require('ipfs')
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 

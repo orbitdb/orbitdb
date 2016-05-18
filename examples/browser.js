@@ -32,7 +32,7 @@ try {
           logger.debug(`${key} | ${result}`);
           logger.debug("---------------------------------------------------")
           console.log('\n');
-        }).catch((e) => logger.error(e));
+        }).catch((e) => logger.error(e.stack));
       };
       setInterval(query, 1000);
     });

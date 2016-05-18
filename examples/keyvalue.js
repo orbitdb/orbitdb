@@ -2,7 +2,8 @@
 
 const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
-const ipfsd   = require('ipfsd-ctl');
+const IPFS = require('ipfs')
+// const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
@@ -16,10 +17,14 @@ const channelName = process.argv[3] ? process.argv[3] : 'c1';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) console.error(err);
-      resolve(ipfs);
-    });
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) console.error(err);
+    //   resolve(ipfs);
+    // });
+    const ipfs = new IPFS()
+    ipfs.goOnline(() => {
+      resolve(ipfs)
+    })
   });
 };
 

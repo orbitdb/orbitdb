@@ -6,9 +6,11 @@ const path    = require('path');
 const assert  = require('assert');
 const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
-const ipfsd   = require('ipfsd-ctl');
+// const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
+
+const IPFS = require('ipfs')
 
 // Mute logging
 // require('logplease').setLogLevel('ERROR');
@@ -21,10 +23,10 @@ const password = '';
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
     // OrbitServer.start();
-    ipfsd.disposableApi((err, ipfs) => {
-      if(err) console.error(err);
-      resolve(ipfs);
-    });
+    // ipfsd.disposableApi((err, ipfs) => {
+    //   if(err) console.error(err);
+    //   resolve(ipfs);
+    // });
     // ipfsd.local((err, node) => {
     //   if(err) reject(err);
     //   node.startDaemon((err, ipfs) => {
@@ -32,6 +34,10 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
+    const ipfs = new IPFS();
+    ipfs.goOnline(() => {
+      resolve(ipfs)
+    })
   });
 };
 
@@ -49,8 +55,8 @@ describe('Orbit Client', function() {
       ipfs = await(startIpfs());
       // const str = fs.readFileSync('./test/network.json', 'utf-8');
       // const networkData = new Buffer(JSON.stringify({ Data: str }));
-      const networkFile = await(ipfs.add(path.resolve(process.cwd(), './test/network.json')));
-      assert.equal(networkFile[0].Hash, network);
+      // const networkFile = await(ipfs.add(path.resolve(process.cwd(), './test/network.json')));
+      // assert.equal(networkFile[0].Hash, network);
       client = await(OrbitDB.connect(network, username, password, ipfs, { allowOffline: true }));
       client2 = await(OrbitDB.connect(network, username + "2", password, ipfs, { allowOffline: true }));
     } catch(e) {
@@ -64,6 +70,7 @@ describe('Orbit Client', function() {
   after(() => {
     if(db) db.delete();
     if(client) client.disconnect();
+    if(ipfs) ipfs.goOffline();
   });
 
 /*
