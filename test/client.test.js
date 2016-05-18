@@ -36,17 +36,22 @@ const IpfsApis = [
   // js-ipfs-api via local daemon
   start: () => {
     return new Promise((resolve, reject) => {
-      ipfsd.local((err, node) => {
-        if(err) reject(err);
-        ipfsDaemon = node;
-        ipfsDaemon.startDaemon((err, ipfs) => {
-          if(err) reject(err);
-          resolve(ipfs);
-        });
+      ipfsd.disposableApi((err, ipfs) => {
+        if(err) console.error(err);
+        resolve(ipfs);
       });
+      // ipfsd.local((err, node) => {
+      //   if(err) reject(err);
+      //   ipfsDaemon = node;
+      //   ipfsDaemon.startDaemon((err, ipfs) => {
+      //     if(err) reject(err);
+      //     resolve(ipfs);
+      //   });
+      // });
     });
   },
-  stop: () => new Promise((resolve, reject) => ipfsDaemon.stopDaemon(resolve))
+  stop: () => Promise.resolve()
+  // stop: () => new Promise((resolve, reject) => ipfsDaemon.stopDaemon(resolve))
 }
 ];
 
