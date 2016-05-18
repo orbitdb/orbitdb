@@ -67,10 +67,10 @@ describe('Orbit Client', function() {
     done();
   }));
 
-  after(() => {
+  after((done) => {
     if(db) db.delete();
     if(client) client.disconnect();
-    if(ipfs) ipfs.goOffline();
+    if(ipfs) ipfs.goOffline(done);
   });
 
 /*
