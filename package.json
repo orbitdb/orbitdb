@@ -17,7 +17,7 @@
     "orbit-db-counterstore": "0.0.8",
     "orbit-db-eventstore": "0.0.9",
     "orbit-db-feedstore": "0.0.9",
-    "orbit-db-kvstore": "0.0.8",
+    "orbit-db-kvstore": "0.0.10",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
