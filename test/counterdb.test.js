@@ -19,17 +19,19 @@ const username2 = 'rennurtset';
 const ipfsPath  = '/tmp/orbittests';
 
 let ipfs, ipfsDaemon;
-const IpfsApis = [{
-  // js-ipfs
-  start: () => {
-    return new Promise((resolve, reject) => {
-      const IPFS = require('ipfs')
-      const ipfs = new IPFS();
-      ipfs.goOnline(() => resolve(ipfs));
-    });
-  },
-  stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
-}, {
+const IpfsApis = [
+// {
+//   // js-ipfs
+//   start: () => {
+//     return new Promise((resolve, reject) => {
+//       const IPFS = require('ipfs')
+//       const ipfs = new IPFS();
+//       ipfs.goOnline(() => resolve(ipfs));
+//     });
+//   },
+//   stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+// },
+{
   // js-ipfs-api via local daemon
   start: () => {
     return new Promise((resolve, reject) => {
@@ -49,7 +51,8 @@ const IpfsApis = [{
   },
   stop: () => Promise.resolve()
   // stop: () => new Promise((resolve, reject) => ipfsDaemon.stopDaemon(resolve))
-}];
+}
+];
 
 // OrbitServer.start(); // uncomment if running this test suite stand-alone
 IpfsApis.forEach(function(ipfsApi) {
