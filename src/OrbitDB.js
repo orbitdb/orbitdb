@@ -45,7 +45,7 @@ class OrbitDB {
 
   _createStore(Store, dbname, options) {
     if(!options) options = {};
-    const replicate = options.subscribe ? options.subscribe : true;
+    const replicate = options.subscribe !== undefined ? options.subscribe : true;
     const store = new Store(this._ipfs, this.user.username, dbname, options);
     this.stores[dbname] = store;
     return this._subscribe(store, dbname, replicate);
@@ -111,13 +111,17 @@ class OrbitDB {
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        this._ipfs.cat(hash).then((res) => {
-          let buf = '';
-          res
-            .on('error', (err) => reject(err))
-            .on('data', (data) => buf += data)
-            .on('end', () => resolve(buf))
-        }).catch((e) => reject(e));
+        // this._ipfs.cat(hash).then((res) => {
+        //   let buf = '';
+        //   res
+        //     .on('error', (err) => reject(err))
+        //     .on('data', (data) => buf += data)
+        //     .on('end', () => resolve(buf))
+        // }).catch((e) => reject(e));
+        resolve(JSON.stringify({
+          name: 'localhost dev network',
+          publishers: ['localhost:3333']
+        }))
       });
     };
 

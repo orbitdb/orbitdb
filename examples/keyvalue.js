@@ -2,6 +2,7 @@
 
 const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
+// const IPFS = require('ipfs')
 const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
@@ -20,6 +21,10 @@ const startIpfs = () => {
       if(err) console.error(err);
       resolve(ipfs);
     });
+    // const ipfs = new IPFS()
+    // ipfs.goOnline(() => {
+    //   resolve(ipfs)
+    // })
   });
 };
 
