@@ -1,8 +1,8 @@
 'use strict';
 
 const EventEmitter  = require('events').EventEmitter;
-const Logger       = require('logplease');
-const logger       = Logger.create("orbit-db", { color: Logger.Colors.Magenta });
+const Logger        = require('logplease');
+const logger        = Logger.create("orbit-db", { color: Logger.Colors.Magenta });
 const EventStore    = require('orbit-db-eventstore');
 const FeedStore     = require('orbit-db-feedstore');
 const KeyValueStore = require('orbit-db-kvstore');
@@ -111,17 +111,20 @@ class OrbitDB {
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        // this._ipfs.cat(hash).then((res) => {
-        //   let buf = '';
-        //   res
-        //     .on('error', (err) => reject(err))
-        //     .on('data', (data) => buf += data)
-        //     .on('end', () => resolve(buf))
-        // }).catch((e) => reject(e));
-        resolve(JSON.stringify({
-          name: 'localhost dev network',
-          publishers: ['localhost:3333']
-        }))
+        this._ipfs.files.cat(hash, (err, res) => {
+          if(err) return reject(e)
+          let buf = '';
+          res.on('data', (res) => {
+            res.stream
+              .on('error', (err) => reject(err))
+              .on('data', (data) => buf += data)
+              .on('end', () => resolve(buf.toString()))
+            })
+        });
+        // resolve(JSON.stringify({
+        //   name: 'localhost dev network',
+        //   publishers: ['localhost:3333']
+        // }))
       });
     };
 
