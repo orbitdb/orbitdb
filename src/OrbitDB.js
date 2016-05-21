@@ -61,7 +61,7 @@ class OrbitDB {
     store.events.on('data',    this._onWrite.bind(this));
     store.events.on('close',   this._onClose.bind(this));
 
-    if(subscribe)
+    if(subscribe && this._pubsub)
       this._pubsub.subscribe(dbname, '', this._onMessage.bind(this));
 
     return store.use(this.user.username);
