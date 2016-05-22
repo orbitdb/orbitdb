@@ -37,7 +37,7 @@ class OrbitDB {
   }
 
   disconnect() {
-    this._pubsub.disconnect();
+    if(this._pubsub) this._pubsub.disconnect();
     this.stores = {};
     this.user = null;
     this.network = null;
@@ -76,7 +76,7 @@ class OrbitDB {
   _onWrite(dbname, hash) {
     // console.log(".WRITE", dbname);
     if(!hash) throw new Error("Hash can't be null!");
-    this._pubsub.publish(dbname, hash);
+    if(this._pubsub) this._pubsub.publish(dbname, hash);
     this.events.emit('data', dbname, hash);
   }
 
@@ -101,7 +101,7 @@ class OrbitDB {
   }
 
   _onClose(dbname) {
-    this._pubsub.unsubscribe(dbname);
+    if(this._pubsub) this._pubsub.unsubscribe(dbname);
     delete this.stores[dbname];
     this.events.emit('closed', dbname);
   }
@@ -111,16 +111,27 @@ class OrbitDB {
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        this._ipfs.files.cat(hash, (err, res) => {
-          if(err) return reject(e)
+        // js-ipfs-api
+        this._ipfs.cat(hash, (err, res) => {
+          if(err) return reject(err)
           let buf = '';
-          res.on('data', (res) => {
-            res.stream
-              .on('error', (err) => reject(err))
-              .on('data', (data) => buf += data)
-              .on('end', () => resolve(buf.toString()))
-            })
+          res
+            .on('error', (err) => reject(err))
+            .on('data', (data) => buf += data)
+            .on('end', () => resolve(buf.toString()))
         });
+        // js-ipfs
+        // this._ipfs.files.cat(hash, (err, res) => {
+        //   if(err) return reject(err)
+        //   let buf = '';
+        //   res.on('data', (res) => {
+        //     res.stream
+        //       .on('error', (err) => reject(err))
+        //       .on('data', (data) => buf += data)
+        //       .on('end', () => resolve(buf.toString()))
+        //     })
+        // });
+        // mock
         // resolve(JSON.stringify({
         //   name: 'localhost dev network',
         //   publishers: ['localhost:3333']
@@ -138,7 +149,7 @@ class OrbitDB {
       })
       .then(() => {
         this._pubsub = new PubSub();
-        logger.warn(`Connecting to Pubsub at '${host}:${port}'`);
+        logger.info(`Connecting to Pubsub at '${host}:${port}'`);
         return this._pubsub.connect(host, port, username, password)
       })
       .then(() => {
@@ -149,7 +160,7 @@ class OrbitDB {
       .catch((e) => {
         logger.warn("Couldn't connect to Pubsub: " + e.message);
         if(!allowOffline) {
-          logger.debug("'allowOffline' set to false, terminating");
+          logger.warn("'allowOffline' set to false, terminating");
           if(this._pubsub) this._pubsub.disconnect();
           throw e;
         }
