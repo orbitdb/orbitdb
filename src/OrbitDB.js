@@ -149,18 +149,18 @@ class OrbitDB {
       })
       .then(() => {
         this._pubsub = new PubSub();
-        logger.info(`Connecting to Pubsub at '${host}:${port}'`);
+        logger.debug(`Connecting to network ${hash} (${host}:${port})`);
         return this._pubsub.connect(host, port, username, password)
       })
       .then(() => {
-        logger.debug(`Connected to Pubsub at '${host}:${port}'`);
+        logger.debug(`Connected to network ${hash} (${host}:${port})`);
         this.user = { username: username, id: username } // TODO: user id from ipfs hash
         return;
       })
       .catch((e) => {
-        logger.warn("Couldn't connect to Pubsub: " + e.message);
+        logger.warn(`Couldn't connect to ${hash} network: ${e.message}`);
         if(!allowOffline) {
-          logger.warn("'allowOffline' set to false, terminating");
+          logger.debug(`'allowOffline' set to false, terminating`);
           if(this._pubsub) this._pubsub.disconnect();
           throw e;
         }
