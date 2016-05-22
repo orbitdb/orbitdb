@@ -21,27 +21,27 @@ const password = '';
 
 let ipfs, ipfsDaemon;
 const IpfsApis = [
-{
-  // js-ipfs
-  start: () => {
-    return new Promise((resolve, reject) => {
-      const IPFS = require('ipfs')
-      const ipfs = new IPFS();
-      ipfs.goOnline((err) => {
-        if(err) reject(err)
-        resolve(ipfs)
-      });
-    });
-  },
-  // stop: () => Promise.resolve()
-  stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
-},
+// {
+//   // js-ipfs
+//   start: () => {
+//     return new Promise((resolve, reject) => {
+//       const IPFS = require('ipfs')
+//       const ipfs = new IPFS();
+//       ipfs.goOnline((err) => {
+//         if(err) reject(err)
+//         resolve(ipfs)
+//       });
+//     });
+//   },
+//   // stop: () => Promise.resolve()
+//   stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+// },
 {
   // js-ipfs-api via local daemon
   start: () => {
     return new Promise((resolve, reject) => {
       ipfsd.disposableApi((err, ipfs) => {
-        if(err) console.error(err);
+        if(err) reject(err);
         resolve(ipfs);
       });
       // ipfsd.local((err, node) => {
