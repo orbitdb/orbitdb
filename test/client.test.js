@@ -26,7 +26,7 @@ const IpfsApis = [
   start: () => {
     return new Promise((resolve, reject) => {
       const IPFS = require('ipfs')
-      const ipfs = new IPFS();
+      const ipfs = new IPFS('/tmp/orbitdbtest');
       // resolve(ipfs);
       ipfs.goOnline((err) => {
         if(err) reject(err)
