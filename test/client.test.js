@@ -74,8 +74,6 @@ IpfsApis.forEach(function(ipfsApi) {
     const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json');
 
     before(async(function (done) {
-      this.timeout(20000);
-
       try {
         ipfs = await(ipfsApi.start());
         // const str = fs.readFileSync('./test/network.json', 'utf-8');
