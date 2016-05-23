@@ -27,7 +27,7 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
-    const ipfs = new IPFS()
+    const ipfs = new IPFS('/tmp/benchmark')
     ipfs.goOnline(() => {
       resolve(ipfs)
     })
