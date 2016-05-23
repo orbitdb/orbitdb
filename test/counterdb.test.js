@@ -29,10 +29,8 @@ const IpfsApis = [
       const init = () => {
         return new Promise((resolve, reject) => {
           ipfs.init({}, (err) => {
-            console.log("1")
             if (err) {
               if (err.message === 'repo already exists') {
-                console.log("2", err)
                 return resolve();
               }
               return reject(err);
