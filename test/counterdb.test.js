@@ -25,16 +25,36 @@ const IpfsApis = [
   start: () => {
     return new Promise((resolve, reject) => {
       const IPFS = require('ipfs')
-      const ipfs = new IPFS();
+      const ipfs = new IPFS('/tmp/orbit-db-test');
+      const init = () => {
+        return new Promise((resolve, reject) => {
+          ipfs.init({}, (err) => {
+            console.log("1")
+            if (err) {
+              if (err.message === 'repo already exists') {
+                console.log("2", err)
+                return resolve();
+              }
+              return reject(err);
+            }
+            resolve();
+          });
+        });
+      };
+
       // resolve(ipfs);
-      ipfs.goOnline((err) => {
-        if(err) reject(err)
-        resolve(ipfs)
+      return init().then(() => {
+        resolve(ipfs);
+        // ipfs.goOnline((err) => {
+        //   console.log("ava")
+        //   if(err) reject(err)
+        //   return resolve(ipfs)
+        // });
       });
     });
   },
-  // stop: () => Promise.resolve()
-  stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+  stop: () => Promise.resolve()
+  // stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
 },
 {
   // js-ipfs-api via local daemon

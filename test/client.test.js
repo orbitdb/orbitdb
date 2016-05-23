@@ -23,22 +23,24 @@ let ipfs, ipfsDaemon;
 const IpfsApis = [
 {
   // js-ipfs
+  name: 'js-ipfs',
   start: () => {
     return new Promise((resolve, reject) => {
       const IPFS = require('ipfs')
       const ipfs = new IPFS('/tmp/orbitdbtest');
-      // resolve(ipfs);
-      ipfs.goOnline((err) => {
-        if(err) reject(err)
-        resolve(ipfs)
-      });
+      resolve(ipfs);
+      // ipfs.goOnline((err) => {
+      //   if(err) reject(err)
+      //   resolve(ipfs)
+      // });
     });
   },
-  // stop: () => Promise.resolve()
-  stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+  stop: () => Promise.resolve()
+  // stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
 },
 {
   // js-ipfs-api via local daemon
+  name: 'js-ipfs-api',
   start: () => {
     return new Promise((resolve, reject) => {
       ipfsd.disposableApi((err, ipfs) => {
@@ -64,7 +66,7 @@ OrbitServer.start();
 
 IpfsApis.forEach(function(ipfsApi) {
 
-  describe('Orbit Client', function() {
+  describe('Orbit Client with ' + ipfsApi.name, function() {
     this.timeout(40000);
 
     let client, client2, db;
