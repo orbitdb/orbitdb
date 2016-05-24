@@ -38,6 +38,20 @@ class OrbitDB {
 
   disconnect() {
     if(this._pubsub) this._pubsub.disconnect();
+    this.events.removeAllListeners('load');
+    this.events.removeAllListeners('ready');
+    this.events.removeAllListeners('sync');
+    this.events.removeAllListeners('synced');
+    this.events.removeAllListeners('data');
+    this.events.removeAllListeners('close');
+    Object.keys(this.stores).map((e) => this.stores[e]).forEach((store) => {
+      store.events.removeAllListeners('load');
+      store.events.removeAllListeners('ready');
+      store.events.removeAllListeners('sync');
+      store.events.removeAllListeners('updated');
+      store.events.removeAllListeners('data');
+      store.events.removeAllListeners('close');
+    });
     this.stores = {};
     this.user = null;
     this.network = null;
@@ -67,10 +81,10 @@ class OrbitDB {
     return store.use(this.user.username);
   }
 
-  _onMessage(dbname, message) {
+  _onMessage(dbname, hash) {
     // console.log(".MESSAGE", dbname, message);
     const store = this.stores[dbname];
-    store.sync(message).catch((e) => logger.error(e.stack));
+    store.sync(hash).catch((e) => logger.error(e.stack));
   }
 
   _onWrite(dbname, hash) {
@@ -149,18 +163,22 @@ class OrbitDB {
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        catFromJsIpfsApi(hash).then(resolve)
-          .catch((e) => {
-            catFromJsIpfs(hash).then(resolve)
-              .catch((e) => {
-                logger.warn(".cat - no api or content found, using mock")
                 resolve(JSON.stringify({
                   name: 'localhost dev network',
                   publishers: ['localhost:3333']
                 }))
-              })
+        // catFromJsIpfsApi(hash).then(resolve)
+        //   .catch((e) => {
+        //     catFromJsIpfs(hash).then(resolve)
+        //       .catch((e) => {
+        //         logger.warn(".cat - no api or content found, using mock")
+        //         resolve(JSON.stringify({
+        //           name: 'localhost dev network',
+        //           publishers: ['localhost:3333']
+        //         }))
+        //       })
 
-          })
+        //   })
       });
     };
 
