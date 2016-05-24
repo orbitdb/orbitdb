@@ -153,7 +153,7 @@ IpfsApis.forEach(function(ipfsApi) {
               assert.equal(counters[0].value(), 30);
               assert.equal(counters[1].value(), 30);
               done();
-            }, 1000)
+            }, 2000)
           }).catch((e) => {
             console.log(e);
             assert(e);
