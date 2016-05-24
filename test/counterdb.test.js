@@ -22,6 +22,7 @@ let ipfs, ipfsDaemon;
 const IpfsApis = [
 {
   // js-ipfs
+  name: 'js-ipfs',
   start: () => {
     return new Promise((resolve, reject) => {
       const IPFS = require('ipfs')
@@ -56,6 +57,7 @@ const IpfsApis = [
 },
 {
   // js-ipfs-api via local daemon
+  name: 'js-ipfs-api',
   start: () => {
     return new Promise((resolve, reject) => {
       ipfsd.disposableApi((err, ipfs) => {
@@ -80,7 +82,7 @@ const IpfsApis = [
 // OrbitServer.start(); // uncomment if running this test suite stand-alone
 IpfsApis.forEach(function(ipfsApi) {
 
-  describe('CounterStore', function() {
+  describe('CounterStore with ' + ipfsApi.name, function() {
     this.timeout(40000);
     let client1, client2;
 
