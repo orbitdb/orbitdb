@@ -43,17 +43,16 @@ const IpfsApis = [
 
       // resolve(ipfs);
       return init().then(() => {
-        resolve(ipfs);
-        // ipfs.goOnline((err) => {
-        //   console.log("ava")
-        //   if(err) reject(err)
-        //   return resolve(ipfs)
-        // });
+        // resolve(ipfs);
+        ipfs.goOnline((err) => {
+          if(err) reject(err)
+          return resolve(ipfs)
+        });
       });
     });
   },
-  stop: () => Promise.resolve()
-  // stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+  // stop: () => Promise.resolve()
+  stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
 },
 {
   // js-ipfs-api via local daemon
@@ -61,7 +60,7 @@ const IpfsApis = [
   start: () => {
     return new Promise((resolve, reject) => {
       ipfsd.disposableApi((err, ipfs) => {
-        if(err) console.error(err);
+        if(err) reject(err);
         resolve(ipfs);
       });
       // ipfsd.local((err, node) => {
@@ -147,25 +146,31 @@ IpfsApis.forEach(function(ipfsApi) {
 
       it('syncs counters', (done) => {
         const name = new Date().getTime();
-        Promise.all([client1.counter(name), client2.counter(name)]).then((counters) => {
-          const res1 = Promise.map([13, 10], (f) => counters[0].inc(f), { concurrency: 1 });
-          const res2 = Promise.map([2, 5], (f) => counters[1].inc(f), { concurrency: 1 })
-          Promise.all([res1, res2]).then((res) => {
-            setTimeout(() => {
-              assert.equal(counters[0].value(), 30);
-              assert.equal(counters[1].value(), 30);
-              done();
-            }, 2000)
-          }).catch((e) => {
+        Promise.map([client1, client2], (client) => client.counter(name), { concurrency: 1})
+          .then((counters) => {
+            const res1 = Promise.map([13, 10], (f) => counters[0].inc(f), { concurrency: 1 });
+            const res2 = Promise.map([2, 5], (f) => counters[1].inc(f), { concurrency: 1 })
+            Promise.all([res1, res2])
+              .then((res) => {
+                setTimeout(() => {
+                  assert.equal(counters[0].value(), 30);
+                  assert.equal(counters[1].value(), 30);
+                  done();
+                }, 5000)
+              })
+              .catch((e) => {
+                console.log(e);
+                console.log(e.stack);
+                assert(e);
+                done();
+              });
+          })
+          .catch((e) => {
             console.log(e);
+            console.log(e.stack);
             assert(e);
             done();
           });
-        }).catch((e) => {
-          console.log(e);
-          assert(e);
-          done();
-        });
       });
 
     });

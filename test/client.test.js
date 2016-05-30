@@ -15,6 +15,7 @@ const OrbitServer = require('orbit-server/src/server');
 require('logplease').setLogLevel('ERROR');
 
 // Orbit
+// const network = 'QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM';
 const network = 'Qmeh6ktQ1YFKksugJb59vBxG51xXoEvjBZXRK3DdrF3mNj';
 const username = 'testrunner';
 const password = '';
