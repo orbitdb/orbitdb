@@ -82,13 +82,15 @@ class OrbitDB {
   }
 
   _onMessage(dbname, hash) {
-    // console.log(".MESSAGE", dbname, message);
+    // console.log(".MESSAGE", dbname, hash, this.user.username);
     const store = this.stores[dbname];
+    this.events.emit('message', dbname, hash);
+    // console.log("sync", store !== null, this.user.username)
     store.sync(hash).catch((e) => logger.error(e.stack));
   }
 
   _onWrite(dbname, hash) {
-    // console.log(".WRITE", dbname);
+    // console.log(".WRITE", dbname, hash, this.user.username);
     if(!hash) throw new Error("Hash can't be null!");
     if(this._pubsub) this._pubsub.publish(dbname, hash);
     this.events.emit('data', dbname, hash);
@@ -100,7 +102,7 @@ class OrbitDB {
   }
 
   _onSynced(dbname, items) {
-    // console.log(".SYNCED", dbname);
+    // console.log(".SYNCED", dbname, items.length);
     this.events.emit('synced', dbname, items);
   }
 
@@ -145,7 +147,7 @@ class OrbitDB {
       return new Promise((resolve, reject) => {
         if(this._ipfs.files.cat) {
           logger.debug(".cat with js-ipfs");
-          setTimeout(reject, 10000);
+          setTimeout(reject, 5000);
           this._ipfs.files.cat(hash, (err, res) => {
             if(err) return reject(err);
             let buf = '';
