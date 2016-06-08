@@ -11,11 +11,13 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 - Aggregation happens on client side and data is eventually consistent
 - Designed to work offline first
 
+Check out a visualization of the data flow at https://github.com/haadcode/proto2
+
+![Screenshot](https://raw.githubusercontent.com/haadcode/proto2/master/screenshot.png)
+
 **NOTE: the README can be out of date, I'm working to get up to date. If you find a problem, please open an issue or a PR.**
 
 _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
-
-![Screenshot](https://raw.githubusercontent.com/haadcode/orbit-db/master/screenshot.png)
 
 ## Install
 ```
