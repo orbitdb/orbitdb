@@ -97,12 +97,12 @@ class OrbitDB {
   }
 
   _onSync(dbname) {
-    console.log(".SYNC", dbname);
+    // console.log(".SYNC", dbname);
     this.events.emit('sync', dbname);
   }
 
   _onSynced(dbname, items) {
-    console.log(".SYNCED", dbname, items.length);
+    // console.log(".SYNCED", dbname, items.length);
     this.events.emit('synced', dbname, items);
   }
 
