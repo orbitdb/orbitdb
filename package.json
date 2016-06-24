@@ -18,7 +18,7 @@
     "orbit-db-eventstore": "0.0.16",
     "orbit-db-feedstore": "0.0.13",
     "orbit-db-kvstore": "0.0.12",
-    "socket.io-client": "^1.4.5"
+    "socket.io-client": "^1.4.8"
   },
   "devDependencies": {
     "asyncawait": "^1.0.1",
