@@ -37,17 +37,17 @@ npm install
 
 Key-Value store [example](https://github.com/haadcode/orbit-db/blob/master/examples/keyvalue.js):
 ```
-node examples/keyvalue.js <host> <username> <channel> <key> <value>
+node examples/keyvalue.js <host:port> <username> <channel> <key> <value>
 ```
 
 Event log [example](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) (run several in separate shells):
 ```
-node examples/eventlog.js <host> <username> <channel> <data> <interval in ms>
+node examples/eventlog.js <host:port> <username> <channel> <data> <interval in ms>
 ```
 
 Benchmark writes:
 ```
-node examples/benchmark.js <host> <username> <channel>;
+node examples/benchmark.js <host:port> <username> <channel>;
 ```
 
 
@@ -69,7 +69,7 @@ Then open `examples/browser.html`. See the full example [here](https://github.co
     <script type="text/javascript" src="ipfsapi.min.js" charset="utf-8"></script>
     <script type="text/javascript">
       const ipfs = IpfsApi();
-      OrbitDB.connect('QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM', 'user1', '', ipfs).then((orbit) => {
+      OrbitDB.connect('localhost:3333', 'user1', '', ipfs).then((orbit) => {
         orbit.kvstore('test').then((db) => {
           db.put('hello', 'world').then((res) => {
             const result = db.get(key);
@@ -89,7 +89,7 @@ _See usage example below_
 
 _OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
 
-    connect(host, port, username, password)
+    connect(<host:port>, username, password)
 
     channel(name, password)
 
@@ -125,7 +125,7 @@ const ipfs = ipfsAPI();
 
 async(() => {
     // Connect
-    const orbit = await(OrbitClient.connect('QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM', 'usernamne', '', ipfs));
+    const orbit = await(OrbitClient.connect('localhost:3333', 'usernamne', '', ipfs));
 
     /* Event Log */
     const eventlog = orbit.eventlog('eventlog test');

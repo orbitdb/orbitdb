@@ -125,60 +125,12 @@ class OrbitDB {
   _connect(hash, username, password, allowOffline) {
     if(allowOffline === undefined) allowOffline = false;
 
-    const catFromJsIpfsApi = (hash) => {
-      return new Promise((resolve, reject) => {
-        if(this._ipfs.cat) {
-          logger.debug(".cat with js-ipfs-api");
-          this._ipfs.cat(hash, (err, res) => {
-            if(err) return reject(err)
-            let buf = '';
-            res
-              .on('error', (err) => reject(err))
-              .on('data', (data) => buf += data)
-              .on('end', () => resolve(buf.toString()))
-          });
-        } else {
-          reject("not using js-ipfs-api");
-        }
-      });
-    };
-
-    const catFromJsIpfs = (hash) => {
-      return new Promise((resolve, reject) => {
-        if(this._ipfs.files.cat) {
-          logger.debug(".cat with js-ipfs");
-          setTimeout(reject, 5000);
-          this._ipfs.files.cat(hash, (err, res) => {
-            if(err) return reject(err);
-            let buf = '';
-            res.on('data', (res) => {
-              res.stream
-                .on('error', (err) => reject(err))
-                .on('data', (data) => buf += data)
-                .on('end', () => resolve(buf.toString()))
-              })
-          });
-        } else {
-          reject("not using js-ipfs");
-        }
-      });
-    };
-
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
-        catFromJsIpfsApi(hash).then(resolve)
-          .catch((e) => {
-            catFromJsIpfs(hash).then(resolve)
-              .catch((e) => {
-                logger.warn(".cat - no api or content found, using mock")
-                resolve(JSON.stringify({
-                  // name: 'localhost dev network',
-                  name: 'Orbit DEV Network',
-                  // publishers: ['localhost:3333']
-                  publishers: ['178.62.241.75:3333']
-                }));
-              });
-          });
+        resolve(JSON.stringify({
+          name: 'Orbit DEV Network',
+          publishers: [hash]
+        }));
       });
     };
 

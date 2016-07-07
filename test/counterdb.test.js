@@ -13,7 +13,7 @@ const IPFS        = require('ipfs')
 // Mute logging
 require('logplease').setLogLevel('ERROR');
 
-const network   = 'Qmeh6ktQ1YFKksugJb59vBxG51xXoEvjBZXRK3DdrF3mNj';
+const network = 'localhost:3333';
 const username  = 'testrunner';
 const username2 = 'rennurtset';
 const ipfsPath  = '/tmp/orbittests';
