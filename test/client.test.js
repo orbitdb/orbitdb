@@ -312,6 +312,17 @@ IpfsApis.forEach(function(ipfsApi) {
           assert.equal(first.payload.value, 'hello4');
           done();
         }));
+
+        it('returns items in the correct order', async((done) => {
+          const amount = 3;
+          const iter = db.iterator({ limit: amount });
+          let i = items.length - amount;
+          for(let item of iter) {
+            assert.equal(item.payload.value, 'hello' + i);
+            i ++;
+          }
+          done();
+        }));
       });
 
       describe('Collect', function() {
