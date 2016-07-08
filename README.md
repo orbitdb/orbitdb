@@ -1,5 +1,7 @@
 # OrbitDB
 
+[![CircleCI Status](https://circleci.com/gh/haadcode/orbit.svg?style=shield&circle-token=158cdbe02f9dc4ca4cf84d8f54a8b17b4ed881a1)](https://circleci.com/gh/haadcode/orbit-db)
+
 ## Introduction
 
 Distributed, peer-to-peer database on IPFS.
