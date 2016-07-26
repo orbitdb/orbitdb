@@ -23,6 +23,25 @@ Live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXu
 
 _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
 
+## Data stores
+
+Currently available data stores:
+
+- [orbit-db-kvstore](https://github.com/haadcode/orbit-db-kvstore)
+- [orbit-db-eventstore](https://github.com/haadcode/orbit-db-eventstore)
+- [orbit-db-feedstore](https://github.com/haadcode/orbit-db-feedstore)
+- [orbit-db-counterstore](https://github.com/haadcode/orbit-db-counterstore)
+
+Usage:
+```javascript
+const kvstore = orbit.kvstore('db name')
+const events = orbit.eventlog('db name')
+const feed = orbit.feed('db name')
+const counters = orbit.counter('db name')
+```
+
+Documentation for individual stores are WIP, please see each store's source code for available public methods.
+
 ## Install
 ```
 npm install orbit-db
