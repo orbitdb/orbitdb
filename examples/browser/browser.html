@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <div id="result">Loading...</div>
+
+    <script type="text/javascript" src="../../dist/orbitdb.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      const logger   = Logger.create("orbit-db example", { color: Logger.Colors.Green, showTimestamp: false, showLevel: false })
+      const network = '178.62.241.75:3333'
+      const username = 'user1'
+      const password = ''
+      const channel  = 'browsertest2.dist'
+      const key      = 'greeting'
+      const value    = 'Hello world'
+
+      const elm = document.getElementById("result")
+      const ipfs = new window.Ipfs()
+      OrbitDB.connect(network, username, password, ipfs).then((orbit) => {
+        orbit.kvstore(channel).then((db) => {
+          let count = 1
+          const query = () => {
+            const startTime = new Date().getTime()
+            db.put(key, value + " " + count).then((res) => {
+              const endTime = new Date().getTime()
+              logger.debug(`db.put (#${count}) took ${(endTime - startTime)} ms\n`)
+              count ++
+
+              const result = db.get(key)
+              const output = `
+              ---------------------------------------------------
+              Key | Value
+              ---------------------------------------------------
+              ${key} | ${result}
+              ---------------------------------------------------`
+
+              elm.innerHTML = output.split("\n").join("<br>")
+              logger.debug(output)
+            }).catch((e) => logger.error(e))
+          };
+          setInterval(query, 1000)
+        }).catch((e) => logger.error(e))
+      }).catch((e) => logger.error(e))
+    </script>
+  </body>
+</html>

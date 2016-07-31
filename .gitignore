@@ -6,3 +6,4 @@ node_modules/
 dump.rdb
 Vagrantfile
 orbit-db-cache.json
+examples/browser/bundle.js
