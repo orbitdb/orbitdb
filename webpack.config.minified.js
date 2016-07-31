@@ -2,9 +2,11 @@ const webpack = require('webpack');
 const path = require('path');
 
 module.exports = {
-  entry: './examples/browser/browser.js',
+  entry: './src/OrbitDB.js',
   output: {
-    filename: './examples/browser/bundle.js'
+    libraryTarget: 'var',
+    library: 'OrbitDB',
+    filename: './dist/orbitdb.min.js'
   },
   node: {
     console: false,
