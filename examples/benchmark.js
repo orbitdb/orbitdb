@@ -2,24 +2,24 @@
 
 // const ipfsd   = require('ipfsd-ctl');
 const IPFS    = require('ipfs')
+const ipfsd   = require('ipfsd-ctl');
 const OrbitDB = require('../src/OrbitDB');
 const Timer   = require('./Timer');
 
 // usage: benchmark.js <network hash> <username> <channel>;
 
 // orbit-server
-// const network = 'QmRB8x6aErtKTFHDNRiViixSKYwW1DbfcvJHaZy1hnRzLM'; // dev server
-const network = 'QmaAHGFm78eupEaDFzBfhUL5xn32dbeqn8oU2XCZJTQGBj'; // 'localhost:3333'
+const network = 'localhost:3333';
 const username = process.argv[2] ? process.argv[2] : 'testrunner';
 const password = '';
 const channelName = process.argv[3] ? process.argv[3] : 'c1';
 
 const startIpfs = () => {
   return new Promise((resolve, reject) => {
-    // ipfsd.disposableApi((err, ipfs) => {
-    //   if(err) console.error(err);
-    //   resolve(ipfs);
-    // });
+    ipfsd.disposableApi((err, ipfs) => {
+      if(err) console.error(err);
+      resolve(ipfs);
+    });
     // ipfsd.local((err, node) => {
     //   if(err) reject(err);
     //   node.startDaemon((err, ipfs) => {
@@ -27,10 +27,10 @@ const startIpfs = () => {
     //     resolve(ipfs);
     //   });
     // });
-    const ipfs = new IPFS('/tmp/benchmark')
-    ipfs.goOnline(() => {
-      resolve(ipfs)
-    })
+    // const ipfs = new IPFS('/tmp/benchmark')
+    // ipfs.goOnline(() => {
+    //   resolve(ipfs)
+    // })
   });
 };
 
@@ -44,14 +44,6 @@ let lastTenSeconds = 0;
 let store;
 
 const queryLoop = (db) => {
-// const queryLoop = (ipfs) => {
-  // const data = new Buffer(JSON.stringify({ Data: JSON.stringify({ hello: "world" }) }));
-  // ipfs.object.put(data).then(() => {
-  //   totalQueries ++;
-  //   lastTenSeconds ++;
-  //   queriesPerSecond ++;
-  //   process.nextTick(() => queryLoop(ipfs));
-  // })
   // let timer = new Timer();
   // timer.start();
   store.add(username + totalQueries).then(() => {
@@ -68,7 +60,6 @@ let run = (() => {
     // Connect
     console.log(`Connecting...`)
     startIpfs()
-      // .then((ipfs) => queryLoop(ipfs))
       .then((ipfs) => OrbitDB.connect(network, username, password, ipfs))
       .then((orbit) => {
         console.log("OrbitDB")
@@ -81,19 +72,7 @@ let run = (() => {
         return orbit;
       })
       .then((orbit) => orbit.eventlog(channelName))
-      // .then((db) => {
-      //   console.log("OrbitDB")
-      //   return new Promise((resolve, reject) => {
-      //     db.events.on('load', () => console.log("loading log from history"))
-      //     db.events.on('ready', (dbname) => {
-      //       console.log("log fetched from history for", dbname);
-      //       queryLoop(db);
-      //       resolve();
-      //     });
-      //   });
-      // })
       .then(() => {
-        console.log("++")
         // Metrics output
         setInterval(() => {
           seconds ++;
