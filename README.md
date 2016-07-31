@@ -67,18 +67,19 @@ node examples/eventlog.js <host:port> <username> <channel> <data> <interval in m
 ```
 
 Benchmark writes:
-```
+```bash
 node examples/benchmark.js <host:port> <username> <channel>;
 ```
 
 
 ### Browser examples
-In order to run the browser example, you need to have a local IPFS daemon running. Start it with the following command:
-```
-API_ORIGIN=* ipfs daemon
+Build the examples:
+```bash
+npm install
+npm run build:examples
 ```
 
-Then open `examples/browser.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
+Then open `examples/browser.html` or `examples/index.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
 
 ```html
 <html>
@@ -86,18 +87,19 @@ Then open `examples/browser.html`. See the full example [here](https://github.co
     <meta charset="utf-8">
   </head>
   <body>
-    <script type="text/javascript" src="orbitdb.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="ipfsapi.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../dist/orbitdb.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
+
     <script type="text/javascript">
       const ipfs = IpfsApi();
-      OrbitDB.connect('localhost:3333', 'user1', '', ipfs).then((orbit) => {
-        orbit.kvstore('test').then((db) => {
-          db.put('hello', 'world').then((res) => {
-            const result = db.get(key);
-            console.log(result);
-          });
-        });
-      });
+      OrbitDB.connect('localhost:3333', 'user1', '', ipfs)
+        .then((orbit) => orbit.kvstore('test'))
+        .then((db) => db.put('hello', 'world'))
+        .then((res) => {
+            const result = db.get(key)
+            console.log(result)
+        })
     </script>
   </body>
 </html>
@@ -185,21 +187,20 @@ async(() => {
 The entry point for the code is [src/Client.js](https://github.com/haadcode/orbit-db/blob/master/src/Client.js) and the DB implementation is [src/OrbitDB.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitDB.js)
 
 #### Run Tests
-```
+```bash
 npm test
 ```
 
 Keep tests running while development:
-```
+```bash
 mocha -w
 ```
 
-#### Lint
-*Work in progress! Throws an error "Parsing error: The keyword 'await' is reserved".*
+#### Build distributables
+```bash
+npm install
+npm run build
 ```
-npm run lint
-```
-
 ### TODO
 - make ipfs-log emit events ('data', 'load')
   - Store: this._log.events.on('data', (log, entries) => this._index.updateIndex(log, entries))
