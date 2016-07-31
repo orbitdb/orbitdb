@@ -49,6 +49,8 @@ npm install orbit-db
 
 ## Examples
 
+*To run the examples below, make sure to run a local [orbit-server](https://github.com/haadcode/orbit-server)*
+
 ### Browser examples
 Build the examples:
 ```bash
@@ -83,7 +85,6 @@ Then open `examples/browser.html` or `examples/index.html`. See the full example
 ```
 
 ### Node.js examples
-*To run the examples, make sure to run a local [orbit-server](https://github.com/haadcode/orbit-server)*
 
 Before running the examples, install dependencies with:
 ```
