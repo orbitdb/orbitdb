@@ -48,6 +48,40 @@ npm install orbit-db
 ```
 
 ## Examples
+
+### Browser examples
+Build the examples:
+```bash
+npm install
+npm run build:examples
+```
+
+Then open `examples/browser.html` or `examples/index.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser/browser.html).
+
+```html
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <script type="text/javascript" src="../dist/orbitdb.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+      const ipfs = window.Ipfs();
+      OrbitDB.connect('localhost:3333', 'user1', '', ipfs)
+        .then((orbit) => orbit.kvstore('test'))
+        .then((db) => db.put('hello', 'world'))
+        .then((res) => {
+            const result = db.get(key)
+            console.log(result)
+        })
+    </script>
+  </body>
+</html>
+```
+
 ### Node.js examples
 *To run the examples, make sure to run a local [orbit-server](https://github.com/haadcode/orbit-server)*
 
@@ -69,40 +103,6 @@ node examples/eventlog.js <host:port> <username> <channel> <data> <interval in m
 Benchmark writes:
 ```bash
 node examples/benchmark.js <host:port> <username> <channel>;
-```
-
-
-### Browser examples
-Build the examples:
-```bash
-npm install
-npm run build:examples
-```
-
-Then open `examples/browser.html` or `examples/index.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser.html).
-
-```html
-<html>
-  <head>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <script type="text/javascript" src="../dist/orbitdb.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
-
-    <script type="text/javascript">
-      const ipfs = IpfsApi();
-      OrbitDB.connect('localhost:3333', 'user1', '', ipfs)
-        .then((orbit) => orbit.kvstore('test'))
-        .then((db) => db.put('hello', 'world'))
-        .then((res) => {
-            const result = db.get(key)
-            console.log(result)
-        })
-    </script>
-  </body>
-</html>
 ```
 
 ## API
@@ -183,8 +183,6 @@ async(() => {
 ```
 
 ### Development
-#### Source Code
-The entry point for the code is [src/Client.js](https://github.com/haadcode/orbit-db/blob/master/src/Client.js) and the DB implementation is [src/OrbitDB.js](https://github.com/haadcode/orbit-db/blob/master/src/OrbitDB.js)
 
 #### Run Tests
 ```bash
@@ -200,84 +198,4 @@ mocha -w
 ```bash
 npm install
 npm run build
-```
-### TODO
-- make ipfs-log emit events ('data', 'load')
-  - Store: this._log.events.on('data', (log, entries) => this._index.updateIndex(log, entries))
-- merge 'readable' and 'data' events (only one)
-
-## Notes
-### Data structure description
-*For future [IPLD](https://github.com/ipfs/ipld-examples) references*
-
-List snapshots are posted to pubsub:
-```
-> QmRzWAiFdLkdkwBDehzxhHdhfwbDKDnzqBnX53va58PuQu
-> ...
-```
-
-**Get a list snapshot**
-
-`ipfs object get QmRzWAiFdLkdkwBDehzxhHdhfwbDKDnzqBnX53va58PuQu`
-```json
-{
-  "Links": [],
-  "Data": {
-    "id": "user123",
-    "items": [
-      "QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn",
-      "QmQxndNEzWxKT5KRqRsty7JDGcbPVazaYPCqfB5z1mxmon",
-      "QmUN1X97M2t8MX55H8VoPGXu2fLBpr91iCAzHkXudSMvDE"
-    ]
-  }
-}
-```
-
-**Get the item**
-
-`ipfs object get QmNwREbsgGgiQPXxpvGanD55inFjUXjpEqjiPtpa39P7Mn`
-```json
-{
-  "Links": [],
-  "Data": {
-    "id": "user123",
-    "data": "QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ",
-    "next": [
-      "QmS17ABxzFEVoHv5WEvATetNEZhN2vkNApRPcFQUaJfij3"
-    ]
-  }
-}
-```
-
-**Get the item's data (operation)**
-
-`ipfs object get QmasZEUwc67yftPvdSxRLWenmvF8faLnS7TMphQpn4PCWZ`
-```json
-{
-  "Links": [],
-  "Data": {
-    "op": "PUT",
-    "key": "default",
-    "value": "QmaAPEKDdaucQZRseJmKmWwZhgftBSwj8TD1xEomgcxo1X",
-    "meta":{
-      "type": "text",
-      "size": -1,
-      "from": "user123",
-      "ts": 1456494484094
-    }
-  }
-}
-```
-
-**Get the value**
-
-`ipfs object get QmaAPEKDdaucQZRseJmKmWwZhgftBSwj8TD1xEomgcxo1X`
-```json
-{
-  "Links": [],
-  "Data": {
-    "content": "LambOfGod 347",
-    "ts": 1456494484089
-  }
-}
 ```
