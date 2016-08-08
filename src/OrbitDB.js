@@ -38,19 +38,19 @@ class OrbitDB {
 
   disconnect() {
     if(this._pubsub) this._pubsub.disconnect();
-    this.events.removeAllListeners('load');
-    this.events.removeAllListeners('ready');
-    this.events.removeAllListeners('sync');
-    this.events.removeAllListeners('synced');
+    // this.events.removeAllListeners('load');
+    // this.events.removeAllListeners('ready');
+    // this.events.removeAllListeners('sync');
+    // this.events.removeAllListeners('synced');
     this.events.removeAllListeners('data');
-    this.events.removeAllListeners('close');
+    // this.events.removeAllListeners('close');
     Object.keys(this.stores).map((e) => this.stores[e]).forEach((store) => {
-      store.events.removeAllListeners('load');
-      store.events.removeAllListeners('ready');
-      store.events.removeAllListeners('sync');
-      store.events.removeAllListeners('updated');
+      // store.events.removeAllListeners('load');
+      // store.events.removeAllListeners('ready');
+      // store.events.removeAllListeners('sync');
+      // store.events.removeAllListeners('updated');
       store.events.removeAllListeners('data');
-      store.events.removeAllListeners('close');
+      // store.events.removeAllListeners('close');
     });
     this.stores = {};
     this.user = null;
@@ -68,12 +68,12 @@ class OrbitDB {
   _subscribe(store, dbname, subscribe, callback) {
     if(subscribe === undefined) subscribe = true;
 
-    store.events.on('load',    this._onLoad.bind(this));
-    store.events.on('ready',   this._onReady.bind(this));
-    store.events.on('sync',    this._onSync.bind(this));
-    store.events.on('updated', this._onSynced.bind(this));
-    store.events.on('data',    this._onWrite.bind(this));
-    store.events.on('close',   this._onClose.bind(this));
+    store.events.on('data',  this._onData.bind(this));
+    // store.events.on('write', this._onWrite.bind(this));
+    // store.events.on('sync',  this._onStartSync.bind(this));
+    // store.events.on('load',  this._onLoad.bind(this));
+    // store.events.on('ready', this._onReady.bind(this));
+    // store.events.on('close', this._onClose.bind(this));
 
     if(subscribe && this._pubsub)
       this._pubsub.subscribe(dbname, '', this._onMessage.bind(this), store.options.maxHistory > 0);
@@ -81,45 +81,53 @@ class OrbitDB {
     return store.use(this.user.username);
   }
 
+  /* Replication request from the message broker */
+
   _onMessage(dbname, hash) {
     // console.log(".MESSAGE", dbname, hash, this.user.username);
     const store = this.stores[dbname];
-    this.events.emit('message', dbname, hash);
-    // console.log("sync", store !== null, this.user.username)
     store.sync(hash).catch((e) => logger.error(e.stack));
   }
 
+  /* Data events */
+
   _onWrite(dbname, hash) {
+    // 'New entry written to database...', after adding a new db entry locally
     // console.log(".WRITE", dbname, hash, this.user.username);
     if(!hash) throw new Error("Hash can't be null!");
     if(this._pubsub) this._pubsub.publish(dbname, hash);
-    this.events.emit('data', dbname, hash);
   }
 
-  _onSync(dbname) {
-    // console.log(".SYNC", dbname);
-    this.events.emit('sync', dbname);
-  }
-
-  _onSynced(dbname, items) {
+  _onData(dbname, item) {
+    // 'New database entry...', after a new entry was added to the database
     // console.log(".SYNCED", dbname, items.length);
-    this.events.emit('synced', dbname, items);
+    this.events.emit('data', dbname, item);
   }
 
-  _onLoad(dbname) {
-    // console.log(".LOAD", dbname);
-    this.events.emit('load', dbname);
-  }
+  /* Status indicator events */
 
-  _onReady(dbname) {
-    // console.log(".READY", dbname);
-    this.events.emit('ready', this.stores[dbname]);
-  }
+  // _onStartSync(dbname) {
+  //   // 'Loading new entries...', before replication starts
+  //   // console.log(".SYNC", dbname);
+  //   this.events.emit('sync', dbname);
+  // }
+
+  // _onLoad(dbname) {
+  //   // 'Loading database...', before loading initial oplog history
+  //   // console.log(".LOAD", dbname);
+  //   this.events.emit('load', dbname);
+  // }
+
+  // _onReady(dbname) {
+  //   // 'Database loaded...', after oplog history has been constructed
+  //   // console.log(".READY", dbname);
+  //   this.events.emit('ready', this.stores[dbname]);
+  // }
 
   _onClose(dbname) {
     if(this._pubsub) this._pubsub.unsubscribe(dbname);
     delete this.stores[dbname];
-    this.events.emit('closed', dbname);
+    // this.events.emit('closed', dbname);
   }
 
   _connect(hash, username, password, allowOffline) {
