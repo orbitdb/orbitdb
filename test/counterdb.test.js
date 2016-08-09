@@ -17,6 +17,7 @@ const network = 'localhost:3333';
 const username  = 'testrunner';
 const username2 = 'rennurtset';
 const ipfsPath  = '/tmp/orbittests';
+const cacheFile = path.join(process.cwd(), '/test/orbit-db-cache.json')
 
 let ipfs, ipfsDaemon;
 const IpfsApis = [
@@ -94,7 +95,7 @@ IpfsApis.forEach(function(ipfsApi) {
         .then((res) => {
           ipfs = res;
           return Promise.map([username, username2], (login) => {
-            return OrbitDB.connect(network, login, '', ipfs, { allowOffline: false, cacheFile: './orbit-db-cache.json' });
+            return OrbitDB.connect(network, login, '', ipfs, { allowOffline: false, cacheFile: cacheFile });
           }).then((clients) => {
             client1 = clients[0];
             client2 = clients[1];
@@ -111,31 +112,31 @@ IpfsApis.forEach(function(ipfsApi) {
       if(client1) client1.disconnect();
       if(client2) client2.disconnect();
       ipfsApi.stop().then(() => {
-        rimraf('./orbit-db-cache.json', done)
+        rimraf(cacheFile, done)
       });
     });
 
     describe('counters', function() {
       it('increases a counter value', function(done) {
         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
-        const counter = client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' })
+        const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
         counter.events.on('ready', () => {
           Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1 })
             .then(() => {
-              clearTimeout(timeout)
               assert.equal(counter.value(), 14)
+              clearTimeout(timeout)
               done()
             })
             .catch(done)
         })
       });
 
-      it('creates a new counter from cached data', (done) => {
+      it('creates a new counter from cached data', function(done) {
         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
-        const counter = client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' })
+        const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
         counter.events.on('ready', () => {
-          clearTimeout(timeout)
           assert.equal(counter.value(), 14)
+          clearTimeout(timeout)
           done()
         })
       })

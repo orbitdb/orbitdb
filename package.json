@@ -14,10 +14,10 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "logplease": "^1.2.7",
-    "orbit-db-counterstore": "0.1.0",
-    "orbit-db-eventstore": "0.1.0",
-    "orbit-db-feedstore": "0.1.0",
-    "orbit-db-kvstore": "0.1.0",
+    "orbit-db-counterstore": "0.1.1",
+    "orbit-db-eventstore": "0.1.1",
+    "orbit-db-feedstore": "0.1.1",
+    "orbit-db-kvstore": "0.1.1",
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {

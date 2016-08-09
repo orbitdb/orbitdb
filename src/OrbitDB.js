@@ -8,6 +8,7 @@ const FeedStore     = require('orbit-db-feedstore');
 const KeyValueStore = require('orbit-db-kvstore');
 const CounterStore  = require('orbit-db-counterstore');
 const PubSub        = require('./PubSub');
+const Cache         = require('./Cache');
 
 class OrbitDB {
   constructor(ipfs) {
@@ -54,10 +55,10 @@ class OrbitDB {
     const replicate = options.subscribe !== undefined ? options.subscribe : true;
     const store = new Store(this._ipfs, this.user.username, dbname, options);
     this.stores[dbname] = store;
-    return this._subscribe(store, dbname, replicate);
+    return this._subscribe(store, dbname, replicate, options);
   }
 
-  _subscribe(store, dbname, subscribe, callback) {
+  _subscribe(store, dbname, subscribe, options) {
     if(subscribe === undefined) subscribe = true
 
     store.events.on('data',  this._onData.bind(this))
@@ -69,6 +70,11 @@ class OrbitDB {
     else
       store.loadHistory().catch((e) => logger.error(e.stack));
 
+    Cache.loadCache(options.cacheFile).then(() => {
+      const hash = Cache.get(dbname)
+      store.loadHistory(hash).catch((e) => logger.error(e.stack))
+    })
+
     return store
   }
 
@@ -77,40 +83,43 @@ class OrbitDB {
 
   _onConnected(dbname, hash) {
     // console.log(".CONNECTED", dbname, hash, this.user.username);
-    const store = this.stores[dbname];
-    store.loadHistory(hash).catch((e) => logger.error(e.stack));
+    const store = this.stores[dbname]
+    store.loadHistory(hash).catch((e) => logger.error(e.stack))
   }
 
   /* Replication request from the message broker */
 
   _onMessage(dbname, hash) {
-    // console.log(".MESSAGE", dbname, hash, this.user.username);
-    const store = this.stores[dbname];
-    store.sync(hash).catch((e) => logger.error(e.stack));
+    // console.log(".MESSAGE", dbname, hash, this.user.username)
+    const store = this.stores[dbname]
+    store.sync(hash)
+      .then((res) => Cache.set(dbname, hash))
+      .catch((e) => logger.error(e.stack))
   }
 
   /* Data events */
 
   _onWrite(dbname, hash) {
     // 'New entry written to database...', after adding a new db entry locally
-    // console.log(".WRITE", dbname, hash, this.user.username);
-    if(!hash) throw new Error("Hash can't be null!");
-    if(this._pubsub) this._pubsub.publish(dbname, hash);
+    // console.log(".WRITE", dbname, hash, this.user.username)
+    if(!hash) throw new Error("Hash can't be null!")
+    if(this._pubsub) this._pubsub.publish(dbname, hash)
+    Cache.set(dbname, hash)
   }
 
   _onData(dbname, item) {
     // 'New database entry...', after a new entry was added to the database
     // console.log(".SYNCED", dbname, items.length);
-    this.events.emit('data', dbname, item);
+    this.events.emit('data', dbname, item)
   }
 
   _onClose(dbname) {
-    if(this._pubsub) this._pubsub.unsubscribe(dbname);
-    delete this.stores[dbname];
+    if(this._pubsub) this._pubsub.unsubscribe(dbname)
+    delete this.stores[dbname]
   }
 
   _connect(hash, username, password, allowOffline) {
-    if(allowOffline === undefined) allowOffline = false;
+    if(allowOffline === undefined) allowOffline = false
 
     const readNetworkInfo = (hash) => {
       return new Promise((resolve, reject) => {
