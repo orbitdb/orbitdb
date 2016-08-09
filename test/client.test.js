@@ -584,12 +584,7 @@ IpfsApis.forEach(function(ipfsApi) {
         done();
       }));
 
-      afterEach((done) => {
-        db.delete();
-        client.events.on('closed', (dbname) => {
-          client.events.removeAllListeners('closed')
-          done()
-        });
+      afterEach(() => {
         db.close();
       });
 
@@ -672,7 +667,7 @@ IpfsApis.forEach(function(ipfsApi) {
       it('syncs databases', async((done) => {
         const db2 = await(client2.kvstore(channel, { subscribe: false }));
         db2.delete();
-        db2.events.on('data', async((dbname, hash) => {
+        db2.events.on('write', async((dbname, hash) => {
           await(db.sync(hash))
           const value = db.get('key1');
           assert.equal(value, 'hello2');

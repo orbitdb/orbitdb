@@ -28,9 +28,9 @@ class Pubsub {
       this._socket.disconnect();
   }
 
-  subscribe(hash, password, callback, fetchHistory) {
+  subscribe(hash, callback, onSubscribed, fetchHistory) {
     if(!this._subscriptions[hash]) {
-      this._subscriptions[hash] = { callback: callback, history: fetchHistory };
+      this._subscriptions[hash] = { callback: callback, history: fetchHistory, onSubscribed: onSubscribed };
       this._socket.emit('subscribe', { channel: hash }); // calls back with 'subscribed' event
     }
   }
@@ -55,8 +55,8 @@ class Pubsub {
 
   _handleSubscribed(hash, message) {
     const subscription = this._subscriptions[hash];
-    if(subscription && subscription.history && subscription.callback)
-      subscription.callback(hash, message);
+    if(subscription && subscription.history && subscription.onSubscribed)
+      subscription.onSubscribed(hash, message)
   }
 }
 

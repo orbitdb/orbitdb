@@ -116,62 +116,47 @@ IpfsApis.forEach(function(ipfsApi) {
     });
 
     describe('counters', function() {
-      it('increases a counter value', (done) => {
-        client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' }).then((counter) => {
-          Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1 }).then(() => {
-            assert.equal(counter.value(), 14);
-            done();
-          }).catch((e) => {
-            console.error(e.stack);
-            assert.equal(null, e);
-            done();
-          });
-        }).catch((e) => {
-          console.error(e.stack);
-          assert.equal(' ', e.message);
-          done();
-        });
+      it('increases a counter value', function(done) {
+        const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
+        const counter = client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' })
+        counter.events.on('ready', () => {
+          Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1 })
+            .then(() => {
+              clearTimeout(timeout)
+              assert.equal(counter.value(), 14)
+              done()
+            })
+            .catch(done)
+        })
       });
 
-      it('creates a new counter from cached data', function(done) {
-        client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' }).then((counter) => {
-          assert.equal(counter.value(), 14);
-          done();
-        }).catch((e) => {
-          console.error(e.stack);
-          assert.equal(' ', e.message);
-          done();
-        });
-      });
+      it('creates a new counter from cached data', (done) => {
+        const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
+        const counter = client1.counter('counter test', { subscribe: false, cacheFile: './orbit-db-cache.json' })
+        counter.events.on('ready', () => {
+          clearTimeout(timeout)
+          assert.equal(counter.value(), 14)
+          done()
+        })
+      })
 
       it('syncs counters', (done) => {
         const name = new Date().getTime();
-        Promise.map([client1, client2], (client) => client.counter(name), { concurrency: 1})
-          .then((counters) => {
-            const res1 = Promise.map([13, 10], (f) => counters[0].inc(f), { concurrency: 1 });
-            const res2 = Promise.map([2, 5], (f) => counters[1].inc(f), { concurrency: 1 })
-            Promise.all([res1, res2])
-              .then((res) => {
-                setTimeout(() => {
-                  assert.equal(counters[0].value(), 30);
-                  assert.equal(counters[1].value(), 30);
-                  done();
-                }, 2000)
-              })
-              .catch((e) => {
-                console.log(e);
-                console.log(e.stack);
-                assert(e);
-                done();
-              });
+        const counter1 = client1.counter(name)
+        const counter2 = client2.counter(name)
+        const res1 = Promise.map([13, 10], (f) => counter1.inc(f), { concurrency: 1 })
+        const res2 = Promise.map([2, 5], (f) => counter2.inc(f), { concurrency: 1 })
+        Promise.all([res1, res2])
+          .then((res) => {
+            // wait for a while to make sure db's have been synced
+            setTimeout(() => {
+              assert.equal(counter1.value(), 30)
+              assert.equal(counter2.value(), 30)
+              done()
+            }, 4000)
           })
-          .catch((e) => {
-            console.log(e);
-            console.log(e.stack);
-            assert(e);
-            done();
-          });
-      });
+          .catch(done)
+      })
 
     });
   });
