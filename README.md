@@ -1,10 +1,13 @@
 # OrbitDB
 
+> Distributed, peer-to-peer database on IPFS.
+
 [![CircleCI Status](https://circleci.com/gh/haadcode/orbit.svg?style=shield&circle-token=158cdbe02f9dc4ca4cf84d8f54a8b17b4ed881a1)](https://circleci.com/gh/haadcode/orbit-db)
+[![Project Status](https://badge.waffle.io/haadcode/orbit.svg?label=In%20Progress&title=In%20Progress)](https://waffle.io/haadcode/orbit?source=haadcode%2Forbit-db,haadcode%2Forbit-db-counterstore,haadcode%2Forbit-db-eventstore,haadcode%2Forbit-db-feedstore,haadcode%2Forbit-db-kvstore,haadcode%2Forbit-db-store,haadcode%2Fipfs-log)
 
 ## Introduction
 
-Distributed, peer-to-peer database on IPFS.
+`orbit-db` is a distributed, peer-to-peer database for applications. You can use `orbit-db` for different data models: **Key-Value Store**, **Eventlog** (append-only log), **Feed** (add and remove log) and **Counters**. The database gets replicated automatically with peers who are connected to the same database.
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
@@ -23,6 +26,11 @@ Live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXu
 
 _Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
 
+## Install
+```
+npm install orbit-db
+```
+
 ## Data stores
 
 Currently available data stores:
@@ -32,20 +40,26 @@ Currently available data stores:
 - [orbit-db-feedstore](https://github.com/haadcode/orbit-db-feedstore)
 - [orbit-db-counterstore](https://github.com/haadcode/orbit-db-counterstore)
 
-Usage:
+## Usage
+
 ```javascript
-const kvstore = orbit.kvstore('db name')
-const events = orbit.eventlog('db name')
-const feed = orbit.feed('db name')
-const counters = orbit.counter('db name')
+const OrbitDB = require('orbit-db')
+const IPFS = require('ipfs')
+
+OrbitDB.connect('178.62.241.75:3333', 'tester', null, new IPFS(), { allowOffline: true })
+  .then((orbitdb) => {
+    const kvstore = orbitdb.kvstore('db name')
+    const events = orbitdb.eventlog('db name')
+    const feed = orbitdb.feed('db name')
+    const counters = orbitdb.counter('db name')
+
+    kvstore.put('key1', 'hello1')
+      .then(() => kvstore.get('key1'))
+      .then((value) => console.log(value)) // 'hello!'
+  })
 ```
 
 Documentation for individual stores are WIP, please see each store's source code for available public methods.
-
-## Install
-```
-npm install orbit-db
-```
 
 ## Examples
 
