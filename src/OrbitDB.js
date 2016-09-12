@@ -7,14 +7,14 @@ const EventStore    = require('orbit-db-eventstore');
 const FeedStore     = require('orbit-db-feedstore');
 const KeyValueStore = require('orbit-db-kvstore');
 const CounterStore  = require('orbit-db-counterstore');
-const PubSub        = require('./PubSub');
+const Pubsub        = require('orbit-db-pubsub');
 const Cache         = require('./Cache');
 
 class OrbitDB {
-  constructor(ipfs) {
+  constructor(ipfs, id, options) {
     this._ipfs = ipfs;
-    this._pubsub = null;
-    this.user = null;
+    this._pubsub = options && options.broker ? new options.broker(ipfs) : new Pubsub(ipfs)
+    this.user = { id: id }
     this.network = null;
     this.events = new EventEmitter();
     this.stores = {};
@@ -50,17 +50,16 @@ class OrbitDB {
     this.network = null;
   }
 
-  _createStore(Store, dbname, options) {
-    if(!options) options = {};
-    const replicate = options.subscribe !== undefined ? options.subscribe : true;
-    const store = new Store(this._ipfs, this.user.username, dbname, options);
+  _createStore(Store, dbname, options = { subscribe: true }) {
+    // if(!options) options = {};
+    // const replicate = options.subscribe !== undefined ? options.subscribe : true;
+    const store = new Store(this._ipfs, this.user.id, dbname, options);
     this.stores[dbname] = store;
-    return this._subscribe(store, dbname, replicate, options);
+    return this._subscribe(store, dbname, options.subscribe, options);
   }
 
-  _subscribe(store, dbname, subscribe, options) {
-    if(subscribe === undefined) subscribe = true
-
+  _subscribe(store, dbname, subscribe = true, options) {
+    // if(subscribe === undefined) subscribe = true
     store.events.on('data',  this._onData.bind(this))
     store.events.on('write', this._onWrite.bind(this))
     store.events.on('close', this._onClose.bind(this))
@@ -139,7 +138,6 @@ class OrbitDB {
         port = this.network.publishers[0].split(":")[1];
       })
       .then(() => {
-        this._pubsub = new PubSub();
         logger.debug(`Connecting to network ${hash} (${host}:${port})`);
         return this._pubsub.connect(host, port, username, password)
       })
@@ -162,18 +160,19 @@ class OrbitDB {
 }
 
 class OrbitClientFactory {
-  static connect(network, username, password, ipfs, options) {
-    if(!options) options = { allowOffline: false };
-
+  static connect(host, username, password, ipfs, options = { allowOffline: false }) {
+    // if(!options) options = { allowOffline: false };
     if(!ipfs) {
       logger.error("IPFS instance not provided");
       throw new Error("IPFS instance not provided");
     }
 
-    const client = new OrbitDB(ipfs);
-    return client._connect(network, username, password, options.allowOffline)
-      .then(() => client)
+    const client = new OrbitDB(ipfs, options);
+    client.user = { username: username, id: username } // TODO: user id from ipfs hash
+    return Promise.resolve(client)
+    // return client._connect(host, username, password, options.allowOffline)
+    //   .then(() => client)
   }
 }
 
-module.exports = OrbitClientFactory;
+module.exports = OrbitDB;

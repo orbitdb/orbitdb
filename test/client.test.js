@@ -7,7 +7,7 @@ const assert  = require('assert');
 const async   = require('asyncawait/async');
 const await   = require('asyncawait/await');
 const ipfsd   = require('ipfsd-ctl');
-const IPFS    = require('ipfs')
+// const IPFS    = require('ipfs')
 const OrbitDB = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
 
@@ -21,40 +21,40 @@ const password = '';
 
 let ipfs, ipfsDaemon;
 const IpfsApis = [
-{
-  // js-ipfs
-  name: 'js-ipfs',
-  start: () => {
-    return new Promise((resolve, reject) => {
-      const IPFS = require('ipfs')
-      const ipfs = new IPFS('/tmp/orbitdbtest');
-      resolve(ipfs);
-      // ipfs.goOnline((err) => {
-      //   if(err) reject(err)
-      //   resolve(ipfs)
-      // });
-    });
-  },
-  stop: () => Promise.resolve()
-  // stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
-},
+// {
+//   // js-ipfs
+//   name: 'js-ipfs',
+//   start: () => {
+//     return new Promise((resolve, reject) => {
+//       const IPFS = require('ipfs')
+//       const ipfs = new IPFS('/tmp/orbitdbtest');
+//       resolve(ipfs);
+//       // ipfs.goOnline((err) => {
+//       //   if(err) reject(err)
+//       //   resolve(ipfs)
+//       // });
+//     });
+//   },
+//   stop: () => Promise.resolve()
+//   // stop: () => new Promise((resolve, reject) => ipfs.goOffline(resolve))
+// },
 {
   // js-ipfs-api via local daemon
   name: 'js-ipfs-api',
   start: () => {
     return new Promise((resolve, reject) => {
-      ipfsd.disposableApi((err, ipfs) => {
-        if(err) reject(err);
-        resolve(ipfs);
-      });
-      // ipfsd.local((err, node) => {
+      // ipfsd.disposableApi((err, ipfs) => {
       //   if(err) reject(err);
-      //   ipfsDaemon = node;
-      //   ipfsDaemon.startDaemon((err, ipfs) => {
-      //     if(err) reject(err);
-      //     resolve(ipfs);
-      //   });
+      //   resolve(ipfs);
       // });
+      ipfsd.local((err, node) => {
+        if(err) reject(err);
+        ipfsDaemon = node;
+        ipfsDaemon.startDaemon((err, ipfs) => {
+          if(err) reject(err);
+          resolve(ipfs);
+        });
+      });
     });
   },
   stop: () => Promise.resolve()

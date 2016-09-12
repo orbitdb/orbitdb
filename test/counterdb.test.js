@@ -8,7 +8,7 @@ const rimraf      = require('rimraf')
 const OrbitDB     = require('../src/OrbitDB');
 const OrbitServer = require('orbit-server/src/server');
 const ipfsd       = require('ipfsd-ctl');
-const IPFS        = require('ipfs')
+// const IPFS        = require('ipfs')
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
