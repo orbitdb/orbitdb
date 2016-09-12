@@ -46,13 +46,13 @@ let store;
 const queryLoop = (db) => {
   // let timer = new Timer();
   // timer.start();
-  store.add(username + totalQueries).then(() => {
+  db.add(username + totalQueries).then(() => {
     // console.log(`${timer.stop(true)} ms - ${process._getActiveRequests().length} ${process._getActiveHandles().length}`);
     // console.log(util.inspect(process.memoryUsage()));
     totalQueries ++;
     lastTenSeconds ++;
     queriesPerSecond ++;
-    process.nextTick(queryLoop);
+    process.nextTick(() => queryLoop(db));
   });
 };
 
@@ -61,18 +61,11 @@ let run = (() => {
     console.log(`Connecting...`)
     startIpfs()
       .then((ipfs) => OrbitDB.connect(network, username, password, ipfs))
-      .then((orbit) => {
-        console.log("OrbitDB")
-        orbit.events.on('load', () => console.log("loading log"))
-        orbit.events.on('ready', (db) => {
-          console.log("log fetched from history for", db.dbname);
-          store = db;
-          queryLoop();
-        });
-        return orbit;
-      })
       .then((orbit) => orbit.eventlog(channelName))
-      .then(() => {
+      .then((db) => {
+
+        queryLoop(db);
+
         // Metrics output
         setInterval(() => {
           seconds ++;
