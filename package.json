@@ -19,7 +19,7 @@
     "orbit-db-eventstore": "0.1.1",
     "orbit-db-feedstore": "0.1.1",
     "orbit-db-kvstore": "0.1.1",
-    "orbit-db-pubsub": "0.0.2"
+    "orbit-db-pubsub": "0.0.3"
   },
   "devDependencies": {
     "asyncawait": "^1.0.6",
