@@ -89,7 +89,7 @@ class OrbitDB {
   /* Replication request from the message broker */
 
   _onMessage(dbname, hash) {
-    // console.log(".MESSAGE", dbname, hash, this.stores)
+    console.log(".MESSAGE", dbname, hash)
     const store = this.stores[dbname]
     store.sync(hash)
       .then((res) => Cache.set(dbname, hash))
@@ -115,63 +115,6 @@ class OrbitDB {
   _onClose(dbname) {
     if(this._pubsub) this._pubsub.unsubscribe(dbname)
     delete this.stores[dbname]
-  }
-
-  _connect(hash, username, password, allowOffline) {
-    if(allowOffline === undefined) allowOffline = false
-
-    const readNetworkInfo = (hash) => {
-      return new Promise((resolve, reject) => {
-        resolve(JSON.stringify({
-          name: 'Orbit DEV Network',
-          publishers: [hash]
-        }));
-      });
-    };
-
-    let host, port, name;
-    return readNetworkInfo(hash)
-      .then((object) => {
-        this.network = JSON.parse(object);
-        name = this.network.name;
-        host = this.network.publishers[0].split(":")[0];
-        port = this.network.publishers[0].split(":")[1];
-      })
-      .then(() => {
-        logger.debug(`Connecting to network ${hash} (${host}:${port})`);
-        return this._pubsub.connect(host, port, username, password)
-      })
-      .then(() => {
-        logger.debug(`Connected to network ${hash} (${host}:${port})`);
-        this.user = { username: username, id: username } // TODO: user id from ipfs hash
-        return;
-      })
-      .catch((e) => {
-        logger.warn(`Couldn't connect to ${hash} network: ${e.message}`);
-        if(!allowOffline) {
-          logger.debug(`'allowOffline' set to false, terminating`);
-          if(this._pubsub) this._pubsub.disconnect();
-          throw e;
-        }
-        this.user = { username: username, id: username } // TODO: user id from ipfs hash
-        return;
-      });
-  }
-}
-
-class OrbitClientFactory {
-  static connect(host, username, password, ipfs, options = { allowOffline: false }) {
-    // if(!options) options = { allowOffline: false };
-    if(!ipfs) {
-      logger.error("IPFS instance not provided");
-      throw new Error("IPFS instance not provided");
-    }
-
-    const client = new OrbitDB(ipfs, options);
-    client.user = { username: username, id: username } // TODO: user id from ipfs hash
-    return Promise.resolve(client)
-    // return client._connect(host, username, password, options.allowOffline)
-    //   .then(() => client)
   }
 }
 

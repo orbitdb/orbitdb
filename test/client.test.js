@@ -15,9 +15,7 @@ const OrbitServer = require('orbit-server/src/server');
 require('logplease').setLogLevel('ERROR');
 
 // Orbit
-const network = 'localhost:3333';
 const username = 'testrunner';
-const password = '';
 
 let ipfs, ipfsDaemon;
 const IpfsApis = [
@@ -43,26 +41,24 @@ const IpfsApis = [
   name: 'js-ipfs-api',
   start: () => {
     return new Promise((resolve, reject) => {
-      // ipfsd.disposableApi((err, ipfs) => {
-      //   if(err) reject(err);
-      //   resolve(ipfs);
-      // });
-      ipfsd.local((err, node) => {
+      ipfsd.disposableApi((err, ipfs) => {
         if(err) reject(err);
-        ipfsDaemon = node;
-        ipfsDaemon.startDaemon((err, ipfs) => {
-          if(err) reject(err);
-          resolve(ipfs);
-        });
+        resolve(ipfs);
       });
+      // ipfsd.local((err, node) => {
+      //   if(err) reject(err);
+      //   ipfsDaemon = node;
+      //   ipfsDaemon.startDaemon((err, ipfs) => {
+      //     if(err) reject(err);
+      //     resolve(ipfs);
+      //   });
+      // });
     });
   },
   stop: () => Promise.resolve()
   // stop: () => new Promise((resolve, reject) => ipfsDaemon.stopDaemon(resolve))
 }
 ];
-
-OrbitServer.start();
 
 IpfsApis.forEach(function(ipfsApi) {
 
@@ -80,8 +76,8 @@ IpfsApis.forEach(function(ipfsApi) {
         // const networkData = new Buffer(JSON.stringify({ Data: str }));
         // const networkFile = await(ipfs.add(path.resolve(process.cwd(), './test/network.json')));
         // assert.equal(networkFile[0].Hash, network);
-        client = await(OrbitDB.connect(network, username, password, ipfs, { allowOffline: true }));
-        client2 = await(OrbitDB.connect(network, username + "2", password, ipfs, { allowOffline: true }));
+        client = new OrbitDB(ipfs, username)
+        client2 = new OrbitDB(ipfs, username + '2')
       } catch(e) {
         console.log(e.stack);
         assert.equal(e, null);

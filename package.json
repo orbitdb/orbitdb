@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -30,7 +30,8 @@
     "exports-loader": "^0.6.3",
     "ipfs": "^0.15.0",
     "ipfs-api": "https://github.com/haadcode/js-ipfs-api.git",
-    "ipfsd-ctl": "^0.14.0",
+    "go-ipfs-dep": "https://github.com/haadcode/go-ipfs-dep.git",
+    "ipfsd-ctl": "https://github.com/haadcode/js-ipfsd-ctl.git",
     "json-loader": "^0.5.4",
     "lodash": "^4.3.0",
     "mocha": "^2.4.5",
@@ -39,6 +40,7 @@
     "webpack": "^2.1.0-beta.7"
   },
   "scripts": {
+    "postinstall": "./scripts/post_install.sh",
     "test": "mocha",
     "build": "npm run build:dist && npm run build:minified && npm run build:examples",
     "build:dist": "./node_modules/.bin/webpack --config webpack.config.js",

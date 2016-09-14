@@ -1,8 +1,3 @@
 machine:
   node:
-    version: 4.3.1
-  services:
-    - redis
-dependencies:
-  pre:
-    - npm install -g npm@3.x.x
+    version: 6.1.0
