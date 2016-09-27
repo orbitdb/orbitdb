@@ -5,6 +5,7 @@ const EventStore    = require('orbit-db-eventstore')
 const FeedStore     = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
 const CounterStore  = require('orbit-db-counterstore')
+const DocumentStore = require('orbit-db-docstore')
 const Pubsub        = require('orbit-db-pubsub')
 const Cache         = require('./Cache')
 
@@ -35,6 +36,10 @@ class OrbitDB {
 
   counter(dbname, options) {
     return this._createStore(CounterStore, dbname, options)
+  }
+
+  docstore(dbname, options) {
+    return this._createStore(DocumentStore, dbname, options)
   }
 
   disconnect() {
