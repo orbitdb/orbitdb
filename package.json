@@ -29,7 +29,7 @@
     "exports-loader": "^0.6.3",
     "ipfs": "^0.13.0",
     "ipfs-api": "^6.0.3",
-    "ipfsd-ctl": "^0.14.0",
+    "ipfsd-ctl": "^0.16.0",
     "json-loader": "^0.5.4",
     "lodash": "^4.3.0",
     "mocha": "^2.4.5",
