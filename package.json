@@ -14,7 +14,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "logplease": "^1.2.7",
-    "orbit-db-counterstore": "0.1.1",
+    "orbit-db-counterstore": "0.1.2",
     "orbit-db-eventstore": "0.1.1",
     "orbit-db-feedstore": "0.1.1",
     "orbit-db-kvstore": "0.1.1",
