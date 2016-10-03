@@ -7,3 +7,5 @@ dump.rdb
 Vagrantfile
 orbit-db-cache.json
 examples/browser/bundle.js
+dist/*.map
+dist/orbitdb.js

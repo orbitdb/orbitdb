@@ -9,7 +9,6 @@ const await   = require('asyncawait/await');
 const ipfsd   = require('ipfsd-ctl');
 // const IPFS    = require('ipfs')
 const OrbitDB = require('../src/OrbitDB');
-const OrbitServer = require('orbit-server/src/server');
 
 // Mute logging
 require('logplease').setLogLevel('ERROR');
@@ -63,7 +62,7 @@ const IpfsApis = [
 IpfsApis.forEach(function(ipfsApi) {
 
   describe('Orbit Client with ' + ipfsApi.name, function() {
-    this.timeout(40000);
+    this.timeout(20000);
 
     let client, client2, db;
     let channel = 'abcdefghijklmn';
@@ -398,18 +397,6 @@ IpfsApis.forEach(function(ipfsApi) {
 
         it('returns all items when limit is bigger than number of items', async((done) => {
           const messages = db.iterator({ limit: 300 })
-            .collect()
-            .map((e) => e.hash);
-
-          assert.equal(messages.length, items.length);
-          assert.equal(messages[0], items[0]);
-          done();
-        }));
-      });
-
-      describe('Options: reverse', function() {
-        it('returns all items reversed', async((done) => {
-          const messages = db.iterator({ limit: -1, reverse: true })
             .collect()
             .map((e) => e.hash);
 
