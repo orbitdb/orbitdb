@@ -13,7 +13,6 @@
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "js-base64": "^2.1.9",
     "logplease": "^1.2.7",
     "orbit-db-counterstore": "0.1.1",
     "orbit-db-eventstore": "0.1.1",
