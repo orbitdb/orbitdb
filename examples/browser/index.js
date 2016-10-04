@@ -3,8 +3,8 @@
 const IpfsApi = require('exports?IpfsApi!ipfs-api/dist/index.js')
 const OrbitDB = require('../../src/OrbitDB')
 
-const username = 'user1'
-const channel  = 'browsertest1'
+const username = new Date().getTime()
+const channel  = 'browser-example'
 const key      = 'greeting'
 
 try {
@@ -49,7 +49,7 @@ ${key} | ${result}
 ---------------------------------------------------
 Latest Visitors
 ---------------------------------------------------
-${latest.reverse().map((e) => e.payload.value + " - " + new Date(e.payload.meta.ts).toISOString()).join('\n')}
+${latest.reverse().map((e) => e.payload.value + "   (" + e.payload.from + ") at" + new Date(e.payload.meta.ts).toISOString()).join('\n')}
 
 <b>Counter</b>
 ---------------------------------------------------
@@ -57,7 +57,6 @@ Visitor Count: ${count}
 ---------------------------------------------------
 `
           elm.innerHTML = output.split("\n").join("<br>")
-          console.log(output)          
       })
       .catch((e) => {
         elm.innerHTML = "<i>" + e.message + "</i><br><br>" + "Make sure you have an IPFS daemon running at localhost:5001"
