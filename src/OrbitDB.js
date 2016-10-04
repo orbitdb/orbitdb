@@ -11,7 +11,7 @@ const Pubsub        = require('orbit-db-pubsub')
 const Cache         = require('./Cache')
 
 class OrbitDB {
-  constructor(ipfs, id, options) {
+  constructor(ipfs, id = 'default', options = {}) {
     this._ipfs = ipfs
     this._pubsub = options && options.broker ? new options.broker(ipfs) : new Pubsub(ipfs)
     this.user = { id: id }
@@ -52,15 +52,12 @@ class OrbitDB {
 
   /* Private methods */
   _createStore(Store, dbname, options = { subscribe: true }) {
-    // if(!options) options = {}
-    // const replicate = options.subscribe !== undefined ? options.subscribe : true
     const store = new Store(this._ipfs, this.user.id, dbname, options)
     this.stores[dbname] = store
     return this._subscribe(store, dbname, options.subscribe, options)
   }
 
   _subscribe(store, dbname, subscribe = true, options) {
-    // if(subscribe === undefined) subscribe = true
     store.events.on('data',  this._onData.bind(this))
     store.events.on('write', this._onWrite.bind(this))
     store.events.on('close', this._onClose.bind(this))
