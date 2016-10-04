@@ -16,22 +16,15 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 - Aggregation happens on client side and data is eventually consistent
 - Designed to work offline first
 
-Check out a visualization of the data flow at https://github.com/haadcode/proto2
+**Node.js**
 
-Live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/
+<img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo3.gif" width="60%">
 
-![Screenshot](https://raw.githubusercontent.com/haadcode/proto2/master/screenshot.png)
+**Browser**
 
-**NOTE: the README can be out of date, I'm working to get up to date. If you find a problem, please open an issue or a PR.**
+<img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo1.gif" height="60%">
 
-_Currently requires [orbit-server](https://github.com/haadcode/orbit-server) for pubsub communication. This will change in the future as soon as IPFS provides pubsub._
-
-## Install
-```
-npm install orbit-db
-```
-
-## Data stores
+### Data stores
 
 Currently available data stores:
 
@@ -40,177 +33,145 @@ Currently available data stores:
 - [orbit-db-feedstore](https://github.com/haadcode/orbit-db-feedstore)
 - [orbit-db-counterstore](https://github.com/haadcode/orbit-db-counterstore)
 
+## Install
+
+From npm:
+```
+npm install orbit-db
+```
+
+From git:
+```
+git clone https://github.com/haadcode/orbit-db.git
+cd orbit-db
+npm install
+```
+
 ## Usage
 
 ```javascript
+'use strict'
+
+const IpfsApi = require('ipfs-api')
 const OrbitDB = require('orbit-db')
-const IPFS = require('ipfs')
 
-OrbitDB.connect('178.62.241.75:3333', 'tester', null, new IPFS(), { allowOffline: true })
-  .then((orbitdb) => {
-    const kvstore = orbitdb.kvstore('db name')
-    const events = orbitdb.eventlog('db name')
-    const feed = orbitdb.feed('db name')
-    const counters = orbitdb.counter('db name')
+const ipfs = IpfsApi('localhost', '5001')
+const orbitdb = new OrbitDB(ipfs)
 
-    kvstore.put('key1', 'hello1')
-      .then(() => kvstore.get('key1'))
-      .then((value) => console.log(value)) // 'hello!'
+const db = orbitdb.eventlog("feed name")
+
+db.add("hello world")
+  .then(() => {
+    const latest = db.iterator({ limit: 5 }).collect()
+    console.log(latest.join("\n"))
   })
 ```
 
-Documentation for individual stores are WIP, please see each store's source code for available public methods.
-
 ## Examples
 
-*To run the examples below, make sure to run a local [orbit-server](https://github.com/haadcode/orbit-server)*
+### Browser example
 
-### Browser examples
-Build the examples:
 ```bash
 npm install
 npm run build:examples
+npm run examples:browser
 ```
 
-Then open `examples/browser.html` or `examples/index.html`. See the full example [here](https://github.com/haadcode/orbit-db/blob/master/examples/browser/browser.html).
+### Node.js example
 
-```html
-<html>
-  <head>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <script type="text/javascript" src="../dist/orbitdb.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../node_modules/logplease/dist/logplease.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
-
-    <script type="text/javascript">
-      const ipfs = window.Ipfs();
-      OrbitDB.connect('localhost:3333', 'user1', '', ipfs)
-        .then((orbit) => orbit.kvstore('test'))
-        .then((db) => db.put('hello', 'world'))
-        .then((res) => {
-            const result = db.get(key)
-            console.log(result)
-        })
-    </script>
-  </body>
-</html>
-```
-
-### Node.js examples
-
-Before running the examples, install dependencies with:
-```
-npm install
-```
-
-Key-Value store [example](https://github.com/haadcode/orbit-db/blob/master/examples/keyvalue.js):
-```
-node examples/keyvalue.js <host:port> <username> <channel> <key> <value>
-```
-
-Event log [example](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) (run several in separate shells):
-```
-node examples/eventlog.js <host:port> <username> <channel> <data> <interval in ms>
-```
-
-Benchmark writes:
 ```bash
-node examples/benchmark.js <host:port> <username> <channel>;
+npm install
+npm run examples:node
+```
+
+See detailed [example](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) and run it with:
+```bash
+node examples/eventlog.js
+```
+
+```javascript
+'use strict'
+
+const IpfsDaemon = require('ipfs-daemon')
+const OrbitDB = require('orbit-db')
+
+IpfsDaemon()
+  .then((res) => {
+    const orbitdb = new OrbitDB(res.ipfs)
+    const db = orbitdb.eventlog("|orbit-db|examples|eventlog-example")
+
+    const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
+
+    const query = () => {
+      const index = Math.floor(Math.random() * creatures.length)
+      db.add(creatures[index])
+        .then(() => {
+          const latest = db.iterator({ limit: 5 }).collect()
+          let output = ``
+          output += `---------------------------------------------------\n`
+          output += `Latest Visitors\n`
+          output += `---------------------------------------------------\n`
+          output += latest.reverse().map((e) => e.payload.value).join('\n') + `\n`
+          console.log(output)          
+        })
+        .catch((e) => {
+          console.error(e.stack)
+        })
+    }
+
+    setInterval(query, 1000)
+  })
+  .catch((err) => console.error(err))
 ```
 
 ## API
-**NOTE: the API documentation is currently out of date. It will be updated soon!**
 
-_See usage example below_
+**TODO**
 
-_OrbitDB calls its namespaces channels. A channel is similar to "table", "keyspace", "topic", "feed" or "collection" in other db systems._
+- [orbit-db-kvstore](https://github.com/haadcode/orbit-db-kvstore)
+  - put(key, value)
+  - set(key, value)
+  - get(key)
+- [orbit-db-eventstore](https://github.com/haadcode/orbit-db-eventstore)
+  - add(value)
+  - get(hash)
+  - iterator(options)
+- [orbit-db-feedstore](https://github.com/haadcode/orbit-db-feedstore)
+  - add(value)
+  - del(hash)
+  - get(hash)
+  - iterator(options)
+- [orbit-db-counterstore](https://github.com/haadcode/orbit-db-counterstore)
+  - inc([value])
 
-    connect(<host:port>, username, password)
-
-    channel(name, password)
-
-        .add(data: String) // Insert an event to a channel, returns <ipfs-hash> of the event
-
-        .iterator([options]) // Returns an iterator of events
-
-            // options : { 
-            //   gt: <ipfs-hash>,   // Return events newer than <ipfs-hash>
-            //   gte: <ipfs-hash>,  // Return events newer then <ipfs-hash> (inclusive)
-            //   lt: <ipfs-hash>,   // Return events older than <ipfs-hash>
-            //   lte: <ipfs-hash>,  // Return events older than <ipfs-hash> (inclusive)
-            //   limit: -1,         // Number of events to return, -1 returns all, default 1
-            //   reverse: true      // Return items oldest first, default latest first
-            // }
-
-        .put(key, data: String) // Insert (key,value) to a channel
-
-        .get(key) // Retrieve value
-
-        .del({ key: <key or hash> }) // Remove entry
-
-        .delete() // Deletes the channel, all data will be "removed" (unassociated with the channel, actual data is not deleted from ipfs)
-
-## Usage
-```javascript
-const async   = require('asyncawait/async');
-const ipfsAPI = require('ipfs-api');
-const OrbitDB = require('orbit-db');
-
-// local ipfs daemon
-const ipfs = ipfsAPI();
-
-async(() => {
-    // Connect
-    const orbit = await(OrbitClient.connect('localhost:3333', 'usernamne', '', ipfs));
-
-    /* Event Log */
-    const eventlog = orbit.eventlog('eventlog test');
-    const hash = await(eventlog.add('hello')); // <ipfs-hash>
-
-    // Remove event
-    await(eventlog.remove(hash));
-
-    // Iterator options
-    const options = { limit: -1 }; // fetch all messages
-
-    // Get events
-    const iter = eventlog.iterator(options); // Symbol.iterator
-    const next = iter.next(); // { value: <item>, done: false|true}
-
-    // OR:
-    // var all = iter.collect(); // returns all elements as an array
-
-    // OR:
-    // for(let i of iter)
-    //   console.log(i.hash, i.item);
-
-    /* Delete database locally */
-    eventlog.delete();
-
-    /* KV Store */
-    const kvstore = orbit.kvstore('kv test');
-    await(kvstore.put('key1', 'hello world'));
-    kvstore.get('key1'); // returns "hello world"
-    await(kvstore.del('key1'));
-})();
-```
-
-### Development
+## Development
 
 #### Run Tests
 ```bash
 npm test
 ```
 
-Keep tests running while development:
-```bash
-mocha -w
-```
-
 #### Build distributables
 ```bash
-npm install
 npm run build
 ```
+
+## Background
+
+**TODO**
+
+Check out a visualization of the data flow at https://github.com/haadcode/proto2
+
+Live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/
+
+![Screenshot](https://raw.githubusercontent.com/haadcode/proto2/master/screenshot.png)
+
+**TODO: list of modules used, orbit-db-pubsub, etc.**
+
+## Contributing
+
+**TODO**
+
+## License
+
+MIT ©️ 2016, Haadcode
