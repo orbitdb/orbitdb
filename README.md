@@ -16,8 +16,13 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 - Aggregation happens on client side and data is eventually consistent
 - Designed to work offline first
 
-![Screenshot1](https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo1.gif)
-![Screenshot2](https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo3.gif)
+**Node.js**
+
+<img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo3.gif" width="60%">
+
+**Browser**
+
+<img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo1.gif" height="60%">
 
 ### Data stores
 
