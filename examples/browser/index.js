@@ -16,7 +16,7 @@ try {
   const log = orbit.eventlog(channel + ".log")
   const counter = orbit.counter(channel + ".count")
 
-  const creatures = ['👻', '🤖', '🐬', '🐞', '🐈']
+  const creatures = ['👻', '🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
 
   let count = 1
   const query = () => {
@@ -38,18 +38,20 @@ try {
           const count  = counter.value()
 
           const output = 
-`
+`<b>Key-Value Store</b>
 ---------------------------------------------------
-Key       | Value
+Key | Value
 ---------------------------------------------------
 ${key} | ${result}
 ---------------------------------------------------
 
+<b>Eventlog</b>
 ---------------------------------------------------
 Latest Visitors
 ---------------------------------------------------
-${latest.reverse().map((e) => e.payload.value).join('\n')}
+${latest.reverse().map((e) => e.payload.value + " - " + new Date(e.payload.meta.ts).toISOString()).join('\n')}
 
+<b>Counter</b>
 ---------------------------------------------------
 Visitor Count: ${count}
 ---------------------------------------------------

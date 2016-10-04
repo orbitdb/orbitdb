@@ -8,16 +8,17 @@ module.exports = {
   output: {
     filename: './examples/browser/bundle.js'
   },
+  devtool: 'sourcemap',
   node: {
     console: false,
     process: 'mock',
     Buffer: true
   },
   plugins: [
-    // new webpack.optimize.UglifyJsPlugin({
-    //   mangle: false,
-    //   compress: { warnings: false }
-    // })
+    new webpack.optimize.UglifyJsPlugin({
+      mangle: false,
+      compress: { warnings: false }
+    })
   ],
   resolve: {
     modules: [
@@ -40,7 +41,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        include: /node_modules\/(hoek|qs|wreck|boom|log|orbit.+|logplease|crdts|promisify-es|whatwg-fetch|node-fetch|isomorphic-fetch|db\.js)/,
+        include: /node_modules\/(hoek|qs|wreck|boom|ipfs.+|orbit.+|logplease|crdts|promisify-es|whatwg-fetch|node-fetch|isomorphic-fetch|db\.js)/,
         loader: 'babel',
         query: {
           presets: require.resolve('babel-preset-es2015'),
