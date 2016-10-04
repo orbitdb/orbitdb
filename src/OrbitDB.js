@@ -1,8 +1,6 @@
 'use strict'
 
 const EventEmitter  = require('events').EventEmitter
-const Logger        = require('logplease')
-const logger        = Logger.create("orbit-db", { color: Logger.Colors.Magenta })
 const EventStore    = require('orbit-db-eventstore')
 const FeedStore     = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -10,12 +8,14 @@ const CounterStore  = require('orbit-db-counterstore')
 const Pubsub        = require('orbit-db-pubsub')
 const Cache         = require('./Cache')
 
+const defaultNetworkName = 'Orbit DEV Network'
+
 class OrbitDB {
   constructor(ipfs, id = 'default', options = {}) {
     this._ipfs = ipfs
     this._pubsub = options && options.broker ? new options.broker(ipfs) : new Pubsub(ipfs)
     this.user = { id: id }
-    this.network = { name: 'Orbit PUBSUB Network' }
+    this.network = { name: defaultNetworkName }
     this.events = new EventEmitter()
     this.stores = {}
   }
@@ -65,11 +65,11 @@ class OrbitDB {
     if(subscribe && this._pubsub)
       this._pubsub.subscribe(dbname, this._onMessage.bind(this), this._onConnected.bind(this), store.options.maxHistory > 0)
     else
-      store.loadHistory().catch((e) => logger.error(e.stack))
+      store.loadHistory().catch((e) => console.error(e.stack))
 
     Cache.loadCache(options.cacheFile).then(() => {
       const hash = Cache.get(dbname)
-      store.loadHistory(hash).catch((e) => logger.error(e.stack))
+      store.loadHistory(hash).catch((e) => console.error(e.stack))
     })
 
     return store
@@ -79,7 +79,7 @@ class OrbitDB {
   _onConnected(dbname, hash) {
     // console.log(".CONNECTED", dbname, hash)
     const store = this.stores[dbname]
-    store.loadHistory(hash).catch((e) => logger.error(e.stack))
+    store.loadHistory(hash).catch((e) => console.error(e.stack))
   }
 
   /* Replication request from the message broker */
@@ -88,7 +88,7 @@ class OrbitDB {
     const store = this.stores[dbname]
     store.sync(hash)
       .then((res) => Cache.set(dbname, hash))
-      .catch((e) => logger.error(e.stack))
+      .catch((e) => console.error(e.stack))
   }
 
   /* Data events */
