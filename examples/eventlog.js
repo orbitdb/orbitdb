@@ -1,30 +1,42 @@
 'use strict'
 
-const IpfsApi = require('ipfs-api')
+const IpfsDaemon = require('ipfs-daemon')
 const OrbitDB = require('../src/OrbitDB')
 
-const ipfs = IpfsApi('localhost', '5001')
-const orbitdb = new OrbitDB(ipfs)
-const db = orbitdb.eventlog("/orbit-db/examples/eventlog-example")
-
-const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
-
-const query = () => {
-  const index = Math.floor(Math.random() * creatures.length)
-  db.add(creatures[index])
-    .then(() => {
-      const latest = db.iterator({ limit: 5 }).collect()
-      let output = ``
-      output += `---------------------------------------------------\n`
-      output += `Latest Visitors\n`
-      output += `---------------------------------------------------\n`
-      output += latest.reverse().map((e) => e.payload.value).join('\n') + `\n`
-      console.log(output)          
-    })
-    .catch((e) => {
-      console.error(e.stack)
-      console.log("Make sure you have an IPFS daemon running at localhost:5001")
-    })
+const userId = Math.floor(Math.random() * 100)
+const conf = { 
+  IpfsDataDir: '/tmp/' + userId,
+  Addresses: {
+    API: '/ip4/127.0.0.1/tcp/0',
+    Swarm: ['/ip4/0.0.0.0/tcp/0'],
+    Gateway: '/ip4/0.0.0.0/tcp/0'
+  },
 }
 
-setInterval(query, 1000)  
+IpfsDaemon(conf)
+  .then((res) => {
+    const orbitdb = new OrbitDB(res.ipfs)
+    const db = orbitdb.eventlog("|orbit-db|examples|eventlog-example")
+
+    const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
+
+    const query = () => {
+      const index = Math.floor(Math.random() * creatures.length)
+      db.add({ avatar: creatures[index], userId: userId })
+        .then(() => {
+          const latest = db.iterator({ limit: 5 }).collect()
+          let output = ``
+          output += `--------------------\n`
+          output += `Latest Visitors\n`
+          output += `--------------------\n`
+          output += latest.reverse().map((e) => e.payload.value.avatar + "  (userId: " + e.payload.value.userId + ")").join('\n') + `\n`
+          console.log(output)          
+        })
+        .catch((e) => {
+          console.error(e.stack)
+        })
+    }
+
+    setInterval(query, 1000)
+  })
+  .catch((err) => console.error(err))
