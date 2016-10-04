@@ -73,6 +73,7 @@ db.add("hello world")
 
 ```bash
 npm install
+npm run build:examples
 npm run examples:browser
 ```
 
