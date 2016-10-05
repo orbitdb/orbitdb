@@ -46,9 +46,9 @@
     "postinstall": "./scripts/post_install.sh",
     "test": "mocha",
     "build": "npm run build:dist && npm run build:minified && npm run build:examples",
-    "build:dist": "./node_modules/.bin/webpack --config webpack.config.js",
-    "build:minified": "./node_modules/.bin/webpack --config webpack.config.minified.js",
-    "build:examples": "./node_modules/.bin/webpack --config webpack.example.config.js",
+    "build:dist": "./node_modules/.bin/webpack --config conf/webpack.config.js",
+    "build:minified": "./node_modules/.bin/webpack --config conf/webpack.config.minified.js",
+    "build:examples": "./node_modules/.bin/webpack --config conf/webpack.example.config.js",
     "stats": "./node_modules/.bin/webpack --json > stats.json"
   }
 }

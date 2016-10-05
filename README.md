@@ -81,13 +81,15 @@ npm run examples:node
 <img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo3.gif" width="66%">
 
 **Eventlog**
+
 Check the code in [examples/eventlog.js](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) and run it with:
 ```
 LOG=debug node examples/eventlog.js
 ```
 
 **Key-Value**
-Check the code in [examples/keyvalue.js](https://github.com/haadcode/orbit-db/blob/master/examples/eventlog.js) and run it with:
+
+Check the code in [examples/keyvalue.js](https://github.com/haadcode/orbit-db/blob/master/examples/keystore.js) and run it with:
 ```
 LOG=debug node examples/keyvalue.js
 ```

@@ -2,11 +2,11 @@ const webpack = require('webpack')
 const path = require('path')
 
 module.exports = {
-  entry: [
-    './examples/browser/index.js',
-  ],
+  entry: './src/OrbitDB.js',
   output: {
-    filename: './examples/browser/bundle.js'
+    libraryTarget: 'var',
+    library: 'OrbitDB',
+    filename: './dist/orbitdb.min.js'
   },
   devtool: 'sourcemap',
   node: {
@@ -22,10 +22,13 @@ module.exports = {
   ],
   resolve: {
     modules: [
-      path.join(__dirname, 'node_modules')
+      path.join(__dirname, '../node_modules')
     ],
     alias: {
-      'fs': path.join(__dirname + '/node_modules', 'html5-fs'),
+      'fs': path.join(__dirname, '../node_modules', 'html5-fs'),
+      http: 'stream-http',
+      https: 'https-browserify',
+      Buffer: 'buffer'
     }
   },
   module: {
@@ -41,7 +44,7 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        include: /node_modules\/(hoek|qs|wreck|boom|ipfs.+|orbit.+|logplease|crdts|promisify-es|whatwg-fetch|node-fetch|isomorphic-fetch|db\.js)/,
+        include: /node_modules\/(hoek|qs|wreck|boom|ipfs-.+|orbit-db.+|logplease|crdts|promisify-es6)/,
         loader: 'babel',
         query: {
           presets: require.resolve('babel-preset-es2015'),

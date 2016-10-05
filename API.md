@@ -1,8 +1,6 @@
-## orbit-db API documentation
+# orbit-db API documentation
 
-**WORK IN PROGRESS**
-
-#### Table of Contents
+## Table of Contents
 
 - [Getting Started](#getting-started)
 - [orbitdb](#orbitdb)
@@ -31,7 +29,7 @@
     - [orbitdb](#events)
     - [stores](#events)
 
-#### Getting Started
+## Getting Started
 
 Install `orbit-db` and [ipfs](https://www.npmjs.com/package/ipfs) from npm:
 
@@ -67,11 +65,11 @@ const orbitdb = new OrbitDB(ipfs)
 
 Choose this options if you're using `orbitd-db` to develop **Desktop** (or "headless") applications, eg. with [Electron](https://electron.atom.io).
 
-#### orbitdb
+## orbitdb
 
 After creating an instance of `orbitd-db`, you can now access the different data stores.
 
-##### kvstore(name)
+### kvstore(name)
 
   ```javascript
   const db = orbitdb.kvstore('application.settings')
@@ -101,7 +99,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
     See [events](#stores) for full description.
 
-##### eventlog(name)
+### eventlog(name)
 
   ```javascript
   const db = orbitdb.eventlog('site.visitors')
@@ -136,7 +134,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
     See [events](#stores) for full description.
 
-##### feed(name)
+### feed(name)
 
   ```javascript
   const db = orbitdb.feed('orbit-db.issues')
@@ -176,7 +174,8 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
     See [events](#stores) for full description.
 
-##### counter(name)
+### counter(name)
+
   ```javascript
   const counter = orbitdb.counter('song_123.play_count')
   ```
@@ -204,12 +203,13 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
     See [events](#stores) for full description.
 
-##### disconnect()
+### disconnect()
+
   ```javascript
   orbitdb.disconnect()
   ```
 
-##### events
+### events
 
   - **orbitdb**
 
