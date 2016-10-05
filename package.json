@@ -40,8 +40,8 @@
     "webpack": "^2.1.0-beta.7"
   },
   "scripts": {
-    "examples": "npm run example:node",
-    "examples:node": "LOG=debug node examples/eventlog.js",
+    "examples": "npm run examples:node",
+    "examples:node": "node examples/eventlog.js",
     "examples:browser": "open examples/browser/index.html && LOG=debug node examples/start-daemon.js",
     "postinstall": "./scripts/post_install.sh",
     "test": "mocha",

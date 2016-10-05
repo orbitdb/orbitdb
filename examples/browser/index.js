@@ -39,31 +39,31 @@ try {
 
           const output = 
 `<b>Key-Value Store</b>
----------------------------------------------------
+-------------------------------------------------------
 Key | Value
----------------------------------------------------
+-------------------------------------------------------
 ${key} | ${result}
----------------------------------------------------
+-------------------------------------------------------
 
 <b>Eventlog</b>
----------------------------------------------------
+-------------------------------------------------------
 Latest Visitors
----------------------------------------------------
-${latest.reverse().map((e) => e.payload.value + "   (" + e.payload.from + ") at" + new Date(e.payload.meta.ts).toISOString()).join('\n')}
+-------------------------------------------------------
+${latest.reverse().map((e) => e.payload.value + "   at " + new Date(e.payload.meta.ts).toISOString()).join('\n')}
 
 <b>Counter</b>
----------------------------------------------------
+-------------------------------------------------------
 Visitor Count: ${count}
----------------------------------------------------
+-------------------------------------------------------
 `
           elm.innerHTML = output.split("\n").join("<br>")
       })
       .catch((e) => {
-        elm.innerHTML = "<i>" + e.message + "</i><br><br>" + "Make sure you have an IPFS daemon running at localhost:5001"
+        elm.innerHTML = "<i>" + e.message + "</i><br><br>" + "Waiting for IPFS daemon to start..."
         console.error(e.stack)
       })
   }
-  setInterval(query, 1000)
+  setInterval(query, Math.random() * 3 * 1000)
 
 } catch(e) {
   console.error(e.stack)

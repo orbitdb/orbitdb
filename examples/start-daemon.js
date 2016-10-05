@@ -1,6 +1,7 @@
 const IpfsDaemon = require('ipfs-daemon')
+
 module.exports = IpfsDaemon({
-  IpfsDataDir: './tmp',
+  IpfsDataDir: '/tmp/orbit-db-examples',
   API: {
     HTTPHeaders: {
       "Access-Control-Allow-Origin": ['*'],
@@ -9,5 +10,5 @@ module.exports = IpfsDaemon({
     } 
   }
 })
-.then((res) => console.log("started"))
+.then((res) => console.log("Started IPFS daemon"))
 .catch((err) => console.error(err))

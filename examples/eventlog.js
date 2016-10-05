@@ -3,7 +3,7 @@
 const IpfsDaemon = require('ipfs-daemon')
 const OrbitDB = require('../src/OrbitDB')
 
-const userId = Math.floor(Math.random() * 100)
+const userId = Math.floor(Math.random() * 1000)
 const conf = { 
   IpfsDataDir: '/tmp/' + userId,
   Addresses: {
@@ -12,6 +12,8 @@ const conf = {
     Gateway: '/ip4/0.0.0.0/tcp/0'
   },
 }
+
+console.log("Starting...")
 
 IpfsDaemon(conf)
   .then((res) => {

@@ -1,10 +1,7 @@
 'use strict'
 
-const IpfsApi = require('ipfs-api')
+const IpfsDaemon = require('ipfs-daemon')
 const OrbitDB = require('../src/OrbitDB')
-
-const username = process.argv[2] ? process.argv[2] : 'testrunner'
-const channelName = process.argv[3] ? process.argv[3] : 'c1'
 
 // Metrics
 let totalQueries = 0
@@ -14,7 +11,7 @@ let lastTenSeconds = 0
 
 // Main loop
 const queryLoop = (db) => {
-  db.add(username + totalQueries).then(() => {
+  db.add(totalQueries).then(() => {
     totalQueries ++
     lastTenSeconds ++
     queriesPerSecond ++
@@ -22,28 +19,30 @@ const queryLoop = (db) => {
   })
 }
 
+// Start
 let run = (() => {
-    // Connect
-    console.log(`Connecting...`)
-    const ipfs = IpfsApi('localhost', '5001')
-    const orbit = new OrbitDB(ipfs, 'benchmark')
-    const db = orbit.eventlog(channelName)
+  IpfsDaemon()
+    .then((res) => {
+      const orbit = new OrbitDB(res.ipfs, 'benchmark')
+      const db = orbit.eventlog('orbit-db.benchmark')
 
-    // Metrics output
-    setInterval(() => {
-      seconds ++
-      if(seconds % 10 === 0) {
-        console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
-        if(lastTenSeconds === 0)
-          throw new Error("Problems!")
-        lastTenSeconds = 0
-      }
-      console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
-      queriesPerSecond = 0
-    }, 1000)
+      // Metrics output
+      setInterval(() => {
+        seconds ++
+        if(seconds % 10 === 0) {
+          console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
+          if(lastTenSeconds === 0)
+            throw new Error("Problems!")
+          lastTenSeconds = 0
+        }
+        console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
+        queriesPerSecond = 0
+      }, 1000)
 
-    // Start
-    queryLoop(db)
+      // Start the main loop
+      queryLoop(db)
+    })
+    .catch((e) => console.error(e))
 })()
 
 module.exports = run
