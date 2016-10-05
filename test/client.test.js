@@ -24,7 +24,7 @@ IpfsApis.forEach(function(ipfsApi) {
     let channel = 'abcdefghijklmn'
     const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json')
 
-    before(async(function (done) {
+    before(function (done) {
       ipfsApi.start()
         .then((res) => {
           ipfs = res
@@ -32,15 +32,15 @@ IpfsApis.forEach(function(ipfsApi) {
           client2 = new OrbitDB(ipfs, username + '2')
           done()
         })
-        .catch((e) => console.log(e.stack))
-    }))
+        .catch(done)
+    })
 
-    after(async((done) => {
+    after((done) => {
       if(db) db.delete()
       if(client) client.disconnect()
       if(client2) client2.disconnect()
       ipfsApi.stop().then(() => done())
-    }))
+    })
 
     describe('Add events', function() {
       beforeEach(() => {
@@ -99,26 +99,24 @@ IpfsApis.forEach(function(ipfsApi) {
         db.delete()
       })
 
-      it('deletes an item when only one item in the database', async((done) => {
+      it('deletes an item when only one item in the database', async(() => {
         const head = await(db.add('hello1'))
         const delop = await(db.remove(head))
         const items = db.iterator().collect()
         assert.equal(delop.startsWith('Qm'), true)
         assert.equal(items.length, 0)
-        done()
       }))
 
-      it('deletes an item when two items in the database', async((done) => {
+      it('deletes an item when two items in the database', async(() => {
         await(db.add('hello1'))
         const head = await(db.add('hello2'))
         await(db.remove(head))
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 1)
         assert.equal(items[0].payload.value, 'hello1')
-        done()
       }))
 
-      it('deletes an item between adds', async((done) => {
+      it('deletes an item between adds', async(() => {
         const head = await(db.add('hello1'))
         await(db.add('hello2'))
         db.remove(head)
@@ -128,7 +126,6 @@ IpfsApis.forEach(function(ipfsApi) {
         assert.equal(items[0].hash.startsWith('Qm'), true)
         assert.equal(items[0].payload.key, null)
         assert.equal(items[0].payload.value, 'hello3')
-        done()
       }))
     })
 
@@ -136,7 +133,7 @@ IpfsApis.forEach(function(ipfsApi) {
       let items = []
       const itemCount = 5
 
-      beforeEach(async((done) => {
+      beforeEach(async(() => {
         items = []
         db = client.eventlog(channel, { subscribe: false })
         db.delete()
@@ -144,7 +141,6 @@ IpfsApis.forEach(function(ipfsApi) {
           const hash = await(db.add('hello' + i))
           items.push(hash)
         }
-        done()
       }))
 
       describe('Defaults', function() {
@@ -450,29 +446,26 @@ IpfsApis.forEach(function(ipfsApi) {
         db.close()
       })
 
-      it('put', async((done) => {
+      it('put', async(() => {
         await(db.put('key1', 'hello!'))
         const value = db.get('key1')
         assert.equal(value, 'hello!')
-        done()
       }))
 
-      it('get', async((done) => {
+      it('get', async(() => {
         await(db.put('key1', 'hello!'))
         const value = db.get('key1')
         assert.equal(value, 'hello!')
-        done()
       }))
 
-      it('put updates a value', async((done) => {
+      it('put updates a value', async(() => {
         await(db.put('key1', 'hello!'))
         await(db.put('key1', 'hello again'))
         const value = db.get('key1')
         assert.equal(value, 'hello again')
-        done()
       }))
 
-      it('put/get - multiple keys', async((done) => {
+      it('put/get - multiple keys', async(() => {
         await(db.put('key1', 'hello1'))
         await(db.put('key2', 'hello2'))
         await(db.put('key3', 'hello3'))
@@ -482,58 +475,53 @@ IpfsApis.forEach(function(ipfsApi) {
         assert.equal(v1, 'hello1')
         assert.equal(v2, 'hello2')
         assert.equal(v3, 'hello3')
-        done()
       }))
 
-      it('deletes a key', async((done) => {
+      it('deletes a key', async(() => {
         await(db.put('key1', 'hello!'))
         await(db.del('key1'))
         const value = db.get('key1')
         assert.equal(value, null)
-        done()
       }))
 
-      it('deletes a key after multiple updates', async((done) => {
+      it('deletes a key after multiple updates', async(() => {
         await(db.put('key1', 'hello1'))
         await(db.put('key1', 'hello2'))
         await(db.put('key1', 'hello3'))
         await(db.del('key1'))
         const value = db.get('key1')
         assert.equal(value, null)
-        done()
       }))
 
-      it('get - integer value', async((done) => {
+      it('get - integer value', async(() => {
         await(db.put('key1', 123))
         const v1 = db.get('key1')
         assert.equal(v1, 123)
-        done()
       }))
 
-      it('get - object value', async((done) => {
+      it('get - object value', (done) => {
         const val = { one: 'first', two: 2 }
-        await(db.put('key1', val))
-        const v1 = db.get('key1')
-        assert.equal(_.isEqual(v1, val), true)
-        done()
-      }))
+        db.put('key1', val).then(() => {
+          const v1 = db.get('key1')
+          assert.equal(_.isEqual(v1, val), true)
+          done()
+        })
+      })
 
-      it('get - array value', async((done) => {
+      it('get - array value', async(() => {
         const val = [1, 2, 3, 4, 5]
         await(db.put('key1', val))
         const v1 = db.get('key1')
         assert.equal(_.isEqual(v1, val), true)
-        done()
       }))
 
-      it('syncs databases', async((done) => {
+      it('syncs databases', async(() => {
         const db2 = await(client2.kvstore(channel, { subscribe: false }))
         db2.delete()
         db2.events.on('write', async((dbname, hash) => {
           await(db.sync(hash))
           const value = db.get('key1')
           assert.equal(value, 'hello2')
-          done()
         }))
         await(db.put('key1', 'hello1'))
         await(db2.put('key1', 'hello2'))
