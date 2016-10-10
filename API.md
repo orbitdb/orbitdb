@@ -20,6 +20,12 @@
     - [iterator([options])](#feedname)
     - [remove(hash)](#feedname)
     - [events](#feedname)
+  - [docstore(name, options)](#docstorename-options)
+    - [put(doc)]()
+    - [get(hash)]()
+    - [query(mapper)]()
+    - [del(key)]()
+    - [events]()
   - [counter(name)](#countername)
     - [value](#countername)
     - [inc([amount])](#countername)
@@ -71,6 +77,9 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
 ### kvstore(name)
 
+  Package: 
+  [orbit-db-kvstore](https://github.com/haadcode/orbit-db-kvstore)
+
   ```javascript
   const db = orbitdb.kvstore('application.settings')
   ```
@@ -100,6 +109,9 @@ After creating an instance of `orbitd-db`, you can now access the different data
     See [events](#stores) for full description.
 
 ### eventlog(name)
+
+  Package: 
+  [orbit-db-eventlog](https://github.com/haadcode/orbit-db-eventlog)
 
   ```javascript
   const db = orbitdb.eventlog('site.visitors')
@@ -135,6 +147,9 @@ After creating an instance of `orbitd-db`, you can now access the different data
     See [events](#stores) for full description.
 
 ### feed(name)
+
+  Package: 
+  [orbit-db-feed](https://github.com/haadcode/orbit-db-feed)
 
   ```javascript
   const db = orbitdb.feed('orbit-db.issues')
@@ -174,7 +189,56 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
     See [events](#stores) for full description.
 
+### docstore(name, options)
+
+  Package: 
+  [orbit-db-docstore](https://github.com/shamb0t/orbit-db-docstore)
+
+  ```javascript
+  const db = orbitdb.docstore('orbit.users.shamb0t.profile')
+  ```
+
+  By default, documents are indexed by field '_id'. You can also specify the field to index by:
+
+  ```javascript
+  const db = orbitdb.docstore('orbit.users.shamb0t.profile', { indexBy: 'name' })
+  ```
+
+  - **put(doc)**
+    ```javascript
+    db.put({ _id: 'QmAwesomeIpfsHash', name: 'shamb0t', followers: 500 }).then((hash) => ...)
+    ```
+    
+  - **get(key)**
+    ```javascript
+    const profile = db.get('shamb0t')
+      .map((e) => e.payload.value)
+    // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
+    ```
+    
+  - **query(mapper)**
+    ```javascript
+    const all = db.query((doc) => doc.followers >= 500)
+    // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
+    ```
+
+  - **del(key)**
+    ```javascript
+    db.del('shamb0t').then((removed) => ...)
+    ```
+    
+  - **events**
+
+    ```javascript
+    db.events.on('data', (dbname, event) => ... )
+    ```
+
+    See [events](#stores) for full description.
+
 ### counter(name)
+
+  Package: 
+  [orbit-db-counter](https://github.com/haadcode/orbit-db-counter)
 
   ```javascript
   const counter = orbitdb.counter('song_123.play_count')

@@ -9,6 +9,7 @@ Data in `orbit-db` can be stored in a
 - **Key-Value Store**
 - **Eventlog** (append-only log)
 - **Feed** (add and remove log)
+- **Documents** (indexed by custom fields)
 - **Counters**
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
@@ -63,6 +64,7 @@ See [API documentation](https://github.com/haadcode/orbit-db/blob/master/API.md)
   - [kvstore(name)](https://github.com/haadcode/orbit-db/blob/master/API.md#kvstorename)
   - [eventlog(name)](https://github.com/haadcode/orbit-db/blob/master/API.md#eventlogname)
   - [feed(name)](https://github.com/haadcode/orbit-db/blob/master/API.md#feedname)
+  - [docstore(name, options)](https://github.com/haadcode/orbit-db/blob/master/API.md#docstorename-options)
   - [counter(name)](https://github.com/haadcode/orbit-db/blob/master/API.md#countername)
   - [disconnect()](https://github.com/haadcode/orbit-db/blob/master/API.md#disconnect)
   - [events](https://github.com/haadcode/orbit-db/blob/master/API.md#events)
