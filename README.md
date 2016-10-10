@@ -17,6 +17,22 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 [![CircleCI Status](https://circleci.com/gh/haadcode/orbit-db.svg?style=shield)](https://circleci.com/gh/haadcode/orbit-db)
 [![Project Status](https://badge.waffle.io/haadcode/orbit.svg?label=In%20Progress&title=In%20Progress)](https://waffle.io/haadcode/orbit?source=haadcode%2Forbit-db,haadcode%2Forbit-db-counterstore,haadcode%2Forbit-db-eventstore,haadcode%2Forbit-db-feedstore,haadcode%2Forbit-db-kvstore,haadcode%2Forbit-db-store,haadcode%2Fipfs-log)
 
+## Table of Contents
+
+- [Usage](#usage)
+- [API](#api)
+- [Examples](#examples)
+  - [Install dependencies](#install-dependencies)
+  - [Browser example](#browser-example)
+  - [Node.js example](#nodejs-example)
+- [Development](#development)
+    - [Run Tests](#run-tests)
+    - [Build](#build)
+    - [Benchmark](#benchmark)
+- [Background](#background)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Usage
 ```
 npm install orbit-db ipfs-api
@@ -38,7 +54,7 @@ db.add("hello world")
   })
 ```
 
-### API
+## API
 
 See [API documentation](https://github.com/haadcode/orbit-db/blob/master/API.md) for the full documentation.
 
