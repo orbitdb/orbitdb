@@ -64,7 +64,7 @@ IpfsApis.forEach(function(ipfsApi) {
             assert.notEqual(second, null)
             assert.notEqual(second, head)
             assert.equal(second.startsWith('Qm'), true)
-            assert.equal(second.length, 46)              
+            assert.equal(second.length, 46)
           })
       })
 
@@ -88,7 +88,7 @@ IpfsApis.forEach(function(ipfsApi) {
           .then((hash) => {
             assert.notEqual(hash, null)
             assert.equal(hash.startsWith('Qm'), true)
-            assert.equal(hash.length, 46)            
+            assert.equal(hash.length, 46)
           })
       })
     })
@@ -523,8 +523,92 @@ IpfsApis.forEach(function(ipfsApi) {
           const value = db.get('key1')
           assert.equal(value, 'hello2')
         }))
-        await(db.put('key1', 'hello1'))
-        await(db2.put('key1', 'hello2'))
+      }))
+    })
+
+    describe('Document Store - default index \'_id\'', function() {
+      beforeEach(() => {
+        db = client.docstore(channel, { subscribe: false })
+        db.delete()
+      })
+
+      afterEach(() => {
+        db.close()
+      })
+
+      it('put', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'all the things'}))
+        const value = db.get('hello world')
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'all the things'}])
+      }))
+
+      it('get - partial term match', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'some things'}))
+        await(db.put({ _id: 'hello universe', doc: 'all the things'}))
+        await(db.put({ _id: 'sup world', doc: 'other things'}))
+        const value = db.get('hello')
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'some things' },
+                                 { _id: 'hello universe', doc: 'all the things'}])
+      }))
+
+      it('get after delete', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'some things'}))
+        await(db.put({ _id: 'hello universe', doc: 'all the things'}))
+        await(db.put({ _id: 'sup world', doc: 'other things'}))
+        await(db.del('hello universe'))
+        const value = db.get('hello')
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'some things'}])
+      }))
+
+      it('put updates a value', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'all the things'}))
+        await(db.put({ _id: 'hello world', doc: 'some of the things'}))
+        const value = db.get('hello')
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'some of the things'}])
+      }))
+
+      it('query', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'all the things', views: 17}))
+        await(db.put({ _id: 'sup world', doc: 'some of the things', views: 10}))
+        await(db.put({ _id: 'hello other world', doc: 'none of the things', views: 5}))
+        await(db.put({ _id: 'hey universe', doc: ''}))
+        const value = db.query((e) => e.views > 5)
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'all the things', views: 17},
+                                 { _id: 'sup world', doc: 'some of the things', views: 10}])
+      }))
+
+      it('query after delete', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'all the things', views: 17}))
+        await(db.put({ _id: 'sup world', doc: 'some of the things', views: 10}))
+        await(db.put({ _id: 'hello other world', doc: 'none of the things', views: 5}))
+        await(db.del('hello world'))
+        await(db.put({ _id: 'hey universe', doc: ''}))
+        const value = db.query((e) => e.views > 5)
+        assert.deepEqual(value, [{ _id: 'sup world', doc: 'some of the things', views: 10}])
+      }))
+    })
+
+    describe('Document Store - specified index', function() {
+      beforeEach(() => {
+        db = client.docstore(channel, { subscribe: false, indexBy: 'doc' })
+        db.delete()
+      })
+
+      afterEach(() => {
+        db.close()
+      })
+
+      it('put', async(() => {
+        await(db.put({ _id: 'hello world', doc: 'all the things'}))
+        const value = db.get('all')
+        assert.deepEqual(value, [{ _id: 'hello world', doc: 'all the things'}])
+      }))
+
+      it('get - matches specified index', async(() => {
+        await(db.put({ _id: 'hello universe', doc: 'all the things'}))
+        await(db.put({ _id: 'hello world', doc: 'some things'}))
+        const value = db.get('all')
+        assert.deepEqual(value, [{ _id: 'hello universe', doc: 'all the things'}])
       }))
     })
   })
