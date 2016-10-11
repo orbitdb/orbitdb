@@ -36,7 +36,7 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 
 ## Usage
 ```
-npm install orbit-db ipfs-api
+npm install orbit-db ipfs-api@https://github.com/haadcode/js-ipfs-api.git
 ```
 
 ```javascript
