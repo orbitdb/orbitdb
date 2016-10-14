@@ -142,8 +142,12 @@ Check out a visualization of the data flow at https://github.com/haadcode/proto2
 
 ## Contributing
 
-Issues, comments, feedback, feature requests and PRs highly welcome!
+[![](https://img.shields.io/badge/freenode-%23ipfs-blue.svg?style=flat-square)](http://webchat.freenode.net/?channels=%23ipfs)
+
+I would be happy to accept PRs! If you want to work on something, it'd be good to talk beforehand to make sure nobody else is working on it. You can reach me on Twitter [@haadcode](https://twitter.com/haadcode) or on IRC #ipfs on Freenode, or in the comments of the [issues section](https://github.com/haadcode/orbit/issues).
+
+A good place to start are the issues labelled ["help wanted"](https://github.com/haadcode/orbit-db/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc) or the project's [status board](https://waffle.io/haadcode/orbit-db).
 
 ## License
 
-MIT ©️ 2016 Haadcode
+[MIT](LICENSE) ©️ 2016 Haadcode
