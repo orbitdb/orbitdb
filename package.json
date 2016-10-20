@@ -35,7 +35,6 @@
     "bluebird": "^3.4.6",
     "exports-loader": "^0.6.3",
     "fs-pull-blob-store": "^0.3.0",
-    "html5-fs": "https://github.com/haadcode/html5-fs.git",
     "ipfs-daemon": "0.0.3",
     "ipfs-test-apis": "0.0.1",
     "json-loader": "^0.5.4",

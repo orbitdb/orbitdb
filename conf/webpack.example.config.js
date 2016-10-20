@@ -21,10 +21,7 @@ module.exports = {
   resolve: {
     modules: [
       path.join(__dirname, '../node_modules')
-    ],
-    alias: {
-      'fs': path.join(__dirname, '../node_modules', 'html5-fs'),
-    }
+    ]
   },
   module: {
     loaders: [
