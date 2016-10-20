@@ -1,55 +1,38 @@
 'use strict'
 
-const fs   = require('fs')
-const path = require('path')
-
 let filePath
 let cache = {}
 
-class Cache {
-  static set(key, value) {
-    return new Promise((resolve, reject) => {
-      cache[key] = value
-      if(filePath) {
-        // console.log("write cache:", filePath, JSON.stringify(cache, null, 2))
-        fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", resolve)
-      } else {
-        resolve()
-      }
-    })
-  }
+let store = typeof window !== 'undefined' && window.localStorage
 
-  static get(key) {
+if (!store) {
+  const LocalStorage = require('node-localstorage').LocalStorage
+  store = new LocalStorage('./scratch')
+}
+
+module.exports = {
+  set (key, value) {
+    cache[key] = value
+    if (filePath) {
+      // console.log("write cache:", filePath, JSON.stringify(cache, null, 2))
+      store.setItem(filePath, JSON.stringify(cache, null, 2) + '\n')
+    }
+  },
+
+  get (key) {
     return cache[key]
-  }
+  },
 
-  static loadCache(cacheFile) {
+  loadCache (cacheFile) {
     cache = {}
-    return new Promise((resolve, reject) => {
-      // console.log("load cache:", cacheFile)
-      if(cacheFile) {
-        filePath = cacheFile
-        fs.exists(cacheFile, (res) => {
-          if(res) {
-            fs.readFile(cacheFile, (err, res) => {
-              cache = JSON.parse(res)
-              // console.log("cache:", cache)
-              resolve()
-            })
-          } else {
-            // console.log("cache file doesn't exist")
-            resolve()
-          }
-        })
-      } else {
-        resolve()
-      }
-    })
-  }
+    // console.log("load cache:", cacheFile)
+    if (cacheFile) {
+      filePath = cacheFile
+      cache = JSON.parse(store.getItem(cacheFile) || '{}')
+    }
+  },
 
-  static reset() {
+  reset () {
     cache = {}
   }
 }
-
-module.exports = Cache

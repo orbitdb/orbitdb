@@ -72,10 +72,9 @@ class OrbitDB {
     else
       store.loadHistory().catch((e) => console.error(e.stack))
 
-    Cache.loadCache(options.cacheFile).then(() => {
-      const hash = Cache.get(dbname)
-      store.loadHistory(hash).catch((e) => console.error(e.stack))
-    })
+    Cache.loadCache(options.cacheFile)
+    const hash = Cache.get(dbname)
+    store.loadHistory(hash).catch((e) => console.error(e.stack))
 
     return store
   }
