@@ -1,14 +1,11 @@
 'use strict'
 
+const path = require('path')
+
 let filePath
 let cache = {}
 
 let store = typeof window !== 'undefined' && window.localStorage
-
-if (!store) {
-  const LocalStorage = require('node-localstorage').LocalStorage
-  store = new LocalStorage('./scratch')
-}
 
 module.exports = {
   set (key, value) {
@@ -25,7 +22,12 @@ module.exports = {
 
   loadCache (cacheFile) {
     cache = {}
-    // console.log("load cache:", cacheFile)
+    if (!store) {
+      const LocalStorage = require('node-localstorage').LocalStorage
+      const storePath = path.join(require('os').homedir(), cacheFile || 'stats')
+      store = new LocalStorage(storePath)
+    }
+
     if (cacheFile) {
       filePath = cacheFile
       cache = JSON.parse(store.getItem(cacheFile) || '{}')

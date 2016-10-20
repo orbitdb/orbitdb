@@ -56,7 +56,7 @@ class OrbitDB {
   }
 
   /* Private methods */
-  _createStore(Store, dbname, options = { subscribe: true, cacheFile: 'orbit-db.json' }) {
+  _createStore(Store, dbname, options = { subscribe: true }) {
     const store = new Store(this._ipfs, this.user.id, dbname, options)
     this.stores[dbname] = store
     return this._subscribe(store, dbname, options.subscribe, options)
