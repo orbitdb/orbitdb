@@ -20,7 +20,7 @@ module.exports = {
     return cache[key]
   },
 
-  loadCache (cacheFile) {
+  loadCache (cacheFile = 'orbit-cache') {
     cache = {}
     if (!store) {
       const LocalStorage = require('node-localstorage').LocalStorage
@@ -28,10 +28,8 @@ module.exports = {
       store = new LocalStorage(storePath)
     }
 
-    if (cacheFile) {
-      filePath = cacheFile
-      cache = JSON.parse(store.getItem(cacheFile) || '{}')
-    }
+    filePath = cacheFile
+    cache = JSON.parse(store.getItem(cacheFile) || '{}')
   },
 
   reset () {
