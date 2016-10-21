@@ -56,7 +56,7 @@ class OrbitDB {
   }
 
   /* Private methods */
-  _createStore(Store, dbname, options = { subscribe: true, cacheFile: 'orbit-db.json' }) {
+  _createStore(Store, dbname, options = { subscribe: true }) {
     const store = new Store(this._ipfs, this.user.id, dbname, options)
     this.stores[dbname] = store
     return this._subscribe(store, dbname, options.subscribe, options)
@@ -72,10 +72,9 @@ class OrbitDB {
     else
       store.loadHistory().catch((e) => console.error(e.stack))
 
-    Cache.loadCache(options.cacheFile).then(() => {
-      const hash = Cache.get(dbname)
-      store.loadHistory(hash).catch((e) => console.error(e.stack))
-    })
+    Cache.loadCache(options.cacheFile)
+    const hash = Cache.get(dbname)
+    store.loadHistory(hash).catch((e) => console.error(e.stack))
 
     return store
   }

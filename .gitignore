@@ -10,3 +10,4 @@ examples/browser/bundle.js
 examples/browser/*.map
 dist/*.map
 dist/orbitdb.js
+scratch
