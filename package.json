@@ -15,7 +15,7 @@
   "dependencies": {
     "logplease": "^1.2.7",
     "orbit-db-counterstore": "0.1.4",
-    "orbit-db-eventstore": "0.1.5",
+    "orbit-db-eventstore": "0.1.6",
     "orbit-db-feedstore": "0.1.4",
     "orbit-db-kvstore": "0.1.3",
     "orbit-db-pubsub": "0.0.6",
