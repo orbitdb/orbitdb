@@ -33,7 +33,7 @@
     "fs-pull-blob-store": "^0.3.0",
     "html5-fs": "https://github.com/haadcode/html5-fs.git",
     "ipfs-daemon": "0.0.3",
-    "ipfs-test-apis": "0.0.1",
+    "ipfs-test-apis": "0.0.6",
     "json-loader": "^0.5.4",
     "lodash": "^4.3.0",
     "mocha": "^3.1.0",
