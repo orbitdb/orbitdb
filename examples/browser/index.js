@@ -35,7 +35,7 @@ try {
       .then(() => {
           const result = db.get(key)
           const latest = log.iterator({ limit: 5 }).collect()
-          const count  = counter.value()
+          const count  = counter.value
 
           const output = 
 `<b>Key-Value Store</b>
