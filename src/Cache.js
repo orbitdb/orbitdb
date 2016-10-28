@@ -26,20 +26,41 @@ class Cache {
   static loadCache(cacheFile) {
     cache = {}
     return new Promise((resolve, reject) => {
+
       // console.log("load cache:", cacheFile)
       if(cacheFile) {
-        filePath = cacheFile
-        fs.exists(cacheFile, (res) => {
-          if(res) {
-            fs.readFile(cacheFile, (err, res) => {
-              cache = JSON.parse(res)
-              // console.log("cache:", cache)
+        Cache.initFs().then(() => {
+          filePath = cacheFile
+          fs.exists(cacheFile, (res) => {
+            if(res) {
+              fs.readFile(cacheFile, (err, res) => {
+                cache = JSON.parse(res)
+                // console.log("cache:", cache)
+                resolve()
+              })
+            } else {
+              // console.log("cache file doesn't exist")
               resolve()
-            })
+            }
+          })          
+        })
+      } else {
+        resolve()
+      }
+    })
+  }
+
+  static initFs()  {
+    const isNodejs = process && process.version ? true : false
+    return new Promise((resolve, reject) => {
+      if(!isNodejs) {
+        fs.init(1 * 1024 * 1024, (err) => {
+          if(err) {
+            console.error("Couldn't initialize file system:", err)
           } else {
-            // console.log("cache file doesn't exist")
-            resolve()
+            // console.debug("FileSystem initialized")
           }
+          resolve()
         })
       } else {
         resolve()
