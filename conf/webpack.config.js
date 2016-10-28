@@ -21,7 +21,6 @@ module.exports = {
       path.join(__dirname, '../node_modules')
     ],
     alias: {
-      'fs': path.join(__dirname, '../node_modules', 'html5-fs'),
       http: 'stream-http',
       https: 'https-browserify',
       Buffer: 'buffer'

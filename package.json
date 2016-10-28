@@ -12,19 +12,22 @@
     "node": "^6.x.x"
   },
   "browser": {
-    "fs": "html5-fs"
+    "fs-pull-blob-store": "idb-pull-blob-store"
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "logplease": "^1.2.9",
-    "orbit-db-store": "^0.1.9",
+    "fs-pull-blob-store": "^0.3.0",
+    "idb-pull-blob-store": "^0.5.1",
     "ipfs-log": "^1.5.2",
+    "logplease": "^1.2.9",
     "orbit-db-counterstore": "0.1.7",
+    "orbit-db-docstore": "0.0.8",
     "orbit-db-eventstore": "0.1.8",
     "orbit-db-feedstore": "0.1.7",
     "orbit-db-kvstore": "0.1.6",
     "orbit-db-pubsub": "0.0.6",
-    "orbit-db-docstore": "0.0.8"
+    "orbit-db-store": "^0.1.9",
+    "pull-stream": "^3.4.5"
   },
   "devDependencies": {
     "asyncawait": "^1.0.6",
@@ -35,8 +38,6 @@
     "babel-preset-es2015": "^6.6.0",
     "bluebird": "^3.4.6",
     "exports-loader": "^0.6.3",
-    "fs-pull-blob-store": "^0.4.1",
-    "html5-fs": "https://github.com/haadcode/html5-fs.git",
     "ipfs-daemon": "0.1.1",
     "ipfs-test-apis": "0.0.6",
     "json-loader": "^0.5.4",

@@ -1,18 +1,28 @@
 'use strict'
 
-const fs   = require('fs')
-const path = require('path')
+const pull = require('pull-stream')
+const BlobStore = require('fs-pull-blob-store')
 
 let filePath
+let store
 let cache = {}
 
 class Cache {
   static set(key, value) {
     return new Promise((resolve, reject) => {
       cache[key] = value
-      if(filePath) {
+      if(filePath && store) {
         // console.log("write cache:", filePath, JSON.stringify(cache, null, 2))
-        fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", resolve)
+        pull(
+          pull.values([cache]),
+          pull.map((v) => JSON.stringify(v, null, 2)),
+          store.write(filePath, (err) => {
+            if (err) {
+              return reject(err)
+            }
+            resolve()
+          })
+        )
       } else {
         resolve()
       }
@@ -23,48 +33,23 @@ class Cache {
     return cache[key]
   }
 
-  static loadCache(cacheFile) {
+  static loadCache(cacheFile = 'orbit-db.cache') {
     cache = {}
+    store = new BlobStore(cacheFile)
     return new Promise((resolve, reject) => {
 
       // console.log("load cache:", cacheFile)
-      if(cacheFile) {
-        Cache.initFs().then(() => {
-          filePath = cacheFile
-          fs.exists(cacheFile, (res) => {
-            if(res) {
-              fs.readFile(cacheFile, (err, res) => {
-                cache = JSON.parse(res)
-                // console.log("cache:", cache)
-                resolve()
-              })
-            } else {
-              // console.log("cache file doesn't exist")
-              resolve()
-            }
-          })          
-        })
-      } else {
-        resolve()
-      }
-    })
-  }
-
-  static initFs()  {
-    const isNodejs = process && process.version ? true : false
-    return new Promise((resolve, reject) => {
-      if(!isNodejs) {
-        fs.init(1 * 1024 * 1024, (err) => {
-          if(err) {
-            console.error("Couldn't initialize file system:", err)
-          } else {
-            // console.debug("FileSystem initialized")
+      filePath = cacheFile
+      pull(
+        store.read(cacheFile),
+        pull.collect((err, res) => {
+          if (err) {
+            return reject(err)
           }
-          resolve()
+
+          resolve(JSON.parse(res[0].toString() || '{}'))
         })
-      } else {
-        resolve()
-      }
+      )
     })
   }
 
