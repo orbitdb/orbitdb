@@ -11,9 +11,12 @@
   "engines": {
     "node": "^6.x.x"
   },
+  "browser": {
+    "fs": "html5-fs"
+  },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "logplease": "^1.2.7",
+    "logplease": "^1.2.9",
     "orbit-db-store": "^0.1.9",
     "ipfs-log": "^1.5.2",
     "orbit-db-counterstore": "0.1.7",
