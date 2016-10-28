@@ -39,17 +39,23 @@ class Cache {
     return new Promise((resolve, reject) => {
 
       // console.log("load cache:", cacheFile)
-      filePath = cacheFile
-      pull(
-        store.read(cacheFile),
-        pull.collect((err, res) => {
-          if (err) {
-            return reject(err)
-          }
+      store.exists(cacheFile, (err, exists) => {
+        if (err || !exists) {
+          return resolve()
+        }
 
-          resolve(JSON.parse(res[0].toString() || '{}'))
-        })
-      )
+        filePath = cacheFile
+        pull(
+          store.read(cacheFile),
+          pull.collect((err, res) => {
+            if (err) {
+              return reject(err)
+            }
+
+            resolve(JSON.parse(res[0].toString() || '{}'))
+          })
+        )
+      })
     })
   }
 
