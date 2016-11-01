@@ -22,10 +22,9 @@ IpfsApis.forEach(function(ipfsApi) {
 
     let client, client2, db
     let channel = 'abcdefghijklmn'
-    const cacheFile = path.join(process.cwd(), '/test', 'orbit-db-test-cache.json')
 
     before(function (done) {
-      ipfsApi.start()
+      ipfsApi.start({ IpfsDataDir: '/tmp/orbit-db-tests' })
         .then((res) => {
           ipfs = res
           client = new OrbitDB(ipfs, username)
