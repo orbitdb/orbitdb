@@ -21,7 +21,7 @@ const queryLoop = (db) => {
 
 // Start
 let run = (() => {
-  IpfsDaemon({ IpfsDataDir: '/tmp/orbitd-b-benchmark' })
+  IpfsDaemon({ IpfsDataDir: '/tmp/orbit-db-benchmark' })
     .then((res) => {
       const orbit = new OrbitDB(res.ipfs, 'benchmark')
       const db = orbit.eventlog('orbit-db.benchmark')
