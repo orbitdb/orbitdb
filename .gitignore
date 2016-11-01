@@ -9,3 +9,4 @@ orbit-db-cache.json
 examples/browser/bundle.js
 examples/browser/*.map
 dist/*.map
+orbit-db.json
