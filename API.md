@@ -1,8 +1,57 @@
 # orbit-db API documentation
 
-## Table of Contents
+OrbitDB provides various types of databases for different data models: 
+- [kvstore](#kvstorename) is a key-value database just like your favourite key-value database.
+- [eventlog](#eventlogname) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
+- [feed](#feedname) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
+- [counter](#countername) for counting. Useful for example counting events separate from log/feed data.
+- [docstore](##docstorename-options) is a document database to which documents can be stored and indexed by a specified key. Useful for example building search indices or version controlling documents and data.
 
-- [Getting Started](#getting-started)
+Which database to use depends on your use case and data model.
+
+## Getting Started
+
+Install `orbit-db` and [ipfs](https://www.npmjs.com/package/ipfs) from npm:
+
+```
+npm install orbit-db ipfs
+```
+
+Require it in your program and create the instance:
+
+```javascript
+const IPFS = require('ipfs')
+const OrbitDB = require('orbit-db')
+
+const ipfs = new IPFS()
+const orbitdb = new OrbitDB(ipfs)
+```
+
+`orbitdb` is now the [OrbitDB](#orbitdb) instance we can use to interact with the databases.
+
+This will tell `orbit-db` to use the [Javascript implementation](https://github.com/ipfs/js-ipfs) of IPFS. Choose this options if you're using `orbitd-db` to develop **Browser** applications.
+
+Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use `orbit-db` with a locally running IPFS daemon:
+
+```
+npm install orbit-db ipfs-api
+```
+
+```javascript
+const IpfsApi = require('ipfs-api')
+const OrbitDB = require('orbit-db')
+
+const ipfs = IpfsApi('localhost', '5001')
+const orbitdb = new OrbitDB(ipfs)
+```
+
+`orbitdb` is now the [OrbitDB](#orbitdb) instance we can use to interact with the databases.
+
+Choose this options if you're using `orbitd-db` to develop **Desktop** (or "headless") applications, eg. with [Electron](https://electron.atom.io).
+
+
+## Usage
+
 - [orbitdb](#orbitdb)
   - [kvstore(name)](#kvstorename)
     - [put(key, value)](#kvstorename)
@@ -34,42 +83,6 @@
   - [events](#events)
     - [orbitdb](#events)
     - [stores](#events)
-
-## Getting Started
-
-Install `orbit-db` and [ipfs](https://www.npmjs.com/package/ipfs) from npm:
-
-```
-npm install orbit-db ipfs
-```
-
-Require it in your program:
-
-```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
-
-const ipfs = new IPFS()
-const orbitdb = new OrbitDB(ipfs)
-```
-
-This will tell `orbit-db` to use the [Javascript implementation](https://github.com/ipfs/js-ipfs) of IPFS. Choose this options if you're using `orbitd-db` to develop **Browser** applications.
-
-Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use `orbit-db` with a locally running IPFS daemon:
-
-```
-npm install orbit-db ipfs-api
-```
-
-```javascript
-const IpfsApi = require('ipfs-api')
-const OrbitDB = require('orbit-db')
-
-const ipfs = IpfsApi('localhost', '5001')
-const orbitdb = new OrbitDB(ipfs)
-```
-
-Choose this options if you're using `orbitd-db` to develop **Desktop** (or "headless") applications, eg. with [Electron](https://electron.atom.io).
 
 ## orbitdb
 
@@ -111,7 +124,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
 ### eventlog(name)
 
   Package: 
-  [orbit-db-eventlog](https://github.com/haadcode/orbit-db-eventlog)
+  [orbit-db-eventstore](https://github.com/haadcode/orbit-db-eventstore)
 
   ```javascript
   const db = orbitdb.eventlog('site.visitors')
@@ -149,7 +162,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
 ### feed(name)
 
   Package: 
-  [orbit-db-feed](https://github.com/haadcode/orbit-db-feed)
+  [orbit-db-feedstore](https://github.com/haadcode/orbit-db-feedstore)
 
   ```javascript
   const db = orbitdb.feed('orbit-db.issues')
