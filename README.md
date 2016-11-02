@@ -1,40 +1,36 @@
 # orbit-db
 
+[![npm version](https://badge.fury.io/js/orbit-db.svg)](https://badge.fury.io/js/orbit-db)
+[![CircleCI Status](https://circleci.com/gh/haadcode/orbit-db.svg?style=shield)](https://circleci.com/gh/haadcode/orbit-db)
+[![](https://img.shields.io/badge/made%20by-Protocol%20Labs-blue.svg?style=flat-square)](http://ipn.io)
+[![Project Status](https://badge.waffle.io/haadcode/orbit.svg?label=In%20Progress&title=In%20Progress)](https://waffle.io/haadcode/orbit?source=haadcode%2Forbit-db,haadcode%2Forbit-db-counterstore,haadcode%2Forbit-db-eventstore,haadcode%2Forbit-db-feedstore,haadcode%2Forbit-db-kvstore,haadcode%2Forbit-db-store,haadcode%2Fipfs-log)
+
 > Distributed, peer-to-peer database on IPFS.
 
-`orbit-db` is a serverless, distributed, peer-to-peer database. `orbit-db` uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making `orbit-db` and excellent choice for offline-first applications.
+`orbit-db` is a serverless, distributed, peer-to-peer database. `orbit-db` uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making `orbit-db` and excellent choice for offline-first applications.
 
 Data in `orbit-db` can be stored in a
 
-- **Key-Value Store**
-- **Eventlog** (append-only log)
-- **Feed** (add and remove log)
-- **Documents** (indexed by custom fields)
-- **Counters**
+- **[Key-Value Store](https://github.com/haadcode/orbit-db-kvstore)**
+- **[Eventlog](https://github.com/haadcode/orbit-db-eventstore)** (append-only log)
+- **[Feed](https://github.com/haadcode/orbit-db-feedstore)** (add and remove log)
+- **[Documents](https://github.com/shamb0t/orbit-db-docstore)** (indexed by custom fields)
+- **[Counters](https://github.com/haadcode/orbit-db-counterstore)**
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
-
-[![npm version](https://badge.fury.io/js/orbit-db.svg)](https://badge.fury.io/js/orbit-db)
-[![CircleCI Status](https://circleci.com/gh/haadcode/orbit-db.svg?style=shield)](https://circleci.com/gh/haadcode/orbit-db)
-[![Project Status](https://badge.waffle.io/haadcode/orbit.svg?label=In%20Progress&title=In%20Progress)](https://waffle.io/haadcode/orbit?source=haadcode%2Forbit-db,haadcode%2Forbit-db-counterstore,haadcode%2Forbit-db-eventstore,haadcode%2Forbit-db-feedstore,haadcode%2Forbit-db-kvstore,haadcode%2Forbit-db-store,haadcode%2Fipfs-log)
 
 ## Table of Contents
 
 - [Usage](#usage)
 - [API](#api)
 - [Examples](#examples)
-  - [Install dependencies](#install-dependencies)
-  - [Browser example](#browser-example)
-  - [Node.js example](#nodejs-example)
 - [Development](#development)
-    - [Run Tests](#run-tests)
-    - [Build](#build)
-    - [Benchmark](#benchmark)
 - [Background](#background)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Usage
+
 ```
 npm install orbit-db ipfs-api@https://github.com/haadcode/js-ipfs-api.git
 ```
@@ -55,9 +51,11 @@ db.add("hello world")
   })
 ```
 
+*For more details, see examples for [kvstore](https://github.com/haadcode/orbit-db-kvstore#usage), [eventlog](https://github.com/haadcode/orbit-db-eventstore#usage), [feed](https://github.com/haadcode/orbit-db-feedstore#usage), [docstore](https://github.com/shamb0t/orbit-db-docstore#usage) and [counter](https://github.com/haadcode/orbit-db-counterstore#usage).*
+
 ## API
 
-See [API documentation](https://github.com/haadcode/orbit-db/blob/master/API.md) for the full documentation.
+See [API documentation](https://github.com/haadcode/orbit-db/blob/master/API.md#orbit-db-api-documentation) for the full documentation.
 
 - [Getting Started](https://github.com/haadcode/orbit-db/blob/master/API.md#getting-started)
 - [orbitdb](https://github.com/haadcode/orbit-db/blob/master/API.md#orbitdb)
