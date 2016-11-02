@@ -119,7 +119,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.events.on('data', (dbname, event) => ... )
     ```
 
-    See [events](#stores) for full description.
+    See [events](#events) for full description.
 
 ### eventlog(name)
 
@@ -157,7 +157,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.events.on('data', (dbname, event) => ... )
     ```
 
-    See [events](#stores) for full description.
+    See [events](#events) for full description.
 
 ### feed(name)
 
@@ -200,7 +200,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.events.on('data', (dbname, event) => ... )
     ```
 
-    See [events](#stores) for full description.
+    See [events](#events) for full description.
 
 ### docstore(name, options)
 
@@ -246,7 +246,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.events.on('data', (dbname, event) => ... )
     ```
 
-    See [events](#stores) for full description.
+    See [events](#events) for full description.
 
 ### counter(name)
 
@@ -278,7 +278,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.events.on('data', (dbname, event) => ... )
     ```
 
-    See [events](#stores) for full description.
+    See [events](#events) for full description.
 
 ### disconnect()
 
