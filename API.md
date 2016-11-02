@@ -251,7 +251,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
 ### counter(name)
 
   Package: 
-  [orbit-db-counter](https://github.com/haadcode/orbit-db-counterstore)
+  [orbit-db-counterstore](https://github.com/haadcode/orbit-db-counterstore)
 
   ```javascript
   const counter = orbitdb.counter('song_123.play_count')
