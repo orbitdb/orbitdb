@@ -1,18 +1,32 @@
 'use strict'
 
-const fs   = require('fs')
-const path = require('path')
+const pull = require('pull-stream')
+const BlobStore = require('fs-pull-blob-store')
+const Lock = require('lock')
 
 let filePath
+let store
 let cache = {}
+const lock = new Lock()
 
 class Cache {
   static set(key, value) {
     return new Promise((resolve, reject) => {
       cache[key] = value
-      if(filePath) {
-        // console.log("write cache:", filePath, JSON.stringify(cache, null, 2))
-        fs.writeFile(filePath, JSON.stringify(cache, null, 2) + "\n", resolve)
+      if(filePath && store) {
+        lock(filePath, (release) => {
+          // console.log("write cache:", filePath, JSON.stringify(cache, null, 2))
+          pull(
+            pull.values([cache]),
+            pull.map((v) => JSON.stringify(v, null, 2)),
+            store.write(filePath, release((err) => {
+              if (err) {
+                return reject(err)
+              }
+              resolve()
+            }))
+          )
+        })
       } else {
         resolve()
       }
@@ -23,48 +37,34 @@ class Cache {
     return cache[key]
   }
 
-  static loadCache(cacheFile) {
+  static loadCache(cacheFile = 'orbit-db.cache') {
     cache = {}
+    store = new BlobStore(cacheFile)
+    filePath = cacheFile
+
     return new Promise((resolve, reject) => {
 
       // console.log("load cache:", cacheFile)
-      if(cacheFile) {
-        Cache.initFs().then(() => {
-          filePath = cacheFile
-          fs.exists(cacheFile, (res) => {
-            if(res) {
-              fs.readFile(cacheFile, (err, res) => {
-                cache = JSON.parse(res)
-                // console.log("cache:", cache)
-                resolve()
-              })
-            } else {
-              // console.log("cache file doesn't exist")
-              resolve()
-            }
-          })          
-        })
-      } else {
-        resolve()
-      }
-    })
-  }
+      store.exists(cacheFile, (err, exists) => {
+        if (err || !exists) {
+          return resolve()
+        }
 
-  static initFs()  {
-    const isNodejs = process && process.version ? true : false
-    return new Promise((resolve, reject) => {
-      if(!isNodejs) {
-        fs.init(1 * 1024 * 1024, (err) => {
-          if(err) {
-            console.error("Couldn't initialize file system:", err)
-          } else {
-            // console.debug("FileSystem initialized")
-          }
-          resolve()
+        lock(cacheFile, (release) => {
+          pull(
+            store.read(cacheFile),
+            pull.collect(release((err, res) => {
+              if (err) {
+                return reject(err)
+              }
+
+              cache = JSON.parse(Buffer.concat(res).toString() || '{}')
+
+              resolve()
+            }))
+          )
         })
-      } else {
-        resolve()
-      }
+      })
     })
   }
 

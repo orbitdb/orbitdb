@@ -10,3 +10,6 @@ examples/browser/bundle.js
 examples/browser/*.map
 dist/*.map
 orbit-db.json
+dist/orbitdb.js
+orbit-db.cache
+ipfs/
