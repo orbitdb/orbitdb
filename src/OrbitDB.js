@@ -56,13 +56,13 @@ class OrbitDB {
   }
 
   /* Private methods */
-  _createStore(Store, dbname, options = { subscribe: true, cacheFile: 'orbit-db.json' }) {
+  _createStore(Store, dbname, options = { subscribe: true }) {
     const store = new Store(this._ipfs, this.user.id, dbname, options)
     this.stores[dbname] = store
-    return this._subscribe(store, dbname, options.subscribe, options)
+    return this._subscribe(store, dbname, options.subscribe, options.cachePath)
   }
 
-  _subscribe(store, dbname, subscribe = true, options) {
+  _subscribe(store, dbname, subscribe = true, cachePath = './orbit-db') {
     store.events.on('data',  this._onData.bind(this))
     store.events.on('write', this._onWrite.bind(this))
     store.events.on('close', this._onClose.bind(this))
@@ -72,7 +72,7 @@ class OrbitDB {
     else
       store.loadHistory().catch((e) => console.error(e.stack))
 
-    Cache.loadCache(options.cacheFile).then(() => {
+    Cache.loadCache(cachePath).then(() => {
       const hash = Cache.get(dbname)
       store.loadHistory(hash).catch((e) => console.error(e.stack))
     })

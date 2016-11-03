@@ -4655,11 +4655,15 @@ var Cache = function () {
     }
   }, {
     key: 'loadCache',
-    value: function loadCache() {
-      var cacheFile = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'orbit-db.cache';
+    value: function loadCache(cachePath) {
+      var cacheFile = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'orbit-db.cache';
 
       cache = {};
-      store = new BlobStore(cacheFile);
+
+      if (!cachePath) return _promise2.default.resolve();
+
+      // console.log("cache data:", cachePath)
+      store = new BlobStore(cachePath);
       filePath = cacheFile;
 
       return new _promise2.default(function (resolve, reject) {
@@ -4688,6 +4692,7 @@ var Cache = function () {
     key: 'reset',
     value: function reset() {
       cache = {};
+      store = null;
     }
   }]);
   return Cache;
@@ -25609,17 +25614,17 @@ var OrbitDB = function () {
   }, {
     key: '_createStore',
     value: function _createStore(Store, dbname) {
-      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { subscribe: true, cacheFile: 'orbit-db.json' };
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : { subscribe: true };
 
       var store = new Store(this._ipfs, this.user.id, dbname, options);
       this.stores[dbname] = store;
-      return this._subscribe(store, dbname, options.subscribe, options);
+      return this._subscribe(store, dbname, options.subscribe, options.cachePath);
     }
   }, {
     key: '_subscribe',
     value: function _subscribe(store, dbname) {
       var subscribe = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-      var options = arguments[3];
+      var cachePath = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : './orbit-db';
 
       store.events.on('data', this._onData.bind(this));
       store.events.on('write', this._onWrite.bind(this));
@@ -25629,7 +25634,7 @@ var OrbitDB = function () {
         return console.error(e.stack);
       });
 
-      Cache.loadCache(options.cacheFile).then(function () {
+      Cache.loadCache(cachePath).then(function () {
         var hash = Cache.get(dbname);
         store.loadHistory(hash).catch(function (e) {
           return console.error(e.stack);

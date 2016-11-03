@@ -37,9 +37,14 @@ class Cache {
     return cache[key]
   }
 
-  static loadCache(cacheFile = 'orbit-db.cache') {
+  static loadCache(cachePath, cacheFile = 'orbit-db.cache') {
     cache = {}
-    store = new BlobStore(cacheFile)
+
+    if (!cachePath)
+      return Promise.resolve()
+
+    // console.log("cache data:", cachePath)
+    store = new BlobStore(cachePath)
     filePath = cacheFile
 
     return new Promise((resolve, reject) => {
@@ -70,6 +75,7 @@ class Cache {
 
   static reset() {
     cache = {}
+    store = null
   }
 }
 
