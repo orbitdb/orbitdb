@@ -31,6 +31,8 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 
 ## Usage
 
+*Note that to run this example, you need to have an [IPFS daemon](https://dist.ipfs.io/go-ipfs/floodsub-2), started with --enable-pubsub-experiment, running at localhost:5001*
+
 ```
 npm install orbit-db ipfs-api@https://github.com/haadcode/js-ipfs-api.git
 ```
@@ -47,7 +49,7 @@ const db = orbitdb.eventlog("feed name")
 db.add("hello world")
   .then(() => {
     const latest = db.iterator({ limit: 5 }).collect()
-    console.log(latest.join("\n"))
+    console.log(JSON.stringify(latest, null, 2))
   })
 ```
 
@@ -86,7 +88,7 @@ npm run examples:browser
 
 <img src="https://raw.githubusercontent.com/haadcode/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo1.gif" width="33%">
 
-Check the code in [examples/browser/index.js](https://github.com/haadcode/orbit-db/blob/master/examples/browser/index.js).
+Check the code in [examples/browser/browser.html](https://github.com/haadcode/orbit-db/blob/master/examples/browser/browser.html).
 
 ### Node.js example
 
