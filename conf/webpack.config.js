@@ -31,7 +31,7 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           presets: require.resolve('babel-preset-es2015'),
           plugins: require.resolve('babel-plugin-transform-runtime')
@@ -40,7 +40,7 @@ module.exports = {
       {
         test: /\.js$/,
         include: /node_modules\/(hoek|qs|wreck|boom|ipfs-.+|orbit-db.+|logplease|crdts|promisify-es6)/,
-        loader: 'babel',
+        loader: 'babel-loader',
         query: {
           presets: require.resolve('babel-preset-es2015'),
           plugins: require.resolve('babel-plugin-transform-runtime')
@@ -48,7 +48,7 @@ module.exports = {
       },
       {
         test: /\.json$/,
-        loader: 'json'
+        loader: 'json-loader'
       }
     ]
   },
