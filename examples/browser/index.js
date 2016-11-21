@@ -1,6 +1,6 @@
 'use strict'
 
-const IpfsApi = require('exports?IpfsApi!ipfs-api/dist/index.js')
+const IpfsApi = require('exports-loader?IpfsApi!ipfs-api/dist/index.js')
 const OrbitDB = require('../../src/OrbitDB')
 
 const username = new Date().getTime()
@@ -63,7 +63,9 @@ Visitor Count: ${count}
         console.error(e.stack)
       })
   }
-  setInterval(query, Math.random() * 3 * 1000)
+
+  // Start query loop when the databse has loaded its history
+  db.events.on('ready', () => setInterval(query, 1000))
 
 } catch(e) {
   console.error(e.stack)
