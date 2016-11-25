@@ -1,6 +1,6 @@
 'use strict'
 
-const IpfsApi = require('exports-loader?IpfsApi!ipfs-api/dist/index.js')
+const IpfsApi = require('exports-loader?HaadIpfsApi!@haad/ipfs-api/dist/index.js')
 const OrbitDB = require('../../src/OrbitDB')
 
 const username = new Date().getTime()
@@ -20,16 +20,11 @@ try {
 
   let count = 1
   const query = () => {
-    const startTime = new Date().getTime()
     const idx = Math.floor(Math.random() * creatures.length)
 
     // Set a key-value pair
     db.put(key, "db.put #" + count + " - GrEEtinGs to " + creatures[idx])
-      .then((res) => {
-        const endTime = new Date().getTime()
-        console.log(`db.put (#${count}) took ${(endTime - startTime)} ms\n`)
-        count ++
-      })
+      .then((res) => count ++)
       .then(() => counter.inc()) // Increase the counter by one
       .then(() => log.add(creatures[idx])) // Add an event to 'latest visitors' log
       .then(() => {

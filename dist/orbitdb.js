@@ -4875,7 +4875,7 @@ module.exports = function () {
       if (!ipfs) throw new Error("Entry requires ipfs instance");
       var data = new Buffer((0, _stringify2.default)(entry));
       return ipfs.object.put(data).then(function (res) {
-        return res.toJSON().Hash;
+        return res.toJSON().multihash;
       });
     }
 
@@ -4890,7 +4890,7 @@ module.exports = function () {
       if (!ipfs) throw new Error("Entry requires ipfs instance");
       if (!hash) throw new Error("Invalid hash: " + hash);
       return ipfs.object.get(hash, { enc: 'base58' }).then(function (obj) {
-        var data = JSON.parse(obj.toJSON().Data);
+        var data = JSON.parse(obj.toJSON().data);
         var entry = {
           hash: hash,
           payload: data.payload,
@@ -5093,7 +5093,7 @@ var Log = function () {
       if (!ipfs) throw new Error("Ipfs instance not defined");
       var data = new Buffer((0, _stringify2.default)(log.snapshot));
       return ipfs.object.put(data).then(function (res) {
-        return res.toJSON().Hash;
+        return res.toJSON().multihash;
       });
     }
   }, {
@@ -5104,7 +5104,7 @@ var Log = function () {
       if (!options) options = {};
       var logData = void 0;
       return ipfs.object.get(hash, { enc: 'base58' }).then(function (res) {
-        return logData = JSON.parse(res.toJSON().Data);
+        return logData = JSON.parse(res.toJSON().data);
       }).then(function (res) {
         if (!logData.items) throw new Error("Not a Log instance");
         return Promise.all(logData.items.map(function (f) {
@@ -5648,6 +5648,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var logger = __webpack_require__(92).create("orbit-db.IPFSPubSub");
 
+// TODO: setup logging properly
+
 var IPFSPubsub = function () {
   function IPFSPubsub(ipfs) {
     (0, _classCallCheck3.default)(this, IPFSPubsub);
@@ -5663,25 +5665,29 @@ var IPFSPubsub = function () {
 
       if (!this._subscriptions[hash]) {
         this._subscriptions[hash] = { onMessage: onMessageCallback };
-        this._ipfs.pubsub.sub(encodeURIComponent(hash), { discover: true }, function (err, stream) {
+        this._ipfs.pubsub.subscribe(hash, { discover: true }, function (err, stream) {
           if (err) logger.error(err);
 
-          if (stream) stream.on('data', _this._handleMessage.bind(_this));
+          if (stream) {
+            stream.on('data', _this._handleMessage.bind(_this));
+            // TODO: handle end of stream
+            // stream.on('end', () => console.log("Disconnected from pubsub"))
+          }
         });
-        // FIXME: when js-ipfs-api returns the stream before the
-        // first message has been received, this can be remove
-        this._ipfs.pubsub.pub(encodeURIComponent(hash), '/connect');
       }
     }
   }, {
     key: 'unsubscribe',
     value: function unsubscribe(hash) {
-      if (this._subscriptions[hash]) delete this._subscriptions[hash];
+      if (this._subscriptions[hash]) {
+        this._subscriptions[e].cancel();
+        delete this._subscriptions[hash];
+      }
     }
   }, {
     key: 'publish',
     value: function publish(hash, message) {
-      if (this._subscriptions[hash]) this._ipfs.pubsub.pub(encodeURIComponent(hash), message);
+      if (this._subscriptions[hash]) this._ipfs.pubsub.publish(hash, message);
     }
   }, {
     key: 'disconnect',
@@ -5689,20 +5695,17 @@ var IPFSPubsub = function () {
       var _this2 = this;
 
       (0, _keys2.default)(this._subscriptions).forEach(function (e) {
-        //this._subscriptions[e].stream.end() ???
-        delete _this2._subscriptions[e];
+        return _this2.unsubscribe(e);
       });
     }
   }, {
     key: '_handleMessage',
     value: function _handleMessage(message) {
-      if (message.data === '/connect') return;
-
       var hash = message.topicIDs[0];
-      var sub = this._subscriptions[hash];
+      var subscription = this._subscriptions[hash];
 
-      if (sub && sub.onMessage) {
-        sub.onMessage(hash, message.data);
+      if (subscription && subscription.onMessage) {
+        subscription.onMessage(hash, message.data);
       }
     }
   }]);

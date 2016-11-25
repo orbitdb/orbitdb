@@ -18,7 +18,7 @@ let ipfs
 IpfsApis.forEach(function(ipfsApi) {
 
   describe('Orbit Client with ' + ipfsApi.name, function() {
-    this.timeout(20000)
+    this.timeout(40000)
 
     let client, client2, db
     let channel = 'abcdefghijklmn'
@@ -34,11 +34,11 @@ IpfsApis.forEach(function(ipfsApi) {
         .catch(done)
     })
 
-    after((done) => {
+    after(() => {
       if(db) db.delete()
       if(client) client.disconnect()
       if(client2) client2.disconnect()
-      ipfsApi.stop().then(() => done())
+      ipfsApi.stop()
     })
 
     describe('Add events', function() {

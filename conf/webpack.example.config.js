@@ -13,10 +13,10 @@ module.exports = {
     Buffer: true
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      mangle: false,
-      compress: { warnings: false }
-    })
+    // new webpack.optimize.UglifyJsPlugin({
+    //   mangle: false,
+    //   compress: { warnings: false }
+    // })
   ],
   resolve: {
     modules: [

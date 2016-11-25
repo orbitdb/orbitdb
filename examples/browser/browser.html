@@ -6,7 +6,7 @@
     <div id="result">Loading...</div>
 
     <script type="text/javascript" src="../../dist/orbitdb.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../node_modules/ipfs-api/dist/index.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/@haad/ipfs-api/dist/index.min.js" charset="utf-8"></script>
 
     <script type="text/javascript">
 
@@ -16,7 +16,7 @@
 
       try {
         const elm = document.getElementById("result")
-        const ipfs = IpfsApi('localhost', '5001')
+        const ipfs = HaadIpfsApi('localhost', '5001')
         const orbit = new OrbitDB(ipfs, username)
 
         const db = orbit.kvstore(channel)
@@ -27,17 +27,12 @@
 
         let count = 1
         const query = () => {
-          const startTime = new Date().getTime()
           const idx = Math.floor(Math.random() * creatures.length)
           const creature = creatures[idx] + " " + creatures[idx]
 
           // Set a key-value pair
-          db.put(key, "db.put #" + count + " - GrEEtinGs to " + creature)
-            .then((res) => {
-              const endTime = new Date().getTime()
-              console.log(`db.put (#${count}) took ${(endTime - startTime)} ms\n`)
-              count ++
-            })
+          db.put(key, "db.put #" + count + " - GrEEtinGs from " + creature)
+            .then((res) => count ++)
             .then(() => counter.inc()) // Increase the counter by one
             .then(() => log.add(creature)) // Add an event to 'latest visitors' log
             .then(() => {
