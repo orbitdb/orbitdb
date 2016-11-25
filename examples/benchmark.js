@@ -11,16 +11,18 @@ let lastTenSeconds = 0
 
 // Main loop
 const queryLoop = (db) => {
-  db.add(totalQueries).then(() => {
-    totalQueries ++
-    lastTenSeconds ++
-    queriesPerSecond ++
-    process.nextTick(() => queryLoop(db))
-  })
+  db.add(totalQueries)
+    .then(() => {
+      totalQueries ++
+      lastTenSeconds ++
+      queriesPerSecond ++
+      process.nextTick(() => queryLoop(db))
+    })
+    .catch((e) => console.error(e))
 }
 
 // Start
-console.log("Starting...")
+console.log("Starting IPFS daemon...")
 
 const ipfs = new IpfsDaemon({ IpfsDataDir: '/tmp/orbit-db-benchmark' })
 

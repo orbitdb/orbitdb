@@ -1,6 +1,6 @@
 'use strict'
 
-const IpfsApi = require('exports-loader?HaadIpfsApi!@haad/ipfs-api/dist/index.js')
+const IpfsApi = require('@haad/ipfs-api')
 const OrbitDB = require('../../src/OrbitDB')
 
 const username = new Date().getTime()
@@ -9,7 +9,7 @@ const key      = 'greeting'
 
 try {
   const elm = document.getElementById("result")
-  const ipfs = IpfsApi('localhost', '5001')
+  const ipfs = new IpfsApi('localhost', '5001')
   const orbit = new OrbitDB(ipfs, username)
 
   const db = orbit.kvstore(channel)
