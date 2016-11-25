@@ -28,9 +28,9 @@
       "resolved": "https://registry.npmjs.org/idb-pull-blob-store/-/idb-pull-blob-store-0.5.1.tgz"
     },
     "ipfs-log": {
-      "version": "1.6.0-beta.3",
-      "from": "ipfs-log@>=1.6.0-beta.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/ipfs-log/-/ipfs-log-1.6.0-beta.3.tgz"
+      "version": "1.6.0-beta.4",
+      "from": "ipfs-log@>=1.6.0-beta.4 <2.0.0",
+      "resolved": "https://registry.npmjs.org/ipfs-log/-/ipfs-log-1.6.0-beta.4.tgz"
     },
     "is-typedarray": {
       "version": "1.0.0",
@@ -103,7 +103,7 @@
       "resolved": "https://registry.npmjs.org/orbit-db-counterstore/-/orbit-db-counterstore-0.1.7.tgz",
       "dependencies": {
         "ipfs-log": {
-          "version": "1.6.0-beta.3"
+          "version": "1.6.0-beta.4"
         },
         "orbit-db-store": {
           "version": "0.2.0-beta.1"
@@ -116,7 +116,7 @@
       "resolved": "https://registry.npmjs.org/orbit-db-docstore/-/orbit-db-docstore-0.0.8.tgz",
       "dependencies": {
         "ipfs-log": {
-          "version": "1.6.0-beta.3"
+          "version": "1.6.0-beta.4"
         },
         "orbit-db-store": {
           "version": "0.2.0-beta.1"
@@ -129,7 +129,7 @@
       "resolved": "https://registry.npmjs.org/orbit-db-eventstore/-/orbit-db-eventstore-0.1.8.tgz",
       "dependencies": {
         "ipfs-log": {
-          "version": "1.6.0-beta.3"
+          "version": "1.6.0-beta.4"
         },
         "orbit-db-store": {
           "version": "0.2.0-beta.1"
@@ -147,7 +147,7 @@
       "resolved": "https://registry.npmjs.org/orbit-db-kvstore/-/orbit-db-kvstore-0.1.6.tgz",
       "dependencies": {
         "ipfs-log": {
-          "version": "1.6.0-beta.3"
+          "version": "1.6.0-beta.4"
         },
         "orbit-db-store": {
           "version": "0.2.0-beta.1"
