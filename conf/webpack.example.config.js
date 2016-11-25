@@ -7,6 +7,10 @@ module.exports = {
     filename: './examples/browser/bundle.js'
   },
   devtool: 'sourcemap',
+  stats: { 
+    colors: true, 
+    cached: false 
+  },
   node: {
     console: false,
     process: 'mock',
