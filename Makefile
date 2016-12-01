@@ -1,13 +1,13 @@
 all: build
 
 deps:
-	@npm install
+	npm install
 
 test: deps
-	@npm run test
+	npm run test
 	
 build: deps
-	@npm run build
+	npm run build
 	@echo "Build success!"
 	@echo "Output: 'dist/', 'examples/browser/'"
 
