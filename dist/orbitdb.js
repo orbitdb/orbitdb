@@ -5668,7 +5668,8 @@ var IPFSPubsub = function () {
         this._ipfs.pubsub.subscribe(hash, { discover: true }, function (err, stream) {
           if (err) logger.error(err);
 
-          if (stream) {
+          if (stream && _this._subscriptions[hash]) {
+            _this._subscriptions[hash].stream = stream;
             stream.on('data', _this._handleMessage.bind(_this));
             // TODO: handle end of stream
             // stream.on('end', () => console.log("Disconnected from pubsub"))
@@ -5680,7 +5681,8 @@ var IPFSPubsub = function () {
     key: 'unsubscribe',
     value: function unsubscribe(hash) {
       if (this._subscriptions[hash]) {
-        this._subscriptions[e].cancel();
+        if (this._subscriptions[hash].stream) this._subscriptions[hash].stream.cancel();
+
         delete this._subscriptions[hash];
       }
     }

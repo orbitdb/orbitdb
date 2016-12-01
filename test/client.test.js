@@ -17,7 +17,7 @@ let ipfs
 
 IpfsApis.forEach(function(ipfsApi) {
 
-  describe('Orbit Client with ' + ipfsApi.name, function() {
+  describe('orbit-db client with ' + ipfsApi.name, function() {
     this.timeout(40000)
 
     let client, client2, db
