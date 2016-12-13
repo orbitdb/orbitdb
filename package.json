@@ -24,7 +24,7 @@
     "orbit-db-counterstore": "0.1.7",
     "orbit-db-docstore": "0.0.8",
     "orbit-db-eventstore": "0.1.8",
-    "orbit-db-feedstore": "0.1.7",
+    "orbit-db-feedstore": "0.1.8",
     "orbit-db-kvstore": "0.1.6",
     "orbit-db-pubsub": "0.0.6",
     "orbit-db-store": "^0.1.9",
