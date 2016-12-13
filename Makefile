@@ -6,7 +6,7 @@ deps:
 test: deps
 	npm run test
 	
-build: deps
+build: test
 	npm run build
 	@echo "Build success!"
 	@echo "Output: 'dist/', 'examples/browser/'"
@@ -16,4 +16,4 @@ clean:
 	rm -rf ipfs/
 	rm -rf node_modules/
 
-.PHONY: all deps test clean
+.PHONY: test build

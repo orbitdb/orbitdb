@@ -1,16 +1,25 @@
 'use strict'
 
-const IpfsApi = require('@haad/ipfs-api')
+const IPFS = require('ipfs-daemon/src/ipfs-browser-daemon')
 const OrbitDB = require('../../src/OrbitDB')
 
 const username = new Date().getTime()
-const channel  = 'browser-example'
+const channel  = 'browser-examples'
 const key      = 'greeting'
 
-try {
-  const elm = document.getElementById("result")
-  const ipfs = new IpfsApi('localhost', '5001')
-  const orbit = new OrbitDB(ipfs, username)
+const elm = document.getElementById("result")
+
+const ipfs = new IPFS()
+
+function handleError(e) {
+  console.error(e.stack)
+  elm.innerHTML = e.message  
+}
+
+ipfs.on('error', (e) => handleError(e))
+
+ipfs.on('ready', () => {
+  const orbit = new OrbitDB(ipfs, username, { maxHistory: 5 })
 
   const db = orbit.kvstore(channel)
   const log = orbit.eventlog(channel + ".log")
@@ -32,37 +41,30 @@ try {
           const latest = log.iterator({ limit: 5 }).collect()
           const count  = counter.value
 
-          const output = 
-`<b>Key-Value Store</b>
--------------------------------------------------------
-Key | Value
--------------------------------------------------------
-${key} | ${result}
--------------------------------------------------------
+          const output = `
+          <b>Key-Value Store</b>
+          -------------------------------------------------------
+          Key | Value
+          -------------------------------------------------------
+          ${key} | ${result}
+          -------------------------------------------------------
 
-<b>Eventlog</b>
--------------------------------------------------------
-Latest Visitors
--------------------------------------------------------
-${latest.reverse().map((e) => e.payload.value + "   at " + new Date(e.payload.meta.ts).toISOString()).join('\n')}
+          <b>Eventlog</b>
+          -------------------------------------------------------
+          Latest Visitors
+          -------------------------------------------------------
+          ${latest.reverse().map((e) => e.payload.value + "   at " + new Date(e.payload.meta.ts).toISOString()).join('\n')}
 
-<b>Counter</b>
--------------------------------------------------------
-Visitor Count: ${count}
--------------------------------------------------------
-`
+          <b>Counter</b>
+          -------------------------------------------------------
+          Visitor Count: ${count}
+          -------------------------------------------------------
+          `
           elm.innerHTML = output.split("\n").join("<br>")
       })
-      .catch((e) => {
-        elm.innerHTML = "<i>" + e.message + "</i><br><br>" + "Waiting for IPFS daemon to start..."
-        console.error(e.stack)
-      })
+      .catch((e) => handleError(e))
   }
 
   // Start query loop when the databse has loaded its history
   db.events.on('ready', () => setInterval(query, 1000))
-
-} catch(e) {
-  console.error(e.stack)
-  elm.innerHTML = e.message
-}
+})
