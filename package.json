@@ -22,7 +22,7 @@
     "lock": "^0.1.3",
     "logplease": "^1.2.9",
     "orbit-db-counterstore": "0.1.7",
-    "orbit-db-docstore": "0.0.8",
+    "orbit-db-docstore": "0.0.9",
     "orbit-db-eventstore": "0.1.8",
     "orbit-db-feedstore": "0.1.7",
     "orbit-db-kvstore": "0.1.6",
