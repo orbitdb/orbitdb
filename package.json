@@ -42,7 +42,7 @@
     "ipfs-daemon": "0.1.1",
     "ipfs-test-apis": "0.0.6",
     "json-loader": "^0.5.4",
-    "lodash": "^4.16.4",
+    "lodash": "^4.17.3",
     "mocha": "^3.1.2",
     "stream-http": "^2.4.1",
     "webpack": "^2.1.0-beta.25"
