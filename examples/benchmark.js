@@ -1,6 +1,6 @@
 'use strict'
 
-const IpfsDaemon = require('ipfs-daemon')
+const IpfsDaemon = require('ipfs-daemon/src/ipfs-node-daemon')
 const OrbitDB = require('../src/OrbitDB')
 
 // Metrics
@@ -24,7 +24,7 @@ const queryLoop = (db) => {
 // Start
 console.log("Starting IPFS daemon...")
 
-const ipfs = new IpfsDaemon({ IpfsDataDir: '/tmp/orbit-db-benchmark' })
+const ipfs = new IpfsDaemon()
 
 ipfs.on('error', (err) => console.error(err))
 
