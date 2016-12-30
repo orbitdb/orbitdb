@@ -7,43 +7,71 @@ const assert   = require('assert')
 const async    = require('asyncawait/async')
 const await    = require('asyncawait/await')
 const Promise  = require('bluebird')
-const IpfsApis = require('ipfs-test-apis')
+// const IpfsApis = require('ipfs-test-apis')
 const OrbitDB  = require('../src/OrbitDB')
+const rmrf = require('rimraf')
+const IpfsNodeDaemon = require('ipfs-daemon/src/ipfs-node-daemon')
+const IpfsNativeDaemon = require('ipfs-daemon/src/ipfs-native-daemon')
+
+if (typeof window !== 'undefined') 
+  window.LOG = 'ERROR'
+
+// Data directories
+const defaultIpfsDirectory = './ipfs'
+const defaultOrbitDBDirectory = './orbit-db'
 
 // Orbit
 const username = 'testrunner'
 
-let ipfs
+const hasIpfsApiWithPubsub = (ipfs) => {
+  return ipfs.object.get !== undefined
+      && ipfs.object.put !== undefined
+      && ipfs.pubsub.publish !== undefined
+      && ipfs.pubsub.subscribe !== undefined
+}
 
-IpfsApis.forEach(function(ipfsApi) {
+[IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
+// IpfsApis.forEach(function(ipfsApi) {
 
-  describe('orbit-db client with ' + ipfsApi.name, function() {
+  describe('orbit-db client', function() {
     this.timeout(40000)
 
-    let client, client2, db
+    let ipfs, client, client2, db
     let channel = 'abcdefghijklmn'
 
     before(function (done) {
-      ipfsApi.start({ IpfsDataDir: '/tmp/orbit-db-tests' })
-        .then((res) => {
-          ipfs = res
-          client = new OrbitDB(ipfs, username)
-          client2 = new OrbitDB(ipfs, username + '2')
-          done()
-        })
-        .catch(done)
+      rmrf.sync(defaultIpfsDirectory)
+      rmrf.sync(defaultOrbitDBDirectory)
+      ipfs = new IpfsDaemon()
+      ipfs.on('error', done)
+      ipfs.on('ready', () => {
+        assert.equal(hasIpfsApiWithPubsub(ipfs), true)
+        client = new OrbitDB(ipfs, username)
+        client2 = new OrbitDB(ipfs, username + '2')
+        done()        
+      })
+      // ipfsApi.start({ IpfsDataDir: '/tmp/orbit-db-tests' })
+      //   .then((res) => {
+      //     ipfs = res
+      //     client = new OrbitDB(ipfs, username)
+      //     client2 = new OrbitDB(ipfs, username + '2')
+      //     done()
+      //   })
+      //   .catch(done)
     })
 
     after(() => {
       if(db) db.delete()
       if(client) client.disconnect()
       if(client2) client2.disconnect()
-      ipfsApi.stop()
+      ipfs.stop()
+      rmrf.sync(defaultOrbitDBDirectory)
+      rmrf.sync(defaultIpfsDirectory)
     })
 
     describe('Add events', function() {
       beforeEach(() => {
-        db = client.eventlog(channel, { subscribe: false })
+        db = client.eventlog(channel, { subscribe: false, maxHistory: 0 })
         db.delete()
       })
 
@@ -69,15 +97,12 @@ IpfsApis.forEach(function(ipfsApi) {
 
       it('adds five items', async(() => {
         for(let i = 1; i <= 5; i ++)
-          await(db.add('hello' + i));
-        // const items = [1, 2, 3, 4, 5]
-        // return Promise.map(items, (i) => db.add('hello' + i), { concurrency: 1 })
-        //   .then((res) => {
-            const items = db.iterator({ limit: -1 }).collect()
-            assert.equal(items.length, 5)
-            assert.equal(_.first(items.map((f) => f.payload.value)), 'hello1')
-            assert.equal(_.last(items.map((f) => f.payload.value)), 'hello5')
-          // })
+          await(db.add('hello' + i))
+
+        const items = db.iterator({ limit: -1 }).collect()
+        assert.equal(items.length, 5)
+        assert.equal(_.first(items.map((f) => f.payload.value)), 'hello1')
+        assert.equal(_.last(items.map((f) => f.payload.value)), 'hello5')
       }))
 
       it('adds an item that is > 256 bytes', () => {
@@ -94,7 +119,7 @@ IpfsApis.forEach(function(ipfsApi) {
 
     describe('Delete events (Feed)', function() {
       beforeEach(() => {
-        db = client.feed(channel, { subscribe: false })
+        db = client.feed(channel, { subscribe: false, maxHistory: 0 })
         db.delete()
       })
 
@@ -134,7 +159,7 @@ IpfsApis.forEach(function(ipfsApi) {
 
       beforeEach(async(() => {
         items = []
-        db = client.eventlog(channel, { subscribe: false })
+        db = client.eventlog(channel, { subscribe: false, maxHistory: 0 })
         db.delete()
         for(let i = 0; i < itemCount; i ++) {
           const hash = await(db.add('hello' + i))
@@ -437,7 +462,7 @@ IpfsApis.forEach(function(ipfsApi) {
 
     describe('Key-Value Store', function() {
       beforeEach(() => {
-        db = client.kvstore(channel, { subscribe: false })
+        db = client.kvstore(channel, { subscribe: false, maxHistory: 0 })
         db.delete()
       })
 
@@ -527,7 +552,7 @@ IpfsApis.forEach(function(ipfsApi) {
 
     describe('Document Store - default index \'_id\'', function() {
       beforeEach(() => {
-        db = client.docstore(channel, { subscribe: false })
+        db = client.docstore(channel, { subscribe: false, maxHistory: 0 })
         db.delete()
       })
 
@@ -589,7 +614,7 @@ IpfsApis.forEach(function(ipfsApi) {
 
     describe('Document Store - specified index', function() {
       beforeEach(() => {
-        db = client.docstore(channel, { subscribe: false, indexBy: 'doc' })
+        db = client.docstore(channel, { subscribe: false, indexBy: 'doc', maxHistory: 0 })
         db.delete()
       })
 
