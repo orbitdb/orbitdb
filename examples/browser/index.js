@@ -4,12 +4,15 @@ const IPFS = require('ipfs-daemon/src/ipfs-browser-daemon')
 const OrbitDB = require('../../src/OrbitDB')
 
 const username = new Date().getTime()
-const channel  = 'browser-examples'
+const channel  = 'orbitdb-browser-examples'
 const key      = 'greeting'
 
 const elm = document.getElementById("result")
 
-const ipfs = new IPFS()
+const ipfs = new IPFS({
+  // dev server: webrtc-star-signalling.cloud.ipfs.team
+  SignalServer: '188.166.203.82:20000',
+})
 
 function handleError(e) {
   console.error(e.stack)
