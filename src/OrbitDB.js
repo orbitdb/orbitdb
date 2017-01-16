@@ -105,10 +105,10 @@ class OrbitDB {
     Cache.set(dbname, hash)
   }
 
-  _onData(dbname, item) {
+  _onData(dbname, items) {
     // 'New database entry...', after a new entry was added to the database
     // console.log(".SYNCED", dbname, items.length)
-    this.events.emit('data', dbname, item)
+    this.events.emit('data', dbname, items)
   }
 
   _onClose(dbname) {

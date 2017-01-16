@@ -25700,10 +25700,10 @@ var OrbitDB = function () {
     }
   }, {
     key: '_onData',
-    value: function _onData(dbname, item) {
+    value: function _onData(dbname, items) {
       // 'New database entry...', after a new entry was added to the database
       // console.log(".SYNCED", dbname, items.length)
-      this.events.emit('data', dbname, item);
+      this.events.emit('data', dbname, items);
     }
   }, {
     key: '_onClose',

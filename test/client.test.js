@@ -31,6 +31,7 @@ const hasIpfsApiWithPubsub = (ipfs) => {
 }
 
 [IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
+// [IpfsNodeDaemon].forEach((IpfsDaemon) => {
 // IpfsApis.forEach(function(ipfsApi) {
 
   describe('orbit-db client', function() {
@@ -48,16 +49,8 @@ const hasIpfsApiWithPubsub = (ipfs) => {
         assert.equal(hasIpfsApiWithPubsub(ipfs), true)
         client = new OrbitDB(ipfs, username)
         client2 = new OrbitDB(ipfs, username + '2')
-        done()        
+        done()
       })
-      // ipfsApi.start({ IpfsDataDir: '/tmp/orbit-db-tests' })
-      //   .then((res) => {
-      //     ipfs = res
-      //     client = new OrbitDB(ipfs, username)
-      //     client2 = new OrbitDB(ipfs, username + '2')
-      //     done()
-      //   })
-      //   .catch(done)
     })
 
     after(() => {
