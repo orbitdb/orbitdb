@@ -9,6 +9,10 @@ module.exports = {
     filename: './dist/orbitdb.min.js'
   },
   devtool: 'sourcemap',
+  stats: { 
+    colors: true, 
+    cached: false 
+  },
   node: {
     console: false,
     process: 'mock',

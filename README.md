@@ -31,26 +31,28 @@ This is the Javascript implementation and it works both in **Node.js** and **Bro
 
 ## Usage
 
-*Note that to run this example, you need to have an [IPFS daemon](https://dist.ipfs.io/go-ipfs/floodsub-2), started with --enable-pubsub-experiment, running at localhost:5001*
-
 ```
-npm install orbit-db ipfs-api@https://github.com/haadcode/js-ipfs-api.git
+npm install orbit-db ipfs-daemon
 ```
 
 ```javascript
-const IpfsApi = require('ipfs-api')
+const IPFS = require('ipfs-daemon/src/ipfs-node-daemon')
 const OrbitDB = require('orbit-db')
 
-const ipfs = IpfsApi('localhost', '5001')
-const orbitdb = new OrbitDB(ipfs)
+const ipfs = new IPFS()
 
-const db = orbitdb.eventlog("feed name")
+ipfs.on('error', (e) => console.error(e))
+ipfs.on('ready', (e) => {
+  const orbitdb = new OrbitDB(ipfs)
 
-db.add("hello world")
-  .then(() => {
-    const latest = db.iterator({ limit: 5 }).collect()
-    console.log(JSON.stringify(latest, null, 2))
-  })
+  const db = orbitdb.eventlog("feed name")
+
+  db.add("hello world")
+    .then(() => {
+      const latest = db.iterator({ limit: 5 }).collect()
+      console.log(JSON.stringify(latest, null, 2))
+    })  
+})
 ```
 
 *For more details, see examples for [kvstore](https://github.com/haadcode/orbit-db-kvstore#usage), [eventlog](https://github.com/haadcode/orbit-db-eventstore#usage), [feed](https://github.com/haadcode/orbit-db-feedstore#usage), [docstore](https://github.com/shamb0t/orbit-db-docstore#usage) and [counter](https://github.com/haadcode/orbit-db-counterstore#usage).*

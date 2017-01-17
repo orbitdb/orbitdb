@@ -7,6 +7,10 @@ module.exports = {
     filename: './examples/browser/bundle.js'
   },
   devtool: 'sourcemap',
+  stats: { 
+    colors: true, 
+    cached: false 
+  },
   node: {
     console: false,
     process: 'mock',
@@ -20,38 +24,37 @@ module.exports = {
   ],
   resolve: {
     modules: [
-      path.join(__dirname, '../node_modules')
-    ]
+      'node_modules',
+      path.resolve(__dirname, '../node_modules')
+    ],
+    alias: {
+      // These are needed because node-libs-browser depends on outdated
+      // versions
+      //
+      // Can be dropped once https://github.com/devongovett/browserify-zlib/pull/18
+      // is shipped
+      zlib: 'browserify-zlib',
+      // Can be dropped once https://github.com/webpack/node-libs-browser/pull/41
+      // is shipped
+      http: 'stream-http'
+    }
+  },
+  resolveLoader: {
+    modules: [
+      'node_modules',
+      path.resolve(__dirname, '../node_modules')
+    ],
+    moduleExtensions: ['-loader']
   },
   module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: require.resolve('babel-preset-es2015'),
-          plugins: require.resolve('babel-plugin-transform-runtime')
-        }
-      },
-      {
-        test: /\.js$/,
-        include: /node_modules\/(hoek|qs|wreck|boom|ipfs.+|orbit.+|logplease|crdts|promisify-es|whatwg-fetch|node-fetch|isomorphic-fetch|db\.js)/,
-        loader: 'babel-loader',
-        query: {
-          presets: require.resolve('babel-preset-es2015'),
-          plugins: require.resolve('babel-plugin-transform-runtime')
-        }
-      },
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
-      }
-    ]
+    rules: [{
+      test: /\.json$/,
+      loader: 'json-loader'
+    }]
   },
-  externals: {
-    net: '{}',
-    tls: '{}',
-    'require-dir': '{}'
-  }
+  node: {
+    Buffer: true
+  },
+  plugins: [],
+  target: 'web'
 }

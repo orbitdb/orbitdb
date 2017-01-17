@@ -12,6 +12,9 @@ const lock = new Lock()
 class Cache {
   static set(key, value) {
     return new Promise((resolve, reject) => {
+      if (cache[key] === value)
+        return resolve()
+
       cache[key] = value
       if(filePath && store) {
         lock(filePath, (release) => {

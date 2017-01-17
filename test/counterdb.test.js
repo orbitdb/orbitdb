@@ -13,32 +13,47 @@
 // const username2 = 'rennurtset'
 // const cacheFile = path.join(process.cwd(), '/tmp/orbit-db-tests/cache.json')
 
+// const daemonConfs = require('./ipfs-daemons.conf.js')
+
+// const waitForPeers = (ipfs, peersToWait, topic, callback) => {
+//   const i = setInterval(() => {
+//     ipfs.pubsub.peers(topic, (err, peers) => {
+//       if (err) {
+//         return callback(err)
+//       }
+
+//       const hasAllPeers = peersToWait.map((e) => peers.includes(e)).filter((e) => e === false).length === 0
+//       if (hasAllPeers) {
+//         clearInterval(i)
+//         callback(null)
+//       }
+//     })
+//   }, 1000)
+// }
+
 // IpfsApis.forEach(function(ipfsApi) {
 //   let ipfs, ipfsDaemon
 
 //   describe('CounterStore with ' + ipfsApi.name, function() {
-//     this.timeout(40000)
+//     this.timeout(20000)
 //     let client1, client2
 //     let daemon1, daemon2
 
 //     before((done) => {
 //       // rimraf.sync('./orbit-db-cache.json')
-//       daemon1
-//       Promise.all([
-//         IpfsDaemon({ IpfsDataDir: '/tmp/daemon1' }), 
-//         IpfsDaemon({ IpfsDataDir: '/tmp/daemon2' })
-//       ])
-//       .then((res) => {
-//         ipfs = [res[0].ipfs, res[1].ipfs]
-//         daemon1 = res[0].daemon
-//         daemon2 = res[1].daemon
-//         done()        
-//       })     
+//       daemon1 = new IpfsDaemon(daemonConfs.daemon1)
+//       daemon1.on('ready', () => {
+//         daemon2 = new IpfsDaemon(daemonConfs.daemon2)
+//         daemon2.on('ready', () => {
+//           ipfs = [daemon1, daemon2]
+//           done()
+//         })
+//       })
 //     })
 
 //     after((done) => {
-//       daemon1.stopDaemon()
-//       daemon2.stopDaemon()
+//       daemon1.stop()
+//       daemon2.stop()
 //       done()
 //     })
 
@@ -86,16 +101,22 @@
 //         const numbers = [[13, 10], [2, 5]]
 //         // const res1 = ([13, 10]).map((f) => counter1.inc(f))//, { concurrency: 1 })
 //         // const res2 = ([2, 5]).map((f) => counter2.inc(f))//, { concurrency: 1 })
-//         Promise.map([counter1, counter2], (counter, i) => numbers[i].map((e) => counter.inc(e)) , { concurrency: 1 })
-//           .then((res) => {
-//             // wait for a while to make sure db's have been synced
-//             setTimeout(() => {
-//               assert.equal(counter2.value(), 30)
-//               assert.equal(counter1.value(), 30)
-//               done()
-//             }, 10000)
+
+//         waitForPeers(daemon1, [daemon2.PeerId], name, (err, res) => {
+//           waitForPeers(daemon2, [daemon1.PeerId], name, (err, res) => {
+//             const increaseCounter = (counter, i) => numbers[i].map((e) => counter.inc(e))
+//             Promise.map([counter1, counter2], increaseCounter, { concurrency: 1 })
+//               .then((res) => {
+//                 // wait for a while to make sure db's have been synced
+//                 setTimeout(() => {
+//                   assert.equal(counter2.value, 30)
+//                   assert.equal(counter1.value, 30)
+//                   done()
+//                 }, 2000)
+//               })
+//               .catch(done)          
 //           })
-//           .catch(done)
+//         })
 //       })
 
 //     })
