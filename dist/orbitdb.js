@@ -4636,6 +4636,8 @@ var Cache = function () {
     key: 'set',
     value: function set(key, value) {
       return new _promise2.default(function (resolve, reject) {
+        if (cache[key] === value) return resolve();
+
         cache[key] = value;
         if (filePath && store) {
           lock(filePath, function (release) {
