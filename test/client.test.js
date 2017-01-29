@@ -532,15 +532,39 @@ const hasIpfsApiWithPubsub = (ipfs) => {
         assert.equal(_.isEqual(v1, val), true)
       }))
 
-      it('syncs databases', async(() => {
-        const db2 = await(client2.kvstore(channel, { subscribe: false }))
-        db2.delete()
-        db2.events.on('write', async((dbname, hash) => {
-          await(db.sync(hash))
-          const value = db.get('key1')
-          assert.equal(value, 'hello2')
-        }))
-      }))
+      it('syncs databases', (done) => {
+        const db2 = client2.kvstore(channel, { subscribe: false, maxHistory: 0 })
+        db2.events.on('write', (dbname, hash) => {
+          assert.equal(db.get('key1', null))
+
+          db.sync(hash).then((hash) => {
+            const value = db.get('key1')
+            assert.equal(value, 'hello2')
+            done()
+          })
+        })
+        db2.put('key1', 'hello2')
+      })
+
+      it('sync returns the updated log\'s hash', (done) => {
+        let firstHash, secondHash
+        const db2 = client2.kvstore(channel, { subscribe: false, maxHistory: 0 })
+        db2.events.on('write', (dbname, hash) => {
+          db.sync(hash).then((hash) => {
+            const value1 = db.get('key1')
+            const value2 = db.get('key2')
+            assert.equal(value1, 'hello1')
+            assert.equal(value2, 'hello2')
+            assert.notEqual(firstHash, hash)
+            done()
+          })
+        })
+        db.events.on('write', (dbname, hash) => {
+          firstHash = hash
+          db2.put('key2', 'hello2')
+        })
+        db.put('key1', 'hello1')
+      })
     })
 
     describe('Document Store - default index \'_id\'', function() {
