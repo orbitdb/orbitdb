@@ -93,6 +93,7 @@ class OrbitDB {
     const store = this.stores[dbname]
     store.sync(hash)
       .then((res) => Cache.set(dbname, hash))
+      .then(() => this.events.emit('synced', dbname, hash))
       .catch((e) => console.error(e.stack))
   }
 
