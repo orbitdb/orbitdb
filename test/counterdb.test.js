@@ -1,13 +1,12 @@
 // 'use strict'
 
-// const assert   = require('assert')
-// const path     = require('path')
-// const fs       = require('fs')
-// const Promise  = require('bluebird')
-// const rimraf   = require('rimraf')
-// const IpfsApis = require('ipfs-test-apis')
-// const IpfsDaemon = require('ipfs-daemon')
-// const OrbitDB  = require('../src/OrbitDB')
+// const path = require('path')
+// const assert = require('assert')
+// const Promise = require('bluebird')
+// const rmrf = require('rimraf')
+// const IpfsNodeDaemon = require('ipfs-daemon/src/ipfs-node-daemon')
+// const IpfsNativeDaemon = require('ipfs-daemon/src/ipfs-native-daemon')
+// const OrbitDB = require('../src/OrbitDB')
 
 // const username  = 'testrunner'
 // const username2 = 'rennurtset'
@@ -31,16 +30,16 @@
 //   }, 1000)
 // }
 
-// IpfsApis.forEach(function(ipfsApi) {
+// [IpfsNodeDaemon].forEach((IpfsDaemon) => {
 //   let ipfs, ipfsDaemon
 
-//   describe('CounterStore with ' + ipfsApi.name, function() {
+//   describe('CounterStore', function() {
 //     this.timeout(20000)
 //     let client1, client2
 //     let daemon1, daemon2
 
 //     before((done) => {
-//       // rimraf.sync('./orbit-db-cache.json')
+//       rmrf.sync(cacheFile)
 //       daemon1 = new IpfsDaemon(daemonConfs.daemon1)
 //       daemon1.on('ready', () => {
 //         daemon2 = new IpfsDaemon(daemonConfs.daemon2)
@@ -54,17 +53,18 @@
 //     after((done) => {
 //       daemon1.stop()
 //       daemon2.stop()
+//       rmrf.sync(cacheFile)
 //       done()
 //     })
 
 //     beforeEach(() => {
-//       client1 = new OrbitDB(ipfs[0], username, { cacheFile: cacheFile })
-//       client2 = new OrbitDB(ipfs[1], username2, { cacheFile: cacheFile })
+//       client1 = new OrbitDB(ipfs[0])
+//       client2 = new OrbitDB(ipfs[1])
 //     })
 
 //     afterEach(() => {
-//       if(client1) client1.disconnect()
-//       if(client2) client2.disconnect()
+//       if (client1) client1.disconnect()
+//       if (client2) client2.disconnect()
 //     })
 
 //     describe('counters', function() {
@@ -72,9 +72,9 @@
 //         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
 //         const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
 //         counter.events.on('ready', () => {
-//           Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1 })
+//           Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1, cacheFile: cacheFile })
 //             .then(() => {
-//               assert.equal(counter.value(), 14)
+//               assert.equal(counter.value, 14)
 //               clearTimeout(timeout)
 //               client1.disconnect()
 //               done()
@@ -83,11 +83,11 @@
 //         })
 //       })
 
-//       it('creates a new counter from cached data', function(done) {
+//       it.skip('creates a new counter from cached data', function(done) {
 //         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
 //         const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
 //         counter.events.on('ready', () => {
-//           assert.equal(counter.value(), 14)
+//           assert.equal(counter.value, 14)
 //           clearTimeout(timeout)
 //           client1.disconnect()
 //           done()
@@ -104,9 +104,11 @@
 
 //         waitForPeers(daemon1, [daemon2.PeerId], name, (err, res) => {
 //           waitForPeers(daemon2, [daemon1.PeerId], name, (err, res) => {
+//           console.log("load!!!")
 //             const increaseCounter = (counter, i) => numbers[i].map((e) => counter.inc(e))
 //             Promise.map([counter1, counter2], increaseCounter, { concurrency: 1 })
 //               .then((res) => {
+//                 console.log("..", res)
 //                 // wait for a while to make sure db's have been synced
 //                 setTimeout(() => {
 //                   assert.equal(counter2.value, 30)
