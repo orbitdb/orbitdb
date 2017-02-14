@@ -26,12 +26,12 @@ const username = 'testrunner'
 const hasIpfsApiWithPubsub = (ipfs) => {
   return ipfs.object.get !== undefined
       && ipfs.object.put !== undefined
-      && ipfs.pubsub.publish !== undefined
-      && ipfs.pubsub.subscribe !== undefined
+      // && ipfs.pubsub.publish !== undefined
+      // && ipfs.pubsub.subscribe !== undefined
 }
 
-[IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
-// [IpfsNodeDaemon].forEach((IpfsDaemon) => {
+// [IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
+[IpfsNodeDaemon].forEach((IpfsDaemon) => {
 // IpfsApis.forEach(function(ipfsApi) {
 
   describe('orbit-db client', function() {

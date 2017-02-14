@@ -26,8 +26,8 @@ const databaseName = 'oribt-db-tests'
 const hasIpfsApiWithPubsub = (ipfs) => {
   return ipfs.object.get !== undefined
       && ipfs.object.put !== undefined
-      && ipfs.pubsub.publish !== undefined
-      && ipfs.pubsub.subscribe !== undefined
+      // && ipfs.pubsub.publish !== undefined
+      // && ipfs.pubsub.subscribe !== undefined
 }
 
 const waitForPeers = (ipfs, channel) => {
@@ -46,7 +46,7 @@ const waitForPeers = (ipfs, channel) => {
 }
 
 // [IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
-[IpfsNativeDaemon].forEach((IpfsDaemon) => {
+[IpfsNodeDaemon].forEach((IpfsDaemon) => {
 
   describe('orbit-db replication', function() {
     this.timeout(40000)
