@@ -32,10 +32,13 @@ const hasIpfsApiWithPubsub = (ipfs) => {
 
 const waitForPeers = (ipfs, channel) => {
   return new Promise((resolve) => {
-    console.log("Waiting for peers...")
+    console.log("Waiting for peers for '" + channel + "'...")
     const interval = setInterval(() => {
       ipfs.pubsub.peers(channel)
+      // The tests pass if used with swarm.peers (peers find each other)
+      // ipfs.swarm.peers()
         .then((peers) => {
+          // console.log(peers)
           if (peers.length > 0) {
             clearInterval(interval)
             resolve()
@@ -72,7 +75,7 @@ const waitForPeers = (ipfs, channel) => {
           assert.equal(hasIpfsApiWithPubsub(ipfs2), true)
           client1 = new OrbitDB(ipfs1, databaseName)
           client2 = new OrbitDB(ipfs2, databaseName + '2')
-          done()        
+          done()
         })
       })
     })
@@ -89,7 +92,7 @@ const waitForPeers = (ipfs, channel) => {
         db2 = client2.eventlog(databaseName, { maxHistory: 0 })
       })
 
-      it('replicates database of 1 entry', (done) => {
+      it.only('replicates database of 1 entry', (done) => {
         waitForPeers(ipfs1, databaseName + '2')
           .then(async(() => {
             db2.events.on('history', (db, data) => {
