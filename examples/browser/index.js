@@ -10,8 +10,18 @@ const key      = 'greeting'
 const elm = document.getElementById("result")
 
 const ipfs = new IPFS({
+  IpfsDataDir: '/tmp/orbit-db-examples',
   // dev server: webrtc-star-signalling.cloud.ipfs.team
-  SignalServer: '188.166.203.82:20000',
+  SignalServer: 'star-signal.cloud.ipfs.team', // IPFS dev server
+  Discovery: {
+    MDNS: {
+      Enabled: false,
+      Interval: 10
+    },
+    webRTCStar: {
+      Enabled: true
+    }
+  },
 })
 
 function handleError(e) {
