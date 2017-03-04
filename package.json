@@ -19,7 +19,7 @@
     "fs-pull-blob-store": "^0.4.1",
     "idb-pull-blob-store": "^0.5.1",
     "lock": "^0.1.3",
-    "logplease": "^1.2.12",
+    "logplease": "^1.2.13",
     "orbit-db-counterstore": "^0.1.8",
     "orbit-db-docstore": "^0.0.9",
     "orbit-db-eventstore": "^0.1.9",
