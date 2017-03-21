@@ -25,7 +25,7 @@
     "orbit-db-eventstore": "^0.1.9",
     "orbit-db-feedstore": "^0.1.8",
     "orbit-db-kvstore": "^0.1.7",
-    "orbit-db-pubsub": "^0.1.6",
+    "orbit-db-pubsub": "^0.2.0",
     "pull-stream": "^3.4.5"
   },
   "devDependencies": {
