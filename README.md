@@ -19,6 +19,8 @@ Data in `orbit-db` can be stored in a
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
+Try the [live demo](https://ipfs.io/ipfs/QmUETzzv9FxBwPn4H6q3i6QXTzicvV3MMuKN53JQU3yMSG/)!
+
 ## Table of Contents
 
 - [Usage](#usage)
