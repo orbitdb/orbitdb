@@ -1,66 +1,50 @@
 'use strict'
 
-const _ = require('lodash')
-const fs = require('fs')
-const path = require('path')
 const assert = require('assert')
-const async = require('asyncawait/async')
-const await = require('asyncawait/await')
-const OrbitDB = require('../src/OrbitDB')
+const mapSeries = require('p-each-series')
 const rmrf = require('rimraf')
-const IpfsNodeDaemon = require('ipfs-daemon/src/ipfs-node-daemon')
-const IpfsNativeDaemon = require('ipfs-daemon/src/ipfs-native-daemon')
-
-if (typeof window !== 'undefined') 
-  window.LOG = 'ERROR'
-
-// Data directories
-const defaultIpfsDirectory = './ipfs'
-const defaultOrbitDBDirectory = './orbit-db'
+const hasIpfsApiWithPubsub = require('./test-utils').hasIpfsApiWithPubsub
+const OrbitDB = require('../src/OrbitDB')
+const config = require('./test-config')
 
 // Daemon settings
 const daemonsConf = require('./ipfs-daemons.conf.js')
 
-const databaseName = 'oribt-db-tests'
-
-const hasIpfsApiWithPubsub = (ipfs) => {
-  return ipfs.object.get !== undefined
-      && ipfs.object.put !== undefined
-      // && ipfs.pubsub.publish !== undefined
-      // && ipfs.pubsub.subscribe !== undefined
-}
-
+// Shared database name
 const waitForPeers = (ipfs, channel) => {
-  return new Promise((resolve) => {
-    console.log("Waiting for peers for '" + channel + "'...")
+  return new Promise((resolve, reject) => {
+    console.log("Waiting for peers...")
     const interval = setInterval(() => {
       ipfs.pubsub.peers(channel)
-      // The tests pass if used with swarm.peers (peers find each other)
-      // ipfs.swarm.peers()
         .then((peers) => {
-          // console.log(peers)
           if (peers.length > 0) {
+            console.log("Found peers, running tests...")
             clearInterval(interval)
             resolve()
           }
+        })
+        .catch((e) => {
+          clearInterval(interval)
+          reject(e)
         })
     }, 1000)
   })
 }
 
-// [IpfsNativeDaemon, IpfsNodeDaemon].forEach((IpfsDaemon) => {
-[IpfsNodeDaemon].forEach((IpfsDaemon) => {
+config.daemons.forEach((IpfsDaemon) => {
 
-  describe('orbit-db replication', function() {
-    this.timeout(40000)
+  describe('orbit-db - Replication', function() {
+    this.timeout(config.timeout)
 
     let ipfs1, ipfs2, client1, client2, db1, db2
 
-    const removeDirectories= () => {
+    const removeDirectories = () => {
       rmrf.sync(daemonsConf.daemon1.IpfsDataDir)
       rmrf.sync(daemonsConf.daemon2.IpfsDataDir)
-      rmrf.sync(defaultIpfsDirectory)
-      rmrf.sync(defaultOrbitDBDirectory)      
+      rmrf.sync(config.defaultIpfsDirectory)
+      rmrf.sync(config.defaultOrbitDBDirectory)
+      rmrf.sync('/tmp/daemon1')
+      rmrf.sync('/tmp/daemon2')
     }
 
     before(function (done) {
@@ -73,57 +57,77 @@ const waitForPeers = (ipfs, channel) => {
         ipfs2.on('error', done)
         ipfs2.on('ready', () => {
           assert.equal(hasIpfsApiWithPubsub(ipfs2), true)
-          client1 = new OrbitDB(ipfs1, databaseName)
-          client2 = new OrbitDB(ipfs2, databaseName + '2')
+          client1 = new OrbitDB(ipfs1, "one")
+          client2 = new OrbitDB(ipfs2, "two")
           done()
         })
       })
     })
 
-    after(() => {
-      ipfs1.stop()
-      ipfs2.stop()
+    after((done) => {
+      if (client1) client1.disconnect()
+      if (client2) client2.disconnect()
+      if (ipfs1) ipfs1.stop()
+      if (ipfs2) ipfs2.stop()
       removeDirectories()
+      setTimeout(() => done(), 10000)
     })
 
     describe('two peers', function() {
       beforeEach(() => {
-        db1 = client1.eventlog(databaseName, { maxHistory: 0 })
-        db2 = client2.eventlog(databaseName, { maxHistory: 0 })
+        db1 = client1.eventlog(config.dbname, { maxHistory: 1, cachePath: '/tmp/daemon1' })
+        db2 = client2.eventlog(config.dbname, { maxHistory: 1, cachePath: '/tmp/daemon2' })
       })
 
-      it.only('replicates database of 1 entry', (done) => {
-        waitForPeers(ipfs1, databaseName + '2')
-          .then(async(() => {
-            db2.events.on('history', (db, data) => {
+      it('replicates database of 1 entry', (done) => {
+        waitForPeers(ipfs1, config.dbname)
+          .then(() => {
+            db2.events.once('error', done)
+            db2.events.once('synced', (db) => {
               const items = db2.iterator().collect()
               assert.equal(items.length, 1)
               assert.equal(items[0].payload.value, 'hello')
               done()
             })
             db1.add('hello')
-          }))
+            .catch(done)
+          })
+          .catch(done)
       })
 
       it('replicates database of 100 entries', (done) => {
         const entryCount = 100
-        waitForPeers(ipfs1, databaseName + '2')
-          .then(async(() => {
+        const entryArr = []
+        let timer
+
+        for (let i = 0; i < entryCount; i ++)
+          entryArr.push(i)
+
+        waitForPeers(ipfs1, config.dbname)
+          .then(() => {
             let count = 0
-            db2.events.on('history', (db, data) => {
-              count ++
-              if (count === entryCount) {
-                const items = db2.iterator({ limit: 100 }).collect()
-                assert.equal(items.length, entryCount)
-                assert.equal(items[0].payload.value, 'hello0')
-                assert.equal(_.last(items).payload.value, 'hello99')
-                done()
+            db2.events.once('error', done)
+            db2.events.on('synced', (d) => {
+              if (count === entryCount && !timer) {
+                timer = setInterval(() => {
+                  const items = db2.iterator({ limit: -1 }).collect()
+                  if (items.length === count) {
+                    clearInterval(timer)
+                    assert.equal(items.length, entryCount)
+                    assert.equal(items[0].payload.value, 'hello0')
+                    assert.equal(items[items.length - 1].payload.value, 'hello99')
+                    setTimeout(done, 5000)
+                  }
+                }, 1000)
               }
             })
 
-            for(let i = 0; i < entryCount; i ++)
-              await(db1.add('hello' + i))
-          }))
+            db1.events.on('write', () => count++)
+
+            mapSeries(entryArr, (i) => db1.add('hello' + i))
+              .catch(done)
+          })
+          .catch(done)
       })
     })
   })

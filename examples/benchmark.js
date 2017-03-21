@@ -16,7 +16,7 @@ const queryLoop = (db) => {
       totalQueries ++
       lastTenSeconds ++
       queriesPerSecond ++
-      process.nextTick(() => queryLoop(db))
+      setImmediate(() => queryLoop(db))
     })
     .catch((e) => console.error(e))
 }
@@ -30,7 +30,7 @@ ipfs.on('error', (err) => console.error(err))
 
 ipfs.on('ready', () => {
   const orbit = new OrbitDB(ipfs, 'benchmark')
-  const db = orbit.eventlog('orbit-db.benchmark')
+  const db = orbit.eventlog('orbit-db.benchmark', { maxHistory: 100 })
 
   // Metrics output
   setInterval(() => {
