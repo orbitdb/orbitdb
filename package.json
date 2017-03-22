@@ -37,7 +37,7 @@
     "p-each-series": "^1.0.0",
     "rimraf": "^2.5.4",
     "uglify-js": "github:mishoo/UglifyJS2#harmony",
-    "webpack": "^2.2.1"
+    "webpack": "^2.3.1"
   },
   "scripts": {
     "examples": "npm run examples:node",
