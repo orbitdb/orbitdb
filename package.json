@@ -19,7 +19,7 @@
     "libp2p-floodsub": "github:libp2p/js-libp2p-floodsub#orbit-floodsub",
     "logplease": "^1.2.12",
     "orbit-db-counterstore": "~0.2.0",
-    "orbit-db-docstore": "github:orbitdb/orbit-db-docstore#v0.2.0",
+    "orbit-db-docstore": "~0.2.0",
     "orbit-db-eventstore": "~0.2.0",
     "orbit-db-feedstore": "~0.2.0",
     "orbit-db-kvstore": "~0.2.0",
