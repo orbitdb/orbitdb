@@ -113,10 +113,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     // { name: 'Friend' }
     ```
 
+  - **load()**
+
+    Load the locally persisted database state to memory.
+
+    ```javascript
+    db.events.on('ready', () => {
+      /* query */
+    })
+    db.load()
+    ```
+
   - **events**
 
     ```javascript
-    db.events.on('data', (dbname, event) => ... )
+    db.events.on('ready', () => /* local database loaded in memory */ )
+    db.events.on('synced', () => /* query for updated results */ )
     ```
 
     See [events](#events) for full description.
@@ -151,10 +163,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     // [{ name: 'User1' }]
     ```
     
+  - **load()**
+
+    Load the locally persisted database state to memory.
+
+    ```javascript
+    db.events.on('ready', () => {
+      /* query */
+    })
+    db.load()
+    ```
+
   - **events**
 
     ```javascript
-    db.events.on('data', (dbname, event) => ... )
+    db.events.on('ready', () => /* local database loaded in memory */ )
+    db.events.on('synced', () => /* query for updated results */ )
     ```
 
     See [events](#events) for full description.
@@ -194,10 +218,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.remove(hash).then((removed) => ...)
     ```
     
+  - **load()**
+
+    Load the locally persisted database state to memory.
+
+    ```javascript
+    db.events.on('ready', () => {
+      /* query */
+    })
+    db.load()
+    ```
+
   - **events**
 
     ```javascript
-    db.events.on('data', (dbname, event) => ... )
+    db.events.on('ready', () => /* local database loaded in memory */ )
+    db.events.on('synced', () => /* query for updated results */ )
     ```
 
     See [events](#events) for full description.
@@ -240,10 +276,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     db.del('shamb0t').then((removed) => ...)
     ```
     
+  - **load()**
+
+    Load the locally persisted database state to memory.
+
+    ```javascript
+    db.events.on('ready', () => {
+      /* query */
+    })
+    db.load()
+    ```
+
   - **events**
 
     ```javascript
-    db.events.on('data', (dbname, event) => ... )
+    db.events.on('ready', () => /* local database loaded in memory */ )
+    db.events.on('synced', () => /* query for updated results */ )
     ```
 
     See [events](#events) for full description.
@@ -272,10 +320,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     counter.value // 8
     ```
     
+  - **load()**
+
+    Load the locally persisted database state to memory.
+
+    ```javascript
+    db.events.on('ready', () => {
+      /* query */
+    })
+    db.load()
+    ```
+
   - **events**
 
     ```javascript
-    db.events.on('data', (dbname, event) => ... )
+    db.events.on('ready', () => /* local database loaded in memory */ )
+    db.events.on('synced', () => /* query for updated results */ )
     ```
 
     See [events](#events) for full description.
@@ -288,26 +348,18 @@ After creating an instance of `orbitd-db`, you can now access the different data
 
 ### events
 
-  - **orbitdb**
-
-    - `data` - (dbname, event)
-
-      Emitted when an update happens in any of the open databases.
-
-      ```javascript
-      orbitdb.events.on('data', (dbname, event) => ...)
-      ```
-
   - **stores**
 
     Each database in `orbit-db` contains an `events` ([EventEmitter](https://nodejs.org/api/events.html)) object that emits events that describe what's happening in the database.
 
-    - `data` - (dbname, event)
-      
-      Emitted after an entry was added to the database
+    - `synced` - (dbname)
+
+      Emitted when an update happens in the databases. Eg. when the database was synchronized with a peer. This is usually a good place to requery the database
+      for updated results, eg. if a value of a key was changed or if there are new
+      events in an event log.
 
       ```javascript
-      db.events.on('data', (dbname, event) => ... )
+      db.events.on('synced', () => ... )
       ```
 
     - `sync` - (dbname)
@@ -318,34 +370,42 @@ After creating an instance of `orbitd-db`, you can now access the different data
       db.events.on('sync', (dbname) => ... )
       ```
 
-    - `load` - (dbname, hash)
+    - `load` - (dbname)
 
-      Emitted before loading the database history. *hash* is the hash from which the history is loaded from.
-
-      ```javascript
-      db.events.on('load', (dbname, hash) => ... )
-      ```
-
-    - `history` - (dbname, entries)
-
-      Emitted after loading the database history. *entries* is an Array of entries that were loaded.
+      Emitted before loading the local database.
 
       ```javascript
-      db.events.on('history', (dbname, entries) => ... )
+      db.events.on('load', (dbname) => ... )
       ```
 
     - `ready` - (dbname)
 
-      Emitted after fully loading the database history.
+      Emitted after fully loading the local database.
 
       ```javascript
       db.events.on('ready', (dbname) => ... )
       ```
 
-    - `write` - (dbname, hash)
+    - `write` - (dbname, hash, entry)
 
-      Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database.
+      Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
 
       ```javascript
-      db.events.on('write', (dbname, hash) => ... )
+      db.events.on('write', (dbname, hash, entry) => ... )
+      ```
+
+    - `load.progress` - (dbname, hash, entry, progress)
+
+      Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
+
+      ```javascript
+      db.events.on('load.porgress', (dbname, hash, entry, progress) => ... )
+      ```
+
+    - `error` - (error)
+
+      Emitted on an error.
+
+      ```javascript
+      db.events.on('error', (err) => ... )
       ```
