@@ -1,127 +1,112 @@
-// 'use strict'
+'use strict'
 
-// const path = require('path')
-// const assert = require('assert')
-// const Promise = require('bluebird')
-// const rmrf = require('rimraf')
-// const IpfsNodeDaemon = require('ipfs-daemon/src/ipfs-node-daemon')
-// const IpfsNativeDaemon = require('ipfs-daemon/src/ipfs-native-daemon')
-// const OrbitDB = require('../src/OrbitDB')
+const path = require('path')
+const assert = require('assert')
+const rmrf = require('rimraf')
+const mapSeries = require('p-each-series')
+const OrbitDB = require('../src/OrbitDB')
+const config = require('./utils/config')
+const startIpfs = require('./utils/start-ipfs')
+const waitForPeers = require('./utils/wait-for-peers')
 
-// const username  = 'testrunner'
-// const username2 = 'rennurtset'
-// const cacheFile = path.join(process.cwd(), '/tmp/orbit-db-tests/cache.json')
+const dbPath1 = './orbitdb/tests/counters/peer1'
+const dbPath2 = './orbitdb/tests/counters/peer2'
+const ipfsPath1 = './orbitdb/tests/counters/peer1/ipfs'
+const ipfsPath2 = './orbitdb/tests/counters/peer2/ipfs'
 
-// const daemonConfs = require('./ipfs-daemons.conf.js')
+describe('CounterStore', function() {
+  this.timeout(config.timeout)
 
-// const waitForPeers = (ipfs, peersToWait, topic, callback) => {
-//   const i = setInterval(() => {
-//     ipfs.pubsub.peers(topic, (err, peers) => {
-//       if (err) {
-//         return callback(err)
-//       }
+  let orbitdb1, orbitdb2
+  let ipfs1, ipfs2
 
-//       const hasAllPeers = peersToWait.map((e) => peers.includes(e)).filter((e) => e === false).length === 0
-//       if (hasAllPeers) {
-//         clearInterval(i)
-//         callback(null)
-//       }
-//     })
-//   }, 1000)
-// }
+  before(async () => {
+    rmrf.sync(dbPath1)
+    rmrf.sync(dbPath2)
+    config.daemon1.repo = ipfsPath1
+    config.daemon2.repo = ipfsPath2
+    ipfs1 = await startIpfs(config.daemon1)
+    ipfs2 = await startIpfs(config.daemon2)
+  })
 
-// [IpfsNodeDaemon].forEach((IpfsDaemon) => {
-//   let ipfs, ipfsDaemon
+  after(async () => {
+    if (orbitdb1)
+      orbitdb1.stop()
 
-//   describe('CounterStore', function() {
-//     this.timeout(20000)
-//     let client1, client2
-//     let daemon1, daemon2
+    if (orbitdb2)
+      orbitdb2.stop()
 
-//     before((done) => {
-//       rmrf.sync(cacheFile)
-//       daemon1 = new IpfsDaemon(daemonConfs.daemon1)
-//       daemon1.on('ready', () => {
-//         daemon2 = new IpfsDaemon(daemonConfs.daemon2)
-//         daemon2.on('ready', () => {
-//           ipfs = [daemon1, daemon2]
-//           done()
-//         })
-//       })
-//     })
+    if (ipfs1)
+      await ipfs1.stop()
 
-//     after((done) => {
-//       daemon1.stop()
-//       daemon2.stop()
-//       rmrf.sync(cacheFile)
-//       done()
-//     })
+    if (ipfs2)
+      await ipfs2.stop()
+  })
 
-//     beforeEach(() => {
-//       client1 = new OrbitDB(ipfs[0])
-//       client2 = new OrbitDB(ipfs[1])
-//     })
+  beforeEach(() => {
+    orbitdb1 = new OrbitDB(ipfs1, './orbitdb/1')
+    orbitdb2 = new OrbitDB(ipfs2, './orbitdb/2')
+  })
 
-//     afterEach(() => {
-//       if (client1) client1.disconnect()
-//       if (client2) client2.disconnect()
-//     })
+  afterEach(() => {
+    if (orbitdb1)
+      orbitdb1.stop()
 
-//     describe('counters', function() {
-//       it('increases a counter value', function(done) {
-//         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
-//         const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
-//         counter.events.on('ready', () => {
-//           Promise.map([13, 1], (f) => counter.inc(f), { concurrency: 1, cacheFile: cacheFile })
-//             .then(() => {
-//               assert.equal(counter.value, 14)
-//               clearTimeout(timeout)
-//               client1.disconnect()
-//               done()
-//             })
-//             .catch(done)
-//         })
-//       })
+    if (orbitdb2)
+      orbitdb2.stop()
+  })
 
-//       it.skip('creates a new counter from cached data', function(done) {
-//         const timeout = setTimeout(() => done(new Error('event was not fired')), 2000)
-//         const counter = client1.counter('counter test', { subscribe: false, cacheFile: cacheFile })
-//         counter.events.on('ready', () => {
-//           assert.equal(counter.value, 14)
-//           clearTimeout(timeout)
-//           client1.disconnect()
-//           done()
-//         })
-//       })
+  describe('counters', function() {
+    let address
 
-//       it.only('syncs counters', (done) => {
-//         const name = new Date().getTime()
-//         const counter1 = client1.counter(name)
-//         const counter2 = client2.counter(name)
-//         const numbers = [[13, 10], [2, 5]]
-//         // const res1 = ([13, 10]).map((f) => counter1.inc(f))//, { concurrency: 1 })
-//         // const res2 = ([2, 5]).map((f) => counter2.inc(f))//, { concurrency: 1 })
+    it('increases a counter value', async () => {
+      const counter = await orbitdb1.counter('counter test', { path: dbPath1 })
+      address = counter.address.toString()
+      await mapSeries([13, 1], (f) => counter.inc(f))
+      assert.equal(counter.value, 14)
+      await counter.close()
+    })
 
-//         waitForPeers(daemon1, [daemon2.PeerId], name, (err, res) => {
-//           waitForPeers(daemon2, [daemon1.PeerId], name, (err, res) => {
-//           console.log("load!!!")
-//             const increaseCounter = (counter, i) => numbers[i].map((e) => counter.inc(e))
-//             Promise.map([counter1, counter2], increaseCounter, { concurrency: 1 })
-//               .then((res) => {
-//                 console.log("..", res)
-//                 // wait for a while to make sure db's have been synced
-//                 setTimeout(() => {
-//                   assert.equal(counter2.value, 30)
-//                   assert.equal(counter1.value, 30)
-//                   done()
-//                 }, 2000)
-//               })
-//               .catch(done)          
-//           })
-//         })
-//       })
+    it('opens a saved counter', async () => {
+      const counter = await orbitdb1.counter(address, { path: dbPath1 })
+      await counter.load()
+      assert.equal(counter.value, 14)
+      await counter.close()
+    })
 
-//     })
-//   })
+    it('syncs counters', async () => {
+      let options = {
+        // Set write access for both clients
+        write: [
+          orbitdb1.key.getPublic('hex'), 
+          orbitdb2.key.getPublic('hex')
+        ],
+      }
 
-// })
+      const numbers = [[13, 10], [2, 5]]
+      const increaseCounter = (counterDB, i) => mapSeries(numbers[i], n => counterDB.inc(n))
+
+      // Create a new counter database in the first client
+      options = Object.assign({}, options, { path: dbPath1 })
+      const counter1 = await orbitdb1.counter(new Date().getTime().toString(), options)
+      // Open the database in the second client
+      options = Object.assign({}, options, { path: dbPath2, sync: true })
+      const counter2 = await orbitdb2.counter(counter1.address.toString(), options)
+
+      // Wait for peers to connect first
+      await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
+      await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
+      // Increase the counters sequentially
+      await mapSeries([counter1, counter2], increaseCounter)
+
+      return new Promise(resolve => {
+        // Wait for a while to make sure db's have been synced
+        setTimeout(() => {
+          assert.equal(counter1.value, 30)
+          assert.equal(counter2.value, 30)
+          resolve()
+        }, 2000)
+      })
+    })
+  })
+})

@@ -1,13 +1,8 @@
 *sublime*
 node_modules/
-*.log
-.vagrant/
-.idea/
-dump.rdb
-Vagrantfile
-examples/browser/bundle.js
-examples/browser/*.map
+examples/browser/browser-webpack-example/bundle.js
+examples/browser/browser-webpack-example/*.map
 examples/browser/lib
 dist/*.map
-orbit-db/
-ipfs/
+dist/orbitdb.js
+orbitdb/
