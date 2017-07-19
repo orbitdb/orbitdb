@@ -399,7 +399,7 @@ After creating an instance of `orbitd-db`, you can now access the different data
       Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
 
       ```javascript
-      db.events.on('load.porgress', (dbname, hash, entry, progress) => ... )
+      db.events.on('load.progress', (dbname, hash, entry, progress) => ... )
       ```
 
     - `error` - (error)
