@@ -111,7 +111,7 @@ LOG=debug node examples/eventlog.js
 
 **Key-Value**
 
-Check the code in [examples/keyvalue.js](https://github.com/orbitdb/orbit-db/blob/master/examples/keystore.js) and run it with:
+Check the code in [examples/keyvalue.js](https://github.com/orbitdb/orbit-db/blob/master/examples/keyvalue.js) and run it with:
 ```
 LOG=debug node examples/keyvalue.js
 ```
