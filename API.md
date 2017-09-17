@@ -155,8 +155,22 @@ After creating an instance of `orbitd-db`, you can now access the different data
     ```
     
   - **iterator([options])**
+
+    **options** : It is an object which supports the following properties
+
+    `gt - (string)`  Greater than
+
+    `gte - (string)`  Greater than or equal to
+
+    `lt - (string)`  Less than
+
+    `lte - (string)`  Less than or equal to
+
+    `limit - (integer)`  Limiting the entries of result
+
+    `reverse - (boolean)`  If set to true will result in reversing the result.
+
     ```javascript
-    // TODO: add all options - gt, gte, lt, lte, limit, reverse
     const all = db.iterator({ limit: -1 })
       .collect()
       .map((e) => e.payload.value)
@@ -205,8 +219,21 @@ After creating an instance of `orbitd-db`, you can now access the different data
     ```
     
   - **iterator([options])**
+
+    **options** : It is an object which supports the following properties
+
+    `gt - (string)`  Greater than
+
+    `gte - (string)`  Greater than or equal to
+
+    `lt - (string)`  Less than
+
+    `lte - (string)`  Less than or equal to
+
+    `limit - (integer)`  Limiting the entries of result
+
+    `reverse - (boolean)`  If set to true will result in reversing the result.
     ```javascript
-    // TODO: add all options - gt, gte, lt, lte, limit, reverse
     const all = db.iterator({ limit: -1 })
       .collect()
       .map((e) => e.payload.value)
