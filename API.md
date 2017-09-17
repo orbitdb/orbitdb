@@ -156,19 +156,19 @@ After creating an instance of `orbitd-db`, you can now access the different data
     
   - **iterator([options])**
 
-    **options** : It is an object which supported the following properties
+    **options** : It is an object which supports the following properties
 
-    `gt` - (String) Greater than
+    `gt - (string)`  Greater than
 
-    `gte` - (String) Greater than or equal to
+    `gte - (string)`  Greater than or equal to
 
-    `lt` - (String) Less than
+    `lt - (string)`  Less than
 
-    `lte` - (String) Less than or equal to
+    `lte - (string)`  Less than or equal to
 
-    `limit` - (Integer) Limiting the entries of result
+    `limit - (integer)`  Limiting the entries of result
 
-    `reverse` - (Boolean) If set to true will result in reversing the result.
+    `reverse - (boolean)`  If set to true will result in reversing the result.
 
     ```javascript
     const all = db.iterator({ limit: -1 })
@@ -220,19 +220,19 @@ After creating an instance of `orbitd-db`, you can now access the different data
     
   - **iterator([options])**
 
-    **options** : It is an object which supported the following properties
+    **options** : It is an object which supports the following properties
 
-    `gt` - (String) Greater than
+    `gt - (string)`  Greater than
 
-    `gte` - (String) Greater than or equal to
+    `gte - (string)`  Greater than or equal to
 
-    `lt` - (String) Less than
+    `lt - (string)`  Less than
 
-    `lte` - (String) Less than or equal to
+    `lte - (string)`  Less than or equal to
 
-    `limit` - (Integer) Limiting the entries of result
+    `limit - (integer)`  Limiting the entries of result
 
-    `reverse` - (Boolean) If set to true will result in reversing the result.
+    `reverse - (boolean)`  If set to true will result in reversing the result.
     ```javascript
     const all = db.iterator({ limit: -1 })
       .collect()
