@@ -6,7 +6,7 @@
 [![](https://img.shields.io/badge/made%20by-Protocol%20Labs-blue.svg?style=flat-square)](http://ipn.io)
 [![Project Status](https://badge.waffle.io/haadcode/orbit.svg?label=In%20Progress&title=In%20Progress)](https://waffle.io/haadcode/orbit?source=haadcode%2Forbit-db,haadcode%2Forbit-db-counterstore,haadcode%2Forbit-db-eventstore,haadcode%2Forbit-db-feedstore,haadcode%2Forbit-db-kvstore,haadcode%2Forbit-db-store,haadcode%2Fipfs-log)
 
-> Distributed, peer-to-peer database on IPFS.
+> Distributed, peer-to-peer database for the decentralized web.
 
 `orbit-db` is a serverless, distributed, peer-to-peer database. `orbit-db` uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making `orbit-db` and excellent choice for offline-first applications.
 
@@ -20,7 +20,9 @@ Data in `orbit-db` can be stored in a
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
-Try the [live demo](https://ipfs.io/ipfs/QmUETzzv9FxBwPn4H6q3i6QXTzicvV3MMuKN53JQU3yMSG/)!
+To get started, try out the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)** or check the [live demo](https://ipfs.io/ipfs/QmUETzzv9FxBwPn4H6q3i6QXTzicvV3MMuKN53JQU3yMSG/)!
+
+<a href="https://asciinema.org/a/JdTmmdBCZarkBkPqbueicwMrG" target="_blank"><img src="https://asciinema.org/a/JdTmmdBCZarkBkPqbueicwMrG.png" width="50%"/></a>
 
 ## Table of Contents
 
@@ -33,6 +35,22 @@ Try the [live demo](https://ipfs.io/ipfs/QmUETzzv9FxBwPn4H6q3i6QXTzicvV3MMuKN53J
 - [License](#license)
 
 ## Usage
+
+### CLI
+
+For the CLI tool to manage orbit-db database, see **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**.
+
+It can be installed from Npm with:
+
+```
+npm install orbit-db-cli -g
+```
+
+### Library
+
+`orbit-db` can be used in your Javascript programs as a module. This works both in Node.js as well as in the browsers.
+
+To start, install the module with:
 
 ```
 npm install orbit-db ipfs-daemon
