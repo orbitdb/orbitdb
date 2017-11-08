@@ -47,5 +47,19 @@
     "build": "npm run build:examples && npm run build:dist",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size",
     "build:dist": "webpack -p --config conf/webpack.config.js --sort-modules-by size"
-  }
+  },
+  "keywords": [
+    "crdt",
+    "database",
+    "decentralized",
+    "distributed",
+    "ipfs",
+    "p2p",
+    "peer-to-peer"
+  ],
+  "homepage": "https://github.com/orbitdb/orbit-db",
+  "bugs": "https://github.com/orbitdb/orbit-db/issues",
+  "contributors": [
+    "Haad"
+  ]
 }
