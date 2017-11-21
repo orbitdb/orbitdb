@@ -25,7 +25,8 @@
     "orbit-db-feedstore": "~1.0.0",
     "orbit-db-keystore": "~0.0.2",
     "orbit-db-kvstore": "~1.0.0",
-    "orbit-db-pubsub": "~0.3.1"
+    "orbit-db-store": "orbitdb/orbit-db-store#feat/ipfs-0.27.0",
+    "orbit-db-pubsub": "orbitdb/orbit-db-pubsub#feat/ipfs-0.27.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -34,7 +35,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "datastore-level": "~0.7.0",
-    "ipfs": "~0.26.0",
+    "ipfs": "github:ipfs/js-ipfs",
     "ipfs-repo": "~0.18.0",
     "mocha": "^4.0.1",
     "p-each-series": "^1.0.0",
