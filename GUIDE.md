@@ -228,6 +228,27 @@ For adding entries to other databases, see:
 - [docs.put()](https://github.com/orbitdb/orbit-db/blob/master/API.md#putdoc)
 - [counter.inc()](https://github.com/orbitdb/orbit-db/blob/master/API.md#incvalue)
 
+**Parallelism** 
+
+We currently don't support parallel updates. Updates to a database need to be executed in a sequential manner. The write throughput is several hundreds or thousands of writes per second (depending on your platform and hardware, YMMV), so this shouldn't slow down your app too much. If it does, [lets us know](https://github.com/orbitdb/orbit-db/issues)!
+
+Update the database one after another:
+```javascript
+await db.put('key1', 'hello1')
+await db.put('key2', 'hello2')
+await db.put('key3', 'hello3')
+```
+
+Not:
+```javascript
+// This is not supported atm!
+Promise.all([
+  db.put('key1', 'hello1'),
+  db.put('key2', 'hello2'),
+  db.put('key3', 'hello3')
+])
+```
+
 ## Get an entry
 
 To get a value or entry from the database, we call the appropriate query function which is different per database type.
