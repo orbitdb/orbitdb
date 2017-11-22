@@ -20,7 +20,7 @@ Data in `orbit-db` can be stored in a
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
-To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check the **[Live demo](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/)**!
+To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check **[Live demo 1](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/)** and **[Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/)**!
 
 <p align="left">
   <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/feat/write-access/screenshots/example1.png" width="28%">
