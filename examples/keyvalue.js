@@ -3,7 +3,20 @@
 const IPFS = require('ipfs')
 const OrbitDB = require('../src/OrbitDB')
 
+const userId = 1
 const creatures = ['🐙', '🐬', '🐋', '🐠', '🐡', '🦀', '🐢', '🐟', '🐳']
+
+const output = (user) => {
+  let output = ``
+  output += `----------------------\n`
+  output += `User\n`
+  output += `----------------------\n`
+  output += `Id: ${userId}\n`
+  output += `Avatar: ${user.avatar}\n`
+  output += `Updated: ${user.updated}\n`
+  output += `----------------------\n`
+  console.log(output)
+}
 
 console.log("Starting...")
 
@@ -19,17 +32,17 @@ ipfs.on('error', (err) => console.error(err))
 
 ipfs.on('ready', async () => {
   let db
-
   try {
     const orbitdb = new OrbitDB(ipfs, './orbitdb/examples/eventlog')
     db = await orbitdb.kvstore('example', { overwrite: true })
+    await db.load()
+    // Query immediately after loading
+    const user = db.get(userId)
+    output(user)
   } catch (e) {
     console.error(e)
     process.exit(1)
   }
-
-  // Create the key
-  const userId = Math.floor(Math.random() * 900 + 100)
 
   const query = async () => {
     // Randomly select an avatar
@@ -42,16 +55,9 @@ ipfs.on('ready', async () => {
     const user = db.get(userId)
 
     // Display the value
-    let output = `\n`
-    output += `----------------------\n`
-    output += `User\n`
-    output += `----------------------\n`
-    output += `Id: ${userId}\n`
-    output += `Avatar: ${user.avatar}\n`
-    output += `Updated: ${user.updated}\n`
-    output += `----------------------`
-    console.log(output)          
+    output(user)
   }
 
+  console.log("Starting update loop...")
   setInterval(query, 1000)
 })
