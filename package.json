@@ -48,9 +48,10 @@
     "examples:node": "node examples/eventlog.js",
     "examples:browser": "open examples/browser/browser.html",
     "test": "mocha",
-    "build": "npm run build:dist && npm run build:examples",
+    "build": "npm run build:es5 && npm run build:dist && npm run build:examples",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size",
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && cp dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js",
-    "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && cp dist/orbitdb.js examples/browser/lib/orbitdb.min.js"
+    "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && cp dist/orbitdb.js examples/browser/lib/orbitdb.min.js",
+    "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-es2015 --plugins babel-plugin-transform-runtime"
   }
 }
