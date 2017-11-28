@@ -130,15 +130,18 @@ describe('orbit-db - Automatic Replication', function() {
 
       // Can't check this for now as db1 might've sent the heads to db2 
       // before we subscribe to the event
-      // db2.events.on('replicate.progress', (address, hash, entry) => {
-      //   try {
-      //     // Check that the head we received from the first peer is the latest
-      //     assert.equal(entry.payload.value, 'hello' + (entryCount - 1))
-      //     assert.equal(entry.clock.time, entryCount)
-      //   } catch (e) {
-      //     reject(e)
-      //   }
-      // })
+      db2.events.on('replicate.progress', (address, hash, entry) => {
+        try {
+          // Check that the head we received from the first peer is the latest
+          // console.log(JSON.stringify(entry))
+          assert.equal(entry.payload.op, 'ADD')
+          assert.equal(entry.payload.key, null)
+          assert.notEqual(entry.payload.value.indexOf('hello'), -1)
+          assert.notEqual(entry.clock, null)
+        } catch (e) {
+          reject(e)
+        }
+      })
 
       db2.events.on('replicated', (address) => {
         try {

@@ -229,7 +229,7 @@ var OrbitDB = function () {
         var heads = store._oplog.heads;
         if (heads.length > 0) {
           logger.debug('Send latest heads of \'' + address + '\':\n', (0, _stringify2.default)(heads, null, 2));
-          room.sendTo(peer, new Buffer((0, _stringify2.default)(heads)));
+          room.sendTo(peer, (0, _stringify2.default)(heads));
         }
         store.events.emit('peer', peer);
       }
