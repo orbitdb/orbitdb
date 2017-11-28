@@ -7,8 +7,8 @@ test: deps
 	npm run test
 	
 build: test
-	npm run build
 	mkdir -p examples/browser/lib/
+	npm run build
 	cp dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js
 	cp node_modules/ipfs/dist/index.min.js examples/browser/lib/ipfs.min.js
 	@echo "Build success!"

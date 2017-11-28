@@ -7,6 +7,9 @@ const userId = 1
 const creatures = ['🐙', '🐬', '🐋', '🐠', '🐡', '🦀', '🐢', '🐟', '🐳']
 
 const output = (user) => {
+  if (!user)
+    return
+
   let output = ``
   output += `----------------------\n`
   output += `User\n`
