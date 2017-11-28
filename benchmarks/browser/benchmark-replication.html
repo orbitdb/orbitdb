@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <h1>OrbitDB - Benchmark Replication</h1>
+
+    <h2>Description</h2>
+    <div>Two peers</div>
+
+    <h2>Results</h2>
+    <pre id="output"></pre>
+
+    <script type="text/javascript" src="../../dist/orbitdb.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
+
+    <script type="text/javascript">
+      // Metrics
+      let metrics1 = {
+        totalQueries: 0,
+        seconds: 0,
+        queriesPerSecond: 0,
+        lastTenSeconds: 0,
+      }
+
+      let metrics2 = {
+        totalQueries: 0,
+        seconds: 0,
+        queriesPerSecond: 0,
+        lastTenSeconds: 0,
+      }
+
+      const ipfsConf = {
+        Addresses: {
+          Swarm: [
+            // Use IPFS dev signal server
+            '/dns4/star-signal.cloud.ipfs.team/wss/p2p-webrtc-star',
+        // '/ip4/0.0.0.0/tcp/9090/wss/p2p-webrtc-star',
+          ]
+        },
+        Bootstrap: [],
+        Discovery: {
+          MDNS: {
+            Enabled: false,
+            Interval: 10
+          },
+          webRTCStar: {
+            Enabled: false
+          }
+        },
+      }
+
+      const defaultConfig = Object.assign({}, {
+        start: true,
+        EXPERIMENTAL: {
+          pubsub: true,
+          sharding: false,
+          dht: false,
+        },
+        config: ipfsConf
+      })
+
+      const conf1 = Object.assign({}, defaultConfig, { 
+        repo: './orbitdb/benchmarks/2replication3/client1/ipfs'
+      })
+
+      const conf2 = Object.assign({}, defaultConfig, { 
+        repo: './orbitdb/benchmarks/2replication3/client2/ipfs'
+      })
+
+      // Write loop
+      const queryLoop = async (db) => {
+        if (metrics1.totalQueries < updateCount) {
+          await db.add(metrics1.totalQueries)
+          metrics1.totalQueries ++
+          metrics1.lastTenSeconds ++
+          metrics1.queriesPerSecond ++
+          setImmediate(() => queryLoop(db))
+        }
+      }
+
+      // Metrics output function
+      const outputMetrics = (name, db, metrics) => {
+          metrics.seconds ++
+          console.log(`[${name}] ${metrics.queriesPerSecond} queries per second, ${metrics.totalQueries} queries in ${metrics.seconds} seconds (Oplog: ${db._oplog.length})`)
+          metrics.queriesPerSecond = 0
+
+          if(metrics.seconds % 10 === 0) {
+            console.log(`[${name}] --> Average of ${metrics.lastTenSeconds/10} q/s in the last 10 seconds`)
+            metrics.lastTenSeconds = 0
+          }  
+      }
+
+      const startIpfs = (config = {}) => {
+        return new Promise((resolve, reject) => {
+          const ipfs = new Ipfs(config)
+          ipfs.on('error', reject)
+          ipfs.on('ready', () => resolve(ipfs))
+        })
+      }
+
+      const database = 'benchmark-replication'
+      const updateCount = 2000
+
+      // Start
+      console.log("Starting IPFS daemons...")
+
+      let run = (async () => {
+        let ipfs2 = await startIpfs(conf2)
+        try {
+          // Create the databases
+          const address = '/orbitdb/QmcPCAwwV1rw7cLQU7VcCaUXEuLYSCH8uUf6NPDLYbL6JT/benchmark-replication'
+          const orbit2 = new OrbitDB(ipfs2, './orbitdb/benchmarks/replication/client3')
+          const db2 = await orbit2.eventlog(address)
+
+          db2.events.on('peer', peer => console.log("PEER2!", peer))
+
+          let db2Connected = false
+
+          db2.events.on('peer', () => {
+            db2Connected = true
+          })
+
+          const startInterval = setInterval(() => {
+            if (db2Connected) {
+              clearInterval(startInterval)
+              // Metrics output for the reader
+              let prevCount = 0
+              setInterval(() => {
+                const result = db2.iterator({ limit: -1 }).collect()
+                metrics2.totalQueries = result.length
+                metrics2.queriesPerSecond = metrics2.totalQueries - prevCount
+                metrics2.lastTenSeconds += metrics2.queriesPerSecond
+                prevCount = metrics2.totalQueries
+
+                outputMetrics("READ", db2, metrics2)
+
+                if (db2._oplog.length === updateCount) {
+                  console.log("Finished")
+                }
+              }, 1000)
+            }
+          }, 100)
+        } catch (e) {
+          console.error(e)
+        }
+      })()
+    </script>
+  </body>
+</html>

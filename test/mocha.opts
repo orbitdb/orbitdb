@@ -1,3 +1,4 @@
 --reporter spec
 --colors
 --recursive
+--exit

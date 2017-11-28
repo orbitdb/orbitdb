@@ -1,0 +1,41 @@
+body {
+  font-family: 'Abel', sans-serif;
+  font-size: 0.8em;
+}
+
+#logo {
+  border-top: 1px dotted black;
+  border-bottom: 1px dotted black;
+}
+
+#status {
+  border-top: 1px dotted black;
+  border-bottom: 1px dotted black;
+  padding: 0.5em 0em;
+  text-align: center;
+}
+
+#results {
+  border: 1px dotted black;
+  padding: 0.5em;
+}
+
+#writerText {
+  padding-top: 0.5em;
+}
+
+pre {
+  text-align: center;
+}
+
+input {
+  padding: 0.5em;
+}
+
+h2 {
+  margin-bottom: 0.2em;
+}
+h3 {
+  margin-top: 0.8em;
+  margin-bottom: 0.2em;
+}
