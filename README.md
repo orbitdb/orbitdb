@@ -152,6 +152,8 @@ npm run build
 node benchmarks/benchmark-add.js
 ```
 
+See [benchmarks/]() for more benchmarks.
+
 #### Logging
 
 To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `debug`,`warn` or `error`:
