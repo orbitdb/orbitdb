@@ -374,7 +374,23 @@ await db.drop()
 
 #### key
 
-The [keypair]([orbit-db-keystore]()) used to access the database.
+The [keypair](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) used to access the database.
+
+```
+const key = db.key
+console.log(key)
+// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e 
+// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b 
+// y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
+```
+
+The key contains the keypair used to sign the database entries. The public key can be retrieved with:
+```
+console.log(db.key.getPublic('hex'))
+// 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
+```
+
+The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key.getPublic('hex')`.
 
 #### type
 
