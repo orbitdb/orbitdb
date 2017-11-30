@@ -326,7 +326,7 @@ const ipfs1 = new IPFS({ repo: './ipfs1' })
 ipfs1.on('ready', async () => {
   // Create the database
   const orbitdb1 = new OrbitDB(ipfs1, './orbitdb1')
-  const db1 = await orbitdb.log('events')
+  const db1 = await orbitdb1.log('events')
 
   // Create the second peer
   const ipfs2 = new IPFS({ repo: './ipfs2' })
@@ -338,7 +338,7 @@ ipfs1.on('ready', async () => {
 
     // When the second database replicated new heads, query the database
     db2.events.on('replicated', () => {
-      const result = db2.iterator({ limit: -1 }).collect()
+      const result = db2.iterator({ limit: -1 }).collect().map(e => e.payload.value)
       console.log(result.join('\n'))
     })
 
