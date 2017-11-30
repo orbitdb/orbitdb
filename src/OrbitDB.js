@@ -122,7 +122,7 @@ class OrbitDB {
   // Callback for local writes to the database. We the update to pubsub.
   _onWrite (address, entry, heads) {
     if(!heads) throw new Error("'heads' not defined")
-    if(this._pubsub) setImmediate(() => this._pubsub.publish(address, heads))
+    if(this._pubsub) this._pubsub.publish(address, heads)
   }
 
   // Callback for receiving a message from the network
