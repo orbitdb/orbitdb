@@ -17,7 +17,7 @@ const ipfsPath2 = './orbitdb/tests/replicate-automatically/2/ipfs'
 describe('orbit-db - Automatic Replication', function() {
   this.timeout(config.timeout)
 
-  let ipfs1, ipfs2, orbitdb1, orbitdb2, db1, db2
+  let ipfs1, ipfs2, orbitdb1, orbitdb2, db1, db2, db3, db4
 
   before(async () => {
     config.daemon1.repo = ipfsPath1
@@ -28,6 +28,9 @@ describe('orbit-db - Automatic Replication', function() {
     rmrf.sync(dbPath2)
     ipfs1 = await startIpfs(config.daemon1)
     ipfs2 = await startIpfs(config.daemon2)
+    // Connect the peers manually to speed up test times
+    await ipfs2.swarm.connect(ipfs1._peerInfo.multiaddrs._multiaddrs[0].toString())
+    await ipfs1.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
     orbitdb1 = new OrbitDB(ipfs1, dbPath1)
     orbitdb2 = new OrbitDB(ipfs2, dbPath2)
   })
@@ -56,11 +59,14 @@ describe('orbit-db - Automatic Replication', function() {
 
     options = Object.assign({}, options, { path: dbPath1 })
     db1 = await orbitdb1.eventlog('replicate-automatically-tests', options)
+    db3 = await orbitdb1.keyvalue('replicate-automatically-tests-kv', options)
   })
 
   afterEach(async () => {
-    await db1.drop()
-    await db2.drop()
+    if (db1) await db1.drop()
+    if (db2) await db2.drop()
+    if (db3) await db3.drop()
+    if (db4) await db4.drop()
   })
 
   it('starts replicating the database when peers connect', async () => {
@@ -82,6 +88,58 @@ describe('orbit-db - Automatic Replication', function() {
     // Listen for the 'replicated' events and check that all the entries
     // were replicated to the second database
     return new Promise((resolve, reject) => {
+      db2.events.on('replicated', (address) => {
+        try {
+          const result1 = db1.iterator({ limit: -1 }).collect()
+          const result2 = db2.iterator({ limit: -1 }).collect()
+          // Make sure we have all the entries
+          if (result1.length === entryCount && result2.length === entryCount) {
+            assert.deepEqual(result1, result2)
+            resolve()
+          }
+        } catch (e) {
+          reject(e)
+        }
+      })
+    })
+  })
+
+  it('automatic replication exchanges the correct heads', async () => {
+    const entryCount = 33
+    const entryArr = []
+    let options = {}
+    let timer
+
+    // Create the entries in the first database
+    for (let i = 0; i < entryCount; i ++)
+      entryArr.push(i)
+
+    await mapSeries(entryArr, (i) => db1.add('hello' + i))
+
+    // Open the second database
+    options = Object.assign({}, options, { path: dbPath2, sync: true })
+    db2 = await orbitdb2.eventlog(db1.address.toString(), options)
+    db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
+
+    // Listen for the 'replicated' events and check that all the entries
+    // were replicated to the second database
+    return new Promise(async (resolve, reject) => {
+      db4.events.on('replicated', (address, hash, entry) => {
+        reject(new Error("Should not receive the 'replicated' event!"))
+      })
+
+      // Can't check this for now as db1 might've sent the heads to db2 
+      // before we subscribe to the event
+      // db2.events.on('replicate.progress', (address, hash, entry) => {
+      //   try {
+      //     // Check that the head we received from the first peer is the latest
+      //     assert.equal(entry.payload.value, 'hello' + (entryCount - 1))
+      //     assert.equal(entry.clock.time, entryCount)
+      //   } catch (e) {
+      //     reject(e)
+      //   }
+      // })
+
       db2.events.on('replicated', (address) => {
         try {
           const result1 = db1.iterator({ limit: -1 }).collect()
