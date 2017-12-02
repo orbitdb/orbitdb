@@ -4,10 +4,6 @@ var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
 
-var _setImmediate2 = require('babel-runtime/core-js/set-immediate');
-
-var _setImmediate3 = _interopRequireDefault(_setImmediate2);
-
 var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
@@ -203,12 +199,8 @@ var OrbitDB = function () {
   }, {
     key: '_onWrite',
     value: function _onWrite(address, entry, heads) {
-      var _this = this;
-
       if (!heads) throw new Error("'heads' not defined");
-      if (this._pubsub) (0, _setImmediate3.default)(function () {
-        return _this._pubsub.publish(address, heads);
-      });
+      if (this._pubsub) this._pubsub.publish(address, heads);
     }
 
     // Callback for receiving a message from the network
@@ -236,7 +228,7 @@ var OrbitDB = function () {
         // Send the newly connected peer our latest heads
         var heads = store._oplog.heads;
         if (heads.length > 0) {
-          logger.debug('Send latest heads:\n', (0, _stringify2.default)(heads, null, 2));
+          logger.debug('Send latest heads of \'' + address + '\':\n', (0, _stringify2.default)(heads, null, 2));
           room.sendTo(peer, new Buffer((0, _stringify2.default)(heads)));
         }
         store.events.emit('peer', peer);
