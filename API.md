@@ -151,7 +151,9 @@ const db = await orbitdb.keyvalue(anotherkvdb.address)
   ```javascript
   await db.set('hello', { name: 'Friend' })
   ```
-  
+
+*set() is an alias of put(). They both work the same.*
+
 #### get(key)
   ```javascript
   const value = db.get('hello')
