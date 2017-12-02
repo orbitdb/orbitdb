@@ -15,7 +15,7 @@ const ipfsPath = './orbitdb/tests/eventlog/ipfs'
 describe('orbit-db - Eventlog', function() {
   this.timeout(config.timeout)
 
-  let ipfs, orbitdb1, orbitdb2, db
+  let ipfs, orbitdb1, db
 
   before(async () => {
     config.daemon1.repo = ipfsPath
@@ -23,15 +23,11 @@ describe('orbit-db - Eventlog', function() {
     rmrf.sync(dbPath)
     ipfs = await startIpfs(config.daemon1)
     orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
-    orbitdb2 = new OrbitDB(ipfs, dbPath + '/2')
   })
 
   after(async () => {
     if(orbitdb1) 
       orbitdb1.stop()
-
-    if(orbitdb2) 
-      orbitdb2.stop()
 
     if (ipfs)
       await ipfs.stop()

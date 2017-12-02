@@ -12,22 +12,18 @@ const ipfsPath = './orbitdb/tests/docstore/ipfs'
 describe('orbit-db - Document Store', function() {
   this.timeout(config.timeout)
 
-  let ipfs, orbitdb1, orbitdb2, db
+  let ipfs, orbitdb1, db
 
   before(async () => {
     config.daemon1.repo = ipfsPath
     rmrf.sync(config.daemon1.repo)
     ipfs = await startIpfs(config.daemon1)
     orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
-    orbitdb2 = new OrbitDB(ipfs, dbPath + '/2')
   })
 
   after(() => {
     if(orbitdb1) 
       orbitdb1.disconnect()
-
-    if(orbitdb2) 
-      orbitdb2.disconnect()
 
     if (ipfs) 
       ipfs.stop()

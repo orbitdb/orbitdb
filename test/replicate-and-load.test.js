@@ -28,6 +28,9 @@ describe('orbit-db - Replicate and Load', function() {
     rmrf.sync(dbPath2)
     ipfs1 = await startIpfs(config.daemon1)
     ipfs2 = await startIpfs(config.daemon2)
+    // Connect the peers manually to speed up test times
+    await ipfs2.swarm.connect(ipfs1._peerInfo.multiaddrs._multiaddrs[0].toString())
+    await ipfs1.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
     orbitdb1 = new OrbitDB(ipfs1, dbPath1)
     orbitdb2 = new OrbitDB(ipfs2, dbPath2)
   })
