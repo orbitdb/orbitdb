@@ -112,6 +112,20 @@ describe('orbit-db - Persistency', function() {
     })
   })
 
+  describe('load from empty snapshot', function() {
+    it('loads database from an empty snapshot', async () => {
+      db = await orbitdb1.eventlog('empty-snapshot')
+      address = db.address.toString()
+      await db.saveSnapshot()
+      await db.close()
+
+      db = await orbitdb1.open(address)
+      await db.loadFromSnapshot()
+      const items = db.iterator({ limit: -1 }).collect()
+      assert.equal(items.length, 0)
+    })
+  })
+
   describe('load from snapshot', function() {
     beforeEach(async () => {
       const dbName = new Date().getTime().toString()
