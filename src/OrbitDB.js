@@ -145,7 +145,7 @@ class OrbitDB {
       let heads = store._oplog.heads
       if (heads.length > 0) {
         logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads, null, 2))
-        room.sendTo(peer, new Buffer(JSON.stringify(heads)))
+        room.sendTo(peer, JSON.stringify(heads))
       }
       store.events.emit('peer', peer)
     }
