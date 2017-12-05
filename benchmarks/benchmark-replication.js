@@ -29,6 +29,12 @@ const ipfsConf = {
     Gateway: '/ip4/0.0.0.0/tcp/0'
   },
   Bootstrap: [],
+  Discovery: {
+    MDNS: {
+      Enabled: true,
+      Interval: 1
+    },
+  },
 }
 
 const repoConf = {
@@ -91,6 +97,9 @@ console.log("Starting IPFS daemons...")
 pMapSeries([conf1, conf2], d => startIpfs(d))
   .then(async ([ipfs1, ipfs2]) => {
     try {
+      await ipfs2.swarm.connect(ipfs1._peerInfo.multiaddrs._multiaddrs[0].toString())
+      await ipfs1.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
+
       // Create the databases
       const orbit1 = new OrbitDB(ipfs1, './orbitdb/benchmarks/replication/client1')
       const orbit2 = new OrbitDB(ipfs2, './orbitdb/benchmarks/replication/client2')
