@@ -11,6 +11,7 @@ const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const AccessController = require('./ipfs-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
+const createDBManifest = require('./db-manifest')
 
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
@@ -206,45 +207,22 @@ class OrbitDB {
     // Save the Access Controller in IPFS
     const accessControllerAddress = await accessController.save()
 
-    // Creates a DB manifest file
-    const createDBManifest = () => {
-      return {
-        name: name,
-        type: type,
-        accessController: path.join('/ipfs', accessControllerAddress),
-      }
-    }
-
     // Save the manifest to IPFS
-    const manifest = createDBManifest()
-    const dag = await this._ipfs.object.put(new Buffer(JSON.stringify(manifest)))
-    const manifestHash = dag.toJSON().multihash.toString()
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
 
     // Create the database address
-    const address = path.join('/orbitdb', manifestHash, name)
-    const dbAddress = OrbitDBAddress.parse(address)
+    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
 
-    // Load local cache
-    try {
-      const cacheFilePath = path.join(dbAddress.root, dbAddress.path)
-      this._cache = new Cache(path.join(directory), cacheFilePath)
-      await this._cache.load()
-    } catch (e) {
-      logger.warn("Couldn't load Cache:", e)
-    }
+    // // Load local cache
+    const haveManifest = await this._loadCache(directory, dbAddress)
+      .then(cache => cache.get(dbAddress.toString()))
+      .then(localData => localData && localData.manifest)
 
-    // Check if we already have the database
-    let localData = await this._cache.get(dbAddress.toString())
-
-    if (localData && localData.manifest && !options.overwrite)
+    if (haveManifest && !options.overwrite)
       throw new Error(`Database '${dbAddress}' already exists!`)
 
     // Save the database locally
-    localData = Object.assign({}, this._cache.get(dbAddress.toString()), {
-      manifest: dbAddress.root
-    })
-    await this._cache.set(dbAddress.toString(), localData)
-    logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
+    await this._saveDBManifest(directory, dbAddress)
 
     logger.debug(`Created database '${dbAddress}'`)
 
@@ -285,19 +263,11 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
-    // Load local cache
-    try {
-      const cacheFilePath = path.join(dbAddress.root, dbAddress.path)
-      this._cache = new Cache(path.join(directory), cacheFilePath)
-      await this._cache.load()
-    } catch (e) {
-      console.warn(e)
-      logger.warn("Couldn't load Cache:", e)
-    }
-
     // Check if we have the database
-    let localData = await this._cache.get(dbAddress.toString())
-    const haveDB = localData && localData.manifest
+    const haveDB = await this._loadCache(directory, dbAddress)
+      .then(cache => cache.get(dbAddress.toString()))
+      .then(localData => localData && localData.manifest)
+
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
     // If we want to try and open the database local-only, throw an error
@@ -319,15 +289,34 @@ class OrbitDB {
       throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
 
     // Save the database locally
-    localData = Object.assign({}, this._cache.get(dbAddress.toString()), {
-      manifest: dbAddress.root
-    })
-    await this._cache.set(dbAddress.toString(), localData)
-    logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
+    await this._saveDBManifest(directory, dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
     return this._openDatabase(dbAddress, manifest.type, options)
+  }
+
+  // Save the database locally
+  async _saveDBManifest (directory, dbAddress) {
+    const cache = await this._loadCache(directory, dbAddress)
+    let localData = Object.assign({}, cache.get(dbAddress.toString()), {
+      manifest: dbAddress.root
+    })
+    await cache.set(dbAddress.toString(), localData)
+    logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
+  }
+
+  async _loadCache (directory, dbAddress) {
+    let cache
+    try {
+      const cacheFilePath = path.join(dbAddress.root, dbAddress.path)
+      cache = new Cache(path.join(directory), cacheFilePath)
+      await cache.load()
+    } catch (e) {
+      logger.warn("Couldn't load Cache:", e)
+    }
+
+    return cache
   }
 
   async _openDatabase (address, type, options) {
