@@ -58,7 +58,17 @@ describe('orbit-db - Persistency', function() {
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, entryCount)
       assert.equal(items[0].payload.value, 'hello0')
-      assert.equal(items[entryCount - 1].payload.value, 'hello99')
+      assert.equal(items[items.length - 1].payload.value, 'hello99')
+    })
+
+    it('loads database partially', async () => {
+      const amount = 33
+      db = await orbitdb1.eventlog(address)
+      await db.load(amount)
+      const items = db.iterator({ limit: -1 }).collect()
+      assert.equal(items.length, amount)
+      assert.equal(items[0].payload.value, 'hello' + (entryCount - amount))
+      assert.equal(items[items.length - 1].payload.value, 'hello99')
     })
 
     it('loading a database emits \'ready\' event', async () => {
@@ -68,7 +78,7 @@ describe('orbit-db - Persistency', function() {
           const items = db.iterator({ limit: -1 }).collect()
           assert.equal(items.length, entryCount)
           assert.equal(items[0].payload.value, 'hello0')
-          assert.equal(items[entryCount - 1].payload.value, 'hello99')
+          assert.equal(items[items.length - 1].payload.value, 'hello99')
           resolve()
         })
         await db.load()
@@ -88,7 +98,9 @@ describe('orbit-db - Persistency', function() {
             assert.notEqual(hash, null)
             assert.notEqual(entry, null)
             if (progress === entryCount && count === entryCount) {
-              resolve()
+              setTimeout(() => {
+                resolve()
+              }, 200)
             }
           } catch (e) {
             reject(e)
