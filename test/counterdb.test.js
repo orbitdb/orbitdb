@@ -27,6 +27,9 @@ describe('CounterStore', function() {
     config.daemon2.repo = ipfsPath2
     ipfs1 = await startIpfs(config.daemon1)
     ipfs2 = await startIpfs(config.daemon2)
+    // Connect the peers manually to speed up test times
+    await ipfs2.swarm.connect(ipfs1._peerInfo.multiaddrs._multiaddrs[0].toString())
+    await ipfs1.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
   })
 
   after(async () => {
@@ -96,6 +99,7 @@ describe('CounterStore', function() {
       // Wait for peers to connect first
       await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
       await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
+
       // Increase the counters sequentially
       await mapSeries([counter1, counter2], increaseCounter)
 
@@ -105,7 +109,7 @@ describe('CounterStore', function() {
           assert.equal(counter1.value, 30)
           assert.equal(counter2.value, 30)
           resolve()
-        }, 2000)
+        }, 1000)
       })
     })
   })
