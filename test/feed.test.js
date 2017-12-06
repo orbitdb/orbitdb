@@ -4,10 +4,10 @@ const assert = require('assert')
 const rmrf = require('rimraf')
 const mapSeries = require('p-map-series')
 const OrbitDB = require('../src/OrbitDB')
-const first = require('./utils/test-utils').first
-const last = require('./utils/test-utils').last
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
+
+const last = arr => arr[arr.length - 1]
 
 const dbPath = './orbitdb/tests/feed'
 const ipfsPath = './orbitdb/tests/feed/ipfs'
@@ -68,8 +68,8 @@ describe('orbit-db - Feed', function() {
       await mapSeries([1, 2, 3, 4, 5], (i) => db.add('hello' + i))
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, 5)
-      assert.equal(first(items.map((f) => f.payload.value)), 'hello1')
-      assert.equal(last(items.map((f) => f.payload.value)), 'hello5')
+      assert.equal(items[0].payload.value, 'hello1')
+      assert.equal(items[items.length - 1].payload.value, 'hello5')
     })
 
     it('adds an item that is > 256 bytes', async () => {
@@ -99,7 +99,7 @@ describe('orbit-db - Feed', function() {
       await db.remove(hash)
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, 1)
-      assert.equal(first(items).payload.value, 'hello1')
+      assert.equal(items[0].payload.value, 'hello1')
     })
 
     it('deletes an item between adds', async () => {
@@ -113,7 +113,7 @@ describe('orbit-db - Feed', function() {
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, 2)
 
-      const firstItem = first(items)
+      const firstItem = items[0]
       const secondItem = items[1]
       assert.equal(firstItem.hash.startsWith('Qm'), true)
       assert.equal(firstItem.payload.key, null)
