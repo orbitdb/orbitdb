@@ -178,10 +178,12 @@ var OrbitDB = function () {
         await accessController.load(options.accessControllerAddress);
       }
 
+      var cache = await this._loadCache(this.directory, address);
+
       var opts = (0, _assign2.default)({ replicate: true }, options, {
         accessController: accessController,
         keystore: this.keystore,
-        cache: this._cache
+        cache: cache
       });
 
       var store = new Store(this._ipfs, this.id, address, opts);
@@ -268,6 +270,8 @@ var OrbitDB = function () {
     value: async function create(name, type) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+      logger.debug('create()');
+
       if (!OrbitDB.isValidType(type)) throw new Error('Invalid database type \'' + type + '\'');
 
       // The directory to look databases from can be passed in as an option
@@ -305,13 +309,13 @@ var OrbitDB = function () {
       );var dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name)
 
       // // Load local cache
-      );var haveManifest = await this._loadCache(directory, dbAddress).then(function (cache) {
-        return cache.get(dbAddress.toString());
-      }).then(function (localData) {
-        return localData && localData.manifest;
+      );var haveDB = await this._loadCache(directory, dbAddress).then(function (cache) {
+        return cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null;
+      }).then(function (data) {
+        return data !== undefined && data !== null;
       });
 
-      if (haveManifest && !options.overwrite) throw new Error('Database \'' + dbAddress + '\' already exists!');
+      if (haveDB && !options.overwrite) throw new Error('Database \'' + dbAddress + '\' already exists!');
 
       // Save the database locally
       await this._saveDBManifest(directory, dbAddress);
@@ -336,6 +340,7 @@ var OrbitDB = function () {
     value: async function open(address) {
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+      logger.debug('open()');
       options = (0, _assign2.default)({ localOnly: false, create: false }, options);
       logger.debug('Open database \'' + address + '\''
 
@@ -361,9 +366,9 @@ var OrbitDB = function () {
 
       // Check if we have the database
       );var haveDB = await this._loadCache(directory, dbAddress).then(function (cache) {
-        return cache.get(dbAddress.toString());
-      }).then(function (localData) {
-        return localData && localData.manifest;
+        return cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null;
+      }).then(function (data) {
+        return data !== undefined && data !== null;
       });
 
       logger.debug((haveDB ? 'Found' : 'Didn\'t find') + (' database \'' + dbAddress + '\'')
@@ -398,11 +403,11 @@ var OrbitDB = function () {
   }, {
     key: '_saveDBManifest',
     value: async function _saveDBManifest(directory, dbAddress) {
-      var cache = await this._loadCache(directory, dbAddress);
-      var localData = (0, _assign2.default)({}, cache.get(dbAddress.toString()), {
-        manifest: dbAddress.root
-      });
-      await cache.set(dbAddress.toString(), localData);
+      var cache = await this._loadCache(directory, dbAddress
+      // let localData = Object.assign({}, cache.get(dbAddress.toString()), {
+      //   manifest: dbAddress.root
+      // })
+      );await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root);
       logger.debug('Saved manifest to IPFS as \'' + dbAddress.root + '\'');
     }
   }, {
@@ -410,9 +415,7 @@ var OrbitDB = function () {
     value: async function _loadCache(directory, dbAddress) {
       var cache = void 0;
       try {
-        var cacheFilePath = path.join(dbAddress.root, dbAddress.path);
-        cache = new Cache(path.join(directory), cacheFilePath);
-        await cache.load();
+        cache = await Cache.load(directory, dbAddress);
       } catch (e) {
         logger.warn("Couldn't load Cache:", e);
       }

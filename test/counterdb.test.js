@@ -109,7 +109,7 @@ describe('CounterStore', function() {
           assert.equal(counter1.value, 30)
           assert.equal(counter2.value, 30)
           resolve()
-        }, 1000)
+        }, 5000)
       })
     })
   })

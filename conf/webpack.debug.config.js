@@ -14,6 +14,7 @@ module.exports = {
   devtool: 'none',
   externals: {
     fs: '{}',
+    mkdirp: '{}',
   },
   node: {
     console: false,
@@ -25,7 +26,10 @@ module.exports = {
     modules: [
       'node_modules',
       path.resolve(__dirname, '../node_modules')
-    ]
+    ],
+    alias: {
+      leveldown: 'level-js',
+    },
   },
   resolveLoader: {
     modules: [

@@ -24,6 +24,7 @@ module.exports = {
   },
   externals: {
     fs: '{}',
+    mkdirp: '{}',
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -38,6 +39,9 @@ module.exports = {
       'node_modules',
       path.resolve(__dirname, '../node_modules')
     ],
+    alias: {
+      leveldown: 'level-js',
+    },
   },
   resolveLoader: {
     modules: [
