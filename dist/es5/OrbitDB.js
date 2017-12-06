@@ -37,6 +37,7 @@ var Cache = require('orbit-db-cache');
 var Keystore = require('orbit-db-keystore');
 var AccessController = require('./ipfs-access-controller');
 var OrbitDBAddress = require('./orbit-db-address');
+var createDBManifest = require('./db-manifest');
 
 var Logger = require('logplease');
 var logger = Logger.create("orbit-db");
@@ -297,44 +298,23 @@ var OrbitDB = function () {
       // Save the Access Controller in IPFS
       var accessControllerAddress = await accessController.save
 
-      // Creates a DB manifest file
-      ();var createDBManifest = function createDBManifest() {
-        return {
-          name: name,
-          type: type,
-          accessController: path.join('/ipfs', accessControllerAddress)
-        };
-      };
-
       // Save the manifest to IPFS
-      var manifest = createDBManifest();
-      var dag = await this._ipfs.object.put(new Buffer((0, _stringify2.default)(manifest)));
-      var manifestHash = dag.toJSON().multihash.toString
+      ();var manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress
 
       // Create the database address
-      ();var address = path.join('/orbitdb', manifestHash, name);
-      var dbAddress = OrbitDBAddress.parse(address
+      );var dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name)
 
-      // Load local cache
-      );try {
-        var cacheFilePath = path.join(dbAddress.root, dbAddress.path);
-        this._cache = new Cache(path.join(directory), cacheFilePath);
-        await this._cache.load();
-      } catch (e) {
-        logger.warn("Couldn't load Cache:", e);
-      }
+      // // Load local cache
+      );var haveManifest = await this._loadCache(directory, dbAddress).then(function (cache) {
+        return cache.get(dbAddress.toString());
+      }).then(function (localData) {
+        return localData && localData.manifest;
+      });
 
-      // Check if we already have the database
-      var localData = await this._cache.get(dbAddress.toString());
-
-      if (localData && localData.manifest && !options.overwrite) throw new Error('Database \'' + dbAddress + '\' already exists!');
+      if (haveManifest && !options.overwrite) throw new Error('Database \'' + dbAddress + '\' already exists!');
 
       // Save the database locally
-      localData = (0, _assign2.default)({}, this._cache.get(dbAddress.toString()), {
-        manifest: dbAddress.root
-      });
-      await this._cache.set(dbAddress.toString(), localData);
-      logger.debug('Saved manifest to IPFS as \'' + dbAddress.root + '\'');
+      await this._saveDBManifest(directory, dbAddress);
 
       logger.debug('Created database \'' + dbAddress + '\''
 
@@ -379,19 +359,13 @@ var OrbitDB = function () {
       // Parse the database address
       var dbAddress = OrbitDBAddress.parse(address
 
-      // Load local cache
-      );try {
-        var cacheFilePath = path.join(dbAddress.root, dbAddress.path);
-        this._cache = new Cache(path.join(directory), cacheFilePath);
-        await this._cache.load();
-      } catch (e) {
-        console.warn(e);
-        logger.warn("Couldn't load Cache:", e);
-      }
-
       // Check if we have the database
-      var localData = await this._cache.get(dbAddress.toString());
-      var haveDB = localData && localData.manifest;
+      );var haveDB = await this._loadCache(directory, dbAddress).then(function (cache) {
+        return cache.get(dbAddress.toString());
+      }).then(function (localData) {
+        return localData && localData.manifest;
+      });
+
       logger.debug((haveDB ? 'Found' : 'Didn\'t find') + (' database \'' + dbAddress + '\'')
 
       // If we want to try and open the database local-only, throw an error
@@ -412,15 +386,38 @@ var OrbitDB = function () {
       );if (options.type && manifest.type !== options.type) throw new Error('Database \'' + dbAddress + '\' is type \'' + manifest.type + '\' but was opened as \'' + options.type + '\'');
 
       // Save the database locally
-      localData = (0, _assign2.default)({}, this._cache.get(dbAddress.toString()), {
-        manifest: dbAddress.root
-      });
-      await this._cache.set(dbAddress.toString(), localData);
-      logger.debug('Saved manifest to IPFS as \'' + dbAddress.root + '\''
+      await this._saveDBManifest(directory, dbAddress
 
       // Open the the database
       );options = (0, _assign2.default)({}, options, { accessControllerAddress: manifest.accessController });
       return this._openDatabase(dbAddress, manifest.type, options);
+    }
+
+    // Save the database locally
+
+  }, {
+    key: '_saveDBManifest',
+    value: async function _saveDBManifest(directory, dbAddress) {
+      var cache = await this._loadCache(directory, dbAddress);
+      var localData = (0, _assign2.default)({}, cache.get(dbAddress.toString()), {
+        manifest: dbAddress.root
+      });
+      await cache.set(dbAddress.toString(), localData);
+      logger.debug('Saved manifest to IPFS as \'' + dbAddress.root + '\'');
+    }
+  }, {
+    key: '_loadCache',
+    value: async function _loadCache(directory, dbAddress) {
+      var cache = void 0;
+      try {
+        var cacheFilePath = path.join(dbAddress.root, dbAddress.path);
+        cache = new Cache(path.join(directory), cacheFilePath);
+        await cache.load();
+      } catch (e) {
+        logger.warn("Couldn't load Cache:", e);
+      }
+
+      return cache;
     }
   }, {
     key: '_openDatabase',
