@@ -4,10 +4,10 @@ const assert = require('assert')
 const rmrf = require('rimraf')
 const mapSeries = require('p-map-series')
 const OrbitDB = require('../src/OrbitDB')
-const first = require('./utils/test-utils').first
-const last = require('./utils/test-utils').last
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
+
+const last = arr => arr[arr.length - 1]
 
 const dbPath = './orbitdb/tests/eventlog'
 const ipfsPath = './orbitdb/tests/eventlog/ipfs'
@@ -65,7 +65,7 @@ describe('orbit-db - Eventlog', function() {
       await mapSeries([1, 2, 3, 4, 5], (i) => db.add('hello' + i))
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, 5)
-      assert.equal(first(items.map((f) => f.payload.value)), 'hello1')
+      assert.equal(items[0].payload.value, 'hello1')
       assert.equal(last(items.map((f) => f.payload.value)), 'hello5')
     })
 

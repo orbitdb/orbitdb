@@ -7,7 +7,6 @@ const rmrf = require('rimraf')
 const mapSeries = require('p-map-series')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
-const { first, last } = require('./utils/test-utils')
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
 
