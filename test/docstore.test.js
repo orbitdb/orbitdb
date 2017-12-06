@@ -21,12 +21,12 @@ describe('orbit-db - Document Store', function() {
     orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
   })
 
-  after(() => {
+  after(async () => {
     if(orbitdb1) 
-      orbitdb1.disconnect()
+      await orbitdb1.stop()
 
     if (ipfs) 
-      ipfs.stop()
+      await ipfs.stop()
   })
 
   it('creates and opens a database', async () => {

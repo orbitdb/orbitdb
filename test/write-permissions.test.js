@@ -68,10 +68,10 @@ describe('orbit-db - Write Permissions', function() {
 
   after(async () => {
     if(orbitdb1) 
-      orbitdb1.stop()
+      await orbitdb1.stop()
 
     if(orbitdb2) 
-      orbitdb2.stop()
+      await orbitdb2.stop()
 
     if (ipfs)
       await ipfs.stop()

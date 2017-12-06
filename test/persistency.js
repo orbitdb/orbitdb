@@ -27,7 +27,7 @@ describe('orbit-db - Persistency', function() {
 
   after(async () => {
     if(orbitdb1) 
-      orbitdb1.stop()
+      await orbitdb1.stop()
 
     if (ipfs)
       await ipfs.stop()

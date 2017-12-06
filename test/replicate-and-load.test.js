@@ -6,7 +6,6 @@ const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
-const stopIpfs = require('./utils/stop-ipfs')
 const waitForPeers = require('./utils/wait-for-peers')
 
 const dbPath1 = './orbitdb/tests/replicate-and-load/1'
@@ -43,10 +42,10 @@ describe('orbit-db - Replicate and Load', function() {
       await orbitdb2.stop()
 
     if (ipfs1)
-      await stopIpfs(ipfs1)
+      await ipfs1.stop()
 
     if (ipfs2)
-      await stopIpfs(ipfs2)
+      await ipfs2.stop()
   })
 
   describe('two peers', function() {

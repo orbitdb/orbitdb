@@ -10,7 +10,6 @@ const OrbitDBAddress = require('../src/orbit-db-address')
 const { first, last } = require('./utils/test-utils')
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
-const stopIpfs = require('./utils/stop-ipfs')
 
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
@@ -34,7 +33,7 @@ describe('orbit-db - Create & Open', function() {
       orbitdb.stop()
 
     if (ipfs)
-      await stopIpfs(ipfs)
+      await ipfs.stop()
   })
 
   describe('Create', function() {
