@@ -12,7 +12,7 @@
     <pre id="output"></pre>
 
     <script type="text/javascript" src="../../dist/orbitdb.min.js" charset="utf-8"></script>
-    <script type="text/javascript" src="../../node_modules/ipfs/dist/index.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/ipfs/dist/index.js" charset="utf-8"></script>
 
     <script type="text/javascript">
       let ipfs
@@ -33,7 +33,7 @@
 
       let run = (() => {
         ipfs = new Ipfs({ 
-          repo: '/orbitdb/benchmarks/browser/benchmark-add',
+          repo: '/orbitdb/benchmarks/browser/benchmark-add/0.27.0',
           start: false,
           EXPERIMENTAL: {
             pubsub: true,
