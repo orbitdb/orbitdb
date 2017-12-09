@@ -19,15 +19,14 @@
     "level": "^2.1.0",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-cache": "orbitdb/orbit-db-cache#feat/leveldb",
-    "orbit-db-counterstore": "~1.0.3",
-    "orbit-db-docstore": "~1.0.1",
-    "orbit-db-eventstore": "~1.0.0",
-    "orbit-db-feedstore": "~1.0.0",
+    "orbit-db-cache": "~0.1.0",
+    "orbit-db-counterstore": "~1.1.0",
+    "orbit-db-docstore": "~1.1.0",
+    "orbit-db-eventstore": "~1.1.0",
+    "orbit-db-feedstore": "~1.1.0",
     "orbit-db-keystore": "~0.0.2",
-    "orbit-db-kvstore": "~1.0.0",
-    "orbit-db-pubsub": "~0.3.6",
-    "orbit-db-store": "orbitdb/orbit-db-store#feat/leveldb"
+    "orbit-db-kvstore": "~1.1.0",
+    "orbit-db-pubsub": "~0.3.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
