@@ -291,7 +291,7 @@ var OrbitDB = function () {
       //   accessController.add('admin', this.key.getPublic('hex'))
       // }
       // Add keys that can write to the database
-      if (options && options.write) {
+      if (options && options.write && options.write.length > 0) {
         options.write.forEach(function (e) {
           return accessController.add('write', e);
         });

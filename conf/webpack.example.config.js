@@ -7,6 +7,7 @@ const Uglify = require('uglifyjs-webpack-plugin')
 const uglifyOptions = {
   uglifyOptions: {
     mangle: false,
+    compress: false,
   },
 }
 
