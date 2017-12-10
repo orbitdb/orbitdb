@@ -202,7 +202,7 @@ class OrbitDB {
     //   accessController.add('admin', this.key.getPublic('hex'))
     // }
     // Add keys that can write to the database
-    if (options && options.write) {
+    if (options && options.write && options.write.length > 0) {
       options.write.forEach(e => accessController.add('write', e))
     } else {
       // Default is to add ourselves as the admin of the database
