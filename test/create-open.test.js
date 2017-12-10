@@ -218,6 +218,12 @@ describe('orbit-db - Create & Open', function() {
       assert.equal(db.address.toString().indexOf('abc'), 56)
     })
 
+    it('opens a database and adds the creator as the only writer', async () => {
+      db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, write: [] })
+      assert.equal(db.access.write.length, 1)
+      assert.equal(db.access.write[0], db.key.getPublic('hex'))
+    })
+
     it('doesn\'t open a database if we don\'t have it locally', async () => {
       const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'non-existent')
       return new Promise((resolve, reject) => {
