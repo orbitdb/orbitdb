@@ -213,7 +213,9 @@ var OrbitDB = function () {
     value: async function _onMessage(address, heads) {
       var store = this.stores[address];
       try {
-        logger.debug('Received heads for \'' + address + '\':\n', (0, _stringify2.default)(heads, null, 2));
+        logger.debug('Received ' + heads.length + ' heads for \'' + address + '\':\n', (0, _stringify2.default)(heads.map(function (e) {
+          return e.hash;
+        }), null, 2));
         await store.sync(heads);
       } catch (e) {
         logger.error(e);
@@ -231,7 +233,9 @@ var OrbitDB = function () {
         // Send the newly connected peer our latest heads
         var heads = store._oplog.heads;
         if (heads.length > 0) {
-          logger.debug('Send latest heads of \'' + address + '\':\n', (0, _stringify2.default)(heads, null, 2));
+          logger.debug('Send latest heads of \'' + address + '\':\n', (0, _stringify2.default)(heads.map(function (e) {
+            return e.hash;
+          }), null, 2));
           room.sendTo(peer, (0, _stringify2.default)(heads));
         }
         store.events.emit('peer', peer);

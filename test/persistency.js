@@ -68,7 +68,35 @@ describe('orbit-db - Persistency', function() {
       const items = db.iterator({ limit: -1 }).collect()
       assert.equal(items.length, amount)
       assert.equal(items[0].payload.value, 'hello' + (entryCount - amount))
+      assert.equal(items[1].payload.value, 'hello' + (entryCount - amount + 1))
       assert.equal(items[items.length - 1].payload.value, 'hello99')
+    })
+
+    it('load and close several times', async () => {
+      const amount = 16
+      for (let i = 0; i < amount; i ++) {
+        db = await orbitdb1.eventlog(address)
+        await db.load()
+        const items = db.iterator({ limit: -1 }).collect()
+        assert.equal(items.length, entryCount)
+        assert.equal(items[0].payload.value, 'hello0')
+        assert.equal(items[1].payload.value, 'hello1')
+        assert.equal(items[items.length - 1].payload.value, 'hello99')
+        await db.close()
+      }
+    })
+
+    it('load, add one, close - several times', async () => {
+      const amount = 8
+      for (let i = 0; i < amount; i ++) {
+        db = await orbitdb1.eventlog(address)
+        await db.load()
+        await db.add('hello' + (entryCount + i))
+        const items = db.iterator({ limit: -1 }).collect()
+        assert.equal(items.length, entryCount + i + 1)
+        assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount + i))
+        await db.close()
+      }
     })
 
     it('loading a database emits \'ready\' event', async () => {
@@ -153,6 +181,21 @@ describe('orbit-db - Persistency', function() {
       assert.equal(items.length, entryCount)
       assert.equal(items[0].payload.value, 'hello0')
       assert.equal(items[entryCount - 1].payload.value, 'hello99')
+    })
+
+    it('load, add one and save snapshot several times', async () => {
+      const amount = 8
+      for (let i = 0; i < amount; i ++) {
+        db = await orbitdb1.eventlog(address)
+        await db.loadFromSnapshot()
+        await db.add('hello' + (entryCount + i))
+        const items = db.iterator({ limit: -1 }).collect()
+        assert.equal(items.length, entryCount + i + 1)
+        assert.equal(items[0].payload.value, 'hello0')
+        assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount + i))
+        await db.saveSnapshot()
+        await db.close()
+      }
     })
 
     it('throws an error when trying to load a missing snapshot', async () => {

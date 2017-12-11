@@ -227,7 +227,7 @@ describe('orbit-db - Create & Open', function() {
     it('doesn\'t open a database if we don\'t have it locally', async () => {
       const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'non-existent')
       return new Promise((resolve, reject) => {
-        setTimeout(resolve, 1000)
+        setTimeout(resolve, 900)
         orbitdb.open(address)
           .then(() => reject(new Error('Shouldn\'t open the database')))
       })

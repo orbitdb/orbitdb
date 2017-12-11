@@ -132,7 +132,7 @@ class OrbitDB {
   async _onMessage (address, heads) {
     const store = this.stores[address]
     try {
-      logger.debug(`Received heads for '${address}':\n`, JSON.stringify(heads, null, 2))
+      logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
       await store.sync(heads)
     } catch (e) {
       logger.error(e)
@@ -147,7 +147,7 @@ class OrbitDB {
       // Send the newly connected peer our latest heads
       let heads = store._oplog.heads
       if (heads.length > 0) {
-        logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads, null, 2))
+        logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
         room.sendTo(peer, JSON.stringify(heads))
       }
       store.events.emit('peer', peer)
