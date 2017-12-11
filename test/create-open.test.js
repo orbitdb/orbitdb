@@ -237,6 +237,7 @@ Object.keys(testAPIs).forEach(API => {
           setTimeout(resolve, 900)
           orbitdb.open(address)
             .then(() => reject(new Error('Shouldn\'t open the database')))
+            .catch(reject)
         })
       })
 
