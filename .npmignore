@@ -11,6 +11,9 @@ examples/
 # Don't distribute source maps
 dist/*.map
 
+# Don't distribute the debug build
+dist/orbitdb.debug.js
+
 # Don't distribute screenshot
 # See examples at https://github.com/orbitdb/orbit-db 
 screenshots/
