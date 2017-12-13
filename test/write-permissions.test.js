@@ -163,10 +163,12 @@ describe('orbit-db - Write Permissions', function() {
   describe('doesn\'t sync if peer is not allowed to write to the database', function() {
     databases.forEach(async (database) => {
       it(database.type + ' doesn\'t sync', async () => {
+
         let options = { 
-          // No write access (only creator of the database can write)
-          write: [],
+          // Only peer 1 can write
+          write: [orbitdb1.key.getPublic('hex')],
         }
+        let err
 
         options = Object.assign({}, options, { path: dbPath + '/sync-test/1' })
         const db1 = await database.create(orbitdb1, 'write error test 1', options)
@@ -174,23 +176,32 @@ describe('orbit-db - Write Permissions', function() {
         options = Object.assign({}, options, { path: dbPath + '/sync-test/2', sync: true })
         const db2 = await database.create(orbitdb2, 'write error test 1', options)
 
-        db1.events.on('replicated', () => {
-          throw new Error('Shouldn\'t replicate!')
-        })
-
         try {
+          // Catch replication event if the update from peer 2 got synced and into the database
+          db1.events.on('replicated', () => err = new Error('Shouldn\'t replicate!'))
+          // Try to update from peer 2, this shouldn't be allowed
           await database.tryInsert(db2)
         } catch (e) {
+          // Make sure peer 2's instance throws an error
           assert.equal(e.toString(), 'Error: Not allowed to write')
         }
 
+        // Make sure nothing was added to the database
         assert.equal(database.query(db1).length, 0)
+
+        // Try to sync peer 1 with peer 2, this shouldn't produce anything
+        // at peer 1 (nothing was supposed to be added to the database by peer 2)
         db1.sync(db2._oplog.heads)
 
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
           setTimeout(() => {
+            // Make sure nothing was added
             assert.equal(database.query(db1).length, 0)
-            resolve()
+            if (err) {
+              reject(err)
+            } else {
+              resolve()
+            }
           }, 300)
         })
       })
