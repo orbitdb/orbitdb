@@ -1,8 +1,14 @@
-*sublime*
+# Make sure to exclude test data directory
+orbitdb/
+
+# Don't distribute the dependencies
 node_modules/
+
+# Don't track examples' dependencies (libs) in git
 examples/browser/browser-webpack-example/bundle.js
 examples/browser/browser-webpack-example/*.map
 examples/browser/lib
-dist/*.map
-dist/orbitdb.js
-orbitdb/
+
+# Don't track builds in git
+# Distribution builds are available via npm
+dist/
