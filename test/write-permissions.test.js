@@ -97,6 +97,9 @@ describe('orbit-db - Write Permissions', function() {
 
         assert.deepEqual(database.getTestValue(db1), database.expectedValue)
         assert.deepEqual(database.getTestValue(db2), database.expectedValue)
+
+        await db1.close()
+        await db2.close()
       })
     })
   })
@@ -122,9 +125,11 @@ describe('orbit-db - Write Permissions', function() {
         db1.sync(db2._oplog.heads)
 
         return new Promise(resolve => {
-          setTimeout(() => {
+          setTimeout(async () => {
             const value = database.getTestValue(db1)
             assert.deepEqual(value, database.expectedValue)
+            await db1.close()
+            await db2.close()
             resolve()
           }, 300)
         })
@@ -150,9 +155,11 @@ describe('orbit-db - Write Permissions', function() {
         db1.sync(db2._oplog.heads)
 
         return new Promise(resolve => {
-          setTimeout(() => {
+          setTimeout(async () => {
             const value = database.getTestValue(db1)
             assert.deepEqual(value, database.expectedValue)
+        await db1.close()
+        await db2.close()
             resolve()
           }, 300)
         })
@@ -194,9 +201,11 @@ describe('orbit-db - Write Permissions', function() {
         db1.sync(db2._oplog.heads)
 
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
+          setTimeout(async () => {
             // Make sure nothing was added
             assert.equal(database.query(db1).length, 0)
+        await db1.close()
+        await db2.close()
             if (err) {
               reject(err)
             } else {
@@ -219,7 +228,7 @@ describe('orbit-db - Write Permissions', function() {
         let err
         try {
           const db1 = await database.create(orbitdb1, 'write error test 2', options)
-        options = Object.assign({}, options, { sync: true })
+          options = Object.assign({}, options, { sync: true })
           const db2 = await database.create(orbitdb2, db1.address.toString(), options)
           await database.tryInsert(db2)
         } catch (e) {

@@ -81,6 +81,8 @@ const main = (IPFS, ORBITDB) => {
     // When we update the database, display result
     db.events.on('write', () => queryAndRender(db))
 
+    db.events.on('replicate.progress', () => queryAndRender(db))
+
     // Hook up to the load progress event and render the progress
     let maxTotal = 0, loaded = 0
     db.events.on('load.progress', (address, hash, entry, progress, total) => {
@@ -242,7 +244,7 @@ const main = (IPFS, ORBITDB) => {
       <br>
       <div><b>Peer ID:</b> ${orbitdb.id}</div>
       <div><b>Peers (database/network):</b> ${databasePeers.length} / ${networkPeers.length}</div>
-      <div><b>Oplog Size:</b> ${db._oplog.length} / ${db._replicationInfo.max}</div>
+      <div><b>Oplog Size:</b> ${db._replicationInfo.progress} / ${db._replicationInfo.max}</div>
       <h2>Results</h2>
       <div id="results">
         <div>

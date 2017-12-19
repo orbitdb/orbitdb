@@ -41,11 +41,16 @@ describe('orbit-db - Automatic Replication', function() {
     if(orbitdb2) 
       await orbitdb2.stop()
 
-    if (ipfs1)
-      await ipfs1.stop()
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        if (ipfs1)
+          await ipfs1.stop()
 
-    if (ipfs2)
-      await ipfs2.stop()
+        if (ipfs2)
+          await ipfs2.stop()
+        resolve()
+      }, 2000)
+    })
   })
 
   beforeEach(async () => {

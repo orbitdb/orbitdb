@@ -2,3 +2,4 @@
 --colors
 --recursive
 --exit
+--slow 1000
