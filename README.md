@@ -116,6 +116,13 @@ cd orbit-db
 npm install
 ```
 
+You'll also need babel and webpack, if you don't have them installed already:
+
+```
+npm install --global babel-cli
+npm install --global webpack
+```
+
 ### Browser example
 
 ```
