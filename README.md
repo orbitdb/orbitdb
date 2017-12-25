@@ -142,7 +142,7 @@ Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orb
 npm run examples:node
 ```
 
-<img src="https://raw.githubusercontent.com/orbitdb/orbit-db/feat/ipfs-pubsub/screenshots/orbit-db-demo3.gif" width="66%">
+<img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/screenshots/orbit-db-demo3.gif" width="66%">
 
 **Eventlog**
 
