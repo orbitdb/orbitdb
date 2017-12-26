@@ -149,7 +149,7 @@ console.log(db.key.getPublic('hex'))
 
 The key can also be accessed from the OrbitDB instance: `orbitdb.key.getPublic('hex')`.
 
-If you want to give access to other peers to write to a database, you need to get their the public key in hex and add it to the access controller upon creating the database. If you want others to give you the access to write, you'll need to give them your public key (output of `orbitdb.key.getPublic('hex')`). For more information, see: [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control).
+If you want to give access to other peers to write to a database, you need to get their public key in hex and add it to the access controller upon creating the database. If you want others to give you the access to write, you'll need to give them your public key (output of `orbitdb.key.getPublic('hex')`). For more information, see: [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control).
 
 ### Access Control
 
