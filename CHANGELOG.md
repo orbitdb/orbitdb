@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.19.0
+
+This release bring a bunch of fixes and updates improving performance, stability and browser compatibility. As always, we highly encourage to update to the latest version and report any problems in https://github.com/orbitdb/orbit-db/issues.
+
+A big thank you to all the contributors who helped and contributed to this release! <3
+
+### Replication
+
+The previous release included a refactored version of the replication code and we've improved it even further in this release in terms of performance as well as stability. We're now seeing *huge* improvement in replication speed, especially when replicating a database from scratch.
+
+To observe these improvements, run the [browser examples](https://github.com/orbitdb/orbit-db/tree/master/examples/browser) with two (different) browser tabs and replicate a database with > 100 or so entries from tab to another.
+
+### Browser compatibility
+
+We had some problems with browsers due to the way we used native modules. This is now fixed and OrbitDB should work in the browsers just the same as in Node.js.
+
+### LevelDB
+
+We've switched from using filesystem-based local cache to using LevelDB as the local storage. [Leveldown](https://www.npmjs.com/package/leveldown/) is used when run in Node.js and [level-js](https://www.npmjs.com/package/level-js) is used for browsers.
+
+### General Updates
+
+We put some work into the [CRDTs library](https://github.com/orbitdb/crdts) we're using and have updated OrbitDB to use the latest version. We've added more tests and improved the test suite code and tests now run faster than they did previously.
+
+### Performance
+
+With all the updates and fixes, we're now seeing much better performance for replicating databases between peers as well as for write throughput. See [benchmarks](https://github.com/orbitdb/orbit-db/tree/master/benchmarks) if you're interested to try it out yourself.
+
 ## v0.18.0
 
 This release is a major one as we've added new features, fixed many of the old problems, improved the performance and code base and overhauled the documentation. OrbitDB is now more robust, easier to use, faster and comes with much awaited write-permissions feature.
