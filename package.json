@@ -11,21 +11,17 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "browser": {
-    "fs-pull-blob-store": "idb-pull-blob-store"
-  },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "level": "^2.1.0",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-cache": "~0.1.0",
-    "orbit-db-counterstore": "~1.1.0",
-    "orbit-db-docstore": "~1.1.0",
-    "orbit-db-eventstore": "~1.1.0",
-    "orbit-db-feedstore": "~1.1.0",
-    "orbit-db-keystore": "~0.0.2",
-    "orbit-db-kvstore": "~1.1.0",
+    "orbit-db-cache": "~0.2.0",
+    "orbit-db-counterstore": "~1.2.0",
+    "orbit-db-docstore": "~1.2.0",
+    "orbit-db-eventstore": "~1.2.0",
+    "orbit-db-feedstore": "~1.2.0",
+    "orbit-db-keystore": "~0.1.0",
+    "orbit-db-kvstore": "~1.2.0",
     "orbit-db-pubsub": "~0.3.8"
   },
   "devDependencies": {
@@ -41,7 +37,7 @@
     "p-each-series": "^1.0.0",
     "p-map-series": "^1.0.0",
     "rimraf": "^2.6.2",
-    "uglifyjs-webpack-plugin": "~1.1.0",
+    "uglifyjs-webpack-plugin": "^1.1.4",
     "webpack": "^3.8.1"
   },
   "scripts": {

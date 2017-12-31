@@ -87,7 +87,8 @@ const main = (IPFS, ORBITDB) => {
     let maxTotal = 0, loaded = 0
     db.events.on('load.progress', (address, hash, entry, progress, total) => {
       loaded ++
-      maxTotal = Math.max.apply(null, [maxTotal, progress, 0])
+      maxTotal = Math.max.apply(null, [progress, maxTotal, progress, 0])
+      total = Math.max.apply(null, [progress, maxTotal, total, 0])
       statusElm.innerHTML = `Loading database... ${maxTotal} / ${total}`
     })
 

@@ -101,14 +101,13 @@ describe('orbit-db - Create & Open', function() {
       })
 
       it('saves the database locally', async () => {
-        console.log(localDataPath)
         assert.equal(fs.existsSync(localDataPath), true)
       })
 
       it('saves database manifest reference locally', async () => {
         const manifestHash = db.address.root
         const address = db.address.toString()
-        levelup(leveldown(localDataPath), (err, db) => {
+        levelup(localDataPath, (err, db) => {
           if (err) {
             assert.equal(err, null)
           }

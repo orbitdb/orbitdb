@@ -29,7 +29,7 @@ class OrbitDB {
     this.stores = {}
     this.types = validTypes
     this.directory = directory || './orbitdb'
-    this.keystore = new Keystore(path.join(this.directory, this.id, '/keystore'))
+    this.keystore = Keystore.create(path.join(this.directory, this.id, '/keystore'))
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
   }
 
@@ -304,9 +304,6 @@ class OrbitDB {
   // Save the database locally
   async _saveDBManifest (directory, dbAddress) {
     const cache = await this._loadCache(directory, dbAddress)
-    // let localData = Object.assign({}, cache.get(dbAddress.toString()), {
-    //   manifest: dbAddress.root
-    // })
     await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
@@ -316,7 +313,8 @@ class OrbitDB {
     try {
       cache = await Cache.load(directory, dbAddress)
     } catch (e) {
-      logger.warn("Couldn't load Cache:", e)
+      console.log(e)
+      logger.error("Couldn't load Cache:", e)
     }
 
     return cache

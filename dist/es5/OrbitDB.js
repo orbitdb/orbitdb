@@ -56,7 +56,7 @@ var OrbitDB = function () {
     this.stores = {};
     this.types = validTypes;
     this.directory = directory || './orbitdb';
-    this.keystore = new Keystore(path.join(this.directory, this.id, '/keystore'));
+    this.keystore = Keystore.create(path.join(this.directory, this.id, '/keystore'));
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id);
   }
 
@@ -407,11 +407,8 @@ var OrbitDB = function () {
   }, {
     key: '_saveDBManifest',
     value: async function _saveDBManifest(directory, dbAddress) {
-      var cache = await this._loadCache(directory, dbAddress
-      // let localData = Object.assign({}, cache.get(dbAddress.toString()), {
-      //   manifest: dbAddress.root
-      // })
-      );await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root);
+      var cache = await this._loadCache(directory, dbAddress);
+      await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root);
       logger.debug('Saved manifest to IPFS as \'' + dbAddress.root + '\'');
     }
   }, {
@@ -421,7 +418,8 @@ var OrbitDB = function () {
       try {
         cache = await Cache.load(directory, dbAddress);
       } catch (e) {
-        logger.warn("Couldn't load Cache:", e);
+        console.log(e);
+        logger.error("Couldn't load Cache:", e);
       }
 
       return cache;
