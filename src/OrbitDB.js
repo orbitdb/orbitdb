@@ -9,10 +9,11 @@ const DocumentStore = require('orbit-db-docstore')
 const Pubsub = require('orbit-db-pubsub')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
-const AccessController = require('./ipfs-access-controller')
+const AccessController = require('./orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
+const mapSeries = require('p-each-series')
 
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
@@ -119,8 +120,10 @@ class OrbitDB {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = new AccessController(this._ipfs)
-      await accessController.load(options.accessControllerAddress)
+      logger.debug(`Loading AccessController for '${address}'`)
+      logger.debug(`Loading AccessController from '${options.accessControllerAddress}'`)
+      accessController = await AccessController.load(options.accessControllerAddress, this, this._ipfs)
+      logger.debug(`AccessController loaded for ${address}:\n${JSON.stringify(accessController.capabilities, null, 2)}`)
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -144,6 +147,8 @@ class OrbitDB {
     // and the p2p network
     if(opts.replicate && this._pubsub)
       this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
+
+    logger.debug(`Store created '${address}'`, store.access.capabilities)
 
     return store
   }
@@ -185,7 +190,7 @@ class OrbitDB {
       onMessage,
       onChannelCreated
     )
- 
+
     if (getStore(address))
       getStore(address).events.emit('peer', peer)
   }
@@ -225,24 +230,20 @@ class OrbitDB {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController
-    const accessController = new AccessController(this._ipfs)
-    /* Disabled temporarily until we do something with the admin keys */
-    // Add admins of the database to the access controller
-    // if (options && options.admin) {
-    //   options.admin.forEach(e => accessController.add('admin', e))
-    // } else {
-    //   // Default is to add ourselves as the admin of the database
-    //   accessController.add('admin', this.key.getPublic('hex'))
-    // }
+    logger.debug(`Create AccessController`)
+    const accessController = await AccessController.create(options.accessControllerType || 'orbitdb', name, this, this._ipfs)
     // Add keys that can write to the database
     if (options && options.write && options.write.length > 0) {
-      options.write.forEach(e => accessController.add('write', e))
+      await mapSeries(options.write, e => accessController.add('write', e))
+      // console.log(options.write)
+      logger.debug(`AccessController created: ${JSON.stringify(accessController.capabilities, null, 2)}`)
     } else {
       // Default is to add ourselves as the admin of the database
-      accessController.add('write', this.key.getPublic('hex'))
+      await accessController.add('write', this.key.getPublic('hex'))
     }
     // Save the Access Controller in IPFS
     const accessControllerAddress = await accessController.save()
+    logger.debug(`AccessController: ${accessControllerAddress}`)
 
     // Save the manifest to IPFS
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
@@ -346,7 +347,7 @@ class OrbitDB {
     try {
       cache = await Cache.load(directory, dbAddress)
     } catch (e) {
-      console.log(e)
+      console.error(e)
       logger.error("Couldn't load Cache:", e)
     }
 

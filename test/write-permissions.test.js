@@ -14,6 +14,8 @@ const {
 
 const dbPath = './orbitdb/tests/write-permissions'
 const ipfsPath = './orbitdb/tests/write-permissions/ipfs'
+const dbPath2 = './orbitdb/tests/write-permissions/2'
+const ipfsPath2 = './orbitdb/tests/write-permissions/2/ipfs'
 
 const databases = [
   {
@@ -59,10 +61,24 @@ const databases = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Write Permissions (${API})`, function() {
-    this.timeout(20000)
+  this.timeout(60000)
 
-    let ipfsd, ipfs, orbitdb1, orbitdb2
+  let ipfs, ipfs2, orbitdb1, orbitdb2
+
+  before(async () => {
+    config.daemon1.repo = ipfsPath
+    config.daemon2.repo = ipfsPath2
+    rmrf.sync(config.daemon1.repo)
+    rmrf.sync(config.daemon2.repo)
+    rmrf.sync(dbPath)
+    rmrf.sync(dbPath2)
+    ipfs = await startIpfs(config.daemon1)
+    ipfs2 = await startIpfs(config.daemon2)
+    await ipfs2.swarm.connect(ipfs._peerInfo.multiaddrs._multiaddrs[0].toString())
+    await ipfs.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
+    orbitdb1 = new OrbitDB(ipfs, dbPath)
+    orbitdb2 = new OrbitDB(ipfs2, dbPath2)
+  })
 
     before(async () => {
       config.daemon1.repo = ipfsPath
@@ -83,6 +99,45 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfsd)
         await stopIpfs(ipfsd)
+    })
+
+  describe('allows multiple peers to write to the databases', function() {
+    databases.forEach(async (database) => {
+      it.only(database.type + ' allows multiple writers', async () => {
+        let options = {
+          // Set write access for both clients
+          write: [
+            orbitdb1.key.getPublic('hex'),
+            orbitdb2.key.getPublic('hex')
+          ],
+        }
+
+        const db1 = await database.create(orbitdb1, 'sync-test', options)
+        options = Object.assign({}, options, { sync: true })
+        delete options.write
+        const db2 = await database.create(orbitdb2, db1.address.toString(), options)
+
+        return new Promise(async (resolve, reject) => {
+          const check = async () => {
+            try {
+              await database.tryInsert(db1)
+              await database.tryInsert(db2)
+
+              assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+              assert.deepEqual(database.getTestValue(db2), database.expectedValue)
+
+              await db1.close()
+              await db2.close()
+              resolve()
+            } catch (e) {
+              reject(e)
+            }
+          }
+          // Check the write permissions after we're sure 
+          // they've been updated from db1->db2
+          db2.access.on('updated', check)
+        })
+      })
     })
 
     describe('allows multiple peers to write to the databases', function() {
