@@ -1,4 +1,4 @@
-# orbit-db
+# OrbitDB
 
 [![](https://img.shields.io/badge/freenode-%23orbitdb-blue.svg?style=flat-square)](http://webchat.freenode.net/?channels=%23orbitdb)
 [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db)
@@ -8,9 +8,9 @@
 
 > A peer-to-peer database for the decentralized web
 
-`orbit-db` is a serverless, distributed, peer-to-peer database. `orbit-db` uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making `orbit-db` an excellent choice for decentralized apps (dApps), blockchain applications and  offline-first web applications.
+OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
 
-Data in `orbit-db` can be stored in a
+Data in OrbitDB can be stored in a
 
 - **[Key-Value Store](https://github.com/orbitdb/orbit-db/blob/master/API.md#keyvaluenameaddress)**
 - **[Log Database](https://github.com/orbitdb/orbit-db/blob/master/API.md#lognameaddress)** (append-only log)
