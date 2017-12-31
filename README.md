@@ -93,6 +93,8 @@ ipfs.on('ready', async () => {
 
 *For more details, see examples for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/haadcode/orbit-db-eventstore#usage), [feed](https://github.com/haadcode/orbit-db-feedstore#usage), [docstore](https://github.com/shamb0t/orbit-db-docstore#usage) and [counter](https://github.com/haadcode/orbit-db-counterstore#usage).*
 
+*The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.*
+
 ## API
 
 See [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbit-db-api-documentation) for the full documentation.
