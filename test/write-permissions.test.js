@@ -6,8 +6,10 @@ const OrbitDB = require('../src/OrbitDB')
 const config = require('./utils/config')
 const startIpfs = require('./utils/start-ipfs')
 
-const dbPath = './orbitdb/tests/sync'
-const ipfsPath = './orbitdb/tests/feed/ipfs'
+const dbPath = './orbitdb/tests/feed/1'
+const dbPath2 = './orbitdb/tests/feed/2'
+const ipfsPath = './orbitdb/tests/feed/1/ipfs'
+const ipfsPath2 = './orbitdb/tests/feed/2/ipfs'
 
 const databases = [
   {
@@ -53,17 +55,23 @@ const databases = [
 ]
 
 describe('orbit-db - Write Permissions', function() {
-  this.timeout(20000)
+  this.timeout(60000)
 
-  let ipfs, orbitdb1, orbitdb2
+  let ipfs, ipfs2, orbitdb1, orbitdb2
 
   before(async () => {
     config.daemon1.repo = ipfsPath
+    config.daemon2.repo = ipfsPath2
     rmrf.sync(config.daemon1.repo)
+    rmrf.sync(config.daemon2.repo)
     rmrf.sync(dbPath)
+    rmrf.sync(dbPath2)
     ipfs = await startIpfs(config.daemon1)
-    orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
-    orbitdb2 = new OrbitDB(ipfs, dbPath + '/2')
+    ipfs2 = await startIpfs(config.daemon2)
+    await ipfs2.swarm.connect(ipfs._peerInfo.multiaddrs._multiaddrs[0].toString())
+    await ipfs.swarm.connect(ipfs2._peerInfo.multiaddrs._multiaddrs[0].toString())
+    orbitdb1 = new OrbitDB(ipfs, dbPath)
+    orbitdb2 = new OrbitDB(ipfs2, dbPath2)
   })
 
   after(async () => {
@@ -79,7 +87,7 @@ describe('orbit-db - Write Permissions', function() {
 
   describe('allows multiple peers to write to the databases', function() {
     databases.forEach(async (database) => {
-      it(database.type + ' allows multiple writers', async () => {
+      it.only(database.type + ' allows multiple writers', async () => {
         let options = { 
           // Set write access for both clients
           write: [
@@ -90,16 +98,29 @@ describe('orbit-db - Write Permissions', function() {
 
         const db1 = await database.create(orbitdb1, 'sync-test', options)
         options = Object.assign({}, options, { sync: true })
+        delete options.write
         const db2 = await database.create(orbitdb2, db1.address.toString(), options)
 
-        await database.tryInsert(db1)
-        await database.tryInsert(db2)
+        return new Promise(async (resolve, reject) => {
+          const check = async () => {
+            try {
+              await database.tryInsert(db1)
+              await database.tryInsert(db2)
 
-        assert.deepEqual(database.getTestValue(db1), database.expectedValue)
-        assert.deepEqual(database.getTestValue(db2), database.expectedValue)
+              assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+              assert.deepEqual(database.getTestValue(db2), database.expectedValue)
 
-        await db1.close()
-        await db2.close()
+              await db1.close()
+              await db2.close()
+              resolve()
+            } catch (e) {
+              reject(e)
+            }
+          }
+          // Check the write permissions after we're sure 
+          // they've been updated from db1->db2
+          db2.access.on('updated', check)
+        })
       })
     })
   })

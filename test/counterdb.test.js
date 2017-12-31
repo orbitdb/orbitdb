@@ -14,7 +14,7 @@ const dbPath2 = './orbitdb/tests/counters/peer2'
 const ipfsPath1 = './orbitdb/tests/counters/peer1/ipfs'
 const ipfsPath2 = './orbitdb/tests/counters/peer2/ipfs'
 
-describe('CounterStore', function() {
+describe.skip('CounterStore', function() {
   this.timeout(config.timeout)
 
   let orbitdb1, orbitdb2

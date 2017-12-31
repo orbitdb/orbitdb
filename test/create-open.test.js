@@ -130,7 +130,7 @@ describe('orbit-db - Create & Open', function() {
         assert.equal(manifest.name, 'second')
         assert.equal(manifest.type, 'feed')
         assert.notEqual(manifest.accessController, null)
-        assert.equal(manifest.accessController.indexOf('/ipfs'), 0)
+        assert.equal(manifest.accessController.indexOf('/orbitdb'), 0)
       })
 
       it('can pass local database directory as an option', async () => {
@@ -138,42 +138,6 @@ describe('orbit-db - Create & Open', function() {
         db = await orbitdb.create('third', 'feed', { directory: dir })
         localDataPath = path.join(dir, db.address.root, db.address.path)
         assert.equal(fs.existsSync(localDataPath), true)
-      })
-
-      describe('Access Controller', function() {
-        before(async () => {
-          if (db) {
-            await db.close()
-            await db.drop()
-          }
-        })
-
-        afterEach(async () => {
-          if (db) {
-            await db.close()
-            await db.drop()
-          }
-        })
-
-        it('creates an access controller and adds ourselves as writer by default', async () => {
-          db = await orbitdb.create('fourth', 'feed')
-          assert.deepEqual(db.access.write, [orbitdb.key.getPublic('hex')])
-        })
-
-        it('creates an access controller and adds writers', async () => {
-          db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')] })
-          assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')])
-        })
-
-        it('creates an access controller and doesn\'t add an admin', async () => {
-          db = await orbitdb.create('sixth', 'feed')
-          assert.deepEqual(db.access.admin, [])
-        })
-
-        it('creates an access controller and doesn\'t add read access keys', async () => {
-          db = await orbitdb.create('seventh', 'feed', { read: ['one', 'two'] })
-          assert.deepEqual(db.access.read, [])
-        })
       })
     })
   })

@@ -6,6 +6,7 @@ class IPFSAccessController extends AccessController {
   constructor (ipfs) {
     super()
     this._ipfs = ipfs
+    this.controllerType = 'ipfs'
   }
 
   async load (address) {
@@ -17,7 +18,8 @@ class IPFSAccessController extends AccessController {
     try {
       const dag = await this._ipfs.object.get(address)
       const obj = JSON.parse(dag.toJSON().data)
-      this._access = obj
+      this._capabilities = obj
+    // console.log(">>", this.capabilities)
     } catch (e) {
       console.log("ACCESS ERROR:", e)
     }
@@ -26,13 +28,13 @@ class IPFSAccessController extends AccessController {
   async save () {
     let hash
     try {
-      const access = JSON.stringify(this._access, null, 2)
-      const dag = await this._ipfs.object.put(new Buffer(access))
+      const json = JSON.stringify(this.capabilities, null, 2)
+      const dag = await this._ipfs.object.put(Buffer.from(json))
       hash = dag.toJSON().multihash.toString()
     } catch (e) {
       console.log("ACCESS ERROR:", e)
     }
-    return hash
+    return '/ipfs/' + hash
   }
 }
 
