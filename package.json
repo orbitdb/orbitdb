@@ -52,7 +52,7 @@
     "build": "npm run build:es5 && npm run build:debug && npm run build:dist && npm run build:examples",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size",
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js",
-    "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.js examples/browser/lib/orbitdb.js",
+    "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.js examples/browser/lib/orbitdb.js && cp dist/orbitdb.js.map examples/browser/lib/orbitdb.js.map",
     "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-es2015 --plugins babel-plugin-transform-runtime"
   }
 }
