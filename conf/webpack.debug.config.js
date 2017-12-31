@@ -11,7 +11,7 @@ module.exports = {
     filename: './dist/orbitdb.js'
   },
   target: 'web',
-  devtool: 'none',
+  devtool: 'source-map',
   externals: {
     fs: '{}',
     mkdirp: '{}',
