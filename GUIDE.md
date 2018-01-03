@@ -153,7 +153,7 @@ If you want to give access to other peers to write to a database, you need to ge
 
 ### Access Control
 
-You can specify the peers that have write-access to a database. You can define a set of peers that can write to a database or allow anyone write to a database. **By default and if not specified otherwise, the only creator of the database will be given write-access**.
+You can specify the peers that have write-access to a database. You can define a set of peers that can write to a database or allow anyone write to a database. **By default and if not specified otherwise, only the creator of the database will be given write-access**.
 
 ***Note!*** *OrbitDB currently supports only write-access and the keys of the writers need to be known when creating a database. That is, the access rights can't be changed after a database has been created. In the future we'll support read access control and dynamic access control in a way that access rights can be added and removed to a database at any point in time without changing the database address. At the moment, if access rights need to be changed, the address of the database will change.*
 
