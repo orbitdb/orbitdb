@@ -20,7 +20,7 @@ Data in OrbitDB can be stored in a
 
 This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
 
-To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check **[Live demo 1](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/)**, **[Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/)** or **[P2P TodoMVC app](https://ipfs.io/ipfs/QmTJGHccriUtq3qf3bvAQUcDUHnBbHNJG2x2FYwYUecN43/)**!
+To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check **[Live demo 1](https://ipfs.io/ipfs/QmeESXh9wPib8Xz7hdRzHuYLDuEUgkYTSuujZ2phQfvznQ/)**, **[Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/)** or **[P2P TodoMVC app](https://ipfs.io/ipfs/QmTJGHccriUtq3qf3bvAQUcDUHnBbHNJG2x2FYwYUecN43/)**!
 
 <p align="left">
   <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/screenshots/example1.png" width="28%">
