@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.19.0",
+  "version": "0.19.1",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
