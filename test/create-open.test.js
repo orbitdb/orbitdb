@@ -200,7 +200,7 @@ describe('orbit-db - Create & Open', function() {
       } catch (e) {
         err = e.toString()
       }
-      assert.equal(err, "Error: Database type not provided! Provide a type with 'options.type' (eventlog|feed|docstore|counter|keyvalue)")
+      assert.equal(err, `Error: Database type not provided! Provide a type with 'options.type' (${OrbitDB.databaseTypes.join('|')})`)
     })
 
     it('opens a database - name only', async () => {

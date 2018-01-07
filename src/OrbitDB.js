@@ -17,7 +17,14 @@ const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('NONE')
 
-const validTypes = ['eventlog', 'feed', 'docstore', 'counter', 'keyvalue']
+// Mapping for 'database type' -> Class
+const databaseTypes = {
+  'counter': CounterStore,
+  'eventlog': EventStore,
+  'feed': FeedStore,
+  'docstore': DocumentStore,
+  'keyvalue': KeyValueStore,
+}
 
 class OrbitDB {
   constructor(ipfs, directory, options = {}) {
@@ -27,7 +34,6 @@ class OrbitDB {
       ? new options.broker(this._ipfs) 
       : new Pubsub(this._ipfs, this.id)
     this.stores = {}
-    this.types = validTypes
     this.directory = directory || './orbitdb'
     this.keystore = Keystore.create(path.join(this.directory, this.id, '/keystore'))
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
@@ -93,8 +99,12 @@ class OrbitDB {
   }
 
   /* Private methods */
-  async _createStore (Store, address, options) {
-    const addr = address.toString()
+  async _createStore (type, address, options) {
+    // Get the type -> class mapping
+    const Store = databaseTypes[type]
+
+    if (!Store)
+      throw new Error(`Invalid database type '${type}'`)
 
     let accessController
     if (options.accessControllerAddress) {
@@ -114,6 +124,8 @@ class OrbitDB {
     store.events.on('write', this._onWrite.bind(this))
     store.events.on('closed', this._onClosed.bind(this))
 
+    // ID of the store is the address as a string
+    const addr = address.toString()
     this.stores[addr] = store
 
     if(opts.replicate && this._pubsub)
@@ -257,7 +269,7 @@ class OrbitDB {
       if (!options.create) {
         throw new Error(`'options.create' set to 'false'. If you want to create a database, set 'options.create' to 'true'.`)
       } else if (options.create && !options.type) {
-        throw new Error(`Database type not provided! Provide a type with 'options.type' (${validTypes.join('|')})`)
+        throw new Error(`Database type not provided! Provide a type with 'options.type' (${OrbitDB.databaseTypes.join('|')})`)
       } else {
         logger.warn(`Not a valid OrbitDB address '${address}', creating the database`)
         options.overwrite = options.overwrite ? options.overwrite : true
@@ -298,7 +310,7 @@ class OrbitDB {
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
-    return this._openDatabase(dbAddress, manifest.type, options)
+    return this._createStore(manifest.type, dbAddress, options)
   }
 
   // Save the database locally
@@ -320,23 +332,17 @@ class OrbitDB {
     return cache
   }
 
-  async _openDatabase (address, type, options) {
-    if (type === 'counter')
-      return this._createStore(CounterStore, address, options)
-    else if (type === 'eventlog')
-      return this._createStore(EventStore, address, options)
-    else if (type === 'feed')
-      return this._createStore(FeedStore, address, options)
-    else if (type === 'docstore')
-      return this._createStore(DocumentStore, address, options)
-    else if (type === 'keyvalue')
-      return this._createStore(KeyValueStore, address, options)
-    else
-      throw new Error(`Invalid database type '${type}'`)
+  /**
+   * Returns supported database types as an Array of strings
+   * Eg. [ 'counter', 'eventlog', 'feed', 'docstore', 'keyvalue']
+   * @return {[Array]} [Supported database types]
+   */
+  static get databaseTypes () {
+    return Object.keys(databaseTypes)
   }
 
   static isValidType (type) {
-    return validTypes.includes(type)
+    return Object.keys(databaseTypes).includes(type)
   }
 
   static create () {
