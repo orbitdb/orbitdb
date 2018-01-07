@@ -15,7 +15,7 @@
   "dependencies": {
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-cache": "~0.2.0",
+    "orbit-db-cache": "~0.2.1",
     "orbit-db-counterstore": "~1.2.0",
     "orbit-db-docstore": "~1.2.0",
     "orbit-db-eventstore": "~1.2.0",

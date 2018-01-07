@@ -86,6 +86,13 @@ describe('orbit-db - Persistency', function() {
       }
     })
 
+    it('closes database while loading', async () => {
+      db = await orbitdb1.eventlog(address)
+      db.load() // don't wait for load to finish
+      await db.close()
+      assert.equal(db._cache.store, null)
+    })
+
     it('load, add one, close - several times', async () => {
       const amount = 8
       for (let i = 0; i < amount; i ++) {
