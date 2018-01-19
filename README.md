@@ -155,6 +155,31 @@ node examples/eventlog.js
 
 More examples at [examples](https://github.com/orbitdb/orbit-db/tree/master/examples).
 
+### Custom Store Types
+
+You can add custom store types to OrbitDB:
+
+```javascript
+// define custom store type
+class CustomStore extends DocumentStore {
+  constructor (ipfs, id, dbname, options) {
+    super(ipfs, id, dbname, options)
+    this._type = CustomStore.type
+  }
+
+  static get type () {
+    return 'custom'
+  }
+}
+
+// add custom type to orbitdb
+OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
+
+// instantiate custom store
+let orbitdb = new OrbitDB(ipfs, dbPath)
+let store = orbitdb.create(name, CustomStore.type)
+```
+
 ## Development
 
 #### Run Tests

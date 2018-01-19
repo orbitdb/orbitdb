@@ -18,7 +18,7 @@ const logger = Logger.create("orbit-db")
 Logger.setLogLevel('NONE')
 
 // Mapping for 'database type' -> Class
-const databaseTypes = {
+let databaseTypes = {
   'counter': CounterStore,
   'eventlog': EventStore,
   'feed': FeedStore,
@@ -343,6 +343,11 @@ class OrbitDB {
 
   static isValidType (type) {
     return Object.keys(databaseTypes).includes(type)
+  }
+
+  static addDatabaseType (type, store) {
+    if (databaseTypes[type]) throw new Error(`Type already exists: ${type}`)
+    databaseTypes[type] = store
   }
 
   static create () {
