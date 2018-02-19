@@ -124,6 +124,7 @@ class OrbitDBAccessController extends AccessController {
     this._capabilities[capability] = Array.from(capabilities)
     try {
       await this._db.put(capability, Array.from(capabilities))
+      this.emit('updated')
     } catch (e) {
       throw e
     }
@@ -140,6 +141,7 @@ class OrbitDBAccessController extends AccessController {
         delete this._capabilities[capability]
         await this._db.del(capability)
       }
+      this.emit('updated')
     } catch (e) {
       throw e
     }
