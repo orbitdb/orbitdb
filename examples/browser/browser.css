@@ -20,6 +20,15 @@ body {
   padding: 0.5em;
 }
 
+#output-header > p {
+  margin: 0;
+  font-style: italic;
+}
+
+#output {
+  padding-top: 1em;
+}
+
 #writerText {
   padding-top: 0.5em;
 }
