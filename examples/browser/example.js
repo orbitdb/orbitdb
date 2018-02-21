@@ -5,7 +5,8 @@ const creatures = [
   '🐼', '🐰', '🐶', '🐥'
 ]
 
-const elm = document.getElementById("output")
+const outputHeaderElm = document.getElementById("output-header")
+const outputElm = document.getElementById("output")
 const statusElm = document.getElementById("status")
 const dbnameField = document.getElementById("dbname")
 const dbAddressField = document.getElementById("dbaddress")
@@ -26,6 +27,7 @@ const main = (IPFS, ORBITDB) => {
   let count = 0
   let interval = Math.floor((Math.random() * 300) + (Math.random() * 2000))
   let updateInterval
+  let dbType, dbAddress
 
   // If we're building with Webpack, use the injected IPFS module.
   // Otherwise use 'Ipfs' which is exposed by ipfs.min.js
@@ -123,7 +125,8 @@ const main = (IPFS, ORBITDB) => {
 
   const resetDatabase = async (db) => {
     writerText.innerHTML = ""
-    elm.innerHTML = ""
+    outputElm.innerHTML = ""
+    outputHeaderElm.innerHTML = ""
 
     clearInterval(updateInterval)
 
@@ -238,11 +241,18 @@ const main = (IPFS, ORBITDB) => {
 
     const result = query(db)
 
-    const output = `
-      <h2>${db.type.toUpperCase()}</h2>
-      <h3 id="remoteAddress">${db.address}</h3>
-      <div><i>Copy this address and use the 'Open Remote Database' in another browser to replicate this database between peers.</i></div>
-      <br>
+    if (dbType !== db.type || dbAddress !== db.address) {
+      dbType = db.type;
+      dbAddress = db.address;
+
+      outputHeaderElm.innerHTML = `
+        <h2>${dbType.toUpperCase()}</h2>
+        <h3 id="remoteAddress">${dbAddress}</h3>
+        <p>Copy this address and use the 'Open Remote Database' in another browser to replicate this database between peers.</p>
+      `
+    }
+
+    outputElm.innerHTML = `
       <div><b>Peer ID:</b> ${orbitdb.id}</div>
       <div><b>Peers (database/network):</b> ${databasePeers.length} / ${networkPeers.length}</div>
       <div><b>Oplog Size:</b> ${db._replicationInfo.progress} / ${db._replicationInfo.max}</div>
@@ -256,9 +266,8 @@ const main = (IPFS, ORBITDB) => {
             : result ? result.toString().replace('"', '').replace('"', '') : result
         }
         </div>
-        </div>
-      `
-    elm.innerHTML = output
+      </div>
+    `
   }
 
   openButton.addEventListener('click', openDatabase)
