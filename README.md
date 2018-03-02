@@ -53,6 +53,8 @@ npm install orbit-db-cli -g
 
 ### As a library
 
+Orbit-db as a library is not supported on Windows.
+
 Install dependencies:
 
 ```
