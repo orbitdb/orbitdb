@@ -27,7 +27,7 @@ describe('orbit-db - Drop Database', function() {
 
   after(async () => {
     if(orbitdb) 
-      orbitdb.stop()
+      await orbitdb.stop()
 
     if (ipfs)
       await ipfs.stop()
@@ -45,6 +45,6 @@ describe('orbit-db - Drop Database', function() {
     it('removes local database files', async () => {
       await db.drop()
       assert.equal(fs.existsSync(localDataPath), false)
-    })    
+    })
   })
 })
