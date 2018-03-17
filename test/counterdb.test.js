@@ -51,12 +51,12 @@ describe('CounterStore', function() {
     orbitdb2 = new OrbitDB(ipfs2, './orbitdb/2')
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (orbitdb1)
-      orbitdb1.stop()
+      await orbitdb1.stop()
 
     if (orbitdb2)
-      orbitdb2.stop()
+      await orbitdb2.stop()
   })
 
   describe('counters', function() {

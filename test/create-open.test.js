@@ -31,7 +31,7 @@ describe('orbit-db - Create & Open', function() {
 
   after(async () => {
     if(orbitdb) 
-      orbitdb.stop()
+      await orbitdb.stop()
 
     if (ipfs)
       await ipfs.stop()

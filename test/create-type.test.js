@@ -36,7 +36,7 @@ describe('orbit-db - Create custom type', function () {
   })
 
   after(async () => {
-    if(orbitdb) orbitdb.stop()
+    if (orbitdb) await orbitdb.stop()
     if (ipfs) await ipfs.stop()
   })
 
