@@ -3,9 +3,14 @@
 const assert = require('assert')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
-const config = require('./utils/config')
-const startIpfs = require('./utils/start-ipfs')
-const customTestKeystore = require('./utils/custom-test-keystore')
+// Include test utilities
+const {
+  config,
+  startIpfs,
+  stopIpfs,
+  testAPIs,
+  CustomTestKeystore,
+} = require('./utils')
 
 const dbPath = './orbitdb/tests/customKeystore'
 const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
@@ -53,58 +58,61 @@ const databases = [
   },
 ]
 
-describe('orbit-db - Using custom keystore', function() {
-  this.timeout(20000)
+Object.keys(testAPIs).forEach(API => {
+  describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
+    this.timeout(20000)
 
-  let ipfs, orbitdb1
+    let ipfsd, ipfs, orbitdb1
 
-  before(async () => {
-    config.daemon1.repo = ipfsPath
-    rmrf.sync(config.daemon1.repo)
-    rmrf.sync(dbPath)
-    ipfs = await startIpfs(config.daemon1)
-    orbitdb1 = new OrbitDB(ipfs, dbPath + '/1', {
-      keystore: customTestKeystore
-    })
-  })
-
-  after(async () => {
-    if(orbitdb1)
-      await orbitdb1.stop()
-
-    if (ipfs)
-      await ipfs.stop()
-  })
-
-  describe('allows orbit to use a custom keystore with different store types', function() {
-    databases.forEach(async (database) => {
-      it(database.type + ' allows custom keystore', async () => {
-        const db1 = await database.create(orbitdb1, 'custom-keystore')
-        await database.tryInsert(db1)
-
-        assert.deepEqual(database.getTestValue(db1), database.expectedValue)
-
-        await db1.close()
+    before(async () => {
+      config.daemon1.repo = ipfsPath
+      rmrf.sync(config.daemon1.repo)
+      rmrf.sync(dbPath)
+      ipfsd = await startIpfs(API, config.daemon1)
+      ipfs = ipfsd.api
+      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1', {
+        keystore: CustomTestKeystore
       })
     })
-  })
 
-  describe('allows a custom keystore to be used with different store and write permissions', function() {
-    databases.forEach(async (database) => {
-      it(database.type + ' allows custom keystore', async () => {
-        const options = {
-          // Set write access for both clients
-          write: [
-            orbitdb1.key.getPublic('hex')
-          ],
-        }
+    after(async () => {
+      if(orbitdb1)
+        await orbitdb1.stop()
 
-        const db1 = await database.create(orbitdb1, 'custom-keystore', options)
-        await database.tryInsert(db1)
+      if (ipfsd)
+        await stopIpfs(ipfsd)
+    })
 
-        assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+    describe('allows orbit to use a custom keystore with different store types', function() {
+      databases.forEach(async (database) => {
+        it(database.type + ' allows custom keystore', async () => {
+          const db1 = await database.create(orbitdb1, 'custom-keystore')
+          await database.tryInsert(db1)
 
-        await db1.close()
+          assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+
+          await db1.close()
+        })
+      })
+    })
+
+    describe('allows a custom keystore to be used with different store and write permissions', function() {
+      databases.forEach(async (database) => {
+        it(database.type + ' allows custom keystore', async () => {
+          const options = {
+            // Set write access for both clients
+            write: [
+              orbitdb1.key.getPublic('hex')
+            ],
+          }
+
+          const db1 = await database.create(orbitdb1, 'custom-keystore', options)
+          await database.tryInsert(db1)
+
+          assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+
+          await db1.close()
+        })
       })
     })
   })
