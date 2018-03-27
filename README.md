@@ -41,6 +41,8 @@ To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)
 
 Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a more in-depth tutorial and to understand how OrbitDB works.
 
+OrbitDB currently supports Linux and OS X, Windows is not supported yet.
+
 ### CLI
 
 For the CLI tool to manage orbit-db database, see **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**.
@@ -52,8 +54,6 @@ npm install orbit-db-cli -g
 ```
 
 ### As a library
-
-Orbit-db as a library is not supported on Windows.
 
 Install dependencies:
 
