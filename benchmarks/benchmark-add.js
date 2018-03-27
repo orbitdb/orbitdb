@@ -42,28 +42,32 @@ const ipfs = new IPFS({
 ipfs.on('error', (err) => console.error(err))
 
 ipfs.on('ready', async () => {
-  try {
-    const orbit = new OrbitDB(ipfs, './orbitdb/benchmarks')
-    const db = await orbit.eventlog('orbit-db.benchmark', { 
-      replicate: false,
-    })
+  const run = async () => {
+    try {
+      const orbit = new OrbitDB(ipfs, './orbitdb/benchmarks')
+      const db = await orbit.eventlog('orbit-db.benchmark', { 
+        replicate: false,
+      })
 
-    // Metrics output
-    setInterval(() => {
-      seconds ++
-      if(seconds % 10 === 0) {
-        console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
-        if(lastTenSeconds === 0)
-          throw new Error("Problems!")
-        lastTenSeconds = 0
-      }
-      console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Oplog: ${db._oplog.length})`)
-      queriesPerSecond = 0
-    }, 1000)
-    // Start the main loop
-    queryLoop(db)
-  } catch (e) {
-    console.log(e)
-    process.exit(1)
+      // Metrics output
+      setInterval(() => {
+        seconds ++
+        if(seconds % 10 === 0) {
+          console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
+          if(lastTenSeconds === 0)
+            throw new Error("Problems!")
+          lastTenSeconds = 0
+        }
+        console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Oplog: ${db._oplog.length})`)
+        queriesPerSecond = 0
+      }, 1000)
+      // Start the main loop
+      queryLoop(db)
+    } catch (e) {
+      console.log(e)
+      process.exit(1)
+    }
   }
+
+  run()
 })
