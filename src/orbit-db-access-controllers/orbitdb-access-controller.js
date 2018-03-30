@@ -1,12 +1,13 @@
 'use strict'
 
-const path = require('path')
+const EventEmitter = require('events').EventEmitter
 const AccessController = require('./access-controller')
+const { ensureAddress } = require('./utils')
 
 const Logger = require('logplease')
-const logger = Logger.create("orbit-db-access-controller", { color: Logger.Colors.Green })
+const logger = Logger.create("orbit-db-access-controller", { color: Logger.Colors.Red })
 
-class OrbitDBAccessController extends AccessController {
+class OrbitDBAccessController extends EventEmitter {
   constructor (orbitdb) {
     super()
     this._orbitdb = orbitdb
@@ -15,71 +16,21 @@ class OrbitDBAccessController extends AccessController {
   }
 
   get capabilities () {
-    // console.log("!!!!!!!!!!!")
-    // console.log(this._capabilities)
-    // console.log(this._db.access.capabilities)
     if (this._db) {
+      let capabilities = this._db.all()
+      // Merge with the root controller access map
       Object.entries(this._db.access.capabilities).forEach(e => {
         const key = e[0]
-        if (!this._capabilities[key]) this._capabilities[key] = []
-        this._capabilities[key] = Array.from(new Set([...this._capabilities[key], ...e[1]]))
+        const oldValue = capabilities[key] || []
+        capabilities[key] = Array.from(new Set([...oldValue, ...e[1]]))
       })
+      return capabilities
     }
-    // console.log("!!!!!!!!!!!", this._capabilities)
-    return this._capabilities
+    return {}
   }
 
-  async init (name) {
-    if (this._db)
-      await this._db.close()
-
-    const suffix = name.toString().split('/').pop()
-    name = suffix === '_access' ? name : path.join(name, '/_access')
-
-    this._db = await this._orbitdb.keyvalue(name, {
-      accessControllerType: 'ipfs', // the "root controller" should be immutable, use ipfs as the type
-      sync: true,
-      write: [this._orbitdb.key.getPublic('hex')],
-    })
-    this._db.events.on('ready', () => {
-      this._capabilities = this._db._index._index
-      this.emit('updated')
-    })
-    this._db.events.on('replicated', () => {
-      this._capabilities = this._db._index._index
-      this.emit('updated')
-    })
-    // this._db.events.on('ready', () => {
-    //   this._capabilities = this._db._index._index
-    //   this.emit('updated')
-    // })
-    // console.log(">", this.capabilities)
-    // Add the creator to the default write capabilities
-    // await this.add('write', this._orbitdb.key.getPublic('hex'))
-    // console.log(">>", this.capabilities)
-    return new Promise(async (resolve) => {
-      logger.debug("Load database")
-      await this._db.load()
-      // Get list of capbalities from the database
-      this._capabilities = this._db._index._index
-      resolve()
-      // if (this._db.peers.length > 0)
-      //   return resolve()
-
-      // this._db.events.on('peer', async () => {
-      //   console.log("-----------------------------------------------")
-      //   console.log("PEEER")
-      //   // Load locally persisted state
-      //   await this._db.load()
-      //   // Get list of capbalities from the database
-      //   this._capabilities = this._db._index._index
-      //   resolve()
-      // })
-      // setTimeout(() => {
-      //   console.log("TIMEOUT")
-      //   resolve()
-      // }, 3000)
-    })
+  get (capability) {
+    return this.capabilities[capability]
   }
 
   async close () {
@@ -87,30 +38,20 @@ class OrbitDBAccessController extends AccessController {
   }
 
   async load (address) {
-    const suffix = address.toString().split('/').pop()
-    const addr = suffix === '_access' ? address : path.join(address, '/_access')
-    await this.init(addr)
-      // const suffix = address.toString().split('/').pop()
-      // address = suffix === '_access' ? address : path.join(address, '/_access')
+    if (this._db)
+      await this._db.close()
 
-      // this._db = await this._orbitdb.keyvalue(address)//, {
-      // //   accessControllerType: 'ipfs', // the "root controller" should be immutable, use ipfs as the type
-      // //   // sync: true,
-      // //   // write: [this._orbitdb.key.getPublic('hex')],
-      // // })
+    this._db = await this._orbitdb.keyvalue(ensureAddress(address), {
+      accessControllerType: 'ipfs', // the "root controller" is immutable, use ipfs controller
+      sync: true,
+      write: [this._orbitdb.key.getPublic('hex')],
+    })
 
-      // // console.log("---- LOAD! -----")
-      // // Load locally persisted state
-      // await this._db.load()
-      // this._capabilities = this._db._index._index
-      // resolve()
-    // })
-    // return new Promise(resolve => {
-    //   setTimeout(() => {
-    //     this._capabilities = this._db._index._index
-    //     resolve()
-    //   }, 2000)
-    // })
+    this._db.events.on('ready', this._onUpdate.bind(this))
+    this._db.events.on('write', this._onUpdate.bind(this))
+    this._db.events.on('replicated', this._onUpdate.bind(this))
+
+    await this._db.load()
   }
 
   async save () {
@@ -118,33 +59,24 @@ class OrbitDBAccessController extends AccessController {
   }
 
   async add (capability, key) {
-    // console.log("add:", capability, key)
-    let capabilities = new Set(this._db.get(capability) || [])
-    capabilities.add(key)
-    this._capabilities[capability] = Array.from(capabilities)
-    try {
-      await this._db.put(capability, Array.from(capabilities))
-      this.emit('updated')
-    } catch (e) {
-      throw e
-    }
+    // Merge current keys with the new key
+    const capabilities = new Set([...(this._db.get(capability) || []), ...[key]])
+    await this._db.put(capability, Array.from(capabilities))
   }
 
   async remove (capability, key) {
     let capabilities = new Set(this._db.get(capability) || [])
     capabilities.delete(key)
-    this._capabilities[capability] = Array.from(capabilities)
-    try {
-      if (capabilities.size > 0) {
-        await this._db.put(capability, Array.from(capabilities))
-      } else {
-        delete this._capabilities[capability]
-        await this._db.del(capability)
-      }
-      this.emit('updated')
-    } catch (e) {
-      throw e
+    if (capabilities.size > 0) {
+      await this._db.put(capability, Array.from(capabilities))
+    } else {
+      await this._db.del(capability)
     }
+  }
+
+  /* Private methods */
+  _onUpdate () {
+    this.emit('updated')
   }
 }
 

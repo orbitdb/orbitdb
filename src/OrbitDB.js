@@ -231,7 +231,7 @@ class OrbitDB {
 
     // Create an AccessController
     logger.debug(`Create AccessController`)
-    const accessController = await AccessController.create(options.accessControllerType || 'orbitdb', name, this, this._ipfs)
+    const accessController = await AccessController.create(options.accessControllerType || 'ipfs', name, this, this._ipfs)
     // Add keys that can write to the database
     if (options && options.write && options.write.length > 0) {
       await mapSeries(options.write, e => accessController.add('write', e))

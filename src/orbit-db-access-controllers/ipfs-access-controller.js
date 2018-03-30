@@ -19,7 +19,6 @@ class IPFSAccessController extends AccessController {
       const dag = await this._ipfs.object.get(address)
       const obj = JSON.parse(dag.toJSON().data)
       this._capabilities = obj
-    // console.log(">>", this.capabilities)
     } catch (e) {
       console.log("ACCESS ERROR:", e)
     }

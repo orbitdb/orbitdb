@@ -103,8 +103,8 @@ Object.keys(testAPIs).forEach(API => {
 
   describe('allows multiple peers to write to the databases', function() {
     databases.forEach(async (database) => {
-      it.only(database.type + ' allows multiple writers', async () => {
-        let options = {
+      it(database.type + ' allows multiple writers', async () => {
+        let options = { 
           // Set write access for both clients
           write: [
             orbitdb1.key.getPublic('hex'),
@@ -118,24 +118,19 @@ Object.keys(testAPIs).forEach(API => {
         const db2 = await database.create(orbitdb2, db1.address.toString(), options)
 
         return new Promise(async (resolve, reject) => {
-          const check = async () => {
-            try {
-              await database.tryInsert(db1)
-              await database.tryInsert(db2)
+          try {
+            await database.tryInsert(db1)
+            await database.tryInsert(db2)
 
-              assert.deepEqual(database.getTestValue(db1), database.expectedValue)
-              assert.deepEqual(database.getTestValue(db2), database.expectedValue)
+            assert.deepEqual(database.getTestValue(db1), database.expectedValue)
+            assert.deepEqual(database.getTestValue(db2), database.expectedValue)
 
-              await db1.close()
-              await db2.close()
-              resolve()
-            } catch (e) {
-              reject(e)
-            }
+            await db1.close()
+            await db2.close()
+            resolve()
+          } catch (e) {
+            reject(e)
           }
-          // Check the write permissions after we're sure 
-          // they've been updated from db1->db2
-          db2.access.on('updated', check)
         })
       })
     })

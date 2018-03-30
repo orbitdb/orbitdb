@@ -40,7 +40,7 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
 
   describe('Constructor', function() {
     let accessController
-    
+
     before(() => {
       accessController = new OrbitDBAccessController(orbitdb)
     })
@@ -69,7 +69,7 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
 
   describe('add', function() {
     let accessController
-    
+
     before(async () => {
       accessController = new OrbitDBAccessController(orbitdb)
       await accessController.load('testdb/add')
@@ -104,11 +104,30 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
         'delete': ['ABCD'],
       })
     })
+
+
+    it('send \'updated\' event when a capability was added', async () => {
+      return new Promise(async (resolve, reject) => {
+        accessController.on('updated', () => {
+          try {
+            assert.deepEqual(accessController.capabilities, {
+              'write': [pubKey],
+              'read': ['ABCD', 'AXES'],
+              'delete': ['ABCD'],
+            })
+            resolve()
+          } catch (e) {
+            reject(e)
+          }
+        })
+        await accessController.add('read', 'AXES')
+      })
+    })
   })
 
   describe('remove', function() {
     let accessController
-    
+
     before(async () => {
       accessController = new OrbitDBAccessController(orbitdb)
       await accessController.load('testdb/remove')
@@ -150,11 +169,31 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
         'write': [pubKey]
       })
     })
+
+    it('send \'updated\' event when a capability was removed', async () => {
+      await accessController.add('admin', 'cats')
+      await accessController.add('admin', 'dogs')
+
+      return new Promise(async (resolve, reject) => {
+        accessController.on('updated', () => {
+          try {
+            assert.deepEqual(accessController.capabilities, {
+              'write': [pubKey],
+              'admin': ['dogs'],
+            })
+            resolve()
+          } catch (e) {
+            reject(e)
+          }
+        })
+        await accessController.remove('admin', 'cats')
+      })
+    })
   })
 
   describe('save and load', function() {
     let accessController, address, dbName
-    
+
     before(async () => {
       dbName = 'testdb-load-' + new Date().getTime()
       accessController = new OrbitDBAccessController(orbitdb)
@@ -168,7 +207,11 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
       await accessController.remove('another', 'AA')
       await accessController.add('admin', pubKey)
       address = await accessController.save()
-      await accessController.load(address)
+      return new Promise(async (resolve) => {
+        // Test that the access controller emits 'updated' after it was loaded
+        accessController.on('updated', () => resolve())
+        await accessController.load(address)
+      })
     })
 
     it('has the correct database address for the internal db', async () => {
@@ -186,7 +229,7 @@ describe.only('orbit-db - Access Controller (OrbitDB)', function() {
 
   describe('OrbitDB Integration', function() {
     it('saves database manifest file locally', async () => {
-      const db = await orbitdb.feed('AABB', { replicate: false })
+      const db = await orbitdb.feed('AABB', { replicate: false, accessControllerType: 'orbitdb' })
       const dag = await ipfs.object.get(db.address.root)
       const manifest = JSON.parse(dag.toJSON().data)
       assert.notEqual(manifest, )

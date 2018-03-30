@@ -15,7 +15,7 @@ const startIpfs = require('./utils/start-ipfs')
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
-describe.skip('orbit-db - Access Controller', function() {
+describe.only('orbit-db - Access Controller', function() {
   this.timeout(config.timeout)
 
   let ipfs, orbitdb, db, address
@@ -37,32 +37,47 @@ describe.skip('orbit-db - Access Controller', function() {
       await ipfs.stop()
   })
 
-  describe('Access Controller', function() {
+  describe('Access Controller (Default)', function() {
     afterEach(async () => {
       if (db) {
         await db.drop()
-        // await db.close()
       }
+    })
+
+    it('returns an error for unknown controller type', async () => {
+      let err
+      try {
+        await orbitdb.create('fourth', 'feed', { accessControllerType: 'wedonthavethistype' })
+      } catch (e) {
+        err = e
+      }
+      assert.equal(err, 'Error: Unsupported access controller type \'wedonthavethistype\'')
     })
 
     it('creates an access controller and adds ourselves as writer by default', async () => {
       db = await orbitdb.create('fourth', 'feed')
-      assert.deepEqual(db.access.write, [orbitdb.key.getPublic('hex')])
+      assert.deepEqual(db.access.capabilities.write, [orbitdb.key.getPublic('hex')])
     })
 
     it('creates an access controller and adds writers', async () => {
-      db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')] })
-      assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')])
+      const keys = [
+        'another-key', 
+        'yet-another-key', 
+        orbitdb.key.getPublic('hex')
+      ]
+
+      db = await orbitdb.create('fourth', 'feed', { write: keys })
+      assert.deepEqual(db.access.capabilities.write, keys)
     })
 
     it('creates an access controller and doesn\'t add an admin', async () => {
       db = await orbitdb.create('sixth', 'feed')
-      assert.deepEqual(db.access.admin, [])
+      assert.equal(db.access.capabilities.admin, undefined)
     })
 
     it('creates an access controller and doesn\'t add read access keys', async () => {
       db = await orbitdb.create('seventh', 'feed', { read: ['one', 'two'] })
-      assert.deepEqual(db.access.read, [])
+      assert.equal(db.access.capabilities.read, undefined)
     })
   })
 })
