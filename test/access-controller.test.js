@@ -15,7 +15,7 @@ const startIpfs = require('./utils/start-ipfs')
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
-describe.only('orbit-db - Access Controller', function() {
+describe.only('orbit-db - Access Controller (Default)', function() {
   this.timeout(config.timeout)
 
   let ipfs, orbitdb, db, address
@@ -37,7 +37,7 @@ describe.only('orbit-db - Access Controller', function() {
       await ipfs.stop()
   })
 
-  describe('Access Controller (Default)', function() {
+  describe('Access Controller', function() {
     afterEach(async () => {
       if (db) {
         await db.drop()

@@ -17,7 +17,8 @@ class OrbitDBAccessController extends EventEmitter {
 
   get capabilities () {
     if (this._db) {
-      let capabilities = this._db.all()
+      // let capabilities = this._db.all()
+      let capabilities = this._db._index._index
       // Merge with the root controller access map
       Object.entries(this._db.access.capabilities).forEach(e => {
         const key = e[0]
