@@ -7,16 +7,16 @@ const KeyValueStore = require('orbit-db-kvstore')
 const CounterStore = require('orbit-db-counterstore')
 const DocumentStore = require('orbit-db-docstore')
 const Pubsub = require('orbit-db-pubsub')
-const Channel = require('ipfs-pubsub-1on1')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const AccessController = require('./ipfs-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
+const exchangeHeads = require('./exchange-heads')
 
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
-Logger.setLogLevel('NONE')
+Logger.setLogLevel('ERROR')
 
 // Mapping for 'database type' -> Class
 let databaseTypes = {
@@ -87,11 +87,14 @@ class OrbitDB {
       delete this.stores[db.address.toString()]
     }
 
-    // Close all direct connections to peers
-    Object.keys(this._directConnections).forEach(e => {
+    // Close a direct connection and remove it from internal state
+    const removeDirectConnect = e => {
       this._directConnections[e].close()
       delete this._directConnections[e]
-    })
+    }
+
+    // Close all direct connections to peers
+    Object.keys(this._directConnections).forEach(removeDirectConnect)
 
     // Disconnect from pubsub
     if (this._pubsub) 
@@ -136,6 +139,9 @@ class OrbitDB {
     const addr = address.toString()
     this.stores[addr] = store
 
+    // Subscribe to pubsub to get updates from peers,
+    // this is what hooks us into the message propagation layer
+    // and the p2p network
     if(opts.replicate && this._pubsub)
       this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
 
@@ -153,44 +159,35 @@ class OrbitDB {
     const store = this.stores[address]
     try {
       logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
-      if (store)
+      if (store && heads && heads.length > 0) {
         await store.sync(heads)
+      }
     } catch (e) {
       logger.error(e)
     }
   }
 
   // Callback for when a peer connected to a database
-  async _onPeerConnected (address, peer, room) {
+  async _onPeerConnected (address, peer) {
     logger.debug(`New peer '${peer}' connected to '${address}'`)
-    const store = this.stores[address]
-    if (store) {
-      // Create a direct channel to the connected peer
-      let channel = this._directConnections[peer]
-      if (!channel) {
-        try {
-          logger.debug(`Create a channel`)
-          channel = await Channel.open(this._ipfs, peer)
-          channel.on('message', (message) => this._onMessage(address, JSON.parse(message.data)))
-          this._directConnections[peer] = channel
-          logger.debug(`Channel created`)
-        } catch (e) {
-          console.error(e)
-          logger.error(e)
-        }
-      }
-      // Send the newly connected peer our latest heads
-      let heads = store._oplog.heads
-      if (heads.length > 0) {
-        // Wait for the direct channel to be fully connected
-        await channel.connect()
-        logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
-        channel.send(JSON.stringify(heads))
-      }
-      store.events.emit('peer', peer)
-    } else {
-      logger.error(`Database '${address}' is not open!`)
-    }
+
+    const getStore = address => this.stores[address]
+    const getDirectConnection = peer => this._directConnections[peer]
+    const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel
+    const onMessage = (address, heads) => this._onMessage(address, heads)
+
+    const channel = await exchangeHeads(
+      this._ipfs,
+      address,
+      peer,
+      getStore,
+      getDirectConnection,
+      onMessage,
+      onChannelCreated
+    )
+ 
+    if (getStore(address))
+      getStore(address).events.emit('peer', peer)
   }
 
   // Callback when database was closed
@@ -314,7 +311,7 @@ class OrbitDB {
     // If we want to try and open the database local-only, throw an error
     // if we don't have the database locally
     if (options.localOnly && !haveDB) {
-      logger.error(`Database '${dbAddress}' doesn't exist!`)
+      logger.warn(`Database '${dbAddress}' doesn't exist!`)
       throw new Error(`Database '${dbAddress}' doesn't exist!`)
     }
 
