@@ -132,14 +132,18 @@ Object.keys(testAPIs).forEach(API => {
         db = await orbitdb1.eventlog(address)
         return new Promise(async (resolve, reject) => {
           let count = 0
-          db.events.on('load.progress', (address, hash, entry, progress, total) => {
+          db.events.on('load.progress', (address, hash, entry) => {
             count ++
             try {
               assert.equal(address, db.address.toString())
-              assert.equal(total, entryCount)
+
+              const { progress, max } = db.replicationStatus
+              assert.equal(max, entryCount)
               assert.equal(progress, count)
+
               assert.notEqual(hash, null)
               assert.notEqual(entry, null)
+
               if (progress === entryCount && count === entryCount) {
                 setTimeout(() => {
                   resolve()
@@ -246,12 +250,15 @@ Object.keys(testAPIs).forEach(API => {
         db = await orbitdb1.eventlog(address)
         return new Promise(async (resolve, reject) => {
           let count = 0
-          db.events.on('load.progress', (address, hash, entry, progress, total) => {
+          db.events.on('load.progress', (address, hash, entry) => {
             count ++
             try {
               assert.equal(address, db.address.toString())
-              assert.equal(total, entryCount)
+
+              const { progress, max } = db.replicationStatus
+              assert.equal(max, entryCount)
               assert.equal(progress, count)
+
               assert.notEqual(hash, null)
               assert.notEqual(entry, null)
               if (progress === entryCount && count === entryCount) {
