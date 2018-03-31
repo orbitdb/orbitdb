@@ -1,5 +1,5 @@
 module.exports = {
-  timeout: 60000,
+  timeout: 30000,
   dbname: 'orbit-db-tests',
   defaultIpfsConfig: {
     start: true,
