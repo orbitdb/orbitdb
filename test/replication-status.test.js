@@ -23,7 +23,7 @@ const dbPath2 = './orbitdb/tests/create-open/2'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Load (${API})`, function() {
+  describe(`orbit-db - Replication Status (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2, db, address
@@ -38,6 +38,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       orbitdb1 = new OrbitDB(ipfs, dbPath1)
       orbitdb2 = new OrbitDB(ipfs, dbPath2)
+      db = await orbitdb1.log('replication status tests')
     })
 
     after(async () => {
@@ -51,53 +52,47 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd)
     })
 
-    describe('Replication Status', function() {
-      before(async () => {
-        db = await orbitdb1.log('replication status tests')
+    it('has correct initial state', async () => {
+      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
+    })
+
+    it('has correct replication info after load', async () => {
+      await db.add('hello')
+      await db.close()
+      await db.load()
+      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 1, max: 1 })
+    })
+
+    it('has correct replication info after close', async () => {
+      await db.close()
+      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
+    })
+
+    it('has correct replication info after sync', async () => {
+      await db.load()
+      await db.add('hello2')
+      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
+
+      const db2 = await orbitdb2.log(db.address.toString(), { create: false, sync: false })
+      await db2.sync(db._oplog.heads)
+
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            assert.deepEqual(db2.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
+            resolve()
+          } catch (e) {
+            reject(e)
+          }
+        }, 100)
       })
+    })
 
-      it('has correct initial state', async () => {
-        assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
-      })
-
-      it('has correct replication info after load', async () => {
-        await db.add('hello')
-        await db.close()
-        await db.load()
-        assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 1, max: 1 })
-      })
-
-      it('has correct replication info after close', async () => {
-        await db.close()
-        assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
-      })
-
-      it('has correct replication info after sync', async () => {
-        await db.load()
-        await db.add('hello2')
-        assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
-
-        const db2 = await orbitdb2.log(db.address.toString(), { create: false, sync: false })
-        await db2.sync(db._oplog.heads)
-
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            try {
-              assert.deepEqual(db2.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
-              resolve()
-            } catch (e) {
-              reject(e)
-            }
-          }, 100)
-        })
-      })
-
-      it('has correct replication info after loading from snapshot', async () => {
-        await db.saveSnapshot()
-        await db.close()
-        await db.loadFromSnapshot()
-        assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
-      })
+    it('has correct replication info after loading from snapshot', async () => {
+      await db.saveSnapshot()
+      await db.close()
+      await db.loadFromSnapshot()
+      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
     })
   })
 })
