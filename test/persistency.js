@@ -20,7 +20,7 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Persistency (${API})`, function() {
     this.timeout(config.timeout)
 
-    const entryCount = 100
+    const entryCount = 65
 
     let ipfsd, ipfs, orbitdb1, db, address
 
@@ -66,7 +66,7 @@ Object.keys(testAPIs).forEach(API => {
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, entryCount)
         assert.equal(items[0].payload.value, 'hello0')
-        assert.equal(items[items.length - 1].payload.value, 'hello99')
+        assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount - 1))
       })
 
       it('loads database partially', async () => {
@@ -77,11 +77,11 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(items.length, amount)
         assert.equal(items[0].payload.value, 'hello' + (entryCount - amount))
         assert.equal(items[1].payload.value, 'hello' + (entryCount - amount + 1))
-        assert.equal(items[items.length - 1].payload.value, 'hello99')
+        assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount - 1))
       })
 
       it('load and close several times', async () => {
-        const amount = 16
+        const amount = 8
         for (let i = 0; i < amount; i ++) {
           db = await orbitdb1.eventlog(address)
           await db.load()
@@ -89,7 +89,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(items.length, entryCount)
           assert.equal(items[0].payload.value, 'hello0')
           assert.equal(items[1].payload.value, 'hello1')
-          assert.equal(items[items.length - 1].payload.value, 'hello99')
+          assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount - 1))
           await db.close()
         }
       })
@@ -121,7 +121,7 @@ Object.keys(testAPIs).forEach(API => {
             const items = db.iterator({ limit: -1 }).collect()
             assert.equal(items.length, entryCount)
             assert.equal(items[0].payload.value, 'hello0')
-            assert.equal(items[items.length - 1].payload.value, 'hello99')
+            assert.equal(items[items.length - 1].payload.value, 'hello' + (entryCount - 1))
             resolve()
           })
           await db.load()
@@ -199,11 +199,11 @@ Object.keys(testAPIs).forEach(API => {
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, entryCount)
         assert.equal(items[0].payload.value, 'hello0')
-        assert.equal(items[entryCount - 1].payload.value, 'hello99')
+        assert.equal(items[entryCount - 1].payload.value, 'hello' + (entryCount - 1))
       })
 
       it('load, add one and save snapshot several times', async () => {
-        const amount = 8
+        const amount = 4
         for (let i = 0; i < amount; i ++) {
           db = await orbitdb1.eventlog(address)
           await db.loadFromSnapshot()
@@ -239,7 +239,7 @@ Object.keys(testAPIs).forEach(API => {
             const items = db.iterator({ limit: -1 }).collect()
             assert.equal(items.length, entryCount)
             assert.equal(items[0].payload.value, 'hello0')
-            assert.equal(items[entryCount - 1].payload.value, 'hello99')
+            assert.equal(items[entryCount - 1].payload.value, 'hello' + (entryCount - 1))
             resolve()
           })
           await db.loadFromSnapshot()
