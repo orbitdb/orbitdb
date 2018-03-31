@@ -4,12 +4,16 @@ const assert = require('assert')
 const mapSeries = require('p-each-series')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
-const config = require('./utils/config')
-const startIpfs = require('./utils/start-ipfs')
-const stopIpfs = require('./utils/stop-ipfs')
-const testAPIs = require('./utils/test-apis')
-const connectPeers = require('./utils/connect-peers')
-const waitForPeers = require('./utils/wait-for-peers')
+
+// Include test utilities
+const {
+  config,
+  startIpfs,
+  stopIpfs,
+  connectPeers,
+  waitForPeers,
+  testAPIs,
+} = require('./utils')
 
 const dbPath1 = './orbitdb/tests/multiple-databases/1'
 const dbPath2 = './orbitdb/tests/multiple-databases/2'
