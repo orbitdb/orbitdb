@@ -13,7 +13,7 @@
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "ipfs-pubsub-1on1": "~0.0.3",
+    "ipfs-pubsub-1on1": "~0.0.4",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.2",
