@@ -214,7 +214,7 @@ Object.keys(testAPIs).forEach(API => {
 
       describe('Options: limit', function() {
         it('returns 1 item when limit is 0', () => {
-          const iter = db.iterator({ limit: 1 })
+          const iter = db.iterator({ limit: 0 })
           const first = iter.next().value
           const second = iter.next().value
           assert.equal(first.hash, last(items))
