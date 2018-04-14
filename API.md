@@ -188,17 +188,19 @@ const db = await orbitdb.eventlog(anotherlogdb.address)
 
 **options** : It is an object which supports the following properties
 
-`gt - (string)`  Greater than
+`gt - (string)`  Greater than, takes an item's `hash`.
 
-`gte - (string)`  Greater than or equal to
+`gte - (string)`  Greater than or equal to, takes an item's `hash`.
 
-`lt - (string)`  Less than
+`lt - (string)`  Less than, takes an item's `hash`.
 
-`lte - (string)`  Less than or equal to
+`lte - (string)`  Less than or equal to, takes an item's `hash` value.
 
-`limit - (integer)`  Limiting the entries of result
+`limit - (integer)`  Limiting the entries of result, defaults to `1`, and `-1` means all items (no limit).
 
 `reverse - (boolean)`  If set to true will result in reversing the result.
+
+If `hash` not found when passing `gt`, `gte`, `lt`, or `lte`, the iterator will return all items (respecting `limit` and `reverse`).
 
 ```javascript
 const all = db.iterator({ limit: -1 })
@@ -240,17 +242,19 @@ See the [Store](#store) section for details of common methods and properties.
 
 **options** : It is an object which supports the following properties
 
-`gt - (string)`  Greater than
+`gt - (string)`  Greater than, takes an item's `hash`.
 
-`gte - (string)`  Greater than or equal to
+`gte - (string)`  Greater than or equal to, takes an item's `hash`.
 
-`lt - (string)`  Less than
+`lt - (string)`  Less than, takes an item's `hash`.
 
-`lte - (string)`  Less than or equal to
+`lte - (string)`  Less than or equal to, takes an item's `hash`.
 
-`limit - (integer)`  Limiting the entries of result
+`limit - (integer)`  Limiting the entries of result, defaults to `1`, and `-1` means all items (no limit).
 
 `reverse - (boolean)`  If set to true will result in reversing the result.
+
+If `hash` not found when passing `gt`, `gte`, `lt`, or `lte`, the iterator will return all items (respecting `limit` and `reverse`).
 
 ```javascript
 const all = db.iterator({ limit: -1 })
