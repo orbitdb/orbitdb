@@ -127,11 +127,24 @@ npm install --global babel-cli
 npm install --global webpack
 ```
 
+Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to 
+```
+make clean && make
+```
+to redo the local package-lock.json with working native dependencies. 
+
 ### Browser example
 
+In macOS:
 ```
 npm run build
-npm run examples:browser
+npm run examples:browser-macos
+```
+
+In Linux:
+```
+npm run build
+npm run examples:browser-linux
 ```
 
 <p align="left">
