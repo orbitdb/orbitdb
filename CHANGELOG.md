@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.20.0
+
+### go-ipfs support
+
+With this release, we finally bring back the support for using OrbitDB with go-ipfs (through js-ipfs-api). You can now use OrbitDB again with a running IPFS daemon and without starting an in-process js-ipfs node.
+
+To make OrbitDB work again with go-ipfs, we refactored some parts of the messaging and created two new modules to do that: ipfs-pubsub-peer-monitor and ipfs-pubsub-1on1. They're both modules on top of IPFS Pubsub and are used to handle the automatic message exchange upon peers connecting.
+
+As this is the first release with support for go-ipfs in a long time, please report any problems you may experience!
+
+### Improved test suite and documentation
+
+We've improved the documents by adding details, fixing errors and clarifying them.
+
+We also improved the tests a lot since the previous release. We now run the tests with js-ipfs-api (go-ipfs) in addition to running them with js-ipfs (Node.js). We've also cleaned up and refactored the boilerplate code for tests, improved the speed of the test run and generally polished the test suite for better readability and maintainability.
+
+### Custom stores and keys
+
+OrbitDB can now use a custom store through addDatabaseType(), see more [here]().
+
+We added support for pssing a custom [keystore]() to the store and use your own keys to sign and verify the database updates.
+
+### Important fixes
+
+The previous release brought in LevelDB as the storage backend for Node.js and browser and there were some rough edges. We've fixed a bunch a problems related to using LevelDB and it should all work now.
+
+Last, we further improved the replication code and its performance at places.
+
 ## v0.19.0
 
 This release bring a bunch of fixes and updates improving performance, stability and browser compatibility. As always, we highly encourage to update to the latest version and report any problems in https://github.com/orbitdb/orbit-db/issues.
