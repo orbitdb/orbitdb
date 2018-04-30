@@ -23,7 +23,7 @@
     "orbit-db-feedstore": "~1.4.0",
     "orbit-db-keystore": "~0.1.0",
     "orbit-db-kvstore": "~1.4.0",
-    "orbit-db-store": "~2.5.0",
+    "orbit-db-store": "git+ssh://git@github.com/dashevo/orbit-db-store",
     "orbit-db-pubsub": "~0.5.3"
   },
   "devDependencies": {
