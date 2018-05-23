@@ -119,7 +119,9 @@ class OrbitDB {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = new AccessController.IPFSAccessController(this._ipfs);
+      accessController =
+        options.accessController ||
+        new AccessController.IPFSAccessController(this._ipfs);
       await accessController.load(options.accessControllerAddress);
     }
 
@@ -225,26 +227,12 @@ class OrbitDB {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController
-    const accessController = new AccessController.IPFSAccessController(
-      this._ipfs,
-    );
-    /* Disabled temporarily until we do something with the admin keys */
-    // Add admins of the database to the access controller
-    // if (options && options.admin) {
-    //   options.admin.forEach(e => accessController.add('admin', e))
-    // } else {
-    //   // Default is to add ourselves as the admin of the database
-    //   accessController.add('admin', this.key.getPublic('hex'))
-    // }
-    // Add keys that can write to the database
-    if (options && options.write && options.write.length > 0) {
-      options.write.forEach(e => accessController.add('write', e))
-    } else {
-      // Default is to add ourselves as the admin of the database
-      accessController.add('write', this.key.getPublic('hex'))
-    }
-    // Save the Access Controller in IPFS
-    const accessControllerAddress = await accessController.save()
+    const accessController =
+      options.accessController ||
+      new AccessController.IPFSAccessController(this._ipfs);
+
+    accessController.addWritePermissions(options, this.key.getPublic('hex'));
+    const accessControllerAddress = await accessController.save();
 
     // Save the manifest to IPFS
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
