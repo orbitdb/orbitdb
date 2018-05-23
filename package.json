@@ -16,6 +16,7 @@
     "ipfs-pubsub-1on1": "~0.0.4",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
+    "orbit-db-access-controller": "git://github.com/coyotespike/orbit-db-access-controller.git#7b37c9931bea6f25d10166ec73259dd8995d7e88",
     "orbit-db-cache": "~0.2.2",
     "orbit-db-counterstore": "~1.4.0",
     "orbit-db-docstore": "~1.4.0",
