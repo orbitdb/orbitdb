@@ -16,6 +16,7 @@
     "ipfs-pubsub-1on1": "~0.0.4",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
+    "orbit-db-access-controller": "git://github.com/coyotespike/orbit-db-access-controller.git",
     "orbit-db-cache": "~0.2.2",
     "orbit-db-counterstore": "~1.4.0",
     "orbit-db-docstore": "~1.4.0",
@@ -23,7 +24,7 @@
     "orbit-db-feedstore": "~1.4.0",
     "orbit-db-keystore": "~0.1.0",
     "orbit-db-kvstore": "~1.4.0",
-    "orbit-db-store": "~2.5.0",
+    "orbit-db-store": "git://github.com/coyotespike/orbit-db-store#da2ab95bfe2198a8b81b2e257b636bc3e5548111",
     "orbit-db-pubsub": "~0.5.3"
   },
   "devDependencies": {
