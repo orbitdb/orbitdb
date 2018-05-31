@@ -1,0 +1,10 @@
+os: linux
+language: node_js
+node_js:
+  - '8'
+install:
+  - npm install
+before_install:
+  - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
+before_script:
+  - npm run lint

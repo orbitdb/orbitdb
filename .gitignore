@@ -12,3 +12,4 @@ examples/browser/lib
 # Don't track builds in git
 # Distribution builds are available via npm
 dist/
+.idea
