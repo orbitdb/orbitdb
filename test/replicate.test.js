@@ -283,7 +283,7 @@ Object.keys(testAPIs).forEach(API => {
 
         db2.events.on('replicate.progress', (address, hash, entry) => {
           eventCount['replicate.progress'] ++
-          // console.log("[progress]  ", '#' + eventCount['replicate.progress'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
+          console.log("[progress]  ", '#' + eventCount['replicate.progress'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
           // assert.equal(db2.replicationStatus.progress, eventCount['replicate.progress'])
           events.push({
             event: 'replicate.progress',
