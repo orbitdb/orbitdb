@@ -135,6 +135,37 @@ Object.keys(testAPIs).forEach(API => {
         assert.deepEqual(value1, [doc2, doc3])
         assert.deepEqual(value2, [doc2])
       })
+
+      it('query returns full op', async () => {
+        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17}
+        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
+
+        const expectedOperation = {
+          op: 'PUT', 
+          key: 'sup world', 
+          value: { 
+            _id: 'sup world', 
+            doc: 'some of the things', 
+            views: 10
+          },
+        }
+
+        await db.put(doc1)
+        await db.put(doc2)
+
+        const res = db.query(e => e.payload.value.views < 17, { fullOp: true })[0]
+        assert.notEqual(res, undefined)
+        assert.notEqual(res.hash, undefined)
+        assert.notEqual(res.id, undefined)
+        assert.deepEqual(res.payload, expectedOperation)
+        assert.notEqual(res.next, undefined)
+        assert.equal(res.next.length, 1)
+        assert.equal(res.v, 0)
+        assert.notEqual(res.clock, undefined)
+        assert.equal(res.clock.time, 2)
+        assert.notEqual(res.key, undefined)
+        assert.notEqual(res.sig, undefined)
+      })
     })
 
     describe('Specified index', function() {
