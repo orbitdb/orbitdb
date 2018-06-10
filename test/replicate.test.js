@@ -321,7 +321,6 @@ Object.keys(testAPIs).forEach(API => {
 
         const st = new Date().getTime()
         timer = setInterval(async () => {
-          console.log(`[replicate progress count] - ${eventCount['replicate.progress']}`)
           if (eventCount['replicate.progress'] === expectedEventCount) {
             clearInterval(timer)
 
