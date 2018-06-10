@@ -266,7 +266,7 @@ Object.keys(testAPIs).forEach(API => {
           write: [
             orbitdb1.key.getPublic('hex'),
             orbitdb2.key.getPublic('hex')
-          ],
+          ]
         }
 
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
@@ -277,22 +277,22 @@ Object.keys(testAPIs).forEach(API => {
           events.push({
             event: 'replicate',
             count: eventCount['replicate'],
-            entry: entry,
+            entry: entry
           })
         })
 
         db2.events.on('replicate.progress', (address, hash, entry) => {
           eventCount['replicate.progress'] ++
-          console.log("[progress]  ", '#' + eventCount['replicate.progress'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
+          //console.log("[progress]  ", '#' + eventCount['replicate.progress'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
           // assert.equal(db2.replicationStatus.progress, eventCount['replicate.progress'])
           events.push({
             event: 'replicate.progress',
             count: eventCount['replicate.progress'],
-            entry: entry ,
+            entry: entry,
             replicationInfo: {
               max: db2.replicationStatus.max,
-              progress: db2.replicationStatus.progress,
-            },
+              progress: db2.replicationStatus.progress
+            }
           })
         })
 
@@ -314,13 +314,14 @@ Object.keys(testAPIs).forEach(API => {
             count: eventCount['replicate'],
             replicationInfo: {
               max: db2.replicationStatus.max,
-              progress: db2.replicationStatus.progress,
-            },
+              progress: db2.replicationStatus.progress
+            }
           })
         })
 
         const st = new Date().getTime()
         timer = setInterval(async () => {
+          console.log(`[replicate progress count] - ${eventCount['replicate.progress']}`)
           if (eventCount['replicate.progress'] === expectedEventCount) {
             clearInterval(timer)
 
