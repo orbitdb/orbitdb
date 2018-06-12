@@ -40,6 +40,7 @@ class OrbitDB {
     this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
     this._directConnections = {}
+    this.contractAPI = options.contractAPI;
   }
 
   /* Databases */
@@ -124,6 +125,13 @@ class OrbitDB {
       logger.debug(`Loading AccessController from '${options.accessControllerAddress}'`)
       accessController = await AccessController.load(options.accessControllerAddress, this, this._ipfs)
       logger.debug(`AccessController loaded for ${address}:\n${JSON.stringify(accessController.capabilities, null, 2)}`)
+      accessController = await AccessController.load(
+        options.accessControllerAddress,
+        this,
+        this._ipfs,
+        this.contractAPI,
+        this.keystore
+      );
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -231,7 +239,22 @@ class OrbitDB {
 
     // Create an AccessController
     logger.debug(`Create AccessController`)
-    const accessController = await AccessController.create(options.accessControllerType || 'ipfs', name, this, this._ipfs)
+    let controllerOptions = {
+      type: 'ipfs',
+      databaseAddress: name,
+      orbitdb: this,
+      ipfs: this._ipfs,
+      contractAPI: this.contractAPI,
+      keystore: this.keystore
+    };
+    if (options.accessController) {
+      controllerOptions = Object.assign(
+        {},
+        controllerOptions,
+        options.accessController,
+      );
+    }
+    const accessController = await AccessController.create(controllerOptions);
     // Add keys that can write to the database
     if (options && options.write && options.write.length > 0) {
       await mapSeries(options.write, e => accessController.add('write', e))

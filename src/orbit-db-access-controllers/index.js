@@ -1,8 +1,12 @@
 const IPFSAccessController = require('./ipfs-access-controller')
 const OrbitDBAccessController = require('./orbitdb-access-controller')
+const ContractAccessController = require('./contract-access-controller');
 
-const create = async (type, databaseAddress, orbitdb, ipfs) => {
+const create = async ({ type, databaseAddress, orbitdb, ipfs, ...rest }) => {
   switch (type) {
+    case 'contract':
+      return new ContractAccessController({ ...rest, ipfs });
+      break;
     case 'ipfs':
       return new IPFSAccessController(ipfs)
       break;
@@ -18,9 +22,9 @@ const create = async (type, databaseAddress, orbitdb, ipfs) => {
 
 module.exports = {
   create: create,
-  load: async (address, orbitdb, ipfs) => {
+  load: async (address, orbitdb, ipfs, contractAPI, keystore) => {
     const type = address.toString().split('/')[1]
-    const accessController = await create(type, null, orbitdb, ipfs)
+    const accessController = await create({ type, orbitdb, ipfs, contractAPI, keystore });
     await accessController.load(address)
     return accessController
   },

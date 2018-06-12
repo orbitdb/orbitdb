@@ -14,6 +14,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "ipfs-pubsub-1on1": "~0.0.4",
+    "ipfs-log": "github:coyotespike:ipfs-log#add-custom-permissions",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.2",
@@ -21,11 +22,15 @@
     "orbit-db-docstore": "~1.4.1",
     "orbit-db-eventstore": "~1.4.0",
     "orbit-db-feedstore": "~1.4.0",
+    "orbit-db-store": "github:coyotespike/orbit-db-store#add-custom-permissions",
     "orbit-db-keystore": "~0.1.0",
     "orbit-db-kvstore": "~1.4.0",
-    "orbit-db-store": "~2.5.0",
     "orbit-db-pubsub": "~0.5.3"
   },
+    "resolutions": {
+        "orbit-db-store": "github:coyotespike/orbit-db-store#add-custom-permissions",
+        "ipfs-log": "github:coyotespike:ipfs-log#add-custom-permissions"
+    },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
