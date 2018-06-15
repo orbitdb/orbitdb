@@ -37,8 +37,6 @@ class ContractAccessController extends AccessController {
     let answer;
     if (this._contractAPI) {
       answer = await this._contractAPI.add(capability, key);
-    }
-    if (answer) {
       let capabilities = new Set(this._capabilities[capability] || []);
       capabilities.add(key);
       this._capabilities[capability] = Array.from(capabilities);

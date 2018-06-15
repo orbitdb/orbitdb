@@ -123,8 +123,6 @@ class OrbitDB {
     if (options.accessControllerAddress) {
       logger.debug(`Loading AccessController for '${address}'`)
       logger.debug(`Loading AccessController from '${options.accessControllerAddress}'`)
-      accessController = await AccessController.load(options.accessControllerAddress, this, this._ipfs)
-      logger.debug(`AccessController loaded for ${address}:\n${JSON.stringify(accessController.capabilities, null, 2)}`)
       accessController = await AccessController.load(
         options.accessControllerAddress,
         this,
@@ -132,6 +130,7 @@ class OrbitDB {
         this.contractAPI,
         this.keystore
       );
+        logger.debug(`AccessController loaded for ${address}:\n${JSON.stringify(accessController.capabilities, null, 2)}`)
     }
 
     const cache = await this._loadCache(this.directory, address)
