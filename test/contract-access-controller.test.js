@@ -2,40 +2,38 @@
 
 const assert = require('assert');
 const rmrf = require('rimraf');
+const sinon = require('sinon');
 const OrbitDB = require('../src/OrbitDB');
 const ContractAccessController = require('../src/orbit-db-access-controllers/contract-access-controller');
 
-const {
-    config,
-    startIpfs,
-    stopIpfs,
-    testAPIs,
-} = require('./utils')
-
+const { config, startIpfs, stopIpfs, testAPIs } = require('./utils');
 
 const dbPath = './orbitdb/tests/contract-access-controller';
 const ipfsPath = './orbitdb/tests/contract-access-controller/ipfs';
 
+class contractAPI {
+  constructor(contractAddress) {
+    this.contractAddress = contractAddress;
+    this._capabilities = {};
+    this.blockNumber = 0;
+  }
+  async add(capability, key) {
+    this.blockNumber++;
+    let capabilities = new Set(this._capabilities[capability] || []);
+    capabilities.add(key);
+    this._capabilities[capability] = Array.from(capabilities);
+
+    return this.blockNumber;
+  }
+  async fetchKeys() {
+    return this._capabilities;
+  }
+}
+
 Object.keys(testAPIs).forEach(API => {
-  describe(`smart contract - Write Permissions`, function() {
+  describe.only(`smart contract - Write Permissions`, function() {
     this.timeout(20000);
-    let ipfsd, ipfs, orbitdb1, orbitdb2;
-
-    class contractAPI {
-      constructor(contractAddress) {
-        this.contractAddress = contractAddress;
-        this._capabilities = {};
-        this.blockNumber = 0;
-      }
-      async add(capability, key) {
-        this.blockNumber++;
-        let capabilities = new Set(this._capabilities[capability] || []);
-        capabilities.add(key);
-        this._capabilities[capability] = Array.from(capabilities);
-
-        return this.blockNumber;
-      }
-    }
+    let contractAPI1, ipfsd, ipfs, orbitdb1, orbitdb2;
 
     before(async () => {
       config.daemon1.repo = ipfsPath;
@@ -43,8 +41,10 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath);
       ipfsd = await startIpfs(API, config.daemon1);
       ipfs = ipfsd.api;
+      contractAPI1 = new contractAPI('fakeNews');
       orbitdb1 = new OrbitDB(ipfs, dbPath + '/1', {
-        contractAPI: new contractAPI('fakeNews'),
+        accessController: { type: 'contract' },
+        contractAPI: contractAPI1,
       });
       orbitdb2 = new OrbitDB(ipfs, dbPath + '/2', {
         contractAPI: new contractAPI('fakeNews'),
@@ -87,11 +87,18 @@ Object.keys(testAPIs).forEach(API => {
       it("Adds '*' to write permissions", () => {
         assert.equal(accessController.get('write')[0], '*');
       });
+      it('emits an event', () => {
+        var eventSpy = sinon.spy();
+        accessController.on('chainSignature not present', eventSpy);
+        accessController.verifyPermissions();
+        assert(eventSpy.called, 'Event did not fire in 1000ms.');
+        assert(eventSpy.calledOnce, 'Event fired more than once');
+      });
     });
 
     describe('Passes down custom decorateEntry and verifyEntry functions', () => {
       it('entries contain extra properties when decorated', async () => {
-        const db1 = await orbitdb1.eventlog('replicate-automatically-tests', {
+        const db1 = await orbitdb1.eventlog('pass-functions-tests', {
           decorateEntry: entry => {
             entry.chainSig = 'test';
             return entry;
@@ -110,14 +117,57 @@ Object.keys(testAPIs).forEach(API => {
     });
 
     describe('Starts smart contract controller on startup', () => {
-      xit('Fetches permissioned keys on start up', () => {});
+      let db;
+
+      before(async () => {
+        sinon.spy(contractAPI1, 'fetchKeys');
+        db = await orbitdb1.feed('fetch-keys-test', {
+          accessController: { type: 'contract' },
+        });
+      });
+
+      it('Fetches permissions on start up', async () => {
+        assert(contractAPI1.fetchKeys.calledOnce);
+      });
       xit('Does not fetch after start up', () => {});
+      xit('Previously fetched keys present before fetching again', () => {});
       xit('Listens for smart contract events', () => {});
-      xit('Asks user to sign if keystore does not have a chainSignature', () => {});
-      xit('Saves keystore to IPFS', () => {});
-      xit('Does not ask user to sign a second time', () => {});
     });
 
+    describe.only('Signs local Orbit public key', () => {
+      let db;
+
+      before(async () => {
+        db = await orbitdb1.feed('sign-keys-test', {
+          accessController: { type: 'contract' },
+        });
+      });
+
+      xit('Asks user to sign if keystore does not have a chainSignature', async () => {
+        const db2 = await orbitdb1.feed('sign-keys-test', {
+          accessController: { type: 'orbitdb' },
+        });
+        db2.access.on('updated', () => {
+          console.log('hellooooooooo');
+        });
+
+        const hash = await db2.add({ name: 'User1' });
+      });
+
+      xit('Asks user to sign if keystore does not have a chainSignature', async () => {
+        db.access.on('chainSignature not present', () => {
+          console.log('has been called?');
+        });
+        try {
+          const hash = await db.add({ name: 'User1' });
+        } catch (e) {
+          assert.equal(e, 'Error: Not allowed to write');
+        }
+      });
+      xit('Keypair used to sign has public key matching that in smart contract', () => {});
+      xit('Saves chainSignature in manifest', () => {});
+      xit('Does not ask user to sign a second time', () => {});
+    });
     describe('Allows admin to add admins and users to smart contract', () => {
       xit('Allows admin to add admins', () => {});
       xit('Allows admin to add users', () => {});
@@ -128,7 +178,6 @@ Object.keys(testAPIs).forEach(API => {
       it('saves database manifest file locally', async () => {
         const db = await orbitdb1.feed('AABB', {
           replicate: false,
-
           accessController: { type: 'contract' },
         });
         const dag = await ipfs.object.get(db.address.root);

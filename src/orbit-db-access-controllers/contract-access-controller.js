@@ -10,6 +10,7 @@ class ContractAccessController extends AccessController {
     this._contractAPI = options.contractAPI;
     this.controllerType = 'contract';
     this._ipfs = options.ipfs;
+    this._capabilities = {};
     this.keystore = options.keystore;
     this.add('write', '*');
   }
@@ -23,13 +24,19 @@ class ContractAccessController extends AccessController {
   }
 
   verifyPermissions(entry) {
+    if (!this.chainSig) {
+      super.emit('chainSignature not present');
+      return false;
+    }
+
     return true;
   }
 
   // walletSigningFunction, like ethWallet.signMessage.bind(ethWallet)
   genKey(walletSigningFunction) {
     const chainSig = walletSigningFunction(this.publicKey);
-    this.keystore.chainSig = chainSig;
+    this.chainSig = chainSig;
+    this.emit('chainSignature created');
   }
 
   async close() {}
@@ -48,22 +55,35 @@ class ContractAccessController extends AccessController {
     return this.capabilities[capability];
   }
 
+  async fetchKeys() {
+    const keys = await this._contractAPI.fetchKeys();
+    this._capabilities = keys;
+  }
+
   async load(address) {
     if (address.indexOf('/contract') === 0) address = address.split('/')[2];
 
     try {
       const dag = await this._ipfs.object.get(address);
       const obj = JSON.parse(dag.toJSON().data);
-      this._capabilities = obj;
+      const { capabilities, chainSig } = obj;
+      this._capabilities = capabilities;
+      this.chainSig = chainSig;
     } catch (e) {
       console.log('ACCESS ERROR:', e);
     }
+
+    await this.fetchKeys();
   }
 
   async save() {
     let hash;
     try {
-      const json = JSON.stringify(this._capabilities, null, 2);
+      const data = {
+        capabilities: this._capabilities,
+        chainSig: this.chainSig,
+      };
+      const json = JSON.stringify(data, null, 2);
       const dag = await this._ipfs.object.put(Buffer.from(json));
       hash = dag.toJSON().multihash.toString();
     } catch (e) {
