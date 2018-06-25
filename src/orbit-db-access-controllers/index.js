@@ -22,9 +22,9 @@ const create = async ({ type, databaseAddress, orbitdb, ipfs, ...rest }) => {
 
 module.exports = {
   create: create,
-  load: async (address, orbitdb, ipfs, contractAPI, keystore) => {
+  load: async (address, orbitdb, ipfs, contractAPI, key) => {
     const type = address.toString().split('/')[1]
-    const accessController = await create({ type, orbitdb, ipfs, contractAPI, keystore });
+    const accessController = await create({ type, orbitdb, ipfs, contractAPI, key });
     await accessController.load(address)
     return accessController
   },

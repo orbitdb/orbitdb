@@ -11,8 +11,11 @@ class ContractAccessController extends AccessController {
     this.controllerType = 'contract';
     this._ipfs = options.ipfs;
     this._capabilities = {};
-    this.keystore = options.keystore;
+    this.key = options.key;
     this.add('write', '*');
+    this.chainSig = null;
+    this.verifyPermissions = this.verifyPermissions.bind(this);
+  }
   }
 
   decorateEntry(entry) {
@@ -25,11 +28,15 @@ class ContractAccessController extends AccessController {
 
   verifyPermissions(entry) {
     if (!this.chainSig) {
-      super.emit('chainSignature not present');
+      this.emit('chainSignature not present', { publicKey: this.key });
       return false;
     }
 
     return true;
+  }
+
+  addChainSignature(chainSig) {
+    this.chainSig = chainSig;
   }
 
   // walletSigningFunction, like ethWallet.signMessage.bind(ethWallet)
