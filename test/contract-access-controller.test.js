@@ -87,11 +87,12 @@ Object.keys(testAPIs).forEach(API => {
       it("Adds '*' to write permissions", () => {
         assert.equal(accessController.get('write')[0], '*');
       });
+
       it('emits an event', () => {
-        var eventSpy = sinon.spy();
+        const eventSpy = sinon.spy();
         accessController.on('chainSignature not present', eventSpy);
         accessController.verifyPermissions();
-        assert(eventSpy.called, 'Event did not fire in 1000ms.');
+        assert(eventSpy.called, 'Event did not fire');
         assert(eventSpy.calledOnce, 'Event fired more than once');
       });
     });
@@ -143,26 +144,42 @@ Object.keys(testAPIs).forEach(API => {
         });
       });
 
-      xit('Asks user to sign if keystore does not have a chainSignature', async () => {
-        const db2 = await orbitdb1.feed('sign-keys-test', {
-          accessController: { type: 'orbitdb' },
-        });
-        db2.access.on('updated', () => {
-          console.log('hellooooooooo');
-        });
+      it('Emits event if no chainSignature', async () => {
+        const eventSpy = sinon.spy();
+        db.access.on('chainSignature not present', eventSpy);
 
-        const hash = await db2.add({ name: 'User1' });
-      });
-
-      xit('Asks user to sign if keystore does not have a chainSignature', async () => {
-        db.access.on('chainSignature not present', () => {
-          console.log('has been called?');
-        });
         try {
           const hash = await db.add({ name: 'User1' });
         } catch (e) {
           assert.equal(e, 'Error: Not allowed to write');
         }
+        assert(eventSpy.called, 'Event did not fire');
+      });
+      it('Emitted event contains local public key', async () => {
+        const eventSpy = sinon.spy();
+        db.access.on('chainSignature not present', event => {
+          assert(event.publicKey);
+          eventSpy();
+        });
+
+        try {
+          const hash = await db.add({ name: 'User1' });
+        } catch (e) {}
+
+        assert(eventSpy.called, 'Event did not fire');
+      });
+      it('Allows user to add chainSignature', async () => {
+        assert(!db.access.chainSig);
+        db.access.on('chainSignature not present', event => {
+          const chainSig = event.publicKey + '/chainSig';
+          db.access.addChainSignature(chainSig);
+        });
+
+        try {
+          const hash = await db.add({ name: 'User1' });
+        } catch (e) {}
+
+        assert(db.access.chainSig);
       });
       xit('Keypair used to sign has public key matching that in smart contract', () => {});
       xit('Saves chainSignature in manifest', () => {});
