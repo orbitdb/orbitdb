@@ -31,8 +31,8 @@ class OrbitDB {
   constructor(ipfs, directory, options = {}) {
     this._ipfs = ipfs
     this.id = options.peerId || (this._ipfs._peerInfo ? this._ipfs._peerInfo.id._idB58String : 'default')
-    this._pubsub = options && options.broker 
-      ? new options.broker(this._ipfs) 
+    this._pubsub = options && options.broker
+      ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
     this.stores = {}
     this.directory = directory || './orbitdb'
@@ -97,7 +97,7 @@ class OrbitDB {
     Object.keys(this._directConnections).forEach(removeDirectConnect)
 
     // Disconnect from pubsub
-    if (this._pubsub) 
+    if (this._pubsub)
       this._pubsub.disconnect()
 
     // Remove all databases from the state
@@ -125,8 +125,8 @@ class OrbitDB {
 
     const cache = await this._loadCache(this.directory, address)
 
-    const opts = Object.assign({ replicate: true }, options, { 
-      accessController: accessController, 
+    const opts = Object.assign({ replicate: true }, options, {
+      accessController: accessController,
       keystore: this.keystore,
       cache: cache,
       onClose: this._onClose.bind(this),
@@ -185,7 +185,7 @@ class OrbitDB {
       onMessage,
       onChannelCreated
     )
- 
+
     if (getStore(address))
       getStore(address).events.emit('peer', peer)
   }
@@ -373,6 +373,14 @@ class OrbitDB {
 
   static getDatabaseTypes () {
     return databaseTypes
+  }
+
+  static isValidAddress (address) {
+    return OrbitDBAddress.isValid(address)
+  }
+
+  static parseAddress (address) {
+    return OrbitDBAddress.parse(address)
   }
 }
 
