@@ -14,7 +14,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "ipfs-pubsub-1on1": "~0.0.4",
-    "ipfs-log": "github:coyotespike:ipfs-log#add-custom-permissions",
+    "ipfs-log": "github:orbitdb/ipfs-log#feat/acl-refactor",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.2",
@@ -29,7 +29,7 @@
   },
     "resolutions": {
         "orbit-db-store": "github:coyotespike/orbit-db-store#add-custom-permissions",
-        "ipfs-log": "github:coyotespike:ipfs-log#add-custom-permissions"
+    "ipfs-log": "github:orbitdb/ipfs-log#feat/acl-refactor"
     },
   "devDependencies": {
     "babel-core": "^6.26.0",

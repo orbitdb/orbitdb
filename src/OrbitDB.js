@@ -155,7 +155,7 @@ class OrbitDB {
     if(opts.replicate && this._pubsub)
       this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
 
-    logger.debug(`Store created '${address}'`, store.access.capabilities)
+    // logger.debug(`Store created '${address}'`, store.access.capabilities)
 
     return store
   }
