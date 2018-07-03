@@ -83,9 +83,11 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('loads the root access controller from IPFS', () => {
-        assert.deepEqual(accessController._db.access.capabilities, { write: [pubKey] })
-        assert.equal(accessController._db.access.controllerType, 'ipfs')
-      })
+        assert.deepEqual(accessController._db.acl.capabilities, {
+          write: [pubKey],
+        });
+        assert.equal(accessController._db.acl.controllerType, 'ipfs');
+      });
 
       it('adds a capability', async () => {
         try {

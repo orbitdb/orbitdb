@@ -14,19 +14,31 @@ class ContractAccessController extends AccessController {
     this.key = options.key;
     this.add('write', '*');
     this.chainSig = null;
-    this.verifyPermissions = this.verifyPermissions.bind(this);
-  }
   }
 
-  decorateEntry(entry) {
-    return entry;
+  getPublicSigningKey(format = 'hex') {
+    return this.key;
   }
 
-  verifyEntry(entry) {
+  verify(entry) {
+    if (!this.chainSig) {
+      this.emit('chainSignature not present', { publicKey: this.key });
+      return false;
+    }
+
     return true;
   }
 
-  verifyPermissions(entry) {
+  sign(data) {
+      // Verify that we're allowed to write
+    if (!this.canAppend(this.getPublicSigningKey('hex')))
+      throw new Error("Not allowed to write")
+
+      // sign public key with wallet of contract key
+    return 'mysign';
+  }
+
+  canAppend(entry) {
     if (!this.chainSig) {
       this.emit('chainSignature not present', { publicKey: this.key });
       return false;

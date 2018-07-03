@@ -31,7 +31,7 @@ class contractAPI {
 }
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`smart contract - Write Permissions`, function() {
+  describe(`smart contract - Write Permissions`, function() {
     this.timeout(20000);
     let contractAPI1, ipfsd, ipfs, orbitdb1, orbitdb2;
 
@@ -84,23 +84,24 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(accessController.controllerType, 'contract');
       });
 
+      // TODO take this out, no longer necessary
       it("Adds '*' to write permissions", () => {
         assert.equal(accessController.get('write')[0], '*');
       });
 
-      it('emits an event', () => {
+      it('emits an event when verify is called and no chainSignature is present', () => {
         const eventSpy = sinon.spy();
         accessController.on('chainSignature not present', eventSpy);
-        accessController.verifyPermissions();
+        accessController.verify();
         assert(eventSpy.called, 'Event did not fire');
         assert(eventSpy.calledOnce, 'Event fired more than once');
       });
     });
 
-    describe('Passes down custom decorateEntry and verifyEntry functions', () => {
+    describe.skip('Uses custom sign and verify functions', () => {
       it('entries contain extra properties when decorated', async () => {
         const db1 = await orbitdb1.eventlog('pass-functions-tests', {
-          decorateEntry: entry => {
+          verify: entry => {
             entry.chainSig = 'test';
             return entry;
           },
@@ -135,7 +136,7 @@ Object.keys(testAPIs).forEach(API => {
       xit('Listens for smart contract events', () => {});
     });
 
-    describe.only('Signs local Orbit public key', () => {
+    describe('Signs local Orbit public key', () => {
       let db;
 
       before(async () => {
@@ -146,7 +147,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('Emits event if no chainSignature', async () => {
         const eventSpy = sinon.spy();
-        db.access.on('chainSignature not present', eventSpy);
+        db.acl.on('chainSignature not present', eventSpy);
 
         try {
           const hash = await db.add({ name: 'User1' });
@@ -155,9 +156,9 @@ Object.keys(testAPIs).forEach(API => {
         }
         assert(eventSpy.called, 'Event did not fire');
       });
-      it('Emitted event contains local public key', async () => {
+      xit('Emitted event contains local public key', async () => {
         const eventSpy = sinon.spy();
-        db.access.on('chainSignature not present', event => {
+        db.acl.on('chainSignature not present', event => {
           assert(event.publicKey);
           eventSpy();
         });
@@ -169,17 +170,17 @@ Object.keys(testAPIs).forEach(API => {
         assert(eventSpy.called, 'Event did not fire');
       });
       it('Allows user to add chainSignature', async () => {
-        assert(!db.access.chainSig);
-        db.access.on('chainSignature not present', event => {
+        assert(!db.acl.chainSig);
+        db.acl.on('chainSignature not present', event => {
           const chainSig = event.publicKey + '/chainSig';
-          db.access.addChainSignature(chainSig);
+          db.acl.addChainSignature(chainSig);
         });
 
         try {
           const hash = await db.add({ name: 'User1' });
         } catch (e) {}
 
-        assert(db.access.chainSig);
+        assert(db.acl.chainSig);
       });
       xit('Keypair used to sign has public key matching that in smart contract', () => {});
       xit('Saves chainSignature in manifest', () => {});
@@ -211,7 +212,7 @@ Object.keys(testAPIs).forEach(API => {
       let db, db2;
       before(async () => {
         db = await orbitdb1.keyvalue('first', {
-          verifyPermissions: () => true,
+          verify: () => true,
           accessController: { type: 'contract', ipfs },
         });
       });
@@ -219,16 +220,15 @@ Object.keys(testAPIs).forEach(API => {
       xit('Entry is decorated with chainSignature and chainPublicKey', () => {});
     });
 
-    describe('Controls writing based on access controller verifyPermissions', () => {
+    describe('Controls writing based on access controller verify', () => {
       let db, db2;
       before(async () => {
         db = await orbitdb1.keyvalue('first', {
-          verifyPermissions: () => true,
+            canAppend: () => true,
           accessController: { type: 'contract', ipfs },
         });
-
+          db.acl.addChainSignature('myChainSig')
         db2 = await orbitdb1.keyvalue('first', {
-          verifyPermissions: () => false,
           accessController: { type: 'contract', ipfs },
         });
       });
