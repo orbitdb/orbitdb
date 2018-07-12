@@ -19,31 +19,31 @@ const db = await orbitdb.keyvalue('profile')
 ```
 
 - **Public OrbitDB Instance Methods**
-  - [orbitdb.keyvalue(name|address)](#keyvaluenameaddress)
+  - [orbitdb.keyvalue(name|address)](#orbitdbkeyvaluenameaddress)
     - [kv.put(key, value)](#putkey-value)
     - [kv.set(key, value)](#setkey-value)
     - [kv.get(key)](#getkey)
-  - [orbitdb.log(name|address)](#lognameaddress)
+  - [orbitdb.log(name|address)](#orbitdblognameaddress)
     - [log.add(event)](#addevent)
     - [log.get(hash)](#gethash)
     - [log.iterator([options])](#iteratoroptions)
-  - [orbitdb.feed(name|address)](#feednameaddress)
+  - [orbitdb.feed(name|address)](#orbitdbfeednameaddress)
     - [feed.add(data)](#adddata)
     - [feed.get(hash)](#gethash-1)
     - [feed.remove(hash)](#removehash)
-    - [feed.iterator([options])](#iteratoroptions)
-  - [orbitdb.docs(name|address, options)](#docsnameaddress-options)
+    - [feed.iterator([options])](#iteratoroptions-1)
+  - [orbitdb.docs(name|address, options)](#orbitdbdocsnameaddress-options)
     - [docs.put(doc)](#putdoc)
     - [docs.get(hash)](#getkey-1)
     - [docs.query(mapper)](#querymapper)
     - [del(key)](#delkey)
-  - [orbitdb.counter(name|address)](#counternameaddress)
+  - [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
     - [counter.value](#value)
     - [counter.inc([value])](#incvalue)
   - [orbitdb.create(name|address, type, [options])]()
   - [orbitdb.open(name|address, [options])]()
-  - [orbitdb.stop()](#stop)
-  - [orbitdb.disconnect()]()
+  - [orbitdb.stop()](#orbitdbstop)
+  - [orbitdb.disconnect()](orbitdbdisconnect)
 - **Static Properties**
   - [OrbitDB.databaseTypes](#databasetypes)
 - **Static Methods**
@@ -60,7 +60,6 @@ const db = await orbitdb.keyvalue('profile')
   - [store.events](#events)
   - [store.key](#key)
   - [store.type](#type)
-
 
 ## Public Instance Methods
 ### orbitdb.keyvalue(name|address)
@@ -264,6 +263,8 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   counter.value // 8
   ```
 
+### orbitdb.create(name|address, type, [options])
+### orbitdb.open(name|address, [options])
 ### orbitdb.stop()
 
   Stop OrbitDB, close databases and disconnect the databases from the network.
@@ -271,6 +272,8 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   ```javascript
   orbitdb.stop()
   ```
+### orbitdb.disconnect()
+
 ## Static Properties
 ### OrbitDB.databaseTypes
 Returns supported database types (i.e. store types) as an Array of strings

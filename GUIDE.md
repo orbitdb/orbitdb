@@ -70,11 +70,11 @@ ipfs.on('ready', () => {
 ## Create a database
 
 First, choose the data model you want to use. The available data models are:
-- [Key-Value](https://github.com/orbitdb/orbit-db/blob/master/API.md##keyvaluenameaddress)
-- [Log](https://github.com/orbitdb/orbit-db/blob/master/API.md#lognameaddress) (append-only log)
-- [Feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#feednameaddress) (same as log database but entries can be removed)
-- [Documents](https://github.com/orbitdb/orbit-db/blob/master/API.md#docsnameaddress-options) (store indexed JSON documents)
-- [Counters](https://github.com/orbitdb/orbit-db/blob/master/API.md#counternameaddress)
+- [Key-Value](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress)
+- [Log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress) (append-only log)
+- [Feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress) (same as log database but entries can be removed)
+- [Documents](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options) (store indexed JSON documents)
+- [Counters](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)
 
 Then, create a database instance (we'll use Key-Value database in this example):
 

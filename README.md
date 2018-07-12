@@ -12,16 +12,16 @@ OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS]
 
 OrbitDB provides various types of databases for different data models and use cases:
 
-- [log](#lognameaddress) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
-- [feed](#feednameaddress) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
-- [keyvalue](#keyvaluenameaddress) is a key-value database just like your favourite key-value database.
-- [docs](#docsnameaddress-options) is a document database to which documents can be stored and indexed by a specified key. Useful for example building search indices or version controlling documents and data.
-- [counter](#counternameaddress) for counting. Useful for example counting events separate from log/feed data.
+- [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
+- [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
+- [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress) is a key-value database just like your favourite key-value database.
+- [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options) is a document database to which documents can be stored and indexed by a specified key. Useful for example building search indices or version controlling documents and data.
+- [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress) for counting. Useful for example counting events separate from log/feed data.
 
 #### Project status & support
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). *The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.*
 
-### Getting Started
+#### Getting Started
 
 To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check **[Live demo 1](https://ipfs.io/ipfs/QmeESXh9wPib8Xz7hdRzHuYLDuEUgkYTSuujZ2phQfvznQ/)**, **[Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/)** or **[P2P TodoMVC app](https://ipfs.io/ipfs/QmTJGHccriUtq3qf3bvAQUcDUHnBbHNJG2x2FYwYUecN43/)**!
 
@@ -29,8 +29,8 @@ To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)
 
 - [Usage](#usage)
   - [CLI](#cli)
-  - [Module with IPFS Instance]()
-  - [Module with IPFS Daemon]()
+  - [Module with IPFS Instance](#module-with-ipfs-instance)
+  - [Module with IPFS Daemon](#module-with-ipfs-daemon)
 - [API](#api)
 - [Examples](#examples)
 - [Packages](#packages)
@@ -138,39 +138,39 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 - `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
 
 - **Public OrbitDB Instance Methods**
-  - [orbitdb.keyvalue(name|address)](#keyvaluenameaddress)
-    - [kv.put(key, value)](#putkey-value)
-    - [kv.set(key, value)](#setkey-value)
-    - [kv.get(key)](#getkey)
-  - [orbitdb.log(name|address)](#lognameaddress)
-    - [log.add(event)](#addevent)
-    - [log.get(hash)](#gethash)
-    - [log.iterator([options])](#iteratoroptions)
-  - [orbitdb.feed(name|address)](#feednameaddress)
-    - [feed.add(data)](#adddata)
-    - [feed.get(hash)](#gethash-1)
-    - [feed.remove(hash)](#removehash)
-    - [feed.iterator([options])](#iteratoroptions)
-  - [orbitdb.docs(name|address, options)](#docsnameaddress-options)
-    - [docs.put(doc)](#putdoc)
-    - [docs.get(hash)](#getkey-1)
-    - [docs.query(mapper)](#querymapper)
-    - [del(key)](#delkey)
-  - [orbitdb.counter(name|address)](#counternameaddress)
-    - [counter.value](#value)
-    - [counter.inc([value])](#incvalue)
+  - [orbitdb.keyvalue(name|address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress)
+    - [kv.put(key, value)](https://github.com/orbitdb/orbit-db/blob/master/API.md#putkey-value)
+    - [kv.set(key, value)](https://github.com/orbitdb/orbit-db/blob/master/API.md#setkey-value)
+    - [kv.get(key)](https://github.com/orbitdb/orbit-db/blob/master/API.md#getKey)
+  - [orbitdb.log(name|address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress)
+    - [log.add(event)](https://github.com/orbitdb/orbit-db/blob/master/API.md#addevent)
+    - [log.get(hash)](https://github.com/orbitdb/orbit-db/blob/master/API.md#gethash)
+    - [log.iterator([options])](https://github.com/orbitdb/orbit-db/blob/master/API.md#iteratoroptions)
+  - [orbitdb.feed(name|address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress)
+    - [feed.add(data)](https://github.com/orbitdb/orbit-db/blob/master/API.md#adddata)
+    - [feed.get(hash)](https://github.com/orbitdb/orbit-db/blob/master/API.md#gethash-1)
+    - [feed.remove(hash)](https://github.com/orbitdb/orbit-db/blob/master/API.md#removehash)
+    - [feed.iterator([options])](https://github.com/orbitdb/orbit-db/blob/master/API.md#iteratoroptions-1)
+  - [orbitdb.docs(name|address, options)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options)
+    - [docs.put(doc)](https://github.com/orbitdb/orbit-db/blob/master/API.md#putdoc)
+    - [docs.get(hash)](https://github.com/orbitdb/orbit-db/blob/master/API.md#getkey-1)
+    - [docs.query(mapper)](https://github.com/orbitdb/orbit-db/blob/master/API.md#querymapper)
+    - [del(key)](https://github.com/orbitdb/orbit-db/blob/master/API.md#delkey)
+  - [orbitdb.counter(name|address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)
+    - [counter.value](https://github.com/orbitdb/orbit-db/blob/master/API.md#value)
+    - [counter.inc([value])](https://github.com/orbitdb/orbit-db/blob/master/API.md#incvalue)
   - [orbitdb.create(name|address, type, [options])]()
   - [orbitdb.open(name|address, [options])]()
-  - [orbitdb.stop()](#stop)
-  - [orbitdb.disconnect()]()
+  - [orbitdb.stop()](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbstop)
+  - [orbitdb.disconnect()](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdisconnect)
 - **Static Properties**
-  - [OrbitDB.databaseTypes](#databasetypes)
+  - [OrbitDB.databaseTypes](https://github.com/orbitdb/orbit-db/blob/master/API.md#databasetypes)
 - **Static Methods**
-  - [OrbitDB.isValidType(type)](#isvalidtypetype)
-  - [OrbitDB.addDatabaseType(type, store)](#adddatabasetypetype-store)
-  - [OrbitDB.getDatabaseTypes()](#getdatabasetypes)
-  - [OrbitDB.isValidAddress(address)](#isvalidaddressaddress)
-  - [OrbitDB.parseAddress(address)](#parseaddressaddress)
+  - [OrbitDB.isValidType(type)](https://github.com/orbitdb/orbit-db/blob/master/API.md#isvalidtypetype)
+  - [OrbitDB.addDatabaseType(type, store)](https://github.com/orbitdb/orbit-db/blob/master/API.md#adddatabasetypetype-store)
+  - [OrbitDB.getDatabaseTypes()](https://github.com/orbitdb/orbit-db/blob/master/API.md#getdatabasetypes)
+  - [OrbitDB.isValidAddress(address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#isvalidaddressaddress)
+  - [OrbitDB.parseAddress(address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#parseaddressaddress)
 
 - [Store API](#store)
   - [load()](#load)
@@ -302,7 +302,7 @@ npm run build
 node benchmarks/benchmark-add.js
 ```
 
-See [benchmarks/]() for more benchmarks.
+See [benchmarks/](https://github.com/orbitdb/orbit-db/tree/master/benchmarks) for more benchmarks.
 
 #### Logging
 
