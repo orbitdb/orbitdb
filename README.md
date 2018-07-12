@@ -19,7 +19,7 @@ OrbitDB provides various types of databases for different data models and use ca
 - [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress) for counting. Useful for example counting events separate from log/feed data.
 
 #### Project status & support
-This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). *The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.*
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
 
 #### Getting Started
 
@@ -129,13 +129,15 @@ See [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md) 
 
 ### constructor(ipfs, [directory], [options])
 ```javascript
-OBconst orbitdb = new OrbitDB(ipfs)
+const orbitdb = new OrbitDB(ipfs)
 ```
 Creates and returns an instance of OrbitDB. Use the optional `directory` argument to specify a path to be used for the database files (Default: `'./orbitdb'`). In addition, you can use the optional `options` argument for further configuration. It is an object with any of these properties:
 
 - `peerId` (string): By default it uses the base58 string of the ipfs peer id.
 
 - `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
+
+After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a database instance.
 
 - **Public OrbitDB Instance Methods**
   - [orbitdb.keyvalue(name|address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress)
