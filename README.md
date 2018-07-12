@@ -12,11 +12,13 @@ OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS]
 
 OrbitDB provides various types of databases for different data models and use cases:
 
-- [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
-- [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
-- [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress) is a key-value database just like your favourite key-value database.
-- [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options) is a document database to which documents can be stored and indexed by a specified key. Useful for example building search indices or version controlling documents and data.
-- [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress) for counting. Useful for example counting events separate from log/feed data.
+- **[log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress)**: an immutable (append-only) log with traversable history. Useful for *"latest N"* use cases or as a message queue.
+- **[feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress)**: a mutable log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
+- **[keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress)**: a key-value database just like your favourite key-value database.
+- **[docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
+- **[counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)**: Useful for counting events separate from log/feed data.
+
+All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, operation-based conflict-free replicated data structure (CRDT) for distributed systems.
 
 #### Project status & support
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
@@ -276,14 +278,16 @@ OrbitDB uses the following modules:
 - [ipfs-pubub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
 - [crdts](https://github.com/orbitdb/crdts)
 - [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
+- [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
+- [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
+
+##### OrbitDB Store Packages
 - [orbit-db-store](https://github.com/orbitdb/orbit-db-store)
 - [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
 - [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
 - [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
 - [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
 - [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
-- [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
-- [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
 
 To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
 
