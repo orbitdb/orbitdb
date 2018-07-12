@@ -14,6 +14,8 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 
 After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store). See the [Store](#store) section for details of common methods and properties.
 
+*For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
+
 ```javascript
 const db = await orbitdb.keyvalue('profile')
 ```
@@ -57,9 +59,16 @@ const db = await orbitdb.keyvalue('profile')
   - [store.load()](#load)
   - [store.close()](#close)
   - [store.drop()](#drop)
-  - [store.events](#events)
   - [store.key](#key)
   - [store.type](#type)
+- [Store Events](#storeevents)
+  - [replicated](#replicated)
+  - [replicate](#replicate)
+  - [replicate.progress](#replicateprogress)
+  - [load](#load)
+  - [load.progress](#loadprogess)
+  - [ready](#ready)
+  - [write](#write)
 
 ## Public Instance Methods
 ### orbitdb.keyvalue(name|address)
@@ -386,65 +395,58 @@ The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key
 
 The type of the database as a string.
 
-#### events
+### Store Events
 
 Each database in `orbit-db` contains an `events` ([EventEmitter](https://nodejs.org/api/events.html)) object that emits events that describe what's happening in the database. Events can be listened to with:
 ```javascript
 db.events.on(name, callback)
 ```
 
-- **`replicated`** - (address)
+#### replicated
+```javascript
+db.events.on('replicated', (address) => ... )
+```
 
-  Emitted when a the database was synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
+Emitted when a the database was synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
 
-  ```javascript
-  db.events.on('replicated', (address) => ... )
-  ```
+#### replicate
+```javascript
+db.events.on('replicate', (address) => ... )
+```
 
-- **`replicate`** - (address)
+Emitted before replicating a part of the database with a peer.
 
-  Emitted before replicating a part of the database with a peer.
+#### replicate.progress
+```javascript
+db.events.on('replicate.progress', (address, hash, entry, progress, have) => ... )
+```
 
-  ```javascript
-  db.events.on('replicate', (address) => ... )
-  ```
+Emitted while replicating a database. *address* is id of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is the current progress. *have* is a map of database pieces we have.
 
-- **`replicate.progress`** - (address, hash, entry, progress, have)
+#### load
+```javascript
+db.events.on('load', (dbname) => ... )
+```
 
-  Emitted while replicating a database. *address* is id of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is the current progress. *have* is a map of database pieces we have.
+Emitted before loading the database.
 
-  ```javascript
-  db.events.on('replicate.progress', (address, hash, entry, progress, have) => ... )
-  ```
+#### load.progress
+```javascript
+db.events.on('load.progress', (address, hash, entry, progress, total) => ... )
+```
 
-- **`load`** - (dbname)
+Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
 
-  Emitted before loading the database.
+#### ready
+```javascript
+db.events.on('ready', (dbname) => ... )
+```
 
-  ```javascript
-  db.events.on('load', (dbname) => ... )
-  ```
+Emitted after fully loading the local database.
 
-- **`load.progress`** - (address, hash, entry, progress, total)
+#### write
+```javascript
+db.events.on('write', (dbname, hash, entry) => ... )
+```
 
-  Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
-
-  ```javascript
-  db.events.on('load.progress', (address, hash, entry, progress, total) => ... )
-  ```
-
-- **`ready`** - (dbname)
-
-  Emitted after fully loading the local database.
-
-  ```javascript
-  db.events.on('ready', (dbname) => ... )
-  ```
-
-- **`write`** - (dbname, hash, entry)
-
-  Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
-
-  ```javascript
-  db.events.on('write', (dbname, hash, entry) => ... )
-  ```
+Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.

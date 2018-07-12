@@ -175,13 +175,20 @@ After creating an `OrbitDB` instance , you can access the different data stores.
   - [OrbitDB.isValidAddress(address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#isvalidaddressaddress)
   - [OrbitDB.parseAddress(address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#parseaddressaddress)
 
-- [Store API](#store)
-  - [load()](#load)
-  - [close()](#close)
-  - [drop()](#drop)
-  - [events](#events)
-  - [key](#key)
-  - [type](#type)
+- [Store API](https://github.com/orbitdb/orbit-db/blob/master/API.md#store)
+  - [load()](https://github.com/orbitdb/orbit-db/blob/master/API.md#load)
+  - [close()](https://github.com/orbitdb/orbit-db/blob/master/API.md#close)
+  - [drop()](https://github.com/orbitdb/orbit-db/blob/master/API.md#drop)
+  - [key](https://github.com/orbitdb/orbit-db/blob/master/API.md#key)
+  - [type](https://github.com/orbitdb/orbit-db/blob/master/API.md#type)
+- [Store Events](https://github.com/orbitdb/orbit-db/blob/master/API.md#storeevents)
+  - [replicated](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicated)
+  - [replicate](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicate)
+  - [replicate.progress](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicateprogress)
+  - [load](https://github.com/orbitdb/orbit-db/blob/master/API.md#load)
+  - [load.progress](https://github.com/orbitdb/orbit-db/blob/master/API.md#loadprogress)
+  - [ready](https://github.com/orbitdb/orbit-db/blob/master/API.md#ready)
+  - [write](https://github.com/orbitdb/orbit-db/blob/master/API.md#write)
 
 ### Custom Store Types
 
