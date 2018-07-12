@@ -185,7 +185,7 @@ After creating an `OrbitDB` instance , you can access the different data stores.
   - [replicated](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicated)
   - [replicate](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicate)
   - [replicate.progress](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicateprogress)
-  - [load](https://github.com/orbitdb/orbit-db/blob/master/API.md#load)
+  - [load](https://github.com/orbitdb/orbit-db/blob/master/API.md#load-1)
   - [load.progress](https://github.com/orbitdb/orbit-db/blob/master/API.md#loadprogress)
   - [ready](https://github.com/orbitdb/orbit-db/blob/master/API.md#ready)
   - [write](https://github.com/orbitdb/orbit-db/blob/master/API.md#write)
