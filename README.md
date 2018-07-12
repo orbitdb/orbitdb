@@ -10,30 +10,31 @@
 
 OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
 
-Data in OrbitDB can be stored in a
+OrbitDB provides various types of databases for different data models and use cases:
 
-- **[Key-Value Store](https://github.com/orbitdb/orbit-db/blob/master/API.md#keyvaluenameaddress)**
-- **[Log Database](https://github.com/orbitdb/orbit-db/blob/master/API.md#lognameaddress)** (append-only log)
-- **[Feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#feednameaddress)** (same as log database but entries can be removed)
-- **[Document Store](https://github.com/orbitdb/orbit-db/blob/master/API.md#docsnameaddress-options)** (store indexed JSON documents)
-- **[Counters](https://github.com/orbitdb/orbit-db/blob/master/API.md#counternameaddress)**
+- [log](#lognameaddress) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
+- [feed](#feednameaddress) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
+- [keyvalue](#keyvaluenameaddress) is a key-value database just like your favourite key-value database.
+- [docs](#docsnameaddress-options) is a document database to which documents can be stored and indexed by a specified key. Useful for example building search indices or version controlling documents and data.
+- [counter](#counternameaddress) for counting. Useful for example counting events separate from log/feed data.
 
-This is the Javascript implementation and it works both in **Node.js** and **Browsers**.
+#### Project status & support
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). *The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.*
+
+### Getting Started
 
 To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**, read the **[Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** or check **[Live demo 1](https://ipfs.io/ipfs/QmeESXh9wPib8Xz7hdRzHuYLDuEUgkYTSuujZ2phQfvznQ/)**, **[Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/)** or **[P2P TodoMVC app](https://ipfs.io/ipfs/QmTJGHccriUtq3qf3bvAQUcDUHnBbHNJG2x2FYwYUecN43/)**!
-
-<p align="left">
-  <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/screenshots/example1.png" width="28%">
-  <a href="https://asciinema.org/a/JdTmmdBCZarkBkPqbueicwMrG" target="_blank"><img src="https://asciinema.org/a/JdTmmdBCZarkBkPqbueicwMrG.png" width="50%"/></a>
-</p>
 
 ## Table of Contents
 
 - [Usage](#usage)
+  - [CLI](#cli)
+  - [Module with IPFS Instance]()
+  - [Module with IPFS Daemon]()
 - [API](#api)
 - [Examples](#examples)
+- [Packages](#packages)
 - [Development](#development)
-- [Background](#background)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -41,7 +42,7 @@ To get started, try the **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)
 
 Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a more in-depth tutorial and to understand how OrbitDB works.
 
-OrbitDB currently supports Linux and OS X, Windows is not supported yet.
+*For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/haadcode/orbit-db-eventstore#usage), [feed](https://github.com/haadcode/orbit-db-feedstore#usage), [docstore](https://github.com/shamb0t/orbit-db-docstore#usage) and [counter](https://github.com/haadcode/orbit-db-counterstore#usage).*
 
 ### CLI
 
@@ -53,7 +54,9 @@ It can be installed from Npm with:
 npm install orbit-db-cli -g
 ```
 
-### As a library
+### Module with IPFS Instance
+
+If you're using `orbitd-db` to develop **browser** applications, use it as a module with the javascript instance of IPFS
 
 Install dependencies:
 
@@ -61,20 +64,18 @@ Install dependencies:
 npm install orbit-db ipfs
 ```
 
-Use it as a module:
-
 ```javascript
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
 // OrbitDB uses Pubsub which is an experimental feature
 // and need to be turned on manually.
-// Note that these options need to be passed to IPFS in 
+// Note that these options need to be passed to IPFS in
 // all examples even if not specfied so.
 const ipfsOptions = {
   EXPERIMENTAL: {
     pubsub: true
-  },
+  }
 }
 
 // Create IPFS instance
@@ -82,33 +83,127 @@ const ipfs = new IPFS(ipfsOptions)
 
 ipfs.on('error', (e) => console.error(e))
 ipfs.on('ready', async () => {
-  // Create a database
   const orbitdb = new OrbitDB(ipfs)
-  const db = await orbitdb.log('database name')
-  // Add an entry to the database
-  const hash = await db.add('hello world')
-  // Get last 5 entries
-  const latest = db.iterator({ limit: 5 }).collect()
-  console.log(JSON.stringify(latest, null, 2))
+
+  // Create / Open a database
+  const db = await orbitdb.log('hello')
+  await db.load()
+
+  // Listen for updates from peers
+  db.events.on('replicated', (address) => {
+    console.log(db.iterator({ limit: -1 }).collect())
+  })
+
+  // Add an entry
+  const hash = await db.add('world')
+  console.log(hash)
+
+  // Query
+  const result = db.iterator({ limit: -1 }).collect()
+  console.log(JSON.stringify(result, null, 2))
 })
 ```
 
-*For more details, see examples for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/haadcode/orbit-db-eventstore#usage), [feed](https://github.com/haadcode/orbit-db-feedstore#usage), [docstore](https://github.com/shamb0t/orbit-db-docstore#usage) and [counter](https://github.com/haadcode/orbit-db-counterstore#usage).*
+### Module with IPFS Daemon
+Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use `orbit-db` with a locally running IPFS daemon. Use this method if you're using `orbitd-db` to develop **backend** or **desktop** applications, eg. with [Electron](https://electron.atom.io).
 
-*The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.*
+Install dependencies:
+
+```
+npm install orbit-db ipfs-api
+```
+
+```javascript
+const IpfsApi = require('ipfs-api')
+const OrbitDB = require('orbit-db')
+
+const ipfs = IpfsApi('localhost', '5001')
+const orbitdb = new OrbitDB(ipfs)
+const db = await orbitdb.log('hello')
+...
+```
 
 ## API
 
-See [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbit-db-api-documentation) for the full documentation.
+See [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the full documentation.
 
-- [Getting Started](https://github.com/orbitdb/orbit-db/blob/master/API.md#getting-started)
-- [OrbitDB](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdb)
-  - [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#keyvaluenameaddress)
-  - [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#lognameaddress)
-  - [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#feednameaddress)
-  - [docstore](https://github.com/orbitdb/orbit-db/blob/master/API.md#docsnameaddress-options)
-  - [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#counternameaddress)
-  - [common](https://github.com/orbitdb/orbit-db/blob/master/API.md#store)
+### constructor(ipfs, [directory], [options])
+```javascript
+OBconst orbitdb = new OrbitDB(ipfs)
+```
+Creates and returns an instance of OrbitDB. Use the optional `directory` argument to specify a path to be used for the database files (Default: `'./orbitdb'`). In addition, you can use the optional `options` argument for further configuration. It is an object with any of these properties:
+
+- `peerId` (string): By default it uses the base58 string of the ipfs peer id.
+
+- `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
+
+- **Public OrbitDB Instance Methods**
+  - [orbitdb.keyvalue(name|address)](#keyvaluenameaddress)
+    - [kv.put(key, value)](#putkey-value)
+    - [kv.set(key, value)](#setkey-value)
+    - [kv.get(key)](#getkey)
+  - [orbitdb.log(name|address)](#lognameaddress)
+    - [log.add(event)](#addevent)
+    - [log.get(hash)](#gethash)
+    - [log.iterator([options])](#iteratoroptions)
+  - [orbitdb.feed(name|address)](#feednameaddress)
+    - [feed.add(data)](#adddata)
+    - [feed.get(hash)](#gethash-1)
+    - [feed.remove(hash)](#removehash)
+    - [feed.iterator([options])](#iteratoroptions)
+  - [orbitdb.docs(name|address, options)](#docsnameaddress-options)
+    - [docs.put(doc)](#putdoc)
+    - [docs.get(hash)](#getkey-1)
+    - [docs.query(mapper)](#querymapper)
+    - [del(key)](#delkey)
+  - [orbitdb.counter(name|address)](#counternameaddress)
+    - [counter.value](#value)
+    - [counter.inc([value])](#incvalue)
+  - [orbitdb.create(name|address, type, [options])]()
+  - [orbitdb.open(name|address, [options])]()
+  - [orbitdb.stop()](#stop)
+  - [orbitdb.disconnect()]()
+- **Static Properties**
+  - [OrbitDB.databaseTypes](#databasetypes)
+- **Static Methods**
+  - [OrbitDB.isValidType(type)](#isvalidtypetype)
+  - [OrbitDB.addDatabaseType(type, store)](#adddatabasetypetype-store)
+  - [OrbitDB.getDatabaseTypes()](#getdatabasetypes)
+  - [OrbitDB.isValidAddress(address)](#isvalidaddressaddress)
+  - [OrbitDB.parseAddress(address)](#parseaddressaddress)
+
+- [Store API](#store)
+  - [load()](#load)
+  - [close()](#close)
+  - [drop()](#drop)
+  - [events](#events)
+  - [key](#key)
+  - [type](#type)
+
+### Custom Store Types
+
+You can add custom store types to OrbitDB:
+
+```javascript
+// define custom store type
+class CustomStore extends DocumentStore {
+  constructor (ipfs, id, dbname, options) {
+    super(ipfs, id, dbname, options)
+    this._type = CustomStore.type
+  }
+
+  static get type () {
+    return 'custom'
+  }
+}
+
+// add custom type to orbitdb
+OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
+
+// instantiate custom store
+let orbitdb = new OrbitDB(ipfs, dbPath)
+let store = orbitdb.create(name, CustomStore.type)
+```
 
 ## Examples
 
@@ -127,11 +222,11 @@ npm install --global babel-cli
 npm install --global webpack
 ```
 
-Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to 
+Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to
 ```
 make clean && make
 ```
-to redo the local package-lock.json with working native dependencies. 
+to redo the local package-lock.json with working native dependencies.
 
 ### Browser example
 
@@ -170,30 +265,25 @@ node examples/eventlog.js
 
 More examples at [examples](https://github.com/orbitdb/orbit-db/tree/master/examples).
 
-### Custom Store Types
+## Packages
 
-You can add custom store types to OrbitDB:
+OrbitDB uses the following modules:
 
-```javascript
-// define custom store type
-class CustomStore extends DocumentStore {
-  constructor (ipfs, id, dbname, options) {
-    super(ipfs, id, dbname, options)
-    this._type = CustomStore.type
-  }
+- [ipfs](https://github.com/ipfs/js-ipfs)
+- [ipfs-log](https://github.com/orbitdb/ipfs-log)
+- [ipfs-pubub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
+- [crdts](https://github.com/orbitdb/crdts)
+- [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
+- [orbit-db-store](https://github.com/orbitdb/orbit-db-store)
+- [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
+- [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
+- [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
+- [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
+- [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
+- [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
+- [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
 
-  static get type () {
-    return 'custom'
-  }
-}
-
-// add custom type to orbitdb
-OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
-
-// instantiate custom store
-let orbitdb = new OrbitDB(ipfs, dbPath)
-let store = orbitdb.create(name, CustomStore.type)
-```
+To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
 
 ## Development
 
@@ -221,26 +311,6 @@ To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `d
 ```
 LOG=debug node <file>
 ```
-
-## Background
-
-Uses the following modules:
-
-- [ipfs-log](https://github.com/orbitdb/ipfs-log)
-- [crdts](https://github.com/orbitdb/crdts)
-- [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
-- [orbit-db-store](https://github.com/orbitdb/orbit-db-store)
-- [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
-- [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
-- [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
-- [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
-- [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
-- [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
-- [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
-- [ipfs](https://github.com/ipfs/js-ipfs)
-- [ipfs-pubub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
-
-To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
 
 ## Contributing
 

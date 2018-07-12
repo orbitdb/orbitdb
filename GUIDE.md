@@ -1,6 +1,6 @@
 # Getting Started with OrbitDB
 
-This guide will get you familiar using OrbitDB in your JavaScript application. OrbitDB and IPFS both work in Node.js applications as well as in browser applications.
+This guide will get you familiar with using OrbitDB in your JavaScript application. OrbitDB and IPFS both work in Node.js applications as well as in browser applications. (Windows is not supported yet though)
 
 This guide is still being worked on and we would love to get [feedback and suggestions](https://github.com/orbitdb/orbit-db/issues) on how to improve it!
 
@@ -26,7 +26,7 @@ OrbitDB is a peer-to-peer database meaning that each peer has its own instance o
 
 This means that each application contains the full database that they're using. This in turn changes the data modeling as compared to client-server model where there's usually one big database for all entries: in OrbitDB, the data should be stored, "partitioned" or "sharded" based on the access rights for that data. For example, in a twitter-like application, tweets would not be saved in a global "tweets" database to which millions of users write concurrently, but rather, ***each user would have their own database*** for their tweets. To follow a user, a peer would subscribe to a user's feed, ie. replicate their feed database.
 
-OrbitDB supports multiple data models (see more details below) and as such the developer has a variety ways to structure data. Combined with the peer-to-peer paradigm, the data modeling is important factor to build scalable decentralized applications. 
+OrbitDB supports multiple data models (see more details below) and as such the developer has a variety of ways to structure data. Combined with the peer-to-peer paradigm, the data modeling is important factor to build scalable decentralized applications.
 
 This may not be intuitive or you might not be sure what the best approach would be and we'd be happy to help you decide on your data modeling and application needs, [feel free to reach out](https://github.com/orbitdb/orbit-db/issues)!
 
@@ -47,13 +47,13 @@ const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
 // OrbitDB uses Pubsub which is an experimental feature
-// and need to be turned on manually. 
-// Note that these options need to be passed to IPFS in 
+// and need to be turned on manually.
+// Note that these options need to be passed to IPFS in
 // all examples in this document even if not specfied so.
 const ipfsOptions = {
   EXPERIMENTAL: {
     pubsub: true
-  },
+  }
 }
 
 // Create IPFS instance
@@ -69,7 +69,7 @@ ipfs.on('ready', () => {
 
 ## Create a database
 
-First, choose the data model you want to use. The available data models are: 
+First, choose the data model you want to use. The available data models are:
 - [Key-Value](https://github.com/orbitdb/orbit-db/blob/master/API.md##keyvaluenameaddress)
 - [Log](https://github.com/orbitdb/orbit-db/blob/master/API.md#lognameaddress) (append-only log)
 - [Feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#feednameaddress) (same as log database but entries can be removed)
@@ -116,7 +116,7 @@ ipfs.on('ready', async () => {
 
 #### Manifest
 
-The second part of the address, the IPFS multihash `Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC`, is the manifest of a database. It's an IPFS object that contains information about the database. 
+The second part of the address, the IPFS multihash `Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC`, is the manifest of a database. It's an IPFS object that contains information about the database.
 
 The database manifest can be fetched from IPFS and it looks like this:
 
@@ -136,8 +136,8 @@ Each entry in a database is signed by who created that entry. The signing key, t
 ```
 const key = db.key
 console.log(key)
-// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e 
-// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b 
+// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e
+// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b
 // y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
 ```
 
@@ -175,9 +175,9 @@ ipfs.on('ready', async () => {
 })
 ```
 
-To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's key: `orbitdb.key.getPublic('hex')`. 
+To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's key: `orbitdb.key.getPublic('hex')`.
 
-The keys look like this: 
+The keys look like this:
 `042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839`
 
 Give access to another peer to write to the database:
@@ -207,7 +207,7 @@ ipfs.on('ready', async () => {
 
 #### Public databases
 
-The access control mechanism also support "public" databases to which anyone can write to. 
+The access control mechanism also support "public" databases to which anyone can write to.
 
 This can be done by adding a `*` to the write access array:
 ```javascript
@@ -247,7 +247,7 @@ For adding entries to other databases, see:
 - [docs.put()](https://github.com/orbitdb/orbit-db/blob/master/API.md#putdoc)
 - [counter.inc()](https://github.com/orbitdb/orbit-db/blob/master/API.md#incvalue)
 
-**Parallelism** 
+**Parallelism**
 
 We currently don't support parallel updates. Updates to a database need to be executed in a sequential manner. The write throughput is several hundreds or thousands of writes per second (depending on your platform and hardware, YMMV), so this shouldn't slow down your app too much. If it does, [lets us know](https://github.com/orbitdb/orbit-db/issues)!
 
