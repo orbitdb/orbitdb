@@ -56,11 +56,11 @@ const db = await orbitdb.keyvalue('profile')
   - [OrbitDB.parseAddress(address)](#parseaddressaddress)
 
 - [Store API](#store)
-  - [store.load()](#load)
-  - [store.close()](#close)
-  - [store.drop()](#drop)
-  - [store.key](#key)
-  - [store.type](#type)
+  - [store.load()](#storeload)
+  - [store.close()](#storeclose)
+  - [store.drop()](#storedrop)
+  - [store.key](#storekey)
+  - [store.type](#storetype)
 - [Store Events](#storeevents)
   - [replicated](#replicated)
   - [replicate](#replicate)
@@ -336,7 +336,7 @@ OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/fi
 
 Every database (store) has the following methods available in addition to their specific methods.
 
-#### load()
+#### store.load()
 
 Load the locally persisted database state to memory.
 
@@ -354,7 +354,7 @@ await db.load()
 /* database is now ready to be queried */
 ```
 
-#### close()
+#### store.close()
 
 Close the database.
 
@@ -363,7 +363,7 @@ Async:
 await db.close()
 ```
 
-#### drop()
+#### store.drop()
 
 Remove the database locally. This does not delete any data from peers.
 
@@ -371,7 +371,7 @@ Remove the database locally. This does not delete any data from peers.
 await db.drop()
 ```
 
-#### key
+#### store.key
 
 The [keypair](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) used to access the database.
 
@@ -391,7 +391,7 @@ console.log(db.key.getPublic('hex'))
 
 The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key.getPublic('hex')`.
 
-#### type
+#### store.type
 
 The type of the database as a string.
 
@@ -402,49 +402,49 @@ Each database in `orbit-db` contains an `events` ([EventEmitter](https://nodejs.
 db.events.on(name, callback)
 ```
 
-#### replicated
+#### `replicated`
 ```javascript
 db.events.on('replicated', (address) => ... )
 ```
 
 Emitted when a the database was synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
 
-#### replicate
+#### `replicate`
 ```javascript
 db.events.on('replicate', (address) => ... )
 ```
 
 Emitted before replicating a part of the database with a peer.
 
-#### replicate.progress
+#### `replicate.progress`
 ```javascript
 db.events.on('replicate.progress', (address, hash, entry, progress, have) => ... )
 ```
 
 Emitted while replicating a database. *address* is id of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is the current progress. *have* is a map of database pieces we have.
 
-#### load
+#### `load`
 ```javascript
 db.events.on('load', (dbname) => ... )
 ```
 
 Emitted before loading the database.
 
-#### load.progress
+#### `load.progress`
 ```javascript
 db.events.on('load.progress', (address, hash, entry, progress, total) => ... )
 ```
 
 Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
 
-#### ready
+#### `ready`
 ```javascript
 db.events.on('ready', (dbname) => ... )
 ```
 
 Emitted after fully loading the local database.
 
-#### write
+#### `write`
 ```javascript
 db.events.on('write', (dbname, hash, entry) => ... )
 ```
