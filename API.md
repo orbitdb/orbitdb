@@ -1,6 +1,6 @@
 # orbit-db API documentation
 
-OrbitDB provides various types of databases for different data models: 
+OrbitDB provides various types of databases for different data models:
 - [log](#lognameaddress) is an append-only log with traversable history. Useful for *"latest N"* use cases or as a message queue.
 - [feed](#feednameaddress) is a log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
 - [keyvalue](#keyvaluenameaddress) is a key-value database just like your favourite key-value database.
@@ -43,7 +43,7 @@ ipfs.on('ready', () => {
   // Add an entry
   const hash = await db.add('world')
   console.log(hash)
-  
+
   // Query
   const result = db.iterator({ limit: -1 }).collect()
   console.log(result)
@@ -80,28 +80,38 @@ Choose this options if you're using `orbitd-db` to develop **backend** or **desk
 
 - [OrbitDB](#orbitdb)
   - [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
-  - [keyvalue(name|address)](#keyvaluenameaddress)
-    - [put(key, value)](#putkey-value)
-    - [set(key, value)](#setkey-value)
-    - [get(key)](#getkey)
-  - [log(name|address)](#lognameaddress)
-    - [add(event)](#addevent)
-    - [get(hash)](#gethash)
-    - [iterator([options])](#iteratoroptions)
-  - [feed(name|address)](#feednameaddress)
-    - [add(data)](#adddata)
-    - [get(hash)](#gethash-1)
-    - [remove(hash)](#removehash)
-    - [iterator([options])](#iteratoroptions)
-  - [docs(name|address, options)](#docsnameaddress-options)
-    - [put(doc)](#putdoc)
-    - [get(hash)](#getkey-1)
-    - [query(mapper)](#querymapper)
-    - [del(key)](#delkey)
-  - [counter(name|address)](#counternameaddress)
-    - [value](#value)
-    - [inc([value])](#incvalue)
-  - [stop()](#stop)
+  - **Public Methods**
+    - [keyvalue(name|address)](#keyvaluenameaddress)
+      - [put(key, value)](#putkey-value)
+      - [set(key, value)](#setkey-value)
+      - [get(key)](#getkey)
+    - [log(name|address)](#lognameaddress)
+      - [add(event)](#addevent)
+      - [get(hash)](#gethash)
+      - [iterator([options])](#iteratoroptions)
+    - [feed(name|address)](#feednameaddress)
+      - [add(data)](#adddata)
+      - [get(hash)](#gethash-1)
+      - [remove(hash)](#removehash)
+      - [iterator([options])](#iteratoroptions)
+    - [docs(name|address, options)](#docsnameaddress-options)
+      - [put(doc)](#putdoc)
+      - [get(hash)](#getkey-1)
+      - [query(mapper)](#querymapper)
+      - [del(key)](#delkey)
+    - [counter(name|address)](#counternameaddress)
+      - [value](#value)
+      - [inc([value])](#incvalue)
+    - [create(name|address, type, [options])]()
+    - [stop()](#stop)
+  - **Static Properties**
+    - [databaseTypes]()
+  - **Static Methods**
+    - [isValidType()]()
+    - [addDatabaseType()]()
+    - [getDatabaseTypes()]()
+    - [isValidAddress()]()
+    - [parseAddress()]()
 - [Store](#store)
   - [load()](#load)
   - [close()](#close)
@@ -127,9 +137,10 @@ ipfs.on('ready', () => {
 After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store). See the [Store](#store) section for details of common methods and properties.
 
 ```javascript
-const db = await orbitdb.kvstore('profile')
+const db = await orbitdb.keyvalue('profile')
 ```
 
+### **Public Methods**
 ### keyvalue(name|address)
 
 Module: [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
@@ -176,14 +187,14 @@ const db = await orbitdb.eventlog(anotherlogdb.address)
   ```javascript
   const hash = await db.add({ name: 'User1' })
   ```
-  
+
 #### get(hash)
   ```javascript
   const event = db.get(hash)
     .map((e) => e.payload.value)
   // { name: 'User1' }
   ```
-  
+
 #### iterator([options])
 
 **options** : It is an object which supports the following properties
@@ -225,19 +236,19 @@ See the [Store](#store) section for details of common methods and properties.
   ```javascript
   const hash = await db.add({ name: 'User1' })
   ```
-  
+
 #### get(hash)
   ```javascript
   const event = db.get(hash)
     .map((e) => e.payload.value)
   // { name: 'User1' }
   ```
-  
+
 #### remove(hash)
   ```javascript
   const hash = await db.remove(hash)
   ```
-  
+
 #### iterator([options])
 
 **options** : It is an object which supports the following properties
@@ -285,14 +296,14 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
   ```javascript
   const hash = await db.put({ _id: 'QmAwesomeIpfsHash', name: 'shamb0t', followers: 500 })
   ```
-  
+
 #### get(key)
   ```javascript
   const profile = db.get('shamb0t')
     .map((e) => e.payload.value)
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
-  
+
 #### query(mapper)
   ```javascript
   const all = db.query((doc) => doc.followers >= 500)
@@ -303,7 +314,7 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
   ```javascript
   const hash = await db.del('shamb0t')
   ```
-    
+
 ### counter(name|address)
 
 Module: [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
@@ -330,7 +341,7 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   await counter.inc(-2)
   counter.value // 8
   ```
-    
+
 ### stop()
 
   Stop OrbitDB, close databases and disconnect the databases from the network.
@@ -338,6 +349,54 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   ```javascript
   orbitdb.stop()
   ```
+### **Static Properties**
+### databaseTypes
+Returns supported database types (i.e. store types) as an Array of strings
+```js
+OrbitDB.databaseTypes
+// [ 'counter', 'eventlog', 'feed', 'docstore', 'keyvalue']
+```
+
+### **Static Methods**
+
+### isValidType(type)
+Returns `true` if the provided string is a supported database type
+```js
+OrbitDB.isValidType('docstore')
+// true
+```
+
+### addDatabaseType(type, store)
+Adds a custom database type & store to OrbitDB
+```js
+const CustomStore = require('./CustomStore')
+OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
+```
+
+### getDatabaseTypes()
+Returns an object mapping database types to Store Classes
+```js
+OrbitDB.getDatabaseTypes()
+// { counter: [Function: CounterStore],
+//  eventlog: [Function: EventStore],
+//  feed: [Function: FeedStore],
+//  docstore: [Function: DocumentStore],
+//  keyvalue: [Function: KeyValueStore] }
+```
+### isValidAddress(address)
+Returns `true` if the provided string is a valid orbitdb address
+```js
+OrbitDB.isValidAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database')
+// true
+```
+### parseAddress(address)
+Returns an instance of OrbitDBAddress if the provided string is a valid orbitdb address
+```js
+OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database')
+// OrbitDBAddress {
+//  root: 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC',
+//  path: 'first-database' }
+```
 
 ## Store
 
@@ -385,8 +444,8 @@ The [keypair](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) use
 ```
 const key = db.key
 console.log(key)
-// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e 
-// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b 
+// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e
+// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b
 // y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
 ```
 
