@@ -21,10 +21,10 @@ const db = await orbitdb.keyvalue('profile')
 ```
 
 **Public OrbitDB Instance Methods**
-- [orbitdb.create(name, type, [options])]()
-- [orbitdb.open(name|address, [options])]()
+- [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
+- [orbitdb.open(name|address, [options])](#orbitdbopenaddress-options)
+- [orbitdb.disconnect()](#orbitdbdisconnect)
 - [orbitdb.stop()](#orbitdbstop)
-- [orbitdb.disconnect()](orbitdbdisconnect)
 - [orbitdb.keyvalue(name|address)](#orbitdbkeyvaluenameaddress)
   - [kv.put(key, value)](#putkey-value)
   - [kv.set(key, value)](#setkey-value)
@@ -105,14 +105,20 @@ Returns a `Promise` that resolves to [a database instance](#store). `address` (s
 - `type` (string): A supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). Required if create is set to `true`. Otherwise it's used to validate the manifest.
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 
+### orbitdb.disconnect()
+
+Close databases, connections, pubsub and reset orbitdb state.
+
+```javascript
+await orbitdb.disconnect()
+```
+
 ### orbitdb.stop()
 
-  Stop OrbitDB, close databases and disconnect the databases from the network.
-
-  ```javascript
-  orbitdb.stop()
-  ```
-### orbitdb.disconnect()
+Alias for `orbitdb.disconnect()`
+```javascript
+await orbitdb.stop()
+```
 
 ### orbitdb.keyvalue(name|address)
 > Creates and opens a keyvalue database
