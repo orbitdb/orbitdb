@@ -272,7 +272,22 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   counter.value // 8
   ```
 
-### orbitdb.create(name|address, type, [options])
+### orbitdb.create(name, type, [options])
+Creates and opens an OrbitDB database. Returns a `Promise` that resolves to [a database instance](#store). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
+- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
+- `write` (array): An array of hex encoded public keys which are used to set write acces to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
+- `overwrite` (boolean): Overwrite an existing database (Default: `false`)
+```javascript
+const db = await orbitdb.create('user.posts', 'eventlog', {
+  write: [
+    // Give access to ourselves
+    orbitdb.key.getPublic('hex'),
+    // Give access to the second peer
+    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+  ]
+})
+// db created & opened
+```
 ### orbitdb.open(name|address, [options])
 ### orbitdb.stop()
 
