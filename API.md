@@ -95,15 +95,23 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
 ### orbitdb.open(address, [options])
 > Opens an OrbitDB database.
 
-Convienance methods are available when opening/creating any of the default OrbitDB database types (i.e. `orbitdb.feed(address, options)` instead of `orbitdb.open(address, { type: 'feed', ... })`)
+Convienance methods are available when opening/creating any of the default OrbitDB database types: [feed](#orbitdbfeednameaddress), [docs](#orbitdbdocsnameaddress-options), [log](#orbitdblognameaddress), [keyvalue](#orbitdbkeyvaluenameaddress), [counter](#orbitdbcounternameaddress)
+
+You can use: `orbitdb.feed(address, options)`
+
+Instead of: `orbitdb.open(address, { type: 'feed', ...options })`
 
 Returns a `Promise` that resolves to [a database instance](#store). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
 
 - `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
 - `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
-- `create` (boolean): Whether to create the database if a valid OrbitDB address is not provided. (Default: `false`)
+- `create` (boolean): Whether or not to create the database if a valid OrbitDB address is not provided. (Default: `false`)
 - `type` (string): A supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). Required if create is set to `true`. Otherwise it's used to validate the manifest.
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
+
+```javascript
+const db = await orbitdb.open('/orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database')
+```
 
 ### orbitdb.disconnect()
 
