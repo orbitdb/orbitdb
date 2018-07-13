@@ -21,6 +21,10 @@ const db = await orbitdb.keyvalue('profile')
 ```
 
 **Public OrbitDB Instance Methods**
+- [orbitdb.create(name, type, [options])]()
+- [orbitdb.open(name|address, [options])]()
+- [orbitdb.stop()](#orbitdbstop)
+- [orbitdb.disconnect()](orbitdbdisconnect)
 - [orbitdb.keyvalue(name|address)](#orbitdbkeyvaluenameaddress)
   - [kv.put(key, value)](#putkey-value)
   - [kv.set(key, value)](#setkey-value)
@@ -42,10 +46,6 @@ const db = await orbitdb.keyvalue('profile')
 - [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
   - [counter.value](#value)
   - [counter.inc([value])](#incvalue)
-- [orbitdb.create(name, type, [options])]()
-- [orbitdb.open(name|address, [options])]()
-- [orbitdb.stop()](#orbitdbstop)
-- [orbitdb.disconnect()](orbitdbdisconnect)
 
 **Static Properties**
 - [OrbitDB.databaseTypes](#databasetypes)
@@ -74,7 +74,48 @@ const db = await orbitdb.keyvalue('profile')
 - [write](#write)
 
 ## Public Instance Methods
+### orbitdb.create(name, type, [options])
+> Creates and opens an OrbitDB database.
+
+Returns a `Promise` that resolves to [a database instance](#store). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
+- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
+- `write` (array): An array of hex encoded public keys which are used to set write acces to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
+- `overwrite` (boolean): Overwrite an existing database (Default: `false`)
+```javascript
+const db = await orbitdb.create('user.posts', 'eventlog', {
+  write: [
+    // Give access to ourselves
+    orbitdb.key.getPublic('hex'),
+    // Give access to the second peer
+    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+  ]
+})
+// db created & opened
+```
+### orbitdb.open(address, [options])
+> Opens an OrbitDB database.
+
+Convienance methods are available when opening/creating any of the default OrbitDB database types (i.e. `orbitdb.feed(address, options)` instead of `orbitdb.open(address, { type: 'feed', ... })`)
+
+Returns a `Promise` that resolves to [a database instance](#store). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
+
+- `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
+- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
+- `create` (boolean): Whether to create the database if a valid OrbitDB address is not provided. (Default: `false`)
+- `type` (string): A supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). Required if create is set to `true`. Otherwise it's used to validate the manifest.
+- `overwrite` (boolean): Overwrite an existing database (Default: `false`)
+
+### orbitdb.stop()
+
+  Stop OrbitDB, close databases and disconnect the databases from the network.
+
+  ```javascript
+  orbitdb.stop()
+  ```
+### orbitdb.disconnect()
+
 ### orbitdb.keyvalue(name|address)
+> Creates and opens a keyvalue database
 
 Module: [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
 
@@ -105,6 +146,7 @@ const db = await orbitdb.keyvalue(anotherkvdb.address)
   ```
 
 ### orbitdb.log(name|address)
+> Creates and opens an eventlog database
 
 Module: [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
 
@@ -154,6 +196,7 @@ const all = db.iterator({ limit: -1 })
 ```
 
 ### orbitdb.feed(name|address)
+> Creates and opens a feed database
 
 Module: [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
 
@@ -208,6 +251,7 @@ const all = db.iterator({ limit: -1 })
 ```
 
 ### orbitdb.docs(name|address, options)
+> Creates and opens a docstore database
 
 Module: [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
 
@@ -249,6 +293,7 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
   ```
 
 ### orbitdb.counter(name|address)
+> Creates and opens a counter database
 
 Module: [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
 
@@ -274,44 +319,6 @@ const counter = await orbitdb.counter(anothercounterdb.address)
   await counter.inc(-2)
   counter.value // 8
   ```
-
-### orbitdb.create(name, type, [options])
-Creates and opens an OrbitDB database. Returns a `Promise` that resolves to [a database instance](#store). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
-- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
-- `write` (array): An array of hex encoded public keys which are used to set write acces to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
-- `overwrite` (boolean): Overwrite an existing database (Default: `false`)
-```javascript
-const db = await orbitdb.create('user.posts', 'eventlog', {
-  write: [
-    // Give access to ourselves
-    orbitdb.key.getPublic('hex'),
-    // Give access to the second peer
-    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
-  ]
-})
-// db created & opened
-```
-### orbitdb.open(address, [options])
-> Opens an OrbitDB database.
-
-Convienance methods are available when opening/creating any of the default OrbitDB database types (i.e. `orbitdb.feed(address, options)` instead of `orbitdb.open(address, { type: 'feed', ... })`)
-
-Returns a `Promise` that resolves to [a database instance](#store). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
-
-- `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
-- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
-- `create` (boolean): Whether to create the database if a valid OrbitDB address is not provided. (Default: `false`)
-- `type` (string): A supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). Required if create is set to `true`. Otherwise it's used to validate the manifest.
-- `overwrite` (boolean): Overwrite an existing database (Default: `false`)
-
-### orbitdb.stop()
-
-  Stop OrbitDB, close databases and disconnect the databases from the network.
-
-  ```javascript
-  orbitdb.stop()
-  ```
-### orbitdb.disconnect()
 
 ## Static Properties
 ### OrbitDB.databaseTypes
