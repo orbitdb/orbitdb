@@ -458,7 +458,7 @@ db.events.on(name, callback)
 db.events.on('replicated', (address) => ... )
 ```
 
-Emitted when a the database was synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
+Emitted when the database has synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
 
 #### `replicate`
 ```javascript

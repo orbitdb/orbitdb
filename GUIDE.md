@@ -1,6 +1,6 @@
 # Getting Started with OrbitDB
 
-This guide will get you familiar with using OrbitDB in your JavaScript application. OrbitDB and IPFS both work in Node.js applications as well as in browser applications. (Windows is not supported yet though)
+This guide will get you familiar with using OrbitDB in your JavaScript application. OrbitDB and IPFS both work in Node.js applications as well as in browser applications. (Windows is not supported yet though).
 
 This guide is still being worked on and we would love to get [feedback and suggestions](https://github.com/orbitdb/orbit-db/issues) on how to improve it!
 
