@@ -115,7 +115,7 @@ Object.keys(testAPIs).forEach(API => {
         it('saves database manifest reference locally', async () => {
           const manifestHash = db.address.root
           const address = db.address.toString()
-          levelup(localDataPath, (err, db) => {
+          levelup(leveldown(localDataPath), (err, db) => {
             if (err) {
               assert.equal(err, null)
             }
