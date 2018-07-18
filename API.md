@@ -58,7 +58,7 @@ const db = await orbitdb.keyvalue('profile')
 - [OrbitDB.parseAddress(address)](#parseaddressaddress)
 
 **[Store API](#store)**
-- [store.load()](#storeload)
+- [store.load()](#storeloadamount)
 - [store.close()](#storeclose)
 - [store.drop()](#storedrop)
 - [store.key](#storekey)
@@ -387,9 +387,9 @@ OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/fi
 
 Every database (store) has the following methods available in addition to their specific methods.
 
-#### store.load()
+#### store.load([amount])
 
-Load the locally persisted database state to memory.
+Load the locally persisted database state to memory. Use the optional `amount` argument to limit the number of entries loaded into memory, starting from the head(s) (Default: `-1` will load all entries)
 
 With events:
 ```javascript

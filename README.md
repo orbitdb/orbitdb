@@ -178,7 +178,7 @@ After creating an `OrbitDB` instance , you can access the different data stores.
 - [OrbitDB.parseAddress(address)](https://github.com/orbitdb/orbit-db/blob/master/API.md#parseaddressaddress)
 
 **[Store API](https://github.com/orbitdb/orbit-db/blob/master/API.md#store)**
-- [load()](https://github.com/orbitdb/orbit-db/blob/master/API.md#storeload)
+- [load()](https://github.com/orbitdb/orbit-db/blob/master/API.md#storeloadamount)
 - [close()](https://github.com/orbitdb/orbit-db/blob/master/API.md#storeclose)
 - [drop()](https://github.com/orbitdb/orbit-db/blob/master/API.md#storedrop)
 - [key](https://github.com/orbitdb/orbit-db/blob/master/API.md#storekey)
