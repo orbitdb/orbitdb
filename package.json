@@ -24,7 +24,7 @@
     "orbit-db-keystore": "~0.1.0",
     "orbit-db-kvstore": "~1.4.0",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "~2.5.0"
+    "orbit-db-store": "~2.5.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
