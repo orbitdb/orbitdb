@@ -183,6 +183,7 @@ After creating an `OrbitDB` instance , you can access the different data stores.
 - [drop()](https://github.com/orbitdb/orbit-db/blob/master/API.md#storedrop)
 - [key](https://github.com/orbitdb/orbit-db/blob/master/API.md#storekey)
 - [type](https://github.com/orbitdb/orbit-db/blob/master/API.md#storetype)
+
 **[Store Events](https://github.com/orbitdb/orbit-db/blob/master/API.md#storeevents)**
 - [replicated](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicated)
 - [replicate](https://github.com/orbitdb/orbit-db/blob/master/API.md#replicate)
