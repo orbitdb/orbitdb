@@ -300,15 +300,16 @@ Object.keys(testAPIs).forEach(API => {
         db2.events.on('replicated', (address, length) => {
           eventCount['replicated'] += length
           // console.log("[replicated]", '#' + eventCount['replicated'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished, "|")
-          assert.equal(db2.replicationStatus.progress, eventCount['replicated'])
-          assert.equal(db2.replicationStatus.max, expectedEventCount)
-
-          // Test the replicator state
-          assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
-          assert.equal(db2._loader.tasksQueued <= db2.options.referenceCount, true)
-          assert.equal(db2.options.referenceCount, 64)
-          assert.equal(db2._loader.tasksRunning, 0)
-          assert.equal(db2._loader.tasksFinished, db2.replicationStatus.progress)
+          try {
+            // Test the replicator state
+            assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
+            assert.equal(db2._loader.tasksQueued <= db2.options.referenceCount, true)
+            assert.equal(db2.options.referenceCount, 64)
+            assert.equal(db2._loader.tasksRunning, 0)
+            assert.equal(db2._loader.tasksFinished, db2.replicationStatus.progress)
+          } catch (e) {
+            reject(e)
+          }
 
           events.push({ 
             event: 'replicated', 
@@ -428,7 +429,12 @@ Object.keys(testAPIs).forEach(API => {
           eventCount['replicated'] += length
           const values = db2.iterator({limit: -1}).collect()
           // console.log("[replicated]", '#' + eventCount['replicated'] + ':', current, '/', total, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished, "|", db2._loader._stats.a, db2._loader._stats.b, db2._loader._stats.c, db2._loader._stats.d)
-          assert.equal(db2.replicationStatus.progress <= db2.replicationStatus.max, true)
+          try {
+            assert.equal(db2.replicationStatus.progress <= db2.replicationStatus.max, true)
+          } catch (e) {
+            reject(e)
+          }
+
           events.push({ 
             event: 'replicated', 
             count: eventCount['replicate'], 
