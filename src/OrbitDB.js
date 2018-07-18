@@ -97,8 +97,9 @@ class OrbitDB {
     Object.keys(this._directConnections).forEach(removeDirectConnect)
 
     // Disconnect from pubsub
-    if (this._pubsub)
-      this._pubsub.disconnect()
+    if (this._pubsub) {
+      await this._pubsub.disconnect()
+    }
 
     // Remove all databases from the state
     this.stores = {}
@@ -191,12 +192,13 @@ class OrbitDB {
   }
 
   // Callback when database was closed
-  _onClose (address) {
+  async _onClose (address) {
     logger.debug(`Close ${address}`)
 
     // Unsubscribe from pubsub
-    if(this._pubsub)
-      this._pubsub.unsubscribe(address)
+    if (this._pubsub) {
+      await this._pubsub.unsubscribe(address)
+    }
 
     delete this.stores[address]
   }
