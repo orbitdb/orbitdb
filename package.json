@@ -18,7 +18,7 @@
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.2",
     "orbit-db-counterstore": "~1.4.0",
-    "orbit-db-docstore": "~1.4.1",
+    "orbit-db-docstore": "~1.4.3",
     "orbit-db-eventstore": "~1.4.0",
     "orbit-db-feedstore": "~1.4.0",
     "orbit-db-keystore": "~0.1.0",
