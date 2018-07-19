@@ -284,7 +284,7 @@ OrbitDB uses the following modules:
 
 - [ipfs](https://github.com/ipfs/js-ipfs)
 - [ipfs-log](https://github.com/orbitdb/ipfs-log)
-- [ipfs-pubub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
+- [ipfs-pubsub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
 - [crdts](https://github.com/orbitdb/crdts)
 - [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
 - [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
