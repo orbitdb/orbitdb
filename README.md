@@ -21,7 +21,7 @@ OrbitDB provides various types of databases for different data models and use ca
 - **[docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
 - **[counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)**: Useful for counting events separate from log/feed data.
 
-All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, operation-based conflict-free replicated data structure (CRDT) for distributed systems.
+All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, operation-based conflict-free replicated data structure (CRDT) for distributed systems. If none of the OrbitDB database types match your needs and/or you need case-specific functionality, you can easily [implement and use a custom database store](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#custom-stores) of your own.
 
 #### Project status & support
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
@@ -139,31 +139,6 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a database instance.
 
 *For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
-
-### Custom Store Types
-
-You can add custom store types to OrbitDB:
-
-```javascript
-// define custom store type
-class CustomStore extends DocumentStore {
-  constructor (ipfs, id, dbname, options) {
-    super(ipfs, id, dbname, options)
-    this._type = CustomStore.type
-  }
-
-  static get type () {
-    return 'custom'
-  }
-}
-
-// add custom type to orbitdb
-OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
-
-// instantiate custom store
-let orbitdb = new OrbitDB(ipfs, dbPath)
-let store = orbitdb.create(name, CustomStore.type)
-```
 
 ## Examples
 

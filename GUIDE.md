@@ -19,6 +19,7 @@ This guide is still being worked on and we would love to get [feedback and sugge
 - [Get an entry](#get-an-entry)
 - [Persistency](#persistency)
 - [Replicating a database](#replicating-a-database)
+- [Custom Database Stores](#custom-stores)
 
 ## Background
 
@@ -348,6 +349,31 @@ ipfs1.on('ready', async () => {
     }, 1000)
   })
 })
+```
+
+## Custom Stores
+
+Use a custom store to implement case specifc functionality that is not supported by the default OrbitDB database stores. Then, you can easily add and use your custom store with OrbitDB:
+
+```javascript
+// define custom store type
+class CustomStore extends DocumentStore {
+  constructor (ipfs, id, dbname, options) {
+    super(ipfs, id, dbname, options)
+    this._type = CustomStore.type
+  }
+
+  static get type () {
+    return 'custom'
+  }
+}
+
+// add custom type to orbitdb
+OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
+
+// instantiate custom store
+let orbitdb = new OrbitDB(ipfs, dbPath)
+let store = orbitdb.create(name, CustomStore.type)
 ```
 
 ## More information
