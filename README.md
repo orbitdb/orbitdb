@@ -55,7 +55,7 @@ npm install orbit-db-cli -g
 
 ### Module with IPFS Instance
 
-If you're using `orbitd-db` to develop **browser** applications, use it as a module with the javascript instance of IPFS
+If you're using `orbitd-db` to develop **browser** or **Node.js** applications, use it as a module with the javascript instance of IPFS
 
 Install dependencies:
 
