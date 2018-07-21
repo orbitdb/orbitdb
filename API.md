@@ -95,12 +95,6 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
 ### orbitdb.open(address, [options])
 > Opens an OrbitDB database.
 
-Convienance methods are available when opening/creating any of the default OrbitDB database types: [feed](#orbitdbfeednameaddress), [docs](#orbitdbdocsnameaddress-options), [log](#orbitdblognameaddress), [keyvalue](#orbitdbkeyvaluenameaddress), [counter](#orbitdbcounternameaddress)
-
-You can use: `orbitdb.feed(address, options)`
-
-Instead of: `orbitdb.open(address, { type: 'feed', ...options })`
-
 Returns a `Promise` that resolves to [a database instance](#store). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
 
 - `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
@@ -113,9 +107,16 @@ Returns a `Promise` that resolves to [a database instance](#store). `address` (s
 const db = await orbitdb.open('/orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database')
 ```
 
-### orbitdb.disconnect()
+Convienance methods are available when opening/creating any of the default OrbitDB database types: [feed](#orbitdbfeednameaddress), [docs](#orbitdbdocsnameaddress-options), [log](#orbitdblognameaddress), [keyvalue](#orbitdbkeyvaluenameaddress), [counter](#orbitdbcounternameaddress)
 
-Close databases, connections, pubsub and reset orbitdb state.
+You can use: `orbitdb.feed(address, options)`
+
+Instead of: `orbitdb.open(address, { type: 'feed', ...options })`
+
+### orbitdb.disconnect()
+>Close databases, connections, pubsub and reset orbitdb state.
+
+Returns a `Promise` that resolves once complete.
 
 ```javascript
 await orbitdb.disconnect()
@@ -131,7 +132,7 @@ await orbitdb.stop()
 ### orbitdb.keyvalue(name|address)
 > Creates and opens a keyvalue database
 
-Module: [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
+Returns a `Promise` that resolves to a [`KeyValueStore` instance](https://github.com/orbitdb/orbit-db-kvstore).
 
 ```javascript
 const db = await orbitdb.keyvalue('application.settings')
@@ -139,21 +140,24 @@ const db = await orbitdb.keyvalue('application.settings')
 const db = await orbitdb.keyvalue(anotherkvdb.address)
 ```
 
+Module: [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
+
 **See the [Store](#store) section for details of common methods and properties.**
 
 #### put(key, value)
+Returns a `Promise` that resolves to a `String` that is the multihash of the entry.
   ```javascript
   await db.put('hello', { name: 'World' })
   ```
 
 #### set(key, value)
+Alias for `.put()`
   ```javascript
   await db.set('hello', { name: 'Friend' })
   ```
 
-*set() is an alias of put(). They both work the same.*
-
 #### get(key)
+Returns an `Object` with the contents of the entry.
   ```javascript
   const value = db.get('hello')
   // { name: 'Friend' }
@@ -162,7 +166,7 @@ const db = await orbitdb.keyvalue(anotherkvdb.address)
 ### orbitdb.log(name|address)
 > Creates and opens an eventlog database
 
-Module: [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
+Returns a `Promise` that resolves to a [`EventStore` instance](https://github.com/orbitdb/orbit-db-eventstore).
 
 ```javascript
 const db = await orbitdb.eventlog('site.visitors')
@@ -170,14 +174,18 @@ const db = await orbitdb.eventlog('site.visitors')
 const db = await orbitdb.eventlog(anotherlogdb.address)
 ```
 
+Module: [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
+
 **See the [Store](#store) section for details of common methods and properties.**
 
 #### add(event)
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.add({ name: 'User1' })
   ```
 
 #### get(hash)
+Returns an `Object` with the contents of the entry.
   ```javascript
   const event = db.get(hash)
     .map((e) => e.payload.value)
@@ -185,6 +193,8 @@ const db = await orbitdb.eventlog(anotherlogdb.address)
   ```
 
 #### iterator([options])
+
+Returns an `Array` of `Objects` based on the `options`.
 
 **options** : It is an object which supports the following properties
 
@@ -212,7 +222,7 @@ const all = db.iterator({ limit: -1 })
 ### orbitdb.feed(name|address)
 > Creates and opens a feed database
 
-Module: [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
+Returns a `Promise` that resolves to a [`FeedStore` instance](https://github.com/orbitdb/orbit-db-feedstore).
 
 ```javascript
 const db = await orbitdb.feed('orbit-db.issues')
@@ -220,14 +230,18 @@ const db = await orbitdb.feed('orbit-db.issues')
 const db = await orbitdb.feed(anotherfeeddb.address)
 ```
 
+Module: [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
+
 See the [Store](#store) section for details of common methods and properties.
 
 #### add(data)
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.add({ name: 'User1' })
   ```
 
 #### get(hash)
+Returns an `Object` with the contents of the entry.
   ```javascript
   const event = db.get(hash)
     .map((e) => e.payload.value)
@@ -235,11 +249,14 @@ See the [Store](#store) section for details of common methods and properties.
   ```
 
 #### remove(hash)
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.remove(hash)
   ```
 
 #### iterator([options])
+
+Returns an `Array` of `Objects` based on the `options`.
 
 **options** : It is an object which supports the following properties
 
@@ -267,7 +284,7 @@ const all = db.iterator({ limit: -1 })
 ### orbitdb.docs(name|address, options)
 > Creates and opens a docstore database
 
-Module: [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
+Returns a `Promise` that resolves to a [`DocumentStore` instance](https://github.com/orbitdb/orbit-db-docstore).
 
 ```javascript
 const db = await orbitdb.docs('orbit.users.shamb0t.profile')
@@ -281,14 +298,18 @@ By default, documents are indexed by field `_id`. You can also specify the field
 const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' })
 ```
 
+Module: [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
+
 **See the [Store](#store) section for details of common methods and properties.**
 
 #### put(doc)
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.put({ _id: 'QmAwesomeIpfsHash', name: 'shamb0t', followers: 500 })
   ```
 
 #### get(key)
+Returns an `Array` with a single `Object` if key exists.
   ```javascript
   const profile = db.get('shamb0t')
     .map((e) => e.payload.value)
@@ -296,12 +317,14 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
   ```
 
 #### query(mapper)
+Returns an `Array` of `Objects` based on the `mapper`.
   ```javascript
   const all = db.query((doc) => doc.followers >= 500)
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
 
 #### del(key)
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.del('shamb0t')
   ```
@@ -309,7 +332,7 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
 ### orbitdb.counter(name|address)
 > Creates and opens a counter database
 
-Module: [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
+Returns a `Promise` that resolves to a [`DocumentStore` instance](https://github.com/orbitdb/orbit-db-docstore).
 
 ```javascript
 const counter = await orbitdb.counter('song_123.play_count')
@@ -317,14 +340,18 @@ const counter = await orbitdb.counter('song_123.play_count')
 const counter = await orbitdb.counter(anothercounterdb.address)
 ```
 
+Module: [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore).
+
 **See the [Store](#store) section for details of common methods and properties.**
 
 #### value
+Returns a `Number`.
   ```javascript
   counter.value // 0
   ```
 
 #### inc([value])
+Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   await counter.inc()
   counter.value // 1
@@ -336,7 +363,7 @@ const counter = await orbitdb.counter(anothercounterdb.address)
 
 ## Static Properties
 ### OrbitDB.databaseTypes
-Returns supported database types (i.e. store types) as an Array of strings
+Returns supported database types (i.e. store types) as an `Array` of `Strings`
 ```js
 OrbitDB.databaseTypes
 // [ 'counter', 'eventlog', 'feed', 'docstore', 'keyvalue']
@@ -345,7 +372,7 @@ OrbitDB.databaseTypes
 ## Static Methods
 
 ### OrbitDB.isValidType(type)
-Returns `true` if the provided string is a supported database type
+Returns `true` if the provided `String` is a supported database type
 ```js
 OrbitDB.isValidType('docstore')
 // true
@@ -359,7 +386,7 @@ OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
 ```
 
 ### OrbitDB.getDatabaseTypes()
-Returns an object mapping database types to Store Classes
+Returns an `Object` mapping database types to Store Classes
 ```js
 OrbitDB.getDatabaseTypes()
 // { counter: [Function: CounterStore],
@@ -369,13 +396,13 @@ OrbitDB.getDatabaseTypes()
 //  keyvalue: [Function: KeyValueStore] }
 ```
 ### OrbitDB.isValidAddress(address)
-Returns `true` if the provided string is a valid orbitdb address
+Returns `true` if the provided `String` is a valid OrbitDB address
 ```js
 OrbitDB.isValidAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database')
 // true
 ```
 ### OrbitDB.parseAddress(address)
-Returns an instance of OrbitDBAddress if the provided string is a valid orbitdb address
+Returns an instance of OrbitDBAddress if the provided `String` is a valid orbitdb address
 ```js
 OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database')
 // OrbitDBAddress {
@@ -390,6 +417,8 @@ Every database (store) has the following methods available in addition to their 
 #### store.load([amount])
 
 Load the locally persisted database state to memory. Use the optional `amount` argument to limit the number of entries loaded into memory, starting from the head(s) (Default: `-1` will load all entries)
+
+Returns a `Promise` that resolves once complete
 
 With events:
 ```javascript
@@ -406,8 +435,8 @@ await db.load()
 ```
 
 #### store.close()
-
-Close the database.
+> Close the database.
+Returns a `Promise` that resolves once complete
 
 Async:
 ```javascript
@@ -415,8 +444,9 @@ await db.close()
 ```
 
 #### store.drop()
+> Remove the database locally. This does not delete any data from peers.
 
-Remove the database locally. This does not delete any data from peers.
+Returns a `Promise` that resolves once complete
 
 ```javascript
 await db.drop()
@@ -424,7 +454,7 @@ await db.drop()
 
 #### store.key
 
-The [keypair](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) used to access the database.
+Returns an instance of [`KeyPair`](https://github.com/indutny/elliptic/blob/master/lib/elliptic/ec/key.js#L8). The keypair is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) for more information on how OrbitDB uses the keypair.
 
 ```
 const key = db.key
@@ -434,7 +464,7 @@ console.log(key)
 // y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
 ```
 
-The key contains the keypair used to sign the database entries. The public key can be retrieved with:
+The public key can be retrieved with:
 ```
 console.log(db.key.getPublic('hex'))
 // 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
@@ -444,7 +474,7 @@ The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key
 
 #### store.type
 
-The type of the database as a string.
+Returns the type of the database as a `String`.
 
 ### Store Events
 
