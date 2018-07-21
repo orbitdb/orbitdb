@@ -78,9 +78,9 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(db.dbname, 'counter database')
       })
 
-      it('value is undefined when it\'s a fresh database', async () => {
-        const db = await orbitdb1.feed('counter database')
-        assert.equal(db.value, undefined)
+      it('value is zero when it\'s a fresh database', async () => {
+        const db = await orbitdb1.counter('counter database')
+        assert.equal(db.value, 0)
       })
 
       it('increases a counter value', async () => {
