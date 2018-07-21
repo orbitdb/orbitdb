@@ -29,10 +29,12 @@ const db = await orbitdb.keyvalue('profile')
   - [kv.put(key, value)](#putkey-value)
   - [kv.set(key, value)](#setkey-value)
   - [kv.get(key)](#getkey)
+- [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
 - [orbitdb.log(name|address)](#orbitdblognameaddress)
   - [log.add(event)](#addevent)
   - [log.get(hash)](#gethash)
   - [log.iterator([options])](#iteratoroptions)
+- [orbitdb.eventlog(name|address)](#orbitdbeventlognameaddress)
 - [orbitdb.feed(name|address)](#orbitdbfeednameaddress)
   - [feed.add(data)](#adddata)
   - [feed.get(hash)](#gethash-1)
@@ -43,6 +45,7 @@ const db = await orbitdb.keyvalue('profile')
   - [docs.get(hash)](#getkey-1)
   - [docs.query(mapper)](#querymapper)
   - [del(key)](#delkey)
+- [orbitdb.docstore(name|address, options)](#orbitdbdocstorenameaddress-options)
 - [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
   - [counter.value](#value)
   - [counter.inc([value])](#incvalue)
@@ -163,6 +166,10 @@ Returns an `Object` with the contents of the entry.
   // { name: 'Friend' }
   ```
 
+### orbitdb.kvstore(name|address)
+
+Alias for [`orbitdb.keyvalue()`](#orbitdbkeyvaluenameaddress)
+
 ### orbitdb.log(name|address)
 > Creates and opens an eventlog database
 
@@ -218,6 +225,10 @@ const all = db.iterator({ limit: -1 })
   .map((e) => e.payload.value)
 // [{ name: 'User1' }]
 ```
+
+### orbitdb.eventlog(name|address)
+
+Alias for [`orbitdb.log()`](#orbitdblognameaddress)
 
 ### orbitdb.feed(name|address)
 > Creates and opens a feed database
@@ -328,6 +339,10 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```javascript
   const hash = await db.del('shamb0t')
   ```
+
+### orbitdb.docstore(name|address, options)
+
+Alias for [`orbitdb.docs()`](#orbitdbdocsnameaddress-options)
 
 ### orbitdb.counter(name|address)
 > Creates and opens a counter database
