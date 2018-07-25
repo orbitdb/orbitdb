@@ -143,8 +143,13 @@ class OrbitDB {
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
-    if(opts.replicate && this._pubsub)
-      this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
+    if(opts.replicate && this._pubsub) {
+      try {
+        await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
+      } catch (e) {
+        console.error("E!", e)
+      }
+    }
 
     return store
   }

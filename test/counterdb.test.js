@@ -55,9 +55,13 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd2)
     })
 
-    beforeEach(() => {
+    beforeEach(async () => {
+    const peers1 = await ipfs1.swarm.peers()
+    console.log("p1>", peers1)
       orbitdb1 = new OrbitDB(ipfs1, './orbitdb/1')
       orbitdb2 = new OrbitDB(ipfs2, './orbitdb/2')
+    const peers2 = await ipfs1.swarm.peers()
+    console.log("p2>", peers2)
     })
 
     afterEach(async () => {
@@ -98,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
         await counter.close()
       })
 
-      it('syncs counters', async () => {
+      it.only('syncs counters', async () => {
         let options = {
           // Set write access for both clients
           write: [
@@ -110,6 +114,8 @@ Object.keys(testAPIs).forEach(API => {
         const numbers = [[13, 10], [2, 5]]
         const increaseCounter = (counterDB, i) => mapSeries(numbers[i], n => counterDB.inc(n))
 
+    const peers3 = await ipfs1.swarm.peers()
+    console.log("p3>", peers3)
         // Create a new counter database in the first client
         options = Object.assign({}, options, { path: dbPath1 })
         const counter1 = await orbitdb1.counter(new Date().getTime().toString(), options)
@@ -117,7 +123,12 @@ Object.keys(testAPIs).forEach(API => {
         options = Object.assign({}, options, { path: dbPath2, sync: true })
         const counter2 = await orbitdb2.counter(counter1.address.toString(), options)
 
+    const peers4 = await ipfs1.swarm.peers()
+    console.log("p4>", peers4)
         // Wait for peers to connect first
+        console.log("db1>", orbitdb1.id)
+        console.log("db2>", orbitdb2.id)
+        console.log("address>", counter1.address.toString())
         await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
 
