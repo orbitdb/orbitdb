@@ -252,7 +252,9 @@ A good place to start are the issues labelled ["help wanted"](https://github.com
 
 The development of OrbitDB has been sponsored by:
 
+* [Haja Networks](https://haja.io)
 * [Protocol Labs](https://protocol.ai/)
+* [Maintainer Mountaineer](https://maintainer.io)
 
 If you want to sponsor developers to work on OrbitDB, please reach out to @haadcode.
 
