@@ -535,7 +535,7 @@ Emitted while loading the local database, once for each entry. *dbname* is the n
 
 #### `ready`
 ```javascript
-db.events.on('ready', (dbname) => ... )
+db.events.on('ready', (dbname, heads) => ... )
 ```
 
 Emitted after fully loading the local database.
