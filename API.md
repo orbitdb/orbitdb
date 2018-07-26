@@ -75,6 +75,7 @@ const db = await orbitdb.keyvalue('profile')
 - [load.progress](#loadprogress)
 - [ready](#ready)
 - [write](#write)
+- [closed](#closed)
 
 ## Public Instance Methods
 ### orbitdb.create(name, type, [options])
@@ -546,3 +547,9 @@ db.events.on('write', (dbname, hash, entry) => ... )
 ```
 
 Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
+
+#### `closed`
+Emitted once the database has finished closing.
+```javascript
+db.events.on('closed', (dbname) => ... )
+```
