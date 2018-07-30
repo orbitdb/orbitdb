@@ -102,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
         await counter.close()
       })
 
-      it.only('syncs counters', async () => {
+      it('syncs counters', async () => {
         let options = {
           // Set write access for both clients
           write: [
