@@ -51,14 +51,14 @@ const db = await orbitdb.keyvalue('profile')
   - [counter.inc([value])](#incvalue)
 
 **Static Properties**
-- [OrbitDB.databaseTypes](#databasetypes)
+- [OrbitDB.databaseTypes](#orbitdbdatabasetypes)
 
 **Static Methods**
-- [OrbitDB.isValidType(type)](#isvalidtypetype)
-- [OrbitDB.addDatabaseType(type, store)](#adddatabasetypetype-store)
-- [OrbitDB.getDatabaseTypes()](#getdatabasetypes)
-- [OrbitDB.isValidAddress(address)](#isvalidaddressaddress)
-- [OrbitDB.parseAddress(address)](#parseaddressaddress)
+- [OrbitDB.isValidType(type)](#orbitdbisvalidtypetype)
+- [OrbitDB.addDatabaseType(type, store)](#orbitdbadddatabasetypetype-store)
+- [OrbitDB.getDatabaseTypes()](#orbitdbgetdatabasetypes)
+- [OrbitDB.isValidAddress(address)](#orbitdbisvalidaddressaddress)
+- [OrbitDB.parseAddress(address)](#orbitdbparseaddressaddress)
 
 **[Store API](#store)**
 - [store.load()](#storeloadamount)
@@ -67,7 +67,7 @@ const db = await orbitdb.keyvalue('profile')
 - [store.key](#storekey)
 - [store.type](#storetype)
 
-**[Store Events](#storeevents)**
+**[Store Events](#store-events)**
 - [replicated](#replicated)
 - [replicate](#replicate)
 - [replicate.progress](#replicateprogress)
