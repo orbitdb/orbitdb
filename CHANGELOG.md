@@ -1,5 +1,26 @@
 # Changelog
 
+## Table of Contents
+
+<!-- toc -->
+
+- [v0.19.0](#v0190)
+  * [Replication](#replication)
+  * [Browser compatibility](#browser-compatibility)
+  * [LevelDB](#leveldb)
+  * [General Updates](#general-updates)
+  * [Performance](#performance)
+- [v0.18.0](#v0180)
+  * [Write-permissions](#write-permissions)
+  * [Addresses](#addresses)
+  * [Replication](#replication-1)
+  * [Performance](#performance-1)
+  * [Documentation and Examples](#documentation-and-examples)
+  * [Code Base Improvements](#code-base-improvements)
+- [v0.12.0](#v0120)
+
+<!-- tocstop -->
+
 ## v0.19.0
 
 This release bring a bunch of fixes and updates improving performance, stability and browser compatibility. As always, we highly encourage to update to the latest version and report any problems in https://github.com/orbitdb/orbit-db/issues.

@@ -6,20 +6,25 @@ This guide is still being worked on and we would love to get [feedback and sugge
 
 ## Table of Contents
 
+<!-- toc -->
+
 - [Background](#background)
 - [Install](#install)
 - [Setup](#setup)
 - [Create a database](#create-a-database)
-  - [Address](#address)
-  - [Manifest](#manifest)
-- [Keys](#keys)
-- [Access Control](#access-control)
-  - [Public databases](#public-databases)
+  * [Address](#address)
+    + [Manifest](#manifest)
+  * [Keys](#keys)
+  * [Access Control](#access-control)
+    + [Public databases](#public-databases)
 - [Add an entry](#add-an-entry)
 - [Get an entry](#get-an-entry)
 - [Persistency](#persistency)
 - [Replicating a database](#replicating-a-database)
-- [Custom Database Stores](#custom-stores)
+- [Custom Stores](#custom-stores)
+- [More information](#more-information)
+
+<!-- tocstop -->
 
 ## Background
 

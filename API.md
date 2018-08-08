@@ -2,6 +2,69 @@
 
 Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a more in-depth tutorial and to understand how OrbitDB works.
 
+## Table of Contents
+
+<!-- toc -->
+
+- [Constructor](#constructor)
+  * [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
+- [Public Instance Methods](#public-instance-methods)
+  * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
+  * [orbitdb.open(address, [options])](#orbitdbopenaddress-options)
+  * [orbitdb.disconnect()](#orbitdbdisconnect)
+  * [orbitdb.stop()](#orbitdbstop)
+  * [orbitdb.keyvalue(name|address)](#orbitdbkeyvaluenameaddress)
+    + [put(key, value)](#putkey-value)
+    + [set(key, value)](#setkey-value)
+    + [get(key)](#getkey)
+  * [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
+  * [orbitdb.log(name|address)](#orbitdblognameaddress)
+    + [add(event)](#addevent)
+    + [get(hash)](#gethash)
+    + [iterator([options])](#iteratoroptions)
+  * [orbitdb.eventlog(name|address)](#orbitdbeventlognameaddress)
+  * [orbitdb.feed(name|address)](#orbitdbfeednameaddress)
+    + [add(data)](#adddata)
+    + [get(hash)](#gethash-1)
+    + [remove(hash)](#removehash)
+    + [iterator([options])](#iteratoroptions-1)
+  * [orbitdb.docs(name|address, options)](#orbitdbdocsnameaddress-options)
+    + [put(doc)](#putdoc)
+    + [get(key)](#getkey-1)
+    + [query(mapper)](#querymapper)
+    + [del(key)](#delkey)
+  * [orbitdb.docstore(name|address, options)](#orbitdbdocstorenameaddress-options)
+  * [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
+    + [value](#value)
+    + [inc([value])](#incvalue)
+- [Static Properties](#static-properties)
+  * [OrbitDB.databaseTypes](#orbitdbdatabasetypes)
+- [Static Methods](#static-methods)
+  * [OrbitDB.isValidType(type)](#orbitdbisvalidtypetype)
+  * [OrbitDB.addDatabaseType(type, store)](#orbitdbadddatabasetypetype-store)
+  * [OrbitDB.getDatabaseTypes()](#orbitdbgetdatabasetypes)
+  * [OrbitDB.isValidAddress(address)](#orbitdbisvalidaddressaddress)
+  * [OrbitDB.parseAddress(address)](#orbitdbparseaddressaddress)
+- [Store API](#store-api)
+  * [store.load([amount])](#storeloadamount)
+  * [store.close()](#storeclose)
+  * [store.drop()](#storedrop)
+  * [store.key](#storekey)
+  * [store.type](#storetype)
+- [Store Events](#store-events)
+  * [`replicated`](#replicated)
+  * [`replicate`](#replicate)
+    + [`replicate.progress`](#replicateprogress)
+  * [`load`](#load)
+    + [`load.progress`](#loadprogress)
+  * [`ready`](#ready)
+  * [`write`](#write)
+  * [`closed`](#closed)
+
+<!-- tocstop -->
+
+## Constructor
+
 ### constructor(ipfs, [directory], [options])
 ```javascript
 const orbitdb = new OrbitDB(ipfs)
@@ -20,64 +83,8 @@ After creating an `OrbitDB` instance , you can access the different data stores.
 const db = await orbitdb.keyvalue('profile')
 ```
 
-**Public OrbitDB Instance Methods**
-- [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
-- [orbitdb.open(name|address, [options])](#orbitdbopenaddress-options)
-- [orbitdb.disconnect()](#orbitdbdisconnect)
-- [orbitdb.stop()](#orbitdbstop)
-- [orbitdb.keyvalue(name|address)](#orbitdbkeyvaluenameaddress)
-  - [kv.put(key, value)](#putkey-value)
-  - [kv.set(key, value)](#setkey-value)
-  - [kv.get(key)](#getkey)
-- [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
-- [orbitdb.log(name|address)](#orbitdblognameaddress)
-  - [log.add(event)](#addevent)
-  - [log.get(hash)](#gethash)
-  - [log.iterator([options])](#iteratoroptions)
-- [orbitdb.eventlog(name|address)](#orbitdbeventlognameaddress)
-- [orbitdb.feed(name|address)](#orbitdbfeednameaddress)
-  - [feed.add(data)](#adddata)
-  - [feed.get(hash)](#gethash-1)
-  - [feed.remove(hash)](#removehash)
-  - [feed.iterator([options])](#iteratoroptions-1)
-- [orbitdb.docs(name|address, options)](#orbitdbdocsnameaddress-options)
-  - [docs.put(doc)](#putdoc)
-  - [docs.get(hash)](#getkey-1)
-  - [docs.query(mapper)](#querymapper)
-  - [del(key)](#delkey)
-- [orbitdb.docstore(name|address, options)](#orbitdbdocstorenameaddress-options)
-- [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
-  - [counter.value](#value)
-  - [counter.inc([value])](#incvalue)
-
-**Static Properties**
-- [OrbitDB.databaseTypes](#databasetypes)
-
-**Static Methods**
-- [OrbitDB.isValidType(type)](#isvalidtypetype)
-- [OrbitDB.addDatabaseType(type, store)](#adddatabasetypetype-store)
-- [OrbitDB.getDatabaseTypes()](#getdatabasetypes)
-- [OrbitDB.isValidAddress(address)](#isvalidaddressaddress)
-- [OrbitDB.parseAddress(address)](#parseaddressaddress)
-
-**[Store API](#store)**
-- [store.load()](#storeloadamount)
-- [store.close()](#storeclose)
-- [store.drop()](#storedrop)
-- [store.key](#storekey)
-- [store.type](#storetype)
-
-**[Store Events](#storeevents)**
-- [replicated](#replicated)
-- [replicate](#replicate)
-- [replicate.progress](#replicateprogress)
-- [load](#load)
-- [load.progress](#loadprogress)
-- [ready](#ready)
-- [write](#write)
-- [closed](#closed)
-
 ## Public Instance Methods
+
 ### orbitdb.create(name, type, [options])
 > Creates and opens an OrbitDB database.
 
@@ -426,11 +433,11 @@ OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/fi
 //  path: 'first-database' }
 ```
 
-## Store
+## Store API
 
 Every database (store) has the following methods available in addition to their specific methods.
 
-#### store.load([amount])
+### store.load([amount])
 
 Load the locally persisted database state to memory. Use the optional `amount` argument to limit the number of entries loaded into memory, starting from the head(s) (Default: `-1` will load all entries)
 
@@ -450,7 +457,7 @@ await db.load()
 /* database is now ready to be queried */
 ```
 
-#### store.close()
+### store.close()
 > Close the database.
 Returns a `Promise` that resolves once complete
 
@@ -459,7 +466,7 @@ Async:
 await db.close()
 ```
 
-#### store.drop()
+### store.drop()
 > Remove the database locally. This does not delete any data from peers.
 
 Returns a `Promise` that resolves once complete
@@ -468,7 +475,7 @@ Returns a `Promise` that resolves once complete
 await db.drop()
 ```
 
-#### store.key
+### store.key
 
 Returns an instance of [`KeyPair`](https://github.com/indutny/elliptic/blob/master/lib/elliptic/ec/key.js#L8). The keypair is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) for more information on how OrbitDB uses the keypair.
 
@@ -488,25 +495,25 @@ console.log(db.key.getPublic('hex'))
 
 The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key.getPublic('hex')`.
 
-#### store.type
+### store.type
 
 Returns the type of the database as a `String`.
 
-### Store Events
+## Store Events
 
 Each database in `orbit-db` contains an `events` ([EventEmitter](https://nodejs.org/api/events.html)) object that emits events that describe what's happening in the database. Events can be listened to with:
 ```javascript
 db.events.on(name, callback)
 ```
 
-#### `replicated`
+### `replicated`
 ```javascript
 db.events.on('replicated', (address) => ... )
 ```
 
 Emitted when the database has synced with another peer. This is usually a good place to re-query the database for updated results, eg. if a value of a key was changed or if there are new events in an event log.
 
-#### `replicate`
+### `replicate`
 ```javascript
 db.events.on('replicate', (address) => ... )
 ```
@@ -520,7 +527,7 @@ db.events.on('replicate.progress', (address, hash, entry, progress, have) => ...
 
 Emitted while replicating a database. *address* is id of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is the current progress. *have* is a map of database pieces we have.
 
-#### `load`
+### `load`
 ```javascript
 db.events.on('load', (dbname) => ... )
 ```
@@ -534,21 +541,21 @@ db.events.on('load.progress', (address, hash, entry, progress, total) => ... )
 
 Emitted while loading the local database, once for each entry. *dbname* is the name of the database that emitted the event. *hash* is the multihash of the entry that was just loaded. *entry* is the database operation entry. *progress* is a sequential number starting from 0 upon calling `load()`.
 
-#### `ready`
+### `ready`
 ```javascript
 db.events.on('ready', (dbname, heads) => ... )
 ```
 
 Emitted after fully loading the local database.
 
-#### `write`
+### `write`
 ```javascript
 db.events.on('write', (dbname, hash, entry) => ... )
 ```
 
 Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
 
-#### `closed`
+### `closed`
 Emitted once the database has finished closing.
 ```javascript
 db.events.on('closed', (dbname) => ... )
