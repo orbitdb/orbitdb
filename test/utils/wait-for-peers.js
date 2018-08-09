@@ -15,6 +15,7 @@ const waitForPeers = (ipfs, peersToWait, topic, callback) => {
         }
       } catch (e) {
         console.error("EEEEEEEEE", e)
+        reject(e)
       }
     }, 500)
   })

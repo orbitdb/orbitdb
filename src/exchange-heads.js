@@ -36,7 +36,7 @@ const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection,
   const heads = getHeadsForDatabase(getStore(address))
   logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
   if (heads) {
-    channel.send(JSON.stringify({ address: address, heads: heads }))
+    await channel.send(JSON.stringify({ address: address, heads: heads }))
   }
 
   return channel
