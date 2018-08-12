@@ -24,7 +24,9 @@
     "orbit-db-keystore": "~0.1.0",
     "orbit-db-kvstore": "~1.4.0",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "~2.5.3"
+    "orbit-db-store": "~2.5.3",
+    "remark-cli": "^5.0.0",
+    "remark-validate-links": "^7.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -50,7 +52,7 @@
     "examples:node": "node examples/eventlog.js",
     "examples:browser-macos": "open examples/browser/browser.html",
     "examples:browser-linux": "xdg-open examples/browser/browser.html",
-    "toc": "markdown-toc --no-first1 -i README.md && markdown-toc --no-first1 -i API.md && markdown-toc --no-first1 -i GUIDE.md && markdown-toc --no-first1 -i CHANGELOG.md",
+    "lint:docs": "markdown-toc --no-first1 -i README.md && markdown-toc --no-first1 -i API.md && markdown-toc --no-first1 -i GUIDE.md && markdown-toc --no-first1 -i CHANGELOG.md && remark -qf -u validate-links .",
     "test": "TEST=all mocha",
     "build": "npm run build:es5 && npm run build:debug && npm run build:dist && npm run build:examples",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp node_modules/ipfs/dist/index.js examples/browser/lib/ipfs.js",

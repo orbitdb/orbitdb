@@ -75,7 +75,7 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 
 - `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
 
-After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store). See the [Store](#store) section for details of common methods and properties.
+After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
 
 *For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
 
@@ -88,7 +88,7 @@ const db = await orbitdb.keyvalue('profile')
 ### orbitdb.create(name, type, [options])
 > Creates and opens an OrbitDB database.
 
-Returns a `Promise` that resolves to [a database instance](#store). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
+Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
 - `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
 - `write` (array): An array of hex encoded public keys which are used to set write acces to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
@@ -106,7 +106,7 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
 ### orbitdb.open(address, [options])
 > Opens an OrbitDB database.
 
-Returns a `Promise` that resolves to [a database instance](#store). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
+Returns a `Promise` that resolves to [a database instance](#store-api). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
 
 - `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
 - `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
@@ -153,7 +153,7 @@ const db = await orbitdb.keyvalue(anotherkvdb.address)
 
 Module: [orbit-db-kvstore](https://github.com/orbitdb/orbit-db-kvstore)
 
-**See the [Store](#store) section for details of common methods and properties.**
+**See the [Store](#store-api) section for details of common methods and properties.**
 
 #### put(key, value)
 Returns a `Promise` that resolves to a `String` that is the multihash of the entry.
@@ -191,7 +191,7 @@ const db = await orbitdb.eventlog(anotherlogdb.address)
 
 Module: [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
 
-**See the [Store](#store) section for details of common methods and properties.**
+**See the [Store](#store-api) section for details of common methods and properties.**
 
 #### add(event)
 Returns a `Promise` that resolves to the multihash of the entry as a `String`.
@@ -251,7 +251,7 @@ const db = await orbitdb.feed(anotherfeeddb.address)
 
 Module: [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
 
-See the [Store](#store) section for details of common methods and properties.
+See the [Store](#store-api) section for details of common methods and properties.
 
 #### add(data)
 Returns a `Promise` that resolves to the multihash of the entry as a `String`.
@@ -319,7 +319,7 @@ const db = await orbitdb.docs('orbit.users.shamb0t.profile', { indexBy: 'name' }
 
 Module: [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
 
-**See the [Store](#store) section for details of common methods and properties.**
+**See the [Store](#store-api) section for details of common methods and properties.**
 
 #### put(doc)
 Returns a `Promise` that resolves to the multihash of the entry as a `String`.
@@ -365,7 +365,7 @@ const counter = await orbitdb.counter(anothercounterdb.address)
 
 Module: [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore).
 
-**See the [Store](#store) section for details of common methods and properties.**
+**See the [Store](#store-api) section for details of common methods and properties.**
 
 #### value
 Returns a `Number`.
@@ -493,7 +493,7 @@ console.log(db.key.getPublic('hex'))
 // 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
 ```
 
-The key can also be accessed from the [OrbitDB](#orbitdb) instance: `orbitdb.key.getPublic('hex')`.
+The key can also be accessed from the OrbitDB instance: `orbitdb.key.getPublic('hex')`.
 
 ### store.type
 

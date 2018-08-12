@@ -71,7 +71,7 @@ ipfs.on('ready', () => {
 })
 ```
 
-`orbitdb` is now the [OrbitDB](#orbitdb) instance we can use to interact with the databases.
+`orbitdb` is now the OrbitDB instance we can use to interact with the databases.
 
 ## Create a database
 
