@@ -28,16 +28,29 @@ This is the Javascript implementation and it works both in **Browsers** and **No
 
 ## Table of Contents
 
+<!-- toc -->
+
 - [Usage](#usage)
-  - [CLI](#cli)
-  - [Module with IPFS Instance](#module-with-ipfs-instance)
-  - [Module with IPFS Daemon](#module-with-ipfs-daemon)
+  * [CLI](#cli)
+  * [Module with IPFS Instance](#module-with-ipfs-instance)
+  * [Module with IPFS Daemon](#module-with-ipfs-daemon)
 - [API](#api)
 - [Examples](#examples)
+  * [Install dependencies](#install-dependencies)
+  * [Browser example](#browser-example)
+  * [Node.js example](#nodejs-example)
 - [Packages](#packages)
+  * [OrbitDB Store Packages](#orbitdb-store-packages)
 - [Development](#development)
+  * [Run Tests](#run-tests)
+  * [Build](#build)
+  * [Benchmark](#benchmark)
+  * [Logging](#logging)
 - [Contributing](#contributing)
+- [Sponsors](#sponsors)
 - [License](#license)
+
+<!-- tocstop -->
 
 ## Usage
 
@@ -126,20 +139,6 @@ const db = await orbitdb.log('hello')
 
 See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the full documentation.
 
-### constructor(ipfs, [directory], [options])
-```javascript
-const orbitdb = new OrbitDB(ipfs)
-```
-Creates and returns an instance of OrbitDB. Use the optional `directory` argument to specify a path to be used for the database files (Default: `'./orbitdb'`). In addition, you can use the optional `options` argument for further configuration. It is an object with any of these properties:
-
-- `peerId` (string): By default it uses the base58 string of the ipfs peer id.
-
-- `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
-
-After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a database instance.
-
-*For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
-
 ## Examples
 
 ### Install dependencies
@@ -212,7 +211,7 @@ OrbitDB uses the following modules:
 - [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
 - [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
 
-##### OrbitDB Store Packages
+### OrbitDB Store Packages
 - [orbit-db-store](https://github.com/orbitdb/orbit-db-store)
 - [orbit-db-eventstore](https://github.com/orbitdb/orbit-db-eventstore)
 - [orbit-db-feedstore](https://github.com/orbitdb/orbit-db-feedstore)
@@ -224,24 +223,24 @@ To understand a little bit about the architecture, check out a visualization of 
 
 ## Development
 
-#### Run Tests
+### Run Tests
 ```
 npm test
 ```
 
-#### Build
+### Build
 ```
 npm run build
 ```
 
-#### Benchmark
+### Benchmark
 ```
 node benchmarks/benchmark-add.js
 ```
 
 See [benchmarks/](https://github.com/orbitdb/orbit-db/tree/master/benchmarks) for more benchmarks.
 
-#### Logging
+### Logging
 
 To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `debug`,`warn` or `error`:
 
