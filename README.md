@@ -268,4 +268,4 @@ If you want to sponsor developers to work on OrbitDB, please reach out to @haadc
 
 ## License
 
-[MIT](LICENSE) ©️ 2017 Haadcode
+[MIT](LICENSE) © 2015-2018 Protocol Labs Inc., Haja Networks Oy
