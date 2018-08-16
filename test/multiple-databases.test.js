@@ -142,7 +142,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it.only('replicates multiple open databases', async () => {
-      const entryCount = 32
+      const entryCount = 1
       const entryArr = []
 
       // Create an array that we use to create the db entries

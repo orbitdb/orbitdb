@@ -49,7 +49,7 @@
     "examples:node": "node examples/eventlog.js",
     "examples:browser-macos": "open examples/browser/browser.html",
     "examples:browser-linux": "xdg-open examples/browser/browser.html",
-    "test": "TEST=all mocha",
+    "test": "TEST=go IPFS_LOGGING=DEBUG DEBUG=ipfsd-ctl:daemon:stderr mocha",
     "build": "npm run build:es5 && npm run build:debug && npm run build:dist && npm run build:examples",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp node_modules/ipfs/dist/index.js examples/browser/lib/ipfs.js",
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js",
