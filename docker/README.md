@@ -21,6 +21,15 @@ After building local image, run node.js-examples inside container:
 docker run -ti --rm orbit-db npm run examples:node
 ```
 
+## Why would you want to run OrbitDB in container?
+
+Containers are nice because as software execution environments they are:
+- Reproducible, which helps testing and development because you can revert container to original state by destroying it and creating it again,
+- Isolated, which guarantees that external factors like npm versions, operating system version, or other installed software like native compilers do not affect the execution.
+
+They also make implementing virtualized networks for testing and benchmarking easier, which may help projects that use OrbitDB.
+
 ## Tested versions
 
-- Docker 1.13.1 (Fedora Linux 27)
+- Docker 1.13.1 (Linux 4.17.5-100.fc27.x86_64)
+- Docker 18.06.1-ce (Linux 4.17.5-100.fc27.x86_64)
