@@ -190,7 +190,7 @@ Object.keys(testAPIs).forEach(API => {
           const db1 = await database.create(orbitdb1, 'write error test 1', options)
           options = Object.assign({}, options, { path: dbPath + '/sync-test/2', sync: true })
           const db2 = await database.create(orbitdb2, 'write error test 1', options)
-          
+
           try {
             // Catch replication event if the update from peer 2 got synced and into the database
             db1.events.on('replicated', () => err = new Error('Shouldn\'t replicate!'))
@@ -216,7 +216,7 @@ Object.keys(testAPIs).forEach(API => {
               await db1.close()
               await db2.close()
               if (!err) {
-                reject(err)
+                reject(new Error('tryInsert should throw an err'))
               } else {
                 resolve()
               }
