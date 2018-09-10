@@ -102,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
           const options = {
             // Set write access for both clients
             write: [
-              orbitdb1.key.getPublic('hex')
+              orbitdb1.identity.publicKey
             ],
           }
 

@@ -82,13 +82,15 @@ Object.keys(testAPIs).forEach(API => {
       await connectPeers(ipfs1, ipfs2)
       orbitdb1 = new OrbitDB(ipfs1, dbPath1)
       orbitdb2 = new OrbitDB(ipfs2, dbPath2)
+      await orbitdb1.initialize()
+      await orbitdb2.initialize()
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if(orbitdb2) 
+      if(orbitdb2)
         await orbitdb2.stop()
 
       if (ipfsd1)
@@ -102,8 +104,8 @@ Object.keys(testAPIs).forEach(API => {
       let options = {}
       // Set write access for both clients
       options.write = [
-        orbitdb1.key.getPublic('hex'), 
-        orbitdb2.key.getPublic('hex')
+        orbitdb1.identity.publicKey,
+        orbitdb2.identity.publicKey
       ],
 
       console.log("Creating databases and waiting for peers to connect")
@@ -117,7 +119,7 @@ Object.keys(testAPIs).forEach(API => {
         localDatabases.push(db)
       }
 
-      // Open the databases on the second node, set 'sync' flag so that 
+      // Open the databases on the second node, set 'sync' flag so that
       // the second peer fetches the db manifest from the network
       options = Object.assign({}, options, { sync: true })
       for (let [index, dbInterface] of databaseInterfaces.entries()) {
@@ -149,7 +151,7 @@ Object.keys(testAPIs).forEach(API => {
       for (let i = 1; i < entryCount + 1; i ++)
         entryArr.push(i)
 
-      // Result state, 
+      // Result state,
       // we count how many times 'replicated' event was fired per db
       let replicated = {}
       localDatabases.forEach(db => {

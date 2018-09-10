@@ -38,7 +38,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb) 
+      if(orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
@@ -165,12 +165,12 @@ Object.keys(testAPIs).forEach(API => {
 
           it('creates an access controller and adds ourselves as writer by default', async () => {
             db = await orbitdb.create('fourth', 'feed')
-            assert.deepEqual(db.access.write, [orbitdb.key.getPublic('hex')])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and adds writers', async () => {
-            db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')] })
-            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')])
+            db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.identity.publicKey] })
+            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and doesn\'t add an admin', async () => {
@@ -228,7 +228,7 @@ Object.keys(testAPIs).forEach(API => {
       it('opens a database and adds the creator as the only writer', async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, write: [] })
         assert.equal(db.access.write.length, 1)
-        assert.equal(db.access.write[0], db.key.getPublic('hex'))
+        assert.equal(db.access.write[0], db.identity.publicKey)
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
@@ -256,6 +256,7 @@ Object.keys(testAPIs).forEach(API => {
         await db.add('hello2')
 
         db = await orbitdb.open(db.address)
+
         await db.load()
         const res = db.iterator({ limit: -1 }).collect()
 
