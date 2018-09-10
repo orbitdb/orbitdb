@@ -2,9 +2,9 @@
 
 class AccessController {
   constructor () {
-    this._access = { 
-      admin: [], 
-      write: [],  
+    this._access = {
+      admin: [],
+      write: [],
       read: [], // Not used atm
     }
   }
@@ -12,6 +12,17 @@ class AccessController {
   /* Overridable functions */
   async load (address) {}
   async save () {}
+
+  async canAppend(entry, identityProvider){
+    //verify identity?
+    if (this._access.write.includes('*'))
+      return true
+
+    if (this._access.write.includes(entry.identity.publicKey))
+      return true
+
+    return false
+  }
 
   /* Properties */
   get admin () {
@@ -78,7 +89,7 @@ class AccessController {
         break
       default:
       break
-    }    
+    }
   }
 }
 
