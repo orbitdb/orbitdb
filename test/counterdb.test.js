@@ -118,19 +118,18 @@ Object.keys(testAPIs).forEach(API => {
         options = Object.assign({}, options, { path: dbPath2, sync: true })
         const counter2 = await orbitdb2.counter(counter1.address.toString(), options)
 
-        // // Wait for peers to connect first
+        // Wait for peers to connect first
         await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
-        //
-        // // Increase the counters sequentially
+
+        // Increase the counters sequentially
         await mapSeries([counter1, counter2], increaseCounter)
-        //
+
         return new Promise(resolve => {
           // Wait for a while to make sure db's have been synced
           setTimeout(() => {
-            assert.equal(30, 30)
-            // assert.equal(counter1.value, 30)
-            // assert.equal(counter2.value, 30)
+            assert.equal(counter1.value, 30)
+            assert.equal(counter2.value, 30)
             resolve()
           }, 1000)
         })

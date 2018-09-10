@@ -121,7 +121,6 @@ class OrbitDB {
       await this.initialize()
     // Get the type -> class mapping
     const Store = databaseTypes[type]
-    // this.identity = this.identity || await IdentityProvider.createIdentity(this.keystore, this.id, options.identitySignerFn)
 
     if (!Store)
       throw new Error(`Invalid database type '${type}'`)
