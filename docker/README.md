@@ -24,8 +24,8 @@ docker run -ti --rm orbit-db npm run examples:node
 ## Why would you want to run OrbitDB in container?
 
 Containers are nice because as software execution environments they are:
-- Reproducible, which helps testing and development because you can revert container to original state by destroying it and creating it again,
-- Isolated, which guarantees that external factors like npm versions, operating system version, or other installed software like native compilers do not affect the execution.
+- Reproducible, which helps testing and development because you can revert the container to original state by destroying it and creating it again,
+- Isolated, which guarantees that external factors like npm versions, the operating system version, or other installed software like native compilers do not affect the execution.
 
 They also make implementing virtualized networks for testing and benchmarking easier, which may help projects that use OrbitDB.
 
