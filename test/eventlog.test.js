@@ -30,11 +30,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+      orbitdb1 = await OrbitDB.init(ipfs, dbPath + '/1')
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
       if (ipfsd)

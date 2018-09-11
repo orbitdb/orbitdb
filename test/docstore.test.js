@@ -26,14 +26,14 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(config.daemon1.repo)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+      orbitdb1 = await OrbitDB.init(ipfs, dbPath + '/1')
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if (ipfsd) 
+      if (ipfsd)
         await stopIpfs(ipfsd)
     })
 
@@ -141,11 +141,11 @@ Object.keys(testAPIs).forEach(API => {
         const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
 
         const expectedOperation = {
-          op: 'PUT', 
-          key: 'sup world', 
-          value: { 
-            _id: 'sup world', 
-            doc: 'some of the things', 
+          op: 'PUT',
+          key: 'sup world',
+          value: {
+            _id: 'sup world',
+            doc: 'some of the things',
             views: 10
           },
         }
@@ -170,10 +170,10 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Specified index', function() {
       beforeEach(async () => {
-        const options = { 
-          indexBy: 'doc', 
-          replicate: false, 
-          maxHistory: 0 
+        const options = {
+          indexBy: 'doc',
+          replicate: false,
+          maxHistory: 0
         }
         db = await orbitdb1.docstore(config.dbname, options)
       })

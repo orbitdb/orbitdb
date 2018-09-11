@@ -31,19 +31,24 @@ let databaseTypes = {
 class OrbitDB {
   constructor(ipfs, directory, options = {}) {
     this._ipfs = ipfs
-    this.id = options.peerId || (this._ipfs._peerInfo ? this._ipfs._peerInfo.id._idB58String : 'default')
+    this.id = options.peerId
+    this.identity = options.identity
     this._pubsub = options && options.broker
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
-    this.stores = {}
     this.directory = directory || './orbitdb'
-    this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
-    this.identity = options.identity
+    this.stores = {}
     this._directConnections = {}
   }
 
-  async initialize(options = {}) {
-    this.identity = await IdentityProvider.createIdentity(this.keystore, this.id, options.identitySignerFn)
+  static async init (ipfs, directory, options = {}) {
+    const { id } = await ipfs.id()
+    directory = directory || './orbitdb'
+    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+    const identity = options.identity || await IdentityProvider.createIdentity(keystore, options.id || id, options.identitySignerFn)
+    options = Object.assign({}, options, { peerId: id, identity: identity })
+    const orbitdb = new OrbitDB(ipfs, directory, options)
+    return orbitdb
   }
 
   /* Databases */
@@ -117,8 +122,6 @@ class OrbitDB {
 
   /* Private methods */
   async _createStore (type, address, options) {
-    if (!this.identity)
-      await this.initialize()
     // Get the type -> class mapping
     const Store = databaseTypes[type]
 
@@ -222,9 +225,6 @@ class OrbitDB {
   async create (name, type, options = {}) {
     logger.debug(`create()`)
 
-    if (!this.identity)
-      await this.initialize()
-
     if (!OrbitDB.isValidType(type))
       throw new Error(`Invalid database type '${type}'`)
 
@@ -289,9 +289,6 @@ class OrbitDB {
    */
   async open (address, options = {}) {
     logger.debug(`open()`)
-
-    if (!this.identity)
-      await this.initialize()
 
     options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)

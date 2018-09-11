@@ -55,10 +55,8 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     beforeEach(async () => {
-      orbitdb1 = new OrbitDB(ipfs1, './orbitdb/1')
-      orbitdb2 = new OrbitDB(ipfs2, './orbitdb/2')
-      await orbitdb1.initialize()
-      await orbitdb2.initialize()
+      orbitdb1 = await OrbitDB.init(ipfs1, './orbitdb/1')
+      orbitdb2 = await OrbitDB.init(ipfs2, './orbitdb/2')
     })
 
     afterEach(async () => {
