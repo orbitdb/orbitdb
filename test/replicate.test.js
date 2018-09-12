@@ -64,8 +64,8 @@ Object.keys(testAPIs).forEach(API => {
     beforeEach(async () => {
       clearInterval(timer)
 
-      orbitdb1 = await OrbitDB.init(ipfs1, dbPath1)
-      orbitdb2 = await OrbitDB.init(ipfs2, dbPath2)
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
 
       options = {
         // Set write access for both clients

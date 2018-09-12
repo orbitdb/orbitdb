@@ -134,7 +134,7 @@ describe.skip('OrbitDB - Network Stress Tests', function() {
       }
 
       const createOrbitDB = async (databaseConfig, ipfs) => {
-        const orbitdb = await OrbitDB.init(ipfs, path.join('./orbitdb/network-tests/', databaseConfig.name))
+        const orbitdb = await OrbitDB.createInstance(ipfs, { directory: path.join('./orbitdb/network-tests/', databaseConfig.name) })
         const db = await orbitdb.eventlog(databaseConfig.address, {
           write: ['*']
         })

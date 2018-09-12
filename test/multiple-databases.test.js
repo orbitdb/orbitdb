@@ -80,8 +80,8 @@ Object.keys(testAPIs).forEach(API => {
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
-      orbitdb1 = await OrbitDB.init(ipfs1, dbPath1)
-      orbitdb2 = await OrbitDB.init(ipfs2, dbPath2)
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
     })
 
     after(async () => {

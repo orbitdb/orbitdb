@@ -41,9 +41,9 @@ class OrbitDB {
     this._directConnections = {}
   }
 
-  static async init (ipfs, directory, options = {}) {
+  static async createInstance (ipfs, options = {}) {
     const { id } = await ipfs.id()
-    directory = directory || './orbitdb'
+    const directory = options.directory || './orbitdb'
     const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
     const identity = options.identity || await IdentityProvider.createIdentity(keystore, options.id || id, options.identitySignerFn)
     options = Object.assign({}, options, { peerId: id, identity: identity })
