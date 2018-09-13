@@ -17,7 +17,7 @@
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "~1.4.0",
+    "orbit-db-counterstore": "github:shamb0t/orbit-db-counterstore#feat/new-ipfs-log",
     "orbit-db-docstore": "~1.4.3",
     "orbit-db-eventstore": "~1.4.0",
     "orbit-db-feedstore": "~1.4.0",
