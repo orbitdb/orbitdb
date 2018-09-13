@@ -11,6 +11,7 @@ class IPFSAccessController extends AccessController {
   async load (address) {
     // Transform '/ipfs/QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
     // to 'QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
+    address = address.toString().replace(/\\/g, '/');
     if (address.indexOf('/ipfs') === 0)
       address = address.split('/')[2]
 

@@ -138,7 +138,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)
-          assert.equal(manifest.accessController.indexOf('/ipfs'), 0)
+          assert.ok(manifest.accessController.indexOf('/ipfs') === 0 || manifest.accessController.indexOf('\\ipfs') === 0)
         })
 
         it('can pass local database directory as an option', async () => {
