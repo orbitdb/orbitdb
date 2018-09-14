@@ -28,15 +28,15 @@ let databaseTypes = {
   'keyvalue': KeyValueStore,
 }
 
-class OrbitDB {
-  constructor(ipfs, directory, options = {}) {
+  class OrbitDB {
+  constructor(ipfs, identity, options = {}) {
     this._ipfs = ipfs
     this.id = options.peerId
-    this.identity = options.identity
+    this.identity = identity
     this._pubsub = options && options.broker
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
-    this.directory = directory || './orbitdb'
+    this.directory = options.directory || './orbitdb'
     this.stores = {}
     this._directConnections = {}
   }
@@ -44,10 +44,10 @@ class OrbitDB {
   static async createInstance (ipfs, options = {}) {
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+    const keystore = options.keystore || Keystore.create(path.join(directory, options.id || id, '/keystore'))
     const identity = options.identity || await IdentityProvider.createIdentity(keystore, options.id || id, options.identitySignerFn)
-    options = Object.assign({}, options, { peerId: id, identity: identity })
-    const orbitdb = new OrbitDB(ipfs, directory, options)
+    options = Object.assign({}, options, { peerId: id , directory: directory })
+    const orbitdb = new OrbitDB(ipfs, identity, options)
     return orbitdb
   }
 
