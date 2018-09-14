@@ -14,7 +14,7 @@ This guide is still being worked on and we would love to get [feedback and sugge
 - [Create a database](#create-a-database)
   * [Address](#address)
     + [Manifest](#manifest)
-  * [Keys](#keys)
+  * [Identity](#identity)
   * [Access Control](#access-control)
     + [Public databases](#public-databases)
 - [Add an entry](#add-an-entry)
@@ -135,27 +135,31 @@ The database manifest can be fetched from IPFS and it looks like this:
 }
 ```
 
-### Keys
+### Identity
 
-Each entry in a database is signed by who created that entry. The signing key, the key that a peer uses to sign entries, can be accessed as a member variable of the database instance:
+Each entry in a database is signed by who created that entry. The identity, which includes the public key used to sign entries, can be accessed via the identity member variable of the database instance:
 
 ```
-const key = db.key
-console.log(key)
-// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e
-// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b
-// y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
+const identity = db.identity
+console.log(identity.toJSON())
+//{ id: 'QmZyYjpG6SMJJx2rbye8HXNMufGRtpn9yFkdd27uuq6xrR',
+//  publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
+//  signatures:
+//   { id: '3045022058bbb2aa415623085124b32b254b8668d95370261ade8718765a8086644fc8ae022100c736b45c6b2ef60c921848027f51020a70ee50afa20bc9853877e994e6121c15',
+//     publicKey: '3046022100d138ccc0fbd48bd41e74e40ddf05c1fa6ff903a83b2577ef7d6387a33992ea4b022100ca39e8d8aef43ac0c6ec05c1b95b41fce07630b5dc61587a32d90dc8e4cf9766'
+//   },
+//  type: 'orbitdb'
+//}
 ```
+The identity also contains signatures proving possession of the id and OrbitDB public key. This is included to allow proof of ownership of an external public key within OrbitDB.
 
-The key contains the keypair used to sign the database entries. The public key can be retrieved with:
+The OrbitDB public key can be retrieved with:
 ```
-console.log(db.key.getPublic('hex'))
+console.log(db.identity.publicKey)
 // 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
 ```
 
-The key can also be accessed from the OrbitDB instance: `orbitdb.key.getPublic('hex')`.
-
-If you want to give access to other peers to write to a database, you need to get their public key in hex and add it to the access controller upon creating the database. If you want others to give you the access to write, you'll need to give them your public key (output of `orbitdb.key.getPublic('hex')`). For more information, see: [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control).
+If you want to give access to other peers to write to a database, you need to get their public key in hex and add it to the access controller upon creating the database. If you want others to give you the access to write, you'll need to give them your public key (output of `orbitdb.identity.publicKey`). For more information, see: [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control).
 
 ### Access Control
 
@@ -172,7 +176,7 @@ ipfs.on('ready', async () => {
 
   const access = {
     // Give write access to ourselves
-    write: [orbitdb.key.getPublic('hex')],
+    write: [orbitdb.identity.publicKey],
   }
 
   const db = await orbitdb.keyvalue('first-database', access)
@@ -181,7 +185,7 @@ ipfs.on('ready', async () => {
 })
 ```
 
-To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's key: `orbitdb.key.getPublic('hex')`.
+To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's key: `orbitdb.identity.publicKey`.
 
 The keys look like this:
 `042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839`
@@ -196,7 +200,7 @@ ipfs.on('ready', async () => {
     // Setup write access
     write: [
       // Give access to ourselves
-      orbitdb.key.getPublic('hex'),
+      orbitdb.identity.publicKey,
       // Give access to the second peer
       '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
     ],

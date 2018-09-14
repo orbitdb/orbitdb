@@ -48,9 +48,12 @@ let databaseTypes = {
   }
 
   static async createInstance (ipfs, options = {}) {
+    if (!isDefined(ipfs))
+      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || Keystore.create(path.join(directory, options.id || id, '/keystore'))
+    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
     const identity = options.identity || await IdentityProvider.createIdentity(keystore, options.id || id, options.identitySignerFn)
     options = Object.assign({}, options, { peerId: id , directory: directory })
     const orbitdb = new OrbitDB(ipfs, identity, options)
