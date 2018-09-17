@@ -344,7 +344,6 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
 Returns an `Array` with a single `Object` if key exists.
   ```javascript
   const profile = db.get('shamb0t')
-    .map((e) => e.payload.value)
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
 
