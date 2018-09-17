@@ -6,8 +6,9 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 <!-- toc -->
 
-- [Constructor](#constructor)
-  * [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
+- [Creating an OrbitDB instance](#createinstance)
+  * [createInstance(ipfs, [options])](#createInstanceipfs-options)
+  * [constructor(ipfs, identity, [options])](#constructoripfs-directory-options)
 - [Public Instance Methods](#public-instance-methods)
   * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
   * [orbitdb.open(address, [options])](#orbitdbopenaddress-options)

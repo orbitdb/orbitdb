@@ -14,7 +14,7 @@ const AccessController = require('./ipfs-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
-
+const isDefined = require('./utils/is-defined')
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('ERROR')
@@ -30,9 +30,15 @@ let databaseTypes = {
 
   class OrbitDB {
   constructor(ipfs, identity, options = {}) {
+    if (!isDefined(ipfs))
+      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
+    if (!isDefined(identity))
+      throw new Error('identity is a required as argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
     this._ipfs = ipfs
-    this.id = options.peerId
     this.identity = identity
+    this.id = options.peerId
     this._pubsub = options && options.broker
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
