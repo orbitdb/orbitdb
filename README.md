@@ -84,7 +84,7 @@ const OrbitDB = require('orbit-db')
 // OrbitDB uses Pubsub which is an experimental feature
 // and need to be turned on manually.
 // Note that these options need to be passed to IPFS in
-// all examples even if not specfied so.
+// all examples even if not specified so.
 const ipfsOptions = {
   EXPERIMENTAL: {
     pubsub: true
