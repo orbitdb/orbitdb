@@ -272,7 +272,7 @@ class OrbitDB {
   /*
       options = {
         localOnly: false // if set to true, throws an error if database can't be found locally
-        create: false // wether to create the database
+        create: false // whether to create the database
         type: TODO
         overwrite: TODO
 

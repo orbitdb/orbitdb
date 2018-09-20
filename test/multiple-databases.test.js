@@ -66,7 +66,7 @@ Object.keys(testAPIs).forEach(API => {
     let localDatabases = []
     let remoteDatabases = []
 
-    // Create two IPFS instances and two OrbitDB instaces (2 nodes/peers)
+    // Create two IPFS instances and two OrbitDB instances (2 nodes/peers)
     before(async () => {
       config.daemon1.repo = ipfsPath1
       config.daemon2.repo = ipfsPath2
