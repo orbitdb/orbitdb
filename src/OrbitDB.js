@@ -34,7 +34,7 @@ let databaseTypes = {
       throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
 
     if (!isDefined(identity))
-      throw new Error('identity is a required as argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+      throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
 
     this._ipfs = ipfs
     this.identity = identity
