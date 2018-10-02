@@ -202,8 +202,8 @@ ipfs.on('ready', async () => {
     ],
   }
 
-  const db = await orbitdb.keyvalue('first-database', access)
-  console.log(db.address.toString())
+  const db1 = await orbitdb.keyvalue('first-database', access)
+  console.log(db1.address.toString())
   // /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
 
   // Second peer opens the database from the address
