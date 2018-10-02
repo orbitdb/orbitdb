@@ -28,7 +28,7 @@ let databaseTypes = {
   'keyvalue': KeyValueStore,
 }
 
-  class OrbitDB {
+class OrbitDB {
   constructor(ipfs, identity, options = {}) {
     if (!isDefined(ipfs))
       throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
@@ -137,14 +137,14 @@ let databaseTypes = {
     if (!Store)
       throw new Error(`Invalid database type '${type}'`)
 
-    let accessController
-    if (options.accessControllerAddress) {
+    let accessController = options.accessController
+    if (!accessController) {
       accessController = new IPFSAccessController(this._ipfs)
-      await accessController.load(options.accessControllerAddress)
     }
 
-    const cache = await this._loadCache(this.directory, address)
+    await accessController.setup(options)
 
+    const cache = await this._loadCache(this.directory, address)
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
       cache: cache,
@@ -245,7 +245,7 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an IPFSAccessController
-    const accessController = new IPFSAccessController(this._ipfs)
+    const accessController = options.accessController || new IPFSAccessController(this._ipfs)
     /* Disabled temporarily until we do something with the admin keys */
     // Add admins of the database to the access controller
     // if (options && options.admin) {
@@ -255,12 +255,15 @@ let databaseTypes = {
     //   accessController.add('admin', this.key.getPublic('hex'))
     // }
     // Add keys that can write to the database
-    if (options && options.write && options.write.length > 0) {
-      options.write.forEach(e => accessController.add('write', e))
-    } else {
-      // Default is to add ourselves as the admin of the database
-      accessController.add('write', this.identity.publicKey)
+    if (!options.accessController) {
+      if (options && options.write && options.write.length > 0) {
+        await Promise.all(options.write.map(e => accessController.add('write', e)))
+      } else {
+        // Default is to add ourselves as the admin of the database
+        await accessController.add('write', this.identity.publicKey)
+      }
     }
+
     // Save the Access Controller in IPFS
     const accessControllerAddress = await accessController.save()
 
@@ -295,7 +298,7 @@ let databaseTypes = {
         overwrite: TODO
 
       }
-   */
+  */
   async open (address, options = {}) {
     logger.debug(`open()`)
 
@@ -406,3 +409,5 @@ let databaseTypes = {
 }
 
 module.exports = OrbitDB
+module.exports.IdentityProvider = IdentityProvider
+module.exports.IPFSAccessController = IPFSAccessController
