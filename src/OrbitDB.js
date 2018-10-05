@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const pMap = require('p-map')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -11,6 +12,7 @@ const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const IdentityProvider = require('orbit-db-identity-provider')
 const AccessController = require('./ipfs-access-controller')
+const ContractAccessController = require('./contract-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
@@ -139,8 +141,18 @@ let databaseTypes = {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = new AccessController(this._ipfs)
-      await accessController.load(options.accessControllerAddress)
+      const type = options.acType || 'default'
+      switch(type) {
+        case 'contract':
+          if (!isDefined(options.contractAPI))
+            throw new Error('Access controller address is contract. options.contractAPI is required.')
+          accessController = new ContractAccessController(options.contractAPI)
+          accessController.load()
+          break
+        default:
+          accessController = new AccessController(this._ipfs)
+          await accessController.load(options.accessControllerAddress)
+      }
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -245,7 +257,16 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController
-    const accessController = new AccessController(this._ipfs)
+    let accessController
+    switch(options.acType) {
+      case 'contract':
+        accessController = new ContractAccessController(options.contractAPI)
+        accessController.load()
+        break
+      default:
+        accessController = new AccessController(this._ipfs)
+    }
+
     /* Disabled temporarily until we do something with the admin keys */
     // Add admins of the database to the access controller
     // if (options && options.admin) {
@@ -256,10 +277,10 @@ let databaseTypes = {
     // }
     // Add keys that can write to the database
     if (options && options.write && options.write.length > 0) {
-      options.write.forEach(e => accessController.add('write', e))
+      await pMap(options.write, async (e) => accessController.add('write', e))
     } else {
       // Default is to add ourselves as the admin of the database
-      accessController.add('write', this.identity.publicKey)
+      await accessController.add('write', this.identity.id)
     }
     // Save the Access Controller in IPFS
     const accessControllerAddress = await accessController.save()
