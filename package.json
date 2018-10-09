@@ -28,6 +28,7 @@
     "orbit-db-store": "github:shamb0t/orbit-db-store#feat/new-ipfs-log"
   },
   "devDependencies": {
+    "@colony/purser-software": "^1.1.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
@@ -48,6 +49,7 @@
     "remark-validate-links": "^7.0.0",
     "rimraf": "^2.6.2",
     "uglifyjs-webpack-plugin": "^1.1.4",
+    "web3": "^1.0.0-beta.36",
     "webpack": "^3.8.1"
   },
   "scripts": {
