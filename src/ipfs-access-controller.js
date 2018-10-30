@@ -1,8 +1,8 @@
 'use strict'
 
-const AccessController = require('./access-controller')
+const AbstractAccessController = require('./access-controller')
 
-class IPFSAccessController extends AccessController {
+class IPFSAccessController extends AbstractAccessController {
   constructor (ipfs) {
     super()
     this._ipfs = ipfs

@@ -1,6 +1,6 @@
 'use strict'
 
-class AccessController {
+class AbstractAccessController {
   /* Overridable functions */
   async load (accessControllerAddress) {}
   async setup (options) {}
@@ -18,4 +18,4 @@ class AccessController {
   }
 }
 
-module.exports = AccessController
+module.exports = AbstractAccessController
