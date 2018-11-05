@@ -1,13 +1,12 @@
 'use strict'
 const AccessController = require('./access-controller')
+const ContractAPI = require('./contract-api')
 const prefix = 'contract'
 
 class ContractAccessController extends AccessController {
-  constructor(contractAPI) {
+  constructor(acParameters) {
     super()
-    if (!contractAPI)
-      throw new Error('contractAPI is a required argument')
-    this.contractAPI = contractAPI
+    this.contractAPI = new ContractAPI(acParameters.web3, acParameters.abi, acParameters.contractAddress, acParameters.primaryAccount)
   }
 
   async canAppend (entry, identityProvider) {

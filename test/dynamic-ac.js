@@ -7,9 +7,9 @@ const ContractAPI = require('../src/contract-api')
 const IdentityProvider = require('orbit-db-identity-provider')
 const { open } = require('@colony/purser-software')
 const Web3 = require('web3')
+const Keystore = require('orbit-db-keystore')
 const fs = require('fs')
 const path =require('path')
-const keystore = require('orbit-db-keystore').create(path.join('./','/keystore'))
 const abi = JSON.parse(fs.readFileSync(path.resolve('./test/', 'abi.json')))
 
 // Include test utilities
@@ -35,15 +35,16 @@ const databases = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Write Permissions (${API})`, function() {
+  describe(`orbit-db - Smart Contract Permissions (${API})`, function() {
     this.timeout(20000)
 
-    let ipfsd, ipfs, orbitdb1, orbitdb2, id1, id2, contractAPI
+    let ipfsd, ipfs, orbitdb1, orbitdb2, id1, id2, acOptions, keystore
 
     before(async () => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
+      keystore = Keystore.create(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
 
@@ -59,7 +60,8 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       const web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:8546'))
-      contractAPI = new ContractAPI(web3, abi, address, primaryAccount)
+      acOptions = Object.assign({}, { web3 }, { abi }, { contractAddress: address }, { primaryAccount })
+      // contractAPI = new ContractAPI(web3, abi, address, primaryAccount)
 
       const signer1 = async (id, data) => { return await wallet1.signMessage({ message: data }) }
       const signer2 = async (id, data) => { return await wallet2.signMessage({ message: data }) }
@@ -68,14 +70,14 @@ Object.keys(testAPIs).forEach(API => {
       id2 = await IdentityProvider.createIdentity(keystore, wallet2.address, { type: 'ethers', identitySignerFn: signer2 })
 
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
-        acType: 'contract',
-        contractAPI: contractAPI,
+        acType: 'eth-contract',
+        acOptions: acOptions,
         directory: dbPath + '/1',
         identity: id1
       })
       orbitdb2 = await OrbitDB.createInstance(ipfs, {
         acType: 'contract',
-        contractAPI: contractAPI,
+        acOptions: acOptions,
         directory: dbPath + '/2',
         identity: id2
       })
@@ -96,8 +98,8 @@ Object.keys(testAPIs).forEach(API => {
       databases.forEach(async (database) => {
         it(database.type + ' allows multiple writers', async () => {
           let options = {
-            acType: 'contract',
-            contractAPI: contractAPI,
+            acOptions: acOptions,
+            acType: 'eth-contract',
             // Set write access for both clients
             write: [
               orbitdb1.identity.id
