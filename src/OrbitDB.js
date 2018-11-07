@@ -252,10 +252,11 @@ class OrbitDB {
     // Create the database address
     const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
 
-    // // Load local cache
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+    // Load the locally saved database information
+    const cache = await this._loadCache(directory, dbAddress)
+
+    // Check if we have the database locally
+    const haveDB = await this._haveLocalData(cache, dbAddress)
 
     if (haveDB && !options.overwrite)
       throw new Error(`Database '${dbAddress}' already exists!`)
@@ -303,11 +304,11 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
-    // Check if we have the database
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+    // Load the locally saved db information
+    const cache = await this._loadCache(directory, dbAddress)
 
+    // Check if we have the database
+    const haveDB = await this._haveLocalData(cache, dbAddress)
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
     // If we want to try and open the database local-only, throw an error
@@ -343,6 +344,7 @@ class OrbitDB {
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
+  // Loads the locally saved database information (manifest, head hashes)
   async _loadCache (directory, dbAddress) {
     let cache
     try {
@@ -353,6 +355,20 @@ class OrbitDB {
     }
 
     return cache
+  }
+
+  /**
+   * Check if we have the database, or part of it, saved locally
+   * @param  {[Cache]} cache [The OrbitDBCache instance containing the local data]
+   * @param  {[OrbitDBAddress]} dbAddress [Address of the database to check]
+   * @return {[Boolean]} [Returns true if we have cached the db locally, false if not]
+   */
+  async _haveLocalData (cache, dbAddress) {
+    if (!cache) {
+      return false
+    }
+    const data = await cache.get(path.join(dbAddress.toString(), '_manifest')) 
+    return data !== undefined && data !== null
   }
 
   /**
