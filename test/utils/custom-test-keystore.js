@@ -44,6 +44,7 @@ class CustomTestKeystore {
   }
 
   verify(signature, key, data) {
+    console.log(signature, key, data)
     let res = false
     res = ec.verify(data, signature, key)
     return Promise.resolve(res)

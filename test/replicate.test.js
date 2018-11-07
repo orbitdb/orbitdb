@@ -69,10 +69,12 @@ Object.keys(testAPIs).forEach(API => {
 
       options = {
         // Set write access for both clients
-        write: [
-          orbitdb1.identity.publicKey,
-          orbitdb2.identity.publicKey
-        ],
+        accessController: {
+          write: [
+            orbitdb1.identity.publicKey,
+            orbitdb2.identity.publicKey
+          ],
+        }
       }
 
       options = Object.assign({}, options, { path: dbPath1 })
@@ -263,11 +265,6 @@ Object.keys(testAPIs).forEach(API => {
           path: dbPath2,
           overwrite: true,
           sync: true,
-          // Set write access for both clients
-          write: [
-            orbitdb1.identity.publicKey,
-            orbitdb2.identity.publicKey
-          ],
         }
 
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
@@ -389,14 +386,10 @@ Object.keys(testAPIs).forEach(API => {
           path: dbPath2,
           overwrite: true,
           sync: true,
-          // Set write access for both clients
-          write: [
-            orbitdb1.identity.publicKey,
-            orbitdb2.identity.publicKey
-          ],
         }
 
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
+        assert.equal(db1.address.toString(), db2.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
         db2.events.on('replicate', (address, entry) => {

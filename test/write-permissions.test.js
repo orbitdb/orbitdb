@@ -96,10 +96,12 @@ Object.keys(testAPIs).forEach(API => {
         it(database.type + ' allows multiple writers', async () => {
           let options = {
             // Set write access for both clients
-            write: [
-              orbitdb1.identity.publicKey,
-              orbitdb2.identity.publicKey
-            ],
+            accessController: {
+              write: [
+                orbitdb1.identity.publicKey,
+                orbitdb2.identity.publicKey
+              ],
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test', options)
@@ -123,10 +125,12 @@ Object.keys(testAPIs).forEach(API => {
         it(database.type + ' syncs', async () => {
           let options = {
             // Set write access for both clients
-            write: [
-              orbitdb1.identity.publicKey,
-              orbitdb2.identity.publicKey
-            ],
+            accessController: {
+              write: [
+                orbitdb1.identity.publicKey,
+                orbitdb2.identity.publicKey
+              ]
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test', options)
@@ -156,7 +160,9 @@ Object.keys(testAPIs).forEach(API => {
         it(database.type + ' syncs', async () => {
           let options = {
             // Set write permission for everyone
-            write: ['*'],
+            accessController: {
+              write: ['*']
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test-public-dbs', options)
@@ -187,7 +193,9 @@ Object.keys(testAPIs).forEach(API => {
 
           let options = {
             // Only peer 1 can write
-            write: [orbitdb1.identity.publicKey],
+            accessController: {
+              write: [orbitdb1.identity.publicKey]
+            }
           }
           let err
           options = Object.assign({}, options, { path: dbPath + '/sync-test/1' })
@@ -235,7 +243,9 @@ Object.keys(testAPIs).forEach(API => {
         it(database.type + ' throws an error', async () => {
           let options = {
             // No write access (only creator of the database can write)
-            write: [],
+            accessController: {
+              write: []
+            }
           }
 
           let err

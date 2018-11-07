@@ -11,7 +11,7 @@ const Pubsub = require('orbit-db-pubsub')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const IdentityProvider = require('orbit-db-identity-provider')
-const ACFactory = require('./ACFactory')
+let ACFactory = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
@@ -46,6 +46,8 @@ let databaseTypes = {
     this.directory = options.directory || './orbitdb'
     this.stores = {}
     this._directConnections = {}
+
+    ACFactory = options.ACFactory || ACFactory
   }
 
   static async createInstance (ipfs, options = {}) {
@@ -67,7 +69,7 @@ let databaseTypes = {
     return this.open(address, options)
   }
 
-  async log (address, options) {
+  async log (address, options = {}) {
     options = Object.assign({ create: true, type: 'eventlog' }, options)
     return this.open(address, options)
   }
@@ -76,12 +78,12 @@ let databaseTypes = {
     return this.log(address, options)
   }
 
-  async keyvalue (address, options) {
+  async keyvalue (address, options = {}) {
     options = Object.assign({ create: true, type: 'keyvalue' }, options)
     return this.open(address, options)
   }
 
-  async kvstore (address, options) {
+  async kvstore (address, options = {}) {
     return this.keyvalue(address, options)
   }
 
@@ -140,7 +142,7 @@ let databaseTypes = {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = await ACFactory.resolve(this._ipfs, options.accessControllerAddress, options.acOptions)
+      accessController = await ACFactory.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -245,12 +247,8 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController
-    if (!options.write || options.write.length === 0) {
-      // Default is to add ourselves as the admin of the database
-      options = Object.assign({}, options, { write: [ this.identity.publicKey ] })
-    }
-
-    const accessControllerAddress = await ACFactory.create(this._ipfs, options)
+    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
+    const accessControllerAddress = await ACFactory.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
@@ -267,7 +265,7 @@ let databaseTypes = {
       throw new Error(`Database '${dbAddress}' already exists!`)
 
     // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
+    await this._addManifestToCache(directory, dbAddress)
 
     logger.debug(`Created database '${dbAddress}'`)
 
@@ -336,7 +334,7 @@ let databaseTypes = {
       throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
 
     // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
+    await this._addManifestToCache(directory, dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
@@ -344,7 +342,7 @@ let databaseTypes = {
   }
 
   // Save the database locally
-  async _saveDBManifest (directory, dbAddress) {
+  async _addManifestToCache (directory, dbAddress) {
     const cache = await this._loadCache(directory, dbAddress)
     await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
