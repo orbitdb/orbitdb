@@ -12,7 +12,7 @@ const Keystore = require('orbit-db-keystore')
 const IdentityProvider = require('orbit-db-identity-provider')
 const IPFSAccessController = require('./ipfs-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
-const createDBManifest = require('./db-manifest')
+const { createDBManifest, uploadDBManifest, signDBManifest, verifyDBManifest } = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
 const isDefined = require('./utils/is-defined')
 const Logger = require('logplease')
@@ -268,12 +268,14 @@ class OrbitDB {
     const accessControllerAddress = await accessController.save()
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
+    const manifest = createDBManifest(name, type, accessControllerAddress, this.identity)
+    const manifestHash = await uploadDBManifest(this._ipfs, manifest)
 
     // Create the database address
-    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    const manifestSignature = await signDBManifest(manifest, this.identity, this.identity.provider)
+    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name, manifestSignature))
 
-    // // Load local cache
+    // Load local cache
     const haveDB = await this._loadCache(directory, dbAddress)
       .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
       .then(data => data !== undefined && data !== null)
@@ -345,6 +347,11 @@ class OrbitDB {
     const dag = await this._ipfs.object.get(dbAddress.root)
     const manifest = JSON.parse(dag.toJSON().data)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
+
+    const isValid = await verifyDBManifest(manifest, dbAddress.signature, this.identity.provider)
+    if (!isValid) {
+      throw new Error(`Could not verify ${dbAddress}`)
+    }
 
     // Make sure the type from the manifest matches the type that was given as an option
     if (options.type && manifest.type !== options.type)
