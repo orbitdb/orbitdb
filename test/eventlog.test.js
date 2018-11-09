@@ -87,7 +87,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('adds an item that is > 256 bytes', async () => {
         db = await orbitdb1.eventlog('third database')
-        let msg = new Buffer(1024)
+        let msg = Buffer.alloc(1024)
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)

@@ -99,11 +99,13 @@ Object.keys(testAPIs).forEach(API => {
 
       it('syncs counters', async () => {
         let options = {
-          // Set write access for both clients
-          write: [
-            orbitdb1.identity.publicKey,
-            orbitdb2.identity.publicKey
-          ],
+          accessController: {
+            // Set write access for both clients
+            write: [
+              orbitdb1.identity.publicKey,
+              orbitdb2.identity.publicKey
+            ],
+          }
         }
 
         const numbers = [[13, 10], [2, 5]]

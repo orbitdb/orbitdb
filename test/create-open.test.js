@@ -169,18 +169,17 @@ Object.keys(testAPIs).forEach(API => {
           })
 
           it('creates an access controller and adds writers', async () => {
-            db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.identity.publicKey] })
+            db = await orbitdb.create('fourth', 'feed', { 
+              accessController: {
+                write: ['another-key', 'yet-another-key', orbitdb.identity.publicKey]
+              }
+            })
             assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.identity.publicKey])
-          })
-
-          it('creates an access controller and doesn\'t add an admin', async () => {
-            db = await orbitdb.create('sixth', 'feed')
-            assert.deepEqual(db.access.admin, [])
           })
 
           it('creates an access controller and doesn\'t add read access keys', async () => {
             db = await orbitdb.create('seventh', 'feed', { read: ['one', 'two'] })
-            assert.deepEqual(db.access.read, [])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
         })
       })
