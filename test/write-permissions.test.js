@@ -72,11 +72,11 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: dbPath + '/1',
-        id: 'A'
+        peerId: 'A'
       })
       orbitdb2 = await OrbitDB.createInstance(ipfs, {
         directory: dbPath + '/2',
-        id: 'B'
+        peerId: 'B'
       })
     })
 
