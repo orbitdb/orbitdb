@@ -30,11 +30,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = new OrbitDB(ipfs, dbPath)
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
-      if(orbitdb) 
+      if(orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
@@ -53,7 +53,7 @@ Object.keys(testAPIs).forEach(API => {
       it('removes local database files', async () => {
         await db.drop()
         assert.equal(fs.existsSync(localDataPath), false)
-      })    
+      })
     })
   })
 })

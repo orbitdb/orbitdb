@@ -30,11 +30,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/1' })
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
       if (ipfsd)
@@ -87,7 +87,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('adds an item that is > 256 bytes', async () => {
         db = await orbitdb1.eventlog('third database')
-        let msg = new Buffer(1024)
+        let msg = Buffer.alloc(1024)
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)

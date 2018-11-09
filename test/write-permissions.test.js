@@ -5,11 +5,11 @@ const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
-const { 
-  config, 
-  startIpfs, 
-  stopIpfs, 
-  testAPIs, 
+const {
+  config,
+  startIpfs,
+  stopIpfs,
+  testAPIs,
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/write-permissions'
@@ -70,15 +70,21 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
-      orbitdb2 = new OrbitDB(ipfs, dbPath + '/2')
+      orbitdb1 = await OrbitDB.createInstance(ipfs, {
+        directory: dbPath + '/1',
+        id: 'A'
+      })
+      orbitdb2 = await OrbitDB.createInstance(ipfs, {
+        directory: dbPath + '/2',
+        id: 'B'
+      })
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if(orbitdb2) 
+      if(orbitdb2)
         await orbitdb2.stop()
 
       if (ipfsd)
@@ -88,12 +94,14 @@ Object.keys(testAPIs).forEach(API => {
     describe('allows multiple peers to write to the databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' allows multiple writers', async () => {
-          let options = { 
+          let options = {
             // Set write access for both clients
-            write: [
-              orbitdb1.key.getPublic('hex'), 
-              orbitdb2.key.getPublic('hex')
-            ],
+            accessController: {
+              write: [
+                orbitdb1.identity.publicKey,
+                orbitdb2.identity.publicKey
+              ],
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test', options)
@@ -115,12 +123,14 @@ Object.keys(testAPIs).forEach(API => {
     describe('syncs databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
-          let options = { 
+          let options = {
             // Set write access for both clients
-            write: [
-              orbitdb1.key.getPublic('hex'), 
-              orbitdb2.key.getPublic('hex')
-            ],
+            accessController: {
+              write: [
+                orbitdb1.identity.publicKey,
+                orbitdb2.identity.publicKey
+              ]
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test', options)
@@ -148,9 +158,11 @@ Object.keys(testAPIs).forEach(API => {
     describe('syncs databases that anyone can write to', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
-          let options = { 
+          let options = {
             // Set write permission for everyone
-            write: ['*'],
+            accessController: {
+              write: ['*']
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'sync-test-public-dbs', options)
@@ -166,8 +178,8 @@ Object.keys(testAPIs).forEach(API => {
             setTimeout(async () => {
               const value = database.getTestValue(db1)
               assert.deepEqual(value, database.expectedValue)
-          await db1.close()
-          await db2.close()
+              await db1.close()
+              await db2.close()
               resolve()
             }, 300)
           })
@@ -179,15 +191,15 @@ Object.keys(testAPIs).forEach(API => {
       databases.forEach(async (database) => {
         it(database.type + ' doesn\'t sync', async () => {
 
-          let options = { 
+          let options = {
             // Only peer 1 can write
-            write: [orbitdb1.key.getPublic('hex')],
+            accessController: {
+              write: [orbitdb1.identity.publicKey]
+            }
           }
           let err
-
           options = Object.assign({}, options, { path: dbPath + '/sync-test/1' })
           const db1 = await database.create(orbitdb1, 'write error test 1', options)
-
           options = Object.assign({}, options, { path: dbPath + '/sync-test/2', sync: true })
           const db2 = await database.create(orbitdb2, 'write error test 1', options)
 
@@ -198,8 +210,9 @@ Object.keys(testAPIs).forEach(API => {
             await database.tryInsert(db2)
           } catch (e) {
             // Make sure peer 2's instance throws an error
-            assert.equal(e.toString(), 'Error: Not allowed to write')
+            err = e.toString()
           }
+          assert.equal(err, `Error: Could not append entry, key "${orbitdb2.identity.id}" is not allowed to write to the log`)
 
           // Make sure nothing was added to the database
           assert.equal(database.query(db1).length, 0)
@@ -212,10 +225,10 @@ Object.keys(testAPIs).forEach(API => {
             setTimeout(async () => {
               // Make sure nothing was added
               assert.equal(database.query(db1).length, 0)
-          await db1.close()
-          await db2.close()
-              if (err) {
-                reject(err)
+              await db1.close()
+              await db2.close()
+              if (!err) {
+                reject(new Error('tryInsert should throw an err'))
               } else {
                 resolve()
               }
@@ -228,9 +241,11 @@ Object.keys(testAPIs).forEach(API => {
     describe('throws an error if peer is not allowed to write to the database', function() {
       databases.forEach(async (database) => {
         it(database.type + ' throws an error', async () => {
-          let options = { 
+          let options = {
             // No write access (only creator of the database can write)
-            write: [],
+            accessController: {
+              write: []
+            }
           }
 
           let err
@@ -242,7 +257,7 @@ Object.keys(testAPIs).forEach(API => {
           } catch (e) {
             err = e.toString()
           }
-          assert.equal(err, 'Error: Not allowed to write')
+          assert.equal(err, `Error: Could not append entry, key "${orbitdb2.identity.id}" is not allowed to write to the log`)
         })
       })
     })
