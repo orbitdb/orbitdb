@@ -1,7 +1,6 @@
 'use strict'
 
 const path = require('path')
-const pMap = require('p-map')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
