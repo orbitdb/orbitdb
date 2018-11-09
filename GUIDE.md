@@ -55,7 +55,7 @@ const OrbitDB = require('orbit-db')
 // OrbitDB uses Pubsub which is an experimental feature
 // and need to be turned on manually.
 // Note that these options need to be passed to IPFS in
-// all examples in this document even if not specfied so.
+// all examples in this document even if not specified so.
 const ipfsOptions = {
   EXPERIMENTAL: {
     pubsub: true
@@ -206,8 +206,8 @@ ipfs.on('ready', async () => {
     ],
   }
 
-  const db = await orbitdb.keyvalue('first-database', access)
-  console.log(db.address.toString())
+  const db1 = await orbitdb.keyvalue('first-database', access)
+  console.log(db1.address.toString())
   // /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
 
   // Second peer opens the database from the address
@@ -362,7 +362,7 @@ ipfs1.on('ready', async () => {
 
 ## Custom Stores
 
-Use a custom store to implement case specifc functionality that is not supported by the default OrbitDB database stores. Then, you can easily add and use your custom store with OrbitDB:
+Use a custom store to implement case specific functionality that is not supported by the default OrbitDB database stores. Then, you can easily add and use your custom store with OrbitDB:
 
 ```javascript
 // define custom store type
