@@ -34,11 +34,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = new OrbitDB(ipfs, dbPath)
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
-      if(orbitdb) 
+      if(orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
@@ -165,22 +165,21 @@ Object.keys(testAPIs).forEach(API => {
 
           it('creates an access controller and adds ourselves as writer by default', async () => {
             db = await orbitdb.create('fourth', 'feed')
-            assert.deepEqual(db.access.write, [orbitdb.key.getPublic('hex')])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and adds writers', async () => {
-            db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')] })
-            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')])
-          })
-
-          it('creates an access controller and doesn\'t add an admin', async () => {
-            db = await orbitdb.create('sixth', 'feed')
-            assert.deepEqual(db.access.admin, [])
+            db = await orbitdb.create('fourth', 'feed', { 
+              accessController: {
+                write: ['another-key', 'yet-another-key', orbitdb.identity.publicKey]
+              }
+            })
+            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and doesn\'t add read access keys', async () => {
             db = await orbitdb.create('seventh', 'feed', { read: ['one', 'two'] })
-            assert.deepEqual(db.access.read, [])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
         })
       })
@@ -228,7 +227,7 @@ Object.keys(testAPIs).forEach(API => {
       it('opens a database and adds the creator as the only writer', async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, write: [] })
         assert.equal(db.access.write.length, 1)
-        assert.equal(db.access.write[0], db.key.getPublic('hex'))
+        assert.equal(db.access.write[0], db.identity.publicKey)
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
@@ -256,6 +255,7 @@ Object.keys(testAPIs).forEach(API => {
         await db.add('hello2')
 
         db = await orbitdb.open(db.address)
+
         await db.load()
         const res = db.iterator({ limit: -1 }).collect()
 
