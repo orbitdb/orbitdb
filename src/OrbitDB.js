@@ -148,6 +148,7 @@ let databaseTypes = {
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
+      keystore: this.keystore,
       cache: cache,
       onClose: this._onClose.bind(this),
     })
@@ -255,10 +256,11 @@ let databaseTypes = {
     // Create the database address
     const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
 
-    // Load local cache
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+    // Load the locally saved database information
+    const cache = await this._loadCache(directory, dbAddress)
+
+    // Check if we have the database locally
+    const haveDB = await this._haveLocalData(cache, dbAddress)
 
     if (haveDB && !options.overwrite)
       throw new Error(`Database '${dbAddress}' already exists!`)
@@ -275,7 +277,7 @@ let databaseTypes = {
   /*
       options = {
         localOnly: false // if set to true, throws an error if database can't be found locally
-        create: false // wether to create the database
+        create: false // whether to create the database
         type: TODO
         overwrite: TODO
 
@@ -307,10 +309,11 @@ let databaseTypes = {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
+    // Load the locally saved db information
+    const cache = await this._loadCache(directory, dbAddress)
+
     // Check if we have the database
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+    const haveDB = await this._haveLocalData(cache, dbAddress)
 
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
@@ -357,6 +360,20 @@ let databaseTypes = {
     }
 
     return cache
+  }
+
+  /**
+   * Check if we have the database, or part of it, saved locally
+   * @param  {[Cache]} cache [The OrbitDBCache instance containing the local data]
+   * @param  {[OrbitDBAddress]} dbAddress [Address of the database to check]
+   * @return {[Boolean]} [Returns true if we have cached the db locally, false if not]
+   */
+  async _haveLocalData (cache, dbAddress) {
+    if (!cache) {
+      return false
+    }
+    const data = await cache.get(path.join(dbAddress.toString(), '_manifest')) 
+    return data !== undefined && data !== null
   }
 
   /**
