@@ -18,15 +18,15 @@
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "github:orbitdb/orbit-db-access-controllers",
     "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "github:shamb0t/orbit-db-counterstore#feat/new-ipfs-log",
-    "orbit-db-docstore": "~1.4.3",
-    "orbit-db-eventstore": "~1.4.0",
-    "orbit-db-feedstore": "~1.4.0",
+    "orbit-db-counterstore": "github:orbitdb/orbit-db-counterstore#feat/new-acs",
+    "orbit-db-docstore": "github:orbitdb/orbit-db-docstore#feat/new-acs",
+    "orbit-db-eventstore": "github:orbitdb/orbit-db-eventstore#feat/new-acs",
+    "orbit-db-feedstore": "github:orbitdb/orbit-db-feedstore#feat/new-acs",
     "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#feat/verify-identity",
     "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#fix/verification",
-    "orbit-db-kvstore": "~1.4.0",
+    "orbit-db-kvstore": "github:orbitdb/orbit-db-kvstore#feat/new-acs",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "github:shamb0t/orbit-db-store#feat/new-ipfs-log"
+    "orbit-db-store": "github:orbitdb/orbit-db-store#feat/new-acs"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
