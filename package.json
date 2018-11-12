@@ -49,7 +49,8 @@
     "remark-validate-links": "^7.0.0",
     "rimraf": "^2.6.2",
     "uglifyjs-webpack-plugin": "^2.0.1",
-    "webpack": "^4.25.1"
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "examples": "npm run examples:node",

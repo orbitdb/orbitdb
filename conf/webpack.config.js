@@ -2,7 +2,6 @@
 
 const path = require('path')
 const webpack = require('webpack')
-const Uglify = require('uglifyjs-webpack-plugin')
 
 module.exports = {
   entry: './src/OrbitDB.js',
@@ -27,7 +26,6 @@ module.exports = {
         'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
       }
     }),
-    new Uglify(),
   ],
   resolve: {
     modules: [
