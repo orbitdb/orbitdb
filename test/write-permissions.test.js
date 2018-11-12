@@ -70,14 +70,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = await OrbitDB.createInstance(ipfs, {
-        directory: dbPath + '/1',
-        peerId: 'A'
-      })
-      orbitdb2 = await OrbitDB.createInstance(ipfs, {
-        directory: dbPath + '/2',
-        peerId: 'B'
-      })
+      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/1' })
+      orbitdb2 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/2' })
     })
 
     after(async () => {
