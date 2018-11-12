@@ -2,7 +2,6 @@
 
 const path = require('path')
 const webpack = require('webpack')
-const Uglify = require('uglifyjs-webpack-plugin')
 
 const uglifyOptions = {
   uglifyOptions: {
@@ -26,8 +25,7 @@ module.exports = {
       'process.env': {
         'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
       }
-    }),
-    new Uglify(uglifyOptions),
+    })
   ],
   resolve: {
     modules: [
