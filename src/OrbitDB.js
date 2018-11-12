@@ -45,7 +45,8 @@ let databaseTypes = {
     this.directory = options.directory || './orbitdb'
     this.stores = {}
     this._directConnections = {}
-
+    // ACFactory module can be passed in to enable 
+    // testing with orbit-db-access-controller
     ACFactory = options.ACFactory || ACFactory
   }
 
@@ -246,7 +247,7 @@ let databaseTypes = {
     if (OrbitDBAddress.isValid(name))
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
-    // Create an AccessController
+    // Create an AccessController, use IPFS AC as the default
     options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await ACFactory.create(this, options.accessController.type, options.accessController || {})
 
