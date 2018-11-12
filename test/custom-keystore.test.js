@@ -59,7 +59,7 @@ const databases = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe.skip(`orbit-db - Use a Custom Keystore (${API})`, function() {
+  describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
     this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1
@@ -72,7 +72,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: dbPath + '/1',
-        keystore: CustomTestKeystore
+        keystore: CustomTestKeystore().create()
       })
     })
 
