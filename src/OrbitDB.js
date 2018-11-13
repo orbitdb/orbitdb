@@ -216,15 +216,9 @@ class OrbitDB {
   async create (name, type, options = {}) {
     logger.debug(`create()`)
 
-    if (!OrbitDB.isValidType(type))
-      throw new Error(`Invalid database type '${type}'`)
-
     // The directory to look databases from can be passed in as an option
     const directory = options.directory || this.directory
     logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
-
-    if (OrbitDBAddress.isValid(name))
-      throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create the database address
     const dbAddress = await this.determineAddress(name, type, options)
@@ -248,6 +242,12 @@ class OrbitDB {
   }
 
   async determineAddress(name, type, options = {}) {
+    if (!OrbitDB.isValidType(type))
+      throw new Error(`Invalid database type '${type}'`)
+
+    if (OrbitDBAddress.isValid(name))
+      throw new Error(`Given database name is an address. Please give only the name of the database!`)
+
     // Create an AccessController
     const accessController = new AccessController(this._ipfs)
     /* Disabled temporarily until we do something with the admin keys */
