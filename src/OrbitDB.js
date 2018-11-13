@@ -226,6 +226,28 @@ class OrbitDB {
     if (OrbitDBAddress.isValid(name))
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
+    // Create the database address
+    const dbAddress = await this.determineAddress(name, type, options)
+
+    // Load the locally saved database information
+    const cache = await this._loadCache(directory, dbAddress)
+
+    // Check if we have the database locally
+    const haveDB = await this._haveLocalData(cache, dbAddress)
+
+    if (haveDB && !options.overwrite)
+      throw new Error(`Database '${dbAddress}' already exists!`)
+
+    // Save the database locally
+    await this._saveDBManifest(directory, dbAddress)
+
+    logger.debug(`Created database '${dbAddress}'`)
+
+    // Open the database
+    return this.open(dbAddress, options)
+  }
+
+  async determineAddress(name, type, options = {}) {
     // Create an AccessController
     const accessController = new AccessController(this._ipfs)
     /* Disabled temporarily until we do something with the admin keys */
@@ -250,24 +272,7 @@ class OrbitDB {
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
 
     // Create the database address
-    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
-
-    // Load the locally saved database information
-    const cache = await this._loadCache(directory, dbAddress)
-
-    // Check if we have the database locally
-    const haveDB = await this._haveLocalData(cache, dbAddress)
-
-    if (haveDB && !options.overwrite)
-      throw new Error(`Database '${dbAddress}' already exists!`)
-
-    // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
-
-    logger.debug(`Created database '${dbAddress}'`)
-
-    // Open the database
-    return this.open(dbAddress, options)
+    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
   }
 
   /*
