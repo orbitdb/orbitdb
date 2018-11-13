@@ -203,45 +203,7 @@ class OrbitDB {
     delete this.stores[address]
   }
 
-  /* Create and Open databases */
-
-  /*
-    options = {
-      admin: [], // array of keys that are the admins of this database (same as write access)
-      write: [], // array of keys that can write to this database
-      directory: './orbitdb', // directory in which to place the database files
-      overwrite: false, // whether we should overwrite the existing database if it exists
-    }
-  */
-  async create (name, type, options = {}) {
-    logger.debug(`create()`)
-
-    // The directory to look databases from can be passed in as an option
-    const directory = options.directory || this.directory
-    logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
-
-    // Create the database address
-    const dbAddress = await this.determineAddress(name, type, options)
-
-    // Load the locally saved database information
-    const cache = await this._loadCache(directory, dbAddress)
-
-    // Check if we have the database locally
-    const haveDB = await this._haveLocalData(cache, dbAddress)
-
-    if (haveDB && !options.overwrite)
-      throw new Error(`Database '${dbAddress}' already exists!`)
-
-    // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
-
-    logger.debug(`Created database '${dbAddress}'`)
-
-    // Open the database
-    return this.open(dbAddress, options)
-  }
-
-  async determineAddress(name, type, options = {}) {
+  async _determineAddress(name, type, options = {}, onlyHash) {
     if (!OrbitDB.isValidType(type))
       throw new Error(`Invalid database type '${type}'`)
 
@@ -266,13 +228,55 @@ class OrbitDB {
       accessController.add('write', this.key.getPublic('hex'))
     }
     // Save the Access Controller in IPFS
-    const accessControllerAddress = await accessController.save()
+    const accessControllerAddress = await accessController.save(onlyHash)
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
 
     // Create the database address
     return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+  }
+
+  /* Create and Open databases */
+
+  /*
+    options = {
+      admin: [], // array of keys that are the admins of this database (same as write access)
+      write: [], // array of keys that can write to this database
+      directory: './orbitdb', // directory in which to place the database files
+      overwrite: false, // whether we should overwrite the existing database if it exists
+    }
+  */
+  async create (name, type, options = {}) {
+    logger.debug(`create()`)
+
+    // The directory to look databases from can be passed in as an option
+    const directory = options.directory || this.directory
+    logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
+
+    // Create the database address
+    const dbAddress = await this._determineAddress(name, type, options)
+
+    // Load the locally saved database information
+    const cache = await this._loadCache(directory, dbAddress)
+
+    // Check if we have the database locally
+    const haveDB = await this._haveLocalData(cache, dbAddress)
+
+    if (haveDB && !options.overwrite)
+      throw new Error(`Database '${dbAddress}' already exists!`)
+
+    // Save the database locally
+    await this._saveDBManifest(directory, dbAddress)
+
+    logger.debug(`Created database '${dbAddress}'`)
+
+    // Open the database
+    return this.open(dbAddress, options)
+  }
+
+  async determineAddress(name, type, options = {}) {
+    return this._determineAddress(name, type, options, true)
   }
 
   /*
@@ -372,7 +376,7 @@ class OrbitDB {
     if (!cache) {
       return false
     }
-    const data = await cache.get(path.join(dbAddress.toString(), '_manifest')) 
+    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
     return data !== undefined && data !== null
   }
 
