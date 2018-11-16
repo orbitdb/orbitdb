@@ -1,5 +1,6 @@
 'use strict'
 
+const path = require('path')
 const AbstractAccessController = require('./access-controller')
 
 class IPFSAccessController extends AbstractAccessController {
@@ -41,7 +42,7 @@ class IPFSAccessController extends AbstractAccessController {
     } catch (e) {
       console.log("ACCESS ERROR:", e)
     }
-    return hash
+    return path.join('/ipfs', hash)
   }
 
   async setup ({ accessControllerAddress: address }) {

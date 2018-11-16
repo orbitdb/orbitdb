@@ -268,7 +268,7 @@ class OrbitDB {
     const accessControllerAddress = await accessController.save()
 
     // Save the manifest to IPFS
-    const manifest = createDBManifest(name, type, accessControllerAddress, this.identity)
+    const manifest = createDBManifest(name, type, accessControllerAddress, this.identity.publicKey)
     const manifestHash = await uploadDBManifest(this._ipfs, manifest)
 
     // Create the database address
