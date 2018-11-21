@@ -37,6 +37,7 @@ class OrbitDB {
     this.stores = {}
     this.directory = directory || './orbitdb'
     this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
+    this.cache = options.cache || Cache
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
     this._directConnections = {}
   }
@@ -348,7 +349,7 @@ class OrbitDB {
   async _loadCache (directory, dbAddress) {
     let cache
     try {
-      cache = await Cache.load(directory, dbAddress)
+      cache = await this.cache.load(directory, dbAddress)
     } catch (e) {
       console.log(e)
       logger.error("Couldn't load Cache:", e)
