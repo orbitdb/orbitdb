@@ -6,6 +6,10 @@ This is a living document. If you see an answer that could be improved, please [
 
 This document is seeded by questions from people opening issues in this repository. If enough people ask the same question, we'll add one here and point newcomers to it. Please don't be offended if the maintainers say "read the FAQ" - it's our way of making sure we don't spend all of our time answering the same questions.
 
+## Database replication is not working. Why?
+
+_The answer to this question is a work in progress. See [orbit-db#505](https://github.com/orbitdb/orbit-db/issues/505)._
+
 ## Can I recreate the entire database on another machine based on the address?
 
 A database can't be "recreated" without downloading the database from other peers. Knowing an address will allow a user to open the database, which automatically connects to other peers who have the database open, and downloads the database which then "recreates" the database state locally, ie. replicates the database.
