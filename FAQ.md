@@ -23,3 +23,9 @@ In short: it can't be assumed that data has been replicated to the network after
 Currently js-ipfs doesn't have GC, so nothing gets removed meaning everything is pinned by default.
 
 However, this will change in the future as js-ipfs gets GC and we want to make sure that OrbitDB is actually persisting everything (by default), so some work on pinning needs to happen. If you're using OrbitDB with go-ipfs (through js-ipfs-api), then GC happens and data may not be persisted anymore after a time. This is a known issue and we're planning to implement actual pinning (from IPFS perspective) soon.
+
+## Does orbit have a shared feed between peers where multiple peers can append to the same feed?
+
+> "...or, is it done more like scuttlebutt, where each peer has their own feed"
+
+All databases (feeds) are shared between peers, so nobody "owns them" like users do in ssb (afaik). Multiple peers can append to the same db. @tyleryasaka is right in that each peer has their own copy of the db (the log) and they may have different versions between them but, as @tyleryasaka (correctly) describes, through the syncing/replication process the peers exchange "their knowledge of the db" (heads) with each other, the dbs/logs get merged. This is what the "CRDT" in ipfs-log enables. But from address/authority/ownership perspective, they all share the same feed.
