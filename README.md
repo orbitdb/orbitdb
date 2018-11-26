@@ -61,7 +61,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 For the CLI tool to manage orbit-db database, see **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**.
 
-It can be installed from Npm with:
+It can be installed from npm with:
 
 ```
 npm install orbit-db-cli -g
