@@ -9,3 +9,11 @@ This document is seeded by questions from people opening issues in this reposito
 ## Can I recreate the entire database on another machine based on the address?
 
 A database can't be "recreated" without downloading the database from other peers. Knowing an address will allow a user to open the database, which automatically connects to other peers who have the database open, and downloads the database which then "recreates" the database state locally, ie. replicates the database.
+
+## Is every 'put' to OrbitDB immediately sent to the network and persisted?
+
+When calling `put` or any other update operation on a database, the data is 1) saved locally and persisted to IPFS and 2) send to the network, through IPFS Pubsub, to peers who have the database open (ie. peers).
+
+Upon calling `put` (or other updates), OrbitDB saves the data locally and returns. That is, the operation and its data is saved to the local node only after which `put` returns and *asynchronously* sends a message to pubsub peers. OrbitDB doesn't have a notion of confirming replication status from other peers (although this can be added on user-level) and considers operation a success upon persisting it locally. OrbitDB doesn't use consensus nor does it wait for the network to confirm operations making it an *eventually consistent* system.
+
+In short: it can't be assumed that data has been replicated to the network after an update-operation call finishes (eg. `put`, `add`).
