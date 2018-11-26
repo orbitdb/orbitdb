@@ -17,3 +17,9 @@ When calling `put` or any other update operation on a database, the data is 1) s
 Upon calling `put` (or other updates), OrbitDB saves the data locally and returns. That is, the operation and its data is saved to the local node only after which `put` returns and *asynchronously* sends a message to pubsub peers. OrbitDB doesn't have a notion of confirming replication status from other peers (although this can be added on user-level) and considers operation a success upon persisting it locally. OrbitDB doesn't use consensus nor does it wait for the network to confirm operations making it an *eventually consistent* system.
 
 In short: it can't be assumed that data has been replicated to the network after an update-operation call finishes (eg. `put`, `add`).
+
+## Does OrbitDB already support pinning when using js-ipfs ?
+
+Currently js-ipfs doesn't have GC, so nothing gets removed meaning everything is pinned by default.
+
+However, this will change in the future as js-ipfs gets GC and we want to make sure that OrbitDB is actually persisting everything (by default), so some work on pinning needs to happen. If you're using OrbitDB with go-ipfs (through js-ipfs-api), then GC happens and data may not be persisted anymore after a time. This is a known issue and we're planning to implement actual pinning (from IPFS perspective) soon.
