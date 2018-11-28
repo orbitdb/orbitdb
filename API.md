@@ -10,6 +10,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
 - [Public Instance Methods](#public-instance-methods)
   * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
+  * [orbitdb.determineAddress(name, type, [options])](#orbitdbdetermineaddressname-type-options)
   * [orbitdb.open(address, [options])](#orbitdbopenaddress-options)
   * [orbitdb.disconnect()](#orbitdbdisconnect)
   * [orbitdb.stop()](#orbitdbstop)
@@ -104,6 +105,21 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
 })
 // db created & opened
 ```
+
+### orbitdb.determineAddress(name, type, [options])
+> Returns the orbit-db address for given parameters
+
+Returns a `Promise` that resolves to an orbit-db address. The parameters correspond exactly with the parameters of [orbit-db.create](#orbitdbcreatename-type-options). This is useful for determining a database address ahead of time, or deriving another peer's address from their public key and the database name and type. *No database is actually created.*
+
+```javascript
+const dbAddress = await orbitdb.determineAddress('user.posts', 'eventlog', {
+  write: [
+    // This could be someone else's public key
+    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+  ]
+})
+```
+
 ### orbitdb.open(address, [options])
 > Opens an OrbitDB database.
 
