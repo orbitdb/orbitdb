@@ -32,7 +32,12 @@ class IPFSAccessController extends AccessController {
       let dag
       if (onlyHash) {
         dag = await new Promise(resolve => {
-          DAGNode.create(Buffer.from(access), (err, n) => { resolve(n) })
+          DAGNode.create(Buffer.from(access), (err, n) => {
+            if (err) {
+              throw err
+            }
+            resolve(n)
+          })
         })
       } else {
         dag = await this._ipfs.object.put(new Buffer(access))
