@@ -12,7 +12,12 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
   const manifestJSON = JSON.stringify(manifest)
   if (onlyHash) {
     dag = await new Promise(resolve => {
-      DAGNode.create(Buffer.from(manifestJSON), (err, n) => { resolve(n) })
+      DAGNode.create(Buffer.from(manifestJSON), (err, n) => {
+        if (err) {
+          throw err
+        }
+        resolve(n)
+      })
     })
   } else {
     dag = await ipfs.object.put(Buffer.from(manifestJSON))
