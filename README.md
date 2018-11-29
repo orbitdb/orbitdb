@@ -27,6 +27,9 @@ All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on to
 #### Project status & support
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
 
+#### Community Calls
+We also have **regular community calls**, which we announce in the issues in [the @orbitdb welcome repository](https://github.com/orbitdb/welcome/issues). Join us!
+
 ## Table of Contents
 
 <!-- toc -->
