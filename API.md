@@ -60,6 +60,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [`ready`](#ready)
   * [`write`](#write)
   * [`closed`](#closed)
+  * [`peer.exchanged`](#peerexchanged)
 
 <!-- tocstop -->
 
@@ -560,3 +561,10 @@ Emitted once the database has finished closing.
 ```javascript
 db.events.on('closed', (dbname) => ... )
 ```
+
+### `peer.exchanged`
+```javascript
+db.events.on('peer.exchanged', (peer, address, heads) => ... )
+```
+
+Emitted after heads have been exchanged with a peer for a specific database. This will be emitted after every exchange, even if no heads are received from the peer, or if all received heads are already present. (This is in contrast with the `replicated` event, which will only fire when new heads have been received.) Note that `heads` here contains heads *received* as part of the exchange, not heads sent.
