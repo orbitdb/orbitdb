@@ -156,13 +156,14 @@ class OrbitDB {
   }
 
   // Callback for receiving a message from the network
-  async _onMessage (address, heads) {
+  async _onMessage (address, heads, peer) {
     const store = this.stores[address]
     try {
       logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
       if (store && heads && heads.length > 0) {
         await store.sync(heads)
       }
+      store.events.emit('peer.exchanged', peer, address, heads)
     } catch (e) {
       logger.error(e)
     }
@@ -175,7 +176,7 @@ class OrbitDB {
     const getStore = address => this.stores[address]
     const getDirectConnection = peer => this._directConnections[peer]
     const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel
-    const onMessage = (address, heads) => this._onMessage(address, heads)
+    const onMessage = (address, heads) => this._onMessage(address, heads, peer)
 
     const channel = await exchangeHeads(
       this._ipfs,
