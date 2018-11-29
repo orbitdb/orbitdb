@@ -160,10 +160,12 @@ class OrbitDB {
     const store = this.stores[address]
     try {
       logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
-      if (store && heads && heads.length > 0) {
-        await store.sync(heads)
+      if (store && heads) {
+        if (heads.length > 0) {
+          await store.sync(heads)
+        }
+        store.events.emit('peer.exchanged', peer, address, heads)
       }
-      store.events.emit('peer.exchanged', peer, address, heads)
     } catch (e) {
       logger.error(e)
     }
