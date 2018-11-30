@@ -260,6 +260,8 @@ We also have **regular community calls**, which we announce in the issues in [th
 
 If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbit-db/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc) or the project's [status board](https://waffle.io/orbitdb/orbit-db).
 
+Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md), and that all activity in the [@orbitdb](https://github.com/orbitdb) organization falls under it. Read it when you get the chance, as being part of this community means that you agree to abide by it. Thanks. 
+
 ## Sponsors
 
 The development of OrbitDB has been sponsored by:
