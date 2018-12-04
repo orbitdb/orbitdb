@@ -23,7 +23,7 @@
     "orbit-db-feedstore": "~1.4.0",
     "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider",
     "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#fix/verification",
-    "orbit-db-kvstore": "github:thiagodelgado111/orbit-db-kvstore#maintenance/new-ipfs-log",
+    "orbit-db-kvstore": "github:JoinColony/orbit-db-kvstore#develop",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "github:orbitdb/orbit-db-store#b5483fe3beec72fb8c98f993ea42b1345467ffd2"
   },
