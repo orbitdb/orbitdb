@@ -5,58 +5,16 @@ const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
-const { 
-  config, 
-  startIpfs, 
-  stopIpfs, 
-  testAPIs, 
+const {
+  config,
+  startIpfs,
+  stopIpfs,
+  testAPIs,
+  databases,
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/write-permissions'
 const ipfsPath = './orbitdb/tests/write-permissions/ipfs'
-
-const databases = [
-  {
-    type: 'eventlog',
-    create: (orbitdb, name, options) => orbitdb.eventlog(name, options),
-    tryInsert: (db) => db.add('hello'),
-    query: (db) => db.iterator({ limit: -1 }).collect(),
-    getTestValue: (db) => db.iterator({ limit: -1 }).collect()[0].payload.value,
-    expectedValue: 'hello',
-  },
-  {
-    type: 'feed',
-    create: (orbitdb, name, options) => orbitdb.feed(name, options),
-    tryInsert: (db) => db.add('hello'),
-    query: (db) => db.iterator({ limit: -1 }).collect(),
-    getTestValue: (db) => db.iterator({ limit: -1 }).collect()[0].payload.value,
-    expectedValue: 'hello',
-  },
-  {
-    type: 'key-value',
-    create: (orbitdb, name, options) => orbitdb.kvstore(name, options),
-    tryInsert: (db) => db.set('one', 'hello'),
-    query: (db) => [],
-    getTestValue: (db) => db.get('one'),
-    expectedValue: 'hello',
-  },
-  {
-    type: 'documents',
-    create: (orbitdb, name, options) => orbitdb.docstore(name, options),
-    tryInsert: (db) => db.put({ _id: 'hello world', doc: 'all the things'}),
-    query: (db) => [],
-    getTestValue: (db) => db.get('hello world'),
-    expectedValue: [{ _id: 'hello world', doc: 'all the things'}],
-  },
-  {
-    type: 'counter',
-    create: (orbitdb, name, options) => orbitdb.counter(name, options),
-    tryInsert: (db) => db.inc(8),
-    query: (db) => [],
-    getTestValue: (db) => db.value,
-    expectedValue: 8,
-  },
-]
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Write Permissions (${API})`, function() {
@@ -75,10 +33,10 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if(orbitdb2) 
+      if(orbitdb2)
         await orbitdb2.stop()
 
       if (ipfsd)
@@ -88,10 +46,10 @@ Object.keys(testAPIs).forEach(API => {
     describe('allows multiple peers to write to the databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' allows multiple writers', async () => {
-          let options = { 
+          let options = {
             // Set write access for both clients
             write: [
-              orbitdb1.key.getPublic('hex'), 
+              orbitdb1.key.getPublic('hex'),
               orbitdb2.key.getPublic('hex')
             ],
           }
@@ -115,10 +73,10 @@ Object.keys(testAPIs).forEach(API => {
     describe('syncs databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
-          let options = { 
+          let options = {
             // Set write access for both clients
             write: [
-              orbitdb1.key.getPublic('hex'), 
+              orbitdb1.key.getPublic('hex'),
               orbitdb2.key.getPublic('hex')
             ],
           }
@@ -148,7 +106,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('syncs databases that anyone can write to', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
-          let options = { 
+          let options = {
             // Set write permission for everyone
             write: ['*'],
           }
@@ -179,7 +137,7 @@ Object.keys(testAPIs).forEach(API => {
       databases.forEach(async (database) => {
         it(database.type + ' doesn\'t sync', async () => {
 
-          let options = { 
+          let options = {
             // Only peer 1 can write
             write: [orbitdb1.key.getPublic('hex')],
           }
@@ -228,7 +186,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('throws an error if peer is not allowed to write to the database', function() {
       databases.forEach(async (database) => {
         it(database.type + ' throws an error', async () => {
-          let options = { 
+          let options = {
             // No write access (only creator of the database can write)
             write: [],
           }
