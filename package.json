@@ -15,6 +15,7 @@
   "dependencies": {
     "ipfs-pubsub-1on1": "~0.0.4",
     "ipld-dag-pb": "0.14.11",
+    "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.4",
