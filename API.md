@@ -373,7 +373,7 @@ Alias for [`orbitdb.docs()`](#orbitdbdocsnameaddress-options)
 ### orbitdb.counter(name|address)
 > Creates and opens a counter database
 
-Returns a `Promise` that resolves to a [`DocumentStore` instance](https://github.com/orbitdb/orbit-db-docstore).
+Returns a `Promise` that resolves to a [`CounterStore` instance](https://github.com/orbitdb/orbit-db-counterstore).
 
 ```javascript
 const counter = await orbitdb.counter('song_123.play_count')
