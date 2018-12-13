@@ -22,8 +22,8 @@
     "orbit-db-docstore": "github:orbitdb/orbit-db-docstore#feat/new-acs",
     "orbit-db-eventstore": "github:orbitdb/orbit-db-eventstore#feat/new-acs",
     "orbit-db-feedstore": "github:orbitdb/orbit-db-feedstore#feat/new-acs",
-    "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#feat/verify-identity",
-    "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#fix/verification",
+    "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#feat/resolvers",
+    "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#fix/static-verification",
     "orbit-db-kvstore": "github:orbitdb/orbit-db-kvstore#feat/new-acs",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "github:orbitdb/orbit-db-store#feat/new-acs"

@@ -9,7 +9,7 @@ const DocumentStore = require('orbit-db-docstore')
 const Pubsub = require('orbit-db-pubsub')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
-const IdentityProvider = require('orbit-db-identity-provider')
+const Identities = require('orbit-db-identity-provider')
 let ACFactory = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
@@ -57,7 +57,10 @@ let databaseTypes = {
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
     const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
-    const identity = options.identity || await IdentityProvider.createIdentity(keystore, options.id || id, options.identitySignerFn)
+    const identity = options.identity || await Identities.createIdentity({ 
+      id: options.id || id,
+      keystore: keystore,
+    })
     options = Object.assign({}, options, { peerId: id , directory: directory })
     const orbitdb = new OrbitDB(ipfs, identity, options)
     return orbitdb
