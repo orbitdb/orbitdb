@@ -43,6 +43,7 @@ let databaseTypes = {
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
+    this.keystore = options.keystore
     this.stores = {}
     this._directConnections = {}
     // ACFactory module can be passed in to enable 
@@ -57,11 +58,16 @@ let databaseTypes = {
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
     const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+
     const identity = options.identity || await Identities.createIdentity({ 
       id: options.id || id,
       keystore: keystore,
     })
-    options = Object.assign({}, options, { peerId: id , directory: directory })
+    options = Object.assign({}, options, { 
+      peerId: id , 
+      directory: directory,
+      keystore: keystore
+    })
     const orbitdb = new OrbitDB(ipfs, identity, options)
     return orbitdb
   }
