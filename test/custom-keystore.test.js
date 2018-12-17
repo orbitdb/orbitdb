@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
+const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 // Include test utilities
 const {
@@ -29,7 +30,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
-        directory: dbPath + '/1',
+        directory: path.join(dbPath, '1'),
         keystore: CustomTestKeystore().create()
       })
     })

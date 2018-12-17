@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
+const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
@@ -28,8 +29,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/1' })
-      orbitdb2 = await OrbitDB.createInstance(ipfs, { directory: dbPath + '/2' })
+      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '1') })
+      orbitdb2 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '2') })
     })
 
     after(async () => {
@@ -150,9 +151,9 @@ Object.keys(testAPIs).forEach(API => {
             }
           }
           let err
-          options = Object.assign({}, options, { path: dbPath + '/sync-test/1' })
+          options = Object.assign({}, options, { path: path.join(dbPath, '/sync-test/1') })
           const db1 = await database.create(orbitdb1, 'write error test 1', options)
-          options = Object.assign({}, options, { path: dbPath + '/sync-test/2', sync: true })
+          options = Object.assign({}, options, { path: path.join(dbPath, '/sync-test/2'), sync: true })
           const db2 = await database.create(orbitdb2, 'write error test 1', options)
 
           try {
