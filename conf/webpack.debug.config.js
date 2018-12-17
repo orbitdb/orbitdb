@@ -7,7 +7,7 @@ module.exports = {
   output: {
     libraryTarget: 'var',
     library: 'OrbitDB',
-    filename: './dist/orbitdb.js'
+    filename: '../dist/orbitdb.js'
   },
   target: 'web',
   devtool: 'source-map',

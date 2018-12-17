@@ -21,7 +21,9 @@ ipfs.on('ready', async () => {
   let db
 
   try {
-    const orbitdb = new OrbitDB(ipfs, './orbitdb/examples/eventlog')
+    orbitdb = await OrbitDB.createInstance(ipfs, {
+      directory: './orbitdb/examples/eventlog'
+    })
     db = await orbitdb.eventlog('example', { overwrite: true })
   } catch (e) {
     console.error(e)
