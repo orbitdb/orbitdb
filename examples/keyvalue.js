@@ -36,7 +36,9 @@ ipfs.on('error', (err) => console.error(err))
 ipfs.on('ready', async () => {
   let db
   try {
-    const orbitdb = new OrbitDB(ipfs, './orbitdb/examples/eventlog')
+    orbitdb = await OrbitDB.createInstance(ipfs, {
+      directory: './orbitdb/examples/keyvalue'
+    })
     db = await orbitdb.kvstore('example', { overwrite: true })
     await db.load()
     // Query immediately after loading
