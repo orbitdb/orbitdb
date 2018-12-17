@@ -256,8 +256,7 @@ let databaseTypes = {
 
   /*
     options = {
-      admin: [], // array of keys that are the admins of this database (same as write access)
-      write: [], // array of keys that can write to this database
+      accessController: { write: [] } // array of keys that can write to this database
       directory: './orbitdb', // directory in which to place the database files
       overwrite: false, // whether we should overwrite the existing database if it exists
     }
