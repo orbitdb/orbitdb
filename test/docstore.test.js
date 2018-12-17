@@ -161,7 +161,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.deepEqual(res.payload, expectedOperation)
         assert.notEqual(res.next, undefined)
         assert.equal(res.next.length, 1)
-        assert.equal(res.v, 0)
+        assert.equal(res.v, 1)
         assert.notEqual(res.clock, undefined)
         assert.equal(res.clock.time, 2)
         assert.notEqual(res.key, undefined)

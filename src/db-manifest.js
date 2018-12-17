@@ -1,5 +1,5 @@
 const path = require('path')
-const { DAGNode } = require('ipld-dag-pb')
+const io = require('orbit-db-io')
 
 // Creates a DB manifest file and saves it in IPFS
 const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyHash) => {
@@ -8,21 +8,8 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
     type: type,
     accessController: path.join('/ipfs', accessControllerAddress),
   }
-  let dag
-  const manifestJSON = JSON.stringify(manifest)
-  if (onlyHash) {
-    dag = await new Promise(resolve => {
-      DAGNode.create(Buffer.from(manifestJSON), (err, n) => {
-        if (err) {
-          throw err
-        }
-        resolve(n)
-      })
-    })
-  } else {
-    dag = await ipfs.object.put(Buffer.from(manifestJSON))
-  }
-  return dag.toJSON().multihash.toString()
+
+  return io.write(ipfs, 'dag-cbor', manifest, { onlyHash })
 }
 
 module.exports = createDBManifest

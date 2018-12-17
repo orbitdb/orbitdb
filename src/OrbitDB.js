@@ -14,7 +14,8 @@ let AccessControllers = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
-const isDefined = require('./utils/is-defined')
+const { isDefined, io } = require('./utils')
+
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('ERROR')
@@ -166,7 +167,6 @@ let databaseTypes = {
 
     const store = new Store(this._ipfs, this.identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
-
     // ID of the store is the address as a string
     const addr = address.toString()
     this.stores[addr] = store
@@ -346,8 +346,7 @@ let databaseTypes = {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const dag = await this._ipfs.object.get(dbAddress.root)
-    const manifest = JSON.parse(dag.toJSON().data)
+    const manifest = await io.read(this._ipfs, dbAddress.root)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
