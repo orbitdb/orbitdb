@@ -187,12 +187,14 @@ Access rights are setup by passing an `access` object that defines the access ri
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
   const orbitdb = await OrbitDB.createInstance(ipfs)
-  const access = {
+  const options = {
     // Give write access to ourselves
-    write: [orbitdb.identity.publicKey],
+    accessController: {
+      write: [orbitdb.identity.publicKey]
+    }
   }
 
-  const db = await orbitdb.keyvalue('first-database', access)
+  const db = await orbitdb.keyvalue('first-database', options)
   console.log(db.address.toString())
   // /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
 })
@@ -209,17 +211,19 @@ const ipfs = new IPFS()
 ipfs.on('ready', async () => {
   const orbitdb = await OrbitDB.createInstance(ipfs)
 
-  const access = {
+  const options = {
     // Setup write access
-    write: [
-      // Give access to ourselves
-      orbitdb.identity.publicKey,
-      // Give access to the second peer
-      '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
-    ],
+    accessController: {
+      write: [
+        // Give access to ourselves
+        orbitdb.identity.publicKey,
+        // Give access to the second peer
+        '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
+      ]
+    }
   }
 
-  const db1 = await orbitdb.keyvalue('first-database', access)
+  const db1 = await orbitdb.keyvalue('first-database', options)
   console.log(db1.address.toString())
   // /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
 
@@ -238,12 +242,14 @@ const ipfs = new IPFS()
 ipfs.on('ready', async () => {
   const orbitdb = await OrbitDB.createInstance(ipfs)
 
-  const access = {
+  const options = {
     // Give write access to everyone
-    write: ['*'],
+    accessController: {
+      write: ['*']
+    }
   }
 
-  const db = await orbitdb.keyvalue('first-database', access)
+  const db = await orbitdb.keyvalue('first-database', options)
   console.log(db.address.toString())
   // /orbitdb/QmRrauSxaAvNjpZcm2Cq6y9DcrH8wQQWGjtokF4tgCUxGP/first-database
 })
@@ -268,7 +274,7 @@ await db.access.grant('write', id2.publicKey) // grant access to id2
 
 #### Custom Access Controller
 
-You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the ACFactory object before passing it to OrbitDB.
+You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the AccessControllers object before passing it to OrbitDB.
 
 ```javascript
 class OtherAccessController extends AccessController {
@@ -276,10 +282,10 @@ class OtherAccessController extends AccessController {
     async canAppend(entry, identityProvider) {} // return true if entry can be added, identityProvider allows you to verify entry.identity
     async grant (access, identity) {} // Logic for granting access to identity
 }
-
-ACFactory.addAccessController({ AccessController: OtherAccessController })
+let AccessControllers = require('orbit-db-access-controllers')
+AccessControllers.addAccessController({ AccessController: OtherAccessController })
 const orbitdb = await OrbitDB.createInstance(ipfs, {
-  ACFactory: ACFactory
+  AccessControllers: AccessControllers
 })
 
 const db = await orbitdb.keyvalue('first-database', {
