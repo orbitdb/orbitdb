@@ -67,7 +67,7 @@ const ipfs = new IPFS(ipfsOptions)
 
 ipfs.on('ready', () => {
   // Create OrbitDB instance
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 })
 ```
 
@@ -87,7 +87,7 @@ Then, create a database instance (we'll use Key-Value database in this example):
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
   const db = await orbitdb.keyvalue('first-database')
 })
 ```
@@ -113,7 +113,7 @@ For example:
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
   const db = await orbitdb.keyvalue('first-database')
   console.log(db.address.toString())
   // /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
@@ -139,22 +139,36 @@ The database manifest can be fetched from IPFS and it looks like this:
 
 Each entry in a database is signed by who created that entry. The identity, which includes the public key used to sign entries, can be accessed via the identity member variable of the database instance:
 
-```
+```javascript
 const identity = db.identity
 console.log(identity.toJSON())
-//{ id: 'QmZyYjpG6SMJJx2rbye8HXNMufGRtpn9yFkdd27uuq6xrR',
-//  publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
-//  signatures:
-//   { id: '3045022058bbb2aa415623085124b32b254b8668d95370261ade8718765a8086644fc8ae022100c736b45c6b2ef60c921848027f51020a70ee50afa20bc9853877e994e6121c15',
-//     publicKey: '3046022100d138ccc0fbd48bd41e74e40ddf05c1fa6ff903a83b2577ef7d6387a33992ea4b022100ca39e8d8aef43ac0c6ec05c1b95b41fce07630b5dc61587a32d90dc8e4cf9766'
-//   },
-//  type: 'orbitdb'
-//}
+// prints
+{
+  id: '0443729cbd756ad8e598acdf1986c8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
+  publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
+  signatures: {
+    id: '3045022058bbb2aa415623085124b32b254b8668d95370261ade8718765a8086644fc8ae022100c736b45c6b2ef60c921848027f51020a70ee50afa20bc9853877e994e6121c15',
+    publicKey: '3046022100d138ccc0fbd48bd41e74e40ddf05c1fa6ff903a83b2577ef7d6387a33992ea4b022100ca39e8d8aef43ac0c6ec05c1b95b41fce07630b5dc61587a32d90dc8e4cf9766'
+  },
+  type: 'orbitdb'
+}
 ```
-The identity also contains signatures proving possession of the id and OrbitDB public key. This is included to allow proof of ownership of an external public key within OrbitDB.
+
+
+#### Creating an identity
+```javascript
+const Identities = require('orbit-db-identity-provider')
+const options = { id: 'local-id' }
+const identity = await Identities.createIdentity(options)
+```
+This identity can be used in OrbitDB by passing it in as an argument in the `options` object:
+```javascript
+const orbitdb = await OrbitDB.createInstance(ipfs, { identity: identity })
+```
+The identity also contains signatures proving possession of the id and OrbitDB public key. This is included to allow proof of ownership of an external public key within OrbitDB. You can read more [here](https://github.com/orbitdb/orbit-db-identity-provider)
 
 The OrbitDB public key can be retrieved with:
-```
+```javascript
 console.log(db.identity.publicKey)
 // 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
 ```
@@ -165,15 +179,14 @@ If you want to give access to other peers to write to a database, you need to ge
 
 You can specify the peers that have write-access to a database. You can define a set of peers that can write to a database or allow anyone write to a database. **By default and if not specified otherwise, only the creator of the database will be given write-access**.
 
-***Note!*** *OrbitDB currently supports only write-access and the keys of the writers need to be known when creating a database. That is, the access rights can't be changed after a database has been created. In the future we'll support read access control and dynamic access control in a way that access rights can be added and removed to a database at any point in time without changing the database address. At the moment, if access rights need to be changed, the address of the database will change.*
+***Note!*** *OrbitDB currently supports only dynamically adding write-access. That is, write-access cannot be revoked once added. In the future we'll support read access control and dynamic access control in a way that access rights can be added and removed to a database at any point in time without changing the database address. At the moment, if access rights need to be removed, the address of the database will change.*
 
 Access rights are setup by passing an `access` object that defines the access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database.
 
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
-
+  const orbitdb = await OrbitDB.createInstance(ipfs)
   const access = {
     // Give write access to ourselves
     write: [orbitdb.identity.publicKey],
@@ -194,7 +207,7 @@ Give access to another peer to write to the database:
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 
   const access = {
     // Setup write access
@@ -215,6 +228,30 @@ ipfs.on('ready', async () => {
 })
 ```
 
+To give access to another peer after the database has been created, you must set the access-controller `type` to an `AccessController` which supports dynamically adding keys such as `OrbitDBAccessController`.
+
+```javaScript
+db = await orbitdb1.feed('AABB', {
+  accessController: {
+    type: 'orbitdb', //OrbitDBAccessController
+    write: [id1.publicKey]
+  }
+})
+
+await db.access.grant('write', id2.publicKey) // grant access to id2
+```
+
+#### Custom Access Controller
+
+You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the ACFactory object before passing it to OrbitDB.
+
+```javascript
+class OtherAccessController extends AccessController {
+  
+}
+ACFactory.addAccessController({ AccessController: OtherAccessController })
+```
+
 #### Public databases
 
 The access control mechanism also support "public" databases to which anyone can write to.
@@ -223,7 +260,7 @@ This can be done by adding a `*` to the write access array:
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 
   const access = {
     // Give write access to everyone
@@ -245,7 +282,7 @@ To add an entry to the database, we simply call `db.put(key, value)`.
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
   const db = await orbitdb.keyvalue('first-database')
   await db.put('name', 'hello')
 })
@@ -286,7 +323,7 @@ Key-Value:
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
   const db = await orbitdb.keyvalue('first-database')
   await db.put('name', 'hello')
   const value = db.get('name')
@@ -307,7 +344,7 @@ OrbitDB saves the state of the database automatically on disk. This means that u
 ```javascript
 const ipfs = new IPFS()
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 
   const db1 = await orbitdb.keyvalue('first-database')
   await db1.put('name', 'hello')
@@ -335,7 +372,7 @@ Replicate a database between two nodes:
 const ipfs1 = new IPFS({ repo: './ipfs1' })
 ipfs1.on('ready', async () => {
   // Create the database
-  const orbitdb1 = new OrbitDB(ipfs1, './orbitdb1')
+  const orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: './orbitdb1' })
   const db1 = await orbitdb1.log('events')
 
   // Create the second peer
@@ -343,7 +380,7 @@ ipfs1.on('ready', async () => {
   ipfs2.on('ready', async () => {
     // Open the first database for the second peer,
     // ie. replicate the database
-    const orbitdb2 = new OrbitDB(ipfs2, './orbitdb2')
+    const orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: './orbitdb2' })
     const db2 = await orbitdb2.log(db1.address.toString())
 
     // When the second database replicated new heads, query the database
@@ -381,7 +418,7 @@ class CustomStore extends DocumentStore {
 OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
 
 // instantiate custom store
-let orbitdb = new OrbitDB(ipfs, dbPath)
+let orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
 let store = orbitdb.create(name, CustomStore.type)
 ```
 
