@@ -228,30 +228,6 @@ ipfs.on('ready', async () => {
 })
 ```
 
-To give access to another peer after the database has been created, you must set the access-controller `type` to an `AccessController` which supports dynamically adding keys such as `OrbitDBAccessController`.
-
-```javaScript
-db = await orbitdb1.feed('AABB', {
-  accessController: {
-    type: 'orbitdb', //OrbitDBAccessController
-    write: [id1.publicKey]
-  }
-})
-
-await db.access.grant('write', id2.publicKey) // grant access to id2
-```
-
-#### Custom Access Controller
-
-You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the ACFactory object before passing it to OrbitDB.
-
-```javascript
-class OtherAccessController extends AccessController {
-  
-}
-ACFactory.addAccessController({ AccessController: OtherAccessController })
-```
-
 #### Public databases
 
 The access control mechanism also support "public" databases to which anyone can write to.
@@ -274,6 +250,45 @@ ipfs.on('ready', async () => {
 ```
 
 Note how the access controller hash is different compared to the previous example!
+
+#### Granting access after database creation
+
+To give access to another peer after the database has been created, you must set the access-controller `type` to an `AccessController` which supports dynamically adding keys such as `OrbitDBAccessController`.
+
+```javaScript
+db = await orbitdb1.feed('AABB', {
+  accessController: {
+    type: 'orbitdb', //OrbitDBAccessController
+    write: [id1.publicKey]
+  }
+})
+
+await db.access.grant('write', id2.publicKey) // grant access to id2
+```
+
+#### Custom Access Controller
+
+You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the ACFactory object before passing it to OrbitDB.
+
+```javascript
+class OtherAccessController extends AccessController {
+    static get type () { return 'othertype'} // Return the type for this controller
+    async canAppend(entry, identityProvider) {} // return true if entry can be added, identityProvider allows you to verify entry.identity
+    async grant (access, identity) {} // Logic for granting access to identity
+}
+
+ACFactory.addAccessController({ AccessController: OtherAccessController })
+const orbitdb = await OrbitDB.createInstance(ipfs, {
+  ACFactory: ACFactory
+})
+
+const db = await orbitdb.keyvalue('first-database', {
+  accessController: {
+    type: 'othertype',
+    write: [id1.publicKey]
+  }
+})
+```
 
 ## Add an entry
 
