@@ -44,9 +44,10 @@ let databaseTypes = {
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
     this.keystore = options.keystore
+    this.cache = options.cache || Cache
     this.stores = {}
     this._directConnections = {}
-    // ACFactory module can be passed in to enable 
+    // ACFactory module can be passed in to enable
     // testing with orbit-db-access-controller
     ACFactory = options.ACFactory || ACFactory
   }
@@ -59,12 +60,12 @@ let databaseTypes = {
     const directory = options.directory || './orbitdb'
     const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
 
-    const identity = options.identity || await Identities.createIdentity({ 
+    const identity = options.identity || await Identities.createIdentity({
       id: options.id || id,
       keystore: keystore,
     })
-    options = Object.assign({}, options, { 
-      peerId: id , 
+    options = Object.assign({}, options, {
+      peerId: id ,
       directory: directory,
       keystore: keystore
     })
@@ -233,6 +234,24 @@ let databaseTypes = {
     delete this.stores[address]
   }
 
+  async _determineAddress(name, type, options = {}, onlyHash) {
+    if (!OrbitDB.isValidType(type))
+      throw new Error(`Invalid database type '${type}'`)
+
+    if (OrbitDBAddress.isValid(name))
+      throw new Error(`Given database name is an address. Please give only the name of the database!`)
+
+    // Create an AccessController, use IPFS AC as the default
+    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
+    const accessControllerAddress = await ACFactory.create(this, options.accessController.type, options.accessController || {})
+
+    // Save the manifest to IPFS
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
+
+    // Create the database address
+    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+  }
+
   /* Create and Open databases */
 
   /*
@@ -246,25 +265,12 @@ let databaseTypes = {
   async create (name, type, options = {}) {
     logger.debug(`create()`)
 
-    if (!OrbitDB.isValidType(type))
-      throw new Error(`Invalid database type '${type}'`)
-
     // The directory to look databases from can be passed in as an option
     const directory = options.directory || this.directory
     logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
 
-    if (OrbitDBAddress.isValid(name))
-      throw new Error(`Given database name is an address. Please give only the name of the database!`)
-
-    // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
-    const accessControllerAddress = await ACFactory.create(this, options.accessController.type, options.accessController || {})
-
-    // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
-
     // Create the database address
-    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    const dbAddress = await this._determineAddress(name, type, options)
 
     // Load the locally saved database information
     const cache = await this._loadCache(directory, dbAddress)
@@ -282,6 +288,10 @@ let databaseTypes = {
 
     // Open the database
     return this.open(dbAddress, options)
+  }
+
+  async determineAddress(name, type, options = {}) {
+    return this._determineAddress(name, type, options, true)
   }
 
   /*
@@ -363,7 +373,7 @@ let databaseTypes = {
   async _loadCache (directory, dbAddress) {
     let cache
     try {
-      cache = await Cache.load(directory, dbAddress)
+      cache = await this.cache.load(directory, dbAddress)
     } catch (e) {
       console.log(e)
       logger.error("Couldn't load Cache:", e)
@@ -382,7 +392,7 @@ let databaseTypes = {
     if (!cache) {
       return false
     }
-    const data = await cache.get(path.join(dbAddress.toString(), '_manifest')) 
+    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
     return data !== undefined && data !== null
   }
 
