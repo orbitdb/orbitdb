@@ -3,13 +3,6 @@
 const path = require('path')
 const webpack = require('webpack')
 
-const uglifyOptions = {
-  uglifyOptions: {
-    mangle: false,
-    compress: false,
-  },
-}
-
 module.exports = {
   entry: './examples/browser/browser-webpack-example/index.js',
   output: {
