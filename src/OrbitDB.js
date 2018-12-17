@@ -10,7 +10,7 @@ const Pubsub = require('orbit-db-pubsub')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const Identities = require('orbit-db-identity-provider')
-let ACFactory = require('orbit-db-access-controllers')
+let AccessControllers = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
@@ -47,9 +47,9 @@ let databaseTypes = {
     this.cache = options.cache || Cache
     this.stores = {}
     this._directConnections = {}
-    // ACFactory module can be passed in to enable
+    // AccessControllers module can be passed in to enable
     // testing with orbit-db-access-controller
-    ACFactory = options.ACFactory || ACFactory
+    AccessControllers = options.AccessControllers || AccessControllers
   }
 
   static async createInstance (ipfs, options = {}) {
@@ -152,7 +152,7 @@ let databaseTypes = {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = await ACFactory.resolve(this, options.accessControllerAddress, options.accessController)
+      accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -243,7 +243,7 @@ let databaseTypes = {
 
     // Create an AccessController, use IPFS AC as the default
     options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
-    const accessControllerAddress = await ACFactory.create(this, options.accessController.type, options.accessController || {})
+    const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
