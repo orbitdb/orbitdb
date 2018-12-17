@@ -129,10 +129,12 @@ Object.keys(testAPIs).forEach(API => {
 
                 // Set write access for both clients
                 let options = {
-                  write: [
-                    orbitdb1.identity.publicKey,
-                    orbitdb2.identity.publicKey
-                  ],
+                  accessController: {
+                    write: [
+                      orbitdb1.identity.publicKey,
+                      orbitdb2.identity.publicKey
+                    ],
+                  }
                 }
 
                 // Get the previous address to make sure nothing mutates it

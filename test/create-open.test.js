@@ -267,7 +267,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database and adds the creator as the only writer', async () => {
-        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, write: [] })
+        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         assert.equal(db.access.write.length, 1)
         assert.equal(db.access.write[0], db.identity.publicKey)
       })
