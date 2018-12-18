@@ -36,7 +36,7 @@ ipfs.on('error', (err) => console.error(err))
 ipfs.on('ready', async () => {
   let db
   try {
-    orbitdb = await OrbitDB.createInstance(ipfs, {
+    const orbitdb = await OrbitDB.createInstance(ipfs, {
       directory: './orbitdb/examples/keyvalue'
     })
     db = await orbitdb.kvstore('example', { overwrite: true })

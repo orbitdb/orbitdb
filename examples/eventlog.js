@@ -21,10 +21,11 @@ ipfs.on('ready', async () => {
   let db
 
   try {
-    orbitdb = await OrbitDB.createInstance(ipfs, {
+    const orbitdb = await OrbitDB.createInstance(ipfs, {
       directory: './orbitdb/examples/eventlog'
     })
     db = await orbitdb.eventlog('example', { overwrite: true })
+    await db.load()
   } catch (e) {
     console.error(e)
     process.exit(1)
@@ -42,7 +43,7 @@ ipfs.on('ready', async () => {
       output += `--------------------\n`
       output += `ID  | Visitor\n`
       output += `--------------------\n`
-      output += latest.reverse().map((e) => e.payload.value.userId + ' | ' + e.payload.value.avatar + ')').join('\n') + `\n`
+      output += latest.reverse().map((e) => e.payload.value.userId + ' | ' + e.payload.value.avatar).join('\n') + `\n`
       console.log(output)
     } catch (e) {
       console.error(e)
