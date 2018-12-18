@@ -40,7 +40,7 @@ This may not be intuitive or you might not be sure what the best approach would 
 
 Install [orbit-db](https://github.com/orbitdb/orbit-db) and [ipfs](https://www.npmjs.com/package/ipfs) from npm:
 
-```
+```sh
 npm install orbit-db ipfs
 ```
 
@@ -104,7 +104,7 @@ The first part, `/orbitdb`, specifies the protocol in use. The second part, an I
 In order to replicate the database with peers, the address is what you need to give to other peers in order for them to start replicating the database.
 
 The database address can be accessed as `db.address` from the database instance:
-```
+```javascript
 const address = db.address
 // address == '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
 ```
@@ -181,7 +181,7 @@ You can specify the peers that have write-access to a database. You can define a
 
 ***Note!*** *OrbitDB currently supports only dynamically adding write-access. That is, write-access cannot be revoked once added. In the future we'll support read access control and dynamic access control in a way that access rights can be added and removed to a database at any point in time without changing the database address. At the moment, if access rights need to be removed, the address of the database will change.*
 
-Access rights are setup by passing an `access` object that defines the access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database.
+Access rights are setup by passing an `accessController` object that defines the access-controller type and access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database.
 
 ```javascript
 const ipfs = new IPFS()
