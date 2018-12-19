@@ -4,6 +4,8 @@ const path = require('path')
 const multihash = require('multihashes')
 const CID = require('cids')
 
+const notEmpty = e => e !== '' && e !== ' '
+
 class OrbitDBAddress {
   constructor (root, path) {
     this.root = root
@@ -15,14 +17,19 @@ class OrbitDBAddress {
   }
 
   static isValid (address) {
+    const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
+
     const parts = address.toString()
       .split('/')
-      .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
-      .filter(e => e !== '' && e !== ' ')
+      .filter(containsProtocolPrefix)
+      .filter(notEmpty)
 
-    const accessControllerHash = (parts[0].indexOf('zd') > -1) ? new CID(parts[0]).multihash : null
+    let accessControllerHash
+
     try {
-      multihash.validate(accessControllerHash)
+      accessControllerHash = (parts[0].indexOf('zd') > -1) 
+        ? new CID(parts[0]).toBaseEncodedString() 
+        : null
     } catch (e) {
       return false
     }
@@ -40,7 +47,7 @@ class OrbitDBAddress {
     const parts = address.toString()
       .split('/')
       .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
-      .filter(e => e !== '' && e !== ' ')
+      .filter(notEmpty)
 
     return new OrbitDBAddress(parts[0], parts.slice(1, parts.length).join('/'))
   }

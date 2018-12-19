@@ -65,10 +65,10 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('isValid Address', () => {
-      it('throws an error if address is empty', () => {
-        assert.throws(() => {
-          const result = OrbitDB.isValidAddress('')
-        })
+      it('returns false for empty string as address', () => {
+        const result = OrbitDB.isValidAddress('')
+
+        assert.equal(result, false)
       })
 
       it('validate address successfully', () => {
