@@ -30,6 +30,7 @@ Object.keys(testAPIs).forEach(API => {
     let id1, id2
 
     let timer
+    let timerInterval = 200
     let options
 
     before(async () => {
@@ -144,7 +145,7 @@ Object.keys(testAPIs).forEach(API => {
             assert.equal(items[items.length - 1].payload.value, 'hello99')
             resolve()
           }
-        }, 100)
+        }, timerInterval)
       })
     })
 
@@ -224,7 +225,7 @@ Object.keys(testAPIs).forEach(API => {
 
               resolve()
             }
-          }, 100)
+          }, timerInterval)
         } catch (e) {
           reject(e)
         }
@@ -359,7 +360,7 @@ Object.keys(testAPIs).forEach(API => {
               reject(e)
             }
           }
-        }, 100)
+        }, timerInterval)
       })
     })
 
@@ -487,7 +488,7 @@ Object.keys(testAPIs).forEach(API => {
 
               resolve()
             }
-          }, 100)
+          }, timerInterval)
         } catch (e) {
           reject(e)
         }

@@ -2,6 +2,7 @@
 
 const path = require('path')
 const multihash = require('multihashes')
+const CID = require('cids')
 
 class OrbitDBAddress {
   constructor (root, path) {
@@ -19,7 +20,7 @@ class OrbitDBAddress {
       .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
       .filter(e => e !== '' && e !== ' ')
 
-    const accessControllerHash = parts[0].indexOf('Qm') > -1 ? multihash.fromB58String(parts[0]) : null
+    const accessControllerHash = (parts[0].indexOf('zd') > -1) ? new CID(parts[0]).multihash : null
     try {
       multihash.validate(accessControllerHash)
     } catch (e) {
@@ -30,7 +31,7 @@ class OrbitDBAddress {
   }
 
   static parse (address) {
-    if (!address) 
+    if (!address)
       throw new Error(`Not a valid OrbitDB address: ${address}`)
 
     if (!OrbitDBAddress.isValid(address))

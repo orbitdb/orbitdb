@@ -50,17 +50,17 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('parse address successfully', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = '/orbitdb/zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZKBi/first-database'
         const result = OrbitDB.parseAddress(address)
 
         const isInstanceOf = result instanceof OrbitDBAddress
         assert.equal(isInstanceOf, true)
 
-        assert.equal(result.root, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
+        assert.equal(result.root, 'zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZKBi')
         assert.equal(result.path, 'first-database')
 
         assert.equal(result.toString().indexOf('/orbitdb'), 0)
-        assert.equal(result.toString().indexOf('Qm'), 9)
+        assert.equal(result.toString().indexOf('zd'), 9)
       })
     })
 
@@ -72,28 +72,28 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('validate address successfully', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = '/orbitdb/zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZKBi/first-database'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)
       })
 
       it('handle missing orbitdb prefix', () => {
-        const address = 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = 'zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZKBi/first-database'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)
       })
 
       it('handle missing db address name', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'
+        const address = '/orbitdb/zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZKBi'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)
       })
 
       it('handle invalid multihash', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzc/first-database'
+        const address = '/orbitdb/zdj7Wkkhxcu2rsiN6GUyHCLsSLL47kdUNfjbFqBUUhMFTZK/first-database'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, false)

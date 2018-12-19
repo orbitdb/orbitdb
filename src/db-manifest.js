@@ -8,31 +8,40 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
     type: type,
     accessController: path.join('/ipfs', accessControllerAddress),
   }
-  let dag, hash
+  let cid, hash
   const manifestJSON = JSON.stringify(manifest)
   if (onlyHash) {
-    dag = await new Promise(resolve => {
-      DAGNode.create(Buffer.from(manifestJSON), (err, n) => {
-        if (err) {
-          throw err
-        }
-        resolve(n)
-      })
-    })
-    const cid = await new Promise(resolve => {
-      util.cid(dag, (err, node) => {
+    // const dag = await new Promise(resolve => {
+    //   DAGNode.create(Buffer.from(manifestJSON), (err, n) => {
+    //     if (err) {
+    //       throw err
+    //     }
+    //     resolve(n)
+    //   })
+    // })
+    cid = await new Promise(resolve => {
+      // util.serialize(manifestJSON), (err, node) => {
+      //   if (err) {
+      //     throw err
+      //   }
+      //   util.cid(node, { version: 1 }, (err, node) => {
+      //     if (err) {
+      //       throw err
+      //     }
+      //     resolve(node)
+      //   })
+      // })
+      util.cid(manifestJSON, { version: 1 }, (err, node) => {
         if (err) {
           throw err
         }
         resolve(node)
       })
     })
-    hash = cid.toBaseEncodedString()
   } else {
-    dag = await ipfs.object.put(Buffer.from(manifestJSON))
-    hash = dag.toJSON().multihash.toString()
+    cid = await ipfs.dag.put(Buffer.from(manifestJSON))
   }
-  return hash
+  return cid.toBaseEncodedString()
 }
 
 module.exports = createDBManifest

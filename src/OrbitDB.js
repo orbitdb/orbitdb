@@ -346,8 +346,8 @@ let databaseTypes = {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const dag = await this._ipfs.object.get(dbAddress.root)
-    const manifest = JSON.parse(dag.toJSON().data)
+    const dag = await this._ipfs.dag.get(dbAddress.root)
+    const manifest = JSON.parse(dag.value)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
