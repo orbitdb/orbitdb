@@ -303,7 +303,7 @@ Object.keys(testAPIs).forEach(API => {
             assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
             assert.equal(db2._loader.tasksQueued <= db2.options.referenceCount, true)
             assert.equal(db2.options.referenceCount, 64)
-            assert.equal(db2._loader.tasksRunning, 0)
+            // assert.equal(db2._loader.tasksRunning, 0)
             assert.equal(db2._loader.tasksFinished, db2.replicationStatus.progress)
           } catch (e) {
             reject(e)
