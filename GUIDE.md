@@ -179,9 +179,9 @@ If you want to give access to other peers to write to a database, you need to ge
 
 You can specify the peers that have write-access to a database. You can define a set of peers that can write to a database or allow anyone write to a database. **By default and if not specified otherwise, only the creator of the database will be given write-access**.
 
-***Note!*** *OrbitDB currently supports only dynamically adding write-access. That is, write-access cannot be revoked once added. In the future we'll support read access control and dynamic access control in a way that access rights can be added and removed to a database at any point in time without changing the database address. At the moment, if access rights need to be removed, the address of the database will change.*
+***Note!*** *OrbitDB currently supports only dynamically adding write-access. That is, write-access cannot be revoked once added. In the future OrbitDB will support access revocation and read access control. At the moment, if access rights need to be removed, the address of the database will change.*
 
-Access rights are setup by passing an `accessController` object that defines the access-controller type and access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database.
+Access rights are setup by passing an `accessController` object that specifies the access-controller type and access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database. The public keys to which access is given can be retrieved from the identity.publicKey property of each peer.
 
 ```javascript
 const ipfs = new IPFS()
@@ -259,17 +259,17 @@ Note how the access controller hash is different compared to the previous exampl
 
 #### Granting access after database creation
 
-To give access to another peer after the database has been created, you must set the access-controller `type` to an `AccessController` which supports dynamically adding keys such as `OrbitDBAccessController`.
+To give access to another peer after the database has been created, you must set the access-controller `type` to an `AccessController` which supports dynamically adding write-access such as `OrbitDBAccessController`.
 
 ```javaScript
 db = await orbitdb1.feed('AABB', {
   accessController: {
     type: 'orbitdb', //OrbitDBAccessController
-    write: [id1.publicKey]
+    write: [identity1.publicKey]
   }
 })
 
-await db.access.grant('write', id2.publicKey) // grant access to id2
+await db.access.grant('write', identity2.publicKey) // grant access to identity2
 ```
 
 #### Custom Access Controller
@@ -278,12 +278,23 @@ You can create a custom access controller by implementing the `AccessController`
 
 ```javascript
 class OtherAccessController extends AccessController {
-    static get type () { return 'othertype'} // Return the type for this controller
-    async canAppend(entry, identityProvider) {} // return true if entry can be added, identityProvider allows you to verify entry.identity
+
+    static get type () { return 'othertype' } // Return the type for this controller
+
+    async canAppend(entry, identityProvider) {
+      // logic to determine if entry can be added, for example:
+      if (entry.payload === "hello world" && entry.identity.id === identity.id && identityProvider.verifyIdentity(entry.identity))
+        return true
+
+      return false
+      }
+
     async grant (access, identity) {} // Logic for granting access to identity
 }
+
 let AccessControllers = require('orbit-db-access-controllers')
 AccessControllers.addAccessController({ AccessController: OtherAccessController })
+
 const orbitdb = await OrbitDB.createInstance(ipfs, {
   AccessControllers: AccessControllers
 })
