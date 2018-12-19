@@ -23,19 +23,22 @@ const startIpfs = (type, config = {}) => {
     IPFSFactory
       .create(testAPIs[type])
       .spawn(config, async (err, ipfsd) => {
-        if (err) { 
-          reject(err) 
+        if (err) {
+          reject(err)
         }
 
         // Monkey patch _peerInfo to the ipfs api/instance
         // to make js-ipfs-api compatible with js-ipfs
         // TODO: Get IPFS id via coherent API call (without it being asynchronous)
-        if (!ipfsd.api._peerInfo) {
-          let { id } = await ipfsd.api.id()
-          ipfsd.api._peerInfo = { id: { _idB58String: id } }
-        }
+        // console.log("IPS",ipfsd)
+        setTimeout(async () => {
+          if (!ipfsd.api._peerInfo) {
+            let { id } = await ipfsd.api.id()
+            ipfsd.api._peerInfo = { id: { _idB58String: id } }
+          }
+          resolve(ipfsd)
+        }, 100) // hack to fix pubsub ERRCONNREFUSED
 
-        resolve(ipfsd)
       })
   })
 }
