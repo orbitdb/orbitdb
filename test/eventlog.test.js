@@ -92,8 +92,8 @@ Object.keys(testAPIs).forEach(API => {
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)
-        assert.equal(hash.startsWith('Qm'), true)
-        assert.equal(hash.length, 46)
+        assert.equal(hash.startsWith('zd'), true)
+        assert.equal(hash.length, 49)
       })
     })
 
@@ -119,7 +119,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator()
           const next = iter.next().value
           assert.notEqual(next, null)
-          assert.equal(next.hash.startsWith('Qm'), true)
+          assert.equal(next.hash.startsWith('zd'), true)
           assert.equal(next.payload.key, null)
           assert.equal(next.payload.value, 'hello4')
         })

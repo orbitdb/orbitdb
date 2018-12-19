@@ -93,8 +93,8 @@ Object.keys(testAPIs).forEach(API => {
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)
-        assert.equal(hash.startsWith('Qm'), true)
-        assert.equal(hash.length, 46)
+        assert.equal(hash.startsWith('zd'), true)
+        assert.equal(hash.length, 49)
       })
 
       it('deletes an item when only one item in the database', async () => {
@@ -102,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
         const hash = await db.add('hello3')
         const delopHash = await db.remove(hash)
         const items = db.iterator().collect()
-        assert.equal(delopHash.startsWith('Qm'), true)
+        assert.equal(delopHash.startsWith('zd'), true)
         assert.equal(items.length, 0)
       })
 
@@ -130,7 +130,7 @@ Object.keys(testAPIs).forEach(API => {
 
         const firstItem = items[0]
         const secondItem = items[1]
-        assert.equal(firstItem.hash.startsWith('Qm'), true)
+        assert.equal(firstItem.hash.startsWith('zd'), true)
         assert.equal(firstItem.payload.key, null)
         assert.equal(firstItem.payload.value, 'hello2')
         assert.equal(secondItem.payload.value, 'hello3')
@@ -159,7 +159,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator()
           const next = iter.next().value
           assert.notEqual(next, null)
-          assert.equal(next.hash.startsWith('Qm'), true)
+          assert.equal(next.hash.startsWith('zd'), true)
           assert.equal(next.payload.key, null)
           assert.equal(next.payload.value, 'hello4')
         })
