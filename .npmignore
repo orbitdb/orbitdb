@@ -5,7 +5,7 @@ orbitdb/
 node_modules/
 
 # Don't distribute examples with the module
-# See examples at https://github.com/orbitdb/orbit-db 
+# See examples at https://github.com/orbitdb/orbit-db
 examples/
 
 # Don't distribute source maps
@@ -15,5 +15,5 @@ dist/*.map
 dist/orbitdb.js
 
 # Don't distribute screenshot
-# See examples at https://github.com/orbitdb/orbit-db 
-screenshots/
+# See examples at https://github.com/orbitdb/orbit-db
+images/
