@@ -230,7 +230,7 @@ OrbitDB uses the following modules:
 
 To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
 
-Community-maintained typescript typings are available here: https://github.com/orbitdb/orbit-db-types
+Community-maintained Typescript typings are available here: https://github.com/orbitdb/orbit-db-types
 
 ## Development
 
