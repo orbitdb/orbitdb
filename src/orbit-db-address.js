@@ -1,6 +1,5 @@
 'use strict'
 
-const path = require('path')
 const multihash = require('multihashes')
 
 class OrbitDBAddress {
@@ -10,7 +9,7 @@ class OrbitDBAddress {
   }
 
   toString () {
-    return path.join('/orbitdb', this.root, this.path)
+    return '/orbitdb' + '/' + this.root + '/' + this.path
   }
 
   static isValid (address) {

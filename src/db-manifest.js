@@ -1,4 +1,4 @@
-const path = require('path')
+
 const { DAGNode } = require('ipld-dag-pb')
 
 // Creates a DB manifest file and saves it in IPFS
@@ -6,7 +6,7 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
   const manifest = {
     name: name,
     type: type,
-    accessController: path.join('/ipfs', accessControllerAddress),
+    accessController: '/ipfs' + '/' + accessControllerAddress,
   }
   let dag
   const manifestJSON = JSON.stringify(manifest)

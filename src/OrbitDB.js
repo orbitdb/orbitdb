@@ -1,6 +1,5 @@
 'use strict'
 
-const path = require('path')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -36,7 +35,7 @@ class OrbitDB {
       : new Pubsub(this._ipfs, this.id)
     this.stores = {}
     this.directory = directory || './orbitdb'
-    this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
+    this.keystore = options.keystore || Keystore.create(this.directory + '/' + this.id + '/' + '/keystore')
     this.cache = options.cache || Cache
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
     this._directConnections = {}
@@ -235,7 +234,7 @@ class OrbitDB {
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
 
     // Create the database address
-    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    return OrbitDBAddress.parse('/orbitdb' + '/' + manifestHash, name)
   }
 
   /* Create and Open databases */
@@ -350,7 +349,7 @@ class OrbitDB {
   // Save the database locally
   async _saveDBManifest (directory, dbAddress) {
     const cache = await this._loadCache(directory, dbAddress)
-    await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
+    await cache.set(dbAddress.toString() + '/' + '_manifest', dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
@@ -377,7 +376,7 @@ class OrbitDB {
     if (!cache) {
       return false
     }
-    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
+    const data = await cache.get(dbAddress.toString() + '/' + '_manifest')
     return data !== undefined && data !== null
   }
 
