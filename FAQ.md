@@ -49,6 +49,17 @@ However, this will change in the future as js-ipfs gets GC and we want to make s
 
 All databases (feeds) are shared between peers, so nobody "owns them" like users do in ssb (afaik). Multiple peers can append to the same db. @tyleryasaka is right in that each peer has their own copy of the db (the log) and they may have different versions between them but, as @tyleryasaka (correctly) describes, through the syncing/replication process the peers exchange "their knowledge of the db" (heads) with each other, the dbs/logs get merged. This is what the "CRDT" in ipfs-log enables. But from address/authority/ownership perspective, they all share the same feed.
 
+### I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB
+
+This happens when there's only one node with data available, and the system isn't able to effectively get all of the data it needs from it. In order to get around this, IPFS instantiates nodes with preload enabled, so that one node isn't effectively DDoSed. However, sometimes these nodes go down, as well, causing 429 errors. To get around this in example cases (certainly not in production), disable preload:
+
+```js
+this.ipfs = new Ipfs({
+  preload: { enabled: false },
+  // ...
+}
+```
+
 ### How can I contribute to this FAQ?
 
 See the introduction at the top! Please open any issues and pull requests you can to improve this FAQ.md. It is here for you. If you're confused, ask another question publicly; it's possible that other people are, too. If you don't want to open an issue, feel free to jump onto [the Gitter](https://gitter.im/orbitdb/Lobby) and ask us there, too.
