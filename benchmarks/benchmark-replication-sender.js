@@ -46,8 +46,8 @@ const defaultConfig = Object.assign({}, {
   config: ipfsConf
 })
 
-const conf1 = Object.assign({}, defaultConfig, { 
-  repo: new IPFSRepo('./orbitdb/benchmarks/replication/client1/ipfs', repoConf) 
+const conf1 = Object.assign({}, defaultConfig, {
+  repo: new IPFSRepo('./orbitdb/benchmarks/replication/client1/ipfs', repoConf)
 })
 
 // Write loop
@@ -74,7 +74,7 @@ const outputMetrics = (name, db, metrics) => {
     if(metrics.seconds % 10 === 0) {
       console.log(`[${name}] --> Average of ${metrics.lastTenSeconds/10} q/s in the last 10 seconds`)
       metrics.lastTenSeconds = 0
-    }  
+    }
 }
 
 const database = 'benchmark-replication'
@@ -87,7 +87,7 @@ pMapSeries([conf1,], d => startIpfs('js-ipfs', d))
   .then(async ([ipfs1]) => {
     try {
       // Create the databases
-      const orbit1 = new OrbitDB(ipfs1.api, './orbitdb/benchmarks/replication/client1')
+      const orbit1 = await OrbitDB.createInstance(ipfs1.api, { directory: './orbitdb/benchmarks/replication/client1' })
       const db1 = await orbit1.eventlog(database, { overwrite: true })
       console.log(db1.address.toString())
 

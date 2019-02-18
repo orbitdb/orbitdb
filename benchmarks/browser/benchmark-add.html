@@ -32,7 +32,7 @@
       }
 
       let run = (() => {
-        ipfs = new Ipfs({ 
+        ipfs = new Ipfs({
           repo: '/orbitdb/benchmarks/browser/benchmark-add/0.27.0',
           start: false,
           EXPERIMENTAL: {
@@ -47,8 +47,8 @@
         ipfs.on('ready', async () => {
           const outputElm = document.getElementById('output')
           try {
-            const orbit = new OrbitDB(ipfs, './orbitdb/benchmarks/browser')
-            const db = await orbit.eventlog('orbit-db.benchmark.add', { 
+            const orbit = await OrbitDB.createInstance(ipfs, { directory: './orbitdb/benchmarks/browser' })
+            const db = await orbit.eventlog('orbit-db.benchmark.add', {
               replicate: false,
             })
 
