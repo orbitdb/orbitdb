@@ -1,15 +1,12 @@
 # OrbitDB
 
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby)
-[![](https://img.shields.io/badge/freenode-%23orbitdb-blue.svg?style=flat-square)](http://webchat.freenode.net/?channels=%23orbitdb)
-[![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db)
-[![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
-[![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
-[![Project Status](https://badge.waffle.io/orbitdb/orbit-db.svg?columns=In%20Progress&title=In%20Progress)](https://waffle.io/orbitdb/orbit-db)
+<p align="left">
+  <img src="images/orbit_db_logo_color.jpg" width="256" />
+</p>
 
-> A peer-to-peer database for the decentralized web
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
 
-OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
+OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
 
 **Test it live at [Live demo 1](https://ipfs.io/ipfs/QmeESXh9wPib8Xz7hdRzHuYLDuEUgkYTSuujZ2phQfvznQ/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/QmTJGHccriUtq3qf3bvAQUcDUHnBbHNJG2x2FYwYUecN43/)**!
 
@@ -17,7 +14,7 @@ OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses [IPFS]
 OrbitDB provides various types of databases for different data models and use cases:
 
 - **[log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress)**: an immutable (append-only) log with traversable history. Useful for *"latest N"* use cases or as a message queue.
-- **[feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress)**: a mutable log with traversable history. Entries can be added and removed. Useful for *"shopping cart" type of use cases, or for example as a feed of blog posts or "tweets".
+- **[feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress)**: a mutable log with traversable history. Entries can be added and removed. Useful for *"shopping cart"* type of use cases, or for example as a feed of blog posts or "tweets".
 - **[keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress)**: a key-value database just like your favourite key-value database.
 - **[docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
 - **[counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)**: Useful for counting events separate from log/feed data.
@@ -25,7 +22,17 @@ OrbitDB provides various types of databases for different data models and use ca
 All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, operation-based conflict-free replicated data structure (CRDT) for distributed systems. If none of the OrbitDB database types match your needs and/or you need case-specific functionality, you can easily [implement and use a custom database store](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#custom-stores) of your own.
 
 #### Project status & support
-This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.0.0. To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
+
+Status: **in active development**
+
+***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://gitter.im/orbitdb/Lobby) if you plan to use OrbitDB in mission critical systems.*
+
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.6.0 due to the usage of `...` spread syntax. LTS versions (even numbered versions 8, 10, etc) are preferred.
+
+To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
+
+#### Community Calls
+We also have regular community calls, which we announce in the issues in [the @orbitdb welcome repository](https://github.com/orbitdb/welcome/issues). Join us!
 
 ## Table of Contents
 
@@ -61,7 +68,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 For the CLI tool to manage orbit-db database, see **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**.
 
-It can be installed from Npm with:
+It can be installed from npm with:
 
 ```
 npm install orbit-db-cli -g
@@ -74,7 +81,7 @@ If you're using `orbitd-db` to develop **browser** or **Node.js** applications, 
 Install dependencies:
 
 ```
-npm install orbit-db ipfs
+npm install orbit-db ipfs@0.33.0
 ```
 
 ```javascript
@@ -132,8 +139,9 @@ const OrbitDB = require('orbit-db')
 
 const ipfs = IpfsApi('localhost', '5001')
 const orbitdb = new OrbitDB(ipfs)
-const db = await orbitdb.log('hello')
-...
+orbitdb.log('hello').then(db => {
+  // Do something with your db.
+})
 ```
 
 ## API
@@ -178,7 +186,7 @@ npm run examples:browser-linux
 ```
 
 <p align="left">
-  <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/screenshots/example1.png" width="33%">
+  <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/images/example1.png" width="33%">
 </p>
 
 Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orbit-db/blob/master/examples/browser/browser.html) and try the [live example](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/).
@@ -189,7 +197,7 @@ Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orb
 npm run examples:node
 ```
 
-<img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/screenshots/orbit-db-demo3.gif" width="66%">
+<img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/images/orbit-db-demo3.gif" width="66%">
 
 **Eventlog**
 
@@ -222,6 +230,8 @@ OrbitDB uses the following modules:
 
 To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
 
+Community-maintained Typescript typings are available here: https://github.com/orbitdb/orbit-db-types
+
 ## Development
 
 ### Run Tests
@@ -251,11 +261,15 @@ LOG=debug node <file>
 
 ## Contributing
 
-We would be happy to accept PRs! If you want to work on something, it'd be good to talk beforehand to make sure nobody else is working on it. You can reach us on IRC [#orbitdb](http://webchat.freenode.net/?channels=%23orbitdb) on Freenode, or in the comments of the [issues section](https://github.com/orbitdb/orbit-db/issues).
+**Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
+
+As far as code goes, we would be happy to accept PRs! If you want to work on something, it'd be good to talk beforehand to make sure nobody else is working on it. You can reach us [on Gitter](https://gitter.im/orbitdb/Lobby), or in the [issues section](https://github.com/orbitdb/orbit-db/issues).
 
 We also have **regular community calls**, which we announce in the issues in [the @orbitdb welcome repository](https://github.com/orbitdb/welcome/issues). Join us!
 
-If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbit-db/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc) or the project's [status board](https://waffle.io/orbitdb/orbit-db).
+If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbit-db/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc).
+
+Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md), and that all activity in the [@orbitdb](https://github.com/orbitdb) organization falls under it. Read it when you get the chance, as being part of this community means that you agree to abide by it. Thanks.
 
 ## Sponsors
 

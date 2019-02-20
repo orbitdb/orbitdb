@@ -186,6 +186,48 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
+    describe('determineAddress', function() {
+      describe('Errors', function() {
+        it('throws an error if given an invalid database type', async () => {
+          let err
+          try {
+            await orbitdb.determineAddress('first', 'invalid-type')
+          } catch (e) {
+            err = e.toString()
+          }
+          assert.equal(err, 'Error: Invalid database type \'invalid-type\'')
+        })
+
+        it('throws an error if given an address instead of name', async () => {
+          let err
+          try {
+            await orbitdb.determineAddress('/orbitdb/Qmc9PMho3LwTXSaUXJ8WjeBZyXesAwUofdkGeadFXsqMzW/first', 'feed')
+          } catch (e) {
+            err = e.toString()
+          }
+          assert.equal(err, 'Error: Given database name is an address. Please give only the name of the database!')
+        })
+      })
+
+      describe('Success', function() {
+        before(async () => {
+          address = await orbitdb.determineAddress('third', 'feed', { replicate: false })
+          localDataPath = path.join(dbPath, address.root, address.path)
+        })
+
+        it('does not save the address locally', async () => {
+          assert.equal(fs.existsSync(localDataPath), false)
+        })
+
+        it('returns the address that would have been created', async () => {
+          db = await orbitdb.create('third', 'feed', { replicate: false })
+          assert.equal(address.toString().indexOf('/orbitdb'), 0)
+          assert.equal(address.toString().indexOf('Qm'), 9)
+          assert.equal(address.toString(), db.address.toString())
+        })
+      })
+    })
+
     describe('Open', function() {
       before(async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed' })

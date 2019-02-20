@@ -10,6 +10,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
 - [Public Instance Methods](#public-instance-methods)
   * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
+  * [orbitdb.determineAddress(name, type, [options])](#orbitdbdetermineaddressname-type-options)
   * [orbitdb.open(address, [options])](#orbitdbopenaddress-options)
   * [orbitdb.disconnect()](#orbitdbdisconnect)
   * [orbitdb.stop()](#orbitdbstop)
@@ -75,6 +76,8 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 
 - `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
 
+- 'cache' (Cache Instance) : By default creates an instance of [Cache](https://github.com/orbitdb/orbit-db-cache). A custom cache instance can also be used.
+
 After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
 
 *For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
@@ -90,7 +93,7 @@ const db = await orbitdb.keyvalue('profile')
 
 Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
 - `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
-- `write` (array): An array of hex encoded public keys which are used to set write acces to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
+- `write` (array): An array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
 ```javascript
@@ -104,6 +107,21 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
 })
 // db created & opened
 ```
+
+### orbitdb.determineAddress(name, type, [options])
+> Returns the orbit-db address for given parameters
+
+Returns a `Promise` that resolves to an orbit-db address. The parameters correspond exactly with the parameters of [orbit-db.create](#orbitdbcreatename-type-options). This is useful for determining a database address ahead of time, or deriving another peer's address from their public key and the database name and type. *No database is actually created.*
+
+```javascript
+const dbAddress = await orbitdb.determineAddress('user.posts', 'eventlog', {
+  write: [
+    // This could be someone else's public key
+    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+  ]
+})
+```
+
 ### orbitdb.open(address, [options])
 > Opens an OrbitDB database.
 
@@ -332,7 +350,6 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
 Returns an `Array` with a single `Object` if key exists.
   ```javascript
   const profile = db.get('shamb0t')
-    .map((e) => e.payload.value)
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
 
@@ -356,7 +373,7 @@ Alias for [`orbitdb.docs()`](#orbitdbdocsnameaddress-options)
 ### orbitdb.counter(name|address)
 > Creates and opens a counter database
 
-Returns a `Promise` that resolves to a [`DocumentStore` instance](https://github.com/orbitdb/orbit-db-docstore).
+Returns a `Promise` that resolves to a [`CounterStore` instance](https://github.com/orbitdb/orbit-db-counterstore).
 
 ```javascript
 const counter = await orbitdb.counter('song_123.play_count')
