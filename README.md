@@ -81,13 +81,12 @@ If you're using `orbitd-db` to develop **browser** or **Node.js** applications, 
 Install dependencies:
 
 ```
-npm install orbit-db ipfs@0.33.0
+npm install orbit-db ipfs
 ```
 
 ```javascript
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
-
 // OrbitDB uses Pubsub which is an experimental feature
 // and need to be turned on manually.
 // Note that these options need to be passed to IPFS in
@@ -103,7 +102,7 @@ const ipfs = new IPFS(ipfsOptions)
 
 ipfs.on('error', (e) => console.error(e))
 ipfs.on('ready', async () => {
-  const orbitdb = new OrbitDB(ipfs)
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 
   // Create / Open a database
   const db = await orbitdb.log('hello')
@@ -130,18 +129,20 @@ Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use
 Install dependencies:
 
 ```
-npm install orbit-db ipfs-api
+npm install orbit-db ipfs-http-client
 ```
 
 ```javascript
-const IpfsApi = require('ipfs-api')
+const IpfsClient = require('ipfs-http-client')
 const OrbitDB = require('orbit-db')
 
-const ipfs = IpfsApi('localhost', '5001')
-const orbitdb = new OrbitDB(ipfs)
-orbitdb.log('hello').then(db => {
+const ipfs = IpfsClient('localhost', '5001')
+
+OrbitDB.createInstance(ipfs).then(async (orbitdb) => {
+  const db = await orbitdb.log('hello')
   // Do something with your db.
 })
+
 ```
 
 ## API
@@ -218,7 +219,8 @@ OrbitDB uses the following modules:
 - [crdts](https://github.com/orbitdb/crdts)
 - [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
 - [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
-- [orbit-db-keystore](https://github.com/orbitdb/orbit-db-keystore)
+- [orbit-db-identity-provider](https://github.com/orbitdb/orbit-db-identity-provider)
+- [orbit-db-access-controllers](https://github.com/orbitdb/orbit-db-access-controllers)
 
 ### OrbitDB Store Packages
 - [orbit-db-store](https://github.com/orbitdb/orbit-db-store)
