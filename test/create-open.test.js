@@ -9,7 +9,7 @@ const levelup = require('levelup')
 const leveldown = require('leveldown')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
-
+const io = require('orbit-db-io')
 // Include test utilities
 const {
   config,
@@ -34,11 +34,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = new OrbitDB(ipfs, dbPath)
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
-      if(orbitdb) 
+      if(orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
@@ -104,8 +104,8 @@ Object.keys(testAPIs).forEach(API => {
 
         it('database has the correct address', async () => {
           assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
-          assert.equal(db.address.toString().indexOf('Qm'), 9)
-          assert.equal(db.address.toString().indexOf('second'), 56)
+          assert.equal(db.address.toString().indexOf('zd'), 9)
+          assert.equal(db.address.toString().indexOf('second'), 59)
         })
 
         it('saves the database locally', async () => {
@@ -132,8 +132,7 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('saves database manifest file locally', async () => {
-          const dag = await ipfs.object.get(db.address.root)
-          const manifest = JSON.parse(dag.toJSON().data)
+          const manifest = await io.read(ipfs, db.address.root)
           assert.notEqual(manifest, )
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
@@ -165,22 +164,21 @@ Object.keys(testAPIs).forEach(API => {
 
           it('creates an access controller and adds ourselves as writer by default', async () => {
             db = await orbitdb.create('fourth', 'feed')
-            assert.deepEqual(db.access.write, [orbitdb.key.getPublic('hex')])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and adds writers', async () => {
-            db = await orbitdb.create('fourth', 'feed', { write: ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')] })
-            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.key.getPublic('hex')])
-          })
-
-          it('creates an access controller and doesn\'t add an admin', async () => {
-            db = await orbitdb.create('sixth', 'feed')
-            assert.deepEqual(db.access.admin, [])
+            db = await orbitdb.create('fourth', 'feed', {
+              accessController: {
+                write: ['another-key', 'yet-another-key', orbitdb.identity.publicKey]
+              }
+            })
+            assert.deepEqual(db.access.write, ['another-key', 'yet-another-key', orbitdb.identity.publicKey])
           })
 
           it('creates an access controller and doesn\'t add read access keys', async () => {
             db = await orbitdb.create('seventh', 'feed', { read: ['one', 'two'] })
-            assert.deepEqual(db.access.read, [])
+            assert.deepEqual(db.access.write, [orbitdb.identity.publicKey])
           })
         })
       })
@@ -222,7 +220,7 @@ Object.keys(testAPIs).forEach(API => {
         it('returns the address that would have been created', async () => {
           db = await orbitdb.create('third', 'feed', { replicate: false })
           assert.equal(address.toString().indexOf('/orbitdb'), 0)
-          assert.equal(address.toString().indexOf('Qm'), 9)
+          assert.equal(address.toString().indexOf('zd'), 9)
           assert.equal(address.toString(), db.address.toString())
         })
       })
@@ -256,21 +254,21 @@ Object.keys(testAPIs).forEach(API => {
       it('opens a database - name only', async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
-        assert.equal(db.address.toString().indexOf('Qm'), 9)
-        assert.equal(db.address.toString().indexOf('abc'), 56)
+        assert.equal(db.address.toString().indexOf('zd'), 9)
+        assert.equal(db.address.toString().indexOf('abc'), 59)
       })
 
       it('opens the same database - from an address', async () => {
         db = await orbitdb.open(db.address)
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
-        assert.equal(db.address.toString().indexOf('Qm'), 9)
-        assert.equal(db.address.toString().indexOf('abc'), 56)
+        assert.equal(db.address.toString().indexOf('zd'), 9)
+        assert.equal(db.address.toString().indexOf('abc'), 59)
       })
 
       it('opens a database and adds the creator as the only writer', async () => {
-        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, write: [] })
+        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         assert.equal(db.access.write.length, 1)
-        assert.equal(db.access.write[0], db.key.getPublic('hex'))
+        assert.equal(db.access.write[0], db.identity.publicKey)
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
@@ -298,6 +296,7 @@ Object.keys(testAPIs).forEach(API => {
         await db.add('hello2')
 
         db = await orbitdb.open(db.address)
+
         await db.load()
         const res = db.iterator({ limit: -1 }).collect()
 
@@ -307,5 +306,4 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
   })
-
 })

@@ -38,17 +38,17 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      orbitdb1 = new OrbitDB(ipfs1, dbPath1)
-      orbitdb2 = new OrbitDB(ipfs2, dbPath2)
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if(orbitdb2) 
+      if(orbitdb2)
         await orbitdb2.stop()
 
       if (ipfsd1)
@@ -63,8 +63,8 @@ Object.keys(testAPIs).forEach(API => {
       const openDatabases1 = async (options) => {
         // Set write access for both clients
         options.write = [
-          orbitdb1.key.getPublic('hex'), 
-          orbitdb2.key.getPublic('hex')
+          orbitdb1.identity.publicKey,
+          orbitdb2.identity.publicKey
         ],
 
         options = Object.assign({}, options, { path: dbPath1 })
@@ -77,8 +77,8 @@ Object.keys(testAPIs).forEach(API => {
       const openDatabases = async (options) => {
         // Set write access for both clients
         options.write = [
-          orbitdb1.key.getPublic('hex'), 
-          orbitdb2.key.getPublic('hex')
+          orbitdb1.identity.publicKey,
+          orbitdb2.identity.publicKey
         ],
 
         options = Object.assign({}, options, { path: dbPath1, create: true })
@@ -129,10 +129,12 @@ Object.keys(testAPIs).forEach(API => {
 
                 // Set write access for both clients
                 let options = {
-                  write: [
-                    orbitdb1.key.getPublic('hex'), 
-                    orbitdb2.key.getPublic('hex')
-                  ],
+                  accessController: {
+                    write: [
+                      orbitdb1.identity.publicKey,
+                      orbitdb2.identity.publicKey
+                    ],
+                  }
                 }
 
                 // Get the previous address to make sure nothing mutates it
