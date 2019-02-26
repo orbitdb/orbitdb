@@ -3,13 +3,14 @@
 const assert = require('assert')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
+const CustomCache = require('orbit-db-cache')
 // Include test utilities
 const {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-  CustomTestKeystore,
+  CustomTestCache,
   databases,
 } = require('./utils')
 
@@ -17,7 +18,7 @@ const dbPath = './orbitdb/tests/customKeystore'
 const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
+  describe(`orbit-db - Use a Custom Cache (${API})`, function() {
     this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1
@@ -29,7 +30,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       orbitdb1 = new OrbitDB(ipfs, dbPath + '/1', {
-        keystore: CustomTestKeystore
+        cache: CustomTestCache
       })
     })
 
@@ -41,30 +42,10 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd)
     })
 
-    describe('allows orbit to use a custom keystore with different store types', function() {
+    describe('allows orbit to use a custom cache with different store types', function() {
       databases.forEach(async (database) => {
         it(database.type + ' allows custom keystore', async () => {
           const db1 = await database.create(orbitdb1, 'custom-keystore')
-          await database.tryInsert(db1)
-
-          assert.deepEqual(database.getTestValue(db1), database.expectedValue)
-
-          await db1.close()
-        })
-      })
-    })
-
-    describe('allows a custom keystore to be used with different store and write permissions', function() {
-      databases.forEach(async (database) => {
-        it(database.type + ' allows custom keystore', async () => {
-          const options = {
-            // Set write access for both clients
-            write: [
-              orbitdb1.key.getPublic('hex')
-            ],
-          }
-
-          const db1 = await database.create(orbitdb1, 'custom-keystore', options)
           await database.tryInsert(db1)
 
           assert.deepEqual(database.getTestValue(db1), database.expectedValue)

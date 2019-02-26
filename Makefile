@@ -20,6 +20,10 @@ build: test
 clean:
 	rm -rf orbitdb/
 	rm -rf node_modules/
-	rm package-lock.json
+
+clean-dependencies: clean
+	if [ -a package-lock.json ]; then rm package-lock.json; fi;
+
+rebuild: | clean-dependencies build
 
 .PHONY: test build

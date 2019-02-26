@@ -31,12 +31,13 @@ class OrbitDB {
   constructor(ipfs, directory, options = {}) {
     this._ipfs = ipfs
     this.id = options.peerId || (this._ipfs._peerInfo ? this._ipfs._peerInfo.id._idB58String : 'default')
-    this._pubsub = options && options.broker 
-      ? new options.broker(this._ipfs) 
+    this._pubsub = options && options.broker
+      ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
     this.stores = {}
     this.directory = directory || './orbitdb'
     this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
+    this.cache = options.cache || Cache
     this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
     this._directConnections = {}
   }
@@ -97,8 +98,9 @@ class OrbitDB {
     Object.keys(this._directConnections).forEach(removeDirectConnect)
 
     // Disconnect from pubsub
-    if (this._pubsub) 
-      this._pubsub.disconnect()
+    if (this._pubsub) {
+      await this._pubsub.disconnect()
+    }
 
     // Remove all databases from the state
     this.stores = {}
@@ -125,8 +127,8 @@ class OrbitDB {
 
     const cache = await this._loadCache(this.directory, address)
 
-    const opts = Object.assign({ replicate: true }, options, { 
-      accessController: accessController, 
+    const opts = Object.assign({ replicate: true }, options, {
+      accessController: accessController,
       keystore: this.keystore,
       cache: cache,
       onClose: this._onClose.bind(this),
@@ -185,41 +187,26 @@ class OrbitDB {
       onMessage,
       onChannelCreated
     )
- 
+
     if (getStore(address))
       getStore(address).events.emit('peer', peer)
   }
 
   // Callback when database was closed
-  _onClose (address) {
+  async _onClose (address) {
     logger.debug(`Close ${address}`)
 
     // Unsubscribe from pubsub
-    if(this._pubsub)
-      this._pubsub.unsubscribe(address)
+    if (this._pubsub) {
+      await this._pubsub.unsubscribe(address)
+    }
 
     delete this.stores[address]
   }
 
-  /* Create and Open databases */
-
-  /*
-    options = {
-      admin: [], // array of keys that are the admins of this database (same as write access)
-      write: [], // array of keys that can write to this database
-      directory: './orbitdb', // directory in which to place the database files
-      overwrite: false, // whether we should overwrite the existing database if it exists
-    }
-  */
-  async create (name, type, options = {}) {
-    logger.debug(`create()`)
-
+  async _determineAddress(name, type, options = {}, onlyHash) {
     if (!OrbitDB.isValidType(type))
       throw new Error(`Invalid database type '${type}'`)
-
-    // The directory to look databases from can be passed in as an option
-    const directory = options.directory || this.directory
-    logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
 
     if (OrbitDBAddress.isValid(name))
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
@@ -242,18 +229,40 @@ class OrbitDB {
       accessController.add('write', this.key.getPublic('hex'))
     }
     // Save the Access Controller in IPFS
-    const accessControllerAddress = await accessController.save()
+    const accessControllerAddress = await accessController.save(onlyHash)
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress)
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
 
     // Create the database address
-    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+  }
 
-    // // Load local cache
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+  /* Create and Open databases */
+
+  /*
+    options = {
+      admin: [], // array of keys that are the admins of this database (same as write access)
+      write: [], // array of keys that can write to this database
+      directory: './orbitdb', // directory in which to place the database files
+      overwrite: false, // whether we should overwrite the existing database if it exists
+    }
+  */
+  async create (name, type, options = {}) {
+    logger.debug(`create()`)
+
+    // The directory to look databases from can be passed in as an option
+    const directory = options.directory || this.directory
+    logger.debug(`Creating database '${name}' as ${type} in '${directory}'`)
+
+    // Create the database address
+    const dbAddress = await this._determineAddress(name, type, options)
+
+    // Load the locally saved database information
+    const cache = await this._loadCache(directory, dbAddress)
+
+    // Check if we have the database locally
+    const haveDB = await this._haveLocalData(cache, dbAddress)
 
     if (haveDB && !options.overwrite)
       throw new Error(`Database '${dbAddress}' already exists!`)
@@ -267,10 +276,14 @@ class OrbitDB {
     return this.open(dbAddress, options)
   }
 
+  async determineAddress(name, type, options = {}) {
+    return this._determineAddress(name, type, options, true)
+  }
+
   /*
       options = {
         localOnly: false // if set to true, throws an error if database can't be found locally
-        create: false // wether to create the database
+        create: false // whether to create the database
         type: TODO
         overwrite: TODO
 
@@ -301,11 +314,11 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
-    // Check if we have the database
-    const haveDB = await this._loadCache(directory, dbAddress)
-      .then(cache => cache ? cache.get(path.join(dbAddress.toString(), '_manifest')) : null)
-      .then(data => data !== undefined && data !== null)
+    // Load the locally saved db information
+    const cache = await this._loadCache(directory, dbAddress)
 
+    // Check if we have the database
+    const haveDB = await this._haveLocalData(cache, dbAddress)
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
     // If we want to try and open the database local-only, throw an error
@@ -341,16 +354,31 @@ class OrbitDB {
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
+  // Loads the locally saved database information (manifest, head hashes)
   async _loadCache (directory, dbAddress) {
     let cache
     try {
-      cache = await Cache.load(directory, dbAddress)
+      cache = await this.cache.load(directory, dbAddress)
     } catch (e) {
       console.log(e)
       logger.error("Couldn't load Cache:", e)
     }
 
     return cache
+  }
+
+  /**
+   * Check if we have the database, or part of it, saved locally
+   * @param  {[Cache]} cache [The OrbitDBCache instance containing the local data]
+   * @param  {[OrbitDBAddress]} dbAddress [Address of the database to check]
+   * @return {[Boolean]} [Returns true if we have cached the db locally, false if not]
+   */
+  async _haveLocalData (cache, dbAddress) {
+    if (!cache) {
+      return false
+    }
+    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
+    return data !== undefined && data !== null
   }
 
   /**
@@ -373,6 +401,14 @@ class OrbitDB {
 
   static getDatabaseTypes () {
     return databaseTypes
+  }
+
+  static isValidAddress (address) {
+    return OrbitDBAddress.isValid(address)
+  }
+
+  static parseAddress (address) {
+    return OrbitDBAddress.parse(address)
   }
 }
 

@@ -255,7 +255,7 @@ const main = (IPFS, ORBITDB) => {
     outputElm.innerHTML = `
       <div><b>Peer ID:</b> ${orbitdb.id}</div>
       <div><b>Peers (database/network):</b> ${databasePeers.length} / ${networkPeers.length}</div>
-      <div><b>Oplog Size:</b> ${db._replicationInfo.progress} / ${db._replicationInfo.max}</div>
+      <div><b>Oplog Size:</b> ${db._replicationStatus.progress} / ${db._replicationStatus.max}</div>
       <h2>Results</h2>
       <div id="results">
         <div>
