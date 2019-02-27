@@ -54,6 +54,7 @@ We also have regular community calls, which we announce in the issues in [the @o
   * [Build](#build)
   * [Benchmark](#benchmark)
   * [Logging](#logging)
+- [Frequently Asked Questions](#frequently-asked-questions)
 - [Contributing](#contributing)
 - [Sponsors](#sponsors)
 - [License](#license)
@@ -258,6 +259,10 @@ To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `d
 ```
 LOG=debug node <file>
 ```
+
+## Frequently Asked Questions
+
+We have an FAQ! [Go take a look at it](FAQ.md). If a question isn't there, open an issue and suggest adding it. We can work on the best answer together.
 
 ## Contributing
 
