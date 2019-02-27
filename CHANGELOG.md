@@ -1,7 +1,27 @@
 # Changelog
 
 ## v0.20.0
-***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the entry data-structure has also changed to include `identity` and `cid` fields as well as increment the version to 1. Read further and see the [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md), [examples](https://github.com/orbitdb/orbit-db/tree/master/examples) and [Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) to learn more about the changes. Note that we don't use semver for the npm module, so be sure to lock your orbit-db dependency to the previous release if you don't want to upgrade.
+***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the entry data-structure has also changed to include `identity` and `cid` fields as well as increment the version to 1.
+
+API breaking changes:
+
+- ### Constructor:
+The OrbitDB constructor requires an instance of `identity` to be passed as an argument:
+```javascript
+const orbitdb = new OrbitDB(ipfs, identity, [options])
+```
+- ### Creating an OrbitDB instance:
+  The preferred method for creating an instance of OrbitDB is the async `createInstance` method which will create an `identity` for you if one is not passed in the options.
+```javascript
+const orbitdb = await OrbitDB.createInstance(ipfs, [options])
+```
+- ### OrbitDB key
+  The `key` property has been removed and replaced with `identity`. You can access the public-key with:
+  ```javascript
+  orbitdb.identity.publicKey
+  ```
+
+Read further and see the [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md), [examples](https://github.com/orbitdb/orbit-db/tree/master/examples) and [Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) to learn more about the changes. Note that we don't use semver for the npm module, so be sure to lock your orbit-db dependency to the previous release if you don't want to upgrade.
 
 ### Improved Write Permissions
 
