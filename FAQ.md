@@ -15,6 +15,7 @@ This document is seeded by questions from people opening issues in this reposito
 - [Is every `put` to OrbitDB immediately sent to the network and persisted?](#is-every-put-to-orbitdb-immediately-sent-to-the-network-and-persisted)
 - [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
 - [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
+- [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
 - [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
 
 <!-- tocstop -->
@@ -48,6 +49,17 @@ However, this will change in the future as js-ipfs gets GC and we want to make s
 > "...or, is it done more like scuttlebutt, where each peer has their own feed"
 
 All databases (feeds) are shared between peers, so nobody "owns them" like users do in ssb (afaik). Multiple peers can append to the same db. @tyleryasaka is right in that each peer has their own copy of the db (the log) and they may have different versions between them but, as @tyleryasaka (correctly) describes, through the syncing/replication process the peers exchange "their knowledge of the db" (heads) with each other, the dbs/logs get merged. This is what the "CRDT" in ipfs-log enables. But from address/authority/ownership perspective, they all share the same feed.
+
+### I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB
+
+This happens when there's only one node with data available, and the system isn't able to effectively get all of the data it needs from it. In order to get around this, IPFS instantiates nodes with preload enabled, so that one node isn't effectively DDoSed. However, sometimes these nodes go down, as well, causing 429 errors. To get around this in example cases (certainly not in production), disable preload:
+
+```js
+this.ipfs = new Ipfs({
+  preload: { enabled: false },
+  // ...
+}
+```
 
 ### How can I contribute to this FAQ?
 
