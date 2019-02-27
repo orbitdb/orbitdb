@@ -3,6 +3,7 @@
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
+const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
@@ -30,11 +31,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '1') })
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
       if (ipfsd)
@@ -61,20 +62,20 @@ Object.keys(testAPIs).forEach(API => {
         const hash = await db.add('hello1')
         const items = db.iterator({ limit: -1 }).collect()
         assert.notEqual(hash, null)
-        assert.equal(hash, last(items).hash)
+        assert.equal(hash, last(items).cid)
         assert.equal(items.length, 1)
       })
 
       it('returns the added entry\'s hash, 2 entries', async () => {
         db = await orbitdb1.feed(address)
         await db.load()
-        const prevHash = db.iterator().collect()[0].hash
+        const prevHash = db.iterator().collect()[0].cid
         const hash = await db.add('hello2')
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 2)
         assert.notEqual(hash, null)
         assert.notEqual(hash, prevHash)
-        assert.equal(hash, last(items).hash)
+        assert.equal(hash, last(items).cid)
       })
 
       it('adds five items', async () => {
@@ -88,12 +89,12 @@ Object.keys(testAPIs).forEach(API => {
 
       it('adds an item that is > 256 bytes', async () => {
         db = await orbitdb1.feed('third')
-        let msg = new Buffer(1024)
+        let msg = Buffer.alloc(1024)
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)
-        assert.equal(hash.startsWith('Qm'), true)
-        assert.equal(hash.length, 46)
+        assert.equal(hash.startsWith('zd'), true)
+        assert.equal(hash.length, 49)
       })
 
       it('deletes an item when only one item in the database', async () => {
@@ -101,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
         const hash = await db.add('hello3')
         const delopHash = await db.remove(hash)
         const items = db.iterator().collect()
-        assert.equal(delopHash.startsWith('Qm'), true)
+        assert.equal(delopHash.startsWith('zd'), true)
         assert.equal(items.length, 0)
       })
 
@@ -129,7 +130,7 @@ Object.keys(testAPIs).forEach(API => {
 
         const firstItem = items[0]
         const secondItem = items[1]
-        assert.equal(firstItem.hash.startsWith('Qm'), true)
+        assert.equal(firstItem.cid.startsWith('zd'), true)
         assert.equal(firstItem.payload.key, null)
         assert.equal(firstItem.payload.value, 'hello2')
         assert.equal(secondItem.payload.value, 'hello3')
@@ -158,7 +159,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator()
           const next = iter.next().value
           assert.notEqual(next, null)
-          assert.equal(next.hash.startsWith('Qm'), true)
+          assert.equal(next.cid.startsWith('zd'), true)
           assert.equal(next.payload.key, null)
           assert.equal(next.payload.value, 'hello4')
         })
@@ -177,7 +178,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator()
           const first = iter.next().value
           const second = iter.next().value
-          assert.equal(first.hash, hashes[hashes.length - 1])
+          assert.equal(first.cid, hashes[hashes.length - 1])
           assert.equal(second, null)
           assert.equal(first.payload.value, 'hello4')
         })
@@ -217,7 +218,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator({ limit: 0 })
           const first = iter.next().value
           const second = iter.next().value
-          assert.equal(first.hash, last(hashes))
+          assert.equal(first.cid, last(hashes))
           assert.equal(second, null)
         })
 
@@ -225,7 +226,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator({ limit: 1 })
           const first = iter.next().value
           const second = iter.next().value
-          assert.equal(first.hash, last(hashes))
+          assert.equal(first.cid, last(hashes))
           assert.equal(second, null)
         })
 
@@ -235,16 +236,16 @@ Object.keys(testAPIs).forEach(API => {
           const second = iter.next().value
           const third = iter.next().value
           const fourth = iter.next().value
-          assert.equal(first.hash, hashes[hashes.length - 3])
-          assert.equal(second.hash, hashes[hashes.length - 2])
-          assert.equal(third.hash, hashes[hashes.length - 1])
+          assert.equal(first.cid, hashes[hashes.length - 3])
+          assert.equal(second.cid, hashes[hashes.length - 2])
+          assert.equal(third.cid, hashes[hashes.length - 1])
           assert.equal(fourth, null)
         })
 
         it('returns all items', () => {
           const messages = db.iterator({ limit: -1 })
             .collect()
-            .map((e) => e.hash)
+            .map((e) => e.cid)
 
           messages.reverse()
           assert.equal(messages.length, hashes.length)
@@ -254,7 +255,7 @@ Object.keys(testAPIs).forEach(API => {
         it('returns all items when limit is bigger than -1', () => {
           const messages = db.iterator({ limit: -300 })
             .collect()
-            .map((e) => e.hash)
+            .map((e) => e.cid)
 
           assert.equal(messages.length, hashes.length)
           assert.equal(messages[0], hashes[0])
@@ -263,7 +264,7 @@ Object.keys(testAPIs).forEach(API => {
         it('returns all items when limit is bigger than number of items', () => {
           const messages = db.iterator({ limit: 300 })
             .collect()
-            .map((e) => e.hash)
+            .map((e) => e.cid)
 
           assert.equal(messages.length, hashes.length)
           assert.equal(messages[0], hashes[0])
@@ -275,7 +276,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns 1 item when gte is the head', () => {
             const messages = db.iterator({ gte: last(hashes), limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 1)
             assert.equal(messages[0], last(hashes))
@@ -290,7 +291,7 @@ Object.keys(testAPIs).forEach(API => {
             const gte = hashes[hashes.length - 2]
             const messages = db.iterator({ gte: gte, limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 2)
             assert.equal(messages[0], hashes[hashes.length - 2])
@@ -300,7 +301,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns all items when gte is the root item', () => {
             const messages = db.iterator({ gte: hashes[0], limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, hashes.length)
             assert.equal(messages[0], hashes[0])
@@ -310,7 +311,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns items when gt is the root item', () => {
             const messages = db.iterator({ gt: hashes[0], limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, itemCount - 1)
             assert.equal(messages[0], hashes[1])
@@ -320,13 +321,13 @@ Object.keys(testAPIs).forEach(API => {
           it('returns items when gt is defined', () => {
             const messages = db.iterator({ limit: -1})
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             const gt = messages[2]
 
             const messages2 = db.iterator({ gt: gt, limit: 100 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages2.length, 2)
             assert.equal(messages2[0], messages[messages.length - 2])
@@ -338,7 +339,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns one item after head when lt is the head', () => {
             const messages = db.iterator({ lt: last(hashes) })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 1)
             assert.equal(messages[0], hashes[hashes.length - 2])
@@ -347,7 +348,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns all items when lt is head and limit is -1', () => {
             const messages = db.iterator({ lt: last(hashes), limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, hashes.length - 1)
             assert.equal(messages[0], hashes[0])
@@ -357,7 +358,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns 3 items when lt is head and limit is 3', () => {
             const messages = db.iterator({ lt: last(hashes), limit: 3 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 3)
             assert.equal(messages[0], hashes[hashes.length - 4])
@@ -372,7 +373,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns one item when lte is the root item', () => {
             const messages = db.iterator({ lte: hashes[0] })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 1)
             assert.equal(messages[0], hashes[0])
@@ -381,7 +382,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns all items when lte is the head', () => {
             const messages = db.iterator({ lte: last(hashes), limit: -1 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, itemCount)
             assert.equal(messages[0], hashes[0])
@@ -391,7 +392,7 @@ Object.keys(testAPIs).forEach(API => {
           it('returns 3 items when lte is the head', () => {
             const messages = db.iterator({ lte: last(hashes), limit: 3 })
               .collect()
-              .map((e) => e.hash)
+              .map((e) => e.cid)
 
             assert.equal(messages.length, 3)
             assert.equal(messages[0], hashes[hashes.length - 3])

@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
+const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
@@ -26,14 +27,14 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(config.daemon1.repo)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1')
+      orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '1') })
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if (ipfsd) 
+      if (ipfsd)
         await stopIpfs(ipfsd)
     })
 
@@ -141,11 +142,11 @@ Object.keys(testAPIs).forEach(API => {
         const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
 
         const expectedOperation = {
-          op: 'PUT', 
-          key: 'sup world', 
-          value: { 
-            _id: 'sup world', 
-            doc: 'some of the things', 
+          op: 'PUT',
+          key: 'sup world',
+          value: {
+            _id: 'sup world',
+            doc: 'some of the things',
             views: 10
           },
         }
@@ -160,7 +161,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.deepEqual(res.payload, expectedOperation)
         assert.notEqual(res.next, undefined)
         assert.equal(res.next.length, 1)
-        assert.equal(res.v, 0)
+        assert.equal(res.v, 1)
         assert.notEqual(res.clock, undefined)
         assert.equal(res.clock.time, 2)
         assert.notEqual(res.key, undefined)
@@ -170,10 +171,10 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Specified index', function() {
       beforeEach(async () => {
-        const options = { 
-          indexBy: 'doc', 
-          replicate: false, 
-          maxHistory: 0 
+        const options = {
+          indexBy: 'doc',
+          replicate: false,
+          maxHistory: 0
         }
         db = await orbitdb1.docstore(config.dbname, options)
       })

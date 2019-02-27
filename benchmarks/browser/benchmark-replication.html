@@ -60,11 +60,11 @@
         config: ipfsConf
       })
 
-      const conf1 = Object.assign({}, defaultConfig, { 
+      const conf1 = Object.assign({}, defaultConfig, {
         repo: './orbitdb/benchmarks/2replication3/client1/ipfs'
       })
 
-      const conf2 = Object.assign({}, defaultConfig, { 
+      const conf2 = Object.assign({}, defaultConfig, {
         repo: './orbitdb/benchmarks/2replication3/client2/ipfs'
       })
 
@@ -88,7 +88,7 @@
           if(metrics.seconds % 10 === 0) {
             console.log(`[${name}] --> Average of ${metrics.lastTenSeconds/10} q/s in the last 10 seconds`)
             metrics.lastTenSeconds = 0
-          }  
+          }
       }
 
       const startIpfs = (config = {}) => {
@@ -109,8 +109,8 @@
         let ipfs2 = await startIpfs(conf2)
         try {
           // Create the databases
-          const address = '/orbitdb/QmcPCAwwV1rw7cLQU7VcCaUXEuLYSCH8uUf6NPDLYbL6JT/benchmark-replication'
-          const orbit2 = new OrbitDB(ipfs2, './orbitdb/benchmarks/replication/client3')
+          const address = '/orbitdb/zdpuArNFJaH4Fk5dHH4rYSCtmbyaJLNHUyeFX4WszFxEqwJTE/benchmark-replication'
+          const orbit2 = await OrbitDB.createInstance(ipfs2, { directory: './orbitdb/benchmarks/replication/client3' })
           const db2 = await orbit2.eventlog(address)
 
           db2.events.on('peer', peer => console.log("PEER2!", peer))

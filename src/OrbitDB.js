@@ -9,10 +9,12 @@ const DocumentStore = require('orbit-db-docstore')
 const Pubsub = require('orbit-db-pubsub')
 const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
-const AccessController = require('./ipfs-access-controller')
+const Identities = require('orbit-db-identity-provider')
+let AccessControllers = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
+const { isDefined, io } = require('./utils')
 
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
@@ -27,19 +29,49 @@ let databaseTypes = {
   'keyvalue': KeyValueStore,
 }
 
-class OrbitDB {
-  constructor(ipfs, directory, options = {}) {
+  class OrbitDB {
+  constructor(ipfs, identity, options = {}) {
+    if (!isDefined(ipfs))
+      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
+    if (!isDefined(identity))
+      throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
     this._ipfs = ipfs
-    this.id = options.peerId || (this._ipfs._peerInfo ? this._ipfs._peerInfo.id._idB58String : 'default')
+    this.identity = identity
+    this.id = options.peerId
     this._pubsub = options && options.broker
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
-    this.stores = {}
-    this.directory = directory || './orbitdb'
-    this.keystore = options.keystore || Keystore.create(path.join(this.directory, this.id, '/keystore'))
+    this.directory = options.directory || './orbitdb'
+    this.keystore = options.keystore
     this.cache = options.cache || Cache
-    this.key = this.keystore.getKey(this.id) || this.keystore.createKey(this.id)
+    this.stores = {}
     this._directConnections = {}
+    // AccessControllers module can be passed in to enable
+    // testing with orbit-db-access-controller
+    AccessControllers = options.AccessControllers || AccessControllers
+  }
+
+  static async createInstance (ipfs, options = {}) {
+    if (!isDefined(ipfs))
+      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+
+    const { id } = await ipfs.id()
+    const directory = options.directory || './orbitdb'
+    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+
+    const identity = options.identity || await Identities.createIdentity({
+      id: options.id || id,
+      keystore: keystore,
+    })
+    options = Object.assign({}, options, {
+      peerId: id ,
+      directory: directory,
+      keystore: keystore
+    })
+    const orbitdb = new OrbitDB(ipfs, identity, options)
+    return orbitdb
   }
 
   /* Databases */
@@ -48,7 +80,7 @@ class OrbitDB {
     return this.open(address, options)
   }
 
-  async log (address, options) {
+  async log (address, options = {}) {
     options = Object.assign({ create: true, type: 'eventlog' }, options)
     return this.open(address, options)
   }
@@ -57,12 +89,12 @@ class OrbitDB {
     return this.log(address, options)
   }
 
-  async keyvalue (address, options) {
+  async keyvalue (address, options = {}) {
     options = Object.assign({ create: true, type: 'keyvalue' }, options)
     return this.open(address, options)
   }
 
-  async kvstore (address, options) {
+  async kvstore (address, options = {}) {
     return this.keyvalue(address, options)
   }
 
@@ -121,8 +153,7 @@ class OrbitDB {
 
     let accessController
     if (options.accessControllerAddress) {
-      accessController = new AccessController(this._ipfs)
-      await accessController.load(options.accessControllerAddress)
+      accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
     const cache = await this._loadCache(this.directory, address)
@@ -134,9 +165,8 @@ class OrbitDB {
       onClose: this._onClose.bind(this),
     })
 
-    const store = new Store(this._ipfs, this.id, address, opts)
+    const store = new Store(this._ipfs, this.identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
-
     // ID of the store is the address as a string
     const addr = address.toString()
     this.stores[addr] = store
@@ -211,25 +241,9 @@ class OrbitDB {
     if (OrbitDBAddress.isValid(name))
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
-    // Create an AccessController
-    const accessController = new AccessController(this._ipfs)
-    /* Disabled temporarily until we do something with the admin keys */
-    // Add admins of the database to the access controller
-    // if (options && options.admin) {
-    //   options.admin.forEach(e => accessController.add('admin', e))
-    // } else {
-    //   // Default is to add ourselves as the admin of the database
-    //   accessController.add('admin', this.key.getPublic('hex'))
-    // }
-    // Add keys that can write to the database
-    if (options && options.write && options.write.length > 0) {
-      options.write.forEach(e => accessController.add('write', e))
-    } else {
-      // Default is to add ourselves as the admin of the database
-      accessController.add('write', this.key.getPublic('hex'))
-    }
-    // Save the Access Controller in IPFS
-    const accessControllerAddress = await accessController.save(onlyHash)
+    // Create an AccessController, use IPFS AC as the default
+    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
+    const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
@@ -242,8 +256,7 @@ class OrbitDB {
 
   /*
     options = {
-      admin: [], // array of keys that are the admins of this database (same as write access)
-      write: [], // array of keys that can write to this database
+      accessController: { write: [] } // array of keys that can write to this database
       directory: './orbitdb', // directory in which to place the database files
       overwrite: false, // whether we should overwrite the existing database if it exists
     }
@@ -268,7 +281,7 @@ class OrbitDB {
       throw new Error(`Database '${dbAddress}' already exists!`)
 
     // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
+    await this._addManifestToCache(directory, dbAddress)
 
     logger.debug(`Created database '${dbAddress}'`)
 
@@ -291,6 +304,7 @@ class OrbitDB {
    */
   async open (address, options = {}) {
     logger.debug(`open()`)
+
     options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)
 
@@ -319,6 +333,7 @@ class OrbitDB {
 
     // Check if we have the database
     const haveDB = await this._haveLocalData(cache, dbAddress)
+
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
     // If we want to try and open the database local-only, throw an error
@@ -331,8 +346,7 @@ class OrbitDB {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const dag = await this._ipfs.object.get(dbAddress.root)
-    const manifest = JSON.parse(dag.toJSON().data)
+    const manifest = await io.read(this._ipfs, dbAddress.root)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
@@ -340,7 +354,7 @@ class OrbitDB {
       throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
 
     // Save the database locally
-    await this._saveDBManifest(directory, dbAddress)
+    await this._addManifestToCache(directory, dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
@@ -348,13 +362,12 @@ class OrbitDB {
   }
 
   // Save the database locally
-  async _saveDBManifest (directory, dbAddress) {
+  async _addManifestToCache (directory, dbAddress) {
     const cache = await this._loadCache(directory, dbAddress)
     await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
-  // Loads the locally saved database information (manifest, head hashes)
   async _loadCache (directory, dbAddress) {
     let cache
     try {

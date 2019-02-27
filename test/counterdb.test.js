@@ -5,7 +5,6 @@ const mapSeries = require('p-each-series')
 const path = require('path')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
-
 // Include test utilities
 const {
   config,
@@ -55,9 +54,9 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd2)
     })
 
-    beforeEach(() => {
-      orbitdb1 = new OrbitDB(ipfs1, './orbitdb/1')
-      orbitdb2 = new OrbitDB(ipfs2, './orbitdb/2')
+    beforeEach(async () => {
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: './orbitdb/1' })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: './orbitdb/2' })
     })
 
     afterEach(async () => {
@@ -100,11 +99,13 @@ Object.keys(testAPIs).forEach(API => {
 
       it('syncs counters', async () => {
         let options = {
-          // Set write access for both clients
-          write: [
-            orbitdb1.key.getPublic('hex'), 
-            orbitdb2.key.getPublic('hex')
-          ],
+          accessController: {
+            // Set write access for both clients
+            write: [
+              orbitdb1.identity.publicKey,
+              orbitdb2.identity.publicKey
+            ],
+          }
         }
 
         const numbers = [[13, 10], [2, 5]]

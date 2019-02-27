@@ -44,8 +44,8 @@ ipfs.on('error', (err) => console.error(err))
 ipfs.on('ready', async () => {
   const run = async () => {
     try {
-      const orbit = new OrbitDB(ipfs, './orbitdb/benchmarks')
-      const db = await orbit.eventlog('orbit-db.benchmark', { 
+      const orbit = await OrbitDB.createInstance(ipfs,{ directory: './orbitdb/benchmarks' })
+      const db = await orbit.eventlog('orbit-db.benchmark', {
         replicate: false,
       })
 
