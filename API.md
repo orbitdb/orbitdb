@@ -351,6 +351,10 @@ Returns an `Array` with a single `Object` if key exists.
   ```javascript
   const profile = db.get('shamb0t')
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
+  // to get all the records
+  const profile = db.get('');
+  // returns all the records
+  // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
 
 #### query(mapper)
