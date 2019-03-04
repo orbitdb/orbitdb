@@ -61,6 +61,10 @@ this.ipfs = new Ipfs({
 }
 ```
 
+### Where can I learn more about security, encryption, and account recovery?
+
+The very short answer is that OrbitDB is agnostic in terms of encryption and account recovery with the aim of providing maximum flexibility with your apps. We don't do any encryption on our side; however, nothing is stopping you from encrypting data before storing it in the OrbitDB network. OrbitDB (just like IPFS) will treat encrypted the data exactly the same. Any node can replicate the data, but only nodes which have access to the encryption key from some other means will be able to decrypt it.
+
 ### How can I contribute to this FAQ?
 
 See the introduction at the top! Please open any issues and pull requests you can to improve this FAQ.md. It is here for you. If you're confused, ask another question publicly; it's possible that other people are, too. If you don't want to open an issue, feel free to jump onto [the Gitter](https://gitter.im/orbitdb/Lobby) and ask us there, too.
