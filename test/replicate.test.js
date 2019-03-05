@@ -237,7 +237,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.only('emits correct replication info on fresh replication', async () => {
+    it('emits correct replication info on fresh replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
         let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0 }

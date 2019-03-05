@@ -18,7 +18,7 @@
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-access-controllers": "github:orbitdb/orbit-db-access-controllers",
+    "orbit-db-access-controllers": "github:orbitdb/orbit-db-access-controllers#libp2p",
     "orbit-db-cache": "~0.2.4",
     "orbit-db-counterstore": "github:orbitdb/orbit-db-counterstore",
     "orbit-db-docstore": "github:orbitdb/orbit-db-docstore",
@@ -29,7 +29,7 @@
     "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#libp2p",
     "orbit-db-kvstore": "github:orbitdb/orbit-db-kvstore",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "github:orbitdb/orbit-db-store",
+    "orbit-db-store": "github:orbitdb/orbit-db-store#libp2p",
     "pify": "^4.0.1"
   },
   "devDependencies": {
