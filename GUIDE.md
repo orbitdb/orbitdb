@@ -173,7 +173,7 @@ ipfs.on('ready', async () => {
   const options = {
     accessController: {
       // Give write access to ourselves
-      write: [orbitdb.key.getPublic('hex')],
+      write: [orbitdb.key.getPublic('hex')]
     }
   };
 
@@ -205,11 +205,6 @@ ipfs.on('ready', async () => {
     }
   };
 
-      // Give access to the second peer
-      '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
-    ],
-  }
-
   const db1 = await orbitdb.keyvalue('first-database', access)
   console.log(db1.address.toString())
   // /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
@@ -232,7 +227,7 @@ ipfs.on('ready', async () => {
   const options = {
     accessController: {
       // Give write access to ourselves
-      write: ['*'],
+      write: ['*']
     }
   };
 
