@@ -31,7 +31,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: path.join(dbPath, '1'),
-        keystore: CustomTestKeystore().create()
+        keystore: await CustomTestKeystore().create()
       })
     })
 

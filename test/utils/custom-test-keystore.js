@@ -15,6 +15,8 @@ class CustomTestKeystore {
     return this.key !== undefined ? true : false
   }
 
+  close () {}
+
   createKey (id) {
     const key = ec.genKeyPair()
     const keyPair = {
@@ -44,7 +46,7 @@ class CustomTestKeystore {
 
 module.exports = (LocalStorage, mkdir) => {
   return {
-    create: (directory) => {
+    create: async (directory) => {
       return new CustomTestKeystore()
     }
   }

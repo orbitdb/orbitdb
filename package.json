@@ -26,7 +26,7 @@
     "orbit-db-feedstore": "github:orbitdb/orbit-db-feedstore#feat/backwards-compatible",
     "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#libp2p",
     "orbit-db-io": "~0.0.1",
-    "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#libp2p",
+    "orbit-db-keystore": "github:albertoelias/orbit-db-keystore#use-indexeddb",
     "orbit-db-kvstore": "github:orbitdb/orbit-db-kvstore#feat/backwards-compatible",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "github:orbitdb/orbit-db-store#feat/backwards-compatible",

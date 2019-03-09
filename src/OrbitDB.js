@@ -59,7 +59,7 @@ let databaseTypes = {
 
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+    const keystore = options.keystore || await Keystore.create(path.join(directory, id, '/keystore'))
 
     const identity = options.identity || await Identities.createIdentity({
       id: options.id || id,
@@ -132,6 +132,11 @@ let databaseTypes = {
     // Disconnect from pubsub
     if (this._pubsub) {
       await this._pubsub.disconnect()
+    }
+
+    // Close keystore
+    if (this.keystore) {
+      await this.keystore.close()
     }
 
     // Remove all databases from the state
