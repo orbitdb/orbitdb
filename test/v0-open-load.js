@@ -11,6 +11,9 @@ const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const io = require('orbit-db-io')
 const IPFS = require('ipfs')
+const Identities = require('orbit-db-identity-provider')
+const migrate = require('localstorage-level-migration').migrateKeys
+
 // Include test utilities
 const {
   config,
@@ -39,11 +42,14 @@ Object.keys(testAPIs).forEach(API => {
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
       await fs.copy(dbFixturesDir, dbPath)
-
-      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
+      
+      let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, existingId: 'QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX', sourcePath: './test/fixtures/keys', migrate })
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath, identity })
     })
 
     after(async () => {
+      rmrf.sync(dbPath)
+
       if(orbitdb)
         await orbitdb.stop()
 
@@ -54,6 +60,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('Open & Load', function() {
       before(async () => {
         db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db')
+        await db.load()
       })
 
       after(async () => {
@@ -82,8 +89,15 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('load v0 orbitdb address', async () => {
-        await db.load()
+
         assert.equal(db.all.length, 3)
+      })
+
+      it('allows migrated key to write', async () => {
+        const hash = await db.add({ thing: 'new addition'})
+        const newEntries = db.all.filter(e => e.v === 1)
+        assert.equal(newEntries.length, 1)
+        assert.strictEqual(newEntries[0].cid, hash)
       })
     })
   })

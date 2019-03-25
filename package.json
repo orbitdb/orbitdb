@@ -43,6 +43,7 @@
     "ipfs": "^0.34.4",
     "ipfs-repo": "^0.26.2",
     "ipfsd-ctl": "^0.42.0",
+    "localstorage-level-migration": "github:orbitdb/localstorage-level-migration",
     "markdown-toc": "^1.2.0",
     "mocha": "^5.2.0",
     "p-each-series": "^1.0.0",
