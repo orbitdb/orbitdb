@@ -12,7 +12,7 @@ const Keystore = require('orbit-db-keystore')
 const IdentityProvider = require('orbit-db-identity-provider')
 const IPFSAccessController = require('./ipfs-access-controller')
 const OrbitDBAddress = require('./orbit-db-address')
-const { createDBManifest, uploadDBManifest, signDBManifest, verifyDBManifest } = require('./db-manifest')
+const { createDBManifest, getManifestHash, uploadDBManifest, signDBManifest, verifyDBManifest } = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
 const isDefined = require('./utils/is-defined')
 const Logger = require('logplease')
@@ -363,6 +363,45 @@ class OrbitDB {
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
     return this._createStore(manifest.type, dbAddress, options)
+  }
+
+  async determineAddress(name, type, options = {}) {
+    if (!OrbitDB.isValidType(type))
+      throw new Error(`Invalid database type '${type}'`)
+
+    if (OrbitDBAddress.isValid(name))
+      throw new Error(`Given database name is an address. Please give only the name of the database!`)
+
+    // Create an AccessController
+    const accessController = options.accessController || new IPFSAccessController(this._ipfs)
+
+    /* Disabled temporarily until we do something with the admin keys */
+    // Add admins of the database to the access controller
+    // if (options && options.admin) {
+    //   options.admin.forEach(e => accessController.add('admin', e))
+    // } else {
+    //   // Default is to add ourselves as the admin of the database
+    //   accessController.add('admin', this.key.getPublic('hex'))
+    // }
+    // Add keys that can write to the database
+    if (!options.accessController) {
+      if (options && options.write && options.write.length > 0) {
+        await Promise.all(options.write.map(e => accessController.add('write', e)))
+      } else {
+        // Default is to add ourselves as the admin of the database
+        await accessController.add('write', this.identity.publicKey)
+      }
+    }
+
+    // Save the Access Controller
+    const accessControllerAddress = await accessController.save({ onlyHash: true })
+
+    const manifest = createDBManifest(name, type, accessControllerAddress, this.identity.publicKey)
+    const manifestSignature = await signDBManifest(manifest, this.identity, this.identity.provider)
+    const manifestHash = await getManifestHash(manifest)
+
+    // Create the database address
+    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name, manifestSignature))
   }
 
   // Save the database locally
