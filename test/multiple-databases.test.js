@@ -165,10 +165,11 @@ Object.keys(testAPIs).forEach(API => {
 
       // Write entries to each database
       console.log("Writing to databases")
-      databaseInterfaces.forEach((dbInterface, index) => {
+      for (let index = 0; index < databaseInterfaces.length; index++) {
+        const dbInterface = databaseInterfaces[index]
         const db = localDatabases[index]
-        mapSeries(entryArr, val => dbInterface.write(db, val))
-      })
+        await mapSeries(entryArr, val => dbInterface.write(db, val))
+      }
 
       // Function to check if all databases have been replicated,
       // we calculate this by checking number of 'replicated' events fired
