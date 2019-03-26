@@ -12,7 +12,7 @@ const OrbitDBAddress = require('../src/orbit-db-address')
 const io = require('orbit-db-io')
 const IPFS = require('ipfs')
 const Identities = require('orbit-db-identity-provider')
-const migrate = require('localstorage-level-migration').migrateKeys
+const migrate = require('localstorage-level-migration')
 
 // Include test utilities
 const {
@@ -24,8 +24,9 @@ const {
 
 const dbPath = './orbitdb/tests/v0'
 
-var dbFixturesDir = './test/fixtures/v0'
-var ipfsFixturesDir = './test/fixtures/ipfs'
+const keyFixtures = './test/fixtures/keys/QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX'
+const dbFixturesDir = './test/fixtures/v0'
+const ipfsFixturesDir = './test/fixtures/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function() {
@@ -42,8 +43,8 @@ Object.keys(testAPIs).forEach(API => {
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
       await fs.copy(dbFixturesDir, dbPath)
-      
-      let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, existingId: 'QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX', sourcePath: './test/fixtures/keys', migrate })
+
+      let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), identityKeysPath: dbPath + '/keys' })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath, identity })
     })
 

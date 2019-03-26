@@ -59,7 +59,7 @@ let databaseTypes = {
 
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || await Keystore.create(path.join(directory, id, '/keystore'))
+    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
 
     const identity = options.identity || await Identities.createIdentity({
       id: options.id || id,
