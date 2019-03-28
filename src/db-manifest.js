@@ -19,13 +19,15 @@ const createDBManifest = (name, type, accessControllerAddress, publicKey) => {
   }
 }
 
-const getManifestHash = async (manifest) => {
-  const dag = await createDAGNode(encodeManifest(manifest))
+const getManifestHash = async (manifest, signature) => {
+  const signedManifest = Object.assign({}, manifest, { signature })
+  const dag = await createDAGNode(encodeManifest(signedManifest))
   return dag.toJSON().multihash.toString()
 }
 
-const uploadDBManifest = async (ipfs, manifest) => {
-  const dag = await ipfs.object.put(encodeManifest(manifest))
+const uploadDBManifest = async (ipfs, manifest, signature) => {
+  const signedManifest = Object.assign({}, manifest, { signature })
+  const dag = await ipfs.object.put(encodeManifest(signedManifest))
   return dag.toJSON().multihash.toString()
 }
 
@@ -33,7 +35,8 @@ const signDBManifest = async (manifest, identity, identityProvider) => {
   return identityProvider.sign(identity, encodeManifest(manifest))
 }
 
-const verifyDBManifest = async (manifest, signature, identityProvider) => {
+const verifyDBManifest = async (signedManifest, identityProvider) => {
+  const { signature, ...manifest } = signedManifest
   const { owner } = manifest
   return identityProvider.verify(signature, owner, encodeManifest(manifest))
 }

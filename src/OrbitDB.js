@@ -269,11 +269,11 @@ class OrbitDB {
 
     // Save the manifest to IPFS
     const manifest = createDBManifest(name, type, accessControllerAddress, this.identity.publicKey)
-    const manifestHash = await uploadDBManifest(this._ipfs, manifest)
+    const signature = await signDBManifest(manifest, this.identity, this.identity.provider)
+    const manifestHash = await uploadDBManifest(this._ipfs, manifest, signature)
 
     // Create the database address
-    const manifestSignature = await signDBManifest(manifest, this.identity, this.identity.provider)
-    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name, manifestSignature))
+    const dbAddress = OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
 
     // Load local cache
     const haveDB = await this._loadCache(directory, dbAddress)
@@ -348,7 +348,7 @@ class OrbitDB {
     const manifest = JSON.parse(dag.toJSON().data)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
-    const isValid = await verifyDBManifest(manifest, dbAddress.signature, this.identity.provider)
+    const isValid = await verifyDBManifest(manifest, this.identity.provider)
     if (!isValid) {
       throw new Error(`Could not verify ${dbAddress}`)
     }
@@ -397,11 +397,11 @@ class OrbitDB {
     const accessControllerAddress = await accessController.save({ onlyHash: true })
 
     const manifest = createDBManifest(name, type, accessControllerAddress, this.identity.publicKey)
-    const manifestSignature = await signDBManifest(manifest, this.identity, this.identity.provider)
-    const manifestHash = await getManifestHash(manifest)
+    const signature = await signDBManifest(manifest, this.identity, this.identity.provider)
+    const manifestHash = await getManifestHash(manifest, signature)
 
     // Create the database address
-    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name, manifestSignature))
+    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
   }
 
   // Save the database locally

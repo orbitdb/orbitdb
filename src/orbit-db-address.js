@@ -4,14 +4,13 @@ const path = require('path')
 const multihash = require('multihashes')
 
 class OrbitDBAddress {
-  constructor (root, path, signature) {
+  constructor (root, path) {
     this.root = root
     this.path = path
-    this.signature = signature
   }
 
   toString () {
-    return path.join('/orbitdb', this.root, this.path, this.signature)
+    return path.join('/orbitdb', this.root, this.path)
   }
 
   static isValid (address) {
@@ -42,7 +41,7 @@ class OrbitDBAddress {
       .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
       .filter(e => e !== '' && e !== ' ')
 
-    return new OrbitDBAddress(parts[0], parts.slice(1, parts.length - 1).join('/'), parts.slice(2, parts.length).join())
+    return new OrbitDBAddress(parts[0], parts.slice(1, parts.length).join('/'))
   }
 }
 
