@@ -6,8 +6,8 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 <!-- toc -->
 
-- [Creating an OrbitDB instance](#createinstance)
-  * [createInstance(ipfs, [options])](#createInstanceipfs-options)
+- [Creating an OrbitDB instance](#creating-an-orbitdb-instance)
+  * [createInstance(ipfs, [options])](#createinstanceipfs-options)
 - [Public Instance Methods](#public-instance-methods)
   * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
   * [orbitdb.open(address, [options])](#orbitdbopenaddress-options)
@@ -33,7 +33,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [put(doc)](#putdoc)
     + [get(key)](#getkey-1)
     + [query(mapper)](#querymapper)
-    + [del(key)](#delkey)
+    + [del(key)](#delkey-1)
   * [orbitdb.docstore(name|address, options)](#orbitdbdocstorenameaddress-options)
   * [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
     + [value](#value)
@@ -41,6 +41,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 - [Static Properties](#static-properties)
   * [OrbitDB.databaseTypes](#orbitdbdatabasetypes)
 - [Static Methods](#static-methods)
+  * [OrbitDB.createInstance(ipfs)](#orbitdbcreateinstanceipfs)
   * [OrbitDB.isValidType(type)](#orbitdbisvalidtypetype)
   * [OrbitDB.addDatabaseType(type, store)](#orbitdbadddatabasetypetype-store)
   * [OrbitDB.getDatabaseTypes()](#orbitdbgetdatabasetypes)
@@ -50,7 +51,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [store.load([amount])](#storeloadamount)
   * [store.close()](#storeclose)
   * [store.drop()](#storedrop)
-  * [store.key](#storekey)
+  * [store.identity](#storeidentity)
   * [store.type](#storetype)
 - [Store Events](#store-events)
   * [`replicated`](#replicated)

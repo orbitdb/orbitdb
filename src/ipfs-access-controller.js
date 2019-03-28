@@ -1,7 +1,17 @@
 'use strict'
 
 const path = require('path')
+const { DAGNode } = require('ipld-dag-pb')
+
 const AbstractAccessController = require('./access-controller')
+
+
+const createDAGNode = obj => new Promise((resolve, reject) => {
+  DAGNode.create(obj, (err, node) => {
+    if (err) return reject(err)
+    return resolve(node);
+  })
+});
 
 class IPFSAccessController extends AbstractAccessController {
   constructor (ipfs) {
@@ -33,11 +43,16 @@ class IPFSAccessController extends AbstractAccessController {
     return this.setup({ accessControllerAddress });
   }
 
-  async save () {
+  async save ({ onlyHash } = {}) {
     let hash
     try {
       const access = JSON.stringify(this._access, null, 2)
-      const dag = await this._ipfs.object.put(new Buffer(access))
+      let dag;
+      if (!onlyHash) {
+        dag = await this._ipfs.object.put(new Buffer(access))
+      } else {
+        dag = await createDAGNode(new Buffer(access));
+      }
       hash = dag.toJSON().multihash.toString()
     } catch (e) {
       console.log("ACCESS ERROR:", e)
