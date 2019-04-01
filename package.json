@@ -39,7 +39,7 @@
     "babel-preset-env": "^1.7.0",
     "datastore-level": "~0.10.0",
     "fs-extra": "^7.0.1",
-    "go-ipfs-dep": "^0.4.18",
+    "go-ipfs-dep": "^0.4.19",
     "ipfs": "^0.34.4",
     "ipfs-repo": "^0.26.2",
     "ipfsd-ctl": "^0.42.0",
