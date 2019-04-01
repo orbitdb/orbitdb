@@ -80,15 +80,15 @@ Object.keys(testAPIs).forEach(API => {
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
-      orbitdb1 = new OrbitDB(ipfs1, dbPath1)
-      orbitdb2 = new OrbitDB(ipfs2, dbPath2)
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
     })
 
     after(async () => {
-      if(orbitdb1) 
+      if(orbitdb1)
         await orbitdb1.stop()
 
-      if(orbitdb2) 
+      if(orbitdb2)
         await orbitdb2.stop()
 
       if (ipfsd1)
@@ -102,8 +102,8 @@ Object.keys(testAPIs).forEach(API => {
       let options = {}
       // Set write access for both clients
       options.write = [
-        orbitdb1.key.getPublic('hex'), 
-        orbitdb2.key.getPublic('hex')
+        orbitdb1.identity.publicKey,
+        orbitdb2.identity.publicKey
       ],
 
       console.log("Creating databases and waiting for peers to connect")
@@ -117,7 +117,7 @@ Object.keys(testAPIs).forEach(API => {
         localDatabases.push(db)
       }
 
-      // Open the databases on the second node, set 'sync' flag so that 
+      // Open the databases on the second node, set 'sync' flag so that
       // the second peer fetches the db manifest from the network
       options = Object.assign({}, options, { sync: true })
       for (let [index, dbInterface] of databaseInterfaces.entries()) {
@@ -149,7 +149,7 @@ Object.keys(testAPIs).forEach(API => {
       for (let i = 1; i < entryCount + 1; i ++)
         entryArr.push(i)
 
-      // Result state, 
+      // Result state,
       // we count how many times 'replicated' event was fired per db
       let replicated = {}
       localDatabases.forEach(db => {
@@ -165,10 +165,11 @@ Object.keys(testAPIs).forEach(API => {
 
       // Write entries to each database
       console.log("Writing to databases")
-      databaseInterfaces.forEach((dbInterface, index) => {
+      for (let index = 0; index < databaseInterfaces.length; index++) {
+        const dbInterface = databaseInterfaces[index]
         const db = localDatabases[index]
-        mapSeries(entryArr, val => dbInterface.write(db, val))
-      })
+        await mapSeries(entryArr, val => dbInterface.write(db, val))
+      }
 
       // Function to check if all databases have been replicated,
       // we calculate this by checking number of 'replicated' events fired

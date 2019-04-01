@@ -27,7 +27,7 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = new OrbitDB(ipfs, dbPath)
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
@@ -50,43 +50,42 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('parse address successfully', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
         const result = OrbitDB.parseAddress(address)
 
         const isInstanceOf = result instanceof OrbitDBAddress
         assert.equal(isInstanceOf, true)
 
-        assert.equal(result.root, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
+        assert.equal(result.root, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
         assert.equal(result.path, 'first-database')
 
         assert.equal(result.toString().indexOf('/orbitdb'), 0)
-        assert.equal(result.toString().indexOf('Qm'), 9)
+        assert.equal(result.toString().indexOf('zd'), 9)
       })
     })
 
     describe('isValid Address', () => {
-      it('throws an error if address is empty', () => {
-        assert.throws(() => {
-          const result = OrbitDB.isValidAddress('')
-        })
+      it('returns false for empty string', () => {
+        const result = OrbitDB.isValidAddress('')
+        assert.equal(result, false)
       })
 
       it('validate address successfully', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)
       })
 
       it('handle missing orbitdb prefix', () => {
-        const address = 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database'
+        const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)
       })
 
       it('handle missing db address name', () => {
-        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, true)

@@ -38,8 +38,8 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      orbitdb1 = new OrbitDB(ipfs1, dbPath1)
-      orbitdb2 = new OrbitDB(ipfs2, dbPath2)
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
@@ -62,8 +62,8 @@ Object.keys(testAPIs).forEach(API => {
       let options = {}
       // Set write access for both clients
       options.write = [
-        orbitdb1.key.getPublic('hex'), 
-        orbitdb2.key.getPublic('hex')
+        orbitdb1.identity.publicKey,
+        orbitdb2.identity.publicKey
       ],
 
       options = Object.assign({}, options, { path: dbPath1 })
@@ -137,7 +137,7 @@ Object.keys(testAPIs).forEach(API => {
           reject(new Error("Should not receive the 'replicated' event!"))
         })
 
-        // Can't check this for now as db1 might've sent the heads to db2 
+        // Can't check this for now as db1 might've sent the heads to db2
         // before we subscribe to the event
         db2.events.on('replicate.progress', (address, hash, entry) => {
           try {

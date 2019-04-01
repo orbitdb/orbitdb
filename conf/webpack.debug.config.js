@@ -1,14 +1,13 @@
 'use strict'
 
 const path = require('path')
-const Uglify = require('uglifyjs-webpack-plugin')
 
 module.exports = {
   entry: './src/OrbitDB.js',
   output: {
     libraryTarget: 'var',
     library: 'OrbitDB',
-    filename: './dist/orbitdb.js'
+    filename: '../dist/orbitdb.js'
   },
   target: 'web',
   devtool: 'source-map',

@@ -46,8 +46,11 @@ const main = (IPFS, ORBITDB) => {
 
   // Create IPFS instance
   const ipfs = new Ipfs({
-    repo: '/orbitdb/examples/browser/new/ipfs/0.27.3',
+    repo: '/orbitdb/examples/browser/new/ipfs/0.33.1',
     start: true,
+    preload: { 
+      enabled: false
+    },
     EXPERIMENTAL: {
       pubsub: true,
     },
@@ -65,11 +68,11 @@ const main = (IPFS, ORBITDB) => {
   })
 
   ipfs.on('error', (e) => handleError(e))
-  ipfs.on('ready', () => {
+  ipfs.on('ready', async () => {
     openButton.disabled = false
     createButton.disabled = false
     statusElm.innerHTML = "IPFS Started"
-    orbitdb = new OrbitDB(ipfs)
+    orbitdb = await OrbitDB.createInstance(ipfs)
   })
 
   const load = async (db, statusText) => {
@@ -89,8 +92,8 @@ const main = (IPFS, ORBITDB) => {
     let maxTotal = 0, loaded = 0
     db.events.on('load.progress', (address, hash, entry, progress, total) => {
       loaded ++
-      maxTotal = Math.max.apply(null, [progress, maxTotal, progress, 0])
-      total = Math.max.apply(null, [progress, maxTotal, total, 0])
+      maxTotal = Math.max.apply(null, [maxTotal, progress, 0])
+      total = Math.max.apply(null, [progress, maxTotal, total, entry.clock.time, 0])
       statusElm.innerHTML = `Loading database... ${maxTotal} / ${total}`
     })
 
@@ -115,10 +118,8 @@ const main = (IPFS, ORBITDB) => {
         await update(db)
       } catch (e) {
         console.error(e.toString())
-        if (e.toString() === 'Error: Not allowed to write') {
-          writerText.innerHTML = '<span style="color: red">' + e.toString() + '</span>'
-          clearInterval(updateInterval)
-        }
+        writerText.innerHTML = '<span style="color: red">' + e.toString() + '</span>'
+        clearInterval(updateInterval)
       }
     }, interval)
   }
@@ -158,7 +159,9 @@ const main = (IPFS, ORBITDB) => {
         type: type,
         // If "Public" flag is set, allow anyone to write to the database,
         // otherwise only the creator of the database can write
-        write: publicAccess ? ['*'] : [],
+        accessController: {
+          write: publicAccess ? ['*'] : [orbitdb.identity.publicKey],
+        }
       })
 
       await load(db, 'Creating database...')
@@ -255,7 +258,7 @@ const main = (IPFS, ORBITDB) => {
     outputElm.innerHTML = `
       <div><b>Peer ID:</b> ${orbitdb.id}</div>
       <div><b>Peers (database/network):</b> ${databasePeers.length} / ${networkPeers.length}</div>
-      <div><b>Oplog Size:</b> ${db._replicationStatus.progress} / ${db._replicationStatus.max}</div>
+      <div><b>Oplog Size:</b> ${Math.max(db._replicationStatus.progress, db._oplog.length)} / ${db._replicationStatus.max}</div>
       <h2>Results</h2>
       <div id="results">
         <div>

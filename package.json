@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.19.9",
+  "version": "0.20.0-rc.1",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -9,45 +9,53 @@
     "url": "https://github.com/orbitdb/orbit-db"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
+    "cids": "^0.5.7",
     "ipfs-pubsub-1on1": "~0.0.4",
-    "ipld-dag-pb": "0.14.11",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
+    "orbit-db-access-controllers": "rc1",
     "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "~1.4.0",
-    "orbit-db-docstore": "~1.4.3",
-    "orbit-db-eventstore": "~1.4.0",
-    "orbit-db-feedstore": "~1.4.0",
-    "orbit-db-keystore": "~0.1.0",
-    "orbit-db-kvstore": "~1.4.0",
+    "orbit-db-counterstore": "rc1",
+    "orbit-db-docstore": "rc1",
+    "orbit-db-eventstore": "rc1",
+    "orbit-db-feedstore": "rc1",
+    "orbit-db-identity-provider": "rc1",
+    "orbit-db-io": "~0.0.1",
+    "orbit-db-keystore": "rc1",
+    "orbit-db-kvstore": "rc1",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "~2.5.3"
+    "orbit-db-store": "rc1"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "datastore-level": "~0.8.0",
-    "go-ipfs-dep": "0.4.13",
-    "ipfs": "~0.30.0",
-    "ipfs-repo": "~0.22.1",
-    "ipfsd-ctl": "^0.37.5",
+    "babel-preset-env": "^1.7.0",
+    "datastore-level": "~0.10.0",
+    "fs-extra": "^7.0.1",
+    "go-ipfs-dep": "^0.4.18",
+    "ipfs": "^0.34.4",
+    "ipfs-repo": "^0.26.2",
+    "ipfsd-ctl": "^0.42.0",
+    "localstorage-level-migration": "^0.0.1",
     "markdown-toc": "^1.2.0",
-    "mocha": "^4.0.1",
+    "mocha": "^5.2.0",
     "p-each-series": "^1.0.0",
+    "p-map": "^1.2.0",
     "p-map-series": "^1.0.0",
+    "p-whilst": "^1.0.0",
+    "pify": "^4.0.1",
     "remark-cli": "^5.0.0",
     "remark-validate-links": "^7.0.0",
     "rimraf": "^2.6.2",
-    "uglifyjs-webpack-plugin": "^1.1.4",
-    "webpack": "^3.8.1"
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2"
   },
   "scripts": {
     "examples": "npm run examples:node",
@@ -61,6 +69,6 @@
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.js examples/browser/lib/orbitdb.js && cp dist/orbitdb.js.map examples/browser/lib/orbitdb.js.map",
     "build:docs/toc": "markdown-toc --no-first1 -i README.md && markdown-toc --no-first1 -i API.md && markdown-toc --no-first1 -i GUIDE.md && markdown-toc --no-first1 -i CHANGELOG.md && markdown-toc --no-first1 -i FAQ.md ",
-    "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-es2015 --plugins babel-plugin-transform-runtime"
+    "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-env --plugins babel-plugin-transform-runtime"
   }
 }

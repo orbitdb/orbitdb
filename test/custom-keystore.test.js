@@ -2,6 +2,7 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
+const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 // Include test utilities
 const {
@@ -28,8 +29,9 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb1 = new OrbitDB(ipfs, dbPath + '/1', {
-        keystore: CustomTestKeystore
+      orbitdb1 = await OrbitDB.createInstance(ipfs, {
+        directory: path.join(dbPath, '1'),
+        keystore: CustomTestKeystore().create()
       })
     })
 
@@ -58,10 +60,10 @@ Object.keys(testAPIs).forEach(API => {
       databases.forEach(async (database) => {
         it(database.type + ' allows custom keystore', async () => {
           const options = {
-            // Set write access for both clients
-            write: [
-              orbitdb1.key.getPublic('hex')
-            ],
+            accessController: {
+              // Set write access for both clients
+              write: [orbitdb1.identity.publicKey],
+            }
           }
 
           const db1 = await database.create(orbitdb1, 'custom-keystore', options)
