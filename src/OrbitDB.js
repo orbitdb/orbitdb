@@ -113,6 +113,10 @@ let databaseTypes = {
   }
 
   async disconnect () {
+    //close Keystore
+    if (this.keystore.close)
+      await this.keystore.close()
+
     // Close all open databases
     const databases = Object.values(this.stores)
     for (let db of databases) {
