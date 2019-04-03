@@ -139,11 +139,9 @@ const OrbitDB = require('orbit-db')
 
 const ipfs = IpfsClient('localhost', '5001')
 
-OrbitDB.createInstance(ipfs).then(async (orbitdb) => {
-  const db = await orbitdb.log('hello')
-  // Do something with your db.
-})
-
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const db = await orbitdb.log('hello')
+// Do something with your db.
 ```
 
 ## API
