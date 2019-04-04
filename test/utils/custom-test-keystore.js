@@ -40,6 +40,10 @@ class CustomTestKeystore {
   verify (signature, publicKey, data) {
     return Promise.resolve(true)
   }
+    
+  getPublic (key) {
+    return key.public.marshal()
+  }
 }
 
 module.exports = (LocalStorage, mkdir) => {
