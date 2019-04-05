@@ -44,6 +44,8 @@ class OrbitDBAddress {
     if (!OrbitDBAddress.isValid(address))
       throw new Error(`Not a valid OrbitDB address: ${address}`)
 
+    address = address.toString().replace(/\\/g, '/')
+
     const parts = address.toString()
       .split('/')
       .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
