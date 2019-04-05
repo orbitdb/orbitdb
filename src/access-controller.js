@@ -10,7 +10,15 @@ class AccessController {
   }
 
   /* Overridable functions */
-  async load (address) {}
+  async load (address) {
+    // Transform '/ipfs/QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
+    // to 'QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
+    address = address.toString().replace(/\\/g, '/');
+    if (address.indexOf('/ipfs') === 0)
+      address = address.split('/')[2]
+
+    console.log(address)
+  }
   async save () {}
 
   /* Properties */
