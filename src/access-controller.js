@@ -16,8 +16,6 @@ class AccessController {
     address = address.toString().replace(/\\/g, '/');
     if (address.indexOf('/ipfs') === 0)
       address = address.split('/')[2]
-
-    console.log(address)
   }
   async save () {}
 
