@@ -14,11 +14,11 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^0.5.7",
-    "ipfs-pubsub-1on1": "~0.0.4",
+    "ipfs-pubsub-1on1": "BartKnucle/ipfs-pubsub-1on1#windows",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-access-controllers": "rc1",
+    "orbit-db-access-controllers": "BartKnucle/orbit-db-access-controllers#windows",
     "orbit-db-cache": "~0.2.4",
     "orbit-db-counterstore": "rc1",
     "orbit-db-docstore": "rc1",
