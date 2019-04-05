@@ -253,7 +253,7 @@ let databaseTypes = {
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
 
     // Create the database address
-    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    return OrbitDBAddress.parse('/orbitdb' + '/' + manifestHash + '/' + name)
   }
 
   /* Create and Open databases */
@@ -368,7 +368,7 @@ let databaseTypes = {
   // Save the database locally
   async _addManifestToCache (directory, dbAddress) {
     const cache = await this._loadCache(directory, dbAddress)
-    await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
+    await cache.set(dbAddress.toString() + '/' + '_manifest', dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
@@ -394,7 +394,7 @@ let databaseTypes = {
     if (!cache) {
       return false
     }
-    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
+    const data = await cache.get(dbAddress.toString() + '/' + '_manifest')
     return data !== undefined && data !== null
   }
 

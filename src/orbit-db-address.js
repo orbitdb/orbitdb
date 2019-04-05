@@ -16,6 +16,7 @@ class OrbitDBAddress {
   }
 
   static isValid (address) {
+    address = address.toString().replace(/\\/g, '/')
     const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
 
     const parts = address.toString()
