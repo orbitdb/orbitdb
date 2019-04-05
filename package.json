@@ -13,7 +13,7 @@
   },
   "main": "src/OrbitDB.js",
   "dependencies": {
-    "ipfs-pubsub-1on1": "BartKnucle/ipfs-pubsub-1on1",
+    "ipfs-pubsub-1on1": "BartKnucle/ipfs-pubsub-1on1#windows",
     "ipld-dag-pb": "0.14.11",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
