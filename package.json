@@ -18,7 +18,7 @@
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-access-controllers": "github:orbitdb/orbit-db-access-controllers#decompress",
+    "orbit-db-access-controllers": "rc1.1",
     "orbit-db-cache": "~0.2.4",
     "orbit-db-counterstore": "rc1",
     "orbit-db-docstore": "rc1",
