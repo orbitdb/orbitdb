@@ -16,6 +16,7 @@ This document is seeded by questions from people opening issues in this reposito
 - [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
 - [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
 - [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
+- [Where can I learn more about security, encryption, and account recovery?](#where-can-i-learn-more-about-security-encryption-and-account-recovery)
 - [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
 
 <!-- tocstop -->
