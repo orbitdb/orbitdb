@@ -26,7 +26,7 @@
     "orbit-db-feedstore": "rc1",
     "orbit-db-identity-provider": "rc1.1",
     "orbit-db-io": "~0.0.1",
-    "orbit-db-keystore": "rc1.1",
+    "orbit-db-keystore": "BartKnucle/orbit-db-keystore#windows",
     "orbit-db-kvstore": "rc1",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "rc1"
