@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.20.0-rc.1.1",
+  "version": "0.20.0-rc2",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "orbit-db-identity-provider": "rc1.1",
     "orbit-db-io": "~0.0.1",
     "orbit-db-keystore": "rc1.1",
-    "orbit-db-kvstore": "rc1",
+    "orbit-db-kvstore": "rc2",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "rc1"
   },
