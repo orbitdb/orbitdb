@@ -1,6 +1,4 @@
 'use strict'
-const path = require('path')
-const multihash = require('multihashes')
 const CID = require('cids')
 
 const notEmpty = e => e !== '' && e !== ' '
@@ -12,11 +10,10 @@ class OrbitDBAddress {
   }
 
   toString () {
-    return path.join('/orbitdb', this.root, this.path)
+    return ['/orbitdb', this.root, this.path].join('/')
   }
 
   static isValid (address) {
-    address = address.toString().replace(/\\/g, '/')
     const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
 
     const parts = address.toString()
@@ -43,8 +40,6 @@ class OrbitDBAddress {
 
     if (!OrbitDBAddress.isValid(address))
       throw new Error(`Not a valid OrbitDB address: ${address}`)
-
-    address = address.toString().replace(/\\/g, '/')
 
     const parts = address.toString()
       .split('/')

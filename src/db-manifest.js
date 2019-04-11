@@ -1,4 +1,3 @@
-const path = require('path')
 const io = require('orbit-db-io')
 
 // Creates a DB manifest file and saves it in IPFS
@@ -6,7 +5,7 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
   const manifest = {
     name: name,
     type: type,
-    accessController: '/ipfs' + '/' + accessControllerAddress
+    accessController: ['/ipfs', accessControllerAddress].join('/'),
   }
 
   return io.write(ipfs, 'dag-cbor', manifest, { onlyHash })
