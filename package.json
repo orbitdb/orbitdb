@@ -24,9 +24,9 @@
     "orbit-db-docstore": "rc1",
     "orbit-db-eventstore": "rc1",
     "orbit-db-feedstore": "rc1",
-    "orbit-db-identity-provider": "rc1.1",
+    "orbit-db-identity-provider": "rc1.2",
     "orbit-db-io": "~0.0.1",
-    "orbit-db-keystore": "rc1.1",
+    "orbit-db-keystore": "rc1.2",
     "orbit-db-kvstore": "rc2",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "rc1"
