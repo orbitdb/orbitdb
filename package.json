@@ -70,5 +70,10 @@
     "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.js examples/browser/lib/orbitdb.js && cp dist/orbitdb.js.map examples/browser/lib/orbitdb.js.map",
     "build:docs/toc": "markdown-toc --no-first1 -i README.md && markdown-toc --no-first1 -i API.md && markdown-toc --no-first1 -i GUIDE.md && markdown-toc --no-first1 -i CHANGELOG.md && markdown-toc --no-first1 -i FAQ.md ",
     "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-env --plugins babel-plugin-transform-runtime"
-  }
+  },
+  "localMaintainers": [
+    "haad <haad@haja.io>",
+    "shamb0t <shams@haja.io>",
+    "hajamark <mark@haja.io>"
+  ]
 }
