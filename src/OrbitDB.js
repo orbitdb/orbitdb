@@ -168,8 +168,9 @@ let databaseTypes = {
       cache: cache,
       onClose: this._onClose.bind(this),
     })
+    const identity = options.identity || this.identity
 
-    const store = new Store(this._ipfs, this.identity, address, opts)
+    const store = new Store(this._ipfs, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
     // ID of the store is the address as a string
     const addr = address.toString()
