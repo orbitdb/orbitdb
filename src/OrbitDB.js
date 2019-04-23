@@ -247,7 +247,7 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
+    options.accessController = Object.assign({}, { address: name, type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
