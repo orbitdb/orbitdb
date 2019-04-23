@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.20.0-rc.5",
+  "version": "0.20.0-rc.6",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-access-controllers": "rc2",
+    "orbit-db-access-controllers": "rc3",
     "orbit-db-cache": "~0.2.4",
     "orbit-db-counterstore": "rc2",
     "orbit-db-docstore": "rc2",
