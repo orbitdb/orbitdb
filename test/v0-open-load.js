@@ -98,7 +98,7 @@ Object.keys(testAPIs).forEach(API => {
         const hash = await db.add({ thing: 'new addition'})
         const newEntries = db.all.filter(e => e.v === 1)
         assert.equal(newEntries.length, 1)
-        assert.strictEqual(newEntries[0].cid, hash)
+        assert.strictEqual(newEntries[0].hash, hash)
       })
     })
   })
