@@ -20,16 +20,16 @@
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "next",
     "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "next",
-    "orbit-db-docstore": "next",
-    "orbit-db-eventstore": "next",
-    "orbit-db-feedstore": "next",
+    "orbit-db-counterstore": "github:orbitdb/orbit-db-counterstore#cid-to-hash",
+    "orbit-db-docstore": "github:orbitdb/orbit-db-docstore#cid-to-hash",
+    "orbit-db-eventstore": "github:orbitdb/orbit-db-eventstore#cid-to-hash",
+    "orbit-db-feedstore": "github:orbitdb/orbit-db-feedstore#cid-to-hash",
     "orbit-db-identity-provider": "rc1.3",
     "orbit-db-io": "~0.0.1",
     "orbit-db-keystore": "rc1.2",
-    "orbit-db-kvstore": "next",
+    "orbit-db-kvstore": "github:orbitdb/orbit-db-kvstore#cid-to-hash",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "next"
+    "orbit-db-store": "github:orbitdb/orbit-db-store#cid-to-hash"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
