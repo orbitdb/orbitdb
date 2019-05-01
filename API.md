@@ -6,8 +6,8 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 <!-- toc -->
 
-- [Constructor](#constructor)
-  * [constructor(ipfs, [directory], [options])](#constructoripfs-directory-options)
+- [Creating an OrbitDB instance](#creating-an-orbitdb-instance)
+  * [createInstance(ipfs, [options])](#createinstanceipfs-options)
 - [Public Instance Methods](#public-instance-methods)
   * [orbitdb.create(name, type, [options])](#orbitdbcreatename-type-options)
   * [orbitdb.determineAddress(name, type, [options])](#orbitdbdetermineaddressname-type-options)
@@ -18,6 +18,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [put(key, value)](#putkey-value)
     + [set(key, value)](#setkey-value)
     + [get(key)](#getkey)
+    + [del(key)](#delkey)
   * [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
   * [orbitdb.log(name|address)](#orbitdblognameaddress)
     + [add(event)](#addevent)
@@ -33,7 +34,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [put(doc)](#putdoc)
     + [get(key)](#getkey-1)
     + [query(mapper)](#querymapper)
-    + [del(key)](#delkey)
+    + [del(key)](#delkey-1)
   * [orbitdb.docstore(name|address, options)](#orbitdbdocstorenameaddress-options)
   * [orbitdb.counter(name|address)](#orbitdbcounternameaddress)
     + [value](#value)
@@ -41,6 +42,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 - [Static Properties](#static-properties)
   * [OrbitDB.databaseTypes](#orbitdbdatabasetypes)
 - [Static Methods](#static-methods)
+  * [OrbitDB.createInstance(ipfs)](#orbitdbcreateinstanceipfs)
   * [OrbitDB.isValidType(type)](#orbitdbisvalidtypetype)
   * [OrbitDB.addDatabaseType(type, store)](#orbitdbadddatabasetypetype-store)
   * [OrbitDB.getDatabaseTypes()](#orbitdbgetdatabasetypes)
@@ -50,7 +52,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [store.load([amount])](#storeloadamount)
   * [store.close()](#storeclose)
   * [store.drop()](#storedrop)
-  * [store.key](#storekey)
+  * [store.identity](#storeidentity)
   * [store.type](#storetype)
 - [Store Events](#store-events)
   * [`replicated`](#replicated)
@@ -64,13 +66,15 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 <!-- tocstop -->
 
-## Constructor
+## Creating an OrbitDB instance
 
-### constructor(ipfs, [directory], [options])
+### createInstance(ipfs, [options])
 ```javascript
-const orbitdb = new OrbitDB(ipfs)
+const orbitdb = await OrbitDB.createInstance(ipfs)
 ```
-Creates and returns an instance of OrbitDB. Use the optional `directory` argument to specify a path to be used for the database files (Default: `'./orbitdb'`). In addition, you can use the optional `options` argument for further configuration. It is an object with any of these properties:
+Creates and returns an instance of OrbitDB. Use the optional `options` argument for further configuration. It is an object with any of these properties:
+
+- `directory` (string): path to be used for the database files. By default it uses `'./orbitdb'`.
 
 - `peerId` (string): By default it uses the base58 string of the ipfs peer id.
 
@@ -78,7 +82,9 @@ Creates and returns an instance of OrbitDB. Use the optional `directory` argumen
 
 - 'cache' (Cache Instance) : By default creates an instance of [Cache](https://github.com/orbitdb/orbit-db-cache). A custom cache instance can also be used.
 
-After creating an `OrbitDB` instance , you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
+- `identity` (Identity Instance): By default it creates an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/src/identity.js)
+
+After creating an `OrbitDB` instance, you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
 
 *For further details, see usage for [kvstore](https://github.com/orbitdb/orbit-db-kvstore#usage), [eventlog](https://github.com/orbitdb/orbit-db-eventstore#usage), [feed](https://github.com/orbitdb/orbit-db-feedstore#usage), [docstore](https://github.com/orbitdb/orbit-db-docstore#usage) and [counter](https://github.com/orbitdb/orbit-db-counterstore#usage).*
 
@@ -93,17 +99,19 @@ const db = await orbitdb.keyvalue('profile')
 
 Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
 - `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
-- `write` (array): An array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB instance key `orbitdb.key`, which would give write access only to yourself)
+- `write` (array): An array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB identity public key `orbitdb.identity.publicKey`, which would give write access only to yourself)
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
 ```javascript
 const db = await orbitdb.create('user.posts', 'eventlog', {
-  write: [
-    // Give access to ourselves
-    orbitdb.key.getPublic('hex'),
-    // Give access to the second peer
-    '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
-  ]
+  accessController: {  
+    write: [
+      // Give access to ourselves
+      orbitdb.identity.publicKey,
+      // Give access to the second peer
+      '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+    ]
+  }
 })
 // db created & opened
 ```
@@ -115,10 +123,11 @@ Returns a `Promise` that resolves to an orbit-db address. The parameters corresp
 
 ```javascript
 const dbAddress = await orbitdb.determineAddress('user.posts', 'eventlog', {
-  write: [
+  accessController: {
+    write: [
     // This could be someone else's public key
     '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
-  ]
+  ]}
 })
 ```
 
@@ -137,7 +146,7 @@ Returns a `Promise` that resolves to [a database instance](#store-api). `address
 const db = await orbitdb.open('/orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database')
 ```
 
-Convienance methods are available when opening/creating any of the default OrbitDB database types: [feed](#orbitdbfeednameaddress), [docs](#orbitdbdocsnameaddress-options), [log](#orbitdblognameaddress), [keyvalue](#orbitdbkeyvaluenameaddress), [counter](#orbitdbcounternameaddress)
+Convenience methods are available when opening/creating any of the default OrbitDB database types: [feed](#orbitdbfeednameaddress), [docs](#orbitdbdocsnameaddress-options), [log](#orbitdblognameaddress), [keyvalue](#orbitdbkeyvaluenameaddress), [counter](#orbitdbcounternameaddress)
 
 You can use: `orbitdb.feed(address, options)`
 
@@ -191,6 +200,13 @@ Returns an `Object` with the contents of the entry.
   ```javascript
   const value = db.get('hello')
   // { name: 'Friend' }
+  ```
+
+#### del(key)
+Deletes the `Object` associated with `key`. Returns a `Promise` that resolves to a `String` that is the multihash of the deleted entry.
+  ```javascript
+  const hash = await db.del('hello')
+  // QmbYHhnXEdmdfUDzZKeEg7HyG2f8veaF2wBrYFcSHJ3mvd
   ```
 
 ### orbitdb.kvstore(name|address)
@@ -351,6 +367,10 @@ Returns an `Array` with a single `Object` if key exists.
   ```javascript
   const profile = db.get('shamb0t')
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
+  // to get all the records
+  const profile = db.get('');
+  // returns all the records
+  // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
 
 #### query(mapper)
@@ -411,6 +431,13 @@ OrbitDB.databaseTypes
 ```
 
 ## Static Methods
+
+### OrbitDB.createInstance(ipfs)
+Returns a `Promise` that resolved to an instance of `OrbitDB`.
+
+```js
+const orbitdb = await OrbitDB.createInstance(ipfs)
+```
 
 ### OrbitDB.isValidType(type)
 Returns `true` if the provided `String` is a supported database type
@@ -493,25 +520,30 @@ Returns a `Promise` that resolves once complete
 await db.drop()
 ```
 
-### store.key
+### store.identity
 
-Returns an instance of [`KeyPair`](https://github.com/indutny/elliptic/blob/master/lib/elliptic/ec/key.js#L8). The keypair is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys) for more information on how OrbitDB uses the keypair.
+Returns an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/src/identity.js). The identity is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#identity) for more information on how OrbitDB uses identity.
 
-```
-const key = db.key
-console.log(key)
-// <Key priv: db8ef129f3d26ac5d7c17b402027488a8f4b2e7fa855c27d680b714cf9c1f87e
-// pub: <EC Point x: f0e33d60f9824ce10b2c8983d3da0311933e82cf5ec9374cd82c0af699cbde5b
-// y: ce206bfccf889465c6g6f9a7fdf452f9c3e1204a6f1b4582ec427ec12b116de9> >
+```javascript
+const identity = db.identity
+console.log(identity.toJSON())
+{ id: 'QmZyYjpG6SMJJx2rbye8HXNMufGRtpn9yFkdd27uuq6xrR',
+  publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
+  signatures:
+   { id: '3045022058bbb2aa415623085124b32b254b8668d95370261ade8718765a8086644fc8ae022100c736b45c6b2ef60c921848027f51020a70ee50afa20bc9853877e994e6121c15',
+     publicKey: '3046022100d138ccc0fbd48bd41e74e40ddf05c1fa6ff903a83b2577ef7d6387a33992ea4b022100ca39e8d8aef43ac0c6ec05c1b95b41fce07630b5dc61587a32d90dc8e4cf9766'
+   },
+  type: 'orbitdb'
+}
 ```
 
 The public key can be retrieved with:
-```
-console.log(db.key.getPublic('hex'))
-// 04d009bd530f2fa0cda29202e1b15e97247893cb1e88601968abfe787f7ea03828fdb7624a618fd67c4c437ad7f48e670cc5a6ea2340b896e42b0c8a3e4d54aebe
+```javascript
+console.log(db.identity.publicKey)
+// 0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c
 ```
 
-The key can also be accessed from the OrbitDB instance: `orbitdb.key.getPublic('hex')`.
+The key can also be accessed from the OrbitDB instance: `orbitdb.identity.publicKey`.
 
 ### store.type
 

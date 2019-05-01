@@ -118,10 +118,8 @@ const main = (IPFS, ORBITDB) => {
         await update(db)
       } catch (e) {
         console.error(e.toString())
-        if (e.toString() === 'Error: Not allowed to write') {
-          writerText.innerHTML = '<span style="color: red">' + e.toString() + '</span>'
-          clearInterval(updateInterval)
-        }
+        writerText.innerHTML = '<span style="color: red">' + e.toString() + '</span>'
+        clearInterval(updateInterval)
       }
     }, interval)
   }
@@ -162,7 +160,7 @@ const main = (IPFS, ORBITDB) => {
         // If "Public" flag is set, allow anyone to write to the database,
         // otherwise only the creator of the database can write
         accessController: {
-          write: publicAccess ? ['*'] : [identity.publicKey],
+          write: publicAccess ? ['*'] : [orbitdb.identity.publicKey],
         }
       })
 

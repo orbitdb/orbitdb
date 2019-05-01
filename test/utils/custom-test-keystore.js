@@ -17,12 +17,14 @@ class CustomTestKeystore {
 
   createKey (id) {
     const key = ec.genKeyPair()
-    const keyPair = ec.keyPair({
-      pub:  key.getPublic('hex'),
+    const keyPair = {
+      public:  {
+        marshal: () => key.getPublic('hex')
+      },
       priv: key.getPrivate('hex'),
       privEnc: 'hex',
       pubEnc: 'hex',
-    })
+    }
 
     return keyPair
   }
@@ -33,12 +35,14 @@ class CustomTestKeystore {
 
   sign (key, data) {
     return Promise.resolve('<signature>')
-    const sig = ec.sign(data, key)
-    return Promise.resolve(sig.toDER('hex'))
   }
 
   verify (signature, publicKey, data) {
     return Promise.resolve(true)
+  }
+    
+  getPublic (key) {
+    return key.public.marshal()
   }
 }
 

@@ -113,6 +113,10 @@ let databaseTypes = {
   }
 
   async disconnect () {
+    //close Keystore
+    if (this.keystore.close)
+      await this.keystore.close()
+
     // Close all open databases
     const databases = Object.values(this.stores)
     for (let db of databases) {
@@ -164,8 +168,9 @@ let databaseTypes = {
       cache: cache,
       onClose: this._onClose.bind(this),
     })
+    const identity = options.identity || this.identity
 
-    const store = new Store(this._ipfs, this.identity, address, opts)
+    const store = new Store(this._ipfs, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
     // ID of the store is the address as a string
     const addr = address.toString()
@@ -242,7 +247,7 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
+    options.accessController = Object.assign({}, { name: name , type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS

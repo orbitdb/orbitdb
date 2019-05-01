@@ -23,7 +23,7 @@ const ipfsPath2 = './orbitdb/tests/replication/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replication (${API})`, function() {
-    this.timeout(100000)
+    this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -297,10 +297,8 @@ Object.keys(testAPIs).forEach(API => {
           try {
             // Test the replicator state
             assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
-            assert.equal(db2._loader.tasksQueued <= db2.options.referenceCount, true)
             assert.equal(db2.options.referenceCount, 64)
             assert.equal(db2._loader.tasksRunning, 0)
-            assert.equal(db2._loader.tasksFinished, db2.replicationStatus.progress)
           } catch (e) {
             reject(e)
           }
@@ -316,8 +314,7 @@ Object.keys(testAPIs).forEach(API => {
           // Resolve with a little timeout to make sure we
           // don't receive more than one event
           setTimeout( async () => {
-            // console.log(eventCount['replicate.progress'], expectedEventCount)
-            if (eventCount['replicate.progress'] === expectedEventCount) {
+            if (eventCount['replicated'] === expectedEventCount) {
               finished = true
             }
           }, 100)

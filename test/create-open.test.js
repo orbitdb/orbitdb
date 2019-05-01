@@ -9,6 +9,7 @@ const levelup = require('levelup')
 const leveldown = require('leveldown')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
+const Identities = require('orbit-db-identity-provider')
 const io = require('orbit-db-io')
 // Include test utilities
 const {
@@ -256,6 +257,15 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)
         assert.equal(db.address.toString().indexOf('abc'), 59)
+      })
+
+      it('opens a database - with a different identity', async () => {
+        const identity = await Identities.createIdentity({ id: 'test-id' })
+        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
+        assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
+        assert.equal(db.address.toString().indexOf('zd'), 9)
+        assert.equal(db.address.toString().indexOf('abc'), 59)
+        assert.equal(db.identity, identity)
       })
 
       it('opens the same database - from an address', async () => {
