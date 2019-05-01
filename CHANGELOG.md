@@ -1,7 +1,7 @@
 # Changelog
 
 ## v0.20.0
-***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the entry data-structure has also changed to include `identity` and `cid` fields as well as increment the version to 1.
+***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the `Entry` object has also changed to include an [`identity`](https://github.com/orbitdb/orbit-db-identity-provider) field as well as increment the version `v` to 1. The `hash` property now holds a [CIDv1](https://github.com/multiformats/cid#cidv1) multihash string.
 
 API breaking changes:
 
