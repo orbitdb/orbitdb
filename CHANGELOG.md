@@ -52,11 +52,9 @@ We've improved the documents by adding details, fixing errors and clarifying the
 
 We also improved the tests a lot since the previous release. We now run the tests with js-ipfs-http-client (go-ipfs) in addition to running them with js-ipfs (Node.js). We've also cleaned up and refactored the boilerplate code for tests, improved the speed of the test run and generally polished the test suite for better readability and maintainability.
 
-### Custom stores and keys
+### Custom stores
 
-OrbitDB can now use a custom store through addDatabaseType(), see more [here]().
-
-We added support for passing a custom [keystore]() to the store and use your own keys to sign and verify the database updates.
+OrbitDB can now use a custom store through addDatabaseType(), see more [here](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbadddatabasetypetype-store) and [here](https://github.com/orbitdb/orbit-db-store#creating-custom-data-stores).
 
 ### Important fixes
 
