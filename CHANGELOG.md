@@ -1,25 +1,66 @@
 # Changelog
 
-## Table of Contents
+## v0.20.0
+***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the `Entry` object has also changed to include an [`identity`](https://github.com/orbitdb/orbit-db-identity-provider) field as well as increment the version `v` to 1. The `hash` property now holds a [CIDv1](https://github.com/multiformats/cid#cidv1) multihash string.
 
-<!-- toc -->
+API breaking changes:
 
-- [v0.19.0](#v0190)
-  * [Replication](#replication)
-  * [Browser compatibility](#browser-compatibility)
-  * [LevelDB](#leveldb)
-  * [General Updates](#general-updates)
-  * [Performance](#performance)
-- [v0.18.0](#v0180)
-  * [Write-permissions](#write-permissions)
-  * [Addresses](#addresses)
-  * [Replication](#replication-1)
-  * [Performance](#performance-1)
-  * [Documentation and Examples](#documentation-and-examples)
-  * [Code Base Improvements](#code-base-improvements)
-- [v0.12.0](#v0120)
+- ### Constructor:
+The OrbitDB constructor requires an instance of `identity` to be passed as an argument:
+```javascript
+const orbitdb = new OrbitDB(ipfs, identity, [options])
+```
+- ### Creating an OrbitDB instance:
+  The preferred method for creating an instance of OrbitDB is the async `createInstance` method which will create an `identity` for you if one is not passed in the options.
+```javascript
+const orbitdb = await OrbitDB.createInstance(ipfs, [options])
+```
+- ### OrbitDB key
+  The `key` property has been removed and replaced with `identity`. You can access the public-key with:
+  ```javascript
+  orbitdb.identity.publicKey
+  ```
 
-<!-- tocstop -->
+Read further and see the [API documentation](https://github.com/orbitdb/orbit-db/blob/master/API.md), [examples](https://github.com/orbitdb/orbit-db/tree/master/examples) and [Getting Started Guide](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) to learn more about the changes. Note that we don't use semver for the npm module, so be sure to lock your orbit-db dependency to the previous release if you don't want to upgrade.
+
+### Improved Write Permissions
+
+OrbitDB now supports dynamically granting write-access to keys after database-creation. Previous releases required the database address to change if the write-access keys were changed. We've added an [AccessController module](https://github.com/orbitdb/orbit-db-access-controllers) which allows custom-logic access-controllers to be added to OrbitDB. Two examples of how to create and add new access-controllers can be found in the repo. An [ethereum-based access-controller](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/contract-access-controller.js) which uses a smart-contract to determine access-rights and an [OrbitDB Access Controller](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/orbitdb-access-controller.js) which uses another OrbitDB store to maintain access-rights. For more information, see: [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control).
+
+### Identity Support
+
+We've added orbit-db-identity-provider which allows users to link external identities, such as an Ethereum account, with their OrbitDB identity. For more information, see [orbit-db-identity-provider](https://github.com/orbitdb/orbit-db-identity-provider).
+
+### Keystore fix
+A bug in orbit-db-keystore in which messages larger than 32-bytes signed by the same key produced the same signature has been fixed.
+
+### js-ipfs v0.34.x support
+
+OrbitDB now uses the ipfs-dag API and thus supports the latest js-ipfs again. :tada:
+
+### go-ipfs support
+
+With this release, we finally bring back the support for using OrbitDB with go-ipfs (through js-ipfs-http-client). You can now use OrbitDB again with a running IPFS daemon and without starting an in-process js-ipfs node.
+
+To make OrbitDB work again with go-ipfs, we refactored some parts of the messaging and created two new modules to do that: ipfs-pubsub-peer-monitor and ipfs-pubsub-1on1. They're both modules on top of IPFS Pubsub and are used to handle the automatic message exchange upon peers connecting.
+
+As this is the first release with support for go-ipfs in a long time, please report any problems you may experience!
+
+### Improved test suite and documentation
+
+We've improved the documents by adding details, fixing errors and clarifying them.
+
+We also improved the tests a lot since the previous release. We now run the tests with js-ipfs-http-client (go-ipfs) in addition to running them with js-ipfs (Node.js). We've also cleaned up and refactored the boilerplate code for tests, improved the speed of the test run and generally polished the test suite for better readability and maintainability.
+
+### Custom stores
+
+OrbitDB can now use a custom store through addDatabaseType(), see more [here](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbadddatabasetypetype-store) and [here](https://github.com/orbitdb/orbit-db-store#creating-custom-data-stores).
+
+### Important fixes
+
+The previous release brought in LevelDB as the storage backend for Node.js and browser and there were some rough edges. We've fixed a bunch a problems related to using LevelDB and it should all work now.
+
+Last, we further improved the replication code and its performance at places.
 
 ## v0.19.0
 
@@ -57,7 +98,7 @@ This release is a major one as we've added new features, fixed many of the old p
 
 ### Write-permissions
 
-OrbitDB now has write-permissioned databases! \o/ This gives us verifiable, distributed databases and data structures enabling tons of new use cases and possibilities. User-owned data collections, feeds and lists, State and Payment Channels, and many more! 
+OrbitDB now has write-permissioned databases! \o/ This gives us verifiable, distributed databases and data structures enabling tons of new use cases and possibilities. User-owned data collections, feeds and lists, State and Payment Channels, and many more!
 
 Permissions are defined by public keys and databases in OrbitDB support one or multiple write keys per database. Each database update is signed with a write-access key and the signature is verified by the clients against access control information. Next step is to extend the access control functionality to include read permissions. Read more about [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control) and [Keys](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys).
 
