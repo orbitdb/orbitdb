@@ -251,7 +251,7 @@ let databaseTypes = {
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash, options.accessController.legacy)
 
     // Create the database address
     return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
