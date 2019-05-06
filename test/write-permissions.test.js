@@ -59,7 +59,7 @@ const databases = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Write Permissions (${API})`, function() {
+  describe.skip(`orbit-db - Write Permissions (${API})`, function() {
     this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2
@@ -85,7 +85,7 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd)
     })
 
-    describe('allows multiple peers to write to the databases', function() {
+    describe.skip('allows multiple peers to write to the databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' allows multiple writers', async () => {
           let options = { 
@@ -112,7 +112,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('syncs databases', function() {
+    describe.skip('syncs databases', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
           let options = { 
@@ -145,7 +145,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('syncs databases that anyone can write to', function() {
+    describe.skip('syncs databases that anyone can write to', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
           let options = { 
@@ -175,7 +175,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('doesn\'t sync if peer is not allowed to write to the database', function() {
+    describe.skip('doesn\'t sync if peer is not allowed to write to the database', function() {
       databases.forEach(async (database) => {
         it(database.type + ' doesn\'t sync', async () => {
 
@@ -225,7 +225,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('throws an error if peer is not allowed to write to the database', function() {
+    describe.skip('throws an error if peer is not allowed to write to the database', function() {
       databases.forEach(async (database) => {
         it(database.type + ' throws an error', async () => {
           let options = { 

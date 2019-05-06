@@ -16,7 +16,7 @@ const dbPath = './orbitdb/tests/kvstore'
 const ipfsPath = './orbitdb/tests/kvstore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Key-Value Database (${API})`, function() {
+  describe.skip(`orbit-db - Key-Value Database (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, db

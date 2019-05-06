@@ -83,7 +83,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(db.value, 0)
       })
 
-      it('increases a counter value', async () => {
+      it.skip('increases a counter value', async () => {
         const counter = await orbitdb1.counter('counter test', { path: dbPath1 })
         address = counter.address.toString()
         await mapSeries([13, 1], (f) => counter.inc(f))
@@ -91,14 +91,14 @@ Object.keys(testAPIs).forEach(API => {
         await counter.close()
       })
 
-      it('opens a saved counter', async () => {
+      it.skip('opens a saved counter', async () => {
         const counter = await orbitdb1.counter(address, { path: dbPath1 })
         await counter.load()
         assert.equal(counter.value, 14)
         await counter.close()
       })
 
-      it('syncs counters', async () => {
+      it.skip('syncs counters', async () => {
         let options = {
           // Set write access for both clients
           write: [
