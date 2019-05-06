@@ -17,14 +17,14 @@
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "~1.4.0",
-    "orbit-db-docstore": "~1.4.3",
-    "orbit-db-eventstore": "~1.4.0",
-    "orbit-db-feedstore": "~1.4.0",
+    "orbit-db-counterstore": "orbitdb/orbit-db-counterstore#patch/1.4.1",
+    "orbit-db-docstore": "orbitdb/orbit-db-docstore#patch/1.4.4",
+    "orbit-db-eventstore": "orbitdb/orbit-db-eventstore#patch/1.4.1",
+    "orbit-db-feedstore": "orbitdb/orbit-db-feedstore#patch/1.4.1",
     "orbit-db-keystore": "~0.1.0",
-    "orbit-db-kvstore": "~1.4.0",
+    "orbit-db-kvstore": "orbitdb/orbit-db-kvstore#patch/1.4.1",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "~2.5.3"
+    "orbit-db-store": "orbitdb/orbit-db-store#patch/2.5.4"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
