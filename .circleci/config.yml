@@ -38,6 +38,13 @@ jobs:
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    # Force re-isntalling all dependencies
+    - run:
+        working_directory: ~/orbitdb/orbit-db
+        command: rm -rf node_modules/
+    - run:
+        working_directory: ~/orbitdb/orbit-db
+        command: rm package-lock.json
     # This is based on your 1.0 configuration file or project settings
     - run:
         working_directory: ~/orbitdb/orbit-db
