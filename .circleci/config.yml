@@ -41,7 +41,7 @@ jobs:
     # This is based on your 1.0 configuration file or project settings
     - run:
         working_directory: ~/orbitdb/orbit-db
-        command: nvm install 8.16.0 && nvm alias default 8.16.0
+        command: nvm install 10.13.0 && nvm alias default 10.13.0
     # Dependencies
     #   This would typically go in either a build or a build-and-test job when using workflows
     # Restore the dependency cache
