@@ -250,7 +250,7 @@ Object.keys(testAPIs).forEach(API => {
           })
       })
 
-      it.skip('open the database and it has the added entries', async () => {
+      it('open the database and it has the added entries', async () => {
         db = await orbitdb.open('ZZZ', { create: true, type: 'feed' })
         await db.add('hello1')
         await db.add('hello2')

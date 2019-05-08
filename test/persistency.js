@@ -41,7 +41,7 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd)
     })
 
-    describe.skip('load', function() {
+    describe('load', function() {
       beforeEach(async () => {
         const dbName = new Date().getTime().toString()
         const entryArr = []
@@ -173,7 +173,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe.skip('load from snapshot', function() {
+    describe('load from snapshot', function() {
       beforeEach(async () => {
         const dbName = new Date().getTime().toString()
         const entryArr = []

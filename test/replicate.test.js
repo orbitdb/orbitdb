@@ -22,7 +22,7 @@ const ipfsPath1 = './orbitdb/tests/replication/1/ipfs'
 const ipfsPath2 = './orbitdb/tests/replication/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.skip(`orbit-db - Replication (${API})`, function() {
+  describe(`orbit-db - Replication (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2

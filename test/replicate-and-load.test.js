@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd2)
     })
 
-    describe.skip('two peers', function() {
+    describe('two peers', function() {
       // Opens two databases db1 and db2 and gives write-access to both of the peers
       const openDatabases1 = async (options) => {
         // Set write access for both clients

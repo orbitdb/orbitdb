@@ -55,7 +55,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(items.length, 0)
       })
 
-      it.skip('returns the added entry\'s hash, 1 entry', async () => {
+      it('returns the added entry\'s hash, 1 entry', async () => {
         db = await orbitdb1.eventlog('first database')
         const hash = await db.add('hello1')
         const items = db.iterator({ limit: -1 }).collect()
@@ -64,7 +64,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(items.length, 1)
       })
 
-      it.skip('returns the added entry\'s hash, 2 entries', async () => {
+      it('returns the added entry\'s hash, 2 entries', async () => {
         db = await orbitdb1.eventlog('first database')
         await db.load()
         const prevHash = db.iterator().collect()[0].hash
@@ -76,7 +76,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(hash, last(items).hash)
       })
 
-      it.skip('adds five items', async () => {
+      it('adds five items', async () => {
         db = await orbitdb1.eventlog('second database')
         await mapSeries([1, 2, 3, 4, 5], (i) => db.add('hello' + i))
         const items = db.iterator({ limit: -1 }).collect()
@@ -85,7 +85,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(last(items.map((f) => f.payload.value)), 'hello5')
       })
 
-      it.skip('adds an item that is > 256 bytes', async () => {
+      it('adds an item that is > 256 bytes', async () => {
         db = await orbitdb1.eventlog('third database')
         let msg = new Buffer(1024)
         msg.fill('a')
@@ -96,7 +96,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe.skip('Iterator', function() {
+    describe('Iterator', function() {
       let hashes = []
       const itemCount = 5
 

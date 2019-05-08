@@ -44,7 +44,7 @@ Object.keys(testAPIs).forEach(API => {
       assert.equal(db.dbname, 'first doc database')
     })
 
-    describe.skip('Default index \'_id\'', function() {
+    describe('Default index \'_id\'', function() {
       beforeEach(async () => {
         const options = {
           replicate: false,
@@ -168,7 +168,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe.skip('Specified index', function() {
+    describe('Specified index', function() {
       beforeEach(async () => {
         const options = { 
           indexBy: 'doc', 
