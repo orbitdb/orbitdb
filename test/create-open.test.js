@@ -11,6 +11,7 @@ const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const Identities = require('orbit-db-identity-provider')
 const io = require('orbit-db-io')
+
 // Include test utilities
 const {
   config,
@@ -95,7 +96,7 @@ Object.keys(testAPIs).forEach(API => {
       describe('Success', function() {
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
-          localDataPath = path.join(dbPath, db.address.root, db.address.path)
+          localDataPath = path.join(dbPath, orbitdb.id, 'cache')
           await db.close()
         })
 
@@ -114,27 +115,17 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('saves database manifest reference locally', async () => {
-          const manifestHash = db.address.root
-          const address = db.address.toString()
-          levelup(leveldown(localDataPath), (err, db) => {
-            if (err) {
-              assert.equal(err, null)
-            }
-
-            db.get(address + '/_manifest', (err, value) => {
-              if (err) {
-                assert.equal(err, null)
-              }
-
-              const data = JSON.parse(value || '{}')
-              assert.equal(data, manifestHash)
-            })
-          })
+          const address = db.id
+          const manifestHash = address.split('/')[2]
+          await db._cache._store.open()
+          const value = await db._cache.get(address + '/_manifest')
+          assert.equal(value, manifestHash)
         })
 
         it('saves database manifest file locally', async () => {
-          const manifest = await io.read(ipfs, db.address.root)
-          assert(manifest)
+          const manifestHash = db.id.split('/')[2]
+          const manifest = await io.read(ipfs, manifestHash)
+          assert.notEqual(manifest, )
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)
@@ -144,8 +135,7 @@ Object.keys(testAPIs).forEach(API => {
         it('can pass local database directory as an option', async () => {
           const dir = './orbitdb/tests/another-feed'
           db = await orbitdb.create('third', 'feed', { directory: dir })
-          localDataPath = path.join(dir, db.address.root, db.address.path)
-          assert.equal(fs.existsSync(localDataPath), true)
+          assert.equal(fs.existsSync(dir), true)
         })
 
         describe('Access Controller', function() {
@@ -228,7 +218,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('Open', function() {
-      before(async () => {
+      beforeEach(async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed' })
       })
 
@@ -260,7 +250,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database - with a different identity', async () => {
-        const identity = await Identities.createIdentity({ id: 'test-id' })
+        const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)

@@ -17,7 +17,9 @@ module.exports = {
   },
   node: {
     console: false,
-    Buffer: true
+    Buffer: true,
+    mkdirp: "empty",
+    fs: "empty"
   },
   plugins: [
   ],

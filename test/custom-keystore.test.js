@@ -22,7 +22,7 @@ const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
-    this.timeout(config.timeout)
+    this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1
 
@@ -32,10 +32,9 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      const identity = await Identities.createIdentity({ type:'custom'})
+      const identity = await Identities.createIdentity({ type: 'custom', keystore: CustomTestKeystore().create()  })
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: path.join(dbPath, '1'),
-        keystore: CustomTestKeystore().create(),
         identity
       })
     })
@@ -67,7 +66,7 @@ Object.keys(testAPIs).forEach(API => {
           const options = {
             accessController: {
               // Set write access for both clients
-              write: [orbitdb1.identity.id],
+              write: [orbitdb1.identity.id]
             }
           }
 

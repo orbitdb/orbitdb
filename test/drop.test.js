@@ -46,13 +46,17 @@ Object.keys(testAPIs).forEach(API => {
     describe('Drop', function() {
       before(async () => {
         db = await orbitdb.create('first', 'feed')
-        localDataPath = path.join(dbPath, db.address.root, db.address.path)
+        localDataPath = path.join(dbPath)
         assert.equal(fs.existsSync(localDataPath), true)
       })
 
-      it('removes local database files', async () => {
+      it('removes local database cache', async () => {
         await db.drop()
-        assert.equal(fs.existsSync(localDataPath), false)
+        assert.equal(await db._cache.get(db.localHeadsPath), undefined)
+        assert.equal(await db._cache.get(db.remoteHeadsPath), undefined)
+        assert.equal(await db._cache.get(db.snapshotPath), undefined)
+        assert.equal(await db._cache.get(db.queuePath), undefined)
+        assert.equal(await db._cache.get(db.manifestPath), undefined)
       })
     })
   })
