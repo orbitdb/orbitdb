@@ -3,7 +3,7 @@
 const Channel = require('ipfs-pubsub-1on1')
 
 const Logger = require('logplease')
-const logger = Logger.create("exchange-heads", { color: Logger.Colors.Yellow })
+const logger = Logger.create('exchange-heads', { color: Logger.Colors.Yellow })
 Logger.setLogLevel('ERROR')
 
 const getHeadsForDatabase = store => (store && store._oplog) ? store._oplog.heads : []

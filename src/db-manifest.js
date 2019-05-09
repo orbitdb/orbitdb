@@ -6,7 +6,7 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, optio
   const manifest = {
     name: name,
     type: type,
-    accessController: path.join('/ipfs', accessControllerAddress),
+    accessController: path.join('/ipfs', accessControllerAddress)
   }
 
   return io.write(ipfs, options.format || 'dag-cbor', manifest, options)

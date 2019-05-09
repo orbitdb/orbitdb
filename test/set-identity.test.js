@@ -1,10 +1,15 @@
 'use strict'
 
+const fs = require('fs')
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
+const Keystore = require('orbit-db-keystore')
+const leveldown = require('leveldown')
+const storage = require('orbit-db-storage-adapter')(leveldown)
+
 // Include test utilities
 const {
   config,
@@ -13,6 +18,7 @@ const {
   testAPIs,
 } = require('./utils')
 
+const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'
 const ipfsPath = './orbitdb/tests/change-identity/ipfs'
 
@@ -20,7 +26,7 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Set identities (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db
+    let ipfsd, ipfs, orbitdb, db, keystore
     let identity1, identity2
     let localDataPath
 
@@ -30,12 +36,18 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      identity1 = await Identities.createIdentity({ id: 'test-id1' })
-      identity2 = await Identities.createIdentity({ id: 'test-id2' })
+
+      if(fs && fs.mkdirSync) fs.mkdirSync(keysPath, { recursive: true })
+      const identityStore = await storage.createStore(keysPath)
+
+      keystore = new Keystore(identityStore)
+      identity1 = await Identities.createIdentity({ id: 'test-id1', keystore })
+      identity2 = await Identities.createIdentity({ id: 'test-id2', keystore })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
+      await keystore.close()
       if(orbitdb)
         await orbitdb.stop()
 

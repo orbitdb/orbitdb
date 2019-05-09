@@ -1,6 +1,5 @@
 'use strict'
 const path = require('path')
-const multihash = require('multihashes')
 const CID = require('cids')
 
 const notEmpty = e => e !== '' && e !== ' '
@@ -37,11 +36,9 @@ class OrbitDBAddress {
   }
 
   static parse (address) {
-    if (!address)
-      throw new Error(`Not a valid OrbitDB address: ${address}`)
+    if (!address) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
 
-    if (!OrbitDBAddress.isValid(address))
-      throw new Error(`Not a valid OrbitDB address: ${address}`)
+    if (!OrbitDBAddress.isValid(address)) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
 
     const parts = address.toString()
       .split('/')
