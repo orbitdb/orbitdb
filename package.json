@@ -29,7 +29,7 @@
     "orbit-db-keystore": "orbitdb/orbit-db-keystore#fix/persistent-leveldb-connection",
     "orbit-db-kvstore": "~1.5.0",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "orbitdb/orbit-db-keystore#fix/store-performance"
+    "orbit-db-store": "orbitdb/orbit-db-store#fix/store-performance"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
