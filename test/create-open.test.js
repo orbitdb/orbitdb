@@ -228,7 +228,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('Open', function() {
-      before(async () => {
+      beforeEach(async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed' })
       })
 
