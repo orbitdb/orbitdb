@@ -1,4 +1,4 @@
-FROM node:carbon
+FROM node:10
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 
