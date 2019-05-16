@@ -1,9 +1,8 @@
-const OrbitDbCache = require('orbit-db-cache/Cache.js')
-const localdown = require('localstorage-down')
-
+const OrbitDbCache = require('orbit-db-cache')
+const OrbitDBStorage = require('../../orbit-db-storage-adapter')
 /**
  * A custom cache example. To create a differing custom example, orbitdb cache was
  * used with another abstract-leveldown compliant storage, localdown as an example
  */
 
-module.exports = OrbitDbCache(localdown)
+module.exports = OrbitDbCache

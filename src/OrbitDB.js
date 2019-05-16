@@ -16,6 +16,10 @@ const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
 
+const Storage = require('../orbit-db-storage-adapter')
+// Including this as a default storage layer for now
+const leveldown = require('leveldown')
+
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('ERROR')
@@ -44,8 +48,9 @@ class OrbitDB {
       ? new options.broker(this._ipfs)
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
+    this.storage = options.storage
     this.keystore = options.keystore
-    this.cache = options.cache || Cache
+    this.cache = options.cache || new Cache(this.storage.cache)
     this.stores = {}
     this._directConnections = {}
     // AccessControllers module can be passed in to enable
@@ -59,19 +64,25 @@ class OrbitDB {
 
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || Keystore.create(path.join(directory, id, '/keystore'))
+    const storage = Object.assign({}, options.storage, {
+      keystore: await Storage.create(leveldown, path.join(directory, id, '/keystore')),
+      cache: await Storage.create(leveldown, path.join(directory, id, '/cache'))
+    })
 
+    const keystore = options.keystore || Keystore.create(storage.keystore)
     const identity = options.identity || await Identities.createIdentity({
       id: options.id || id,
       keystore: keystore,
     })
+
     options = Object.assign({}, options, {
       peerId: id ,
       directory: directory,
-      keystore: keystore
+      keystore: keystore,
+      storage: storage
     })
-    const orbitdb = new OrbitDB(ipfs, identity, options)
-    return orbitdb
+
+    return new OrbitDB(ipfs, identity, options)
   }
 
   /* Databases */
@@ -114,8 +125,12 @@ class OrbitDB {
 
   async disconnect () {
     //close Keystore
-    if (this.keystore.close)
-      await this.keystore.close()
+    if (this.storage.keystore.close)
+      await this.storage.keystore.close()
+
+    //close Cache
+    if (this.storage.cache.close)
+      await this.storage.cache.close()
 
     // Close all open databases
     const databases = Object.values(this.stores)

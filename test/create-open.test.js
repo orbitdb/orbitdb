@@ -95,7 +95,7 @@ Object.keys(testAPIs).forEach(API => {
       describe('Success', function() {
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
-          localDataPath = path.join(dbPath, db.address.root, db.address.path)
+          localDataPath = path.join(dbPath)
           await db.close()
         })
 
