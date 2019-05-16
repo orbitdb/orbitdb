@@ -89,12 +89,12 @@ Object.keys(testAPIs).forEach(API => {
         assert.strictEqual(db.access.write[0], '04b54f6ef529cd2dd2f9c6897a382c492222d42e57826269a38101ffe752aa07260ecd092a970d7eef08c4ddae2b7006ee25f07e4ab62fa5262ae3b51fdea29f78')
       })
 
-      it('load v0 orbitdb address', async () => {
+      it.skip('load v0 orbitdb address', async () => {
 
         assert.equal(db.all.length, 3)
       })
 
-      it('allows migrated key to write', async () => {
+      it.skip('allows migrated key to write', async () => {
         const hash = await db.add({ thing: 'new addition'})
         const newEntries = db.all.filter(e => e.v === 1)
         assert.equal(newEntries.length, 1)
