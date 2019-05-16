@@ -8,7 +8,7 @@ const Storage = (mkdir) => {
     create: (storage, directory = './orbitdb') => {
       // If we're in Node.js, mkdir module is expected to passed
       // and we need to make sure the directory exists
-      if (mkdir && mkdir.c) { // TODO: What is mkdir.c??
+      if (mkdir) { // TODO: What is mkdir.c??
         mkdir.sync(directory)
       }
 
