@@ -29,7 +29,7 @@ const dbFixturesDir = './test/fixtures/v0'
 const ipfsFixturesDir = './test/fixtures/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function() {
+  describe.skip(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb, db, address
