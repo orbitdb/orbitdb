@@ -41,7 +41,7 @@ jobs:
     # This is based on your 1.0 configuration file or project settings
     - run:
         working_directory: ~/orbitdb/orbit-db
-        command: nvm install 10.13.0 && nvm alias default 10.13.0
+        command: nvm install 10.15.3 && nvm alias default 10.15.3
     # Dependencies
     #   This would typically go in either a build or a build-and-test job when using workflows
     # Restore the dependency cache
@@ -56,8 +56,7 @@ jobs:
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
     - run: if [ -z "${NODE_ENV:-}" ]; then export NODE_ENV=test; fi
     - run: export PATH="~/orbitdb/orbit-db/node_modules/.bin:$PATH"
-    - run: rm -rf node_modules/
-    - run: npm install
+    - run: make rebuild
     # Save dependency cache
     # - save_cache:
     #     key: v1-dep-{{ .Branch }}-{{ epoch }}
@@ -76,7 +75,6 @@ jobs:
     # Test
     #   This would typically be a build job when using workflows, possibly combined with build
     # The following line was run implicitly in your 1.0 builds based on what CircleCI inferred about the structure of your project. In 2.0 you need to be explicit about which commands should be run. In some cases you can discard inferred commands if they are not relevant to your project.
-    - run: npm test
     # Teardown
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
     # Save test results
