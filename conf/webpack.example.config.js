@@ -12,6 +12,8 @@ module.exports = {
   devtool: 'none',
   node: {
     Buffer: true,
+    mkdirp: "empty",
+    fs: "empty"
   },
   plugins: [
     new webpack.DefinePlugin({

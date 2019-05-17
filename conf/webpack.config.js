@@ -18,7 +18,8 @@ module.exports = {
   },
   node: {
     console: false,
-    Buffer: true
+    Buffer: true,
+    mkdirp: "empty"
   },
   plugins: [
     new webpack.DefinePlugin({
