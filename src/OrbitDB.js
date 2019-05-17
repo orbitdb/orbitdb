@@ -175,12 +175,12 @@ class OrbitDB {
       accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
-    const cache = await this._loadCache(this.directory, address)
+    // const cache = await this._loadCache(this.directory, address)
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
       keystore: this.keystore,
-      cache: cache,
+      cache: this.cache,
       onClose: this._onClose.bind(this),
     })
     const identity = options.identity || this.identity
@@ -292,10 +292,10 @@ class OrbitDB {
     const dbAddress = await this._determineAddress(name, type, options)
 
     // Load the locally saved database information
-    const cache = await this._loadCache(directory, dbAddress)
+    // const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database locally
-    const haveDB = await this._haveLocalData(cache, dbAddress)
+    const haveDB = await this._haveLocalData(this.cache, dbAddress)
 
     if (haveDB && !options.overwrite)
       throw new Error(`Database '${dbAddress}' already exists!`)
@@ -349,10 +349,10 @@ class OrbitDB {
     const dbAddress = OrbitDBAddress.parse(address)
 
     // Load the locally saved db information
-    const cache = await this._loadCache(directory, dbAddress)
+    // const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database
-    const haveDB = await this._haveLocalData(cache, dbAddress)
+    const haveDB = await this._haveLocalData(this.cache, dbAddress)
 
     logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
 
@@ -383,22 +383,22 @@ class OrbitDB {
 
   // Save the database locally
   async _addManifestToCache (directory, dbAddress) {
-    const cache = await this._loadCache(directory, dbAddress)
-    await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
+    // const cache = await this._loadCache(directory, dbAddress)
+    await this.cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
-  async _loadCache (directory, dbAddress) {
-    let cache
-    try {
-      cache = await this.cache.load(directory, dbAddress)
-    } catch (e) {
-      console.log(e)
-      logger.error("Couldn't load Cache:", e)
-    }
+  // async _loadCache (directory, dbAddress) {
+  //   let cache
+  //   try {
+  //     cache = await this.cache.load(directory, dbAddress)
+  //   } catch (e) {
+  //     console.log(e)
+  //     logger.error("Couldn't load Cache:", e)
+  //   }
 
-    return cache
-  }
+  //   return cache
+  // }
 
   /**
    * Check if we have the database, or part of it, saved locally
