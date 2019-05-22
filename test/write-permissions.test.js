@@ -51,8 +51,8 @@ Object.keys(testAPIs).forEach(API => {
             // Set write access for both clients
             accessController: {
               write: [
-                orbitdb1.identity.publicKey,
-                orbitdb2.identity.publicKey
+                orbitdb1.identity.id,
+                orbitdb2.identity.id
               ],
             }
           }
@@ -80,8 +80,8 @@ Object.keys(testAPIs).forEach(API => {
             // Set write access for both clients
             accessController: {
               write: [
-                orbitdb1.identity.publicKey,
-                orbitdb2.identity.publicKey
+                orbitdb1.identity.id,
+                orbitdb2.identity.id
               ]
             }
           }
@@ -147,7 +147,7 @@ Object.keys(testAPIs).forEach(API => {
           let options = {
             // Only peer 1 can write
             accessController: {
-              write: [orbitdb1.identity.publicKey]
+              write: [orbitdb1.identity.id]
             }
           }
           let err

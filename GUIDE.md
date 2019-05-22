@@ -15,8 +15,11 @@ This guide is still being worked on and we would love to get [feedback and sugge
   * [Address](#address)
     + [Manifest](#manifest)
   * [Identity](#identity)
+    + [Creating an identity](#creating-an-identity)
   * [Access Control](#access-control)
     + [Public databases](#public-databases)
+    + [Granting access after database creation](#granting-access-after-database-creation)
+    + [Custom Access Controller](#custom-access-controller)
 - [Add an entry](#add-an-entry)
 - [Get an entry](#get-an-entry)
 - [Persistency](#persistency)
@@ -457,3 +460,5 @@ let store = orbitdb.create(name, CustomStore.type)
 ## More information
 
 Is this guide missing something you'd like to understand or found an error? Please [open an issue](https://github.com/orbitdb/orbit-db/issues) and let us know what's missing!
+
+Also, if you want a much more in-depth tutorial and exploration of OrbitDB's architecture, please check out the [OrbitDB Field Manual](https://github.com/orbitdb/field-manual).

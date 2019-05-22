@@ -82,7 +82,7 @@ If you're using `orbitd-db` to develop **browser** or **Node.js** applications, 
 Install dependencies:
 
 ```
-npm install orbit-db ipfs
+npm install orbit-db@rc2 ipfs
 ```
 
 ```javascript
@@ -142,6 +142,7 @@ const ipfs = IpfsClient('localhost', '5001')
 const orbitdb = await OrbitDB.createInstance(ipfs)
 const db = await orbitdb.log('hello')
 // Do something with your db.
+// Of course, you may want to wrap these in an async function.
 ```
 
 ## API

@@ -167,8 +167,9 @@ let databaseTypes = {
       cache: cache,
       onClose: this._onClose.bind(this),
     })
+    const identity = options.identity || this.identity
 
-    const store = new Store(this._ipfs, this.identity, address, opts)
+    const store = new Store(this._ipfs, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
     // ID of the store is the address as a string
     const addr = address.toString()
@@ -237,7 +238,7 @@ let databaseTypes = {
     delete this.stores[address]
   }
 
-  async _determineAddress(name, type, options = {}, onlyHash) {
+  async _determineAddress(name, type, options = {}) {
     if (!OrbitDB.isValidType(type))
       throw new Error(`Invalid database type '${type}'`)
 
@@ -245,11 +246,11 @@ let databaseTypes = {
       throw new Error(`Given database name is an address. Please give only the name of the database!`)
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { type: 'ipfs' }, options.accessController)
-    const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
+    options.accessController = Object.assign({}, { name: name , type: 'ipfs' }, options.accessController)
+    const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController  || {})
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, options)
 
     // Create the database address
     return OrbitDBAddress.parse(['/orbitdb', manifestHash, name].join('/'))
@@ -293,7 +294,8 @@ let databaseTypes = {
   }
 
   async determineAddress(name, type, options = {}) {
-    return this._determineAddress(name, type, options, true)
+    const opts = Object.assign({}, { onlyHash: true }, options)
+    return this._determineAddress(name, type, opts)
   }
 
   /*

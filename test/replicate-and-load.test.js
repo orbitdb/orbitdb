@@ -131,8 +131,8 @@ Object.keys(testAPIs).forEach(API => {
                 let options = {
                   accessController: {
                     write: [
-                      orbitdb1.identity.publicKey,
-                      orbitdb2.identity.publicKey
+                      orbitdb1.identity.id,
+                      orbitdb2.identity.id
                     ],
                   }
                 }
