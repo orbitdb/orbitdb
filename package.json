@@ -1,10 +1,6 @@
 {
   "name": "orbit-db",
-<<<<<<< HEAD
-  "version": "0.20.0-rc.5",
-=======
   "version": "0.21.0-rc.1",
->>>>>>> e16794cf220b1f9d61d1f73ec023f9ccc94f08db
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -22,20 +18,6 @@
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-<<<<<<< HEAD
-    "orbit-db-access-controllers": "rc2",
-    "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "rc2",
-    "orbit-db-docstore": "rc2",
-    "orbit-db-eventstore": "rc2",
-    "orbit-db-feedstore": "rc2",
-    "orbit-db-identity-provider": "rc1.3",
-    "orbit-db-io": "~0.0.1",
-    "orbit-db-keystore": "rc1.2",
-    "orbit-db-kvstore": "rc3",
-    "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "rc2"
-=======
     "orbit-db-access-controllers": "next",
     "orbit-db-cache": "~0.2.4",
     "orbit-db-counterstore": "~1.5.0",
@@ -48,7 +30,6 @@
     "orbit-db-kvstore": "~1.5.0",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-store": "~2.6.0"
->>>>>>> e16794cf220b1f9d61d1f73ec023f9ccc94f08db
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
