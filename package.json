@@ -14,7 +14,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^0.5.7",
-    "ipfs-pubsub-1on1": "~0.0.4",
+    "ipfs-pubsub-1on1": "~0.0.6",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
