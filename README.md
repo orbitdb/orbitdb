@@ -82,7 +82,7 @@ If you're using `orbitd-db` to develop **browser** or **Node.js** applications, 
 Install dependencies:
 
 ```
-npm install orbit-db@rc2 ipfs
+npm install orbit-db ipfs
 ```
 
 ```javascript
