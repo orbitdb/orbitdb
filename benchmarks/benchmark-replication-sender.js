@@ -12,7 +12,7 @@ let metrics1 = {
   totalQueries: 0,
   seconds: 0,
   queriesPerSecond: 0,
-  lastTenSeconds: 0,
+  lastTenSeconds: 0
 }
 
 const ipfsConf = {
@@ -26,14 +26,14 @@ const ipfsConf = {
     MDNS: {
       Enabled: true,
       Interval: 1
-    },
-  },
+    }
+  }
 }
 
 const repoConf = {
   storageBackends: {
-    blocks: DatastoreLevel,
-  },
+    blocks: DatastoreLevel
+  }
 }
 
 const defaultConfig = Object.assign({}, {
@@ -41,7 +41,7 @@ const defaultConfig = Object.assign({}, {
   EXPERIMENTAL: {
     pubsub: true,
     sharding: false,
-    dht: false,
+    dht: false
   },
   config: ipfsConf
 })
@@ -56,34 +56,34 @@ const queryLoop = async (db) => {
     try {
       await db.add(metrics1.totalQueries)
     } catch (e) {
-        console.error(e)
+      console.error(e)
     }
-    metrics1.totalQueries ++
-    metrics1.lastTenSeconds ++
-    metrics1.queriesPerSecond ++
+    metrics1.totalQueries++
+    metrics1.lastTenSeconds++
+    metrics1.queriesPerSecond++
     setImmediate(() => queryLoop(db))
   }
 }
 
 // Metrics output function
 const outputMetrics = (name, db, metrics) => {
-    metrics.seconds ++
-    console.log(`[${name}] ${metrics.queriesPerSecond} queries per second, ${metrics.totalQueries} queries in ${metrics.seconds} seconds (Oplog: ${db._oplog.length})`)
-    metrics.queriesPerSecond = 0
+  metrics.seconds++
+  console.log(`[${name}] ${metrics.queriesPerSecond} queries per second, ${metrics.totalQueries} queries in ${metrics.seconds} seconds (Oplog: ${db._oplog.length})`)
+  metrics.queriesPerSecond = 0
 
-    if(metrics.seconds % 10 === 0) {
-      console.log(`[${name}] --> Average of ${metrics.lastTenSeconds/10} q/s in the last 10 seconds`)
-      metrics.lastTenSeconds = 0
-    }
+  if (metrics.seconds % 10 === 0) {
+    console.log(`[${name}] --> Average of ${metrics.lastTenSeconds / 10} q/s in the last 10 seconds`)
+    metrics.lastTenSeconds = 0
+  }
 }
 
 const database = 'benchmark-replication'
 const updateCount = 20000
 
 // Start
-console.log("Starting IPFS daemons...")
+console.log('Starting IPFS daemons...')
 
-pMapSeries([conf1,], d => startIpfs('js-ipfs', d))
+pMapSeries([conf1], d => startIpfs('js-ipfs', d))
   .then(async ([ipfs1]) => {
     try {
       // Create the databases
@@ -108,7 +108,7 @@ pMapSeries([conf1,], d => startIpfs('js-ipfs', d))
 
           // Metrics output for the writer, once/sec
           const writeInterval = setInterval(() => {
-            outputMetrics("WRITE", db1, metrics1)
+            outputMetrics('WRITE', db1, metrics1)
             if (metrics1.totalQueries === updateCount) {
               clearInterval(writeInterval)
             }

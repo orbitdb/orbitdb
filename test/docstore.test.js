@@ -10,14 +10,14 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/docstore'
 const ipfsPath = './orbitdb/tests/docstore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Document Store (${API})`, function() {
+  describe(`orbit-db - Document Store (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, db
@@ -31,11 +31,9 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
     it('creates and opens a database', async () => {
@@ -45,12 +43,12 @@ Object.keys(testAPIs).forEach(API => {
       assert.equal(db.dbname, 'first doc database')
     })
 
-    describe('Default index \'_id\'', function() {
+    describe('Default index \'_id\'', function () {
       beforeEach(async () => {
         const options = {
           replicate: false,
           maxHistory: 0,
-          path: dbPath,
+          path: dbPath
         }
         db = await orbitdb1.docstore(config.dbname, options)
       })
@@ -60,16 +58,16 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('put', async () => {
-        const doc = { _id: 'hello world', doc: 'all the things'}
+        const doc = { _id: 'hello world', doc: 'all the things' }
         await db.put(doc)
         const value = db.get('hello world')
         assert.deepEqual(value, [doc])
       })
 
       it('get - partial term match', async () => {
-        const doc1 = { _id: 'hello world', doc: 'some things'}
-        const doc2 = { _id: 'hello universe', doc: 'all the things'}
-        const doc3 = { _id: 'sup world', doc: 'other things'}
+        const doc1 = { _id: 'hello world', doc: 'some things' }
+        const doc2 = { _id: 'hello universe', doc: 'all the things' }
+        const doc3 = { _id: 'sup world', doc: 'other things' }
         await db.put(doc1)
         await db.put(doc2)
         await db.put(doc3)
@@ -78,9 +76,9 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('get after delete', async () => {
-        const doc1 = { _id: 'hello world', doc: 'some things'}
-        const doc2 = { _id: 'hello universe', doc: 'all the things'}
-        const doc3 = { _id: 'sup world', doc: 'other things'}
+        const doc1 = { _id: 'hello world', doc: 'some things' }
+        const doc2 = { _id: 'hello universe', doc: 'all the things' }
+        const doc3 = { _id: 'sup world', doc: 'other things' }
         await db.put(doc1)
         await db.put(doc2)
         await db.put(doc3)
@@ -92,8 +90,8 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('put updates a value', async () => {
-        const doc1 = { _id: 'hello world', doc: 'all the things'}
-        const doc2 = { _id: 'hello world', doc: 'some of the things'}
+        const doc1 = { _id: 'hello world', doc: 'all the things' }
+        const doc2 = { _id: 'hello world', doc: 'some of the things' }
         await db.put(doc1)
         await db.put(doc2)
         const value = db.get('hello')
@@ -101,10 +99,10 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('query', async () => {
-        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17}
-        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
-        const doc3 = { _id: 'hello other world', doc: 'none of the things', views: 5}
-        const doc4 = { _id: 'hey universe', doc: ''}
+        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17 }
+        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10 }
+        const doc3 = { _id: 'hello other world', doc: 'none of the things', views: 5 }
+        const doc4 = { _id: 'hey universe', doc: '' }
 
         await db.put(doc1)
         await db.put(doc2)
@@ -121,10 +119,10 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('query after delete', async () => {
-        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17}
-        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
-        const doc3 = { _id: 'hello other world', doc: 'none of the things', views: 5}
-        const doc4 = { _id: 'hey universe', doc: ''}
+        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17 }
+        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10 }
+        const doc3 = { _id: 'hello other world', doc: 'none of the things', views: 5 }
+        const doc4 = { _id: 'hey universe', doc: '' }
 
         await db.put(doc1)
         await db.put(doc2)
@@ -138,8 +136,8 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('query returns full op', async () => {
-        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17}
-        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10}
+        const doc1 = { _id: 'hello world', doc: 'all the things', views: 17 }
+        const doc2 = { _id: 'sup world', doc: 'some of the things', views: 10 }
 
         const expectedOperation = {
           op: 'PUT',
@@ -148,7 +146,7 @@ Object.keys(testAPIs).forEach(API => {
             _id: 'sup world',
             doc: 'some of the things',
             views: 10
-          },
+          }
         }
 
         await db.put(doc1)
@@ -169,7 +167,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('Specified index', function() {
+    describe('Specified index', function () {
       beforeEach(async () => {
         const options = {
           indexBy: 'doc',
@@ -184,15 +182,15 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('put', async () => {
-        const doc = { _id: 'hello world', doc: 'all the things'}
+        const doc = { _id: 'hello world', doc: 'all the things' }
         await db.put(doc)
         const value = db.get('all')
         assert.deepEqual(value, [doc])
       })
 
       it('get - matches specified index', async () => {
-        const doc1 = { _id: 'hello world', doc: 'all the things'}
-        const doc2 = { _id: 'hello world', doc: 'some things'}
+        const doc1 = { _id: 'hello world', doc: 'all the things' }
+        const doc2 = { _id: 'hello world', doc: 'some things' }
         await db.put(doc1)
         await db.put(doc2)
         const value1 = db.get('all')

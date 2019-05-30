@@ -10,7 +10,7 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/create-open'
@@ -28,7 +28,7 @@ class CustomStore extends DocumentStore {
 }
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Create Custom Database Type (${API})`, function() {
+  describe(`orbit-db - Create Custom Database Type (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb

@@ -12,7 +12,7 @@ const {
   stopIpfs,
   testAPIs,
   connectPeers,
-  waitForPeers,
+  waitForPeers
 } = require('./utils')
 
 const dbPath1 = './orbitdb/tests/counters/peer1'
@@ -21,7 +21,7 @@ const ipfsPath1 = './orbitdb/tests/counters/peer1/ipfs'
 const ipfsPath2 = './orbitdb/tests/counters/peer2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Counters (${API})`, function() {
+  describe(`orbit-db - Counters (${API})`, function () {
     this.timeout(config.timeout)
 
     let orbitdb1, orbitdb2
@@ -41,17 +41,13 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if (orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfsd1) { await stopIpfs(ipfsd1) }
 
-      if (ipfsd2)
-        await stopIpfs(ipfsd2)
+      if (ipfsd2) { await stopIpfs(ipfsd2) }
     })
 
     beforeEach(async () => {
@@ -60,14 +56,12 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     afterEach(async () => {
-      if (orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
     })
 
-    describe('counters', function() {
+    describe('counters', function () {
       let address
 
       it('creates and opens a database', async () => {
@@ -104,7 +98,7 @@ Object.keys(testAPIs).forEach(API => {
             write: [
               orbitdb1.identity.publicKey,
               orbitdb2.identity.publicKey
-            ],
+            ]
           }
         }
 

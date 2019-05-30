@@ -5,7 +5,7 @@ const databases = [
     tryInsert: (db) => db.add('hello'),
     query: (db) => db.iterator({ limit: -1 }).collect(),
     getTestValue: (db) => db.iterator({ limit: -1 }).collect()[0].payload.value,
-    expectedValue: 'hello',
+    expectedValue: 'hello'
   },
   {
     type: 'feed',
@@ -13,7 +13,7 @@ const databases = [
     tryInsert: (db) => db.add('hello'),
     query: (db) => db.iterator({ limit: -1 }).collect(),
     getTestValue: (db) => db.iterator({ limit: -1 }).collect()[0].payload.value,
-    expectedValue: 'hello',
+    expectedValue: 'hello'
   },
   {
     type: 'key-value',
@@ -21,15 +21,15 @@ const databases = [
     tryInsert: (db) => db.set('one', 'hello'),
     query: (db) => [],
     getTestValue: (db) => db.get('one'),
-    expectedValue: 'hello',
+    expectedValue: 'hello'
   },
   {
     type: 'documents',
     create: (orbitdb, name, options) => orbitdb.docstore(name, options),
-    tryInsert: (db) => db.put({ _id: 'hello world', doc: 'all the things'}),
+    tryInsert: (db) => db.put({ _id: 'hello world', doc: 'all the things' }),
     query: (db) => [],
     getTestValue: (db) => db.get('hello world'),
-    expectedValue: [{ _id: 'hello world', doc: 'all the things'}],
+    expectedValue: [{ _id: 'hello world', doc: 'all the things' }]
   },
   {
     type: 'counter',
@@ -37,8 +37,8 @@ const databases = [
     tryInsert: (db) => db.inc(8),
     query: (db) => [],
     getTestValue: (db) => db.value,
-    expectedValue: 8,
-  },
+    expectedValue: 8
+  }
 ]
 
 module.exports = databases

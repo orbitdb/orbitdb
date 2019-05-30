@@ -7,8 +7,7 @@ const userId = 1
 const creatures = ['🐙', '🐬', '🐋', '🐠', '🐡', '🦀', '🐢', '🐟', '🐳']
 
 const output = (user) => {
-  if (!user)
-    return
+  if (!user) { return }
 
   let output = ``
   output += `----------------------\n`
@@ -21,14 +20,14 @@ const output = (user) => {
   console.log(output)
 }
 
-console.log("Starting...")
+console.log('Starting...')
 
-const ipfs = new IPFS({ 
+const ipfs = new IPFS({
   repo: './orbitdb/examples/ipfs',
   start: true,
   EXPERIMENTAL: {
-    pubsub: true,
-  },
+    pubsub: true
+  }
 })
 
 ipfs.on('error', (err) => console.error(err))
@@ -63,6 +62,6 @@ ipfs.on('ready', async () => {
     output(user)
   }
 
-  console.log("Starting update loop...")
+  console.log('Starting update loop...')
   setInterval(query, 1000)
 })

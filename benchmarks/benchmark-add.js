@@ -14,19 +14,19 @@ let lastTenSeconds = 0
 // Main loop
 const queryLoop = async (db) => {
   await db.add(totalQueries)
-  totalQueries ++
-  lastTenSeconds ++
-  queriesPerSecond ++
+  totalQueries++
+  lastTenSeconds++
+  queriesPerSecond++
   setImmediate(() => queryLoop(db))
 }
 
 // Start
-console.log("Starting IPFS daemon...")
+console.log('Starting IPFS daemon...')
 
 const repoConf = {
   storageBackends: {
-    blocks: DatastoreLevel,
-  },
+    blocks: DatastoreLevel
+  }
 }
 
 const ipfs = new IPFS({
@@ -35,8 +35,8 @@ const ipfs = new IPFS({
   EXPERIMENTAL: {
     pubsub: false,
     sharding: false,
-    dht: false,
-  },
+    dht: false
+  }
 })
 
 ipfs.on('error', (err) => console.error(err))
@@ -44,18 +44,17 @@ ipfs.on('error', (err) => console.error(err))
 ipfs.on('ready', async () => {
   const run = async () => {
     try {
-      const orbit = await OrbitDB.createInstance(ipfs,{ directory: './orbitdb/benchmarks' })
+      const orbit = await OrbitDB.createInstance(ipfs, { directory: './orbitdb/benchmarks' })
       const db = await orbit.eventlog('orbit-db.benchmark', {
-        replicate: false,
+        replicate: false
       })
 
       // Metrics output
       setInterval(() => {
-        seconds ++
-        if(seconds % 10 === 0) {
-          console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
-          if(lastTenSeconds === 0)
-            throw new Error("Problems!")
+        seconds++
+        if (seconds % 10 === 0) {
+          console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
+          if (lastTenSeconds === 0) { throw new Error('Problems!') }
           lastTenSeconds = 0
         }
         console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Oplog: ${db._oplog.length})`)

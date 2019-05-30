@@ -21,7 +21,7 @@ module.exports = {
         webRTCStar: {
           Enabled: false
         }
-      },
+      }
     }
   },
   daemon1: {
@@ -43,8 +43,8 @@ module.exports = {
         webRTCStar: {
           Enabled: false
         }
-      },
-    },
+      }
+    }
   },
   daemon2: {
     EXPERIMENTAL: {
@@ -65,7 +65,7 @@ module.exports = {
         webRTCStar: {
           Enabled: false
         }
-      },
-    },
+      }
+    }
   }
 }

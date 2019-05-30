@@ -12,14 +12,14 @@ let lastTenSeconds = 0
 // Main loop
 const queryLoop = async (db) => {
   await db.add(totalQueries)
-  totalQueries ++
-  lastTenSeconds ++
-  queriesPerSecond ++
+  totalQueries++
+  lastTenSeconds++
+  queriesPerSecond++
   setImmediate(() => queryLoop(db))
 }
 
 // Start
-console.log("Starting...")
+console.log('Starting...')
 
 // Make sure you have a local IPFS daemon running!
 const ipfs = IPFS('127.0.0.1')
@@ -28,16 +28,15 @@ const run = async () => {
   try {
     const orbit = await OrbitDB.createInstance(ipfs, { directory: './orbitdb/benchmarks' })
     const db = await orbit.eventlog('orbit-db.benchmark', {
-      replicate: false,
+      replicate: false
     })
 
     // Metrics output
     setInterval(() => {
-      seconds ++
-      if(seconds % 10 === 0) {
-        console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
-        if(lastTenSeconds === 0)
-          throw new Error("Problems!")
+      seconds++
+      if (seconds % 10 === 0) {
+        console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
+        if (lastTenSeconds === 0) { throw new Error('Problems!') }
         lastTenSeconds = 0
       }
       console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Oplog: ${db._oplog.length})`)

@@ -12,7 +12,7 @@ const {
   stopIpfs,
   testAPIs,
   connectPeers,
-  waitForPeers,
+  waitForPeers
 } = require('./utils')
 
 const dbPath1 = './orbitdb/tests/replicate-automatically/1'
@@ -21,7 +21,7 @@ const ipfsPath1 = './orbitdb/tests/replicate-automatically/1/ipfs'
 const ipfsPath2 = './orbitdb/tests/replicate-automatically/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Automatic Replication (${API})`, function() {
+  describe(`orbit-db - Automatic Replication (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -45,17 +45,13 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if(orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfsd1) { await stopIpfs(ipfsd1) }
 
-      if (ipfs2)
-        await stopIpfs(ipfsd2)
+      if (ipfs2) { await stopIpfs(ipfsd2) }
     })
 
     beforeEach(async () => {
@@ -85,8 +81,7 @@ Object.keys(testAPIs).forEach(API => {
       let timer
 
       // Create the entries in the first database
-      for (let i = 0; i < entryCount; i ++)
-        entryArr.push(i)
+      for (let i = 0; i < entryCount; i++) { entryArr.push(i) }
 
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
@@ -120,8 +115,7 @@ Object.keys(testAPIs).forEach(API => {
       let timer
 
       // Create the entries in the first database
-      for (let i = 0; i < entryCount; i ++)
-        entryArr.push(i)
+      for (let i = 0; i < entryCount; i++) { entryArr.push(i) }
 
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 

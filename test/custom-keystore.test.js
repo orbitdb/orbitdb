@@ -11,14 +11,14 @@ const {
   stopIpfs,
   testAPIs,
   CustomTestKeystore,
-  databases,
+  databases
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/customKeystore'
 const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
+  describe(`orbit-db - Use a Custom Keystore (${API})`, function () {
     this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1
@@ -36,14 +36,12 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
-    describe('allows orbit to use a custom keystore with different store types', function() {
+    describe('allows orbit to use a custom keystore with different store types', function () {
       databases.forEach(async (database) => {
         it(database.type + ' allows custom keystore', async () => {
           const db1 = await database.create(orbitdb1, 'custom-keystore')
@@ -56,13 +54,13 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('allows a custom keystore to be used with different store and write permissions', function() {
+    describe('allows a custom keystore to be used with different store and write permissions', function () {
       databases.forEach(async (database) => {
         it(database.type + ' allows custom keystore', async () => {
           const options = {
             accessController: {
               // Set write access for both clients
-              write: [orbitdb1.identity.publicKey],
+              write: [orbitdb1.identity.publicKey]
             }
           }
 

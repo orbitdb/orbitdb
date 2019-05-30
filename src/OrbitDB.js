@@ -1,5 +1,6 @@
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
@@ -15,13 +16,23 @@ const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
+const isNode = require('is-node')
+const Storage = require('orbit-db-storage-adapter')
 
-const Storage = require('../orbit-db-storage-adapter')
-// Including this as a default storage layer for now
-const leveldown = require('leveldown')
+let storage
+if (isNode) {
+  const leveldown = require('leveldown')
+  storage = Storage(leveldown)
+  storage.preCreate = async (directory, options) => {
+    fs.mkdirSync(directory, { recursive: true })
+  }
+} else {
+  const leveljs = require('level-js')
+  storage = Storage(leveljs)
+}
 
 const Logger = require('logplease')
-const logger = Logger.create("orbit-db")
+const logger = Logger.create('orbit-db')
 Logger.setLogLevel('ERROR')
 
 // Mapping for 'database type' -> Class
@@ -30,16 +41,14 @@ let databaseTypes = {
   'eventlog': EventStore,
   'feed': FeedStore,
   'docstore': DocumentStore,
-  'keyvalue': KeyValueStore,
+  'keyvalue': KeyValueStore
 }
 
 class OrbitDB {
-  constructor(ipfs, identity, options = {}) {
-    if (!isDefined(ipfs))
-      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+  constructor (ipfs, identity, options = {}) {
+    if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
-    if (!isDefined(identity))
-      throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+    if (!isDefined(identity)) { throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     this._ipfs = ipfs
     this.identity = identity
@@ -59,27 +68,27 @@ class OrbitDB {
   }
 
   static async createInstance (ipfs, options = {}) {
-    if (!isDefined(ipfs))
-      throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+    if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const storage = Object.assign({}, options.storage, {
-      keystore: await Storage.create(leveldown, path.join(directory, id, '/keystore')),
-      cache: await Storage.create(leveldown, path.join(directory, id, '/cache'))
-    })
+    const defaultStorage = {
+      keystore: await storage.createStore(path.join(directory, id, '/keystore')),
+      cache: await storage.createStore(path.join(directory, id, '/cache'))
+    }
+    const storageOptions = Object.assign({}, options.storage, defaultStorage)
 
-    const keystore = options.keystore || Keystore.create(storage.keystore)
+    const keystore = options.keystore || new Keystore(storageOptions.keystore)
     const identity = options.identity || await Identities.createIdentity({
       id: options.id || id,
-      keystore: keystore,
+      keystore: keystore
     })
 
     options = Object.assign({}, options, {
-      peerId: id ,
+      peerId: id,
       directory: directory,
       keystore: keystore,
-      storage: storage
+      storage: storageOptions
     })
 
     return new OrbitDB(ipfs, identity, options)
@@ -124,13 +133,11 @@ class OrbitDB {
   }
 
   async disconnect () {
-    //close Keystore
-    if (this.storage.keystore.close)
-      await this.storage.keystore.close()
+    // close Keystore
+    if (this.storage.keystore.close) { await this.storage.keystore.close() }
 
-    //close Cache
-    if (this.storage.cache.close)
-      await this.storage.cache.close()
+    // close Cache
+    if (this.storage.cache.close) { await this.storage.cache.close() }
 
     // Close all open databases
     const databases = Object.values(this.stores)
@@ -167,21 +174,20 @@ class OrbitDB {
     // Get the type -> class mapping
     const Store = databaseTypes[type]
 
-    if (!Store)
-      throw new Error(`Invalid database type '${type}'`)
+    if (!Store) { throw new Error(`Invalid database type '${type}'`) }
 
     let accessController
     if (options.accessControllerAddress) {
       accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
-    // const cache = await this._loadCache(this.directory, address)
+    const cache = await this._loadCache(this.directory, address)
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
       keystore: this.keystore,
       cache: this.cache,
-      onClose: this._onClose.bind(this),
+      onClose: this._onClose.bind(this)
     })
     const identity = options.identity || this.identity
 
@@ -194,16 +200,15 @@ class OrbitDB {
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
-    if(opts.replicate && this._pubsub)
-      this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this))
+    if (opts.replicate && this._pubsub) { this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
 
     return store
   }
 
   // Callback for local writes to the database. We the update to pubsub.
   _onWrite (address, entry, heads) {
-    if(!heads) throw new Error("'heads' not defined")
-    if(this._pubsub) this._pubsub.publish(address, heads)
+    if (!heads) throw new Error("'heads' not defined")
+    if (this._pubsub) this._pubsub.publish(address, heads)
   }
 
   // Callback for receiving a message from the network
@@ -238,8 +243,7 @@ class OrbitDB {
       onChannelCreated
     )
 
-    if (getStore(address))
-      getStore(address).events.emit('peer', peer)
+    if (getStore(address)) { getStore(address).events.emit('peer', peer) }
   }
 
   // Callback when database was closed
@@ -254,15 +258,13 @@ class OrbitDB {
     delete this.stores[address]
   }
 
-  async _determineAddress(name, type, options = {}, onlyHash) {
-    if (!OrbitDB.isValidType(type))
-      throw new Error(`Invalid database type '${type}'`)
+  async _determineAddress (name, type, options = {}, onlyHash) {
+    if (!OrbitDB.isValidType(type)) { throw new Error(`Invalid database type '${type}'`) }
 
-    if (OrbitDBAddress.isValid(name))
-      throw new Error(`Given database name is an address. Please give only the name of the database!`)
+    if (OrbitDBAddress.isValid(name)) { throw new Error(`Given database name is an address. Please give only the name of the database!`) }
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { name: name , type: 'ipfs' }, options.accessController)
+    options.accessController = Object.assign({}, { name: name, type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
@@ -292,13 +294,12 @@ class OrbitDB {
     const dbAddress = await this._determineAddress(name, type, options)
 
     // Load the locally saved database information
-    // const cache = await this._loadCache(directory, dbAddress)
+    const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database locally
     const haveDB = await this._haveLocalData(this.cache, dbAddress)
 
-    if (haveDB && !options.overwrite)
-      throw new Error(`Database '${dbAddress}' already exists!`)
+    if (haveDB && !options.overwrite) { throw new Error(`Database '${dbAddress}' already exists!`) }
 
     // Save the database locally
     await this._addManifestToCache(directory, dbAddress)
@@ -309,7 +310,7 @@ class OrbitDB {
     return this.open(dbAddress, options)
   }
 
-  async determineAddress(name, type, options = {}) {
+  async determineAddress (name, type, options = {}) {
     return this._determineAddress(name, type, options, true)
   }
 
@@ -349,7 +350,7 @@ class OrbitDB {
     const dbAddress = OrbitDBAddress.parse(address)
 
     // Load the locally saved db information
-    // const cache = await this._loadCache(directory, dbAddress)
+    const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database
     const haveDB = await this._haveLocalData(this.cache, dbAddress)
@@ -370,8 +371,7 @@ class OrbitDB {
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
-    if (options.type && manifest.type !== options.type)
-      throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
+    if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
 
     // Save the database locally
     await this._addManifestToCache(directory, dbAddress)
@@ -383,22 +383,13 @@ class OrbitDB {
 
   // Save the database locally
   async _addManifestToCache (directory, dbAddress) {
-    // const cache = await this._loadCache(directory, dbAddress)
     await this.cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 
-  // async _loadCache (directory, dbAddress) {
-  //   let cache
-  //   try {
-  //     cache = await this.cache.load(directory, dbAddress)
-  //   } catch (e) {
-  //     console.log(e)
-  //     logger.error("Couldn't load Cache:", e)
-  //   }
-
-  //   return cache
-  // }
+  async _loadCache (directory, dbAddress) {
+    return this.cache
+  }
 
   /**
    * Check if we have the database, or part of it, saved locally

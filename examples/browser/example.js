@@ -1,25 +1,25 @@
 const creatures = [
-  '🐙', '🐷', '🐬', '🐞', 
+  '🐙', '🐷', '🐬', '🐞',
   '🐈', '🙉', '🐸', '🐓',
   '🐊', '🕷', '🐠', '🐘',
   '🐼', '🐰', '🐶', '🐥'
 ]
 
-const outputHeaderElm = document.getElementById("output-header")
-const outputElm = document.getElementById("output")
-const statusElm = document.getElementById("status")
-const dbnameField = document.getElementById("dbname")
-const dbAddressField = document.getElementById("dbaddress")
-const createButton = document.getElementById("create")
-const openButton = document.getElementById("open")
-const createType = document.getElementById("type")
-const writerText = document.getElementById("writerText")
-const publicCheckbox = document.getElementById("public")
-const readonlyCheckbox = document.getElementById("readonly")
+const outputHeaderElm = document.getElementById('output-header')
+const outputElm = document.getElementById('output')
+const statusElm = document.getElementById('status')
+const dbnameField = document.getElementById('dbname')
+const dbAddressField = document.getElementById('dbaddress')
+const createButton = document.getElementById('create')
+const openButton = document.getElementById('open')
+const createType = document.getElementById('type')
+const writerText = document.getElementById('writerText')
+const publicCheckbox = document.getElementById('public')
+const readonlyCheckbox = document.getElementById('readonly')
 
-function handleError(e) {
+function handleError (e) {
   console.error(e.stack)
-  statusElm.innerHTML = e.message  
+  statusElm.innerHTML = e.message
 }
 
 const main = (IPFS, ORBITDB) => {
@@ -31,39 +31,37 @@ const main = (IPFS, ORBITDB) => {
 
   // If we're building with Webpack, use the injected IPFS module.
   // Otherwise use 'Ipfs' which is exposed by ipfs.min.js
-  if (IPFS)
-    Ipfs = IPFS
+  if (IPFS) { Ipfs = IPFS }
 
   // If we're building with Webpack, use the injected OrbitDB module.
   // Otherwise use 'OrbitDB' which is exposed by orbitdb.min.js
-  if (ORBITDB)
-    OrbitDB = ORBITDB
+  if (ORBITDB) { OrbitDB = ORBITDB }
 
   // Init UI
   openButton.disabled = true
   createButton.disabled = true
-  statusElm.innerHTML = "Starting IPFS..."
+  statusElm.innerHTML = 'Starting IPFS...'
 
   // Create IPFS instance
   const ipfs = new Ipfs({
     repo: '/orbitdb/examples/browser/new/ipfs/0.33.1',
     start: true,
-    preload: { 
+    preload: {
       enabled: false
     },
     EXPERIMENTAL: {
-      pubsub: true,
+      pubsub: true
     },
     config: {
       Addresses: {
         Swarm: [
           // Use IPFS dev signal server
           // '/dns4/star-signal.cloud.ipfs.team/wss/p2p-webrtc-star',
-          '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star',
+          '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
           // Use local signal server
           // '/ip4/0.0.0.0/tcp/9090/wss/p2p-webrtc-star',
         ]
-      },
+      }
     }
   })
 
@@ -71,7 +69,7 @@ const main = (IPFS, ORBITDB) => {
   ipfs.on('ready', async () => {
     openButton.disabled = false
     createButton.disabled = false
-    statusElm.innerHTML = "IPFS Started"
+    statusElm.innerHTML = 'IPFS Started'
     orbitdb = await OrbitDB.createInstance(ipfs)
   })
 
@@ -89,9 +87,9 @@ const main = (IPFS, ORBITDB) => {
     db.events.on('replicate.progress', () => queryAndRender(db))
 
     // Hook up to the load progress event and render the progress
-    let maxTotal = 0, loaded = 0
+    let maxTotal = 0; let loaded = 0
     db.events.on('load.progress', (address, hash, entry, progress, total) => {
-      loaded ++
+      loaded++
       maxTotal = Math.max.apply(null, [maxTotal, progress, 0])
       total = Math.max.apply(null, [progress, maxTotal, total, entry.clock.time, 0])
       statusElm.innerHTML = `Loading database... ${maxTotal} / ${total}`
@@ -125,9 +123,9 @@ const main = (IPFS, ORBITDB) => {
   }
 
   const resetDatabase = async (db) => {
-    writerText.innerHTML = ""
-    outputElm.innerHTML = ""
-    outputHeaderElm.innerHTML = ""
+    writerText.innerHTML = ''
+    outputElm.innerHTML = ''
+    outputHeaderElm.innerHTML = ''
 
     clearInterval(updateInterval)
 
@@ -151,16 +149,16 @@ const main = (IPFS, ORBITDB) => {
 
       db = await orbitdb.open(name, {
         // If database doesn't exist, create it
-        create: true, 
+        create: true,
         overwrite: true,
-        // Load only the local version of the database, 
+        // Load only the local version of the database,
         // don't load the latest from the network yet
         localOnly: false,
         type: type,
         // If "Public" flag is set, allow anyone to write to the database,
         // otherwise only the creator of the database can write
         accessController: {
-          write: publicAccess ? ['*'] : [orbitdb.identity.publicKey],
+          write: publicAccess ? ['*'] : [orbitdb.identity.publicKey]
         }
       })
 
@@ -182,7 +180,7 @@ const main = (IPFS, ORBITDB) => {
     createButton.disabled = true
 
     try {
-      statusElm.innerHTML = "Connecting to peers..."
+      statusElm.innerHTML = 'Connecting to peers...'
       db = await orbitdb.open(address, { sync: true })
       await load(db, 'Loading database...')
 
@@ -199,17 +197,17 @@ const main = (IPFS, ORBITDB) => {
   }
 
   const update = async (db) => {
-    count ++
+    count++
 
     const time = new Date().toISOString()
     const idx = Math.floor(Math.random() * creatures.length)
     const creature = creatures[idx]
 
     if (db.type === 'eventlog') {
-      const value = "GrEEtinGs from " + orbitdb.id + " " + creature + ": Hello #" + count + " (" + time + ")"
+      const value = 'GrEEtinGs from ' + orbitdb.id + ' ' + creature + ': Hello #' + count + ' (' + time + ')'
       await db.add(value)
     } else if (db.type === 'feed') {
-      const value = "GrEEtinGs from " + orbitdb.id + " " + creature + ": Hello #" + count + " (" + time + ")"
+      const value = 'GrEEtinGs from ' + orbitdb.id + ' ' + creature + ': Hello #' + count + ' (' + time + ')'
       await db.add(value)
     } else if (db.type === 'docstore') {
       const value = { _id: 'peer1', avatar: creature, updated: time }
@@ -219,23 +217,12 @@ const main = (IPFS, ORBITDB) => {
     } else if (db.type === 'counter') {
       await db.inc(1)
     } else {
-      throw new Error("Unknown datatbase type: ", db.type)
+      throw new Error('Unknown datatbase type: ', db.type)
     }
   }
 
   const query = (db) => {
-    if (db.type === 'eventlog')
-      return db.iterator({ limit: 5 }).collect()
-    else if (db.type === 'feed')
-      return db.iterator({ limit: 5 }).collect()
-    else if (db.type === 'docstore')
-      return db.get('peer1')
-    else if (db.type === 'keyvalue')
-      return db.get('mykey')
-    else if (db.type === 'counter')
-      return db.value
-    else
-      throw new Error("Unknown datatbase type: ", db.type)
+    if (db.type === 'eventlog') { return db.iterator({ limit: 5 }).collect() } else if (db.type === 'feed') { return db.iterator({ limit: 5 }).collect() } else if (db.type === 'docstore') { return db.get('peer1') } else if (db.type === 'keyvalue') { return db.get('mykey') } else if (db.type === 'counter') { return db.value } else { throw new Error('Unknown datatbase type: ', db.type) }
   }
 
   const queryAndRender = async (db) => {
@@ -245,8 +232,8 @@ const main = (IPFS, ORBITDB) => {
     const result = query(db)
 
     if (dbType !== db.type || dbAddress !== db.address) {
-      dbType = db.type;
-      dbAddress = db.address;
+      dbType = db.type
+      dbAddress = db.address
 
       outputHeaderElm.innerHTML = `
         <h2>${dbType.toUpperCase()}</h2>
@@ -263,11 +250,11 @@ const main = (IPFS, ORBITDB) => {
       <div id="results">
         <div>
         ${result && Array.isArray(result) && result.length > 0 && db.type !== 'docstore' && db.type !== 'keyvalue'
-          ? result.slice().reverse().map((e) => e.payload.value).join('<br>\n')
-          : db.type === 'docstore'
-            ? JSON.stringify(result, null, 2)
-            : result ? result.toString().replace('"', '').replace('"', '') : result
-        }
+    ? result.slice().reverse().map((e) => e.payload.value).join('<br>\n')
+    : db.type === 'docstore'
+      ? JSON.stringify(result, null, 2)
+      : result ? result.toString().replace('"', '').replace('"', '') : result
+}
         </div>
       </div>
     `
@@ -277,5 +264,4 @@ const main = (IPFS, ORBITDB) => {
   createButton.addEventListener('click', createDatabase)
 }
 
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-  module.exports = main
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = main }

@@ -11,7 +11,7 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const last = arr => arr[arr.length - 1]
@@ -20,7 +20,7 @@ const dbPath = './orbitdb/tests/eventlog'
 const ipfsPath = './orbitdb/tests/eventlog/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Log Database (${API})`, function() {
+  describe(`orbit-db - Log Database (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, db
@@ -35,11 +35,9 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
     describe('Eventlog', function () {
@@ -97,7 +95,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('Iterator', function() {
+    describe('Iterator', function () {
       let hashes = []
       const itemCount = 5
 
@@ -107,7 +105,7 @@ Object.keys(testAPIs).forEach(API => {
         hashes = await mapSeries([0, 1, 2, 3, 4], (i) => db.add('hello' + i))
       })
 
-      describe('Defaults', function() {
+      describe('Defaults', function () {
         it('returns an iterator', () => {
           const iter = db.iterator()
           const next = iter.next().value
@@ -128,8 +126,7 @@ Object.keys(testAPIs).forEach(API => {
           const iter = db.iterator({ limit: -1 })
           let messages = []
 
-          for(let i of iter)
-            messages.push(i.key)
+          for (let i of iter) { messages.push(i.key) }
 
           assert.equal(messages.length, hashes.length)
         })
@@ -147,14 +144,14 @@ Object.keys(testAPIs).forEach(API => {
           const amount = 3
           const iter = db.iterator({ limit: amount })
           let i = hashes.length - amount
-          for(let item of iter) {
+          for (let item of iter) {
             assert.equal(item.payload.value, 'hello' + i)
-            i ++
+            i++
           }
         })
       })
 
-      describe('Collect', function() {
+      describe('Collect', function () {
         it('returns all items', () => {
           const messages = db.iterator({ limit: -1 }).collect()
           assert.equal(messages.length, hashes.length)
@@ -173,7 +170,7 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('Options: limit', function() {
+      describe('Options: limit', function () {
         it('returns 1 item when limit is 0', () => {
           const iter = db.iterator({ limit: 0 })
           const first = iter.next().value
@@ -231,8 +228,8 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('Option: ranges', function() {
-        describe('gt & gte', function() {
+      describe('Option: ranges', function () {
+        describe('gt & gte', function () {
           it('returns 1 item when gte is the head', () => {
             const messages = db.iterator({ gte: last(hashes), limit: -1 })
               .collect()
@@ -279,7 +276,7 @@ Object.keys(testAPIs).forEach(API => {
           })
 
           it('returns items when gt is defined', () => {
-            const messages = db.iterator({ limit: -1})
+            const messages = db.iterator({ limit: -1 })
               .collect()
               .map((e) => e.hash)
 
@@ -295,7 +292,7 @@ Object.keys(testAPIs).forEach(API => {
           })
         })
 
-        describe('lt & lte', function() {
+        describe('lt & lte', function () {
           it('returns one item after head when lt is the head', () => {
             const messages = db.iterator({ lt: last(hashes) })
               .collect()

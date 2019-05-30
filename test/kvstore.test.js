@@ -10,14 +10,14 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/kvstore'
 const ipfsPath = './orbitdb/tests/kvstore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Key-Value Database (${API})`, function() {
+  describe(`orbit-db - Key-Value Database (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, db
@@ -32,11 +32,9 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
     beforeEach(async () => {

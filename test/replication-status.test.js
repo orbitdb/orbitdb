@@ -15,7 +15,7 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath1 = './orbitdb/tests/create-open/1'
@@ -23,7 +23,7 @@ const dbPath2 = './orbitdb/tests/create-open/2'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication Status (${API})`, function() {
+  describe(`orbit-db - Replication Status (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2, db, address
@@ -42,14 +42,11 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if(orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
     it('has correct initial state', async () => {

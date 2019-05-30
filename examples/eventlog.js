@@ -5,14 +5,14 @@ const OrbitDB = require('../src/OrbitDB')
 
 const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
 
-console.log("Starting...")
+console.log('Starting...')
 
-const ipfs = new IPFS({ 
+const ipfs = new IPFS({
   repo: './orbitdb/examples/ipfs',
   start: true,
   EXPERIMENTAL: {
-    pubsub: true,
-  },
+    pubsub: true
+  }
 })
 
 ipfs.on('error', (err) => console.error(err))

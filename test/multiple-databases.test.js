@@ -12,7 +12,7 @@ const {
   stopIpfs,
   connectPeers,
   waitForPeers,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath1 = './orbitdb/tests/multiple-databases/1'
@@ -25,25 +25,25 @@ const databaseInterfaces = [
     name: 'logdb',
     open: async (orbitdb, address, options) => await orbitdb.log(address, options),
     write: async (db, index) => await db.add('hello' + index),
-    query: (db) => db.iterator({ limit: -1 }).collect().length,
+    query: (db) => db.iterator({ limit: -1 }).collect().length
   },
   {
     name: 'feed',
     open: async (orbitdb, address, options) => await orbitdb.feed(address, options),
     write: async (db, index) => await db.add('hello' + index),
-    query: (db) => db.iterator({ limit: -1 }).collect().length,
+    query: (db) => db.iterator({ limit: -1 }).collect().length
   },
   {
     name: 'key-value',
     open: async (orbitdb, address, options) => await orbitdb.keyvalue(address, options),
     write: async (db, index) => await db.put('hello', index),
-    query: (db) => db.get('hello'),
+    query: (db) => db.get('hello')
   },
   {
     name: 'counterdb',
     open: async (orbitdb, address, options) => await orbitdb.counter(address, options),
     write: async (db, index) => await db.inc(1),
-    query: (db) => db.value,
+    query: (db) => db.value
   },
   {
     name: 'documents',
@@ -52,12 +52,12 @@ const databaseInterfaces = [
     query: (db) => {
       const docs = db.get('hello')
       return docs ? docs[0].testing : 0
-    },
-  },
+    }
+  }
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Multiple Databases (${API})`, function() {
+  describe(`orbit-db - Multiple Databases (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -85,17 +85,13 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if(orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfsd1) { await stopIpfs(ipfsd1) }
 
-      if (ipfsd2)
-        await stopIpfs(ipfsd2)
+      if (ipfsd2) { await stopIpfs(ipfsd2) }
     })
 
     beforeEach(async () => {
@@ -106,7 +102,7 @@ Object.keys(testAPIs).forEach(API => {
         orbitdb2.identity.publicKey
       ],
 
-      console.log("Creating databases and waiting for peers to connect")
+      console.log('Creating databases and waiting for peers to connect')
 
       // Open the databases on the first node
       options = Object.assign({}, options, { create: true })
@@ -130,15 +126,13 @@ Object.keys(testAPIs).forEach(API => {
       await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
       await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
 
-      console.log("Peers connected")
+      console.log('Peers connected')
     })
 
     afterEach(async () => {
-      for (let db of remoteDatabases)
-        await db.drop()
+      for (let db of remoteDatabases) { await db.drop() }
 
-      for (let db of localDatabases)
-        await db.drop()
+      for (let db of localDatabases) { await db.drop() }
     })
 
     it('replicates multiple open databases', async () => {
@@ -146,8 +140,7 @@ Object.keys(testAPIs).forEach(API => {
       const entryArr = []
 
       // Create an array that we use to create the db entries
-      for (let i = 1; i < entryCount + 1; i ++)
-        entryArr.push(i)
+      for (let i = 1; i < entryCount + 1; i++) { entryArr.push(i) }
 
       // Result state,
       // we count how many times 'replicated' event was fired per db
@@ -164,7 +157,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       // Write entries to each database
-      console.log("Writing to databases")
+      console.log('Writing to databases')
       for (let index = 0; index < databaseInterfaces.length; index++) {
         const dbInterface = databaseInterfaces[index]
         const db = localDatabases[index]
@@ -177,7 +170,7 @@ Object.keys(testAPIs).forEach(API => {
         return remoteDatabases.every(db => db._oplog.length === entryCount)
       }
 
-      console.log("Waiting for replication to finish")
+      console.log('Waiting for replication to finish')
 
       return new Promise((resolve, reject) => {
         const interval = setInterval(() => {

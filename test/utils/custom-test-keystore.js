@@ -12,18 +12,18 @@ class CustomTestKeystore {
   }
 
   hasKey () {
-    return this.key !== undefined ? true : false
+    return this.key !== undefined
   }
 
   createKey (id) {
     const key = ec.genKeyPair()
     const keyPair = {
-      public:  {
+      public: {
         marshal: () => key.getPublic('hex')
       },
       priv: key.getPrivate('hex'),
       privEnc: 'hex',
-      pubEnc: 'hex',
+      pubEnc: 'hex'
     }
 
     return keyPair
@@ -40,7 +40,7 @@ class CustomTestKeystore {
   verify (signature, publicKey, data) {
     return Promise.resolve(true)
   }
-    
+
   getPublic (key) {
     return key.public.marshal()
   }

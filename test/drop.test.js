@@ -11,14 +11,14 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/drop'
 const ipfsPath = './orbitdb/tests/drop/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Drop Database (${API})`, function() {
+  describe(`orbit-db - Drop Database (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb, db, address
@@ -34,16 +34,14 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb)
-        await orbitdb.stop()
+      if (orbitdb) { await orbitdb.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
 
       rmrf.sync(dbPath)
     })
 
-    describe('Drop', function() {
+    describe('Drop', function () {
       before(async () => {
         db = await orbitdb.create('first', 'feed')
         localDataPath = path.join(dbPath)

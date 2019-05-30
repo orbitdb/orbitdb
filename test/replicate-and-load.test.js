@@ -12,7 +12,7 @@ const {
   stopIpfs,
   testAPIs,
   connectPeers,
-  waitForPeers,
+  waitForPeers
 } = require('./utils')
 
 const dbPath1 = './orbitdb/tests/replicate-and-load/1'
@@ -21,7 +21,7 @@ const ipfsPath1 = './orbitdb/tests/replicate-and-load/1/ipfs'
 const ipfsPath2 = './orbitdb/tests/replicate-and-load/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replicate and Load (${API})`, function() {
+  describe(`orbit-db - Replicate and Load (${API})`, function () {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -45,20 +45,16 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if(orbitdb2)
-        await orbitdb2.stop()
+      if (orbitdb2) { await orbitdb2.stop() }
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfsd1) { await stopIpfs(ipfsd1) }
 
-      if (ipfsd2)
-        await stopIpfs(ipfsd2)
+      if (ipfsd2) { await stopIpfs(ipfsd2) }
     })
 
-    describe('two peers', function() {
+    describe('two peers', function () {
       // Opens two databases db1 and db2 and gives write-access to both of the peers
       const openDatabases1 = async (options) => {
         // Set write access for both clients
@@ -93,10 +89,10 @@ Object.keys(testAPIs).forEach(API => {
 
         assert.equal(db1.address.toString(), db2.address.toString())
 
-        console.log("Waiting for peers...")
+        console.log('Waiting for peers...')
         await waitForPeers(ipfs1, [orbitdb2.id], db1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
-        console.log("Found peers")
+        console.log('Found peers')
       })
 
       afterEach(async () => {
@@ -109,8 +105,7 @@ Object.keys(testAPIs).forEach(API => {
         const entryArr = []
         let timer
 
-        for (let i = 0; i < entryCount; i ++)
-          entryArr.push(i)
+        for (let i = 0; i < entryCount; i++) { entryArr.push(i) }
 
         await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
@@ -126,14 +121,13 @@ Object.keys(testAPIs).forEach(API => {
               db2 = null
 
               try {
-
                 // Set write access for both clients
                 let options = {
                   accessController: {
                     write: [
                       orbitdb1.identity.publicKey,
                       orbitdb2.identity.publicKey
-                    ],
+                    ]
                   }
                 }
 

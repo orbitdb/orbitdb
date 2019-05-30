@@ -12,7 +12,7 @@ let metrics2 = {
   totalQueries: 0,
   seconds: 0,
   queriesPerSecond: 0,
-  lastTenSeconds: 0,
+  lastTenSeconds: 0
 }
 
 const ipfsConf = {
@@ -26,14 +26,14 @@ const ipfsConf = {
     MDNS: {
       Enabled: true,
       Interval: 0
-    },
-  },
+    }
+  }
 }
 
 const repoConf = {
   storageBackends: {
-    blocks: DatastoreLevel,
-  },
+    blocks: DatastoreLevel
+  }
 }
 
 const defaultConfig = Object.assign({}, {
@@ -41,7 +41,7 @@ const defaultConfig = Object.assign({}, {
   EXPERIMENTAL: {
     pubsub: true,
     sharding: false,
-    dht: false,
+    dht: false
   },
   config: ipfsConf
 })
@@ -52,21 +52,21 @@ const conf2 = Object.assign({}, defaultConfig, {
 
 // Metrics output function
 const outputMetrics = (name, db, metrics) => {
-    metrics.seconds ++
-    console.log(`[${name}] ${metrics.queriesPerSecond} queries per second, ${metrics.totalQueries} queries in ${metrics.seconds} seconds (Oplog: ${db._oplog.length})`)
-    metrics.queriesPerSecond = 0
+  metrics.seconds++
+  console.log(`[${name}] ${metrics.queriesPerSecond} queries per second, ${metrics.totalQueries} queries in ${metrics.seconds} seconds (Oplog: ${db._oplog.length})`)
+  metrics.queriesPerSecond = 0
 
-    if(metrics.seconds % 10 === 0) {
-      console.log(`[${name}] --> Average of ${metrics.lastTenSeconds/10} q/s in the last 10 seconds`)
-      metrics.lastTenSeconds = 0
-    }
+  if (metrics.seconds % 10 === 0) {
+    console.log(`[${name}] --> Average of ${metrics.lastTenSeconds / 10} q/s in the last 10 seconds`)
+    metrics.lastTenSeconds = 0
+  }
 }
 
 const database = 'benchmark-replication'
 const updateCount = 20000
 
 // Start
-console.log("Starting IPFS daemons...")
+console.log('Starting IPFS daemons...')
 
 pMapSeries([conf2], d => startIpfs('js-ipfs', d))
   .then(async ([ipfs2]) => {
@@ -97,10 +97,10 @@ pMapSeries([conf2], d => startIpfs('js-ipfs', d))
               metrics2.lastTenSeconds += metrics2.queriesPerSecond
               prevCount = metrics2.totalQueries
 
-              outputMetrics("READ", db2, metrics2)
+              outputMetrics('READ', db2, metrics2)
 
               if (db2._oplog.length === updateCount) {
-                console.log("Finished")
+                console.log('Finished')
                 process.exit(0)
               }
             } catch (e) {

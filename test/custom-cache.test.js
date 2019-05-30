@@ -6,7 +6,7 @@ const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const CustomCache = require('orbit-db-cache')
 const localdown = require('localstorage-down')
-const storage = require("orbit-db-storage-adapter")(localdown)
+const storage = require('orbit-db-storage-adapter')(localdown)
 
 // Include test utilities
 const {
@@ -14,20 +14,20 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-  databases,
+  databases
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/customKeystore'
 const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Use a Custom Cache (${API})`, function() {
+  describe(`orbit-db - Use a Custom Cache (${API})`, function () {
     this.timeout(20000)
 
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      const store = await storage.createStore("local")
+      const store = await storage.createStore('local')
       const cache = new CustomCache(store)
 
       config.daemon1.repo = ipfsPath
@@ -42,14 +42,12 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
+      if (orbitdb1) { await orbitdb1.stop() }
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfsd) { await stopIpfs(ipfsd) }
     })
 
-    describe('allows orbit to use a custom cache with different store types', function() {
+    describe('allows orbit to use a custom cache with different store types', function () {
       databases.forEach(async (database) => {
         it(database.type + ' allows custom keystore', async () => {
           const db1 = await database.create(orbitdb1, 'custom-keystore')
