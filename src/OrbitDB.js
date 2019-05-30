@@ -260,15 +260,14 @@ class OrbitDB {
 
   async _determineAddress (name, type, options = {}, onlyHash) {
     if (!OrbitDB.isValidType(type)) { throw new Error(`Invalid database type '${type}'`) }
-
     if (OrbitDBAddress.isValid(name)) { throw new Error(`Given database name is an address. Please give only the name of the database!`) }
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { name: name, type: 'ipfs' }, options.accessController)
+    options.accessController = Object.assign({}, { name: name , type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, onlyHash)
+    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, options)
 
     // Create the database address
     return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
@@ -310,8 +309,9 @@ class OrbitDB {
     return this.open(dbAddress, options)
   }
 
-  async determineAddress (name, type, options = {}) {
-    return this._determineAddress(name, type, options, true)
+  async determineAddress(name, type, options = {}) {
+    const opts = Object.assign({}, { onlyHash: true }, options)
+    return this._determineAddress(name, type, opts)
   }
 
   /*

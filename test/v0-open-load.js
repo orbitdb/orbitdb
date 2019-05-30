@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Open & Load', function () {
       before(async () => {
-        db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db')
+        db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', {accessController: { type: 'legacy-ipfs', skipManifest: true }})
         await db.load()
       })
 
@@ -82,7 +82,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('database has the correct access-controller', async () => {
         assert.equal(db.options.accessControllerAddress, '/ipfs/Qmc3S7aMSmH8oGmx7Zdp8UxVWcDyCq5o2H9qYFgT3GW6nM')
-        assert.equal(db.access.type, 'ipfs')
+        assert.equal(db.access.type, 'legacy-ipfs')
         assert.strictEqual(db.access.write[0], '04b54f6ef529cd2dd2f9c6897a382c492222d42e57826269a38101ffe752aa07260ecd092a970d7eef08c4ddae2b7006ee25f07e4ab62fa5262ae3b51fdea29f78')
       })
 
