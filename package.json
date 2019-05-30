@@ -15,6 +15,7 @@
   "dependencies": {
     "cids": "^0.5.7",
     "ipfs-pubsub-1on1": "~0.0.4",
+    "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
@@ -24,11 +25,12 @@
     "orbit-db-docstore": "~1.5.0",
     "orbit-db-eventstore": "~1.5.0",
     "orbit-db-feedstore": "~1.5.0",
-    "orbit-db-identity-provider": "orbitdb/orbit-db-identity-provider#fix/persistent-store",
+    "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#fix/persistent-store",
     "orbit-db-io": "~0.0.1",
-    "orbit-db-keystore": "orbitdb/orbit-db-keystore#fix/persistent-leveldb-connection",
+    "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#fix/persistent-leveldb-connection",
     "orbit-db-kvstore": "~1.5.0",
     "orbit-db-pubsub": "~0.5.5",
+    "orbit-db-storage-adapter": "^0.4.0",
     "orbit-db-store": "orbitdb/orbit-db-store#fix/store-performance"
   },
   "devDependencies": {
