@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Open & Load', function () {
       before(async () => {
-        db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', {accessController: { type: 'legacy-ipfs', skipManifest: true }})
+        db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', { accessController: { type: 'legacy-ipfs', skipManifest: true } })
         await db.load()
       })
 

@@ -54,7 +54,7 @@ class OrbitDB {
     this.identity = identity
     this.id = options.peerId
     this._pubsub = options && options.broker
-      ? new options.broker(this._ipfs)
+      ? new options.broker(this._ipfs) // eslint-disable-line
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
@@ -181,7 +181,7 @@ class OrbitDB {
       accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
-    const cache = await this._loadCache(this.directory, address)
+    // const cache = await this._loadCache(this.directory, address)
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
@@ -230,10 +230,10 @@ class OrbitDB {
 
     const getStore = address => this.stores[address]
     const getDirectConnection = peer => this._directConnections[peer]
-    const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel
+    const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel // eslint-disable-line
     const onMessage = (address, heads) => this._onMessage(address, heads)
 
-    const channel = await exchangeHeads(
+    await exchangeHeads(
       this._ipfs,
       address,
       peer,
@@ -263,7 +263,7 @@ class OrbitDB {
     if (OrbitDBAddress.isValid(name)) { throw new Error(`Given database name is an address. Please give only the name of the database!`) }
 
     // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { name: name , type: 'ipfs' }, options.accessController)
+    options.accessController = Object.assign({}, { name: name, type: 'ipfs' }, options.accessController)
     const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
 
     // Save the manifest to IPFS
@@ -293,7 +293,7 @@ class OrbitDB {
     const dbAddress = await this._determineAddress(name, type, options)
 
     // Load the locally saved database information
-    const cache = await this._loadCache(directory, dbAddress)
+    // const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database locally
     const haveDB = await this._haveLocalData(this.cache, dbAddress)
@@ -309,7 +309,7 @@ class OrbitDB {
     return this.open(dbAddress, options)
   }
 
-  async determineAddress(name, type, options = {}) {
+  async determineAddress (name, type, options = {}) {
     const opts = Object.assign({}, { onlyHash: true }, options)
     return this._determineAddress(name, type, opts)
   }
@@ -350,7 +350,7 @@ class OrbitDB {
     const dbAddress = OrbitDBAddress.parse(address)
 
     // Load the locally saved db information
-    const cache = await this._loadCache(directory, dbAddress)
+    // const cache = await this._loadCache(directory, dbAddress)
 
     // Check if we have the database
     const haveDB = await this._haveLocalData(this.cache, dbAddress)
