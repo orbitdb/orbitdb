@@ -8,7 +8,7 @@ const OrbitDB = require('../src/OrbitDB')
 const Cache = require('orbit-db-cache')
 
 const localdown = require('localstorage-down')
-const Storage = require('../orbit-db-storage-adapter')
+const Storage = require('orbit-db-storage-adapter')
 
 // Include test utilities
 const {

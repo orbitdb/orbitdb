@@ -11,6 +11,7 @@ const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const Identities = require('orbit-db-identity-provider')
 const io = require('orbit-db-io')
+
 // Include test utilities
 const {
   config,
@@ -260,7 +261,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database - with a different identity', async () => {
-        const identity = await Identities.createIdentity({ id: 'test-id' })
+        const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)

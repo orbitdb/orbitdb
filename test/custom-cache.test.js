@@ -6,7 +6,7 @@ const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const CustomCache = require('orbit-db-cache')
 const localdown = require('localstorage-down')
-const OrbitDBStorage = require("../orbit-db-storage-adapter")
+const storage = require("orbit-db-storage-adapter")(localdown)
 
 // Include test utilities
 const {
@@ -27,8 +27,8 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      const storage = await OrbitDBStorage.create(localdown)
-      const cache = new CustomCache(storage)
+      const store = await storage.createStore("local")
+      const cache = new CustomCache(store)
 
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
