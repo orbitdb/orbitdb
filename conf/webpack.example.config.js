@@ -10,6 +10,11 @@ module.exports = {
   },
   target: 'web',
   devtool: 'none',
+  node: {
+    Buffer: true,
+    mkdirp: "empty",
+    fs: "empty"
+  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
@@ -21,7 +26,7 @@ module.exports = {
     modules: [
       'node_modules',
       path.resolve(__dirname, '../node_modules')
-    ]
+    ],
   },
   resolveLoader: {
     modules: [
@@ -29,5 +34,5 @@ module.exports = {
       path.resolve(__dirname, '../node_modules')
     ],
     moduleExtensions: ['-loader']
-  }
+  },
 }

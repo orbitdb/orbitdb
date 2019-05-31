@@ -16,7 +16,7 @@ const {
 } = require('./utils')
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - OrbitDB Address (${API})`, function () {
+  describe(`orbit-db - OrbitDB Address (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb
@@ -31,9 +31,11 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if (orbitdb) { await orbitdb.stop() }
+      if(orbitdb)
+        await orbitdb.stop()
 
-      if (ipfsd) { await stopIpfs(ipfsd) }
+      if (ipfsd)
+        await stopIpfs(ipfsd)
     })
 
     describe('Parse Address', () => {
@@ -96,5 +98,6 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(result, false)
       })
     })
+
   })
 })

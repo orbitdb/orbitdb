@@ -15,13 +15,16 @@ const Identities = require('orbit-db-identity-provider')
 const migrate = require('localstorage-level-migration')
 const Keystore = require('orbit-db-keystore')
 const storage = require('orbit-db-storage-adapter')(leveldown)
+storage.preCreate = async (directory, options) => {
+  fs.mkdirSync(directory, { recursive: true })
+}
 
 // Include test utilities
 const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs
+  testAPIs,
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/v0'
@@ -44,7 +47,6 @@ Object.keys(testAPIs).forEach(API => {
       const store = await storage.createStore(dbPath + "/keys")
       const keystore = new Keystore(store)
 
-      // copy data files to ipfs and orbitdb repos
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
       await fs.copy(dbFixturesDir, dbPath)
@@ -56,19 +58,22 @@ Object.keys(testAPIs).forEach(API => {
     after(async () => {
       rmrf.sync(dbPath)
 
-      if (orbitdb) { await orbitdb.stop() }
+      if(orbitdb)
+        await orbitdb.stop()
 
-      if (ipfsd) { await stopIpfs(ipfsd) }
+      if (ipfsd)
+        await stopIpfs(ipfsd)
     })
 
-    describe('Open & Load', function () {
+    describe('Open & Load', function() {
       before(async () => {
         db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', { accessController: { type: 'legacy-ipfs', skipManifest: true } })
         await db.load()
       })
 
       after(async () => {
-        if (db) { await db.close() }
+        if (db)
+          await db.close()
       })
 
       it('open v0 orbitdb address', async () => {
@@ -91,12 +96,13 @@ Object.keys(testAPIs).forEach(API => {
         assert.strictEqual(db.access.write[0], '04b54f6ef529cd2dd2f9c6897a382c492222d42e57826269a38101ffe752aa07260ecd092a970d7eef08c4ddae2b7006ee25f07e4ab62fa5262ae3b51fdea29f78')
       })
 
-      it.skip('load v0 orbitdb address', async () => {
+      it('load v0 orbitdb address', async () => {
+
         assert.equal(db.all.length, 3)
       })
 
-      it.skip('allows migrated key to write', async () => {
-        const hash = await db.add({ thing: 'new addition' })
+      it('allows migrated key to write', async () => {
+        const hash = await db.add({ thing: 'new addition'})
         const newEntries = db.all.filter(e => e.v === 1)
         assert.equal(newEntries.length, 1)
         assert.strictEqual(newEntries[0].hash, hash)

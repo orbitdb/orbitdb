@@ -34,7 +34,7 @@ const tests = [
 
 Object.keys(testAPIs).forEach(API => {
   tests.forEach(test => {
-    describe(`orbit-db - ${test.title} (${API})`, function () {
+    describe(`orbit-db - ${test.title} (${API})`, function() {
       this.timeout(config.timeout)
 
       const entryCount = 65
@@ -42,7 +42,7 @@ Object.keys(testAPIs).forEach(API => {
       let ipfsd, ipfs, orbitdb1, db, address
 
       before(async () => {
-        if (test.orbitDBConfig === 'custom') {
+        if(test.orbitDBConfig === "custom") {
           const customStorage = await Storage.create(localdown)
           test.orbitDBConfig = new Cache(customStorage)
         }
@@ -56,17 +56,20 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       after(async () => {
-        if (orbitdb1) { await orbitdb1.stop() }
+        if(orbitdb1)
+          await orbitdb1.stop()
 
-        if (ipfsd) { await stopIpfs(ipfsd) }
+        if (ipfsd)
+          await stopIpfs(ipfsd)
       })
 
-      describe('load', function () {
+      describe('load', function() {
         beforeEach(async () => {
           const dbName = new Date().getTime().toString()
           const entryArr = []
 
-          for (let i = 0; i < entryCount; i++) { entryArr.push(i) }
+          for (let i = 0; i < entryCount; i ++)
+            entryArr.push(i)
 
           db = await orbitdb1.eventlog(dbName)
           address = db.address.toString()
@@ -90,7 +93,6 @@ Object.keys(testAPIs).forEach(API => {
 
         it('loads database partially', async () => {
           const amount = 33
-          debugger
           db = await orbitdb1.eventlog(address)
           await db.load(amount)
           const items = db.iterator({ limit: -1 }).collect()
@@ -102,7 +104,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('load and close several times', async () => {
           const amount = 8
-          for (let i = 0; i < amount; i++) {
+          for (let i = 0; i < amount; i ++) {
             db = await orbitdb1.eventlog(address)
             await db.load()
             const items = db.iterator({ limit: -1 }).collect()
@@ -123,7 +125,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('load, add one, close - several times', async () => {
           const amount = 8
-          for (let i = 0; i < amount; i++) {
+          for (let i = 0; i < amount; i ++) {
             db = await orbitdb1.eventlog(address)
             await db.load()
             await db.add('hello' + (entryCount + i))
@@ -153,7 +155,7 @@ Object.keys(testAPIs).forEach(API => {
           return new Promise(async (resolve, reject) => {
             let count = 0
             db.events.on('load.progress', (address, hash, entry) => {
-              count++
+              count ++
               try {
                 assert.equal(address, db.address.toString())
 
@@ -179,7 +181,7 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('load from empty snapshot', function () {
+      describe('load from empty snapshot', function() {
         it('loads database from an empty snapshot', async () => {
           db = await orbitdb1.eventlog('empty-snapshot')
           address = db.address.toString()
@@ -193,12 +195,13 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('load from snapshot', function () {
+      describe('load from snapshot', function() {
         beforeEach(async () => {
           const dbName = new Date().getTime().toString()
           const entryArr = []
 
-          for (let i = 0; i < entryCount; i++) { entryArr.push(i) }
+          for (let i = 0; i < entryCount; i ++)
+            entryArr.push(i)
 
           db = await orbitdb1.eventlog(dbName)
           address = db.address.toString()
@@ -223,7 +226,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('load, add one and save snapshot several times', async () => {
           const amount = 4
-          for (let i = 0; i < amount; i++) {
+          for (let i = 0; i < amount; i ++) {
             db = await orbitdb1.eventlog(address)
             await db.loadFromSnapshot()
             await db.add('hello' + (entryCount + i))
@@ -270,7 +273,7 @@ Object.keys(testAPIs).forEach(API => {
           return new Promise(async (resolve, reject) => {
             let count = 0
             db.events.on('load.progress', (address, hash, entry) => {
-              count++
+              count ++
               try {
                 assert.equal(address, db.address.toString())
 

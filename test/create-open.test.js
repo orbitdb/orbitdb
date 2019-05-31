@@ -17,14 +17,14 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs
+  testAPIs,
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Create & Open (${API})`, function () {
+  describe(`orbit-db - Create & Open (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb, db, address
@@ -40,13 +40,15 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if (orbitdb) { await orbitdb.stop() }
+      if(orbitdb)
+        await orbitdb.stop()
 
-      if (ipfsd) { await stopIpfs(ipfsd) }
+      if (ipfsd)
+        await stopIpfs(ipfsd)
     })
 
-    describe('Create', function () {
-      describe('Errors', function () {
+    describe('Create', function() {
+      describe('Errors', function() {
         it('throws an error if given an invalid database type', async () => {
           let err
           try {
@@ -78,6 +80,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(err, `Error: Database '${db.address}' already exists!`)
         })
 
+
         it('throws an error if database type doesn\'t match', async () => {
           let err, log, kv
           try {
@@ -90,7 +93,7 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('Success', function () {
+      describe('Success', function() {
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
           localDataPath = path.join(dbPath, orbitdb.id, 'cache')
@@ -131,7 +134,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('saves database manifest file locally', async () => {
           const manifest = await io.read(ipfs, db.address.root)
-          assert.notEqual(manifest)
+          assert.notEqual(manifest, )
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)
@@ -146,7 +149,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(fs.existsSync(localDataPath), true)
         })
 
-        describe('Access Controller', function () {
+        describe('Access Controller', function() {
           before(async () => {
             if (db) {
               await db.close()
@@ -183,8 +186,8 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('determineAddress', function () {
-      describe('Errors', function () {
+    describe('determineAddress', function() {
+      describe('Errors', function() {
         it('throws an error if given an invalid database type', async () => {
           let err
           try {
@@ -206,7 +209,7 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe('Success', function () {
+      describe('Success', function() {
         before(async () => {
           address = await orbitdb.determineAddress('third', 'feed', { replicate: false })
           localDataPath = path.join(dbPath, address.root, address.path)
@@ -225,7 +228,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('Open', function () {
+    describe('Open', function() {
       beforeEach(async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed' })
       })
