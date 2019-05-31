@@ -41,7 +41,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
 
-      const store = storage.createStore(dbPath + "/keys")
+      const store = await storage.createStore(dbPath + "/keys")
       const keystore = new Keystore(store)
 
       // copy data files to ipfs and orbitdb repos
