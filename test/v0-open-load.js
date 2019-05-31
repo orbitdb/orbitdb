@@ -37,25 +37,27 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, address
+    let ipfsd, ipfs, orbitdb, db, address, store
     let localDataPath
 
     before(async () => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-
-      const store = await storage.createStore(dbPath + "/keys")
-      const keystore = new Keystore(store)
-
+      rmrf.sync(dbPath)
+      // copy data files to ipfs and orbitdb repos
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
-      await fs.copy(dbFixturesDir, dbPath)
+      // await fs.copy(dbFixturesDir, dbPath)
+
+      store = await storage.createStore(dbPath + "/keys")
+      const keystore = new Keystore(store)
 
       let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), keystore })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath, identity })
     })
 
     after(async () => {
+      await store.close()
       rmrf.sync(dbPath)
 
       if(orbitdb)
@@ -97,12 +99,11 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('load v0 orbitdb address', async () => {
-
         assert.equal(db.all.length, 3)
       })
 
       it('allows migrated key to write', async () => {
-        const hash = await db.add({ thing: 'new addition'})
+        const hash = await db.add({ thing: 'new addition' })
         const newEntries = db.all.filter(e => e.v === 1)
         assert.equal(newEntries.length, 1)
         assert.strictEqual(newEntries[0].hash, hash)
