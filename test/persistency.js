@@ -71,7 +71,6 @@ Object.keys(testAPIs).forEach(API => {
           db = await orbitdb1.eventlog(dbName)
           address = db.address.toString()
           await mapSeries(entryArr, (i) => db.add('hello' + i))
-          debugger
           await db.close()
           db = null
         })
