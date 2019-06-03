@@ -59,9 +59,8 @@ class OrbitDB {
       ? new options.broker(this._ipfs) // eslint-disable-line
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
-    this.storage = options.storage
     this.keystore = options.keystore
-    this.cache = options.cache || new Cache(this.storage.cache)
+    this.cache = options.cache
     this.stores = {}
     this._directConnections = {}
     // AccessControllers module can be passed in to enable
@@ -85,12 +84,13 @@ class OrbitDB {
       id: options.id || id,
       keystore: keystore,
     })
+    const cache = options.cache || new Cache(storageOptions.cache)
 
     options = Object.assign({}, options, {
       peerId: id ,
       directory: directory,
       keystore: keystore,
-      storage: storageOptions
+      cache: cache
     })
 
     return new OrbitDB(ipfs, identity, options)
@@ -136,12 +136,12 @@ class OrbitDB {
 
   async disconnect () {
     //close Keystore
-    if (this.storage.keystore.close)
-      await this.storage.keystore.close()
+    if (this.keystore._store.close)
+      await this.keystore._store.close()
 
     //close Cache
-    if (this.storage.cache.close)
-      await this.storage.cache.close()
+    if (this.cache._store.close)
+      await this.cache._store.close()
 
     // Close all open databases
     const databases = Object.values(this.stores)
