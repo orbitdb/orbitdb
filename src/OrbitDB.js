@@ -265,7 +265,7 @@ class OrbitDB {
     delete this.stores[address]
   }
 
-  async _determineAddress(name, type, options = {}, onlyHash) {
+  async _determineAddress(name, type, options = {}) {
     if (!OrbitDB.isValidType(type))
       throw new Error(`Invalid database type '${type}'`)
 
