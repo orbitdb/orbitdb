@@ -141,14 +141,6 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(manifest.accessController.indexOf('/ipfs'), 0)
         })
 
-        it.skip('can pass local database directory as an option', async () => {
-          const dir = './orbitdb/tests/another-feed'
-          db = await orbitdb.create('third', 'feed', { directory: dir })
-          localDataPath = path.join(dir)
-          console.log(localDataPath)
-          assert.equal(fs.existsSync(localDataPath), true)
-        })
-
         describe('Access Controller', function() {
           before(async () => {
             if (db) {
