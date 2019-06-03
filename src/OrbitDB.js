@@ -74,26 +74,32 @@ class OrbitDB {
 
     const { id } = await ipfs.id()
     const directory = options.directory || './orbitdb'
-    const storageOptions = Object.assign({}, options.storage, {
-      keystore: await storage.createStore(path.join(directory, id, '/keystore')),
-      cache: await storage.createStore(path.join(directory, id, '/cache'))
-    })
 
-    const keystore = options.keystore || new Keystore(storageOptions.keystore)
-    const identity = options.identity || await Identities.createIdentity({
-      id: options.id || id,
-      keystore: keystore,
-    })
-    const cache = options.cache || new Cache(storageOptions.cache)
+    if(!options.keystore) {
+      let keyStorage = await storage.createStore(path.join(directory, id, '/keystore'))
+      options.keystore = new Keystore(keyStorage)
+    }
 
-    options = Object.assign({}, options, {
+    if(!options.identity) {
+      options.identity = await Identities.createIdentity({
+        id: options.id || id,
+        keystore: options.keystore,
+      })
+    }
+
+    if(!options.cache) {
+      let cacheStorage = await storage.createStore(path.join(directory, id, '/cache'))
+      options.cache = new Cache(cacheStorage)
+    }
+
+    const finalOptions = Object.assign({}, options, {
       peerId: id ,
       directory: directory,
-      keystore: keystore,
-      cache: cache
+      keystore: options.keystore,
+      cache: options.cache
     })
 
-    return new OrbitDB(ipfs, identity, options)
+    return new OrbitDB(ipfs, options.identity, finalOptions)
   }
 
   /* Databases */

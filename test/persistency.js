@@ -28,6 +28,7 @@ const tests = [
   },
   {
     title: 'Persistency with custom cache',
+    type: "custom",
     orbitDBConfig: { directory: path.join(dbPath, '1') }
   }
 ]
@@ -42,9 +43,12 @@ Object.keys(testAPIs).forEach(API => {
       let ipfsd, ipfs, orbitdb1, db, address
 
       before(async () => {
-        if(test.orbitDBConfig === "custom") {
-          const customStorage = await Storage.create(localdown)
-          test.orbitDBConfig = new Cache(customStorage)
+        const options = Object.assign({}, test.orbitDBConfig)
+
+        if(test.type === "custom") {
+          const customStorage = Storage(localdown)
+          const customStore = await customStorage.createStore(dbPath)
+          options.cache = new Cache(customStore)
         }
 
         config.daemon1.repo = ipfsPath
@@ -52,7 +56,7 @@ Object.keys(testAPIs).forEach(API => {
         rmrf.sync(dbPath)
         ipfsd = await startIpfs(API, config.daemon1)
         ipfs = ipfsd.api
-        orbitdb1 = await OrbitDB.createInstance(ipfs, test.orbitDBConfig)
+        orbitdb1 = await OrbitDB.createInstance(ipfs, options)
       })
 
       after(async () => {
