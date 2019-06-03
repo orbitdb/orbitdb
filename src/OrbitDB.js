@@ -318,7 +318,7 @@ class OrbitDB {
       throw new Error(`Database '${dbAddress}' already exists!`)
 
     // Save the database locally
-    await this._addManifestToCache(directory, dbAddress)
+    await this._addManifestToCache(dbAddress)
 
     logger.debug(`Created database '${dbAddress}'`)
 
@@ -391,7 +391,7 @@ class OrbitDB {
       throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
 
     // Save the database locally
-    await this._addManifestToCache(directory, dbAddress)
+    await this._addManifestToCache(dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
@@ -399,8 +399,7 @@ class OrbitDB {
   }
 
   // Save the database locally
-  async _addManifestToCache (directory, dbAddress) {
-    // const cache = await this._loadCache(directory, dbAddress)
+  async _addManifestToCache (dbAddress) {
     await this.cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
