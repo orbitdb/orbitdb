@@ -50,9 +50,13 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(fs.existsSync(localDataPath), true)
       })
 
-      it.skip('removes local database files', async () => {
+      it('removes local database cache', async () => {
         await db.drop()
-        assert.equal(fs.existsSync(localDataPath), false)
+        assert.equal(await db._cache.get(db.localHeadsPath), undefined)
+        assert.equal(await db._cache.get(db.remoteHeadsPath), undefined)
+        assert.equal(await db._cache.get(db.snapshotPath), undefined)
+        assert.equal(await db._cache.get(db.queuePath), undefined)
+        assert.equal(await db._cache.get(db.manifestPath), undefined)
       })
     })
   })
