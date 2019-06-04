@@ -136,12 +136,10 @@ class OrbitDB {
 
   async disconnect () {
     //close Keystore
-    if (this.keystore._store.close)
-      await this.keystore._store.close()
+    await this.keystore.close()
 
     //close Cache
-    if (this.cache._store.close)
-      await this.cache._store.close()
+    await this.cache.close()
 
     // Close all open databases
     const databases = Object.values(this.stores)
