@@ -98,7 +98,6 @@ const db = await orbitdb.keyvalue('profile')
 > Creates and opens an OrbitDB database.
 
 Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
-- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
 - `write` (array): An array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB identity public key `orbitdb.identity.publicKey`, which would give write access only to yourself)
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
@@ -137,7 +136,6 @@ const dbAddress = await orbitdb.determineAddress('user.posts', 'eventlog', {
 Returns a `Promise` that resolves to [a database instance](#store-api). `address` (string) should be a valid OrbitDB address. If a database name is provided instead, it will check `options.create` to determine if it should create the database. `options` is an object with any of the following properties:
 
 - `localOnly` (boolean): If set to `true`, will throw an error if the database can't be found locally. (Default: `false`)
-- `directory` (string): The directory where data will be stored (Default: uses directory option passed to OrbitDB constructor or `./orbitdb` if none was provided).
 - `create` (boolean): Whether or not to create the database if a valid OrbitDB address is not provided. (Default: `false`)
 - `type` (string): A supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). Required if create is set to `true`. Otherwise it's used to validate the manifest.
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
