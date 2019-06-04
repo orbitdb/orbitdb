@@ -313,6 +313,7 @@ class OrbitDB {
   }
 
   async determineAddress(name, type, options = {}) {
+    const opts = Object.assign({}, { onlyHash: true }, options)
     return this._determineAddress(name, type, options, true)
   }
 
