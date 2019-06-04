@@ -19,18 +19,6 @@ const { isDefined, io } = require('./utils')
 const isNode = require('is-node')
 const Storage = require('orbit-db-storage-adapter')
 
-let storage
-if (isNode) {
-  const leveldown = require('leveldown')
-  storage = Storage(leveldown)
-  storage.preCreate = async (directory, options) => {
-    fs.mkdirSync(directory, { recursive: true })
-  }
-} else {
-  const leveljs = require('level-js')
-  storage = Storage(leveljs)
-}
-
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('ERROR')
@@ -73,10 +61,21 @@ class OrbitDB {
       throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
 
     const { id } = await ipfs.id()
-    const directory = options.directory || './orbitdb'
+
+    if(!options.directory)
+      options.directory = './orbitdb'
+
+    if (!options.storage) {
+      const leveldown = isNode ? require('leveldown') : require('level-js')
+      options.storage = Storage(leveldown)
+      options.storage.preCreate = isNode ? async (directory, options) => {
+        fs.mkdirSync(directory, { recursive: true })
+      } : null;
+    }
 
     if(!options.keystore) {
-      let keyStorage = await storage.createStore(path.join(directory, id, '/keystore'))
+      const keystorePath = path.join(options.directory, id, '/keystore')
+      let keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
 
@@ -88,17 +87,12 @@ class OrbitDB {
     }
 
     if(!options.cache) {
-      let cacheStorage = await storage.createStore(path.join(directory, id, '/cache'))
+      const cachePath = path.join(options.directory, id, '/cache')
+      let cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
     }
 
-    const finalOptions = Object.assign({}, options, {
-      peerId: id ,
-      directory: directory,
-      keystore: options.keystore,
-      cache: options.cache
-    })
-
+    const finalOptions = Object.assign({}, options, { peerId: id })
     return new OrbitDB(ipfs, options.identity, finalOptions)
   }
 
