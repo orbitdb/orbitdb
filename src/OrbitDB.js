@@ -232,7 +232,8 @@ class OrbitDB {
 
     const getStore = address => this.stores[address]
     const getDirectConnection = peer => this._directConnections[peer]
-    const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel // eslint-disable-line
+    const onChannelCreated = channel => this._directConnections[channel._receiverID] = channel
+
     const onMessage = (address, heads) => this._onMessage(address, heads)
 
     await exchangeHeads(
