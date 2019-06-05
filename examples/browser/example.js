@@ -171,7 +171,7 @@ const main = (IPFS, ORBITDB) => {
       await load(db, 'Creating database...')
       startWriter(db, interval)
     } catch (e) {
-      console.error(e)
+      handleError(e)
     }
     openButton.disabled = false
     createButton.disabled = false
