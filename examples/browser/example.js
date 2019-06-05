@@ -18,8 +18,8 @@ const publicCheckbox = document.getElementById("public")
 const readonlyCheckbox = document.getElementById("readonly")
 
 function handleError(e) {
-  console.error(e.stack)
-  statusElm.innerHTML = e.message  
+  console.error(e)
+  statusElm.innerHTML = '<pre style="color: red; text-align: left;">' + e.stack + '</pre>'
 }
 
 const main = (IPFS, ORBITDB) => {
@@ -72,7 +72,11 @@ const main = (IPFS, ORBITDB) => {
     openButton.disabled = false
     createButton.disabled = false
     statusElm.innerHTML = "IPFS Started"
-    orbitdb = await OrbitDB.createInstance(ipfs)
+    try {
+      orbitdb = await OrbitDB.createInstance(ipfs)
+    } catch (e) {
+      handleError(e)
+    }
   })
 
   const load = async (db, statusText) => {
