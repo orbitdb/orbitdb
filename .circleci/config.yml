@@ -38,6 +38,8 @@ jobs:
     # In many cases you can simplify this from what is generated here.
     # 'See docs on artifact collection here https://circleci.com/docs/2.0/artifacts/'
     - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    # Test if Circle can download from dist.ipfs.io
+    - run: wget https://dist.ipfs.io/go-ipfs/v0.4.21/go-ipfs_v0.4.21_linux-amd64.tar.gz
     # This is based on your 1.0 configuration file or project settings
     - run:
         working_directory: ~/orbitdb/orbit-db
