@@ -68,7 +68,7 @@ const ipfsOptions = {
 // Create IPFS instance
 const ipfs = new IPFS(ipfsOptions)
 
-ipfs.on('ready', () => {
+ipfs.on('ready', async () => {
   // Create OrbitDB instance
   const orbitdb = await OrbitDB.createInstance(ipfs)
 })
