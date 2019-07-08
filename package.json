@@ -40,7 +40,7 @@
     "datastore-level": "0.10.0",
     "fs-extra": "^7.0.1",
     "go-ipfs-dep": "0.4.19",
-    "ipfs": "~0.36.3",
+    "ipfs": "~0.36.4",
     "ipfs-repo": "~0.26.6",
     "ipfsd-ctl": "~0.42.3",
     "localstorage-level-migration": "^0.0.1",
