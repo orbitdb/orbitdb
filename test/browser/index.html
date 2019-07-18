@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <title>Break OrbitDB</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <script type="text/javascript" src="orbitdb.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ipfs.js" charset="utf-8"></script>
+    <script type="text/javascript" src="identities.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ipfslog.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+      <div style="padding: 0px 0px 25px 0px;">
+        <p>
+          <span id="waitForOpenDB"></span>
+        </p>
+        <button id="addData" type="button">Add random data</button>
+        <hr />
+        <h3> Log Data </h3>
+        <p>
+          <span id="logData"></span>
+        </p>
+      </div>
+    <!-- </div> -->
+    <script type="text/javascript">
+      const randStr = () => Math.random().toString(36).substring(6)
+      const ipfs = new Ipfs({
+        repo: './odb/',
+        EXPERIMENTAL: {
+          pubsub: true
+        },
+        preload: { enabled: false },
+        config: {
+          Bootstrap: [ ]
+        }
+      })
+
+      async function getLogLength () {
+        return window.log._oplog.length
+      }
+
+      async function getLogHash () {
+        return await window.log._oplog.toMultihash()
+      }
+
+      async function loadLog () {
+        await window.log.load()
+      }
+
+      async function getEntries () {
+        return window.log.iterator({ limit: -1 }).collect()
+      }
+
+      async function getSortFn () {
+        return [{hash: 'b', clock: {id: 'A', time: 1}}, {hash: 'a', clock: {id: 'A', time: 1}}].sort(window.log._oplog._sortFn)
+      }
+
+      ipfs.on('ready', async () => {
+        const identity = await Identities.createIdentity({ id: 'A'})
+        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
+        console.log(Log.Sorting.SortByEntryHash.toString())
+        let log = await orbitdb.log('concurrent', { syncLocal: true })
+        window.log = log
+        waitForOpenDB.innerHTML = log.address.toString()
+        await log.load()
+
+        const updateData = () => {
+          logData.innerHTML = ''
+          const count = log.iterator({ limit: -1 }).collect().map(e => {
+            logData.innerHTML += e.clock.time + ': ' + e.hash + '<br />'
+          })
+        }
+
+        addData.addEventListener('click', async event => {
+          const data = randStr()
+          await log.add(data)
+          updateData()
+        })
+      })
+    </script>
+  </body>
+</html>
