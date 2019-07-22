@@ -4,6 +4,15 @@ orbitdb/
 # Don't distribute the dependencies
 node_modules/
 
+#Don't track ipfs files
+test/ipfs/
+test/browser/ipfs/
+test/browser/orbitdb/
+test/browser/orbitdb.js
+test/browser/ipfs.js
+test/browser/ipfslog.min.js
+test/browser/identities.js
+
 # Don't track examples' dependencies (libs) in git
 examples/browser/browser-webpack-example/bundle.js
 examples/browser/browser-webpack-example/*.map
