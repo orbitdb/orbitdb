@@ -134,7 +134,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('saves database manifest file locally', async () => {
           const manifest = await io.read(ipfs, db.address.root)
-          assert.notEqual(manifest, )
+          assert(manifest)
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)

@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>Break OrbitDB</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <script type="text/javascript" src="orbitdb.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ipfs.js" charset="utf-8"></script>
+    <script type="text/javascript" src="identities.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ipfslog.min.js" charset="utf-8"></script>
+  </head>
+  <body>
+      <div style="padding: 0px 0px 25px 0px;">
+        <p>
+          <span id="waitForOpenDB"></span>
+        </p>
+        <button id="addData" type="button">Add random data</button>
+        <hr />
+        <h3> Log Data </h3>
+        <p>
+          <span id="logData"></span>
+        </p>
+      </div>
+    <!-- </div> -->
+    <script type="text/javascript">
+      const randStr = () => Math.random().toString(36).substring(6)
+      const ipfs = new Ipfs({
+        repo: './odb/',
+        EXPERIMENTAL: {
+          pubsub: true
+        },
+        preload: { enabled: false },
+        config: {
+          Bootstrap: [ ]
+        }
+      })
+
+      async function getConsistentLogLength () {
+        return window.consistentLog._oplog.length
+      }
+
+      async function getConsistentLogHash () {
+        return await window.consistentLog._oplog.toMultihash()
+      }
+
+      async function getConsistentEntries () {
+        return window.consistentLog.iterator({ limit: -1 }).collect()
+      }
+
+      async function getInconsistentLogLength () {
+        return window.inconsistentLog._oplog.length
+      }
+
+      async function getInconsistentLogHash () {
+        return await window.inconsistentLog._oplog.toMultihash()
+      }
+
+      async function getInconsistentEntries () {
+        return window.inconsistentLog.iterator({ limit: -1 }).collect()
+      }
+
+      async function loadLogs () {
+        await window.consistentLog.load()
+        await window.inconsistentLog.load()
+      }
+
+      ipfs.on('ready', async () => {
+        const identity = await Identities.createIdentity({ id: 'A'})
+        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
+        const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })
+        const inconsistentLog = await orbitdb.log('concurrent2')
+
+        window.consistentLog = consistentLog
+        window.inconsistentLog = inconsistentLog
+
+        waitForOpenDB.innerHTML = consistentLog.address.toString() + ' + ' + inconsistentLog.address.toString()
+        await consistentLog.load()
+        await inconsistentLog.load()
+
+        // const updateData = () => {
+        //   logData.innerHTML = ''
+        //   const count = consistentlog.iterator({ limit: -1 }).collect().map(e => {
+        //     logData.innerHTML += e.clock.time + ': ' + e.hash + '<br />'
+        //   })
+        // }
+
+        addData.addEventListener('click', async event => {
+          const data = randStr()
+          await consistentLog.add(data)
+          await inconsistentLog.add(data)
+        })
+      })
+    </script>
+  </body>
+</html>

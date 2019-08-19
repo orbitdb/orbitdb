@@ -3,3 +3,4 @@
 --recursive
 --exit
 --slow 1000
+--exclude test/browser/**/*.js

@@ -2,32 +2,17 @@
 
 const multihashing = require('multihashing-async')
 const CID = require('cids')
-const pify = require('pify')
 
-const createMultihash = pify(multihashing)
-
-const transformCborLinksIntoCids = (data) => {
-  if (!data) {
-    return data
+const cidifyString = (str) => {
+  if (!str) {
+    return str
   }
 
-  if (data['/']) {
-    return new CID(data['/'])
+  if (Array.isArray(str)) {
+    return str.map(cidifyString)
   }
 
-  if (Array.isArray(data)) {
-    return data.map(transformCborLinksIntoCids)
-  }
-
-  if (typeof data === 'object') {
-    return Object.keys(data).reduce((obj, key) => {
-      obj[key] = transformCborLinksIntoCids(data[key])
-
-      return obj
-    }, {})
-  }
-
-  return data
+  return new CID(str)
 }
 
 /* Memory store using an LRU cache */
@@ -38,10 +23,9 @@ class MemStore {
 
   async put (value) {
     const buffer = Buffer.from(JSON.stringify(value))
-    const multihash = await createMultihash(buffer, 'sha2-256')
+    const multihash = await multihashing(buffer, 'sha2-256')
     const cid = new CID(1, 'dag-cbor', multihash)
-    const key = cid.toBaseEncodedString()
-
+    const key = cid.toBaseEncodedString('base58btc')
     this._store.set(key, value)
 
     return cid
@@ -49,13 +33,17 @@ class MemStore {
 
   async get (cid) {
     if (CID.isCID(cid)) {
-      cid = cid.toBaseEncodedString()
+      cid = cid.toBaseEncodedString('base58btc')
     }
-
     const data = this._store.get(cid)
+    const links = ['next', 'heads']
+    links.forEach((prop) => {
+      if(data[prop])
+      data[prop] = cidifyString(data[prop])
+    })
 
     return {
-      value: transformCborLinksIntoCids(data)
+      value: data
     }
   }
 }

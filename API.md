@@ -82,7 +82,7 @@ Creates and returns an instance of OrbitDB. Use the optional `options` argument 
 
 - 'cache' (Cache Instance) : By default creates an instance of [Cache](https://github.com/orbitdb/orbit-db-cache). A custom cache instance can also be used.
 
-- `identity` (Identity Instance): By default it creates an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/src/identity.js)
+- `identity` (Identity Instance): By default it creates an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/blob/master/src/identity.js)
 
 After creating an `OrbitDB` instance, you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
 
@@ -522,7 +522,7 @@ await db.drop()
 
 ### store.identity
 
-Returns an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/src/identity.js). The identity is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#identity) for more information on how OrbitDB uses identity.
+Returns an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/blob/master/src/identity.js). The identity is used to sign the database entries. See the [GUIDE](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#identity) for more information on how OrbitDB uses identity.
 
 ```javascript
 const identity = db.identity
