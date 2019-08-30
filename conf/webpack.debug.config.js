@@ -13,13 +13,13 @@ module.exports = {
   devtool: 'source-map',
   externals: {
     fs: '{}',
-    mkdirp: '{}',
+    mkdirp: '{}'
   },
   node: {
     console: false,
     Buffer: true,
-    mkdirp: "empty",
-    fs: "empty"
+    mkdirp: 'empty',
+    fs: 'empty'
   },
   plugins: [
   ],
@@ -29,8 +29,8 @@ module.exports = {
       path.resolve(__dirname, '../node_modules')
     ],
     alias: {
-      leveldown: 'level-js',
-    },
+      leveldown: 'level-js'
+    }
   },
   resolveLoader: {
     modules: [
@@ -38,5 +38,5 @@ module.exports = {
       path.resolve(__dirname, '../node_modules')
     ],
     moduleExtensions: ['-loader']
-  },
+  }
 }
