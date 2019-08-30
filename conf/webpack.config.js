@@ -14,11 +14,12 @@ module.exports = {
   devtool: 'none',
   externals: {
     fs: '{}',
-    mkdirp: '{}',
+    mkdirp: '{}'
   },
   node: {
     console: false,
-    Buffer: true
+    Buffer: true,
+    mkdirp: 'empty'
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -33,8 +34,8 @@ module.exports = {
       path.resolve(__dirname, '../node_modules')
     ],
     alias: {
-      leveldown: 'level-js',
-    },
+      leveldown: 'level-js'
+    }
   },
   resolveLoader: {
     modules: [
@@ -42,5 +43,5 @@ module.exports = {
       path.resolve(__dirname, '../node_modules')
     ],
     moduleExtensions: ['-loader']
-  },
+  }
 }

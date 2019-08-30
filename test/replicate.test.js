@@ -1,4 +1,4 @@
-  'use strict'
+'use strict'
 
 const assert = require('assert')
 const mapSeries = require('p-each-series')
@@ -72,7 +72,7 @@ Object.keys(testAPIs).forEach(API => {
           write: [
             orbitdb1.identity.id,
             orbitdb2.identity.id
-          ],
+          ]
         }
       }
 
@@ -205,9 +205,10 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
+              const minClock = Math.min(...replicateEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
               assert.equal(replicateEvents.length, expectedEventCount)
               assert.equal(replicateEvents[0].entry.payload.value.split(' ')[0], 'hello')
-              assert.equal(replicateEvents[0].entry.clock.time, 1)
+              assert.equal(minClock, 1)
 
               const replicateProgressEvents = events.filter(e => e.event === 'replicate.progress')
               assert.equal(replicateProgressEvents.length, expectedEventCount)
@@ -297,7 +298,7 @@ Object.keys(testAPIs).forEach(API => {
           try {
             // Test the replicator state
             assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
-            assert.equal(db2.options.referenceCount, 64)
+            assert.equal(db2.options.referenceCount, 32)
             assert.equal(db2._loader.tasksRunning, 0)
           } catch (e) {
             reject(e)
@@ -333,19 +334,23 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
+              const maxClock = Math.max(...replicateEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
               assert.equal(replicateEvents.length, expectedEventCount)
               assert.equal(replicateEvents[0].entry.payload.value.split(' ')[0], 'hello')
-              assert.equal(replicateEvents[0].entry.clock.time, expectedEventCount)
+              assert.equal(maxClock, expectedEventCount)
 
               const replicateProgressEvents = events.filter(e => e.event === 'replicate.progress')
+              const maxProgressClock = Math.max(...replicateProgressEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
+              const maxReplicationMax = Math.max(...replicateProgressEvents.map(e => e.replicationInfo.max))
               assert.equal(replicateProgressEvents.length, expectedEventCount)
               assert.equal(replicateProgressEvents[0].entry.payload.value.split(' ')[0], 'hello')
-              assert.equal(replicateProgressEvents[0].entry.clock.time, expectedEventCount)
-              assert.equal(replicateProgressEvents[0].replicationInfo.max, expectedEventCount)
+              assert.equal(maxProgressClock, expectedEventCount)
+              assert.equal(maxReplicationMax, expectedEventCount)
               assert.equal(replicateProgressEvents[0].replicationInfo.progress, 1)
 
               const replicatedEvents = events.filter(e => e.event === 'replicated')
-              assert.equal(replicatedEvents[0].replicationInfo.max, expectedEventCount)
+              const replicateMax = Math.max(...replicatedEvents.map(e => e.replicationInfo.max))
+              assert.equal(replicateMax, expectedEventCount)
               assert.equal(replicatedEvents[replicatedEvents.length - 1].replicationInfo.progress, expectedEventCount)
 
               resolve()
@@ -456,10 +461,11 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(replicateEvents.length, expectedEventCount)
 
               const replicateProgressEvents = events.filter(e => e.event === 'replicate.progress')
+              const maxProgressClock = Math.max(...replicateProgressEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
               assert.equal(replicateProgressEvents.length, expectedEventCount)
-              assert.equal(replicateProgressEvents[replicateProgressEvents.length - 1].entry.clock.time, expectedEventCount)
-              assert.equal(replicateProgressEvents[replicateProgressEvents.length - 1].replicationInfo.max, expectedEventCount * 2)
-              assert.equal(replicateProgressEvents[replicateProgressEvents.length - 1].replicationInfo.progress, expectedEventCount * 2)
+              assert.equal(maxProgressClock, expectedEventCount)
+              assert.equal(db2.replicationStatus.max, expectedEventCount * 2)
+              assert.equal(db2.replicationStatus.progress, expectedEventCount * 2)
 
               const replicatedEvents = events.filter(e => e.event === 'replicated')
               assert.equal(replicatedEvents[replicatedEvents.length - 1].replicationInfo.progress, expectedEventCount * 2)
