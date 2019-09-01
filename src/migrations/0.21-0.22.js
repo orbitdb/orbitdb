@@ -1,5 +1,5 @@
 const path = require('path')
-const fs = require('fs')
+const fs = require('../fs-shim')
 
 const Cache = require('orbit-db-cache')
 
