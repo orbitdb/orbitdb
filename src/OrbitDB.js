@@ -18,6 +18,7 @@ const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
 const Storage = require('orbit-db-storage-adapter')
 const leveldown = require('leveldown')
+const migrations = require('./migrations')
 
 const Logger = require('logplease')
 const logger = Logger.create('orbit-db')
@@ -303,6 +304,8 @@ class OrbitDB {
 
     if (haveDB && !options.overwrite) { throw new Error(`Database '${dbAddress}' already exists!`) }
 
+    await this._migrate(options, dbAddress)
+
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 
@@ -395,8 +398,19 @@ class OrbitDB {
     if (!cache) {
       return false
     }
-    const data = await cache.get(path.join(dbAddress.toString(), '_manifest'))
+
+    const addr = dbAddress.toString()
+    const data = await cache.get(path.join(addr, '_manifest'))
     return data !== undefined && data !== null
+  }
+
+  /**
+   * Runs all migrations inside the src/migration folder
+   * @param Object options  Options to pass into the migration
+   * @param OrbitDBAddress dbAddress Address of database in OrbitDBAddress format
+   */
+  async _migrate (options, dbAddress) {
+    await migrations.run(this, options, dbAddress)
   }
 
   /**

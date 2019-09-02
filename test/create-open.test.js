@@ -2,7 +2,7 @@
 
 const assert = require('assert')
 const mapSeries = require('p-map-series')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
@@ -22,6 +22,8 @@ const {
 
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
+const migrationFixturePath = './test/fixtures/migration/cache-schema-test'
+const ipfsFixturesDir = './test/fixtures/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function() {
@@ -36,6 +38,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
+      await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
+      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
@@ -136,6 +140,37 @@ Object.keys(testAPIs).forEach(API => {
           const dir = './orbitdb/tests/another-feed'
           db = await orbitdb.create('third', 'feed', { directory: dir })
           assert.equal(fs.existsSync(dir), true)
+        })
+
+        it('loads cache from previous version of orbit-db', async() => {
+          const dbName = 'cache-schema-test'
+
+          db = await orbitdb.create(dbName, 'keyvalue')
+          const manifestHash = db.address.root
+          const migrationDataPath = path.join(dbPath, manifestHash, dbName)
+
+          await db.load()
+          assert.equal((await db.get('key')), undefined)
+          await db.close()
+          await db.drop()
+
+          await fs.copy(migrationFixturePath, migrationDataPath)
+          db = await orbitdb.create(dbName, 'keyvalue')
+          await db.load()
+
+          assert.equal(manifestHash, db.address.root)
+          assert.equal((await db.get('key')), 'value')
+        })
+
+        it('loads cache from previous version of orbit-db with the directory option', async() => {
+          const dbName = 'cache-schema-test2'
+          const directory = path.join(dbPath, "some-other-place")
+
+          await fs.copy(migrationFixturePath, directory)
+          db = await orbitdb.create(dbName, 'keyvalue', { directory })
+          await db.load()
+
+          assert.equal((await db.get('key')), 'value')
         })
 
         describe('Access Controller', function() {
