@@ -89,6 +89,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('has correct replication info after loading from snapshot', async () => {
+      await db._cache._store.open();
       await db.saveSnapshot()
       await db.close()
       await db.loadFromSnapshot()
