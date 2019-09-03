@@ -13,7 +13,7 @@ const {
   testAPIs,
   connectPeers,
   waitForPeers,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/counters/peer1'
 const dbPath2 = './orbitdb/tests/counters/peer2'
@@ -25,17 +25,22 @@ Object.keys(testAPIs).forEach(API => {
     this.timeout(config.timeout)
 
     let orbitdb1, orbitdb2
-    let ipfsd1, ipfsd2, ipfs1, ipfs2
+    let ipfs1, ipfs2
+
+    const ipfsConfig1 = Object.assign({}, config.daemon1, {
+      repo: config.daemon1.repo + new Date().getTime()
+    })
+    const ipfsConfig2 = Object.assign({}, config.daemon2, {
+      repo: config.daemon2.repo + new Date().getTime()
+    })
 
     before(async () => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       config.daemon1.repo = ipfsPath1
       config.daemon2.repo = ipfsPath2
-      ipfsd1 = await startIpfs(API, config.daemon1)
-      ipfsd2 = await startIpfs(API, config.daemon2)
-      ipfs1 = ipfsd1.api
-      ipfs2 = ipfsd2.api
+      ipfs1 = await startIpfs(API, ipfsConfig1)
+      ipfs2 = await startIpfs(API, ipfsConfig2)
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
@@ -47,11 +52,11 @@ Object.keys(testAPIs).forEach(API => {
       if (orbitdb2)
         await orbitdb2.stop()
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfs1)
+        await stopIpfs(ipfs1)
 
-      if (ipfsd2)
-        await stopIpfs(ipfsd2)
+      if (ipfs2)
+        await stopIpfs(ipfs2)
     })
 
     beforeEach(async () => {

@@ -11,8 +11,9 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-  databases
-} = require('./utils')
+} = require('orbit-db-test-utils')
+
+const { databases } = require('./utils')
 
 const dbPath = './orbitdb/tests/write-permissions'
 const ipfsPath = './orbitdb/tests/write-permissions/ipfs'
@@ -21,14 +22,13 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Write Permissions (${API})`, function() {
     this.timeout(20000)
 
-    let ipfsd, ipfs, orbitdb1, orbitdb2
+    let ipfs, orbitdb1, orbitdb2
 
     before(async () => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
+      ipfs = await startIpfs(API, config.daemon1)
       orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '1') })
       orbitdb2 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '2') })
     })
@@ -40,8 +40,8 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb2)
         await orbitdb2.stop()
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfs)
+        await stopIpfs(ipfs)
     })
 
     describe('allows multiple peers to write to the databases', function() {
@@ -108,7 +108,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    describe('syncs databases that anyone can write to', function() {
+    describe.skip('syncs databases that anyone can write to', function() {
       databases.forEach(async (database) => {
         it(database.type + ' syncs', async () => {
           let options = {

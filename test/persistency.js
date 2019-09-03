@@ -16,7 +16,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/persistency'
 const ipfsPath = './orbitdb/tests/persistency/ipfs'
@@ -40,7 +40,7 @@ Object.keys(testAPIs).forEach(API => {
 
       const entryCount = 65
 
-      let ipfsd, ipfs, orbitdb1, db, address
+      let ipfs, orbitdb1, db, address
 
       before(async () => {
         const options = Object.assign({}, test.orbitDBConfig)
@@ -54,8 +54,7 @@ Object.keys(testAPIs).forEach(API => {
         config.daemon1.repo = ipfsPath
         rmrf.sync(config.daemon1.repo)
         rmrf.sync(dbPath)
-        ipfsd = await startIpfs(API, config.daemon1)
-        ipfs = ipfsd.api
+        ipfs = await startIpfs(API, config.daemon1)
         orbitdb1 = await OrbitDB.createInstance(ipfs, options)
       })
 
@@ -63,8 +62,8 @@ Object.keys(testAPIs).forEach(API => {
         if(orbitdb1)
           await orbitdb1.stop()
 
-        if (ipfsd)
-          await stopIpfs(ipfsd)
+        if (ipfs)
+          await stopIpfs(ipfs)
       })
 
       describe('load', function() {

@@ -45,15 +45,22 @@ class OrbitDB {
       ? new options.broker(this._ipfs) // eslint-disable-line
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
-    this.keystore = options.keystore
-    this.caches = { 'default': options.cache }
     this.storage = options.storage
-    this.stores = {}
     this._directConnections = {}
+
+    this.caches = { 'default': options.cache }
+    // flag so that the store class doesn't close it
+    if(this.caches['default']) this.caches['default'].isDefault = true
+    this.keystores = { 'default': options.keystore }
+    this.stores = {}
+
     // AccessControllers module can be passed in to enable
     // testing with orbit-db-access-controller
     AccessControllers = options.AccessControllers || AccessControllers
   }
+
+  get keystore() { return this.keystores['default'] }
+  get cache() { return this.caches['default'] }
 
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
@@ -73,6 +80,10 @@ class OrbitDB {
 
       // Create default `level` store
       options.storage = Storage(null, storageOptions)
+    }
+
+    if (options.identity && options.identity.provider._keystore) {
+      options.keystore = options.identity.provider._keystore
     }
 
     if (!options.keystore) {
@@ -137,13 +148,12 @@ class OrbitDB {
   }
 
   async disconnect () {
-    // close Keystore
-    await this.keystore.close()
-
-    // close Cache
-    await Promise.all(Object.values(this.caches).map((cache) => {
-      return cache.close()
-    }))
+    // close keystores
+    const keystores = Object.values(this.keystores)
+    for (let keystore of keystores) {
+      await keystore.close()
+    }
+    this.keystores = []
 
     // Close all open databases
     const databases = Object.values(this.stores)
@@ -151,6 +161,7 @@ class OrbitDB {
       await db.close()
       delete this.stores[db.address.toString()]
     }
+    await this.caches['default'].close()
 
     // Close a direct connection and remove it from internal state
     const removeDirectConnect = e => {
@@ -189,7 +200,6 @@ class OrbitDB {
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
-      keystore: this.keystore,
       cache: options.cache,
       onClose: this._onClose.bind(this)
     })
@@ -295,10 +305,16 @@ class OrbitDB {
     // Create the database address
     const dbAddress = await this._determineAddress(name, type, options)
 
-    options.cache = this.caches[options.directory || 'default']
     if (!options.cache) {
-      const cacheStorage = await this.storage.createStore(options.directory)
-      this.caches[options.directory] = options.cache = new Cache(cacheStorage)
+      if (options.directory) {
+        const cacheStorage = await this.storage.createStore(options.directory)
+        this.caches[options.directory] = options.cache = new Cache(cacheStorage)
+        if (options.cache._store.db.status !== 'open') {
+          await options.cache._store.open()
+        }
+      } else {
+        options.cache = this.caches['default']
+      }
     }
 
     // Check if we have the database locally
@@ -353,7 +369,10 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
-    if (!options.cache) options.cache = this.caches['default']
+    options.cache = this.caches[options.directory] || this.caches['default']
+    if (options.cache._store.db.status !== 'open') {
+      await options.cache._store.open()
+    }
 
     // Check if we have the database
     const haveDB = await this._haveLocalData(options.cache, dbAddress)

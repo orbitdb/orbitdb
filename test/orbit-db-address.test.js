@@ -13,20 +13,19 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - OrbitDB Address (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb
+    let ipfs, orbitdb
 
     before(async () => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
+      ipfs = await startIpfs(API, config.daemon1)
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
@@ -34,8 +33,8 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb)
         await orbitdb.stop()
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfs)
+        await stopIpfs(ipfs)
     })
 
     describe('Parse Address', () => {

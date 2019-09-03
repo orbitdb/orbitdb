@@ -6,7 +6,7 @@ const mapSeries = require('p-map-series')
 const pMap = require('p-map')
 const {
   config,
-} = require('../utils')
+} = require('../../utils')
 
 const clicksPerTab = 20
 const numTabs = 3

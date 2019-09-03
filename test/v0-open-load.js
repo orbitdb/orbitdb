@@ -22,10 +22,11 @@ storage.preCreate = async (directory, options) => {
 // Include test utilities
 const {
   config,
+  getIpfsPeerId,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/v0'
 
@@ -37,22 +38,23 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, address, store
+    let ipfs, orbitdb, db, address, store
     let localDataPath
 
     before(async () => {
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
+      ipfs = await startIpfs(API, config.daemon1)
       rmrf.sync(dbPath)
+      const repoPath = (await ipfs.repo.stat()).repoPath
+      const id = await getIpfsPeerId(ipfs)
       // copy data files to ipfs and orbitdb repos
-      await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
-      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
-      await fs.copy(dbFixturesDir, path.join(dbPath, ipfs._peerInfo.id._idB58String, 'cache'))
+      await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(repoPath, 'blocks'))
+      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(repoPath, 'datastore'))
+      await fs.copy(dbFixturesDir, path.join(dbPath, id, 'cache'))
 
-      store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
+      store = await storage.createStore(path.join(dbPath, id, 'keys'))
       const keystore = new Keystore(store)
 
-      let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), keystore })
+      let identity = await Identities.createIdentity({ id: id, migrate: migrate(keyFixtures), keystore })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath, identity, keystore })
 
     })
@@ -63,8 +65,8 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb)
         await orbitdb.stop()
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfs)
+        await stopIpfs(ipfs)
     })
 
     describe('Open & Load', function() {

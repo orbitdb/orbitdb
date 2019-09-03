@@ -4,7 +4,7 @@ deps:
 	npm install
 
 test: deps
-	npm run test:all
+	npm run test
 	
 build: test
 	mkdir -p examples/browser/lib/

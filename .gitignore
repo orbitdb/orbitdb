@@ -6,12 +6,13 @@ node_modules/
 
 #Don't track ipfs files
 test/ipfs/
-test/browser/ipfs/
-test/browser/orbitdb/
-test/browser/orbitdb.js
-test/browser/ipfs.js
-test/browser/ipfslog.min.js
-test/browser/identities.js
+test/browser/concurrent-tabs/ipfs/
+test/browser/concurrent-tabs/orbitdb/
+test/browser/concurrent-tabs/orbitdb.js
+test/browser/concurrent-tabs/ipfs.js
+test/browser/concurrent-tabs/ipfslog.min.js
+test/browser/concurrent-tabs/identities.js
+test/browser/concurrent-tabs/bundle.js*
 
 # Don't track examples' dependencies (libs) in git
 examples/browser/browser-webpack-example/bundle.js

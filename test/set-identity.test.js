@@ -16,7 +16,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'
@@ -26,7 +26,7 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Set identities (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, keystore
+    let ipfs, orbitdb, db, keystore
     let identity1, identity2
     let localDataPath
 
@@ -34,8 +34,7 @@ Object.keys(testAPIs).forEach(API => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
+      ipfs = await startIpfs(API, config.daemon1)
 
       if(fs && fs.mkdirSync) fs.mkdirSync(keysPath, { recursive: true })
       const identityStore = await storage.createStore(keysPath)
@@ -51,8 +50,8 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb)
         await orbitdb.stop()
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfs)
+        await stopIpfs(ipfs)
     })
 
     beforeEach(async () => {

@@ -13,7 +13,7 @@ const {
   testAPIs,
   connectPeers,
   waitForPeers,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'
@@ -24,7 +24,7 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Automatic Replication (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd1, ipfsd2, ipfs1, ipfs2
+    let ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2, db3, db4
 
     before(async () => {
@@ -34,10 +34,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(config.daemon2.repo)
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
-      ipfsd1 = await startIpfs(API, config.daemon1)
-      ipfsd2 = await startIpfs(API, config.daemon2)
-      ipfs1 = ipfsd1.api
-      ipfs2 = ipfsd2.api
+      ipfs1 = await startIpfs(API, config.daemon1)
+      ipfs2 = await startIpfs(API, config.daemon2)
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
       // Connect the peers manually to speed up test times
@@ -51,11 +49,11 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb2)
         await orbitdb2.stop()
 
-      if (ipfsd1)
-        await stopIpfs(ipfsd1)
+      if (ipfs1)
+        await stopIpfs(ipfs1)
 
       if (ipfs2)
-        await stopIpfs(ipfsd2)
+        await stopIpfs(ipfs2)
     })
 
     beforeEach(async () => {

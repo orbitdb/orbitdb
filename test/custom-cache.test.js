@@ -14,8 +14,9 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-  databases,
-} = require('./utils')
+} = require('orbit-db-test-utils')
+
+const { databases } = require('./utils')
 
 const dbPath = './orbitdb/tests/customKeystore'
 const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
@@ -24,7 +25,7 @@ Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Use a Custom Cache (${API})`, function() {
     this.timeout(20000)
 
-    let ipfsd, ipfs, orbitdb1
+    let ipfs, orbitdb1
 
     before(async () => {
       const store = await storage.createStore("local")
@@ -33,8 +34,7 @@ Object.keys(testAPIs).forEach(API => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
+      ipfs = await startIpfs(API, config.daemon1)
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: path.join(dbPath, '1'),
         cache: cache
@@ -45,8 +45,8 @@ Object.keys(testAPIs).forEach(API => {
       if(orbitdb1)
         await orbitdb1.stop()
 
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      if (ipfs)
+        await stopIpfs(ipfs)
     })
 
     describe('allows orbit to use a custom cache with different store types', function() {
