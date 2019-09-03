@@ -44,6 +44,8 @@ class CustomTestKeystore {
   getPublic (key) {
     return key.public.marshal()
   }
+
+  close () {}
 }
 
 class CustomIdProvider extends IdentityProvider {

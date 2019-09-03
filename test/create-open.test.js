@@ -151,7 +151,6 @@ Object.keys(testAPIs).forEach(API => {
 
           await db.load()
           assert.equal((await db.get('key')), undefined)
-          await db.close()
           await db.drop()
 
           await fs.copy(migrationFixturePath, migrationDataPath)
@@ -176,14 +175,12 @@ Object.keys(testAPIs).forEach(API => {
         describe('Access Controller', function() {
           before(async () => {
             if (db) {
-              await db.close()
               await db.drop()
             }
           })
 
           afterEach(async () => {
             if (db) {
-              await db.close()
               await db.drop()
             }
           })
@@ -338,6 +335,50 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(res.length, 2)
         assert.equal(res[0].payload.value, 'hello1')
         assert.equal(res[1].payload.value, 'hello2')
+      })
+    })
+
+    describe("Close", function() {
+      beforeEach(async () => {
+        Object.values(orbitdb.caches).forEach(cache => {
+          cache.handlers = new Set()
+        })
+      })
+
+      it('closes a custom store', async () => {
+        const directory = path.join(dbPath, "custom-store")
+        db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
+        await db.close()
+        assert.strictEqual(db._cache._store._db.status, 'closed')
+      })
+
+      it('successfully manages multiple caches', async() => {
+        // Cleaning up cruft from other tests
+        const directory = path.join(dbPath, "custom-store")
+        const directory2 = path.join(dbPath, "custom-store2")
+
+        const db1 = await orbitdb.open('xyz1', { create: true, type: 'feed', })
+        const db2 = await orbitdb.open('xyz2', { create: true, type: 'feed', directory })
+        const db3 = await orbitdb.open('xyz3', { create: true, type: 'feed', directory  })
+        const db4 = await orbitdb.open('xyz4', { create: true, type: 'feed', directory: directory2  })
+        const db5 = await orbitdb.open('xyz5', { create: true, type: 'feed', })
+
+        await db1.close()
+        await db2.close()
+        await db4.close()
+
+        assert.strictEqual(orbitdb.cache._store._db.status, 'open')
+        assert.strictEqual(db2._cache._store._db.status, 'open')
+        assert.strictEqual(db3._cache._store._db.status, 'open')
+        assert.strictEqual(db4._cache._store._db.status, 'closed')
+
+        await db3.close()
+        await db5.close()
+
+        assert.strictEqual(orbitdb.cache._store._db.status, 'closed')
+        assert.strictEqual(db2._cache._store._db.status, 'closed')
+        assert.strictEqual(db3._cache._store._db.status, 'closed')
+        assert.strictEqual(db4._cache._store._db.status, 'closed')
       })
     })
   })

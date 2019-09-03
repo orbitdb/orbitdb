@@ -20,7 +20,7 @@
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "~0.2.2",
-    "orbit-db-cache": "next",
+    "orbit-db-cache": "orbitdb/orbit-db-cache#experiment/cache-open",
     "orbit-db-counterstore": "next",
     "orbit-db-docstore": "next",
     "orbit-db-eventstore": "next",
@@ -30,7 +30,7 @@
     "orbit-db-keystore": "next",
     "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-storage-adapter": "^0.5.0",
+    "orbit-db-storage-adapter": "^0.5.3",
     "orbit-db-store": "next"
   },
   "devDependencies": {

@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
 
     it('has correct replication info after load', async () => {
       await db.add('hello')
-      await db.close()
+      // await db.close()
       await db.load()
       assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 1, max: 1 })
     })
@@ -89,8 +89,9 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('has correct replication info after loading from snapshot', async () => {
+      await db._cache._store.open();
       await db.saveSnapshot()
-      await db.close()
+      // await db.close()
       await db.loadFromSnapshot()
       assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
     })
