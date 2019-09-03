@@ -1,6 +1,6 @@
 'use strict'
 
-const fs = require('fs')
+const fs = require('./fs-shim')
 const path = require('path')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
@@ -17,7 +17,6 @@ const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
 const Storage = require('orbit-db-storage-adapter')
-const leveldown = require('leveldown')
 const migrations = require('./migrations')
 
 const Logger = require('logplease')
@@ -65,12 +64,15 @@ class OrbitDB {
 
     if (!options.storage) {
       let storageOptions = {}
+
       if (fs && fs.mkdirSync) {
         storageOptions.preCreate = async (directory) => {
           fs.mkdirSync(directory, { recursive: true })
         }
       }
-      options.storage = Storage(leveldown, storageOptions)
+
+      // Create default `level` store
+      options.storage = Storage(null, storageOptions)
     }
 
     if (!options.keystore) {
