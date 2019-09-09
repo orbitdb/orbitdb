@@ -5,14 +5,17 @@ const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
 const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
+const Cache = require('orbit-db-cache')
+
+const localdown = require('localstorage-down')
+const Storage = require('orbit-db-storage-adapter')
 
 // Include test utilities
 const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
-  CustomTestCache
+  testAPIs
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/persistency'
@@ -25,7 +28,8 @@ const tests = [
   },
   {
     title: 'Persistency with custom cache',
-    orbitDBConfig: { directory: path.join(dbPath, '1'), cache: CustomTestCache }
+    type: "custom",
+    orbitDBConfig: { directory: path.join(dbPath, '1') }
   }
 ]
 
@@ -39,12 +43,20 @@ Object.keys(testAPIs).forEach(API => {
       let ipfsd, ipfs, orbitdb1, db, address
 
       before(async () => {
+        const options = Object.assign({}, test.orbitDBConfig)
+
+        if(test.type === "custom") {
+          const customStorage = Storage(localdown)
+          const customStore = await customStorage.createStore(dbPath)
+          options.cache = new Cache(customStore)
+        }
+
         config.daemon1.repo = ipfsPath
         rmrf.sync(config.daemon1.repo)
         rmrf.sync(dbPath)
         ipfsd = await startIpfs(API, config.daemon1)
         ipfs = ipfsd.api
-        orbitdb1 = await OrbitDB.createInstance(ipfs, test.orbitDBConfig)
+        orbitdb1 = await OrbitDB.createInstance(ipfs, options)
       })
 
       after(async () => {

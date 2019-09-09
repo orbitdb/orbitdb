@@ -133,7 +133,7 @@ Object.keys(testAPIs).forEach(API => {
                     write: [
                       orbitdb1.identity.id,
                       orbitdb2.identity.id
-                    ],
+                    ]
                   }
                 }
 

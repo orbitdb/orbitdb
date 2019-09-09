@@ -1,5 +1,5 @@
 const creatures = [
-  '🐙', '🐷', '🐬', '🐞',
+  '🐙', '🐷', '🐬', '🐞', 
   '🐈', '🙉', '🐸', '🐓',
   '🐊', '🕷', '🐠', '🐘',
   '🐼', '🐰', '🐶', '🐥'
@@ -19,7 +19,7 @@ const readonlyCheckbox = document.getElementById("readonly")
 
 function handleError(e) {
   console.error(e.stack)
-  statusElm.innerHTML = e.message
+  statusElm.innerHTML = e.message  
 }
 
 const main = (IPFS, ORBITDB) => {
@@ -48,7 +48,7 @@ const main = (IPFS, ORBITDB) => {
   const ipfs = new Ipfs({
     repo: '/orbitdb/examples/browser/new/ipfs/0.33.1',
     start: true,
-    preload: {
+    preload: { 
       enabled: false
     },
     EXPERIMENTAL: {
@@ -151,9 +151,9 @@ const main = (IPFS, ORBITDB) => {
 
       db = await orbitdb.open(name, {
         // If database doesn't exist, create it
-        create: true,
+        create: true, 
         overwrite: true,
-        // Load only the local version of the database,
+        // Load only the local version of the database, 
         // don't load the latest from the network yet
         localOnly: false,
         type: type,

@@ -2,7 +2,7 @@
 
 const assert = require('assert')
 const mapSeries = require('p-map-series')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
@@ -11,6 +11,7 @@ const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const Identities = require('orbit-db-identity-provider')
 const io = require('orbit-db-io')
+
 // Include test utilities
 const {
   config,
@@ -21,6 +22,8 @@ const {
 
 const dbPath = './orbitdb/tests/create-open'
 const ipfsPath = './orbitdb/tests/create-open/ipfs'
+const migrationFixturePath = './test/fixtures/migration/cache-schema-test'
+const ipfsFixturesDir = './test/fixtures/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function() {
@@ -35,6 +38,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
+      await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
+      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
@@ -95,7 +100,7 @@ Object.keys(testAPIs).forEach(API => {
       describe('Success', function() {
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
-          localDataPath = path.join(dbPath, db.address.root, db.address.path)
+          localDataPath = path.join(dbPath, orbitdb.id, 'cache')
           await db.close()
         })
 
@@ -114,27 +119,17 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('saves database manifest reference locally', async () => {
-          const manifestHash = db.address.root
-          const address = db.address.toString()
-          levelup(leveldown(localDataPath), (err, db) => {
-            if (err) {
-              assert.equal(err, null)
-            }
-
-            db.get(address + '/_manifest', (err, value) => {
-              if (err) {
-                assert.equal(err, null)
-              }
-
-              const data = JSON.parse(value || '{}')
-              assert.equal(data, manifestHash)
-            })
-          })
+          const address = db.id
+          const manifestHash = address.split('/')[2]
+          await db._cache._store.open()
+          const value = await db._cache.get(address + '/_manifest')
+          assert.equal(value, manifestHash)
         })
 
         it('saves database manifest file locally', async () => {
-          const manifest = await io.read(ipfs, db.address.root)
-          assert(manifest)
+          const manifestHash = db.id.split('/')[2]
+          const manifest = await io.read(ipfs, manifestHash)
+          assert.notEqual(manifest, )
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)
@@ -144,8 +139,38 @@ Object.keys(testAPIs).forEach(API => {
         it('can pass local database directory as an option', async () => {
           const dir = './orbitdb/tests/another-feed'
           db = await orbitdb.create('third', 'feed', { directory: dir })
-          localDataPath = path.join(dir, db.address.root, db.address.path)
-          assert.equal(fs.existsSync(localDataPath), true)
+          assert.equal(fs.existsSync(dir), true)
+        })
+
+        it('loads cache from previous version of orbit-db', async() => {
+          const dbName = 'cache-schema-test'
+
+          db = await orbitdb.create(dbName, 'keyvalue')
+          const manifestHash = db.address.root
+          const migrationDataPath = path.join(dbPath, manifestHash, dbName)
+
+          await db.load()
+          assert.equal((await db.get('key')), undefined)
+          await db.close()
+          await db.drop()
+
+          await fs.copy(migrationFixturePath, migrationDataPath)
+          db = await orbitdb.create(dbName, 'keyvalue')
+          await db.load()
+
+          assert.equal(manifestHash, db.address.root)
+          assert.equal((await db.get('key')), 'value')
+        })
+
+        it('loads cache from previous version of orbit-db with the directory option', async() => {
+          const dbName = 'cache-schema-test2'
+          const directory = path.join(dbPath, "some-other-place")
+
+          await fs.copy(migrationFixturePath, directory)
+          db = await orbitdb.create(dbName, 'keyvalue', { directory })
+          await db.load()
+
+          assert.equal((await db.get('key')), 'value')
         })
 
         describe('Access Controller', function() {
@@ -228,7 +253,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('Open', function() {
-      before(async () => {
+      beforeEach(async () => {
         db = await orbitdb.open('abc', { create: true, type: 'feed' })
       })
 
@@ -260,7 +285,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database - with a different identity', async () => {
-        const identity = await Identities.createIdentity({ id: 'test-id' })
+        const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)
