@@ -33,11 +33,19 @@ const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection,
   logger.debug(`Connected to ${peer}`)
 
   // Send the heads if we have any
-  const heads = getHeadsForDatabase(getStore(address))
+  const store = getStore(address)
+  const heads = getHeadsForDatabase(store)
+
   logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
   if (heads) {
     await channel.send(JSON.stringify({ address: address, heads: heads }))
   }
+
+  // resend if store was originally not ready
+  store.events.on('ready', () => {
+    const heads = getHeadsForDatabase(store)
+    if (heads) channel.send(JSON.stringify({ address: address, heads: heads }))
+  })
 
   return channel
 }
