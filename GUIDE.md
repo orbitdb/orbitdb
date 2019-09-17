@@ -203,7 +203,7 @@ ipfs.on('ready', async () => {
 })
 ```
 
-To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's key: `orbitdb.identity.id`.
+To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's id: `orbitdb.identity.id`.
 
 The keys look like this:
 `042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839`
