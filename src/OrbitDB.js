@@ -403,6 +403,7 @@ class OrbitDB {
       return false
     }
     const data = await cache.get([dbAddress.toString(), '_manifest'].join('/'))
+    const addr = dbAddress.toString()
     return data !== undefined && data !== null
   }
 
