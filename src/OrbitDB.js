@@ -1,6 +1,5 @@
 'use strict'
 
-const fs = require('./fs-shim')
 const path = require('path')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
@@ -58,8 +57,8 @@ class OrbitDB {
     AccessControllers = options.AccessControllers || AccessControllers
   }
 
-  get keystore() { return this.keystores['default'] }
-  get cache() { return this.caches[this.directory] }
+  get keystore () { return this.keystores['default'] }
+  get cache () { return this.caches[this.directory] }
 
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
@@ -277,18 +276,14 @@ class OrbitDB {
     // Cache cleanup
     // First remove the handler by db address
     // Then close the cache if there are no more handlers
-    for(let directory of Object.keys(this.caches)) {
+    for (let directory of Object.keys(this.caches)) {
       const cache = this.caches[directory] || this.cache
       const store = this.stores[address]
 
-      if (store && store.options.directory == directory) {
-        // Closing a custom cache?
-        if (cache.handlers.has(address)) cache.handlers.delete(address)
-        if (!cache.handlers.size) await cache.close()
+      if (store && store.options.directory === directory) {
+        await cache.removeHandler(address)
       } else {
-        // Else remove it from the default cache
-        if (this.cache.handlers.has(address)) this.cache.handlers.delete(address)
-        if (!this.cache.handlers.size) await this.cache.close()
+        await this.cache.removeHandler(address)
       }
     }
     delete this.stores[address]
