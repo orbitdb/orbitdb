@@ -47,8 +47,8 @@ class OrbitDB {
     this.storage = options.storage
     this._directConnections = {}
 
-    this.caches = { }
-    this.caches[this.directory] = options.cache
+    this.caches = {}
+    this.caches[this.directory] = { cache: options.cache, handlers: new Set() }
     this.keystores = { 'default': options.keystore }
     this.stores = {}
 
@@ -58,7 +58,7 @@ class OrbitDB {
   }
 
   get keystore () { return this.keystores['default'] }
-  get cache () { return this.caches[this.directory] }
+  get cache () { return this.caches[this.directory].cache }
 
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
@@ -147,17 +147,17 @@ class OrbitDB {
     }
     this.keystores = []
 
-    const caches = Object.keys(this.caches)
-    for (let directory of caches) {
-      await this.caches[directory].close()
-      delete this.caches[directory]
-    }
-
     // Close all open databases
     const databases = Object.values(this.stores)
     for (let db of databases) {
       await db.close()
       delete this.stores[db.address.toString()]
+    }
+
+    const caches = Object.keys(this.caches)
+    for (let directory of caches) {
+      await this.caches[directory].cache.close()
+      delete this.caches[directory]
     }
 
     // Close a direct connection and remove it from internal state
@@ -183,7 +183,7 @@ class OrbitDB {
     await this.disconnect()
   }
 
-  async _createCache(path) {
+  async _createCache (path) {
     let cacheStorage = await this.storage.createStore(path)
     return new Cache(cacheStorage)
   }
@@ -203,7 +203,9 @@ class OrbitDB {
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
       cache: options.cache,
-      onClose: this._onClose.bind(this)
+      onClose: this._onClose.bind(this),
+      onDrop: this._onDrop.bind(this),
+      onLoad: this._onLoad.bind(this)
     })
     const identity = options.identity || this.identity
 
@@ -265,7 +267,8 @@ class OrbitDB {
   }
 
   // Callback when database was closed
-  async _onClose (address) {
+  async _onClose (db) {
+    const address = db.address.toString()
     logger.debug(`Close ${address}`)
 
     // Unsubscribe from pubsub
@@ -273,20 +276,30 @@ class OrbitDB {
       await this._pubsub.unsubscribe(address)
     }
 
-    // Cache cleanup
-    // First remove the handler by db address
-    // Then close the cache if there are no more handlers
-    for (let directory of Object.keys(this.caches)) {
-      const cache = this.caches[directory] || this.cache
-      const store = this.stores[address]
+    const store = this.stores[address]
+    const dir = store && store.options.directory ? store.options.directory : this.directory
+    const cache = this.caches[dir]
 
-      if (store && store.options.directory === directory) {
-        await cache.removeHandler(address)
-      } else {
-        await this.cache.removeHandler(address)
-      }
+    if (cache && cache.handlers.has(address)) {
+      cache.handlers.delete(address)
+      if (!cache.handlers.size) await cache.cache.close()
     }
+
     delete this.stores[address]
+  }
+
+  async _onDrop (db) {
+    const address = db.address.toString()
+    const dir = db && db.options.directory ? db.options.directory : this.directory
+    await this._requestCache(address, dir, db._cache)
+    this.stores[address] = db
+  }
+
+  async _onLoad (db) {
+    const address = db.address.toString()
+    const dir = db && db.options.directory ? db.options.directory : this.directory
+    await this._requestCache(address, dir, db._cache)
+    this.stores[address] = db
   }
 
   async _determineAddress (name, type, options = {}) {
@@ -321,18 +334,7 @@ class OrbitDB {
     // Create the database address
     const dbAddress = await this._determineAddress(name, type, options)
 
-    if (options.directory) {
-      if (this.caches[options.directory]) {
-        options.cache = this.caches[options.directory]
-      } else {
-        this.caches[options.directory] = await this._createCache(options.directory)
-        options.cache = this.caches[options.directory]
-      }
-    } else {
-      options.cache = this.cache
-    }
-    // Wake up the cache if it needs it
-    if(options.cache) await options.cache.open()
+    options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
     // Check if we have the database locally
     const haveDB = await this._haveLocalData(options.cache, dbAddress)
@@ -355,6 +357,21 @@ class OrbitDB {
     return this._determineAddress(name, type, opts)
   }
 
+  async _requestCache (address, directory, existingCache) {
+    const dir = directory || this.directory
+    if (!this.caches[dir]) {
+      const newCache = existingCache || await this._createCache(dir)
+      this.caches[dir] = { cache: newCache, handlers: new Set() }
+    }
+    this.caches[dir].handlers.add(address)
+    const cache = this.caches[dir].cache
+
+    // "Wake up" the caches if they need it
+    if (cache) await cache.open()
+
+    return cache
+  }
+
   /*
       options = {
         localOnly: false // if set to true, throws an error if database can't be found locally
@@ -369,19 +386,6 @@ class OrbitDB {
 
     options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)
-
-    if (options.directory) {
-      if (this.caches[options.directory]) {
-        options.cache = this.caches[options.directory]
-      } else {
-        this.caches[options.directory] = await this._createCache(options.directory)
-        options.cache = this.caches[options.directory]
-      }
-    } else {
-      options.cache = this.cache
-    }
-    // "Wake up" the caches if they need it
-    if (options.cache) await options.cache.open()
 
     // If address is just the name of database, check the options to crate the database
     if (!OrbitDBAddress.isValid(address)) {
@@ -399,7 +403,7 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
-    options.cache.handlers.add(dbAddress.toString())
+    options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
     // Check if we have the database
     const haveDB = await this._haveLocalData(options.cache, dbAddress)

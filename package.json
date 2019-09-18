@@ -20,7 +20,7 @@
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "~0.2.2",
-    "orbit-db-cache": "^0.3.0-rc3",
+    "orbit-db-cache": "next",
     "orbit-db-counterstore": "next",
     "orbit-db-docstore": "next",
     "orbit-db-eventstore": "next",
@@ -31,7 +31,7 @@
     "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "^0.5.3",
-    "orbit-db-store": "github:orbitdb/orbit-db-store#fix/store-management"
+    "orbit-db-store": "^2.7.0-rc5"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

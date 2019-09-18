@@ -339,15 +339,22 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe("Close", function() {
-      beforeEach(async () => {
-        Object.values(orbitdb.caches).forEach(cache => {
-          cache.handlers = new Set()
-        })
+      before(async () => {
+        if (orbitdb) await orbitdb.stop()
+        orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
       })
-
       it('closes a custom store', async () => {
         const directory = path.join(dbPath, "custom-store")
         db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
+        await db.close()
+        assert.strictEqual(db._cache._store._db.status, 'closed')
+      })
+
+      it("close load close sets status to 'closed'", async () => {
+        const directory = path.join(dbPath, "custom-store")
+        db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
+        await db.close()
+        await db.load()
         await db.close()
         assert.strictEqual(db._cache._store._db.status, 'closed')
       })
@@ -379,6 +386,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.strictEqual(db2._cache._store._db.status, 'closed')
         assert.strictEqual(db3._cache._store._db.status, 'closed')
         assert.strictEqual(db4._cache._store._db.status, 'closed')
+        assert.strictEqual(db5._cache._store._db.status, 'closed')
       })
     })
   })
