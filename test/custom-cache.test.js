@@ -5,13 +5,15 @@ const rmrf = require('rimraf')
 const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const CustomCache = require('orbit-db-cache')
+const localdown = require('localstorage-down')
+const storage = require("orbit-db-storage-adapter")(localdown)
+
 // Include test utilities
 const {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-  CustomTestCache,
   databases,
 } = require('./utils')
 
@@ -25,6 +27,9 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
+      const store = await storage.createStore("local")
+      const cache = new CustomCache(store)
+
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
@@ -32,7 +37,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: path.join(dbPath, '1'),
-        cache: CustomTestCache
+        cache: cache
       })
     })
 

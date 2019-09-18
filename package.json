@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.21.4",
+  "version": "0.22.0-rc4",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -18,20 +18,22 @@
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
-    "orbit-db-access-controllers": "~0.2.0",
-    "orbit-db-cache": "~0.2.4",
-    "orbit-db-counterstore": "~1.5.0",
-    "orbit-db-docstore": "~1.5.0",
-    "orbit-db-eventstore": "~1.5.0",
-    "orbit-db-feedstore": "~1.5.0",
-    "orbit-db-identity-provider": "~0.1.0",
-    "orbit-db-io": "~0.1.0",
-    "orbit-db-keystore": "^0.2.1",
-    "orbit-db-kvstore": "~1.5.0",
+    "orbit-db-access-controllers": "~0.2.2",
+    "orbit-db-cache": "next",
+    "orbit-db-counterstore": "next",
+    "orbit-db-docstore": "next",
+    "orbit-db-eventstore": "next",
+    "orbit-db-feedstore": "next",
+    "orbit-db-identity-provider": "next",
+    "orbit-db-io": "^0.1.1",
+    "orbit-db-keystore": "next",
+    "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-store": "~2.6.0"
+    "orbit-db-storage-adapter": "^0.5.0",
+    "orbit-db-store": "next"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
@@ -39,11 +41,11 @@
     "babel-preset-env": "^1.7.0",
     "datastore-level": "0.10.0",
     "fs-extra": "^7.0.1",
-    "go-ipfs-dep": "~0.4.20",
     "ipfs": "~0.36.4",
     "ipfs-repo": "~0.26.6",
     "ipfsd-ctl": "~0.42.3",
-    "localstorage-level-migration": "^0.0.1",
+    "go-ipfs-dep": "aphelionz/npm-go-ipfs-dep",
+    "localstorage-level-migration": "next",
     "markdown-toc": "^1.2.0",
     "mocha": "^5.2.0",
     "p-each-series": "^1.0.0",
@@ -55,6 +57,7 @@
     "remark-cli": "^5.0.0",
     "remark-validate-links": "^7.0.0",
     "rimraf": "^2.6.2",
+    "standard": "^12.0.1",
     "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"
   },
@@ -73,6 +76,14 @@
     "build:debug": "webpack --config conf/webpack.debug.config.js --sort-modules-by size && mkdir -p examples/browser/lib && cp dist/orbitdb.js examples/browser/lib/orbitdb.js && cp dist/orbitdb.js.map examples/browser/lib/orbitdb.js.map",
     "build:docs/toc": "markdown-toc --no-first1 -i README.md && markdown-toc --no-first1 -i API.md && markdown-toc --no-first1 -i GUIDE.md && markdown-toc --no-first1 -i CHANGELOG.md && markdown-toc --no-first1 -i FAQ.md ",
     "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-env --plugins babel-plugin-transform-runtime"
+  },
+  "standard": {
+    "env": "mocha",
+    "ignore": [
+      "test/**",
+      "examples/**",
+      "benchmarks/**"
+    ]
   },
   "localMaintainers": [
     "haad <haad@haja.io>",
