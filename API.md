@@ -609,7 +609,7 @@ Emitted after an entry was added locally to the database. *hash* is the IPFS has
 db.events.on('peer', (peer) => ... )
 ```
 
-Emitted when a new peer connects via ipfs pubsub. *peer* is the new peer,  an instance of [`peerInfo`](https://github.com/libp2p/js-peer-info)
+Emitted when a new peer connects via ipfs pubsub. *peer* is a string containing the new peer's id
 
 ### `closed`
 Emitted once the database has finished closing.
