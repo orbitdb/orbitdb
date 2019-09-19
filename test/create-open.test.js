@@ -339,6 +339,10 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe("Close", function() {
+      before(async () => {
+        if (orbitdb) await orbitdb.stop()
+        orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
+      })
       it('closes a custom store', async () => {
         const directory = path.join(dbPath, "custom-store")
         db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
@@ -368,8 +372,6 @@ Object.keys(testAPIs).forEach(API => {
 
         await db3.close()
         await db5.close()
-        await orbitdb.cache.close()
-
 
         assert.strictEqual(orbitdb.cache._store._db.status, 'closed')
         assert.strictEqual(db2._cache._store._db.status, 'closed')

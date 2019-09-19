@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
 
     it('has correct replication info after load', async () => {
       await db.add('hello')
-      // await db.close()
+      await db.close()
       await db.load()
       assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 1, max: 1 })
     })
