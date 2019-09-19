@@ -62,6 +62,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [`load.progress`](#loadprogress)
   * [`ready`](#ready)
   * [`write`](#write)
+  * [`peer`](#peer)
   * [`closed`](#closed)
 
 <!-- tocstop -->
@@ -602,6 +603,13 @@ db.events.on('write', (dbname, hash, entry) => ... )
 ```
 
 Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
+
+### `peer`
+```javascript
+db.events.on('peer', (peer) => ... )
+```
+
+Emitted when a new peer connects via ipfs pubsub. *peer* is the new peer,  an instance of [`peerInfo`](https://github.com/libp2p/js-peer-info)
 
 ### `closed`
 Emitted once the database has finished closing.
