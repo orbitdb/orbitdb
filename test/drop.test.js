@@ -52,11 +52,13 @@ Object.keys(testAPIs).forEach(API => {
 
       it('removes local database cache', async () => {
         await db.drop()
+        await db._cache.open()
         assert.equal(await db._cache.get(db.localHeadsPath), undefined)
         assert.equal(await db._cache.get(db.remoteHeadsPath), undefined)
         assert.equal(await db._cache.get(db.snapshotPath), undefined)
         assert.equal(await db._cache.get(db.queuePath), undefined)
         assert.equal(await db._cache.get(db.manifestPath), undefined)
+        await db._cache.close()
       })
     })
   })

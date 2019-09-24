@@ -1,6 +1,6 @@
 {
   "name": "orbit-db",
-  "version": "0.22.0-rc4",
+  "version": "0.22.0-rc5",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -30,7 +30,7 @@
     "orbit-db-keystore": "next",
     "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-storage-adapter": "^0.5.0",
+    "orbit-db-storage-adapter": "^0.5.3",
     "orbit-db-store": "next"
   },
   "devDependencies": {
