@@ -30,7 +30,7 @@
     "orbit-db-keystore": "next",
     "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-storage-adapter": "^0.5.0",
+    "orbit-db-storage-adapter": "^0.5.3",
     "orbit-db-store": "next"
   },
   "devDependencies": {
