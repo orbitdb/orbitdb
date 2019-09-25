@@ -99,19 +99,21 @@ const db = await orbitdb.keyvalue('profile')
 > Creates and opens an OrbitDB database.
 
 Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
-- `write` (array): An array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info. (Default: uses the OrbitDB identity public key `orbitdb.identity.publicKey`, which would give write access only to yourself)
+- `accessController` (object): An object, as shown in the example below, containing the key `write` whose value is an array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info.
+(Default: uses the OrbitDB identity id `orbitdb.identity.id`, which would give write access only to yourself)
+
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
 ```javascript
 const db = await orbitdb.create('user.posts', 'eventlog', {
-  accessController: {  
-    write: [
-      // Give access to ourselves
-      orbitdb.identity.publicKey,
-      // Give access to the second peer
-      '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
-    ]
-  }
+    accessController: {
+      write: [
+        // Give access to ourselves
+        orbitdb.identity.id,
+        // Give access to the second peer
+        '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
+      ]
+    }
 })
 // db created & opened
 ```
@@ -481,9 +483,9 @@ OrbitDB.parseAddress('/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/fi
 
 Every database (store) has the following methods available in addition to their specific methods.
 
-### store.load([amount])
+### store.load([amount], { fetchEntryTimeout })
 
-Load the locally persisted database state to memory. Use the optional `amount` argument to limit the number of entries loaded into memory, starting from the head(s) (Default: `-1` will load all entries)
+Load the locally persisted database state to memory. Use the optional `amount` argument to limit the number of entries loaded into memory, starting from the head(s) (Default: `-1` will load all entries). `fetchEntryTimeout` defines the timeout for fetching an entry.
 
 Returns a `Promise` that resolves once complete
 
