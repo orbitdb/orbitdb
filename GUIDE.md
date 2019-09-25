@@ -280,6 +280,9 @@ await db.access.grant('write', identity2.publicKey) // grant access to identity2
 You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the AccessControllers object before passing it to OrbitDB.
 
 ```javascript
+let AccessControllers = require('orbit-db-access-controllers')
+const AccessController = require('orbit-db-access-controllers/src/access-controller-interface')
+
 class OtherAccessController extends AccessController {
 
     static get type () { return 'othertype' } // Return the type for this controller
@@ -293,9 +296,17 @@ class OtherAccessController extends AccessController {
       }
 
     async grant (access, identity) {} // Logic for granting access to identity
+
+    async save () {
+      // return parameters needed for loading
+      return { parameter: 'some-parameter-needed-for-loading' }
+    }
+
+    static async create (orbitdb, options) {
+      return new OtherAccessController()
+    }
 }
 
-let AccessControllers = require('orbit-db-access-controllers')
 AccessControllers.addAccessController({ AccessController: OtherAccessController })
 
 const orbitdb = await OrbitDB.createInstance(ipfs, {
@@ -305,7 +316,7 @@ const orbitdb = await OrbitDB.createInstance(ipfs, {
 const db = await orbitdb.keyvalue('first-database', {
   accessController: {
     type: 'othertype',
-    write: [id1.publicKey]
+    write: [id1.id]
   }
 })
 ```

@@ -211,9 +211,10 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(minClock, 1)
 
               const replicateProgressEvents = events.filter(e => e.event === 'replicate.progress')
+              const minProgressClock = Math.min(...replicateProgressEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
               assert.equal(replicateProgressEvents.length, expectedEventCount)
               assert.equal(replicateProgressEvents[0].entry.payload.value.split(' ')[0], 'hello')
-              assert.equal(replicateProgressEvents[0].entry.clock.time, 1)
+              assert.equal(minProgressClock, 1)
               assert.equal(replicateProgressEvents[0].replicationInfo.max >= 1, true)
               assert.equal(replicateProgressEvents[0].replicationInfo.progress, 1)
 

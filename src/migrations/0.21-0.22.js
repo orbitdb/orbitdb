@@ -8,7 +8,7 @@ const logger = Logger.create('orbit-db')
 Logger.setLogLevel('ERROR')
 
 async function migrate (OrbitDB, options, dbAddress) {
-  let oldCache = OrbitDB.caches[options.directory]
+  let oldCache = OrbitDB.caches[options.directory] ? OrbitDB.caches[options.directory].cache : null
   let oldStore
 
   if (!oldCache) {
