@@ -62,8 +62,8 @@ class OrbitDB {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     const { id } = await ipfs.id()
-    const directory = options.directory || './orbitdb'
-    const keystore = options.keystore || Keystore.create([directory, id, 'keystore'].join('/'))
+    //const directory = options.directory || './orbitdb'
+    //const keystore = options.keystore || Keystore.create([directory, id, 'keystore'].join('/'))
 
     if (!options.directory) { options.directory = './orbitdb' }
 
@@ -79,7 +79,7 @@ class OrbitDB {
     }
 
     if (!options.keystore) {
-      const keystorePath = path.join(options.directory, id, '/keystore')
+      const keystorePath = [options.directory, id, '/keystore'].join()
       let keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
@@ -92,7 +92,7 @@ class OrbitDB {
     }
 
     if (!options.cache) {
-      const cachePath = path.join(options.directory, id, '/cache')
+      const cachePath = [options.directory, id, '/cache'].join()
       let cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
     }
@@ -432,8 +432,7 @@ class OrbitDB {
 
   // Save the database locally
   async _addManifestToCache (directory, dbAddress) {
-    const cache = await this._loadCache(directory, dbAddress)
-    await cache.set([dbAddress.toString(), '_manifest'].join('/'), dbAddress.root)
+    await this.cache.set([dbAddress.toString(), '_manifest'].join('/'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
 

@@ -3,10 +3,10 @@
     <title>Break OrbitDB</title>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <script type="text/javascript" src="orbitdb.js" charset="utf-8"></script>
-    <script type="text/javascript" src="ipfs.js" charset="utf-8"></script>
-    <script type="text/javascript" src="identities.js" charset="utf-8"></script>
-    <script type="text/javascript" src="ipfslog.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../dist/orbitdb.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/ipfs/dist/index.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/orbit-db-identity-provider/dist/index-browser.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../node_modules/ipfs-log/dist/ipfslog.min.js" charset="utf-8"></script>
   </head>
   <body>
       <div style="padding: 0px 0px 25px 0px;">
@@ -76,17 +76,19 @@
         await consistentLog.load()
         await inconsistentLog.load()
 
-        // const updateData = () => {
-        //   logData.innerHTML = ''
-        //   const count = consistentlog.iterator({ limit: -1 }).collect().map(e => {
-        //     logData.innerHTML += e.clock.time + ': ' + e.hash + '<br />'
-        //   })
-        // }
+        const updateData = async () => {
+          logData.innerHTML = ''
+          const count = inconsistentLog.iterator({ limit: -1 }).collect().map(e => {
+            logData.innerHTML += e.clock.time + ': ' + e.hash + '<br />'
+          })
+        }
+        updateData()
 
         addData.addEventListener('click', async event => {
           const data = randStr()
           await consistentLog.add(data)
           await inconsistentLog.add(data)
+          updateData()
         })
       })
     </script>
