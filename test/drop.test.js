@@ -2,7 +2,6 @@
 
 const assert = require('assert')
 const fs = require('fs')
-const path = require('path')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 
@@ -46,7 +45,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('Drop', function() {
       before(async () => {
         db = await orbitdb.create('first', 'feed')
-        localDataPath = path.join(dbPath)
+        localDataPath = dbPath
         assert.equal(fs.existsSync(localDataPath), true)
       })
 

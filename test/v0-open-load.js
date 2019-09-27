@@ -3,7 +3,6 @@
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const fs = require('fs-extra')
-const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
 const leveldown = require('leveldown')
@@ -45,11 +44,11 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       rmrf.sync(dbPath)
       // copy data files to ipfs and orbitdb repos
-      await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
-      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
-      await fs.copy(dbFixturesDir, path.join(dbPath, ipfs._peerInfo.id._idB58String, 'cache'))
+      await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
+      await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
+      await fs.copy(dbFixturesDir, [dbPath, ipfs._peerInfo.id._idB58String, 'cache'].join('/'))
 
-      store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
+      store = await storage.createStore([dbPath, ipfs._peerInfo.id._idB58String, 'keys'].join('/'))
       const keystore = new Keystore(store)
 
       let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), keystore })

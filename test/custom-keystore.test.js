@@ -2,7 +2,6 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
-const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
 // Include test utilities
@@ -34,7 +33,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
       const identity = await Identities.createIdentity({ type: 'custom', keystore: CustomTestKeystore().create()  })
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
-        directory: path.join(dbPath, '1'),
+        directory: [dbPath, '1'].join('/'),
         identity
       })
     })

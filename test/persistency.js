@@ -3,7 +3,6 @@
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
-const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const Cache = require('orbit-db-cache')
 
@@ -24,12 +23,12 @@ const ipfsPath = './orbitdb/tests/persistency/ipfs'
 const tests = [
   {
     title: 'Persistency',
-    orbitDBConfig: { directory: path.join(dbPath, '1') }
+    orbitDBConfig: { directory: [dbPath, '1'].join('/') }
   },
   {
     title: 'Persistency with custom cache',
     type: "custom",
-    orbitDBConfig: { directory: path.join(dbPath, '1') }
+    orbitDBConfig: { directory: [dbPath, '1'].join('/') }
   }
 ]
 

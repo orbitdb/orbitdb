@@ -2,7 +2,6 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
-const path = require('path')
 const OrbitDB = require('../src/OrbitDB')
 const CustomCache = require('orbit-db-cache')
 const localdown = require('localstorage-down')
@@ -36,7 +35,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
-        directory: path.join(dbPath, '1'),
+        directory: [dbPath, '1'].join('/'),
         cache: cache
       })
     })

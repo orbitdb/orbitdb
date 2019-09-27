@@ -3,7 +3,6 @@
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const fs = require('fs')
-const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
 const leveldown = require('leveldown')
