@@ -383,6 +383,20 @@ Other databases, see:
 - [docs.query()](https://github.com/orbitdb/orbit-db/blob/master/API.md#querymapper)
 - [counter.value](https://github.com/orbitdb/orbit-db/blob/master/API.md#value)
 
+## Entry sorting and conflict resolution
+
+OrbitDB relies on [ipfs-log](https://github.com/orbitdb/ipfs-log) which sorts the entries based on a `sortFn` which determines the order. By default, the `sortFn` is set to [Last Writer Wins](https://github.com/orbitdb/ipfs-log/blob/1d609385f7c5db9926a0388cfcdf7fd2a796c522/src/log-sorting.js#L15) where the entry with the greater clock wins and conflicts are resolved by clock id.
+
+You can pass a custom sorting function to handle conflicts differently as follows:
+
+```javaScript
+const db = await orbitdb.log('sortDifferently', {
+  sortFn: SomeOtherSortFn
+})
+```
+
+`SomeOtherSortFn` takes two entries and should return either `-1` or `1` indicating which of the arguments is greater. The function must not return `0` when comparing entries. See [Log Sorting](https://github.com/orbitdb/ipfs-log/blob/master/src/log-sorting.js#L15)
+
 ## Persistency
 
 OrbitDB saves the state of the database automatically on disk. This means that upon opening a database, the developer can choose to load locally the persisted before using the database. **Loading the database locally before using it is highly recommended!**
