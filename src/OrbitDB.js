@@ -79,7 +79,7 @@ class OrbitDB {
     }
 
     if (!options.keystore) {
-      const keystorePath = [options.directory, id, '/keystore'].join()
+      const keystorePath = [options.directory, id, '/keystore'].join('/')
       let keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
@@ -92,7 +92,7 @@ class OrbitDB {
     }
 
     if (!options.cache) {
-      const cachePath = [options.directory, id, '/cache'].join()
+      const cachePath = [options.directory, id, '/cache'].join('/')
       let cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
     }
