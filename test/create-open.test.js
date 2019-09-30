@@ -99,7 +99,7 @@ Object.keys(testAPIs).forEach(API => {
       describe('Success', function() {
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
-          localDataPath = [dbPath, orbitdb.id, 'cache'].join()
+          localDataPath = [dbPath, orbitdb.id, 'cache'].join('/')
           await db.close()
         })
 
@@ -146,7 +146,7 @@ Object.keys(testAPIs).forEach(API => {
 
           db = await orbitdb.create(dbName, 'keyvalue')
           const manifestHash = db.address.root
-          const migrationDataPath = [dbPath, manifestHash, dbName].join()
+          const migrationDataPath = [dbPath, manifestHash, dbName].join('/')
 
           await db.load()
           assert.equal((await db.get('key')), undefined)
@@ -162,7 +162,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('loads cache from previous version of orbit-db with the directory option', async() => {
           const dbName = 'cache-schema-test2'
-          const directory = [dbPath, "some-other-place"].join()
+          const directory = [dbPath, "some-other-place"].join('/')
 
           await fs.copy(migrationFixturePath, directory)
           db = await orbitdb.create(dbName, 'keyvalue', { directory })
@@ -232,7 +232,7 @@ Object.keys(testAPIs).forEach(API => {
       describe('Success', function() {
         before(async () => {
           address = await orbitdb.determineAddress('third', 'feed', { replicate: false })
-          localDataPath = [dbPath, address.root, address.path].join()
+          localDataPath = [dbPath, address.root, address.path].join('/')
         })
 
         it('does not save the address locally', async () => {
@@ -343,14 +343,14 @@ Object.keys(testAPIs).forEach(API => {
         orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
       })
       it('closes a custom store', async () => {
-        const directory = [dbPath, "custom-store"].join()
+        const directory = [dbPath, "custom-store"].join('/')
         db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
         assert.strictEqual(db._cache._store._db.status, 'closed')
       })
 
       it("close load close sets status to 'closed'", async () => {
-        const directory = [dbPath, "custom-store"].join()
+        const directory = [dbPath, "custom-store"].join('/')
         db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
         await db.load()
@@ -360,8 +360,8 @@ Object.keys(testAPIs).forEach(API => {
 
       it('successfully manages multiple caches', async() => {
         // Cleaning up cruft from other tests
-        const directory = [dbPath, "custom-store"].join()
-        const directory2 = [dbPath, "custom-store2"].join()
+        const directory = [dbPath, "custom-store"].join('/')
+        const directory2 = [dbPath, "custom-store2"].join('/')
 
         const db1 = await orbitdb.open('xyz1', { create: true, type: 'feed', })
         const db2 = await orbitdb.open('xyz2', { create: true, type: 'feed', directory })
