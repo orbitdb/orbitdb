@@ -426,7 +426,7 @@ class OrbitDB {
     await this._addManifestToCache(options.cache, dbAddress)
 
     // Open the the database
-    options = Object.assign({}, options, { accessControllerAddress: manifest.accessController })
+    options = Object.assign({}, options, { accessControllerAddress: manifest.accessController, meta: manifest.meta })
     return this._createStore(manifest.type, dbAddress, options)
   }
 

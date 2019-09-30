@@ -203,6 +203,36 @@ Object.keys(testAPIs).forEach(API => {
             assert.deepEqual(db.access.write, [orbitdb.identity.id])
           })
         })
+        describe('Meta', function() {
+          before(async () => {
+            if (db) {
+              await db.close()
+              await db.drop()
+            }
+          })
+
+          afterEach(async () => {
+            if (db) {
+              await db.close()
+              await db.drop()
+            }
+          })
+
+          it('creates a manifest with no meta field', async () => {
+            db = await orbitdb.create('no-meta', 'feed')
+            const manifest = await io.read(ipfs, db.address.root)
+            assert.strictEqual(manifest.meta, undefined)
+            assert.deepStrictEqual(Object.keys(manifest).filter(k => k === 'meta'), [])
+          })
+
+          it('creates a manifest with a meta field', async () => {
+            const meta = { test: 123 }
+            db = await orbitdb.create('meta', 'feed', { meta })
+            const manifest = await io.read(ipfs, db.address.root)
+            assert.deepStrictEqual(manifest.meta, meta)
+            assert.deepStrictEqual(Object.keys(manifest).filter(k => k === 'meta'), ['meta'])
+          })
+        })
       })
     })
 
