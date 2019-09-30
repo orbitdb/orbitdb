@@ -11,7 +11,6 @@ let jsIpfs = {
   'js-ipfs': {
     type: 'proc',
     exec: IPFS,
-    IpfsClient: IPFSHTTPClient,
   }
 }
 
