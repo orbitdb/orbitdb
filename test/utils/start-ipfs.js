@@ -19,6 +19,10 @@ const startIpfs = (type, config = {}) => {
       config.args = ['--enable-pubsub-experiment']
     }
 
+    if (!config.repoPath) {
+      config.repoPath = config.repo
+    }
+
     // Spawn an IPFS daemon (type defined in)
     IPFSFactory
       .create(testAPIs[type])
