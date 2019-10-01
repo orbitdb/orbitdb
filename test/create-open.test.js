@@ -31,10 +31,10 @@ Object.keys(testAPIs).forEach(API => {
       config.daemon1.repo = ipfsPath
       fs.removeSync(config.daemon1.repo)
       fs.removeSync(dbPath)
+      fs.copySync([ipfsFixturesDir, 'blocks'].join('/'), [ipfsPath, 'blocks'].join('/'))
+      fs.copySync([ipfsFixturesDir, 'datastore'].join('/'), [ipfsPath, 'datastore'].join('/'))
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      //await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
-      //await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
@@ -148,7 +148,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal((await db.get('key')), undefined)
           await db.drop()
 
-          await fs.copy(migrationFixturePath, migrationDataPath)
+          fs.copySync(migrationFixturePath, migrationDataPath)
           db = await orbitdb.create(dbName, 'keyvalue')
           await db.load()
 
@@ -160,8 +160,8 @@ Object.keys(testAPIs).forEach(API => {
           const dbName = 'cache-schema-test2'
           const directory = [dbPath, "some-other-place"].join('/')
 
-          await fs.copy(migrationFixturePath, directory)
-          db = await orbitdb.create(dbName, 'keyvalue', { directory })
+          fs.copySync(migrationFixturePath, directory)
+          db = await orbitdb.create(dbName, 'keyvalue', { directory: directory })
           await db.load()
 
           assert.equal((await db.get('key')), 'value')
