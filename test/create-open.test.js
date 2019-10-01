@@ -33,8 +33,8 @@ Object.keys(testAPIs).forEach(API => {
       fs.removeSync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
-      await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
+      //await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
+      //await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 

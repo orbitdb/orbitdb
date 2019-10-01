@@ -431,11 +431,11 @@ class OrbitDB {
   }
 
   // Save the database locally
-  async _addManifestToCache (directory, dbAddress) {
-    await this.cache.set([dbAddress.toString(), '_manifest'].join('/'), dbAddress.root)
+  async _addManifestToCache (cache, dbAddress) {
+    await cache.set([dbAddress.toString(), '_manifest'].join('/'), dbAddress.root)
     logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
   }
-
+  
   /**
    * Check if we have the database, or part of it, saved locally
    * @param  {[Cache]} cache [The OrbitDBCache instance containing the local data]
@@ -446,8 +446,8 @@ class OrbitDB {
     if (!cache) {
       return false
     }
-    const data = await cache.get([dbAddress.toString(), '_manifest'].join('/'))
     const addr = dbAddress.toString()
+    const data = await cache.get([addr, '_manifest'].join('/'))
     return data !== undefined && data !== null
   }
 
