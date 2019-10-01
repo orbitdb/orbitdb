@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const rmrf = require('rimraf')
+const fs = require('fs-extra')
 const OrbitDB = require('../src/OrbitDB')
 const CustomCache = require('orbit-db-cache')
 const localdown = require('localstorage-down')
@@ -30,8 +30,8 @@ Object.keys(testAPIs).forEach(API => {
       const cache = new CustomCache(store)
 
       config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(dbPath)
+      fs.removeSync(config.daemon1.repo)
+      fs.removeSync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, {

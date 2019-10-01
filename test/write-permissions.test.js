@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const rmrf = require('rimraf')
+const fs = require('fs-extra')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
@@ -24,8 +24,8 @@ Object.keys(testAPIs).forEach(API => {
 
     before(async () => {
       config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(dbPath)
+      fs.removeSync(config.daemon1.repo)
+      fs.removeSync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: [dbPath, '1'].join('/') })

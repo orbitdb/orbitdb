@@ -1,9 +1,7 @@
 'use strict'
 
-const fs = require('fs')
 const assert = require('assert')
-const mapSeries = require('p-map-series')
-const rmrf = require('rimraf')
+const fs = require('fs-extra')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
 const Keystore = require('orbit-db-keystore')
@@ -32,8 +30,8 @@ Object.keys(testAPIs).forEach(API => {
 
     before(async () => {
       config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(dbPath)
+      fs.removeSync(config.daemon1.repo)
+      fs.removeSync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
 

@@ -1,15 +1,9 @@
 'use strict'
 
 const assert = require('assert')
-const mapSeries = require('p-map-series')
 const fs = require('fs-extra')
-const rmrf = require('rimraf')
-const levelup = require('levelup')
 const leveldown = require('leveldown')
 const OrbitDB = require('../src/OrbitDB')
-const OrbitDBAddress = require('../src/orbit-db-address')
-const io = require('orbit-db-io')
-const IPFS = require('ipfs')
 const Identities = require('orbit-db-identity-provider')
 const migrate = require('localstorage-level-migration')
 const Keystore = require('orbit-db-keystore')
@@ -42,7 +36,7 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      rmrf.sync(dbPath)
+      fs.removeSync(dbPath)
       // copy data files to ipfs and orbitdb repos
       await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
       await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
@@ -58,7 +52,7 @@ Object.keys(testAPIs).forEach(API => {
 
     after(async () => {
       await store.close()
-      rmrf.sync(dbPath)
+      fs.removeSync(dbPath)
       if(orbitdb)
         await orbitdb.stop()
 

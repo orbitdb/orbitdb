@@ -2,7 +2,7 @@
 
 const assert = require('assert')
 const mapSeries = require('p-each-series')
-const rmrf = require('rimraf')
+const fs = require('fs-extra')
 const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
@@ -70,10 +70,10 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       config.daemon1.repo = ipfsPath1
       config.daemon2.repo = ipfsPath2
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(config.daemon2.repo)
-      rmrf.sync(dbPath1)
-      rmrf.sync(dbPath2)
+      fs.removeSync(config.daemon1.repo)
+      fs.removeSync(config.daemon2.repo)
+      fs.removeSync(dbPath1)
+      fs.removeSync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api

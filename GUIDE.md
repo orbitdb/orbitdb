@@ -22,6 +22,7 @@ This guide is still being worked on and we would love to get [feedback and sugge
     + [Custom Access Controller](#custom-access-controller)
 - [Add an entry](#add-an-entry)
 - [Get an entry](#get-an-entry)
+- [Entry sorting and conflict resolution](#entry-sorting-and-conflict-resolution)
 - [Persistency](#persistency)
 - [Replicating a database](#replicating-a-database)
 - [Custom Stores](#custom-stores)

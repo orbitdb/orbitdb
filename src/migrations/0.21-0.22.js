@@ -1,4 +1,3 @@
-const path = require('path')
 const fs = require('../fs-shim')
 
 const Cache = require('orbit-db-cache')
@@ -12,7 +11,7 @@ async function migrate (OrbitDB, options, dbAddress) {
   let oldStore
 
   if (!oldCache) {
-    const addr = path.join(OrbitDB.directory, dbAddress.root, dbAddress.path)
+    const addr = [OrbitDB.directory, dbAddress.root, dbAddress.path].join('/')
     if (fs && fs.existsSync && !fs.existsSync(addr)) return
     oldStore = await OrbitDB.storage.createStore(addr)
     oldCache = new Cache(oldStore)
@@ -31,14 +30,14 @@ async function migrate (OrbitDB, options, dbAddress) {
 
   for (let i in migrationKeys) {
     try {
-      const key = path.join(keyRoot, migrationKeys[i])
+      const key = [keyRoot, migrationKeys[i]].join('/')
       const val = await oldCache.get(migrationKeys[i])
       if (val) await options.cache.set(key, val)
     } catch (e) {
       logger.debug(e.message)
     }
   }
-  await options.cache.set(path.join(keyRoot, '_manifest'), dbAddress.root)
+  await options.cache.set([keyRoot, '_manifest'].join('/'), dbAddress.root)
   if (oldStore) await oldStore.close()
 }
 

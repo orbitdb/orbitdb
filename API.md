@@ -49,7 +49,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [OrbitDB.isValidAddress(address)](#orbitdbisvalidaddressaddress)
   * [OrbitDB.parseAddress(address)](#orbitdbparseaddressaddress)
 - [Store API](#store-api)
-  * [store.load([amount])](#storeloadamount)
+  * [store.load([amount], { fetchEntryTimeout })](#storeloadamount--fetchentrytimeout-)
   * [store.close()](#storeclose)
   * [store.drop()](#storedrop)
   * [store.identity](#storeidentity)

@@ -1,7 +1,7 @@
 'use strict'
 
 const assert = require('assert')
-const rmrf = require('rimraf')
+const fs = require('fs-extra')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
 // Include test utilities
@@ -27,8 +27,8 @@ Object.keys(testAPIs).forEach(API => {
 
     before(async () => {
       config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(dbPath)
+      fs.removeSync(config.daemon1.repo)
+      fs.removeSync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       const identity = await Identities.createIdentity({ type: 'custom', keystore: CustomTestKeystore().create()  })

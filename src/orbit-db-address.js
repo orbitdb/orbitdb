@@ -1,5 +1,4 @@
 'use strict'
-const path = require('path');
 const CID = require('cids')
 
 const notEmpty = e => e !== '' && e !== ' '
