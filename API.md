@@ -95,14 +95,17 @@ const db = await orbitdb.keyvalue('profile')
 
 ## Public Instance Methods
 
-### orbitdb.create(name, type, [options])
-> Creates and opens an OrbitDB database.
+Before to start you've to know that OrbitDB has different types of databases each one made to satisfy a different purpose. The databases that you can create are:
 
 * [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress): an imutable (write only) log database. Useful for transactions lists.
 * [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress): a mutable log database. Useful for comments of a blog.
 * [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress): Useful for load data from keywords or an id.
 * [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options): a JSON objects storage. Useful for user data or forum posts.
 * [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress): Useful for ordered data as an order list or playlist.
+
+
+### orbitdb.create(name, type, [options])
+> Creates and opens an OrbitDB database.
 
 Returns a `Promise` that resolves to [a database instance](#store-api). `name` (string) should be the database name, not an OrbitDB address (i.e. `user.posts`). `type` is a supported database type (i.e. `eventlog` or [an added custom type](https://github.com/orbitdb/orbit-db#custom-store-types)). `options` is an object with any of the following properties:
 - `accessController` (object): An object, as shown in the example below, containing the key `write` whose value is an array of hex encoded public keys which are used to set write access to the database. `["*"]` can be passed in to give write access to everyone. See the [GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md) guide for more info.
