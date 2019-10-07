@@ -95,13 +95,13 @@ const db = await orbitdb.keyvalue('profile')
 
 ## Public Instance Methods
 
-Before to start you've to know that OrbitDB has different types of databases each one made to satisfy a different purpose. The databases that you can create are:
+Before to start you've to know that OrbitDB has different types of databases. Each one made to satisfy a different purpose. The databases that you can create are:
 
 * [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress): an imutable (write only) log database. Useful for transactions lists.
 * [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress): a mutable log database. Useful for comments of a blog.
 * [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress): Useful for load data from keywords or an id.
-* [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options): a JSON objects storage. Useful for user data or forum posts.
-* [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress): Useful for ordered data as an order list or playlist.
+* [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options): a JSON documents database. Useful for user data or other structured data.
+* [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress): Useful for ordered data as could be an order list or a playlist.
 
 
 ### orbitdb.create(name, type, [options])
