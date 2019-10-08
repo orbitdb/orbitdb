@@ -90,5 +90,15 @@
     "haad <haad@haja.io>",
     "shamb0t <shams@haja.io>",
     "hajamark <mark@haja.io>"
+  ],
+  "keywords": [
+    "crdt",
+    "database",
+    "decentralized",
+    "decentralised",
+    "distributed",
+    "ipfs",
+    "p2p",
+    "peer-to-peer"
   ]
 }
