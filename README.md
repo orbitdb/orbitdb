@@ -63,7 +63,9 @@ We also have regular community calls, which we announce in the issues in [the @o
 
 ## Usage
 
-Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a more in-depth tutorial and to understand how OrbitDB works.
+Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a quick tutorial on how to use OrbitDB.
+
+For a more in-depth tutorial and exploration of OrbitDB's architecture, please check out the **[OrbitDB Field Manual](https://github.com/orbitdb/field-manual)**.
 
 ### CLI
 
