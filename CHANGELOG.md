@@ -1,5 +1,37 @@
 # Changelog
 
+## v0.22.0
+
+ Up to 10x Performance Increase in Appends :tada:
+
+ - `sortFn` now at the top level
+ - `orbit-db-storage-adapter` now provides cache and keystore interop for mongo, redis, and any `abstract-leveldown`
+
+### (semi-)Breaking Changes
+
+To improve performance, this release changes the way caches are managed.
+
+#### Cache Directory Locations
+
+_Your cache directory structure will change_. There is a migration script that will run upon creating the database.
+
+Old Structure (node.js default):
+```
+orbitdb/[OrbitDB ID]/keystore
+orbitdb/[DB ID]/db-name/
+orbitdb/[DB ID]/db-name1/
+orbitdb/[DB ID]/db-name2/
+```
+
+New Structure (node.js default):
+```
+orbitdb/[OrbitDB ID]/keystore
+orbitdb/[OrbitDB ID]/cache
+```
+##### `identityKeysPath` is optional, but important!
+
+Read more about what this release includes [here](https://orbitdb.org/orbitdb-release-v0.22).
+
 ## v0.20.0
 ***This release contains API breaking changes!*** The release **IS** backwards compatible with respect to old OrbitDB addresses and will be able to process and read old data-structures. The shape of the `Entry` object has also changed to include an [`identity`](https://github.com/orbitdb/orbit-db-identity-provider) field as well as increment the version `v` to 1. The `hash` property now holds a [CIDv1](https://github.com/multiformats/cid#cidv1) multihash string.
 
