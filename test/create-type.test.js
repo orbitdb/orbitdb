@@ -13,8 +13,8 @@ const {
   testAPIs,
 } = require('./utils')
 
-const dbPath = './orbitdb/tests/create-open'
-const ipfsPath = './orbitdb/tests/create-open/ipfs'
+const dbPath = './orbitdb/tests/create-type'
+const ipfsPath = './orbitdb/tests/create-type/ipfs'
 
 class CustomStore extends DocumentStore {
   constructor (ipfs, id, dbname, options) {

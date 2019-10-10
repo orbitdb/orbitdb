@@ -28,9 +28,8 @@ Object.keys(testAPIs).forEach(API => {
     let localDataPath
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      fs.removeSync(config.daemon1.repo)
       fs.removeSync(dbPath)
+      config.daemon1.repo = ipfsPath
       fs.copySync([ipfsFixturesDir, 'blocks'].join('/'), [ipfsPath, 'blocks'].join('/'))
       fs.copySync([ipfsFixturesDir, 'datastore'].join('/'), [ipfsPath, 'datastore'].join('/'))
       ipfsd = await startIpfs(API, config.daemon1)
@@ -158,7 +157,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('loads cache from previous version of orbit-db with the directory option', async() => {
           const dbName = 'cache-schema-test2'
-          const directory = [dbPath, "some-other-place"].join('/')
+          const directory = [dbPath, 'some-other-place'].join('/')
 
           fs.copySync(migrationFixturePath, directory)
           db = await orbitdb.create(dbName, 'keyvalue', { directory: directory })

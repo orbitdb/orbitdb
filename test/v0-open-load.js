@@ -25,6 +25,7 @@ const dbPath = './orbitdb/tests/v0'
 const keyFixtures = './test/fixtures/keys/QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX'
 const dbFixturesDir = './test/fixtures/v0/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db'
 const ipfsFixturesDir = './test/fixtures/ipfs'
+const ipfsPath = './orbitdb/tests/v0/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
@@ -34,14 +35,15 @@ Object.keys(testAPIs).forEach(API => {
     let localDataPath
 
     before(async () => {
-      ipfsd = await startIpfs(API, config.daemon1)
-      ipfs = ipfsd.api
       fs.removeSync(dbPath)
       // copy data files to ipfs and orbitdb repos
-      await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsd.path, 'blocks'].join('/'))
-      await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsd.path, 'datastore'].join('/'))
+      await fs.copy([ipfsFixturesDir, 'blocks'].join('/'), [ipfsPath, 'blocks'].join('/'))
+      await fs.copy([ipfsFixturesDir, 'datastore'].join('/'), [ipfsPath, 'datastore'].join('/'))
+      config.daemon1.repo = ipfsPath
+      ipfsd = await startIpfs(API, config.daemon1)
+      ipfs = ipfsd.api
       await fs.copy(dbFixturesDir, [dbPath, ipfs._peerInfo.id._idB58String, 'cache'].join('/'))
-
+      
       store = await storage.createStore([dbPath, ipfs._peerInfo.id._idB58String, 'keys'].join('/'))
       const keystore = new Keystore(store)
 
