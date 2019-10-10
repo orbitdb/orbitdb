@@ -20,18 +20,18 @@
     "logplease": "^1.2.14",
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "~0.2.2",
-    "orbit-db-cache": "next",
-    "orbit-db-counterstore": "next",
-    "orbit-db-docstore": "next",
-    "orbit-db-eventstore": "next",
-    "orbit-db-feedstore": "next",
-    "orbit-db-identity-provider": "next",
+    "orbit-db-cache": "~0.3.0",
+    "orbit-db-counterstore": "~1.6.0",
+    "orbit-db-docstore": "~1.6.0",
+    "orbit-db-eventstore": "~1.6.0",
+    "orbit-db-feedstore": "~1.6.0",
+    "orbit-db-identity-provider": "~0.2.0",
     "orbit-db-io": "^0.1.1",
-    "orbit-db-keystore": "next",
-    "orbit-db-kvstore": "next",
+    "orbit-db-keystore": "~0.3.0",
+    "orbit-db-kvstore": "~1.6.0",
     "orbit-db-pubsub": "~0.5.5",
-    "orbit-db-storage-adapter": "^0.5.0",
-    "orbit-db-store": "next"
+    "orbit-db-storage-adapter": "^0.5.3",
+    "orbit-db-store": "~2.7.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -45,7 +45,7 @@
     "ipfs": "~0.36.4",
     "ipfs-repo": "~0.26.6",
     "ipfsd-ctl": "~0.42.3",
-    "localstorage-level-migration": "next",
+    "localstorage-level-migration": "~0.1.0",
     "markdown-toc": "^1.2.0",
     "mocha": "^5.2.0",
     "p-each-series": "^1.0.0",
@@ -89,5 +89,15 @@
     "haad <haad@haja.io>",
     "shamb0t <shams@haja.io>",
     "hajamark <mark@haja.io>"
+  ],
+  "keywords": [
+    "crdt",
+    "database",
+    "decentralized",
+    "decentralised",
+    "distributed",
+    "ipfs",
+    "p2p",
+    "peer-to-peer"
   ]
 }
