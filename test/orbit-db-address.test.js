@@ -62,6 +62,20 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(result.toString().indexOf('/orbitdb'), 0)
         assert.equal(result.toString().indexOf('zd'), 9)
       })
+
+      it('parse address with backslashes (win32) successfully', () => {
+        const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
+        const result = OrbitDB.parseAddress(address)
+
+        const isInstanceOf = result instanceof OrbitDBAddress
+        assert.equal(isInstanceOf, true)
+
+        assert.equal(result.root, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
+        assert.equal(result.path, 'first-database')
+
+        assert.equal(result.toString().indexOf('/orbitdb'), 0)
+        assert.equal(result.toString().indexOf('Qm'), 9)
+      })
     })
 
     describe('isValid Address', () => {
@@ -96,6 +110,13 @@ Object.keys(testAPIs).forEach(API => {
         const result = OrbitDB.isValidAddress(address)
 
         assert.equal(result, false)
+      })
+
+      it('validate address with backslashes (win32) successfully', () => {
+        const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
+        const result = OrbitDB.isValidAddress(address)
+
+        assert.equal(result, true)
       })
     })
 

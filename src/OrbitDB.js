@@ -23,12 +23,12 @@ const logger = Logger.create('orbit-db')
 Logger.setLogLevel('ERROR')
 
 // Mapping for 'database type' -> Class
-let databaseTypes = {
-  'counter': CounterStore,
-  'eventlog': EventStore,
-  'feed': FeedStore,
-  'docstore': DocumentStore,
-  'keyvalue': KeyValueStore
+const databaseTypes = {
+  counter: CounterStore,
+  eventlog: EventStore,
+  feed: FeedStore,
+  docstore: DocumentStore,
+  keyvalue: KeyValueStore
 }
 
 class OrbitDB {
@@ -67,7 +67,7 @@ class OrbitDB {
     if (!options.directory) { options.directory = './orbitdb' }
 
     if (!options.storage) {
-      let storageOptions = {}
+      const storageOptions = {}
 
       // Create default `level` store
       options.storage = Storage(null, storageOptions)
@@ -79,7 +79,7 @@ class OrbitDB {
 
     if (!options.keystore) {
       const keystorePath = path.join(options.directory, id, '/keystore')
-      let keyStorage = await options.storage.createStore(keystorePath)
+      const keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
 
@@ -92,7 +92,7 @@ class OrbitDB {
 
     if (!options.cache) {
       const cachePath = path.join(options.directory, id, '/cache')
-      let cacheStorage = await options.storage.createStore(cachePath)
+      const cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
     }
 
@@ -144,13 +144,13 @@ class OrbitDB {
 
     // Close all open databases
     const databases = Object.values(this.stores)
-    for (let db of databases) {
+    for (const db of databases) {
       await db.close()
       delete this.stores[db.address.toString()]
     }
 
     const caches = Object.keys(this.caches)
-    for (let directory of caches) {
+    for (const directory of caches) {
       await this.caches[directory].cache.close()
       delete this.caches[directory]
     }
@@ -179,7 +179,7 @@ class OrbitDB {
   }
 
   async _createCache (path) {
-    let cacheStorage = await this.storage.createStore(path)
+    const cacheStorage = await this.storage.createStore(path)
     return new Cache(cacheStorage)
   }
 
@@ -300,7 +300,7 @@ class OrbitDB {
   async _determineAddress (name, type, options = {}) {
     if (!OrbitDB.isValidType(type)) { throw new Error(`Invalid database type '${type}'`) }
 
-    if (OrbitDBAddress.isValid(name)) { throw new Error(`Given database name is an address. Please give only the name of the database!`) }
+    if (OrbitDBAddress.isValid(name)) { throw new Error('Given database name is an address. Please give only the name of the database!') }
 
     // Create an AccessController, use IPFS AC as the default
     options.accessController = Object.assign({}, { name: name, type: 'ipfs' }, options.accessController)
@@ -310,7 +310,7 @@ class OrbitDB {
     const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, options)
 
     // Create the database address
-    return OrbitDBAddress.parse(path.join('/orbitdb', manifestHash, name))
+    return OrbitDBAddress.parse(OrbitDBAddress.join(manifestHash, name))
   }
 
   /* Create and Open databases */
@@ -322,7 +322,7 @@ class OrbitDB {
     }
   */
   async create (name, type, options = {}) {
-    logger.debug(`create()`)
+    logger.debug('create()')
 
     logger.debug(`Creating database '${name}' as ${type}`)
 
@@ -377,7 +377,7 @@ class OrbitDB {
       }
    */
   async open (address, options = {}) {
-    logger.debug(`open()`)
+    logger.debug('open()')
 
     options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)
@@ -385,7 +385,7 @@ class OrbitDB {
     // If address is just the name of database, check the options to crate the database
     if (!OrbitDBAddress.isValid(address)) {
       if (!options.create) {
-        throw new Error(`'options.create' set to 'false'. If you want to create a database, set 'options.create' to 'true'.`)
+        throw new Error('\'options.create\' set to \'false\'. If you want to create a database, set \'options.create\' to \'true\'.')
       } else if (options.create && !options.type) {
         throw new Error(`Database type not provided! Provide a type with 'options.type' (${OrbitDB.databaseTypes.join('|')})`)
       } else {

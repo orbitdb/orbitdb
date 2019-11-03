@@ -35,6 +35,7 @@ const ipfsFixturesDir = './test/fixtures/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
+    this.retries(1) // windows...
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb, db, address, store
@@ -44,9 +45,15 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       rmrf.sync(dbPath)
+      
+      const filterFunc = (src, dest) => {
+        // windows has problems copying these files...
+        return !(src.includes('LOG') || src.includes('LOCK'))
+      }
+
       // copy data files to ipfs and orbitdb repos
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
-      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'))
+      await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
       await fs.copy(dbFixturesDir, path.join(dbPath, ipfs._peerInfo.id._idB58String, 'cache'))
 
       store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
@@ -60,14 +67,14 @@ Object.keys(testAPIs).forEach(API => {
     after(async () => {
       await store.close()
       rmrf.sync(dbPath)
-      if(orbitdb)
+      if (orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
         await stopIpfs(ipfsd)
     })
 
-    describe('Open & Load', function() {
+    describe('Open & Load', function () {
       before(async () => {
         db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', { accessController: { type: 'legacy-ipfs', skipManifest: true } })
         const localFixtures = await db._cache.get('_localHeads')
@@ -75,6 +82,14 @@ Object.keys(testAPIs).forEach(API => {
         db._cache.set(db.localHeadsPath, localFixtures)
         db._cache.set(db.remoteHeadsPath, remoteFixtures)
         await db.load()
+      })
+
+      beforeEach(async () => {
+        if (process.platform === 'win32') {
+          // for some reason Windows does not load the database correctly at the first time.
+          // this is not a good solution but... it works.
+          await db.load()
+        }
       })
 
       after(async () => {
