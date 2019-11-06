@@ -56,6 +56,13 @@ class OrbitDB {
     // testing with orbit-db-access-controller
     AccessControllers = options.AccessControllers || AccessControllers
   }
+  
+  static get Pubsub () { return Pubsub; }
+  static get Cache () { return Cache; }
+  static get Keystore () { return Keystore; }
+  static get Identities () { return Identities; }
+  static get AccessControllers () { return AccessControllers; }
+  static get Storage () { return Storage; }
 
   get cache () { return this.caches[this.directory].cache }
 
