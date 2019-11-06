@@ -56,16 +56,6 @@ Require OrbitDB and IPFS in your program and create the instances:
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
-// OrbitDB uses Pubsub which is an experimental feature
-// and need to be turned on manually.
-// Note that these options need to be passed to IPFS in
-// all examples in this document even if not specified so.
-const ipfsOptions = {
-  EXPERIMENTAL: {
-    pubsub: true
-  }
-}
-
 // Create IPFS instance
 const ipfs = new IPFS(ipfsOptions)
 
