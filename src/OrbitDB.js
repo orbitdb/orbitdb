@@ -68,8 +68,8 @@ class OrbitDB {
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
   static get KeyValueStore () { return KeyValueStore }
-  static get CounterStore () { return CounterStore; }
-  static get DocumentStore () { return DocumentStore; }
+  static get CounterStore () { return CounterStore }
+  static get DocumentStore () { return DocumentStore }
 
   get cache () { return this.caches[this.directory].cache }
 
