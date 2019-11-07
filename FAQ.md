@@ -8,18 +8,20 @@ This document is seeded by questions from people opening issues in this reposito
 
 **Questions**
 
-<!-- toc -->
+<!-- TOC -->
 
-- [Database replication is not working. Why?](#database-replication-is-not-working-why)
-- [Can I recreate the entire database on another machine based on the address?](#can-i-recreate-the-entire-database-on-another-machine-based-on-the-address)
-- [Is every `put` to OrbitDB immediately sent to the network and persisted?](#is-every-put-to-orbitdb-immediately-sent-to-the-network-and-persisted)
-- [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
-- [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
-- [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
-- [Where can I learn more about security, encryption, and account recovery?](#where-can-i-learn-more-about-security-encryption-and-account-recovery)
-- [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
+- [Frequently Asked Questions](#frequently-asked-questions)
+  - [Database replication is not working. Why?](#database-replication-is-not-working-why)
+  - [Can I recreate the entire database on another machine based on the address?](#can-i-recreate-the-entire-database-on-another-machine-based-on-the-address)
+  - [Is every `put` to OrbitDB immediately sent to the network and persisted?](#is-every-put-to-orbitdb-immediately-sent-to-the-network-and-persisted)
+  - [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
+  - [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
+  - [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
+  - [Where can I learn more about security, encryption, and account recovery?](#where-can-i-learn-more-about-security-encryption-and-account-recovery)
+  - [Is it possible to use OrbitDB with private objects, accessible by only authorized users?](#is-it-possible-to-use-orbitdb-with-private-objects-accessible-by-only-authorized-users)
+  - [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
 
-<!-- tocstop -->
+<!-- /TOC -->
 
 ---
 
@@ -66,6 +68,11 @@ this.ipfs = new Ipfs({
 
 The very short answer is that OrbitDB is agnostic in terms of encryption and account recovery with the aim of providing maximum flexibility with your apps. We don't do any encryption on our side; however, nothing is stopping you from encrypting data before storing it in the OrbitDB network. OrbitDB (just like IPFS) will treat encrypted the data exactly the same. Any node can replicate the data, but only nodes which have access to the encryption key from some other means will be able to decrypt it.
 
+### Is it possible to use OrbitDB with private objects, accessible by only authorized users?
+
+Yes! It is possible to use decentralized identities (DIDs) to encrypt some objects using a shared symmetric key, while allowing other objects to be public. However, this hasn't been implemented yet in any core orbitdb modules. Your best bet is to use a custom access controller to enable this. Some work has been done on this at [3box/3box-orbitdb-plugins](https://github.com/3box/3box-orbitdb-plugins), and we encourage you to check these out, or to jump on the Gitter and ask us for more details. Eventually, it may be merged into OrbitDB.
+
 ### How can I contribute to this FAQ?
 
 See the introduction at the top! Please open any issues and pull requests you can to improve this FAQ.md. It is here for you. If you're confused, ask another question publicly; it's possible that other people are, too. If you don't want to open an issue, feel free to jump onto [the Gitter](https://gitter.im/orbitdb/Lobby) and ask us there, too.
+
