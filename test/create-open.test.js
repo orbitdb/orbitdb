@@ -20,10 +20,10 @@ const {
   testAPIs,
 } = require('./utils')
 
-const dbPath = './orbitdb/tests/create-open'
-const ipfsPath = './orbitdb/tests/create-open/ipfs'
-const migrationFixturePath = './test/fixtures/migration/cache-schema-test'
-const ipfsFixturesDir = './test/fixtures/ipfs'
+const dbPath = path.join(__dirname, 'orbitdb', 'tests', 'create-open')
+const ipfsPath = path.join(__dirname, 'orbitdb', 'tests', 'create-open', 'ipfs')
+const migrationFixturePath = path.join(__dirname, 'fixtures', 'migration', 'cache-schema-test')
+const ipfsFixturesDir = path.join(__dirname, 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function () {
@@ -33,17 +33,18 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb, db, address
     let localDataPath
 
+    const filterFunc = (src, dest) => {
+      // windows has problems copying these files...
+      return !(src.includes('LOG') || src.includes('LOCK'))
+    }
+
+
     before(async () => {
       config.daemon1.repo = ipfsPath
       rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-
-      const filterFunc = (src, dest) => {
-        // windows has problems copying these files...
-        return !(src.includes('LOG') || src.includes('LOCK'))
-      }
 
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
@@ -160,7 +161,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal((await db.get('key')), undefined)
           await db.drop()
 
-          await fs.copy(migrationFixturePath, migrationDataPath)
+          await fs.copy(migrationFixturePath, migrationDataPath, { filter: filterFunc })
           db = await orbitdb.create(dbName, 'keyvalue')
           await db.load()
 
@@ -172,7 +173,7 @@ Object.keys(testAPIs).forEach(API => {
           const dbName = 'cache-schema-test2'
           const directory = path.join(dbPath, "some-other-place")
 
-          await fs.copy(migrationFixturePath, directory)
+          await fs.copy(migrationFixturePath, directory, { filter: filterFunc })
           db = await orbitdb.create(dbName, 'keyvalue', { directory })
           await db.load()
 
