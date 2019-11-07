@@ -70,7 +70,7 @@ The very short answer is that OrbitDB is agnostic in terms of encryption and acc
 
 ### Is it possible to use OrbitDB with private objects, accessible by only authorized users?
 
-Yes! It is possible to use decentralized identities (DIDs) to encrypt some objects using a shared symmetric key, while allowing other objects to be public. However, this hasn't been implemented yet in any core orbitdb modules. Your best bet is to use a custom access controller to enable this. Some work has been done on this by [@3box](https://github.com/3box), and we encourage you to check these out, or to jump on the Gitter and ask us for more details. Eventually, having a one-stop solution for this would be ideal.
+Yes! It is possible to use decentralized identities (DIDs) to encrypt some objects using a shared symmetric key, while allowing other objects to be public. However, this hasn't been implemented yet in any core orbitdb modules. Your best bet is to use a custom access controller to enable this. Some work has been done on this at [3box/3box-orbitdb-plugins](https://github.com/3box/3box-orbitdb-plugins), and we encourage you to check these out, or to jump on the Gitter and ask us for more details. Eventually, it may be merged into OrbitDB.
 
 ### How can I contribute to this FAQ?
 
