@@ -12,7 +12,7 @@ async function migrate (OrbitDB, options, dbAddress) {
   let oldStore
 
   if (!oldCache) {
-    const addr = path.join(OrbitDB.directory, dbAddress.root, dbAddress.path)
+    const addr = (path.posix || path).join(OrbitDB.directory, dbAddress.root, dbAddress.path)
     if (fs && fs.existsSync && !fs.existsSync(addr)) return
     oldStore = await OrbitDB.storage.createStore(addr)
     oldCache = new Cache(oldStore)
@@ -29,7 +29,7 @@ async function migrate (OrbitDB, options, dbAddress) {
     'queue'
   ]
 
-  for (let i in migrationKeys) {
+  for (const i in migrationKeys) {
     try {
       const key = path.join(keyRoot, migrationKeys[i])
       const val = await oldCache.get(migrationKeys[i])
