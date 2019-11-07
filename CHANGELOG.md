@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.22.1
+
+ - Thanks to [#712](https://github.com/orbitdb/orbit-db/pull/712) from @kolessios, as well as the efforts of @BartKnucle and @durac :heart:, OrbitDB now works on Windows :tada: We invite our Windows friends to try it out!
+ - Several submodules are now exposed in the OrbitDB class ([#717](https://github.com/orbitdb/orbit-db/pull/717), thanks @hazae41)
+
 ## v0.22.0
 
  Up to 10x Performance Increase in Appends :tada:
