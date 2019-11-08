@@ -53,7 +53,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('addDatabaseType', function () {
       it('should have the correct custom type', async () => {
         OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
-        let store = await orbitdb.create(dbPath, CustomStore.type)
+        let store = await orbitdb.create(dbPath.replace(/^\.\//, ''), CustomStore.type)
         assert.equal(store._type, CustomStore.type)
       })
 
