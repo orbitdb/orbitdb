@@ -269,7 +269,12 @@ We have an FAQ! [Go take a look at it](FAQ.md). If a question isn't there, open 
 
 ### Are there implementations in other languages?
 
-Yes! Take a look at the Golang implementation: [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
+Yes! Take a look at these implementations:
+
+  - Golang: [berty/go-orbit-db](https://github.com/berty/go-orbit-db)
+  - Python: [orbitdb/py-orbit-db-http-client](https://github.com/orbitdb/py-orbit-db-http-client)
+
+The best place to find out what is out there and what is being actively worked on is likely by asking in the [Gitter](https://gitter.im/orbitdb/Lobby). If you know of any other repos that ought to be included in this section, please open a PR and add them.
 
 ## Contributing
 
