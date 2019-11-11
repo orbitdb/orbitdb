@@ -92,7 +92,17 @@ const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
 // Create IPFS instance
+
+// For js-ipfs >= 0.38
 const ipfs = new IPFS()
+
+// For js-ipfs < 0.38
+const ipfsOptions = {
+  EXPERIMENTAL: {
+    pubsub: true
+  }
+}
+const ipfs = new IPFS(ipfsOptions)
 
 ipfs.on('error', (e) => console.error(e))
 ipfs.on('ready', async () => {
