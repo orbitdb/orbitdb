@@ -267,6 +267,10 @@ LOG=debug node <file>
 
 We have an FAQ! [Go take a look at it](FAQ.md). If a question isn't there, open an issue and suggest adding it. We can work on the best answer together.
 
+### Are there implementations in other languages?
+
+Yes! Take a look at the Golang implementation: [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
+
 ## Contributing
 
 **Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
