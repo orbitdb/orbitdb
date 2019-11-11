@@ -90,18 +90,9 @@ npm install orbit-db ipfs
 ```javascript
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
-// OrbitDB uses Pubsub which is an experimental feature
-// and need to be turned on manually.
-// Note that these options need to be passed to IPFS in
-// all examples even if not specified so.
-const ipfsOptions = {
-  EXPERIMENTAL: {
-    pubsub: true
-  }
-}
 
 // Create IPFS instance
-const ipfs = new IPFS(ipfsOptions)
+const ipfs = new IPFS()
 
 ipfs.on('error', (e) => console.error(e))
 ipfs.on('ready', async () => {
