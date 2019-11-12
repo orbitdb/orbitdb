@@ -21,17 +21,17 @@
     "multihashes": "^0.4.12",
     "orbit-db-access-controllers": "~0.2.2",
     "orbit-db-cache": "~0.3.0",
-    "orbit-db-counterstore": "~1.6.0",
-    "orbit-db-docstore": "~1.6.0",
-    "orbit-db-eventstore": "~1.6.0",
-    "orbit-db-feedstore": "~1.6.0",
+    "orbit-db-counterstore": "orbitdb/orbit-db-counterstore#fix/createStore",
+    "orbit-db-docstore": "orbitdb/orbit-db-docstore#fix/createStore",
+    "orbit-db-eventstore": "orbitdb/orbit-db-eventstore#fix/createStore",
+    "orbit-db-feedstore": "orbitdb/orbit-db-feedstore#fix/createStore",
     "orbit-db-identity-provider": "~0.2.0",
     "orbit-db-io": "^0.1.1",
     "orbit-db-keystore": "~0.3.0",
-    "orbit-db-kvstore": "~1.6.0",
+    "orbit-db-kvstore": "orbitdb/orbit-db-kvstore#fix/createStore",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "^0.5.3",
-    "orbit-db-store": "~2.7.0"
+    "orbit-db-store": "orbitdb/orbit-db-store#fix/createStore"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
