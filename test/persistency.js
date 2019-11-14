@@ -122,9 +122,18 @@ Object.keys(testAPIs).forEach(API => {
 
         it('closes database while loading', async () => {
           db = await orbitdb1.eventlog(address)
-          db.load() // don't wait for load to finish
-          await db.close()
-          assert.equal(db._cache.store, null)
+          await new Promise(async (resolve, reject) => {
+            // don't wait for load to finish
+            db.load().catch(e => {
+              if (e.toString() !== 'ReadError: Database is not open') {
+                reject(e)
+              } else {
+                assert.equal(db._cache.store, null)
+                resolve()
+              }
+            })
+            await db.close()
+          })
         })
 
         it('load, add one, close - several times', async () => {
