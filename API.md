@@ -49,7 +49,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [OrbitDB.isValidAddress(address)](#orbitdbisvalidaddressaddress)
   * [OrbitDB.parseAddress(address)](#orbitdbparseaddressaddress)
 - [Store API](#store-api)
-  * [store.load([amount])](#storeloadamount)
+  * [store.load([amount], { fetchEntryTimeout })](#storeloadamount--fetchentrytimeout-)
   * [store.close()](#storeclose)
   * [store.drop()](#storedrop)
   * [store.identity](#storeidentity)
@@ -94,6 +94,15 @@ const db = await orbitdb.keyvalue('profile')
 ```
 
 ## Public Instance Methods
+
+Before starting, you should know that OrbitDB has different types of databases. Each one satisfies a different purpose. The databases that you can create are:
+
+* [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress): an imutable (write only) log database. Useful for transactions lists.
+* [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress): a mutable log database. Useful for blog comments.
+* [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress): Useful for loading data from keywords or an id.
+* [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options): a JSON documents database. Useful for user data or other structured data.
+* [counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress): Useful for ordered data (like an ordered list or a playlist.)
+
 
 ### orbitdb.create(name, type, [options])
 > Creates and opens an OrbitDB database.

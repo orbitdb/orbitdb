@@ -63,7 +63,9 @@ We also have regular community calls, which we announce in the issues in [the @o
 
 ## Usage
 
-Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a more in-depth tutorial and to understand how OrbitDB works.
+Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md)** guide for a quick tutorial on how to use OrbitDB.
+
+For a more in-depth tutorial and exploration of OrbitDB's architecture, please check out the **[OrbitDB Field Manual](https://github.com/orbitdb/field-manual)**.
 
 ### CLI
 
@@ -88,17 +90,18 @@ npm install orbit-db ipfs
 ```javascript
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
-// OrbitDB uses Pubsub which is an experimental feature
-// and need to be turned on manually.
-// Note that these options need to be passed to IPFS in
-// all examples even if not specified so.
+
+// Create IPFS instance
+
+// For js-ipfs >= 0.38
+const ipfs = new IPFS()
+
+// For js-ipfs < 0.38
 const ipfsOptions = {
   EXPERIMENTAL: {
     pubsub: true
   }
 }
-
-// Create IPFS instance
 const ipfs = new IPFS(ipfsOptions)
 
 ipfs.on('error', (e) => console.error(e))
@@ -289,4 +292,4 @@ If you want to sponsor developers to work on OrbitDB, please reach out to @haadc
 
 ## License
 
-[MIT](LICENSE) © 2015-2018 Protocol Labs Inc., Haja Networks Oy
+[MIT](LICENSE) © 2015-2019 Protocol Labs Inc., Haja Networks Oy

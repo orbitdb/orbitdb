@@ -22,6 +22,7 @@ This guide is still being worked on and we would love to get [feedback and sugge
     + [Custom Access Controller](#custom-access-controller)
 - [Add an entry](#add-an-entry)
 - [Get an entry](#get-an-entry)
+- [Entry sorting and conflict resolution](#entry-sorting-and-conflict-resolution)
 - [Persistency](#persistency)
 - [Replicating a database](#replicating-a-database)
 - [Custom Stores](#custom-stores)
@@ -54,16 +55,6 @@ Require OrbitDB and IPFS in your program and create the instances:
 ```javascript
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
-
-// OrbitDB uses Pubsub which is an experimental feature
-// and need to be turned on manually.
-// Note that these options need to be passed to IPFS in
-// all examples in this document even if not specified so.
-const ipfsOptions = {
-  EXPERIMENTAL: {
-    pubsub: true
-  }
-}
 
 // Create IPFS instance
 const ipfs = new IPFS(ipfsOptions)

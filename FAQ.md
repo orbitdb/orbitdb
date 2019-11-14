@@ -8,18 +8,20 @@ This document is seeded by questions from people opening issues in this reposito
 
 **Questions**
 
-<!-- toc -->
+<!-- TOC -->
 
-- [Database replication is not working. Why?](#database-replication-is-not-working-why)
-- [Can I recreate the entire database on another machine based on the address?](#can-i-recreate-the-entire-database-on-another-machine-based-on-the-address)
-- [Is every `put` to OrbitDB immediately sent to the network and persisted?](#is-every-put-to-orbitdb-immediately-sent-to-the-network-and-persisted)
-- [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
-- [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
-- [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
-- [Where can I learn more about security, encryption, and account recovery?](#where-can-i-learn-more-about-security-encryption-and-account-recovery)
-- [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
+- [Frequently Asked Questions](#frequently-asked-questions)
+  - [Database replication is not working. Why?](#database-replication-is-not-working-why)
+  - [Can I recreate the entire database on another machine based on the address?](#can-i-recreate-the-entire-database-on-another-machine-based-on-the-address)
+  - [Is every `put` to OrbitDB immediately sent to the network and persisted?](#is-every-put-to-orbitdb-immediately-sent-to-the-network-and-persisted)
+  - [Does OrbitDB already support pinning when using js-ipfs ?](#does-orbitdb-already-support-pinning-when-using-js-ipfs-)
+  - [Does orbit have a shared feed between peers where multiple peers can append to the same feed?](#does-orbit-have-a-shared-feed-between-peers-where-multiple-peers-can-append-to-the-same-feed)
+  - [I'm getting a lot of 429 (Too Many Requests) errors when I run OrbitDB](#im-getting-a-lot-of-429-too-many-requests-errors-when-i-run-orbitdb)
+  - [Where can I learn more about security, encryption, and account recovery?](#where-can-i-learn-more-about-security-encryption-and-account-recovery)
+  - [Does OrbitDB natively allow for a multi-writer capability permission model?](#does-orbitdb-natively-allow-for-a-multi-writer-capability-permission-model)
+  - [How can I contribute to this FAQ?](#how-can-i-contribute-to-this-faq)
 
-<!-- tocstop -->
+<!-- /TOC -->
 
 ---
 
@@ -55,7 +57,7 @@ All databases (feeds) are shared between peers, so nobody "owns them" like users
 
 This happens when there's only one node with data available, and the system isn't able to effectively get all of the data it needs from it. In order to get around this, IPFS instantiates nodes with preload enabled, so that one node isn't effectively DDoSed. However, sometimes these nodes go down, as well, causing 429 errors. To get around this in example cases (certainly not in production), disable preload:
 
-```js
+```
 this.ipfs = new Ipfs({
   preload: { enabled: false },
   // ...
@@ -65,6 +67,30 @@ this.ipfs = new Ipfs({
 ### Where can I learn more about security, encryption, and account recovery?
 
 The very short answer is that OrbitDB is agnostic in terms of encryption and account recovery with the aim of providing maximum flexibility with your apps. We don't do any encryption on our side; however, nothing is stopping you from encrypting data before storing it in the OrbitDB network. OrbitDB (just like IPFS) will treat encrypted the data exactly the same. Any node can replicate the data, but only nodes which have access to the encryption key from some other means will be able to decrypt it.
+
+
+### Does OrbitDB natively allow for a multi-writer capability permission model?
+
+BY default, if you allow `*` access to the access controller, like so:
+
+`orbitdb.feed('name', { accessController: { write ['*'] }})`
+
+To allow specific keys to write to the database, pass the keys as strings like so:
+
+`orbitdb.feed('name', { accessController: { write ['key1', 'key2'] }}) // keys cannot be revoked`
+
+Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revokation is a harder and is being worked on by multiple parties, without a solution.
+
+If you want to encrypt the keys or content, it's easier with a single user. If you want to use encryption with multiwriters, that's another bag which also hasn't been solved.
+
+The concept of identity in OrbitDB currently centers on a single user associated with a public key. To do more than this, you may need a different access controller. [@3box](https://github.com/3box) has a modified access controller plugin, [3box-orbitdb-plugins](https://github.com/3box/3box-orbitdb-plugins), which is worth looking at for how to do this.
+
+|  |  Non-Encrypted | Encrypted | 
+| ----- | ----- | ---- |
+| Single Writer | Default | Requires encryption key management |
+| Multi Writer | Difficulty w/ granting + revocation    | Difficulty w/ granting + revocation AND sharing encryption keys     |
+
+We'd love to add multi-writer support to OrbitDB! The maintainers at Haja are currently not working on anything related to it though but would be happy to help. Your best bet is to jump on [Gitter](https://gitter.im/orbitdb/Lobby) and ask us where the current efforts are.
 
 ### How can I contribute to this FAQ?
 
