@@ -81,9 +81,11 @@ Creates and returns an instance of OrbitDB. Use the optional `options` argument 
 
 - `keystore` (Keystore Instance) : By default creates an instance of [Keystore](https://github.com/orbitdb/orbit-db-keystore). A custom keystore instance can be used, see [this](https://github.com/orbitdb/orbit-db/blob/master/test/utils/custom-test-keystore.js) for an example.
 
-- 'cache' (Cache Instance) : By default creates an instance of [Cache](https://github.com/orbitdb/orbit-db-cache). A custom cache instance can also be used.
+- `cache` (Cache Instance) : By default creates an instance of [Cache](https://github.com/orbitdb/orbit-db-cache). A custom cache instance can also be used.
 
 - `identity` (Identity Instance): By default it creates an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-provider/blob/master/src/identity.js)
+
+- `offline` (boolean): Start the OrbitDB instance in offline mode. Databases are not be replicated when the instance is started in offline mode. If the OrbitDB instance was started offline mode and you want to start replicating databases, the OrbitDB instance needs to be re-created. Default: `false`.
 
 After creating an `OrbitDB` instance, you can access the different data stores. Creating a database instance, eg. with `orbitdb.keyvalue(...)`, returns a *Promise* that resolves to a [database instance](#store-api). See the [Store](#store-api) section for details of common methods and properties.
 

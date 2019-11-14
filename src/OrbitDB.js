@@ -40,9 +40,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = options && options.broker
-      ? new options.broker(this._ipfs) // eslint-disable-line
-      : new Pubsub(this._ipfs, this.id)
+    this._pubsub = !options.offline
+      ? options.broker
+        ? new options.broker(this._ipfs) // eslint-disable-line
+        : new Pubsub(this._ipfs, this.id)
+      : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -108,6 +110,10 @@ class OrbitDB {
       const cachePath = path.join(options.directory, id, '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
+    }
+
+    if (options.offline === undefined) {
+      options.offline = false
     }
 
     const finalOptions = Object.assign({}, options, { peerId: id })
@@ -228,7 +234,7 @@ class OrbitDB {
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
-    if (opts.replicate && this._pubsub) { this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
+    if (opts.replicate && this._pubsub) { await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
 
     return store
   }
