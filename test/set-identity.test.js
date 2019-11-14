@@ -39,11 +39,11 @@ Object.keys(testAPIs).forEach(API => {
 
       if(fs && fs.mkdirSync) fs.mkdirSync(keysPath, { recursive: true })
       const identityStore = await storage.createStore(keysPath)
-
       keystore = new Keystore(identityStore)
-      identity1 = await Identities.createIdentity({ id: 'test-id1', keystore })
-      identity2 = await Identities.createIdentity({ id: 'test-id2', keystore })
-      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
+
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath, keystore })
+      identity1 = await orbitdb.identities.createIdentity({ id: 'test-id1' })
+      identity2 = await orbitdb.identities.createIdentity({ id: 'test-id2' })
     })
 
     after(async () => {
@@ -56,13 +56,16 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     beforeEach(async () => {
-      let options = {}
-      options.accessController = {
-        write : [
-          orbitdb.identity.id,
-          identity1.id
-        ]
+      let options = {
+        keystore,
+        accessController : {
+          write : [
+            orbitdb.identity.id,
+            identity1.id
+          ]
+        }
       }
+
       options = Object.assign({}, options, { create: true, type: 'eventlog', overwrite: true })
       db = await orbitdb.open('abc', options)
     })

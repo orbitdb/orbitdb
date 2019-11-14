@@ -320,7 +320,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database - with a different identity', async () => {
-        const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
+        const identity = await orbitdb.identities.createIdentity({ id: 'test-id' })
         db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)

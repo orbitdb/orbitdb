@@ -32,13 +32,14 @@ const databaseTypes = {
 }
 
 class OrbitDB {
-  constructor (ipfs, identity, options = {}) {
+  constructor (ipfs, identities, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     if (!isDefined(identity)) { throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     this._ipfs = ipfs
-    this.identity = identity
+    this._identities = identities
+    this._identity = identity
     this.id = options.peerId
     this._pubsub = options && options.broker
       ? new options.broker(this._ipfs) // eslint-disable-line
@@ -71,6 +72,14 @@ class OrbitDB {
   static get CounterStore () { return CounterStore }
   static get DocumentStore () { return DocumentStore }
 
+  get identity () {
+    return this._identity
+  }
+
+  get identities () {
+    return this._identities
+  }
+
   get cache () { return this.caches[this.directory].cache }
 
   static async createInstance (ipfs, options = {}) {
@@ -87,8 +96,8 @@ class OrbitDB {
       options.storage = Storage(null, storageOptions)
     }
 
-    if (options.identity && options.identity.provider.keystore) {
-      options.keystore = options.identity.provider.keystore
+    if (options.identities && options.identities.keystore) {
+      options.keystore = options.identities.keystore
     }
 
     if (!options.keystore) {
@@ -97,10 +106,11 @@ class OrbitDB {
       options.keystore = new Keystore(keyStorage)
     }
 
+    const identities = options.identities || new Identities({ keystore: options.keystore })
     if (!options.identity) {
-      options.identity = await Identities.createIdentity({
-        id: options.id || id,
-        keystore: options.keystore
+      options.identity = await identities.createIdentity({
+        type: options.identityType || 'orbitdb',
+        id: options.id || id
       })
     }
 
@@ -111,7 +121,7 @@ class OrbitDB {
     }
 
     const finalOptions = Object.assign({}, options, { peerId: id })
-    return new OrbitDB(ipfs, options.identity, finalOptions)
+    return new OrbitDB(ipfs, identities, options.identity, finalOptions)
   }
 
   /* Databases */
@@ -218,7 +228,7 @@ class OrbitDB {
     })
     const identity = options.identity || this.identity
 
-    const store = new Store(this._ipfs, identity, address, opts)
+    const store = new Store(this._ipfs, identity, this.identities, address, opts)
     store.events.on('write', this._onWrite.bind(this))
 
     // ID of the store is the address as a string
@@ -435,7 +445,7 @@ class OrbitDB {
     // Make sure the type from the manifest matches the type that was given as an option
     if (manifest.name !== dbAddress.path) { throw new Error(`Manifest '${manifest.name}' cannot be opened as '${dbAddress.path}'`) }
     if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
-    
+
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 

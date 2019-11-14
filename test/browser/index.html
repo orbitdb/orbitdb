@@ -64,8 +64,7 @@
       }
 
       ipfs.on('ready', async () => {
-        const identity = await Identities.createIdentity({ id: 'A'})
-        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
+        const orbitdb = await OrbitDB.createInstance(ipfs)
         const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })
         const inconsistentLog = await orbitdb.log('concurrent2')
 
