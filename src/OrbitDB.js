@@ -78,7 +78,15 @@ class OrbitDB {
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
-    const { id } = await ipfs.id()
+    if (options.offline === undefined) {
+      options.offline = false
+    }
+
+    if (options.offline && !options.id ) {
+      throw new Error('Offline mode requires passing an `id` in the options')
+    }
+
+    const { id } = options.offline ? ({ id: options.id }) : await ipfs.id()
 
     if (!options.directory) { options.directory = './orbitdb' }
 
@@ -110,10 +118,6 @@ class OrbitDB {
       const cachePath = path.join(options.directory, id, '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
-    }
-
-    if (options.offline === undefined) {
-      options.offline = false
     }
 
     const finalOptions = Object.assign({}, options, { peerId: id })
@@ -441,7 +445,7 @@ class OrbitDB {
     // Make sure the type from the manifest matches the type that was given as an option
     if (manifest.name !== dbAddress.path) { throw new Error(`Manifest '${manifest.name}' cannot be opened as '${dbAddress.path}'`) }
     if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
-    
+
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 
