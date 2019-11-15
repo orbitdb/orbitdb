@@ -212,7 +212,7 @@ node examples/eventlog.js
 
 ### Workshop
 
-We have a field manual which has much more detailed examples and a run-through of how to understand OrbitDB, at [orbitdb/field-manual](https://github.com/orbitdb/web3-workshop). There is also a workshop you can follow, which shows how to build an app, at [orbit-db/web3-workshop](https://github.com/orbitdb/web3-workshop).
+We have a field manual which has much more detailed examples and a run-through of how to understand OrbitDB, at [orbitdb/field-manual](https://github.com/orbitdb/field-manual). There is also a workshop you can follow, which shows how to build an app, at [orbit-db/web3-workshop](https://github.com/orbitdb/web3-workshop).
 
 More examples at [examples](https://github.com/orbitdb/orbit-db/tree/master/examples).
 
