@@ -22,7 +22,7 @@ const ipfsPath2 = './orbitdb/tests/replicate-and-load/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replicate and Load (${API})`, function() {
-    this.timeout(config.timeout)
+    this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -112,13 +112,16 @@ Object.keys(testAPIs).forEach(API => {
         for (let i = 0; i < entryCount; i ++)
           entryArr.push(i)
 
+        console.log("Writing to database...")
         await mapSeries(entryArr, (i) => db1.add('hello' + i))
+        console.log("Done")
 
         return new Promise((resolve, reject) => {
           timer = setInterval(async () => {
-            const items = db2.iterator({ limit: -1 }).collect()
-            if (items.length === entryCount) {
+            if (db2._oplog.length === entryCount) {
               clearInterval(timer)
+
+              const items = db2.iterator({ limit: -1 }).collect()
               assert.equal(items.length, entryCount)
               assert.equal(items[0].payload.value, 'hello0')
               assert.equal(items[items.length - 1].payload.value, 'hello99')
