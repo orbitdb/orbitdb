@@ -58,7 +58,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('starts in offline mode', async () => {
-      orbitdb = await OrbitDB.createInstance(ipfs1, { offline: true, directory: dbPath1 })
+      orbitdb = await OrbitDB.createInstance(ipfs1, { id: 'A', offline: true, directory: dbPath1 })
       assert.equal(orbitdb._pubsub, null)
       await orbitdb.stop()
     })
@@ -72,6 +72,17 @@ Object.keys(testAPIs).forEach(API => {
     it('does not start in offline mode - default', async () => {
       orbitdb = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       assert.notEqual(orbitdb._pubsub, null)
+      await orbitdb.stop()
+    })
+
+    it('throws error if no `id` passed in offline mode', async () => {
+      let err
+      try {
+        orbitdb = await OrbitDB.createInstance(ipfs1, { offline: true, directory: dbPath1 })
+      } catch (e) {
+        err = e.message
+      }
+      assert.equal(err, 'Offline mode requires passing an `id` in the options')
       await orbitdb.stop()
     })
   })
