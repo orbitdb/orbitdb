@@ -32,7 +32,7 @@
     "orbit-db-kvstore": "~1.6.0",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "^0.5.3",
-    "orbit-db-store": "orbitdb/orbit-db-store#feat/bc"
+    "orbit-db-store": "orbitdb/orbit-db-store#feat/update-identities"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
