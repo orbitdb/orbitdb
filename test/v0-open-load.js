@@ -45,7 +45,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       rmrf.sync(dbPath)
-      
+
       const filterFunc = (src, dest) => {
         // windows has problems copying these files...
         return !(src.includes('LOG') || src.includes('LOCK'))
@@ -123,7 +123,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('allows migrated key to write', async () => {
         const hash = await db.add({ thing: 'new addition' })
-        const newEntries = db.all.filter(e => e.v === 1)
+        const newEntries = db.all.filter(e => e.v > 0)
         assert.equal(newEntries.length, 1)
         assert.strictEqual(newEntries[0].hash, hash)
       })
