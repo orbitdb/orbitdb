@@ -38,7 +38,7 @@ Object.keys(testAPIs).forEach(API => {
     this.retries(1) // windows...
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, address, store
+    let ipfsd, ipfs, orbitdb, db, address, keystore
     let localDataPath
 
     before(async () => {
@@ -55,8 +55,8 @@ Object.keys(testAPIs).forEach(API => {
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
 
-      store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
-      const keystore = new Keystore(store)
+      const store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
+      keystore = new Keystore(store)
 
       let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), keystore })
       orbitdb = await OrbitDB.createInstance(ipfs, { identity, keystore })
@@ -64,8 +64,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      await store.close()
-      rmrf.sync(dbPath)
+      await keystore.close()
       if (orbitdb)
         await orbitdb.stop()
 
@@ -94,6 +93,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       after(async () => {
+        rmrf.sync(dbPath)
         if (db)
           await db.close()
       })
@@ -149,6 +149,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       after(async () => {
+        rmrf.sync(dbPath2)
         if (db)
           await db.close()
       })
