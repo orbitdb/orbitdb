@@ -32,13 +32,14 @@ const databaseTypes = {
 }
 
 class OrbitDB {
-  constructor (ipfs, identity, options = {}) {
+  constructor (ipfs, identities, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
-
+    if (!isDefined(identities)) { throw new Error('identities is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
     if (!isDefined(identity)) { throw new Error('identity is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
     this._ipfs = ipfs
-    this.identity = identity
+    this._identities = identities
+    this._identity = identity
     this.id = options.peerId
     this._pubsub = !options.offline
       ? options.broker
@@ -75,6 +76,15 @@ class OrbitDB {
 
   get cache () { return this.caches[this.directory].cache }
 
+
+  get identity () {
+    return this._identity
+  }
+
+  get identities () {
+    return this._identities
+  }
+
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
@@ -97,8 +107,8 @@ class OrbitDB {
       options.storage = Storage(null, storageOptions)
     }
 
-    if (options.identity && options.identity.provider.keystore) {
-      options.keystore = options.identity.provider.keystore
+    if (options.identities && options.identities.keystore) {
+      options.keystore = options.identities.keystore
     }
 
     if (!options.keystore) {
@@ -107,13 +117,13 @@ class OrbitDB {
       options.keystore = new Keystore(keyStorage)
     }
 
+    const identities = options.identities || new Identities({ keystore: options.keystore })
     if (!options.identity) {
-      options.identity = await Identities.createIdentity({
-        id: options.id || id,
-        keystore: options.keystore
+      options.identity = await identities.createIdentity({
+        type: options.identityType || 'orbitdb',
+        id: options.id || id
       })
     }
-
     if (!options.cache) {
       const cachePath = path.join(options.directory, id, '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)
@@ -121,7 +131,7 @@ class OrbitDB {
     }
 
     const finalOptions = Object.assign({}, options, { peerId: id })
-    return new OrbitDB(ipfs, options.identity, finalOptions)
+    return new OrbitDB(ipfs, identities, options.identity, finalOptions)
   }
 
   /* Databases */
@@ -227,8 +237,8 @@ class OrbitDB {
       onLoad: this._onLoad.bind(this)
     })
     const identity = options.identity || this.identity
-
-    const store = new Store(this._ipfs, identity, address, opts)
+    const identities = options.identities || this.identities
+    const store = new Store(this._ipfs, identities, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
 
     // ID of the store is the address as a string
