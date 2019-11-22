@@ -170,6 +170,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('database has the correct access-controller', async () => {
         assert.equal(db.access.type, 'ipfs')
+        assert.equal(db.options.accessControllerAddress, '/ipfs/zdpuAsYRtJLLLDibnmxWPzyRGJEqtjmJP27ppKWcLreNGGTFN')
         assert.strictEqual(db.access.write[0], '*')
       })
 
@@ -182,6 +183,16 @@ Object.keys(testAPIs).forEach(API => {
         const newEntries = db.all.filter(e => e.v > 1)
         assert.equal(newEntries.length, 1)
         assert.strictEqual(newEntries[0].hash, hash)
+      })
+
+      it('reopens db after adding new entry', async () => {
+        await db.close()
+        db = await orbitdb.open(v1Address, { directory: dbPath2 })
+        assert.notEqual(db, null)
+        await db.load()
+        assert.equal(db.all.length, 101)
+        const newEntries = db.all.filter(e => e.v > 1)
+        assert.equal(newEntries.length, 1)
       })
     })
   })
