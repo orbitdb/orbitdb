@@ -54,12 +54,12 @@ Object.keys(testAPIs).forEach(API => {
       // copy data files to ipfs and orbitdb repos
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
-
-      const store = await storage.createStore(path.join(dbPath, ipfs._peerInfo.id._idB58String, 'keys'))
+      const ipfsId = ipfs._peerInfo.id._idB58String
+      const store = await storage.createStore(path.join(dbPath, ipfsId, 'keys'))
       keystore = new Keystore(store)
-
-      let identity = await Identities.createIdentity({ id: ipfs._peerInfo.id._idB58String, migrate: migrate(keyFixtures), keystore })
-      orbitdb = await OrbitDB.createInstance(ipfs, { identity, keystore })
+      const identities = new Identities({ keystore })
+      const identity = await identities.createIdentity({ id: ipfsId, migrate: migrate(keyFixtures) })
+      orbitdb = await OrbitDB.createInstance(ipfs, { identity, identities })
 
     })
 

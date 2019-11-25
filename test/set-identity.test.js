@@ -27,7 +27,7 @@ Object.keys(testAPIs).forEach(API => {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb, db, keystore
-    let identity1, identity2
+    let identity1, identity2, identities
     let localDataPath
 
     before(async () => {
@@ -38,16 +38,15 @@ Object.keys(testAPIs).forEach(API => {
       ipfs = ipfsd.api
 
       if(fs && fs.mkdirSync) fs.mkdirSync(keysPath, { recursive: true })
-      const identityStore = await storage.createStore(keysPath)
 
-      keystore = new Keystore(identityStore)
-      identity1 = await Identities.createIdentity({ id: 'test-id1', keystore })
-      identity2 = await Identities.createIdentity({ id: 'test-id2', keystore })
+      identities = new Identities(keysPath)
+      identity1 = await identities.createIdentity({ id: 'test-id1' })
+      identity2 = await identities.createIdentity({ id: 'test-id2' })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
-      await keystore.close()
+      await identities.close()
       if(orbitdb)
         await orbitdb.stop()
 
@@ -63,7 +62,7 @@ Object.keys(testAPIs).forEach(API => {
           identity1.id
         ]
       }
-      options = Object.assign({}, options, { create: true, type: 'eventlog', overwrite: true })
+      options = Object.assign({}, options, { create: true, type: 'eventlog', overwrite: true, identities })
       db = await orbitdb.open('abc', options)
     })
 

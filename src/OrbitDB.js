@@ -124,6 +124,7 @@ class OrbitDB {
         id: options.id || id
       })
     }
+
     if (!options.cache) {
       const cachePath = path.join(options.directory, id, '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)

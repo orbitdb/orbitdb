@@ -32,10 +32,12 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      const identity = await Identities.createIdentity({ type: 'custom', keystore: CustomTestKeystore().create()  })
+      const identities = new Identities({ keystore: CustomTestKeystore().create() })
+      const identity = await identities.createIdentity({ type: 'custom'  })
       orbitdb1 = await OrbitDB.createInstance(ipfs, {
         directory: path.join(dbPath, '1'),
-        identity
+        identity,
+        identities
       })
     })
 

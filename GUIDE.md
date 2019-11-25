@@ -152,12 +152,12 @@ console.log(identity.toJSON())
 #### Creating an identity
 ```javascript
 const Identities = require('orbit-db-identity-provider')
-const options = { id: 'local-id' }
-const identity = await Identities.createIdentity(options)
+const identities = new Identities()
+const identity = await identities.createIdentity({ id: 'local-id' })
 ```
-This identity can be used in OrbitDB by passing it in as an argument in the `options` object:
+This identity can be used in OrbitDB by passing it in as an argument in the `options` object. The keystore holding the keys corresponding to `identity` is in `identities` and should be passed along with the identity:
 ```javascript
-const orbitdb = await OrbitDB.createInstance(ipfs, { identity: identity })
+const orbitdb = await OrbitDB.createInstance(ipfs, { identity: identity, identities })
 ```
 The identity also contains signatures proving possession of the id and OrbitDB public key. This is included to allow proof of ownership of an external public key within OrbitDB. You can read more [here](https://github.com/orbitdb/orbit-db-identity-provider)
 
@@ -278,9 +278,9 @@ class OtherAccessController extends AccessController {
 
     static get type () { return 'othertype' } // Return the type for this controller
 
-    async canAppend(entry, identityProvider) {
+    async canAppend(entry) {
       // logic to determine if entry can be added, for example:
-      if (entry.payload === "hello world" && entry.identity.id === identity.id && identityProvider.verifyIdentity(entry.identity))
+      if (entry.payload === "hello world" && entry.identity.id === identity.id)
         return true
 
       return false
