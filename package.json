@@ -14,7 +14,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^0.7.1",
-    "ipfs-log": "orbitdb/ipfs-log#feat/load-opt",
+    "ipfs-log": "orbitdb/ipfs-log",
     "ipfs-pubsub-1on1": "~0.0.6",
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
@@ -26,13 +26,13 @@
     "orbit-db-docstore": "~1.6.0",
     "orbit-db-eventstore": "~1.6.0",
     "orbit-db-feedstore": "~1.6.0",
-    "orbit-db-identity-provider": "~0.2.0",
+    "orbit-db-identity-provider": "orbitdb/orbit-db-identity-provider",
     "orbit-db-io": "orbitdb/orbit-db-io",
     "orbit-db-keystore": "~0.3.0",
     "orbit-db-kvstore": "~1.6.0",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "^0.5.3",
-    "orbit-db-store": "orbitdb/orbit-db-store#feat/bc"
+    "orbit-db-store": "orbitdb/orbit-db-store"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
