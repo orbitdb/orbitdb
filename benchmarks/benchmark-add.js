@@ -13,7 +13,7 @@ let lastTenSeconds = 0
 
 // Main loop
 const queryLoop = async (db) => {
-  await db.add(totalQueries)
+  await db.add(totalQueries, { pin: false })
   totalQueries ++
   lastTenSeconds ++
   queriesPerSecond ++
