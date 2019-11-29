@@ -14,7 +14,8 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^0.7.1",
-    "ipfs-pubsub-1on1": "~0.0.4",
+    "ipfs-log": "orbitdb/ipfs-log",
+    "ipfs-pubsub-1on1": "~0.0.6",
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
@@ -25,13 +26,13 @@
     "orbit-db-docstore": "~1.6.0",
     "orbit-db-eventstore": "~1.6.0",
     "orbit-db-feedstore": "~1.6.0",
-    "orbit-db-identity-provider": "~0.2.0",
-    "orbit-db-io": "^0.1.1",
+    "orbit-db-identity-provider": "orbitdb/orbit-db-identity-provider",
+    "orbit-db-io": "orbitdb/orbit-db-io",
     "orbit-db-keystore": "~0.3.0",
     "orbit-db-kvstore": "~1.6.0",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "^0.5.3",
-    "orbit-db-store": "~2.7.0"
+    "orbit-db-store": "orbitdb/orbit-db-store"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -76,7 +77,7 @@
     "lint:docs": "remark -qf -u validate-links .",
     "test:all": "npm run test:browser-multiple-tabs && npm run test",
     "test": "cross-env TEST=all mocha",
-    "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser/orbitdb.js && cpy node_modules/ipfs/dist/index.js ./test/browser/ipfs.js && cpy node_modules/orbit-db-identity-provider/dist/index-browser.min.js ./test/browser/identities.js && cpy node_modules/ipfs-log/dist/ipfslog.min.js ./test/browser/ipfslog.min.js && mocha ./test/browser/concurrent.spec.js",
+    "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser --rename=orbitdb.js && cpy node_modules/ipfs/dist/index.js ./test/browser --rename=ipfs.js && cpy node_modules/orbit-db-identity-provider/dist/index-browser.min.js ./test/browser --rename=identities.js && cpy node_modules/ipfs-log/dist/ipfslog.min.js ./test/browser && mocha ./test/browser/concurrent.spec.js",
     "build": "npm run build:es5 && npm run build:debug && npm run build:dist && npm run build:examples && npm run build:docs/toc",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size && mkdirp examples/browser/lib && cpy node_modules/ipfs/dist/index.js examples/browser/lib/ipfs.js",
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && mkdirp examples/browser/lib && cpy dist/orbitdb.min.js examples/browser/lib/orbitdb.min.js",

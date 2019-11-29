@@ -153,7 +153,7 @@ Object.keys(testAPIs).forEach(API => {
         it('loads cache from previous version of orbit-db', async () => {
           const dbName = 'cache-schema-test'
 
-          db = await orbitdb.create(dbName, 'keyvalue')
+          db = await orbitdb.create(dbName, 'keyvalue', { overwrite: true })
           const manifestHash = db.address.root
           const migrationDataPath = path.join(dbPath, manifestHash, dbName)
 
