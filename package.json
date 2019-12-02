@@ -35,6 +35,7 @@
     "orbit-db-store": "orbitdb/orbit-db-store"
   },
   "devDependencies": {
+    "adm-zip": "^0.4.13",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",

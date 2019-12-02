@@ -7,6 +7,7 @@ const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
 const leveldown = require('leveldown')
+const Zip = require('adm-zip')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const io = require('orbit-db-io')
@@ -27,11 +28,12 @@ const {
   testAPIs,
 } = require('./utils')
 
-const dbPath = './orbitdb/tests/v0'
-const dbFixturesDir = './test/fixtures/v0/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db'
-const keyFixtures = './test/fixtures/keys/QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX'
+const dbPath = path.join('./orbitdb', 'tests', 'v0')
+const dbFixturesDir = path.join('./test', 'fixtures', 'v0', 'QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC', 'v0-db')
+const keyFixtures = path.join('./test', 'fixtures', 'keys','QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX')
 
-const ipfsFixturesDir = './test/fixtures/ipfs'
+const ipfsFixtures = path.join('./test', 'fixtures', 'ipfs.zip')
+const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
@@ -45,6 +47,10 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
       rmrf.sync(dbPath)
+
+
+      const zip = new Zip(ipfsFixtures)
+      await zip.extractAllToAsync(path.join('./test', 'fixtures'), true)
 
       const filterFunc = (src, dest) => {
         // windows has problems copying these files...
@@ -70,6 +76,8 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfsd)
         await stopIpfs(ipfsd)
+
+      rmrf.sync(ipfsFixturesDir)
     })
 
     describe('Open & Load - V0 entries', function () {
