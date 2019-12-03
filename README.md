@@ -272,6 +272,15 @@ LOG=debug node <file>
 
 We have an FAQ! [Go take a look at it](FAQ.md). If a question isn't there, open an issue and suggest adding it. We can work on the best answer together.
 
+### Are there implementations in other languages?
+
+Yes! Take a look at these implementations:
+
+  - Golang: [berty/go-orbit-db](https://github.com/berty/go-orbit-db)
+  - Python: [orbitdb/py-orbit-db-http-client](https://github.com/orbitdb/py-orbit-db-http-client)
+
+The best place to find out what is out there and what is being actively worked on is likely by asking in the [Gitter](https://gitter.im/orbitdb/Lobby). If you know of any other repos that ought to be included in this section, please open a PR and add them.
+
 ## Contributing
 
 **Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
