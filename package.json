@@ -14,7 +14,6 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^0.7.1",
-    "ipfs-log": "orbitdb/ipfs-log",
     "ipfs-pubsub-1on1": "~0.0.6",
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
