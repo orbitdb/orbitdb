@@ -7,6 +7,7 @@ const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
 const leveldown = require('leveldown')
+const Zip = require('adm-zip')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const Identities = require('orbit-db-identity-provider')
@@ -20,10 +21,11 @@ const {
   testAPIs,
 } = require('./utils')
 
-const dbPath = path.join(__dirname, 'orbitdb', 'tests', 'create-open')
-const ipfsPath = path.join(__dirname, 'orbitdb', 'tests', 'create-open', 'ipfs')
-const migrationFixturePath = path.join(__dirname, 'fixtures', 'migration', 'cache-schema-test')
-const ipfsFixturesDir = path.join(__dirname, 'fixtures', 'ipfs')
+const dbPath = path.join('./orbitdb', 'tests', 'create-open')
+const ipfsPath = path.join('./orbitdb', 'tests', 'create-open', 'ipfs')
+const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache-schema-test')
+const ipfsFixtures = path.join('./test', 'fixtures', 'ipfs.zip')
+const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function () {
@@ -45,7 +47,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-
+      const zip = new Zip(ipfsFixtures)
+      await zip.extractAllToAsync(path.join('./test', 'fixtures'), true)
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
@@ -57,6 +60,8 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfsd)
         await stopIpfs(ipfsd)
+
+      rmrf.sync(ipfsFixturesDir)
     })
 
     describe('Create', function () {
@@ -153,7 +158,7 @@ Object.keys(testAPIs).forEach(API => {
         it('loads cache from previous version of orbit-db', async () => {
           const dbName = 'cache-schema-test'
 
-          db = await orbitdb.create(dbName, 'keyvalue')
+          db = await orbitdb.create(dbName, 'keyvalue', { overwrite: true })
           const manifestHash = db.address.root
           const migrationDataPath = path.join(dbPath, manifestHash, dbName)
 

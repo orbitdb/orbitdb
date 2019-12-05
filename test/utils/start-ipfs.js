@@ -15,7 +15,7 @@ const startIpfs = (type, config = {}) => {
     }
 
     // If we're starting a process, pass command line arguments to it
-    if (!config.args) {
+    if (!config.args && type.includes('go')) {
       config.args = ['--enable-pubsub-experiment']
     }
 

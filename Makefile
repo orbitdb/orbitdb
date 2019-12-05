@@ -23,7 +23,8 @@ clean:
 	rm -rf node_modules/
 
 clean-dependencies: clean
-	rm -f package-lock.json;
+	rm -f package-lock.json
+	rm -rf examples/browser/lib
 
 rebuild: | clean-dependencies build
 

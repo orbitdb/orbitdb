@@ -40,9 +40,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = options && options.broker
-      ? new options.broker(this._ipfs) // eslint-disable-line
-      : new Pubsub(this._ipfs, this.id)
+    this._pubsub = !options.offline
+      ? options.broker
+        ? new options.broker(this._ipfs) // eslint-disable-line
+        : new Pubsub(this._ipfs, this.id)
+      : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -76,7 +78,15 @@ class OrbitDB {
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
-    const { id } = await ipfs.id()
+    if (options.offline === undefined) {
+      options.offline = false
+    }
+
+    if (options.offline && !options.id ) {
+      throw new Error('Offline mode requires passing an `id` in the options')
+    }
+
+    const { id } = options.offline ? ({ id: options.id }) : await ipfs.id()
 
     if (!options.directory) { options.directory = './orbitdb' }
 
@@ -228,7 +238,7 @@ class OrbitDB {
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
-    if (opts.replicate && this._pubsub) { this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
+    if (opts.replicate && this._pubsub) { await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
 
     return store
   }
@@ -435,7 +445,7 @@ class OrbitDB {
     // Make sure the type from the manifest matches the type that was given as an option
     if (manifest.name !== dbAddress.path) { throw new Error(`Manifest '${manifest.name}' cannot be opened as '${dbAddress.path}'`) }
     if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
-    
+
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 

@@ -1,4 +1,5 @@
 const IPFS = require('ipfs')
+const IPFSHTTPClient = require('ipfs-http-client')
 
 /**
  * IPFS daemons to run the tests with.
@@ -8,7 +9,7 @@ const IPFS = require('ipfs')
 // https://github.com/ipfs/js-ipfsd-ctl#ipfsfactory---const-f--ipfsfactorycreateoptions
 let jsIpfs = {
   'js-ipfs': {
-    type: 'proc', 
+    type: 'proc',
     exec: IPFS,
   }
 }
@@ -16,6 +17,7 @@ let jsIpfs = {
 const goIpfs = {
   'go-ipfs': {
     type: 'go',
+    IpfsClient: IPFSHTTPClient,
   }
 }
 
