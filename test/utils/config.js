@@ -3,6 +3,9 @@ module.exports = {
   dbname: 'orbit-db-tests',
   defaultIpfsConfig: {
     start: true,
+    EXPERIMENTAL: {
+        pubsub: true
+    },
     config: {
       Addresses: {
         API: '/ip4/127.0.0.1/tcp/0',
@@ -22,6 +25,9 @@ module.exports = {
     }
   },
   daemon1: {
+    EXPERIMENTAL: {
+        pubsub: true
+    },
     config: {
       Addresses: {
         API: '/ip4/127.0.0.1/tcp/0',
@@ -41,6 +47,9 @@ module.exports = {
     },
   },
   daemon2: {
+    EXPERIMENTAL: {
+        pubsub: true
+    },
     config: {
       Addresses: {
         API: '/ip4/127.0.0.1/tcp/0',
