@@ -38,8 +38,10 @@ const repoConf = {
 
 const defaultConfig = Object.assign({}, {
   start: true,
+  preload:{
+    enabled: false
+  },
   EXPERIMENTAL: {
-    pubsub: true,
     sharding: false,
     dht: false,
   },
@@ -47,7 +49,7 @@ const defaultConfig = Object.assign({}, {
 })
 
 const conf2 = Object.assign({}, defaultConfig, {
-  repo: new IPFSRepo('./orbitdb/benchmarks/replication/client22faf/ipfs', repoConf)
+  repo: new IPFSRepo('./orbitdb/benchmarks/replication/client2/ipfs', repoConf)
 })
 
 // Metrics output function

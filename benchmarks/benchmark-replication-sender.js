@@ -38,8 +38,10 @@ const repoConf = {
 
 const defaultConfig = Object.assign({}, {
   start: true,
+  preload: {
+    enabled: false
+  },
   EXPERIMENTAL: {
-    pubsub: true,
     sharding: false,
     dht: false,
   },
