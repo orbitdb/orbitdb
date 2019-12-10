@@ -102,10 +102,10 @@ Object.keys(testAPIs).forEach(API => {
             const result1 = db1.iterator({ limit: -1 }).collect()
             const result2 = db2.iterator({ limit: -1 }).collect()
             // Make sure we have all the entries
-            if (result1.length === entryCount && result2.length === entryCount) {
-              assert.deepEqual(result1, result2)
-              resolve()
-            }
+            assert.strictEqual(result1.length, entryCount)
+            assert.strictEqual(result2.length, entryCount)
+            assert.deepStrictEqual(result1, result2)
+            resolve()
           } catch (e) {
             reject(e)
           }
@@ -156,10 +156,10 @@ Object.keys(testAPIs).forEach(API => {
             const result1 = db1.iterator({ limit: -1 }).collect()
             const result2 = db2.iterator({ limit: -1 }).collect()
             // Make sure we have all the entries
-            if (result1.length === entryCount && result2.length === entryCount) {
-              assert.deepEqual(result1, result2)
-              resolve()
-            }
+            assert.strictEqual(result1.length, entryCount)
+            assert.strictEqual(result2.length, entryCount)
+            assert.deepStrictEqual(result1, result2)
+            resolve()
           } catch (e) {
             reject(e)
           }
