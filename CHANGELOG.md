@@ -2,6 +2,17 @@
 
 Note: OrbitDB follows [semver](https://semver.org/). We are currently in alpha: backwards-incompatible changes may occur in minor releases.
 
+## v0.23.0
+
+### Performance
+  Performance improvements have been made to writing and loading, as well as verification :tada:
+
+##### Write and Load
+  - Each entry added now contains references to previous entries in powers of 2 distance apart up to a maximum distance of `referenceCount` (default 32) from it, speeding up both writing and loading and resulting in smaller entry sizes. [#275](https://github.com/orbitdb/ipfs-log/pull/275)
+
+#### Signature Caching
+  - The default keystore and identity-provider now have caches added to speed up verification of entry signtures and identities. See [#53](https://github.com/orbitdb/orbit-db-identity-provider/pull/53) and [#38](https://github.com/orbitdb/orbit-db-keystore/pull/38)
+
 ## v0.22.1
 
  - Thanks to [#712](https://github.com/orbitdb/orbit-db/pull/712) from @kolessios, as well as the efforts of @BartKnucle and @durac :heart:, OrbitDB now works on Windows :tada: We invite our Windows friends to try it out!
