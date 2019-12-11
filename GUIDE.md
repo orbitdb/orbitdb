@@ -325,6 +325,14 @@ ipfs.on('ready', async () => {
 })
 ```
 
+**NOTE ON PERSISTENCY**
+
+OrbitDB does not automatically pin content added to IPFS. This means that if garbage collection is triggered, any unpinned content will be erased. To pin the entry, pass the optional `{ pin: true }` in the arguments:
+
+```js
+await db.put('name', 'hello', { pin: true })
+```
+
 For adding entries to other databases, see:
 - [log.add()](https://github.com/orbitdb/orbit-db/blob/master/API.md#addevent)
 - [feed.add()](https://github.com/orbitdb/orbit-db/blob/master/API.md#adddata)
