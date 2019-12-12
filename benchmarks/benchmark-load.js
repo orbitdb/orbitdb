@@ -32,7 +32,7 @@ ipfs.on('ready', async () => {
       console.log('Writing DB...')
       const st1 = new Date().getTime()
       for (let i = 0; i < amount; i++) {
-        await db.add('a' + i, 64)
+        await db.add('a' + i)
       }
       const et1 = new Date().getTime()
       console.log('writing took', (et1 - st1), 'ms')
