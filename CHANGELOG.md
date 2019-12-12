@@ -69,6 +69,17 @@ const orbitdb = await OrbitDB.createInstance(ipfs, { offline: true, id: 'mylocal
 
 Note that an `id` will need to be passed if your IPFS node is offline. If you would like to start replicating databases after starting OrbitDB in offline mode, the OrbitDB instance needs to be re-created. See [#726](https://github.com/orbitdb/orbit-db/pull/726)
 
+### Pinning and Garbage Collection
+
+OrbitDB does **not** automatically pin content added to IPFS. This means that if garbage collection is triggered, any unpinned content will be erased. An optional `pin` flag has been added which, when set to `true`, will pin the content to IPFS and can be set as follows:
+
+```js
+await db.put('name', 'hello', { pin: true })
+```
+Note that this is currently _experimental_ and will degrade performance. For more info see [this issue](https://github.com/ipfs/js-ipfs/issues/2650).
+
+It is recommended that you collect the hashes of the entries and pin them outside of the `db.put/add` calls before triggering garbage collection.
+
 ## v0.22.1
 
  - Thanks to [#712](https://github.com/orbitdb/orbit-db/pull/712) from @kolessios, as well as the efforts of @BartKnucle and @durac :heart:, OrbitDB now works on Windows :tada: We invite our Windows friends to try it out!
