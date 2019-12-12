@@ -76,7 +76,9 @@ OrbitDB does **not** automatically pin content added to IPFS. This means that if
 ```js
 await db.put('name', 'hello', { pin: true })
 ```
-Note that this is currently _experimental_ and will degrade performance. It is recommended that you collect the hashes of the entries and pin them outside of the `db.put/add` calls before triggering garbage collection.
+Note that this is currently _experimental_ and will degrade performance. For more info see [this issue](https://github.com/ipfs/js-ipfs/issues/2650).
+
+It is recommended that you collect the hashes of the entries and pin them outside of the `db.put/add` calls before triggering garbage collection.
 
 ## v0.22.1
 
