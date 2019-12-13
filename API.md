@@ -612,7 +612,7 @@ Emitted after fully loading the local database.
 
 ### `write`
 ```javascript
-db.events.on('write', (dbname, hash, entry) => ... )
+db.events.on('write', (address, entry, heads) => ... )
 ```
 
 Emitted after an entry was added locally to the database. *hash* is the IPFS hash of the latest state of the database. *entry* is the added database op.
