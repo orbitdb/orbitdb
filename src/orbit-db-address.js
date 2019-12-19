@@ -27,7 +27,7 @@ class OrbitDBAddress {
     let accessControllerHash
 
     try {
-      accessControllerHash = (parts[0].indexOf('zd') > -1 || parts[0].indexOf('Qm') > -1)
+      accessControllerHash = (parts[0].indexOf('zd') > -1 || parts[0].indexOf('Qm') > -1 || parts[0].indexOf('ba') > -1)
         ? new CID(parts[0]).toBaseEncodedString()
         : null
     } catch (e) {
