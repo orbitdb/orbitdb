@@ -6,7 +6,12 @@ const Logger = require('logplease')
 const logger = Logger.create('exchange-heads', { color: Logger.Colors.Yellow })
 Logger.setLogLevel('ERROR')
 
-const getHeadsForDatabase = store => (store && store._oplog) ? store._oplog.heads : []
+const getHeadsForDatabase = async store => {
+  if (!(store && store._cache)) return []
+  const localHeads = await store._cache.get(store.localHeadsPath) || []
+  const remoteHeads = await store._cache.get(store.remoteHeadsPath) || []
+  return [...localHeads, ...remoteHeads]
+}
 
 const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection, onMessage, onChannelCreated) => {
   const _handleMessage = message => {
@@ -33,7 +38,7 @@ const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection,
   logger.debug(`Connected to ${peer}`)
 
   // Send the heads if we have any
-  const heads = getHeadsForDatabase(getStore(address))
+  const heads = await getHeadsForDatabase(getStore(address))
   logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
   if (heads) {
     await channel.send(JSON.stringify({ address: address, heads: heads }))
