@@ -63,6 +63,24 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(result.toString().indexOf('zd'), 9)
       })
 
+      it('parse address after json serialization', () => {
+        const address = JSON.parse(JSON.stringify(
+          OrbitDB.parseAddress(
+            '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
+          )
+        ))
+        const result = OrbitDB.parseAddress(address)
+
+        const isInstanceOf = result instanceof OrbitDBAddress
+        assert.equal(isInstanceOf, true)
+
+        assert.equal(result.root, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+        assert.equal(result.path, 'first-database')
+
+        assert.equal(result.toString().indexOf('/orbitdb'), 0)
+        assert.equal(result.toString().indexOf('zd'), 9)
+      })
+
       it('parse address with backslashes (win32) successfully', () => {
         const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
         const result = OrbitDB.parseAddress(address)

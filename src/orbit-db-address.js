@@ -14,6 +14,10 @@ class OrbitDBAddress {
     return OrbitDBAddress.join(this.root, this.path)
   }
 
+  toJSON () {
+    return this.toString()
+  }
+
   static isValid (address) {
     address = address.toString().replace(/\\/g, '/')
 
