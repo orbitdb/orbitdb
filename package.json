@@ -31,7 +31,7 @@
     "orbit-db-kvstore": "~1.7.0",
     "orbit-db-pubsub": "~0.5.5",
     "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "~3.0.0"
+    "orbit-db-store": "git://github.com/orbitdb/orbit-db-store.git#3860443bf4f0fefaee9bd31d181a1a891afcba22"
   },
   "devDependencies": {
     "adm-zip": "^0.4.13",
