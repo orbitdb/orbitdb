@@ -30,7 +30,9 @@ const {
 
 const dbPath = path.join('./orbitdb', 'tests', 'v0')
 const dbFixturesDir = path.join('./test', 'fixtures', 'v0', 'QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC', 'v0-db')
-const keyFixtures = path.join('./test', 'fixtures', 'keys','QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX')
+
+// localstorage-level-migration only supports posix style paths
+const keyFixtures = path.posix.join('./test', 'fixtures', 'keys', 'QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX')
 
 const ipfsFixtures = path.join('./test', 'fixtures', 'ipfs.zip')
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')

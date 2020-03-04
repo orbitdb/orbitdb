@@ -81,11 +81,7 @@
       }
 
       const startIpfs = (config = {}) => {
-        return new Promise((resolve, reject) => {
-          const ipfs = new Ipfs(config)
-          ipfs.on('error', reject)
-          ipfs.on('ready', () => resolve(ipfs))
-        })
+        return Ipfs.create(config)
       }
 
       const database = 'benchmark-replication'

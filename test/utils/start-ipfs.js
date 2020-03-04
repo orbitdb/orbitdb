@@ -1,6 +1,7 @@
 'use strict'
 
-const IPFSFactory = require('ipfsd-ctl')
+const IPFSCtl = require('ipfsd-ctl')
+const fs = require('fs-extra')
 const testAPIs = require('./test-apis')
 
 /**
@@ -8,38 +9,39 @@ const testAPIs = require('./test-apis')
  * @param  {Object}  config  [IPFS configuration to use]
  * @return {[Promise<IPFS>]} [IPFS instance]
  */
-const startIpfs = (type, config = {}) => {
-  return new Promise((resolve, reject) => {
-    if (!testAPIs[type]) {
-      reject(new Error(`Wanted API type ${JSON.stringify(type)} is unknown. Available types: ${Object.keys(testAPIs).join(', ')}`))
-    }
+const startIpfs = async (type, config = {}) => {
+  if (!testAPIs[type]) {
+    throw new Error(`Wanted API type ${JSON.stringify(type)} is unknown. Available types: ${Object.keys(testAPIs).join(', ')}`)
+  }
 
-    // If we're starting a process, pass command line arguments to it
-    if (!config.args && type.includes('go')) {
-      config.args = ['--enable-pubsub-experiment']
-    }
+  // If we're starting a process, pass command line arguments to it
+  let args
+  if (!config.args && type.includes('go')) {
+    args = ['--enable-pubsub-experiment']
+  }
 
-    // Spawn an IPFS daemon (type defined in)
-    IPFSFactory
-      .create(testAPIs[type])
-      .spawn(config, async (err, ipfsd) => {
-        if (err) {
-          reject(err)
-        }
+  // Spawn an IPFS daemon (type defined in)
+  if (config.repo && typeof config.repo == "string") {
+    await fs.ensureDir(config.repo)
+  }
+  const IPFSFactory = IPFSCtl.createFactory(testAPIs[type])
+  const ipfsd = await IPFSFactory.spawn({ ipfsOptions: config, args })
 
-        // Monkey patch _peerInfo to the ipfs api/instance
-        // to make js-ipfs-api compatible with js-ipfs
-        // TODO: Get IPFS id via coherent API call (without it being asynchronous)
-        setTimeout(async () => {
-          if (!ipfsd.api._peerInfo) {
-            let { id } = await ipfsd.api.id()
-            ipfsd.api._peerInfo = { id: { _idB58String: id } }
-          }
+  // Monkey patch _peerInfo to the ipfs api/instance
+  // to make js-ipfs-api compatible with js-ipfs
+  // TODO: Get IPFS id via coherent API call (without it being asynchronous)
+  await new Promise((resolve) => {
+    setTimeout(async () => {
+      if (!ipfsd.api._peerInfo) {
+        let { id } = await ipfsd.api.id()
+        ipfsd.api._peerInfo = { id: { _idB58String: id } }
+      }
 
-          resolve(ipfsd)
-        }, 500)
-      })
+      resolve(ipfsd)
+    }, 500)
   })
+
+  return ipfsd
 }
 
 module.exports = startIpfs

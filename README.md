@@ -94,39 +94,26 @@ const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
 // Create IPFS instance
+const ipfs = await IPFS.create()
 
-// For js-ipfs >= 0.38
-const ipfs = new IPFS()
+const orbitdb = await OrbitDB.createInstance(ipfs)
 
-// For js-ipfs < 0.38
-const ipfsOptions = {
-  EXPERIMENTAL: {
-    pubsub: true
-  }
-}
-const ipfs = new IPFS(ipfsOptions)
+// Create / Open a database
+const db = await orbitdb.log('hello')
+await db.load()
 
-ipfs.on('error', (e) => console.error(e))
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-
-  // Create / Open a database
-  const db = await orbitdb.log('hello')
-  await db.load()
-
-  // Listen for updates from peers
-  db.events.on('replicated', (address) => {
-    console.log(db.iterator({ limit: -1 }).collect())
-  })
-
-  // Add an entry
-  const hash = await db.add('world')
-  console.log(hash)
-
-  // Query
-  const result = db.iterator({ limit: -1 }).collect()
-  console.log(JSON.stringify(result, null, 2))
+// Listen for updates from peers
+db.events.on('replicated', (address) => {
+  console.log(db.iterator({ limit: -1 }).collect())
 })
+
+// Add an entry
+const hash = await db.add('world')
+console.log(hash)
+
+// Query
+const result = db.iterator({ limit: -1 }).collect()
+console.log(JSON.stringify(result, null, 2))
 ```
 
 ### Module with IPFS Daemon

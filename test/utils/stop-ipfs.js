@@ -2,16 +2,12 @@
 
 /**
  * Stop an IPFS or ipfsd-ctl instance
- * @param  {Object}  config  [IPFS ipfsd-ctl to stop]
- * @return {None}
+ * @param  {Object} ipfsd IPFS ipfsd-ctl to stop
+ * @return {Promise<void>}
+ * @deprecated use `await ipfsd.stop()` instead
  */
-const stopIpfs = (ipfs) => {
-  return new Promise(async (resolve, reject) => {
-    ipfs.stop((err) => {
-      if (err) { reject(err) }
-      resolve()
-    })
-  })
+const stopIpfs = (ipfsd) => {
+  return ipfsd.stop()
 }
 
 module.exports = stopIpfs

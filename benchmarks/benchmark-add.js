@@ -29,18 +29,14 @@ const repoConf = {
   },
 }
 
-const ipfs = new IPFS({
+IPFS.create({
   repo: new IPFSRepo('./orbitdb/benchmarks/ipfs', repoConf),
   start: false,
   EXPERIMENTAL: {
     sharding: false,
     dht: false,
   },
-})
-
-ipfs.on('error', (err) => console.error(err))
-
-ipfs.on('ready', async () => {
+}).then(async (ipfs) => {
   const run = async () => {
     try {
       const orbit = await OrbitDB.createInstance(ipfs,{ directory: './orbitdb/benchmarks' })

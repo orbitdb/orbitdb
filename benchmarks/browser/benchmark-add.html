@@ -31,8 +31,8 @@
         setImmediate(() => queryLoop(db))
       }
 
-      let run = (() => {
-        ipfs = new Ipfs({
+      let run = (async () => {
+        ipfs = await Ipfs.create({
           repo: '/orbitdb/benchmarks/browser/benchmark-add/0.27.0',
           start: false,
           EXPERIMENTAL: {
@@ -42,36 +42,32 @@
           },
         })
 
-        ipfs.on('error', (err) => console.error(err))
+        const outputElm = document.getElementById('output')
+        try {
+          const orbit = await OrbitDB.createInstance(ipfs, { directory: './orbitdb/benchmarks/browser' })
+          const db = await orbit.eventlog('orbit-db.benchmark.add', {
+            replicate: false,
+          })
 
-        ipfs.on('ready', async () => {
-          const outputElm = document.getElementById('output')
-          try {
-            const orbit = await OrbitDB.createInstance(ipfs, { directory: './orbitdb/benchmarks/browser' })
-            const db = await orbit.eventlog('orbit-db.benchmark.add', {
-              replicate: false,
-            })
-
-            // Metrics output
-            setInterval(() => {
-              seconds ++
-              if(seconds % 10 === 0) {
-                outputElm.innerHTML = `--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds<br>` + outputElm.innerHTML
-                console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
-                if(lastTenSeconds === 0)
-                  throw new Error("Problems!")
-                lastTenSeconds = 0
-              }
-              outputElm.innerHTML = `${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Entries: ${db._oplog.length})<br>` + outputElm.innerHTML
-              // console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Entries: ${db._oplog.length})`)
-              queriesPerSecond = 0
-            }, 1000)
-            // Start the main loop
-            queryLoop(db)
-          } catch (e) {
-            console.error(e)
-          }
-        })
+          // Metrics output
+          setInterval(() => {
+            seconds ++
+            if(seconds % 10 === 0) {
+              outputElm.innerHTML = `--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds<br>` + outputElm.innerHTML
+              console.log(`--> Average of ${lastTenSeconds/10} q/s in the last 10 seconds`)
+              if(lastTenSeconds === 0)
+                throw new Error("Problems!")
+              lastTenSeconds = 0
+            }
+            outputElm.innerHTML = `${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Entries: ${db._oplog.length})<br>` + outputElm.innerHTML
+            // console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Entries: ${db._oplog.length})`)
+            queriesPerSecond = 0
+          }, 1000)
+          // Start the main loop
+          queryLoop(db)
+        } catch (e) {
+          console.error(e)
+        }
       })()
     </script>
   </body>

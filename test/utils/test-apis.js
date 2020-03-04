@@ -10,14 +10,15 @@ const IPFSHTTPClient = require('ipfs-http-client')
 let jsIpfs = {
   'js-ipfs': {
     type: 'proc',
-    exec: IPFS,
+    ipfsModule: IPFS,
   }
 }
 
 const goIpfs = {
   'go-ipfs': {
     type: 'go',
-    IpfsClient: IPFSHTTPClient,
+    ipfsHttpModule: IPFSHTTPClient,
+    ipfsBin: require('go-ipfs-dep').path()
   }
 }
 

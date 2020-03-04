@@ -7,17 +7,13 @@ const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓
 
 console.log("Starting...")
 
-const ipfs = new IPFS({ 
+IPFS.create({
   repo: './orbitdb/examples/ipfs',
   start: true,
   EXPERIMENTAL: {
     pubsub: true,
   },
-})
-
-ipfs.on('error', (err) => console.error(err))
-
-ipfs.on('ready', async () => {
+}).then(async (ipfs) => {
   let db
 
   try {

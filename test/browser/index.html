@@ -23,16 +23,6 @@
     <!-- </div> -->
     <script type="text/javascript">
       const randStr = () => Math.random().toString(36).substring(6)
-      const ipfs = new Ipfs({
-        repo: './odb/',
-        EXPERIMENTAL: {
-          pubsub: true
-        },
-        preload: { enabled: false },
-        config: {
-          Bootstrap: [ ]
-        }
-      })
 
       async function getConsistentLogLength () {
         return window.consistentLog._oplog.length
@@ -63,7 +53,16 @@
         await window.inconsistentLog.load()
       }
 
-      ipfs.on('ready', async () => {
+      Ipfs.create({
+        repo: './odb/',
+        EXPERIMENTAL: {
+          pubsub: true
+        },
+        preload: { enabled: false },
+        config: {
+          Bootstrap: [ ]
+        }
+      }).then(async (ipfs) => {
         const identity = await Identities.createIdentity({ id: 'A'})
         const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
         const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })

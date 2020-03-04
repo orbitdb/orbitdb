@@ -58,7 +58,7 @@ All databases (feeds) are shared between peers, so nobody "owns them" like users
 This happens when there's only one node with data available, and the system isn't able to effectively get all of the data it needs from it. In order to get around this, IPFS instantiates nodes with preload enabled, so that one node isn't effectively DDoSed. However, sometimes these nodes go down, as well, causing 429 errors. To get around this in example cases (certainly not in production), disable preload:
 
 ```
-this.ipfs = new Ipfs({
+this.ipfs = await Ipfs.create({
   preload: { enabled: false },
   // ...
 }

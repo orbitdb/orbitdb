@@ -61,7 +61,7 @@ The default keystore and identity-provider now have caches added to speed up ver
 
 ### Offline mode
 An optional `offline` flag has bee added which, when set to `true`, prevents pubsub from starting and messages from being exchanged. This is useful to speed up testing and for when you would like to use your database locally without networking enabled.
-To use offline mode, start your IPFS nodes offline (with `new IPFS({ start: false })`) and create your OrbitDB instance as follows:
+To use offline mode, start your IPFS nodes offline (with `IPFS.create({ start: false })`) and create your OrbitDB instance as follows:
 
 ```js
 const orbitdb = await OrbitDB.createInstance(ipfs, { offline: true, id: 'mylocalid' })
@@ -217,7 +217,7 @@ This release is a major one as we've added new features, fixed many of the old p
 
 OrbitDB now has write-permissioned databases! \o/ This gives us verifiable, distributed databases and data structures enabling tons of new use cases and possibilities. User-owned data collections, feeds and lists, State and Payment Channels, and many more!
 
-Permissions are defined by public keys and databases in OrbitDB support one or multiple write keys per database. Each database update is signed with a write-access key and the signature is verified by the clients against access control information. Next step is to extend the access control functionality to include read permissions. Read more about [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control) and [Keys](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#keys).
+Permissions are defined by public keys and databases in OrbitDB support one or multiple write keys per database. Each database update is signed with a write-access key and the signature is verified by the clients against access control information. Next step is to extend the access control functionality to include read permissions. Read more about [Access Control](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#access-control) and [Identity](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#identity).
 
 ### Addresses
 

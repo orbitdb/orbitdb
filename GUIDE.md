@@ -57,12 +57,10 @@ const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
 // Create IPFS instance
-const ipfs = new IPFS(ipfsOptions)
+const ipfs = await IPFS.create(ipfsOptions)
 
-ipfs.on('ready', async () => {
-  // Create OrbitDB instance
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-})
+// Create OrbitDB instance
+const orbitdb = await OrbitDB.createInstance(ipfs)
 ```
 
 `orbitdb` is now the OrbitDB instance we can use to interact with the databases.
@@ -79,11 +77,9 @@ First, choose the data model you want to use. The available data models are:
 Then, create a database instance (we'll use Key-Value database in this example):
 
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-  const db = await orbitdb.keyvalue('first-database')
-})
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const db = await orbitdb.keyvalue('first-database')
 ```
 
 ### Address
@@ -105,13 +101,11 @@ const address = db.address
 
 For example:
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-  const db = await orbitdb.keyvalue('first-database')
-  console.log(db.address.toString())
-  // /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
-})
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const db = await orbitdb.keyvalue('first-database')
+console.log(db.address.toString())
+// /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
 ```
 
 #### Manifest
@@ -178,20 +172,18 @@ You can specify the peers that have write-access to a database. You can define a
 Access rights are setup by passing an `accessController` object that specifies the access-controller type and access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database. The public keys to which access is given can be retrieved from the identity.publicKey property of each peer.
 
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-  const options = {
-    // Give write access to ourselves
-    accessController: {
-      write: [orbitdb.identity.id]
-    }
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const options = {
+  // Give write access to ourselves
+  accessController: {
+    write: [orbitdb.identity.id]
   }
+}
 
-  const db = await orbitdb.keyvalue('first-database', options)
-  console.log(db.address.toString())
-  // /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
-})
+const db = await orbitdb.keyvalue('first-database', options)
+console.log(db.address.toString())
+// /orbitdb/Qmd8TmZrWASypEp4Er9tgWP4kCNQnW4ncSnvjvyHQ3EVSU/first-database
 ```
 
 To give write access to another peer, you'll need to get their public key with some means. They'll need to give you the output of their OrbitDB instance's id: `orbitdb.identity.id`.
@@ -201,29 +193,27 @@ The keys look like this:
 
 Give access to another peer to write to the database:
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
 
-  const options = {
-    // Setup write access
-    accessController: {
-      write: [
-        // Give access to ourselves
-        orbitdb.identity.id,
-        // Give access to the second peer
-        '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
-      ]
-    }
+const options = {
+  // Setup write access
+  accessController: {
+    write: [
+      // Give access to ourselves
+      orbitdb.identity.id,
+      // Give access to the second peer
+      '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839',
+    ]
   }
+}
 
-  const db1 = await orbitdb.keyvalue('first-database', options)
-  console.log(db1.address.toString())
-  // /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
+const db1 = await orbitdb.keyvalue('first-database', options)
+console.log(db1.address.toString())
+// /orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC/first-database
 
-  // Second peer opens the database from the address
-  const db2 = await orbitdb.keyvalue(db1.address.toString())
-})
+// Second peer opens the database from the address
+const db2 = await orbitdb.keyvalue(db1.address.toString())
 ```
 
 #### Public databases
@@ -232,21 +222,19 @@ The access control mechanism also support "public" databases to which anyone can
 
 This can be done by adding a `*` to the write access array:
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
 
-  const options = {
-    // Give write access to everyone
-    accessController: {
-      write: ['*']
-    }
+const options = {
+  // Give write access to everyone
+  accessController: {
+    write: ['*']
   }
+}
 
-  const db = await orbitdb.keyvalue('first-database', options)
-  console.log(db.address.toString())
-  // /orbitdb/QmRrauSxaAvNjpZcm2Cq6y9DcrH8wQQWGjtokF4tgCUxGP/first-database
-})
+const db = await orbitdb.keyvalue('first-database', options)
+console.log(db.address.toString())
+// /orbitdb/QmRrauSxaAvNjpZcm2Cq6y9DcrH8wQQWGjtokF4tgCUxGP/first-database
 ```
 
 Note how the access controller hash is different compared to the previous example!
@@ -317,12 +305,10 @@ const db = await orbitdb.keyvalue('first-database', {
 To add an entry to the database, we simply call `db.put(key, value)`.
 
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-  const db = await orbitdb.keyvalue('first-database')
-  await db.put('name', 'hello')
-})
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const db = await orbitdb.keyvalue('first-database')
+await db.put('name', 'hello')
 ```
 
 **NOTE ON PERSISTENCY**
@@ -366,13 +352,11 @@ To get a value or entry from the database, we call the appropriate query functio
 
 Key-Value:
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
-  const db = await orbitdb.keyvalue('first-database')
-  await db.put('name', 'hello')
-  const value = db.get('name')
-})
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
+const db = await orbitdb.keyvalue('first-database')
+await db.put('name', 'hello')
+const value = db.get('name')
 ```
 
 Other databases, see:
@@ -401,19 +385,17 @@ const db = await orbitdb.log('sortDifferently', {
 OrbitDB saves the state of the database automatically on disk. This means that upon opening a database, the developer can choose to load locally the persisted before using the database. **Loading the database locally before using it is highly recommended!**
 
 ```javascript
-const ipfs = new IPFS()
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
+const ipfs = await Ipfs.create()
+const orbitdb = await OrbitDB.createInstance(ipfs)
 
-  const db1 = await orbitdb.keyvalue('first-database')
-  await db1.put('name', 'hello')
-  await db1.close()
+const db1 = await orbitdb.keyvalue('first-database')
+await db1.put('name', 'hello')
+await db1.close()
 
-  const db2 = await orbitdb.keyvalue('first-database')
-  await db2.load()
-  const value = db2.get('name')
-  // 'hello'
-})
+const db2 = await orbitdb.keyvalue('first-database')
+await db2.load()
+const value = db2.get('name')
+// 'hello'
 ```
 
 If the developer doesn't call `load()`, the database will be operational but will not have the persisted data available immediately. Instead, OrbitDB will load the data on the background as new updates come in from peers.
@@ -428,32 +410,30 @@ Replicate a database between two nodes:
 
 ```javascript
 // Create the first peer
-const ipfs1 = new IPFS({ repo: './ipfs1' })
-ipfs1.on('ready', async () => {
-  // Create the database
-  const orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: './orbitdb1' })
-  const db1 = await orbitdb1.log('events')
+const ipfs1 = await IPFS.create({ repo: './ipfs1' })
+  
+// Create the database
+const orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: './orbitdb1' })
+const db1 = await orbitdb1.log('events')
 
-  // Create the second peer
-  const ipfs2 = new IPFS({ repo: './ipfs2' })
-  ipfs2.on('ready', async () => {
-    // Open the first database for the second peer,
-    // ie. replicate the database
-    const orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: './orbitdb2' })
-    const db2 = await orbitdb2.log(db1.address.toString())
+// Create the second peer
+const ipfs2 = await IPFS.create({ repo: './ipfs2' })
 
-    // When the second database replicated new heads, query the database
-    db2.events.on('replicated', () => {
-      const result = db2.iterator({ limit: -1 }).collect().map(e => e.payload.value)
-      console.log(result.join('\n'))
-    })
+// Open the first database for the second peer,
+// ie. replicate the database
+const orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: './orbitdb2' })
+const db2 = await orbitdb2.log(db1.address.toString())
 
-    // Start adding entries to the first database
-    setInterval(async () => {
-      await db1.add({ time: new Date().getTime() })
-    }, 1000)
-  })
+// When the second database replicated new heads, query the database
+db2.events.on('replicated', () => {
+  const result = db2.iterator({ limit: -1 }).collect().map(e => e.payload.value)
+  console.log(result.join('\n'))
 })
+
+// Start adding entries to the first database
+setInterval(async () => {
+  await db1.add({ time: new Date().getTime() })
+}, 1000)
 ```
 
 ## Custom Stores
