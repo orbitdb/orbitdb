@@ -202,7 +202,7 @@ Object.keys(testAPIs).forEach(API => {
         // don't receive more than one event
         setTimeout(() => {
           finished = db2.iterator({ limit: -1 }).collect().length === expectedEventCount
-        }, 200)
+        }, 1000)
       })
 
       return new Promise((resolve, reject) => {
@@ -341,7 +341,7 @@ Object.keys(testAPIs).forEach(API => {
             if (eventCount['replicated'] === expectedEventCount) {
               finished = true
             }
-          }, 100)
+          }, 1000)
         })
 
         const st = new Date().getTime()
