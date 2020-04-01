@@ -110,11 +110,11 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(items.length, 1)
           assert.equal(items[0].payload.value, 'hello')
           resolve()
-        }, 500)
+        }, 100)
       })
     })
 
-    it('replicates database of 100 entries', async () => {
+    it.only('replicates database of 100 entries', async () => {
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
@@ -125,6 +125,7 @@ Object.keys(testAPIs).forEach(API => {
       for (let i = 0; i < entryCount; i ++)
         entryArr.push(i)
 
+      const st = new Date().getTime()
       return new Promise(async (resolve, reject) => {
         try {
           const add = i => db1.add('hello' + i)
@@ -135,7 +136,9 @@ Object.keys(testAPIs).forEach(API => {
 
         timer = setInterval(() => {
           const items = db2.iterator({ limit: -1 }).collect()
-          if (items.length === entryCount) {
+          if (items.length === entryCount && db2._replicator.tasksRunning === 0) {
+            const et = new Date().getTime()
+            console.log("Duration:", (et - st), "ms")
             clearInterval(timer)
             assert.equal(items.length, entryCount)
             assert.equal(items[0].payload.value, 'hello0')
@@ -146,7 +149,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it('emits correct replication info', async () => {
+    it.only('emits correct replication info', async () => {
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
@@ -191,7 +194,7 @@ Object.keys(testAPIs).forEach(API => {
         // Resolve with a little timeout to make sure we
         // don't receive more than one event
         setTimeout(() => {
-          finished = db2.iterator({ limit: -1 }).collect().length === expectedEventCount
+          finished = (db2.iterator({ limit: -1 }).collect().length === expectedEventCount && db2._replicator.tasksRunning === 0)
         }, 200)
       })
 
@@ -201,6 +204,7 @@ Object.keys(testAPIs).forEach(API => {
             if (finished) {
               clearInterval(timer)
 
+              // assert.equal(db2.iterator({ limit: -1 }).collect().length, expectedEventCount)
               assert.equal(eventCount['replicate'], expectedEventCount)
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
 
