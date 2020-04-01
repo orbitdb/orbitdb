@@ -32,4 +32,4 @@ The first process create an internal build so you can access as a normal daemon 
 If we had other files, each one would refeer to an command, you can check other details checking into [Pastel documentation](https://github.com/vadimdemedes/pastel) 
 
 After all you should be able to see something like this into your terminal
-![CLI Running our users table]("cli.png") 
+![CLI Running our users table](cli.png)
