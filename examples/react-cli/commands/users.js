@@ -8,8 +8,8 @@ const initIPFSInstance = async () => {
   return await IPFS.create({ repo: './path-for-js-ipfs-repo' });
 };
 
-// Hello world command
-const Hello = () => {
+// Users command
+const Users = () => {
   const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓'];
   const [users, setUsers] = useState([]);
 
@@ -59,4 +59,4 @@ const Hello = () => {
   );
 };
 
-export default Hello;
+export default Users;
