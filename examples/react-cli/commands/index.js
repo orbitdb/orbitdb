@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Box } from 'ink';
 import Table from 'ink-table';
-
 import IPFS from 'ipfs';
 import OrbitDB from 'orbit-db';
 
@@ -42,18 +41,8 @@ const Hello = () => {
       };
 
       setInterval(query, 1000);
-
-      // Add an entry
-      // const hash = await db.add('world');
-      // console.log(hash);
-
-      // Query
-      const result = db.iterator({ limit: -1 }).collect();
-      // console.log(JSON.stringify(result, null, 2));
     });
   }, []);
-  // Create IPFS instance
-
 
   if (users.length === 0) {
     return (
