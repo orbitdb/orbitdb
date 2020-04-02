@@ -1,31 +1,24 @@
 'use strict'
 
 const IPFS = require('ipfs')
-const OrbitDB = require('../../src/OrbitDB')
+const OrbitDB = require('orbit-db')
 
 const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
 
-console.log("Starting...")
+const initIPFSInstance = async () => {
+  return await IPFS.create({ repo: './keyvalue-ipfs-repo' });
+};
 
-const ipfs = new IPFS({ 
-  repo: './ipfs',
-  start: true,
-  EXPERIMENTAL: {
-    pubsub: true,
-  },
-})
-
-ipfs.on('error', (err) => console.error(err))
-
-ipfs.on('ready', async () => {
+initIPFSInstance().then(async (ipfs) => {
+  
   let db
-
   try {
     const orbitdb = await OrbitDB.createInstance(ipfs, {
-      directory: './eventlog'
+      directory: './orbitdb/examples/keyvalue'
     })
     db = await orbitdb.eventlog('example', { overwrite: true })
     await db.load()
+    // Query immediately after loading
   } catch (e) {
     console.error(e)
     process.exit(1)

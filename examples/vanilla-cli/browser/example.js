@@ -46,7 +46,7 @@ const main = (IPFS, ORBITDB) => {
 
   // Create IPFS instance
   const ipfs = new Ipfs({
-    repo: '/orbitdb/examples/browser/new/ipfs/0.33.1',
+    repo: './browser/new/ipfs/0.33.1',
     start: true,
     preload: { 
       enabled: false

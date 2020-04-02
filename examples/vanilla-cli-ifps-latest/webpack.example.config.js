@@ -4,9 +4,9 @@ const path = require('path')
 const webpack = require('webpack')
 
 module.exports = {
-  entry: './examples/browser/browser-webpack-example/index.js',
+  entry: './browser/browser-webpack-example/index.js',
   output: {
-    filename: '../examples/browser/browser-webpack-example/bundle.js'
+    filename: './browser/browser-webpack-example/bundle.js'
   },
   target: 'web',
   devtool: 'none',

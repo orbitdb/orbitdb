@@ -1,0 +1,52 @@
+Arguments: 
+  /usr/local/bin/node /Users/wallysson/.yarn/bin/yarn.js
+
+PATH: 
+  /Users/wallysson/.yarn/bin:/Users/wallysson/.config/yarn/global/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Users/wallysson/.yarn/bin:/Users/wallysson/.config/yarn/global/node_modules/.bin:/Users/wallysson/.nube/bin:/Users/wallysson/.nube/bin
+
+Yarn version: 
+  1.15.2
+
+Node version: 
+  12.13.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/wallysson/www/orbit-db/examples/vanilla-cli/package.json: Unexpected token } in JSON at position 512
+      at JSON.parse (<anonymous>)
+      at /Users/wallysson/.yarn/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/Users/wallysson/.yarn/lib/cli.js:304:30)
+      at /Users/wallysson/.yarn/lib/cli.js:315:13
+
+npm manifest: 
+  {
+  	"name": "@orbit-db/vanilla-cli",
+  	"version": "0.1.0",
+  	"license": "MIT",
+  	"engines": {
+  		"node": ">=8"
+  	},
+  	"scripts": {
+      "yarn dev": "node eventlog.js",
+      "yarn macos": "open ./browser/browser.html",
+      "yarn linux": "xdg-open examples/browser/browser.html",
+      "yarn windows": "start examples/browser/browser.html",
+      "yarn build": "webpack --config ./webpack.example.config.js --sort-modules-by size"
+  	},
+  	"files": [
+  		"build"
+  	],
+  	"dependencies": {
+  		"ipfs": "^0.42.0",
+  		"orbit-db": "^0.23.1",
+  	}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

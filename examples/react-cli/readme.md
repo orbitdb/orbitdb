@@ -26,7 +26,7 @@ $ yarn dev
 It gonna be waching file changes, so you don't need to rebuild every time. In order to run the our orbit-db code we need to execute our `users` command, each file inside `commands` folder refeers to a CLI command, understaing this we can run our command:
 
 ```
-$ yarn react-cli users
+$ yarn react-cli eventlog
 ```
 The first process create an internal build so you can access as a normal daemon as long the first process still running. 
 If we had other files, each one would refeer to an command, you can check other details checking into [Pastel documentation](https://github.com/vadimdemedes/pastel) 

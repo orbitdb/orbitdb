@@ -1,0 +1,23 @@
+{
+	"name": "@orbit-db/vanilla-cli",
+	"version": "0.1.0",
+	"license": "MIT",
+	"engines": {
+		"node": ">=8"
+	},
+	"scripts": {
+		"eventlog": "node eventlog.js",
+		"keyvalue": "node keyvalue.js",
+		"build": "webpack --config ./webpack.example.config.js --sort-modules-by size"
+	},
+	"files": [
+		"build"
+	],
+	"dependencies": {
+		"ipfs": "^0.42.0",
+		"orbit-db": "^0.23.1"
+	},
+	"devDependencies": {
+		"webpack": "^4.42.1"
+	}
+}

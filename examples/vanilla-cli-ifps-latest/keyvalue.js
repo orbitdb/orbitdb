@@ -1,10 +1,15 @@
 'use strict'
 
 const IPFS = require('ipfs')
-const OrbitDB = require('../../src/OrbitDB')
+const OrbitDB = require('orbit-db')
 
 const userId = 1
 const creatures = ['🐙', '🐬', '🐋', '🐠', '🐡', '🦀', '🐢', '🐟', '🐳']
+
+const initIPFSInstance = async () => {
+  return await IPFS.create({ repo: './keyvalue-ipfs-repo' });
+};
+
 
 const output = (user) => {
   if (!user)
@@ -23,31 +28,19 @@ const output = (user) => {
 
 console.log("Starting...")
 
-const ipfs = new IPFS({ 
-  repo: './ipfs',
-  start: true,
-  EXPERIMENTAL: {
-    pubsub: true,
-  },
-})
 
-ipfs.on('error', (err) => console.error(err))
-
-ipfs.on('ready', async () => {
+initIPFSInstance().then(async (ipfs) => {
   let db
   try {
-    const orbitdb = await OrbitDB.createInstance(ipfs, {
-      directory: './keyvalue'
-    })
+    const orbitdb = await OrbitDB.createInstance(ipfs);
+
     db = await orbitdb.kvstore('example', { overwrite: true })
     await db.load()
-    // Query immediately after loading
-    const user = db.get(userId)
-    output(user)
   } catch (e) {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   }
+
 
   const query = async () => {
     // Randomly select an avatar

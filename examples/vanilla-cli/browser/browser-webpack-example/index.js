@@ -14,7 +14,7 @@
 import IPFS from 'ipfs'
 
 // Import OrbitDB module from 'orbit-db', eg. directory to its package.json
-import OrbitDB from '../../..'
+import OrbitDB = from 'orbit-db'
 
 // When 'orbit-db' was installed from npm, use with:
 // import OrbitDB from 'orbit-db' 
