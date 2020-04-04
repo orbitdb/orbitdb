@@ -17,6 +17,7 @@ const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
 const Storage = require('orbit-db-storage-adapter')
 const migrations = require('./migrations')
+const EventEmitter = require('events').EventEmitter
 
 const Logger = require('logplease')
 const logger = Logger.create('orbit-db')
@@ -45,6 +46,7 @@ class OrbitDB {
       : new Pubsub(this._ipfs, this.id)
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
+    this.events = new EventEmitter()
     this._directConnections = {}
 
     this.caches = {}
@@ -149,6 +151,11 @@ class OrbitDB {
       delete this.stores[db.address.toString()]
     }
 
+    // Remove event listeners
+    this.events.removeAllListeners('open')
+    this.events.removeAllListeners('load')
+    this.events.removeAllListeners('ready')
+
     const caches = Object.keys(this.caches)
     for (let directory of caches) {
       await this.caches[directory].cache.close()
@@ -198,6 +205,7 @@ class OrbitDB {
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
       cache: options.cache,
+      eventEmitter: this.events,
       onClose: this._onClose.bind(this),
       onDrop: this._onDrop.bind(this),
       onLoad: this._onLoad.bind(this)
@@ -295,6 +303,7 @@ class OrbitDB {
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
     this.stores[address] = db
+    this.events.emit('load', address)
   }
 
   async _determineAddress (name, type, options = {}) {
@@ -391,7 +400,12 @@ class OrbitDB {
       } else {
         logger.warn(`Not a valid OrbitDB address '${address}', creating the database`)
         options.overwrite = options.overwrite ? options.overwrite : true
-        return this.create(address, options.type, options)
+        const events = this.events
+        return this.create(address, options.type, options).then((db) => {
+          db.events.on('ready', (address, heads) => events.emit('ready', address, heads))
+          events.emit('open', db.address.toString())
+          return db
+        })
       }
     }
 
@@ -426,7 +440,12 @@ class OrbitDB {
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController, meta: manifest.meta })
-    return this._createStore(manifest.type, dbAddress, options)
+    const events = this.events
+    return this._createStore(manifest.type, dbAddress, options).then((db) => {
+      db.events.on('ready', (address, heads) => events.emit('ready', address, heads))
+      events.emit('open', db.address.toString())
+      return db
+    })
   }
 
   // Save the database locally
