@@ -43,9 +43,9 @@ In short: it can't be assumed that data has been replicated to the network after
 
 ### Does OrbitDB already support pinning when using js-ipfs ?
 
-Currently [js-ipfs](https://github.com/ipfs/js-ipfs) doesn't have GC, so nothing gets removed meaning everything is pinned by default.
+Currently [js-ipfs](https://github.com/ipfs/js-ipfs) supports `ipfs.repo.gc()` but it's yet not run on any sort of schedule, so nothing gets removed from a `js-ipfs` node and therefore an OrbitDB database.
 
-However, this will change in the future as js-ipfs gets GC and we want to make sure that OrbitDB is actually persisting everything (by default), so some work on pinning needs to happen. If you're using OrbitDB with go-ipfs (through js-ipfs-api), then GC happens and data may not be persisted anymore after a time. This is a known issue and we're planning to implement actual pinning (from IPFS perspective) soon.
+However, this will change in the future as js-ipfs schedules GC and we want to make sure that OrbitDB is actually persisting everything (by default), so [some work on pinning needs to happen](https://github.com/ipfs/js-ipfs/issues/2650). If you're using OrbitDB with go-ipfs (through js-ipfs-api), and GC happens and data may not be persisted anymore. Once the pinning performance is fixed we will implement pinning-by-default in [`orbit-db-io`](https://github.com/orbitdb/orbit-db-io).
 
 ### Does orbit have a shared feed between peers where multiple peers can append to the same feed?
 
