@@ -160,13 +160,16 @@ initIPFSInstance().then(ipfs => {
 ```
 
 ### Module with IPFS Daemon
-Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use `orbit-db` with a locally running IPFS daemon. Use this method if you're using `orbitd-db` to develop **backend** or **desktop** applications, eg. with [Electron](https://electron.atom.io).
+
+Alternatively, you can use [ipfs-http-client](https://www.npmjs.com/package/ipfs-http-client) to use `orbit-db` with a locally running IPFS daemon. Use this method if you're using `orbitd-db` to develop **backend** or **desktop** applications, eg. with [Electron](https://electron.atom.io).
 
 Install dependencies:
 
 ```
-npm install orbit-db ipfs-http-client
+npm install orbit-db ipfs-http-client@41.0.1
 ```
+
+**Note:** need to use v41.0.1 until support for modern JS API is added in [orbit-db#767](https://github.com/orbitdb/orbit-db/pull/767).
 
 ```javascript
 const IpfsClient = require('ipfs-http-client')
