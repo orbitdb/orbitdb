@@ -516,4 +516,7 @@ class OrbitDB {
   }
 }
 
+OrbitDB.prototype.AccessControllers = AccessControllers
+OrbitDB.prototype.Identities = Identities
+
 module.exports = OrbitDB
