@@ -115,6 +115,8 @@ Returns a `Promise` that resolves to [a database instance](#store-api). `name` (
 
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
+- `meta` (object): An optional object in [database manifest](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#address). Immutably stores any JSON-serializable value. Readable via `db.options.meta`. Default: `undefined`.
+
 ```javascript
 const db = await orbitdb.create('user.posts', 'eventlog', {
     accessController: {
@@ -124,7 +126,10 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
         // Give access to the second peer
         '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
       ]
-    }
+    },
+    overwrite: true,
+    replicate: false,
+    meta: { hello: 'meta hello' }
 })
 // db created & opened
 ```
