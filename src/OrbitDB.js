@@ -17,6 +17,7 @@ const exchangeHeads = require('./exchange-heads')
 const { isDefined, io } = require('./utils')
 const Storage = require('orbit-db-storage-adapter')
 const migrations = require('./migrations')
+const { EventEmitter } = require('events')
 
 const Logger = require('logplease')
 const logger = Logger.create('orbit-db')
@@ -53,6 +54,8 @@ class OrbitDB {
     this.caches[this.directory] = { cache: options.cache, handlers: new Set() }
     this.keystore = options.keystore
     this.stores = {}
+    this._relayEvents = options.relayEvents
+    this.events = new EventEmitter()
 
     // AccessControllers module can be passed in to enable
     // testing with orbit-db-access-controller
@@ -118,6 +121,10 @@ class OrbitDB {
       const cachePath = path.join(options.directory, id, '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
+    }
+
+    if (!options.relayEvents) {
+      options.relayEvents = []
     }
 
     const finalOptions = Object.assign({}, options, { peerId: id })
@@ -195,6 +202,11 @@ class OrbitDB {
 
     // Remove all databases from the state
     this.stores = {}
+
+    // Remove all event listeners
+    for (var event in this.events._events) {
+      this.events.removeAllListeners(event)
+    }
   }
 
   // Alias for disconnect()
@@ -226,10 +238,18 @@ class OrbitDB {
       onDrop: this._onDrop.bind(this),
       onLoad: this._onLoad.bind(this)
     })
+
+    const relayEvents = options.relayEvents ? options.relayEvents : this._relayEvents
+
     const identity = options.identity || this.identity
 
     const store = new Store(this._ipfs, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
+
+    const eventRelay = this.events
+    for (const eventType of relayEvents) {
+      store.events.on(eventType, (...args) => eventRelay.emit(eventType, address, ...args))
+    }
 
     // ID of the store is the address as a string
     const addr = address.toString()
@@ -239,7 +259,7 @@ class OrbitDB {
     // this is what hooks us into the message propagation layer
     // and the p2p network
     if (opts.replicate && this._pubsub) { await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
-
+    this.events.emit('open', store.address.toString())
     return store
   }
 
@@ -322,6 +342,7 @@ class OrbitDB {
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
     this.stores[address] = db
+    this.events.emit('load', address)
   }
 
   async _determineAddress (name, type, options = {}) {
