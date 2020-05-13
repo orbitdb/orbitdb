@@ -238,28 +238,25 @@ class OrbitDB {
       onDrop: this._onDrop.bind(this),
       onLoad: this._onLoad.bind(this)
     })
-
-    const relayEvents = options.relayEvents ? options.relayEvents : this._relayEvents
-
     const identity = options.identity || this.identity
 
     const store = new Store(this._ipfs, identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
 
-    const eventRelay = this.events
-    for (const eventType of relayEvents) {
-      store.events.on(eventType, (...args) => eventRelay.emit(eventType, address, ...args))
-    }
-
     // ID of the store is the address as a string
     const addr = address.toString()
     this.stores[addr] = store
+
+    const relayEvents = options.relayEvents || this._relayEvents
+    for (const eventType of relayEvents) {
+      store.events.on(eventType, (...args) => this.events.emit(eventType, addr, ...args))
+    }
 
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
     if (opts.replicate && this._pubsub) { await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
-    this.events.emit('open', store.address.toString())
+    this.events.emit('open', addr)
     return store
   }
 
