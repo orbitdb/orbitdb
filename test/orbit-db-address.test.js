@@ -13,7 +13,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - OrbitDB Address (${API})`, function() {

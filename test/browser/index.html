@@ -22,16 +22,29 @@
       </div>
     <!-- </div> -->
     <script type="text/javascript">
-      const randStr = () => Math.random().toString(36).substring(6)
-      const ipfs = new Ipfs({
-        repo: './odb/',
-        EXPERIMENTAL: {
-          pubsub: true
-        },
-        preload: { enabled: false },
-        config: {
-          Bootstrap: [ ]
-        }
+      document.addEventListener('DOMContentLoaded', async () => {
+        const randStr = () => Math.random().toString(36).substring(6)
+        const ipfs = await Ipfs.create({
+          repo: './odb/'
+        })
+
+        const identity = await Identities.createIdentity({ id: 'A'})
+        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
+        const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })
+        const inconsistentLog = await orbitdb.log('concurrent2')
+
+        window.consistentLog = consistentLog
+        window.inconsistentLog = inconsistentLog
+
+        waitForOpenDB.innerHTML = consistentLog.address.toString() + ' + ' + inconsistentLog.address.toString()
+        await consistentLog.load()
+        await inconsistentLog.load()
+
+        addData.addEventListener('click', async event => {
+          const data = randStr()
+          await consistentLog.add(data)
+          await inconsistentLog.add(data)
+        })
       })
 
       async function getConsistentLogLength () {
@@ -63,32 +76,6 @@
         await window.inconsistentLog.load()
       }
 
-      ipfs.on('ready', async () => {
-        const identity = await Identities.createIdentity({ id: 'A'})
-        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
-        const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })
-        const inconsistentLog = await orbitdb.log('concurrent2')
-
-        window.consistentLog = consistentLog
-        window.inconsistentLog = inconsistentLog
-
-        waitForOpenDB.innerHTML = consistentLog.address.toString() + ' + ' + inconsistentLog.address.toString()
-        await consistentLog.load()
-        await inconsistentLog.load()
-
-        // const updateData = () => {
-        //   logData.innerHTML = ''
-        //   const count = consistentlog.iterator({ limit: -1 }).collect().map(e => {
-        //     logData.innerHTML += e.clock.time + ': ' + e.hash + '<br />'
-        //   })
-        // }
-
-        addData.addEventListener('click', async event => {
-          const data = randStr()
-          await consistentLog.add(data)
-          await inconsistentLog.add(data)
-        })
-      })
     </script>
   </body>
 </html>

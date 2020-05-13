@@ -13,7 +13,7 @@ const {
   connectPeers,
   waitForPeers,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/multiple-databases/1'
 const dbPath2 = './orbitdb/tests/multiple-databases/2'
