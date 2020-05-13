@@ -407,7 +407,8 @@ Object.keys(testAPIs).forEach(API => {
           let dbAddres
           const handleEvent = (addr => dbAddres = addr)
           orbitdb.events.once('load',  handleEvent)
-          db = await orbitdb.open('load_event_test', { create: true, type: 'feed'})
+          db = await orbitdb.open('load_event_test', { create: true, type: 'feed', relayEvents:['load'] })
+          await db.add('test')
           await db.load()
           assert.equal(dbAddres, db.address.toString())
       })

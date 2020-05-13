@@ -339,7 +339,6 @@ class OrbitDB {
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
     this.stores[address] = db
-    this.events.emit('load', address)
   }
 
   async _determineAddress (name, type, options = {}) {
