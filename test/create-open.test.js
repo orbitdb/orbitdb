@@ -19,7 +19,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
 const ipfsPath = path.join('./orbitdb', 'tests', 'create-open', 'ipfs')
@@ -39,7 +39,6 @@ Object.keys(testAPIs).forEach(API => {
       // windows has problems copying these files...
       return !(src.includes('LOG') || src.includes('LOCK'))
     }
-
 
     before(async () => {
       config.daemon1.repo = ipfsPath

@@ -12,7 +12,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const last = arr => arr[arr.length - 1]
 

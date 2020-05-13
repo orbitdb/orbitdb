@@ -16,7 +16,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/persistency'
 const ipfsPath = './orbitdb/tests/persistency/ipfs'

@@ -13,7 +13,7 @@ const {
   testAPIs,
   connectPeers,
   waitForPeers,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replicate-and-load/1'
 const dbPath2 = './orbitdb/tests/replicate-and-load/2'
