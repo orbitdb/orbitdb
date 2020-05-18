@@ -44,12 +44,9 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    after(() => {
-      // FIXME: shim to wait until the end of the event loop to call this
-      setTimeout(async () => {
-        await orbitdb1.stop()
-        await stopIpfs(ipfsd)
-      }, 0)
+    after(async () => {
+      await orbitdb1.stop()
+      await stopIpfs(ipfsd)
     })
 
     describe('allows orbit to use a custom cache with different store types', function() {

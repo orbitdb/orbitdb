@@ -42,11 +42,9 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    after(() => {
-      setTimeout(async () => {
-        await orbitdb1.stop()
-        await stopIpfs(ipfsd)
-      }, 0)
+    after(async () => {
+      await orbitdb1.stop()
+      await stopIpfs(ipfsd)
     })
 
     describe('allows orbit to use a custom keystore with different store types', function() {
