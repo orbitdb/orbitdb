@@ -79,7 +79,7 @@ To allow specific keys to write to the database, pass the keys as strings like s
 
 `orbitdb.feed('name', { accessController: { write ['key1', 'key2'] }}) // keys cannot be revoked`
 
-Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revokation is a harder and is being worked on by multiple parties, without a solution.
+Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revocation is a harder and is being worked on by multiple parties, without a solution.
 
 If you want to encrypt the keys or content, it's easier with a single user. If you want to use encryption with multiwriters, that's another bag which also hasn't been solved.
 
