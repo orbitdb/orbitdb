@@ -82,7 +82,7 @@
     "build:es5": "babel src --out-dir ./dist/es5/ --presets babel-preset-env --plugins babel-plugin-transform-runtime"
   },
   "go-ipfs": {
-    "version": "v0.5.0-rc2"
+    "version": "v0.5.1"
   },
   "standard": {
     "env": "mocha",
