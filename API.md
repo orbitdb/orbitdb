@@ -226,6 +226,13 @@ Deletes the `Object` associated with `key`. Returns a `Promise` that resolves to
   // QmbYHhnXEdmdfUDzZKeEg7HyG2f8veaF2wBrYFcSHJ3mvd
   ```
 
+#### all
+Returns an `Object` with the contents of all entries in the index.
+  ```javascript
+  const value = db.all
+  // { hello: { name: 'Friend' } }
+  ```
+
 ### orbitdb.kvstore(name|address)
 
 Alias for [`orbitdb.keyvalue()`](#orbitdbkeyvaluenameaddress)
