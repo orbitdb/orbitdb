@@ -40,6 +40,7 @@ We also have regular community calls, which we announce in the issues in [the @o
 
 - [Usage](#usage)
   * [CLI](#cli)
+  * [Database browser UI](#database-browser-ui)
   * [Module with IPFS Instance](#module-with-ipfs-instance)
   * [Module with IPFS Daemon](#module-with-ipfs-daemon)
 - [API](#api)
@@ -77,6 +78,18 @@ It can be installed from npm with:
 
 ```
 npm install orbit-db-cli -g
+```
+
+### Database browser UI
+
+OrbitDB databases can easily be managed using a web UI, see **[OrbitDB Control Center](https://github.com/orbitdb/orbit-db-control-center)**.
+
+Install and run it locally:
+
+```
+git clone https://github.com/orbitdb/orbit-db-control-center.git
+cd orbit-db-control-center/
+npm i && npm start
 ```
 
 ### Module with IPFS Instance
