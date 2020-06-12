@@ -11,7 +11,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/kvstore'
 const ipfsPath = './orbitdb/tests/kvstore/ipfs'
@@ -31,16 +31,15 @@ Object.keys(testAPIs).forEach(API => {
       orbitdb1 = await OrbitDB.createInstance(ipfs, { directory: path.join(dbPath, '1') })
     })
 
-    after(async () => {
-      if(orbitdb1)
+    after(() => {
+      setTimeout(async () => {
         await orbitdb1.stop()
-
-      if (ipfsd)
         await stopIpfs(ipfsd)
+      }, 0)
     })
 
     beforeEach(async () => {
-      db = await orbitdb1.kvstore(config.dbname, { path: dbPath })
+      db = await orbitdb1.kvstore('orbit-db-tests', { path: dbPath })
     })
 
     afterEach(async () => {

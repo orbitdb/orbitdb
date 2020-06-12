@@ -16,7 +16,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'

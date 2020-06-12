@@ -4,7 +4,7 @@
   <img src="images/orbit_db_logo_color.jpg" width="256" />
 </p>
 
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![Matrix](https://img.shields.io/badge/matrix-%23orbitdb%3Apermaweb.io-blue.svg)](https://riot.permaweb.io/#/room/#orbitdb:permaweb.io) [![Discord](https://img.shields.io/discord/475789330380488707?color=blueviolet&label=discord)](https://discord.gg/v3RNE3M) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![Matrix](https://img.shields.io/badge/matrix-%23orbit--db%3Amatrix.org-blue.svg)](https://riot.im/app/#/room/#orbit-db:matrix.org) [![Discord](https://img.shields.io/discord/475789330380488707?color=blueviolet&label=discord)](https://discord.gg/v3RNE3M) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
 
 OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
 
@@ -27,7 +27,7 @@ Status: **in active development**
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://gitter.im/orbitdb/Lobby) if you plan to use OrbitDB in mission critical systems.*
 
-This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X (Windows is not supported yet). The minimum required version of Node.js is now 8.6.0 due to the usage of `...` spread syntax. LTS versions (even numbered versions 8, 10, etc) are preferred.
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux and OS X and Windows. The minimum required version of Node.js is now 8.6.0 due to the usage of `...` spread syntax. LTS versions (even numbered versions 8, 10, etc) are preferred.
 
 To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
 
@@ -40,6 +40,7 @@ We also have regular community calls, which we announce in the issues in [the @o
 
 - [Usage](#usage)
   * [CLI](#cli)
+  * [Database browser UI](#database-browser-ui)
   * [Module with IPFS Instance](#module-with-ipfs-instance)
   * [Module with IPFS Daemon](#module-with-ipfs-daemon)
 - [API](#api)
@@ -79,6 +80,18 @@ It can be installed from npm with:
 npm install orbit-db-cli -g
 ```
 
+### Database browser UI
+
+OrbitDB databases can easily be managed using a web UI, see **[OrbitDB Control Center](https://github.com/orbitdb/orbit-db-control-center)**.
+
+Install and run it locally:
+
+```
+git clone https://github.com/orbitdb/orbit-db-control-center.git
+cd orbit-db-control-center/
+npm i && npm start
+```
+
 ### Module with IPFS Instance
 
 If you're using `orbit-db` to develop **browser** or **Node.js** applications, use it as a module with the javascript instance of IPFS
@@ -93,50 +106,83 @@ npm install orbit-db ipfs
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
-// Create IPFS instance
-
 // For js-ipfs >= 0.38
-const ipfs = new IPFS()
 
-// For js-ipfs < 0.38
-const ipfsOptions = {
-  EXPERIMENTAL: {
-    pubsub: true
-  }
-}
-const ipfs = new IPFS(ipfsOptions)
+// Create IPFS instance
+const initIPFSInstance = async () => {
+  return await IPFS.create({ repo: "./path-for-js-ipfs-repo" });
+};
 
-ipfs.on('error', (e) => console.error(e))
-ipfs.on('ready', async () => {
-  const orbitdb = await OrbitDB.createInstance(ipfs)
+initIPFSInstance().then(async ipfs => {
+  const orbitdb = await OrbitDB.createInstance(ipfs);
 
   // Create / Open a database
-  const db = await orbitdb.log('hello')
-  await db.load()
+  const db = await orbitdb.log("hello");
+  await db.load();
 
   // Listen for updates from peers
-  db.events.on('replicated', (address) => {
-    console.log(db.iterator({ limit: -1 }).collect())
-  })
+  db.events.on("replicated", address => {
+    console.log(db.iterator({ limit: -1 }).collect());
+  });
 
   // Add an entry
-  const hash = await db.add('world')
-  console.log(hash)
+  const hash = await db.add("world");
+  console.log(hash);
 
   // Query
-  const result = db.iterator({ limit: -1 }).collect()
-  console.log(JSON.stringify(result, null, 2))
-})
+  const result = db.iterator({ limit: -1 }).collect();
+  console.log(JSON.stringify(result, null, 2));
+});
+
+
+// For js-ipfs < 0.38
+
+// Create IPFS instance
+const ipfsOptions = {
+    EXPERIMENTAL: {
+      pubsub: true
+    }
+  };
+
+ipfs = new IPFS(ipfsOptions);
+
+initIPFSInstance().then(ipfs => {
+  ipfs.on("error", e => console.error(e));
+  ipfs.on("ready", async () => {
+    const orbitdb = await OrbitDB.createInstance(ipfs);
+
+    // Create / Open a database
+    const db = await orbitdb.log("hello");
+    await db.load();
+
+    // Listen for updates from peers
+    db.events.on("replicated", address => {
+      console.log(db.iterator({ limit: -1 }).collect());
+    });
+
+    // Add an entry
+    const hash = await db.add("world");
+    console.log(hash);
+
+    // Query
+    const result = db.iterator({ limit: -1 }).collect();
+    console.log(JSON.stringify(result, null, 2));
+  });
+});
+
 ```
 
 ### Module with IPFS Daemon
-Alternatively, you can use [ipfs-api](https://npmjs.org/package/ipfs-api) to use `orbit-db` with a locally running IPFS daemon. Use this method if you're using `orbitd-db` to develop **backend** or **desktop** applications, eg. with [Electron](https://electron.atom.io).
+
+Alternatively, you can use [ipfs-http-client](https://www.npmjs.com/package/ipfs-http-client) to use `orbit-db` with a locally running IPFS daemon. Use this method if you're using `orbitd-db` to develop **backend** or **desktop** applications, eg. with [Electron](https://electron.atom.io).
 
 Install dependencies:
 
 ```
-npm install orbit-db ipfs-http-client
+npm install orbit-db ipfs-http-client@41.0.1
 ```
+
+**Note:** need to use v41.0.1 until support for modern JS API is added in [orbit-db#767](https://github.com/orbitdb/orbit-db/pull/767).
 
 ```javascript
 const IpfsClient = require('ipfs-http-client')

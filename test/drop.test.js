@@ -12,7 +12,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/drop'
 const ipfsPath = './orbitdb/tests/drop/ipfs'

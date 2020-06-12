@@ -14,7 +14,7 @@ const {
   connectPeers,
   waitForPeers,
   MemStore,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replication/1'
 const dbPath2 = './orbitdb/tests/replication/2'

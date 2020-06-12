@@ -43,9 +43,9 @@ In short: it can't be assumed that data has been replicated to the network after
 
 ### Does OrbitDB already support pinning when using js-ipfs ?
 
-Currently [js-ipfs](https://github.com/ipfs/js-ipfs) doesn't have GC, so nothing gets removed meaning everything is pinned by default.
+Currently [js-ipfs](https://github.com/ipfs/js-ipfs) supports `ipfs.repo.gc()` but it's yet not run on any sort of schedule, so nothing gets removed from a `js-ipfs` node and therefore an OrbitDB database.
 
-However, this will change in the future as js-ipfs gets GC and we want to make sure that OrbitDB is actually persisting everything (by default), so some work on pinning needs to happen. If you're using OrbitDB with go-ipfs (through js-ipfs-api), then GC happens and data may not be persisted anymore after a time. This is a known issue and we're planning to implement actual pinning (from IPFS perspective) soon.
+However, this will change in the future as js-ipfs schedules GC and we want to make sure that OrbitDB is actually persisting everything (by default), so [some work on pinning needs to happen](https://github.com/ipfs/js-ipfs/issues/2650). If you're using OrbitDB with go-ipfs (through js-ipfs-api), and GC happens and data may not be persisted anymore. Once the pinning performance is fixed we will implement pinning-by-default in [`orbit-db-io`](https://github.com/orbitdb/orbit-db-io).
 
 ### Does orbit have a shared feed between peers where multiple peers can append to the same feed?
 
@@ -79,7 +79,7 @@ To allow specific keys to write to the database, pass the keys as strings like s
 
 `orbitdb.feed('name', { accessController: { write ['key1', 'key2'] }}) // keys cannot be revoked`
 
-Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revokation is a harder and is being worked on by multiple parties, without a solution.
+Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revocation is a harder and is being worked on by multiple parties, without a solution.
 
 If you want to encrypt the keys or content, it's easier with a single user. If you want to use encryption with multiwriters, that's another bag which also hasn't been solved.
 

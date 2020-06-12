@@ -19,7 +19,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
 const ipfsPath = path.join('./orbitdb', 'tests', 'create-open', 'ipfs')
@@ -39,7 +39,6 @@ Object.keys(testAPIs).forEach(API => {
       // windows has problems copying these files...
       return !(src.includes('LOG') || src.includes('LOCK'))
     }
-
 
     before(async () => {
       config.daemon1.repo = ipfsPath
@@ -142,7 +141,7 @@ Object.keys(testAPIs).forEach(API => {
         it('saves database manifest file locally', async () => {
           const manifestHash = db.id.split('/')[2]
           const manifest = await io.read(ipfs, manifestHash)
-          assert.notEqual(manifest)
+          assert.notEqual(manifest, false)
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')
           assert.notEqual(manifest.accessController, null)
