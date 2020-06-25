@@ -73,7 +73,7 @@
     "lint:docs": "remark -qf -u validate-links .",
     "test:all": "npm run test:browser-multiple-tabs && npm run test",
     "test": "cross-env TEST=js mocha && cross-env TEST=go mocha;",
-    "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser --rename=orbitdb.js && cpy node_modules/ipfs/dist/index.js ./test/browser --rename=ipfs.js && cpy node_modules/orbit-db-identity-provider/dist/index-browser.min.js ./test/browser --rename=identities.js && cpy node_modules/ipfs-log/dist/ipfslog.min.js ./test/browser && mocha ./test/browser/concurrent.spec.js",
+    "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser --rename=orbitdb.js && cpy node_modules/ipfs/dist/index.min.js ./test/browser --rename=ipfs.js && cpy node_modules/orbit-db-identity-provider/dist/index-browser.min.js ./test/browser --rename=identities.js && cpy node_modules/ipfs-log/dist/ipfslog.min.js ./test/browser && mocha ./test/browser/concurrent.spec.js",
     "build": "npm run build:es5 && npm run build:debug && npm run build:dist && npm run build:examples && npm run build:docs/toc",
     "build:examples": "webpack --config conf/webpack.example.config.js --sort-modules-by size",
     "build:dist": "webpack --config conf/webpack.config.js --sort-modules-by size && mkdirp examples/browser/lib && cpy dist/orbitdb.min.js examples/browser/lib",
