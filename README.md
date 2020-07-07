@@ -23,7 +23,8 @@ All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on to
 
 #### Project status & support
 
-Status: **in active development**
+* Status: **in active development**
+* Compatible with **js-ipfs versions <= 0.46**
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://gitter.im/orbitdb/Lobby) if you plan to use OrbitDB in mission critical systems.*
 
@@ -99,10 +100,9 @@ If you're using `orbit-db` to develop **browser** or **Node.js** applications, u
 Install dependencies:
 
 ```
-npm install orbit-db ipfs
+npm install orbit-db ipfs@~0.46.0
 ```
 
-***NOTE!*** Compatible with **js-ipfs versions <= 0.46**
 
 ```javascript
 const IPFS = require('ipfs')
