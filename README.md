@@ -102,7 +102,7 @@ Install dependencies:
 npm install orbit-db ipfs
 ```
 
-***NOTE!*** Compatibility: **js-ipfs versions <= 0.46**
+***NOTE!*** Compatible with **js-ipfs versions <= 0.46**
 
 ```javascript
 const IPFS = require('ipfs')
