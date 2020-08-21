@@ -9,7 +9,7 @@ const {
 } = require('../utils')
 
 const clicksPerTab = 20
-const numTabs = 3
+const numTabs = 2
 
 describe(`orbit-db - browser concurrent writes`, function() {
   this.timeout(numTabs * config.timeout)
