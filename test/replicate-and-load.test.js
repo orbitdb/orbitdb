@@ -21,7 +21,7 @@ const ipfsPath1 = './orbitdb/tests/replicate-and-load/1/ipfs'
 const ipfsPath2 = './orbitdb/tests/replicate-and-load/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replicate and Load (${API})`, function() {
+  describe.skip(`orbit-db - Replicate and Load (${API})`, function() {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
