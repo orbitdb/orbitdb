@@ -25,7 +25,7 @@ Object.keys(testAPIs).forEach(API => {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
-    let orbitdb1, orbitdb2, db1, db2
+    let orbitdb1, orbitdb2
 
     before(async () => {
       config.daemon1.repo = ipfsPath1
@@ -59,20 +59,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('two peers', function() {
-      // Opens two databases db1 and db2 and gives write-access to both of the peers
-      const openDatabases1 = async (options) => {
-        // Set write access for both clients
-        options.write = [
-          orbitdb1.identity.publicKey,
-          orbitdb2.identity.publicKey
-        ],
-
-        options = Object.assign({}, options, { path: dbPath1 })
-        db1 = await orbitdb1.eventlog('replicate-and-load-tests', options)
-        // Set 'localOnly' flag on and it'll error if the database doesn't exist locally
-        options = Object.assign({}, options, { path: dbPath2 })
-        db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      }
+      let db1, db2
 
       const openDatabases = async (options) => {
         // Set write access for both clients
@@ -88,7 +75,7 @@ Object.keys(testAPIs).forEach(API => {
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       }
 
-      beforeEach(async () => {
+      before(async () => {
         await openDatabases({ sync: true })
 
         assert.equal(db1.address.toString(), db2.address.toString())
@@ -99,9 +86,9 @@ Object.keys(testAPIs).forEach(API => {
         console.log("Found peers")
       })
 
-      afterEach(async () => {
-        await db1.drop()
-        await db2.drop()
+      after(async () => {
+        await db1.close()
+        await db2.close()
       })
 
       it('replicates database of 100 entries and loads it from the disk', async () => {
@@ -126,8 +113,6 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(items[0].payload.value, 'hello0')
               assert.equal(items[items.length - 1].payload.value, 'hello99')
 
-              db2 = null
-
               try {
 
                 // Set write access for both clients
@@ -145,19 +130,22 @@ Object.keys(testAPIs).forEach(API => {
 
                 // Open the database again (this time from the disk)
                 options = Object.assign({}, options, { path: dbPath1, create: false })
-                db1 = await orbitdb1.eventlog(addr, options)
+                const db3 = await orbitdb1.eventlog(addr, options)
                 // Set 'localOnly' flag on and it'll error if the database doesn't exist locally
                 options = Object.assign({}, options, { path: dbPath2, localOnly: true })
-                db2 = await orbitdb2.eventlog(addr, options)
+                const db4 = await orbitdb2.eventlog(addr, options)
 
-                await db1.load()
-                await db2.load()
+                await db3.load()
+                await db4.load()
 
                 // Make sure we have all the entries in the databases
-                const result1 = db1.iterator({ limit: -1 }).collect()
-                const result2 = db2.iterator({ limit: -1 }).collect()
+                const result1 = db3.iterator({ limit: -1 }).collect()
+                const result2 = db4.iterator({ limit: -1 }).collect()
                 assert.equal(result1.length, entryCount)
                 assert.equal(result2.length, entryCount)
+
+                await db3.close()
+                await db4.close()
               } catch (e) {
                 reject(e)
               }
