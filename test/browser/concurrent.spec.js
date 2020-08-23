@@ -43,7 +43,7 @@ describe(`orbit-db - browser concurrent writes`, function() {
         await page.goto(`file://${path.resolve(__dirname, 'index.html')}`)
         page.on('dialog', dialog => dialog.dismiss())
         page.on('pageerror', err => console.error(err))
-        await wait(500)
+        await wait(1000)
         return page
       }
 
