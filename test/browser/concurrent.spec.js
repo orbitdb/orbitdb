@@ -4,9 +4,7 @@ const puppeteer = require('puppeteer')
 const path = require('path')
 const mapSeries = require('p-map-series')
 const pMap = require('p-map')
-const {
-  config,
-} = require('../utils')
+const { config } = require('orbit-db-test-utils')
 
 const clicksPerTab = 20
 const numTabs = 3
