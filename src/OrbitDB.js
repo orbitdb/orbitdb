@@ -82,7 +82,7 @@ class OrbitDB {
       options.offline = false
     }
 
-    if (options.offline && !options.id ) {
+    if (options.offline && !options.id) {
       throw new Error('Offline mode requires passing an `id` in the options')
     }
 

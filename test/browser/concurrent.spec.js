@@ -4,12 +4,17 @@ const puppeteer = require('puppeteer')
 const path = require('path')
 const mapSeries = require('p-map-series')
 const pMap = require('p-map')
-const {
-  config,
-} = require('../utils')
+const { config } = require('orbit-db-test-utils')
 
 const clicksPerTab = 20
 const numTabs = 3
+
+const wait = async (milliseconds) => {
+  return new Promise((resolve, reject) => {
+    console.log("waiting...")
+    setTimeout(resolve, milliseconds)
+  })
+}
 
 describe(`orbit-db - browser concurrent writes`, function() {
   this.timeout(numTabs * config.timeout)
@@ -36,6 +41,7 @@ describe(`orbit-db - browser concurrent writes`, function() {
         await page.goto(`file://${path.resolve(__dirname, 'index.html')}`)
         page.on('dialog', dialog => dialog.dismiss())
         page.on('pageerror', err => console.error(err))
+        await wait(1000)
         return page
       }
 

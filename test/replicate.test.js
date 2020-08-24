@@ -522,7 +522,7 @@ Object.keys(testAPIs).forEach(API => {
 
               resolve()
             }
-          }, 100)
+          }, 500)
         } catch (e) {
           reject(e)
         }

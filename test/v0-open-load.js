@@ -11,7 +11,6 @@ const Zip = require('adm-zip')
 const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 const io = require('orbit-db-io')
-const IPFS = require('ipfs')
 const Identities = require('orbit-db-identity-provider')
 const migrate = require('localstorage-level-migration')
 const Keystore = require('orbit-db-keystore')
@@ -32,10 +31,11 @@ const dbPath = path.join('./orbitdb', 'tests', 'v0')
 const dbFixturesDir = path.join('./test', 'fixtures', 'v0', 'QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC', 'v0-db')
 const keyFixtures = path.join('./test', 'fixtures', 'keys','QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX')
 
-const ipfsFixtures = path.join('./test', 'fixtures', 'ipfs.zip')
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
+  let ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
+
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
     this.retries(1) // windows...
     this.timeout(config.timeout)
