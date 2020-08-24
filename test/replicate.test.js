@@ -152,9 +152,10 @@ Object.keys(testAPIs).forEach(API => {
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
       let finished = false
-      let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0 }
+      let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0, 'peer.exchanged': 0 }
       let events = []
       let expectedEventCount = 99
+      let expectedPeerExchangeCount = 99
 
       db2.events.on('replicate', (address, entry) => {
         eventCount['replicate'] ++
@@ -178,6 +179,15 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
+      db2.events.on('peer.exchanged', (address, entry) => {
+        eventCount['peer.exchanged'] ++
+        events.push({
+          event: 'peer.exchanged',
+          count: eventCount['peer.exchanged'],
+          entry: entry,
+        })
+      })
+
       db2.events.on('replicated', (address) => {
         eventCount['replicated'] ++
         events.push({
@@ -192,7 +202,7 @@ Object.keys(testAPIs).forEach(API => {
         // don't receive more than one event
         setTimeout(() => {
           finished = db2.iterator({ limit: -1 }).collect().length === expectedEventCount
-        }, 200)
+        }, 1000)
       })
 
       return new Promise((resolve, reject) => {
@@ -203,6 +213,7 @@ Object.keys(testAPIs).forEach(API => {
 
               assert.equal(eventCount['replicate'], expectedEventCount)
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
+              assert.equal(eventCount['peer.exchanged'] >= expectedPeerExchangeCount, true, 'insuficcient peer.exchanged events fired')
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
               const minClock = Math.min(...replicateEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
@@ -242,9 +253,10 @@ Object.keys(testAPIs).forEach(API => {
     it('emits correct replication info on fresh replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
-        let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0 }
+        let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0, 'peer.exchanged': 0 }
         let events = []
         let expectedEventCount = 512
+        let expectedPeerExchangeCount = 1
 
         // Trigger replication
         let adds = []
@@ -293,6 +305,16 @@ Object.keys(testAPIs).forEach(API => {
           })
         })
 
+        db2.events.on('peer.exchanged', (address, entry) => {
+          eventCount['peer.exchanged'] ++
+          // console.log("[replicate] ", '#' + eventCount['replicate'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
+          events.push({
+            event: 'peer.exchanged',
+            count: eventCount['peer.exchanged'],
+            entry: entry,
+          })
+        })
+
         db2.events.on('replicated', (address, length) => {
           eventCount['replicated'] += length
           // console.log("[replicated]", '#' + eventCount['replicated'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished, "|")
@@ -319,7 +341,7 @@ Object.keys(testAPIs).forEach(API => {
             if (eventCount['replicated'] === expectedEventCount) {
               finished = true
             }
-          }, 100)
+          }, 1000)
         })
 
         const st = new Date().getTime()
@@ -333,6 +355,7 @@ Object.keys(testAPIs).forEach(API => {
             try {
               assert.equal(eventCount['replicate'], expectedEventCount)
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
+              assert.equal(eventCount['peer.exchanged'], expectedPeerExchangeCount)
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
               const maxClock = Math.max(...replicateEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
@@ -366,9 +389,10 @@ Object.keys(testAPIs).forEach(API => {
     it('emits correct replication info in two-way replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
-        let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0 }
+        let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0, 'peer.exchanged': 0 }
         let events = []
         let expectedEventCount = 100
+        let expectedPeerExchangeCount = 100
 
         // Trigger replication
         let adds = []
@@ -418,6 +442,15 @@ Object.keys(testAPIs).forEach(API => {
           })
         })
 
+        db2.events.on('peer.exchanged', (address, entry) => {
+          eventCount['peer.exchanged'] ++
+          events.push({
+            event: 'peer.exchanged',
+            count: eventCount['peer.exchanged'],
+            entry: entry,
+          })
+        })
+
         db2.events.on('replicated', (address, length) => {
           eventCount['replicated'] += length
           const values = db2.iterator({limit: -1}).collect()
@@ -457,6 +490,7 @@ Object.keys(testAPIs).forEach(API => {
               assert.equal(eventCount['replicate'], expectedEventCount)
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
               assert.equal(eventCount['replicated'], expectedEventCount)
+              assert.equal(eventCount['peer.exchanged'] >= expectedPeerExchangeCount, true, 'insuficcient peer.exchanged events fired')
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
               assert.equal(replicateEvents.length, expectedEventCount)
