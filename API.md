@@ -19,6 +19,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [set(key, value)](#setkey-value)
     + [get(key)](#getkey)
     + [del(key)](#delkey)
+    + [all](#all)
   * [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
   * [orbitdb.log(name|address)](#orbitdblognameaddress)
     + [add(event)](#addevent)
