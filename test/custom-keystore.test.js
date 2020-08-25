@@ -11,6 +11,9 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
+} = require('orbit-db-test-utils')
+
+const {
   CustomTestKeystore,
   databases,
 } = require('./utils')
@@ -40,11 +43,8 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
-
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      await orbitdb1.stop()
+      await stopIpfs(ipfsd)
     })
 
     describe('allows orbit to use a custom keystore with different store types', function() {

@@ -5,7 +5,6 @@ const path = require('path')
 const assert = require('assert')
 const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
-const IPFS = require('ipfs')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
 const Keystore = require('orbit-db-keystore')
@@ -18,7 +17,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/offline/db1'
 const dbPath2 = './orbitdb/tests/offline/db2'

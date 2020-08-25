@@ -11,7 +11,7 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/docstore'
 const ipfsPath = './orbitdb/tests/docstore/ipfs'
@@ -52,7 +52,7 @@ Object.keys(testAPIs).forEach(API => {
           maxHistory: 0,
           path: dbPath,
         }
-        db = await orbitdb1.docstore(config.dbname, options)
+        db = await orbitdb1.docstore('orbit-db-tests', options)
       })
 
       afterEach(async () => {
@@ -177,7 +177,7 @@ Object.keys(testAPIs).forEach(API => {
           replicate: false,
           maxHistory: 0
         }
-        db = await orbitdb1.docstore(config.dbname, options)
+        db = await orbitdb1.docstore('orbit-db-tests', options)
       })
 
       afterEach(async () => {

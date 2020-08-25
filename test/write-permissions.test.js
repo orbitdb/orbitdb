@@ -10,7 +10,10 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs,
+  testAPIs
+} = require('orbit-db-test-utils')
+
+const {
   databases
 } = require('./utils')
 

@@ -10,6 +10,7 @@ This guide is still being worked on and we would love to get [feedback and sugge
 
 - [Background](#background)
 - [Install](#install)
+- [API](#api)
 - [Setup](#setup)
 - [Create a database](#create-a-database)
   * [Address](#address)
@@ -47,6 +48,10 @@ Install [orbit-db](https://github.com/orbitdb/orbit-db) and [ipfs](https://www.n
 ```sh
 npm install orbit-db ipfs
 ```
+
+## API
+
+See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the full documentation.
 
 ## Setup
 
