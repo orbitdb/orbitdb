@@ -1,6 +1,6 @@
 # OrbitDB React Cli
 
-This project runs the same basic version of the vanilla-cli and vanilla-cli-latest, With the difference that runs with React CLI - to Archieve this we've used a frameworked called [Pastel](https://github.com/vadimdemedes/pastel) which allow an easy configuration for several commands (Under the hood it uses [Ink](https://github.com/vadimdemedes/ink) as base structure).
+This project runs the same basic version of the vanilla-cli and vanilla-cli-latest, With the difference that runs with React CLI - to Archieve this we've used a frameworked called [Pastel](https://github.com/vadimdemedes/pastel) which allow an easy configuration for several commands. Under the hood it uses [Ink](https://github.com/vadimdemedes/ink) as its basis.
 
 ## Installation
 ```bash
