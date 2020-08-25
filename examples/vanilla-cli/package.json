@@ -18,7 +18,7 @@
 	],
 	"dependencies": {
     "ipfs": "~0.40.0",
-		"orbit-db": "^0.23.1"
+		"orbit-db": "latest"
 	},
 	"devDependencies": {
 		"webpack": "^4.42.1"

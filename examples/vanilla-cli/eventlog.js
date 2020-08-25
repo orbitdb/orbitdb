@@ -1,14 +1,14 @@
 'use strict'
 
 const IPFS = require('ipfs')
-const OrbitDB = require('../../src/OrbitDB')
+const OrbitDB = require('orbit-db')
 
 const creatures = ['🐙', '🐷', '🐬', '🐞', '🐈', '🙉', '🐸', '🐓']
 
 console.log("Starting...")
 
 const ipfs = new IPFS({ 
-  repo: './ipfs',
+  repo: './orbitdb/examples/ipfs',
   start: true,
   EXPERIMENTAL: {
     pubsub: true,
@@ -22,7 +22,7 @@ ipfs.on('ready', async () => {
 
   try {
     const orbitdb = await OrbitDB.createInstance(ipfs, {
-      directory: './eventlog'
+      directory: './orbitdb/examples/eventlog'
     })
     db = await orbitdb.eventlog('example', { overwrite: true })
     await db.load()

@@ -1,5 +1,5 @@
 {
-	"name": "@orbit-db/react-cli",
+	"name": "react-cli",
 	"version": "0.1.0",
 	"license": "MIT",
 	"bin": "./build/cli.js",
@@ -15,10 +15,10 @@
 		"build"
 	],
 	"dependencies": {
+		"ipfs": "latest",
+		"orbit-db": "latest",
 		"ink": "^2.7.1",
 		"ink-table": "^2.0.1",
-		"ipfs": "^0.42.0",
-		"orbit-db": "^0.23.1",
 		"pastel": "^1.0.3",
 		"prop-types": "^15.7.2",
 		"react": "^16.13.1"

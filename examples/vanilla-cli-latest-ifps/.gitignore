@@ -1,0 +1,6 @@
+node_modules
+.vscode
+orbitdb
+build
+path-for-js-ipfs-repo
+keyvalue-ipfs-repo

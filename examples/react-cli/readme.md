@@ -1,35 +1,26 @@
-# React Cli
+# OrbitDB React Cli
 
-This project runs the same basic version of the vanilla-cli, With the difference that runs with React - to Archieve this we use 2 aditional frameworks:
- - [Ink](https://github.com/vadimdemedes/ink)
- - [Pastel](https://github.com/vadimdemedes/pastel)
+This project runs the same basic version of the vanilla-cli and vanilla-cli-latest, With the difference that runs with React CLI - to Archieve this we've used a frameworked called [Pastel](https://github.com/vadimdemedes/pastel) which allow an easy configuration for several commands (Under the hood it uses [Ink](https://github.com/vadimdemedes/ink) as base structure).
 
- They help handle basic CLI configs such as receive params and other things, you can check they docs and see all options they provide.
-
-## Configure
-
+## Installation
 ```bash
 $ yarn install
-```
-or
-```bash
+# or
 $ npm install
 ```
 
-## CLI
-Our project already configured with the basic packages, so yo just need to run the process, first we need to start the process which builds the JS and parse it, once running don't close it
+## Usage
+The project already configured with the basic packages, so yo just need to run the start process. First you can start and build the project using:
 
 ```
 $ yarn dev
 ```
 
-It gonna be waching file changes, so you don't need to rebuild every time. In order to run the our orbit-db code we need to execute our `users` command, each file inside `commands` folder refeers to a CLI command, understaing this we can run our command:
+It gonna start waching for file changes, so you don't need to rebuild every time (It will reload automatic on each code change). In order to run command we need to run our CLI proccess, the name of the package is registered as daemon we can execute any command created inside the folder `commands`, in our case we have a command named eventlog:
 
 ```
 $ yarn react-cli eventlog
 ```
-The first process create an internal build so you can access as a normal daemon as long the first process still running. 
-If we had other files, each one would refeer to an command, you can check other details checking into [Pastel documentation](https://github.com/vadimdemedes/pastel) 
 
-After all you should be able to see something like this into your terminal
+After all you should be able to see the users log changing like this into your terminal:
 ![CLI Running our users table](cli.png)
