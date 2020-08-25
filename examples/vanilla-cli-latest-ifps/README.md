@@ -11,7 +11,7 @@ $ npm install
 ```
 
 ## Usage
-The project already configured with a basic webpack bundler config, generates a build folder where you can test any of the following commands:
+The project is already configured with a basic webpack bundler config. It generates a build folder where you can test any of the following commands:
 
 ### **Eventlog:** Starts a orbitdb instance log with a local database, logging active users as logs
 ```
