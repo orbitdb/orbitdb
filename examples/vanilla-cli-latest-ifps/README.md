@@ -1,6 +1,6 @@
 # Vanilla Cli Latest IFPS
 
-This project uses the latest version of IFPS, which have a different way to initiate the IFPS instance, you can compare both versions([IFPS old version](https://github.com/orbitdb/orbit-db/blob/master/examples/vanilla-cli)) and see how to configure each one and compare their differences.
+This project uses the latest version of IFPS, which has a different way to initiate the IFPS instance. You can compare both versions([IFPS old version](https://github.com/orbitdb/orbit-db/blob/master/examples/vanilla-cli)) and see how to configure each one and compare their differences.
 
 
 ## Installation
