@@ -10,7 +10,7 @@ $ npm install
 ```
 
 ## Usage
-The project already configured with the basic packages, so yo just need to run the start process. First you can start and build the project using:
+The project is already configured with the basic packages, so you just need to run the start process. First, you can start and build the project using:
 
 ```
 $ yarn dev
