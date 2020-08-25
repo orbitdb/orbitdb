@@ -16,7 +16,7 @@ The project is already configured with the basic packages, so you just need to r
 $ yarn dev
 ```
 
-It gonna start waching for file changes, so you don't need to rebuild every time (It will reload automatic on each code change). In order to run command we need to run our CLI proccess, the name of the package is registered as daemon we can execute any command created inside the folder `commands`, in our case we have a command named eventlog:
+It will start watching for file changes, so you don't need to rebuild every time (it will reload automatic on each code change). In order to run command we need to run our CLI process, the name of the package is registered as daemon we can execute any command created inside the folder `commands`, in our case we have a command named eventlog:
 
 ```
 $ yarn react-cli eventlog
