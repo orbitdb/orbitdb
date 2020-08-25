@@ -1,5 +1,5 @@
 # Vanilla Cli
-This project uses old version of IFPS (0.40), which have a different way to initiate the IFPS instance, you can compare both versions([IFPS latest version](https://github.com/orbitdb/orbit-db/blob/master/examples/vanilla-cli-ifps-latest)) and see how to configure each one and their differences.
+This project uses old version of IFPS (0.40), which has a different way to initiate the IFPS instance. You can compare both versions([IFPS latest version](https://github.com/orbitdb/orbit-db/blob/master/examples/vanilla-cli-ifps-latest)) and see how to configure each one and their differences.
 
 ## Installation
 ```bash
