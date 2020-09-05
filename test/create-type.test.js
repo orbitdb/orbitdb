@@ -14,7 +14,6 @@ const {
 } = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/create-open'
-const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
 class CustomStore extends DocumentStore {
   constructor (ipfs, id, dbname, options) {
@@ -34,8 +33,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

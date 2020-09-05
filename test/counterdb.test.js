@@ -16,8 +16,6 @@ const {
 
 const dbPath1 = './orbitdb/tests/counters/peer1'
 const dbPath2 = './orbitdb/tests/counters/peer2'
-const ipfsPath1 = './orbitdb/tests/counters/peer1/ipfs'
-const ipfsPath2 = './orbitdb/tests/counters/peer2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Counters (${API})`, function () {
@@ -29,8 +27,6 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
-      config.daemon1.repo = ipfsPath1
-      config.daemon2.repo = ipfsPath2
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api

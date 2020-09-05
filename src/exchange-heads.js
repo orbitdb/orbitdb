@@ -15,7 +15,7 @@ const getHeadsForDatabase = async store => {
 
 const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection, onMessage, onChannelCreated) => {
   const _handleMessage = message => {
-    const msg = JSON.parse(message.data)
+    const msg = JSON.parse(Buffer.from(message.data).toString())
     const { address, heads } = msg
     onMessage(address, heads)
   }
