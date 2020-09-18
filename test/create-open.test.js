@@ -22,7 +22,6 @@ const {
 } = require('orbit-db-test-utils')
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
-const ipfsPath = path.join('./orbitdb', 'tests', 'create-open', 'ipfs')
 const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache-schema-test')
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
@@ -42,8 +41,6 @@ Object.keys(testAPIs).forEach(API => {
     }
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

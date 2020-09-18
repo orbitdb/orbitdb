@@ -18,7 +18,6 @@ const {
 } = require('./utils')
 
 const dbPath = './orbitdb/tests/write-permissions'
-const ipfsPath = './orbitdb/tests/write-permissions/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Write Permissions (${API})`, function() {
@@ -27,8 +26,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1, orbitdb2
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

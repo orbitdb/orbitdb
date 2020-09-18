@@ -17,8 +17,6 @@ const {
 
 const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'
-const ipfsPath1 = './orbitdb/tests/replicate-automatically/1/ipfs'
-const ipfsPath2 = './orbitdb/tests/replicate-automatically/2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Automatic Replication (${API})`, function() {
@@ -28,10 +26,6 @@ Object.keys(testAPIs).forEach(API => {
     let orbitdb1, orbitdb2, db1, db2, db3, db4
 
     before(async () => {
-      config.daemon1.repo = ipfsPath1
-      config.daemon2.repo = ipfsPath2
-      rmrf.sync(config.daemon1.repo)
-      rmrf.sync(config.daemon2.repo)
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)

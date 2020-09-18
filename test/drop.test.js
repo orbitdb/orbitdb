@@ -15,7 +15,6 @@ const {
 } = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/drop'
-const ipfsPath = './orbitdb/tests/drop/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Drop Database (${API})`, function() {
@@ -25,8 +24,6 @@ Object.keys(testAPIs).forEach(API => {
     let localDataPath
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

@@ -21,7 +21,6 @@ const {
 Identities.addIdentityProvider(CustomTestKeystore().identityProvider)
 
 const dbPath = './orbitdb/tests/customKeystore'
-const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
@@ -30,8 +29,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

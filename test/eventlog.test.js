@@ -17,7 +17,6 @@ const {
 const last = arr => arr[arr.length - 1]
 
 const dbPath = './orbitdb/tests/eventlog'
-const ipfsPath = './orbitdb/tests/eventlog/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Log Database (${API})`, function() {
@@ -26,8 +25,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api

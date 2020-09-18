@@ -4,7 +4,7 @@ deps:
 	npm install
 
 test: deps
-	npm run test:all
+	npm run test:all -- --exit
 	npx validate-maintainers orbit-db --match --ci
 
 build: test

@@ -6,7 +6,6 @@ const OrbitDB = require('../src/OrbitDB')
 const OrbitDBAddress = require('../src/orbit-db-address')
 
 const dbPath = './orbitdb/tests/orbit-db-address'
-const ipfsPath = './orbitdb/tests/orbit-db-address/ipfs'
 
 const {
   config,
@@ -22,8 +21,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
