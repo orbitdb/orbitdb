@@ -71,16 +71,6 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 For a more in-depth tutorial and exploration of OrbitDB's architecture, please check out the **[OrbitDB Field Manual](https://github.com/orbitdb/field-manual)**.
 
-### CLI
-
-For the CLI tool to manage orbit-db database, see **[OrbitDB CLI](https://github.com/orbitdb/orbit-db-cli)**.
-
-It can be installed from npm with:
-
-```
-npm install orbit-db-cli -g
-```
-
 ### Database browser UI
 
 OrbitDB databases can easily be managed using a web UI, see **[OrbitDB Control Center](https://github.com/orbitdb/orbit-db-control-center)**.
@@ -100,7 +90,7 @@ If you're using `orbit-db` to develop **browser** or **Node.js** applications, u
 Install dependencies:
 
 ```
-npm install orbit-db ipfs@~0.46.0
+npm install orbit-db ipfs
 ```
 
 
@@ -181,10 +171,8 @@ Alternatively, you can use [ipfs-http-client](https://www.npmjs.com/package/ipfs
 Install dependencies:
 
 ```
-npm install orbit-db ipfs-http-client@41.0.1
+npm install orbit-db ipfs-http-client
 ```
-
-**Note:** need to use v41.0.1 until support for modern JS API is added in [orbit-db#767](https://github.com/orbitdb/orbit-db/pull/767).
 
 ```javascript
 const IpfsClient = require('ipfs-http-client')
