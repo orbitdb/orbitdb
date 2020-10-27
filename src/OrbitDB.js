@@ -82,7 +82,7 @@ class OrbitDB {
       options.offline = false
     }
 
-    if (options.offline && !options.id ) {
+    if (options.offline && !options.id) {
       throw new Error('Offline mode requires passing an `id` in the options')
     }
 
@@ -443,15 +443,19 @@ class OrbitDB {
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
-    if (manifest.name !== dbAddress.path) { throw new Error(`Manifest '${manifest.name}' cannot be opened as '${dbAddress.path}'`) }
-    if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
+    if (manifest.name !== dbAddress.path) { 
+      logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
+    }
+    if (options.type && manifest.type !== options.type) { 
+      logger.warn(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
+    }
 
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController, meta: manifest.meta })
-    return this._createStore(manifest.type, dbAddress, options)
+    return this._createStore(options.type || manifest.type, dbAddress, options)
   }
 
   // Save the database locally
