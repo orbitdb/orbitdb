@@ -11,6 +11,10 @@
   "engines": {
     "node": ">=10.0.0"
   },
+  "files": [
+    "src",
+    "dist"
+  ],
   "main": "src/OrbitDB.js",
   "dependencies": {
     "cids": "^1.0.0",
