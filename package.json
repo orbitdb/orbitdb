@@ -69,8 +69,8 @@
     "webpack-cli": "^3.3.10"
   },
   "scripts": {
-    "examples": "npm run examples:node",
-    "examples:node": "node examples/eventlog.js",
+    "examples:eventlog": "node examples/eventlog.js",
+    "examples:keyvalue": "node examples/keyvalue.js",
     "examples:browser-macos": "open examples/browser/browser.html",
     "examples:browser-linux": "xdg-open examples/browser/browser.html",
     "examples:browser-windows": "start examples/browser/browser.html",
