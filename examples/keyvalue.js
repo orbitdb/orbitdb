@@ -23,19 +23,17 @@ const output = (user) => {
 
 console.log("Starting...")
 
-const ipfs = new IPFS({ 
-  repo: './orbitdb/examples/ipfs',
-  start: true,
-  EXPERIMENTAL: {
-    pubsub: true,
-  },
-})
-
-ipfs.on('error', (err) => console.error(err))
-
-ipfs.on('ready', async () => {
+async function main () {
   let db
+
   try {
+    const ipfs = await IPFS.create({
+      repo: './orbitdb/examples/ipfs',
+      start: true,
+      EXPERIMENTAL: {
+        pubsub: true,
+      },
+    })
     const orbitdb = await OrbitDB.createInstance(ipfs, {
       directory: './orbitdb/examples/keyvalue'
     })
@@ -65,4 +63,5 @@ ipfs.on('ready', async () => {
 
   console.log("Starting update loop...")
   setInterval(query, 1000)
-})
+}
+main()
