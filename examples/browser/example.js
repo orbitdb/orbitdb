@@ -70,7 +70,6 @@ const main = async (IPFS, ORBITDB) => {
       },
     }
   })
-  window.ipfs = ipfs
 
   openButton.disabled = false
   createButton.disabled = false
