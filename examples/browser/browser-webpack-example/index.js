@@ -6,8 +6,8 @@
   but we inject the Node.js modules of OrbitDB and IPFS into
   the example. 
 
-  In the html example, IPFS and OrbitDB are loaded from the
-  minified distribution builds (in '../lib')
+  In the html example, IPFS and OrbitDB are loaded by ../browser.html from the
+  minified distribution builds
  */
 
 // Import IPFS module
