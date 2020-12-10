@@ -37,7 +37,6 @@ To use with older versions of Node.js, we provide an ES5-compatible build throug
 <!-- toc -->
 
 - [Usage](#usage)
-  * [CLI](#cli)
   * [Database browser UI](#database-browser-ui)
   * [Module with IPFS Instance](#module-with-ipfs-instance)
   * [Module with IPFS Daemon](#module-with-ipfs-daemon)
