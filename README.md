@@ -1,7 +1,7 @@
 # OrbitDB
 
 <p align="left">
-  <img src="images/orbit_db_logo_color.jpg" width="256" />
+  <img src="images/orbit_db_logo_color.png" width="256" />
 </p>
 
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![Matrix](https://img.shields.io/badge/matrix-%23orbit--db%3Amatrix.org-blue.svg)](https://riot.im/app/#/room/#orbit-db:matrix.org) [![Discord](https://img.shields.io/discord/475789330380488707?color=blueviolet&label=discord)](https://discord.gg/v3RNE3M) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
