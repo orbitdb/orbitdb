@@ -158,9 +158,9 @@ Object.keys(testAPIs).forEach(API => {
       describe('Defaults', function() {
         it('returns an iterator', () => {
           const iter = db.iterator()
-          const next = iter.next().value
+          const next = iter.next()
           assert.notEqual(iter, null)
-          assert.notEqual(next, null)
+          assert.notEqual(next.value, null)
         })
 
         it('returns an item with the correct structure', () => {
