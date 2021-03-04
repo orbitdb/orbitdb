@@ -11,6 +11,9 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
+} = require('orbit-db-test-utils')
+
+const {
   CustomTestKeystore,
   databases,
 } = require('./utils')
@@ -18,7 +21,6 @@ const {
 Identities.addIdentityProvider(CustomTestKeystore().identityProvider)
 
 const dbPath = './orbitdb/tests/customKeystore'
-const ipfsPath = './orbitdb/tests/customKeystore/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Use a Custom Keystore (${API})`, function() {
@@ -27,8 +29,6 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
@@ -40,11 +40,8 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
-        await orbitdb1.stop()
-
-      if (ipfsd)
-        await stopIpfs(ipfsd)
+      await orbitdb1.stop()
+      await stopIpfs(ipfsd)
     })
 
     describe('allows orbit to use a custom keystore with different store types', function() {

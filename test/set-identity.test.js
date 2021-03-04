@@ -16,23 +16,20 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'
-const ipfsPath = './orbitdb/tests/change-identity/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Set identities (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, keystore
+    let ipfsd, ipfs, orbitdb, keystore, options
     let identity1, identity2
     let localDataPath
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
@@ -56,7 +53,7 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     beforeEach(async () => {
-      let options = {}
+      options = {}
       options.accessController = {
         write : [
           orbitdb.identity.id,
@@ -64,16 +61,18 @@ Object.keys(testAPIs).forEach(API => {
         ]
       }
       options = Object.assign({}, options, { create: true, type: 'eventlog', overwrite: true })
-      db = await orbitdb.open('abc', options)
     })
 
     it('sets identity', async () => {
+      const db = await orbitdb.open('abc', options)
       assert.equal(db.identity, orbitdb.identity)
       db.setIdentity(identity1)
       assert.equal(db.identity, identity1)
+      await db.close()
     })
 
     it('writes with new identity with access', async () => {
+      const db = await orbitdb.open('abc', options)
       assert.equal(db.identity, orbitdb.identity)
       db.setIdentity(identity1)
       assert.equal(db.identity, identity1)
@@ -84,9 +83,11 @@ Object.keys(testAPIs).forEach(API => {
         err = e.message
       }
       assert.equal(err, null)
+      await db.drop()
     })
 
     it('cannot write with new identity without access', async () => {
+      const db = await orbitdb.open('abc', options)
       assert.equal(db.identity, orbitdb.identity)
       db.setIdentity(identity2)
       assert.equal(db.identity, identity2)
@@ -97,6 +98,7 @@ Object.keys(testAPIs).forEach(API => {
         err = e.message
       }
       assert.equal(err, `Could not append entry, key "${identity2.id}" is not allowed to write to the log`)
+      await db.drop()
     })
   })
 })

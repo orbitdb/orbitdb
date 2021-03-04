@@ -4,7 +4,7 @@ deps:
 	npm install
 
 test: deps
-	npm run test:all
+	npm run test:all -- --exit
 	npx validate-maintainers orbit-db --match --ci
 
 build: test
@@ -14,7 +14,7 @@ build: test
 	cp node_modules/ipfs/dist/index.min.js examples/browser/lib/ipfs.min.js
 	cp dist/orbitdb.js examples/browser/lib/orbitdb.js
 	cp dist/orbitdb.js.map examples/browser/lib/orbitdb.js.map
-	cp node_modules/ipfs/dist/index.js examples/browser/lib/ipfs.js
+	cp node_modules/ipfs/dist/index.min.js examples/browser/lib/ipfs.js
 	@echo "Build success!"
 	@echo "Output: 'dist/', 'examples/browser/'"
 
@@ -24,7 +24,6 @@ clean:
 
 clean-dependencies: clean
 	rm -f package-lock.json
-	rm -rf examples/browser/lib
 
 rebuild: | clean-dependencies build
 

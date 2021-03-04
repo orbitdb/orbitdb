@@ -16,10 +16,9 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = './orbitdb/tests/persistency'
-const ipfsPath = './orbitdb/tests/persistency/ipfs'
 
 const tests = [
   {
@@ -51,8 +50,6 @@ Object.keys(testAPIs).forEach(API => {
           options.cache = new Cache(customStore)
         }
 
-        config.daemon1.repo = ipfsPath
-        rmrf.sync(config.daemon1.repo)
         rmrf.sync(dbPath)
         ipfsd = await startIpfs(API, config.daemon1)
         ipfs = ipfsd.api

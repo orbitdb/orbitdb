@@ -19,6 +19,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
     + [set(key, value)](#setkey-value)
     + [get(key)](#getkey)
     + [del(key)](#delkey)
+    + [all](#all)
   * [orbitdb.kvstore(name|address)](#orbitdbkvstorenameaddress)
   * [orbitdb.log(name|address)](#orbitdblognameaddress)
     + [add(event)](#addevent)
@@ -64,6 +65,7 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [`write`](#write)
   * [`peer`](#peer)
   * [`closed`](#closed)
+  * [`peer.exchanged`](#peerexchanged)
 
 <!-- tocstop -->
 
@@ -99,7 +101,7 @@ const db = await orbitdb.keyvalue('profile')
 
 Before starting, you should know that OrbitDB has different types of databases. Each one satisfies a different purpose. The databases that you can create are:
 
-* [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress): an imutable (write only) log database. Useful for transactions lists.
+* [log](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdblognameaddress): an immutable (write only) log database. Useful for transactions lists.
 * [feed](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbfeednameaddress): a mutable log database. Useful for blog comments.
 * [keyvalue](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbkeyvaluenameaddress): Useful for loading data from keywords or an id.
 * [docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options): a JSON documents database. Useful for user data or other structured data.
@@ -115,6 +117,8 @@ Returns a `Promise` that resolves to [a database instance](#store-api). `name` (
 
 - `overwrite` (boolean): Overwrite an existing database (Default: `false`)
 - `replicate` (boolean): Replicate the database with peers, requires IPFS PubSub. (Default: `true`)
+- `meta` (object): An optional object in [database manifest](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#address). Immutably stores any JSON-serializable value. Readable via `db.options.meta`. Default: `undefined`.
+
 ```javascript
 const db = await orbitdb.create('user.posts', 'eventlog', {
     accessController: {
@@ -124,7 +128,10 @@ const db = await orbitdb.create('user.posts', 'eventlog', {
         // Give access to the second peer
         '042c07044e7ea51a489c02854db5e09f0191690dc59db0afd95328c9db614a2976e088cab7c86d7e48183191258fc59dc699653508ce25bf0369d67f33d5d77839'
       ]
-    }
+    },
+    overwrite: true,
+    replicate: false,
+    meta: { hello: 'meta hello' }
 })
 // db created & opened
 ```
@@ -219,6 +226,13 @@ Deletes the `Object` associated with `key`. Returns a `Promise` that resolves to
   ```javascript
   const hash = await db.del('hello')
   // QmbYHhnXEdmdfUDzZKeEg7HyG2f8veaF2wBrYFcSHJ3mvd
+  ```
+
+#### all
+Returns an `Object` with the contents of all entries in the index.
+  ```javascript
+  const value = db.all
+  // { hello: { name: 'Friend' } }
   ```
 
 ### orbitdb.kvstore(name|address)
@@ -629,3 +643,10 @@ Emitted once the database has finished closing.
 ```javascript
 db.events.on('closed', (dbname) => ... )
 ```
+
+### `peer.exchanged`
+```javascript
+db.events.on('peer.exchanged', (peer, address, heads) => ... )
+```
+
+Emitted after heads have been exchanged with a peer for a specific database. This will be emitted after every exchange, even if no heads are received from the peer, or if all received heads are already present. (This is in contrast with the `replicated` event, which will only fire when new heads have been received.) Note that `heads` here contains heads *received* as part of the exchange, not heads sent.

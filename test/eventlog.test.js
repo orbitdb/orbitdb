@@ -12,22 +12,19 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const last = arr => arr[arr.length - 1]
 
 const dbPath = './orbitdb/tests/eventlog'
-const ipfsPath = './orbitdb/tests/eventlog/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Log Database (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb1, db
+    let ipfsd, ipfs, orbitdb1
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
@@ -44,30 +41,34 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Eventlog', function () {
       it('creates and opens a database', async () => {
-        db = await orbitdb1.eventlog('log database')
+        const db = await orbitdb1.eventlog('log database')
         assert.notEqual(db, null)
         assert.equal(db.type, 'eventlog')
         assert.equal(db.dbname, 'log database')
+        await db.drop()
       })
 
       it('returns 0 items when it\'s a fresh database', async () => {
-        db = await orbitdb1.eventlog('log database')
+        const db = await orbitdb1.eventlog('log database')
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 0)
+        await db.drop()
       })
 
       it('returns the added entry\'s hash, 1 entry', async () => {
-        db = await orbitdb1.eventlog('first database')
+        const db = await orbitdb1.eventlog('first database')
         const hash = await db.add('hello1')
         const items = db.iterator({ limit: -1 }).collect()
         assert.notEqual(hash, null)
         assert.equal(hash, last(items).hash)
         assert.equal(items.length, 1)
+        await db.drop()
       })
 
       it('returns the added entry\'s hash, 2 entries', async () => {
-        db = await orbitdb1.eventlog('first database')
+        const db = await orbitdb1.eventlog('first database')
         await db.load()
+        await db.add('hello1')
         const prevHash = db.iterator().collect()[0].hash
         const hash = await db.add('hello2')
         const items = db.iterator({ limit: -1 }).collect()
@@ -75,31 +76,35 @@ Object.keys(testAPIs).forEach(API => {
         assert.notEqual(hash, null)
         assert.notEqual(hash, prevHash)
         assert.equal(hash, last(items).hash)
+        await db.drop()
       })
 
       it('adds five items', async () => {
-        db = await orbitdb1.eventlog('second database')
+        const db = await orbitdb1.eventlog('second database')
         await mapSeries([1, 2, 3, 4, 5], (i) => db.add('hello' + i))
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 5)
         assert.equal(items[0].payload.value, 'hello1')
         assert.equal(last(items.map((f) => f.payload.value)), 'hello5')
+        await db.drop()
       })
 
       it('adds an item that is > 256 bytes', async () => {
-        db = await orbitdb1.eventlog('third database')
+        const db = await orbitdb1.eventlog('third database')
         let msg = Buffer.alloc(1024)
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)
         assert.equal(hash.startsWith('zd'), true)
         assert.equal(hash.length, 49)
+        await db.drop()
       })
     })
 
     describe('Iterator', function() {
       let hashes = []
       const itemCount = 5
+      let db
 
       before(async () => {
         hashes = []

@@ -19,20 +19,20 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
-const ipfsPath = path.join('./orbitdb', 'tests', 'create-open', 'ipfs')
 const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache-schema-test')
-const ipfsFixtures = path.join('./test', 'fixtures', 'ipfs.zip')
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function () {
+    let ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
+
     this.retries(1) // windows...
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb, db, address
+    let ipfsd, ipfs, orbitdb, address
     let localDataPath
 
     const filterFunc = (src, dest) => {
@@ -40,10 +40,7 @@ Object.keys(testAPIs).forEach(API => {
       return !(src.includes('LOG') || src.includes('LOCK'))
     }
 
-
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
@@ -69,7 +66,7 @@ Object.keys(testAPIs).forEach(API => {
         it('throws an error if given an invalid database type', async () => {
           let err
           try {
-            db = await orbitdb.create('first', 'invalid-type')
+            const db = await orbitdb.create('first', 'invalid-type')
           } catch (e) {
             err = e.toString()
           }
@@ -79,7 +76,7 @@ Object.keys(testAPIs).forEach(API => {
         it('throws an error if given an address instead of name', async () => {
           let err
           try {
-            db = await orbitdb.create('/orbitdb/Qmc9PMho3LwTXSaUXJ8WjeBZyXesAwUofdkGeadFXsqMzW/first', 'feed')
+            const db = await orbitdb.create('/orbitdb/Qmc9PMho3LwTXSaUXJ8WjeBZyXesAwUofdkGeadFXsqMzW/first', 'feed')
           } catch (e) {
             err = e.toString()
           }
@@ -87,14 +84,15 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('throws an error if database already exists', async () => {
-          let err
+          let err, db
           try {
             db = await orbitdb.create('first', 'feed', { replicate: false })
-            db = await orbitdb.create('first', 'feed', { replicate: false })
+            const db2 = await orbitdb.create('first', 'feed', { replicate: false })
           } catch (e) {
             err = e.toString()
           }
           assert.equal(err, `Error: Database '${db.address}' already exists!`)
+          await db.close()
         })
 
 
@@ -111,6 +109,8 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       describe('Success', function () {
+        let db
+
         before(async () => {
           db = await orbitdb.create('second', 'feed', { replicate: false })
           localDataPath = path.join(dbPath, orbitdb.id, 'cache')
@@ -151,8 +151,9 @@ Object.keys(testAPIs).forEach(API => {
 
         it('can pass local database directory as an option', async () => {
           const dir = './orbitdb/tests/another-feed'
-          db = await orbitdb.create('third', 'feed', { directory: dir })
+          const db2 = await orbitdb.create('third', 'feed', { directory: dir })
           assert.equal(fs.existsSync(dir), true)
+          await db2.close()
         })
 
         it('loads cache from previous version of orbit-db', async () => {
@@ -284,19 +285,16 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('returns the address that would have been created', async () => {
-          db = await orbitdb.create('third', 'feed', { replicate: false })
+          const db = await orbitdb.create('third', 'feed', { replicate: false })
           assert.equal(address.toString().indexOf('/orbitdb'), 0)
           assert.equal(address.toString().indexOf('zd'), 9)
           assert.equal(address.toString(), db.address.toString())
+          await db.close()
         })
       })
     })
 
     describe('Open', function () {
-      beforeEach(async () => {
-        db = await orbitdb.open('abc', { create: true, type: 'feed' })
-      })
-
       it('throws an error if trying to open a database with name only and \'create\' is not set to \'true\'', async () => {
         let err
         try {
@@ -318,36 +316,45 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('opens a database - name only', async () => {
-        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)
         assert.equal(db.address.toString().indexOf('abc'), 59)
+        await db.drop()
       })
 
       it('opens a database - with a different identity', async () => {
         const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
-        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db.address.toString().indexOf('zd'), 9)
         assert.equal(db.address.toString().indexOf('abc'), 59)
         assert.equal(db.identity, identity)
+        await db.drop()
       })
 
       it('opens the same database - from an address', async () => {
-        db = await orbitdb.open(db.address)
-        assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
-        assert.equal(db.address.toString().indexOf('zd'), 9)
-        assert.equal(db.address.toString().indexOf('abc'), 59)
+        const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
+        const db2 = await orbitdb.open(db.address)
+        assert.equal(db2.address.toString().indexOf('/orbitdb'), 0)
+        assert.equal(db2.address.toString().indexOf('zd'), 9)
+        assert.equal(db2.address.toString().indexOf('abc'), 59)
+        await db.drop()
+        await db2.drop()
       })
 
       it('opens a database and adds the creator as the only writer', async () => {
-        db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         assert.equal(db.access.write.length, 1)
         assert.equal(db.access.write[0], db.identity.id)
+        await db.drop()
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'non-existent')
+        await db.drop()
         return new Promise((resolve, reject) => {
           setTimeout(resolve, 900)
           orbitdb.open(address)
@@ -356,8 +363,10 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      it('throws an error if trying to open a database locally and we don\'t have it', () => {
+      it('throws an error if trying to open a database locally and we don\'t have it', async () => {
+        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
         const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'second')
+        await db.drop()
         return orbitdb.open(address, { localOnly: true })
           .then(() => new Error('Shouldn\'t open the database'))
           .catch(e => {
@@ -366,11 +375,12 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('open the database and it has the added entries', async () => {
-        db = await orbitdb.open('ZZZ', { create: true, type: 'feed' })
+        const db = await orbitdb.open('ZZZ', { create: true, type: 'feed' })
         await db.add('hello1')
         await db.add('hello2')
+        await db.close()
 
-        db = await orbitdb.open(db.address)
+        const db2 = await orbitdb.open(db.address)
 
         await db.load()
         const res = db.iterator({ limit: -1 }).collect()
@@ -378,6 +388,8 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(res.length, 2)
         assert.equal(res[0].payload.value, 'hello1')
         assert.equal(res[1].payload.value, 'hello2')
+        await db.drop()
+        await db2.drop()
       })
     })
 
@@ -388,14 +400,14 @@ Object.keys(testAPIs).forEach(API => {
       })
       it('closes a custom store', async () => {
         const directory = path.join(dbPath, "custom-store")
-        db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
+        const db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
         assert.strictEqual(db._cache._store._db.status, 'closed')
       })
 
       it("close load close sets status to 'closed'", async () => {
         const directory = path.join(dbPath, "custom-store")
-        db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
+        const db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
         await db.load()
         await db.close()

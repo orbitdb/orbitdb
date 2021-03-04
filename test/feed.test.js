@@ -12,22 +12,19 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const last = arr => arr[arr.length - 1]
 
 const dbPath = './orbitdb/tests/feed'
-const ipfsPath = './orbitdb/tests/feed/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Feed Database (${API})`, function() {
     this.timeout(config.timeout)
 
-    let ipfsd, ipfs, orbitdb1, db, address
+    let ipfsd, ipfs, orbitdb1, address
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
@@ -44,31 +41,35 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('Feed', function() {
       it('creates and opens a database', async () => {
-        db = await orbitdb1.feed('feed database')
+        const db = await orbitdb1.feed('feed database')
         assert.notEqual(db, null)
         assert.equal(db.type, 'feed')
         assert.equal(db.dbname, 'feed database')
+        await db.drop()
       })
 
       it('returns 0 items when it\'s a fresh database', async () => {
-        db = await orbitdb1.feed('feed database')
+        const db = await orbitdb1.feed('feed database')
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 0)
+        await db.drop()
       })
 
       it('returns the added entry\'s hash, 1 entry', async () => {
-        db = await orbitdb1.feed('first')
+        const db = await orbitdb1.feed('first')
         address = db.address.toString()
         const hash = await db.add('hello1')
         const items = db.iterator({ limit: -1 }).collect()
         assert.notEqual(hash, null)
         assert.equal(hash, last(items).hash)
         assert.equal(items.length, 1)
+        await db.drop()
       })
 
       it('returns the added entry\'s hash, 2 entries', async () => {
-        db = await orbitdb1.feed(address)
+        const db = await orbitdb1.feed(address)
         await db.load()
+        await db.add('hello1')
         const prevHash = db.iterator().collect()[0].hash
         const hash = await db.add('hello2')
         const items = db.iterator({ limit: -1 }).collect()
@@ -76,49 +77,53 @@ Object.keys(testAPIs).forEach(API => {
         assert.notEqual(hash, null)
         assert.notEqual(hash, prevHash)
         assert.equal(hash, last(items).hash)
+        await db.drop()
       })
 
       it('adds five items', async () => {
-        db = await orbitdb1.feed('second')
+        const db = await orbitdb1.feed('second')
         await mapSeries([1, 2, 3, 4, 5], (i) => db.add('hello' + i))
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 5)
         assert.equal(items[0].payload.value, 'hello1')
         assert.equal(items[items.length - 1].payload.value, 'hello5')
+        await db.drop()
       })
 
       it('adds an item that is > 256 bytes', async () => {
-        db = await orbitdb1.feed('third')
+        const db = await orbitdb1.feed('third')
         let msg = Buffer.alloc(1024)
         msg.fill('a')
         const hash = await db.add(msg.toString())
         assert.notEqual(hash, null)
         assert.equal(hash.startsWith('zd'), true)
         assert.equal(hash.length, 49)
+        await db.drop()
       })
 
       it('deletes an item when only one item in the database', async () => {
-        db = await orbitdb1.feed('fourth')
+        const db = await orbitdb1.feed('fourth')
         const hash = await db.add('hello3')
         const delopHash = await db.remove(hash)
         const items = db.iterator().collect()
         assert.equal(delopHash.startsWith('zd'), true)
         assert.equal(items.length, 0)
+        await db.drop()
       })
 
       it('deletes an item when two items in the database', async () => {
-        db = await orbitdb1.feed('fifth')
-
+        const db = await orbitdb1.feed('fifth')
         await db.add('hello1')
         const hash = await db.add('hello2')
         await db.remove(hash)
         const items = db.iterator({ limit: -1 }).collect()
         assert.equal(items.length, 1)
         assert.equal(items[0].payload.value, 'hello1')
+        await db.drop()
       })
 
       it('deletes an item between adds', async () => {
-        db = await orbitdb1.feed('sixth')
+        const db = await orbitdb1.feed('sixth')
 
         const hash = await db.add('hello1')
         await db.add('hello2')
@@ -134,10 +139,13 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(firstItem.payload.key, null)
         assert.equal(firstItem.payload.value, 'hello2')
         assert.equal(secondItem.payload.value, 'hello3')
+        await db.drop()
       })
     })
 
     describe('Iterator', function() {
+      let db
+
       let hashes = []
       const itemCount = 5
 

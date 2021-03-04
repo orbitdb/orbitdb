@@ -16,11 +16,10 @@ const {
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('./utils')
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/create-open/1'
 const dbPath2 = './orbitdb/tests/create-open/2'
-const ipfsPath = './orbitdb/tests/create-open/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replication Status (${API})`, function() {
@@ -30,8 +29,6 @@ Object.keys(testAPIs).forEach(API => {
     let localDataPath
 
     before(async () => {
-      config.daemon1.repo = ipfsPath
-      rmrf.sync(config.daemon1.repo)
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd = await startIpfs(API, config.daemon1)

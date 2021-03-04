@@ -2,7 +2,6 @@
 
 const assert = require('assert')
 const mapSeries = require('p-each-series')
-const path = require('path')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 // Include test utilities
@@ -12,16 +11,14 @@ const {
   stopIpfs,
   testAPIs,
   connectPeers,
-  waitForPeers,
-} = require('./utils')
+  waitForPeers
+} = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/counters/peer1'
 const dbPath2 = './orbitdb/tests/counters/peer2'
-const ipfsPath1 = './orbitdb/tests/counters/peer1/ipfs'
-const ipfsPath2 = './orbitdb/tests/counters/peer2/ipfs'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Counters (${API})`, function() {
+  describe(`orbit-db - Counters (${API})`, function () {
     this.timeout(config.timeout)
 
     let orbitdb1, orbitdb2
@@ -30,8 +27,6 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
-      config.daemon1.repo = ipfsPath1
-      config.daemon2.repo = ipfsPath2
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
@@ -80,6 +75,7 @@ Object.keys(testAPIs).forEach(API => {
       it('value is zero when it\'s a fresh database', async () => {
         const db = await orbitdb1.counter('counter database')
         assert.equal(db.value, 0)
+        await db.close()
       })
 
       it('increases a counter value', async () => {
@@ -127,9 +123,12 @@ Object.keys(testAPIs).forEach(API => {
 
         return new Promise(resolve => {
           // Wait for a while to make sure db's have been synced
-          setTimeout(() => {
+          setTimeout(async () => {
             assert.equal(counter1.value, 30)
             assert.equal(counter2.value, 30)
+
+            await counter1.close()
+            await counter2.close()
             resolve()
           }, 1000)
         })
