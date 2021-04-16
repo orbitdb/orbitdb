@@ -390,6 +390,7 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
 
 #### get(key)
 Returns an `Array` with a single `Object` if key exists.
+If it does not exist, this returns an empty array.
   ```javascript
   const profile = db.get('shamb0t')
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
@@ -398,6 +399,7 @@ Returns an `Array` with a single `Object` if key exists.
   // returns all the records
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
+
 
 #### query(mapper)
 Returns an `Array` of `Objects` based on the `mapper`.
