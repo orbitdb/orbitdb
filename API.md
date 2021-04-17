@@ -389,8 +389,8 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```
 
 #### get(key)
-Returns an `Array` with a single `Object` if key exists.
-If it does not exist, this returns an empty array.
+Returns an `Array` of all `Object`s that match the given `key` in their `_id` field or the field specified by `indexBy`.
+If no document with that key exists, this returns an empty array.
   ```javascript
   const profile = db.get('shamb0t')
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
