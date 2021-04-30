@@ -272,6 +272,10 @@ Returns an `Object` with the contents of the entry.
 
 Returns an `Array` of `Objects` based on the `options`.
 
+By default the Array is sorted in chronological order,
+such that the element at index 0 is the first element and 
+the element at the last element is the last element in the Feed.
+
 **options** : It is an object which supports the following properties
 
 `gt - (string)`  Greater than, takes an item's `hash`.
