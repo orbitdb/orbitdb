@@ -139,16 +139,13 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(messages.length, hashes.length)
         })
 
-        it('returns 1 item as default', () => {
-          const iter = db.iterator()
-          const first = iter.next().value
-          const second = iter.next().value
-          assert.equal(first.hash, hashes[hashes.length - 1])
-          assert.equal(second, null)
-          assert.equal(first.payload.value, 'hello4')
+        it('returns all items as default', () => {
+          const iter = db.iterator().collect()
+          
+          assert.equal(iter.length, hashes.lenght)
         })
 
-        it('returns items in the correct order', () => {
+        it('returns items in the order they were added', () => {
           const amount = 3
           const iter = db.iterator({ limit: amount })
           let i = hashes.length - amount
