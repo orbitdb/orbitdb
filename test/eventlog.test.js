@@ -142,7 +142,7 @@ Object.keys(testAPIs).forEach(API => {
         it('returns all items as default', () => {
           const iter = db.iterator().collect()
           
-          assert.equal(iter.length, hashes.lenght)
+          assert.equal(iter.length, hashes.length)
         })
 
         it('returns items in the order they were added', () => {
