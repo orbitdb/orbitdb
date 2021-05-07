@@ -40,11 +40,9 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = !options.offline
-      ? options.broker
-        ? new options.broker(this._ipfs) // eslint-disable-line
-        : new Pubsub(this._ipfs, this.id)
-      : null
+    this._pubsub = !options.offline ?
+            new (options.broker ? options.broker : Pubsub)(this._ipfs, this.id)
+        : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
