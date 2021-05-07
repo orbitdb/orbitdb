@@ -41,7 +41,9 @@ class OrbitDB {
     this.identity = identity
     this.id = options.peerId
     this._pubsub = !options.offline ?
-            new (options.broker ? options.broker : Pubsub)(this._ipfs, this.id)
+            new (
+                options.broker ?  options.broker : Pubsub
+            )(this._ipfs, this.id)
         : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
