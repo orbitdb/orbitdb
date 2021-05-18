@@ -75,6 +75,12 @@ class OrbitDB {
 
   get cache () { return this.caches[this.directory].cache }
 
+  /**
+   * Return an instance of OrbitDB given an IPFS or HTTP-IPFS-Client
+   * @param ipfs - the js-ipfs instance or ipfshttpclient instance
+   * @param options - several options
+   * @return instance of orbitdb
+   */
   static async createInstance (ipfs, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
