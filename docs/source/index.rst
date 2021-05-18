@@ -7,10 +7,7 @@ Welcome to OrbitDB's documentation!
 ===================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   interface
-
+   /interface.rst
 
 
 Indices and tables

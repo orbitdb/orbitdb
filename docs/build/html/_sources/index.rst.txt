@@ -7,12 +7,7 @@ Welcome to OrbitDB's documentation!
 ===================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-.. autofunction:: ./OrbitDB.OrbitDB#createInstance.staticMethod
-  :members:
-
+   /interface.rst
 
 
 Indices and tables
