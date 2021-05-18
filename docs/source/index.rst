@@ -9,8 +9,8 @@ Welcome to OrbitDB's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   .. js:autoclass:: ./OrbitDB.OrbitDB
-      :members:
+
+.. js:autoclass:: OrbitDB
 
 
 
