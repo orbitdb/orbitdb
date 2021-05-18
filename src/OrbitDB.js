@@ -471,9 +471,9 @@ class OrbitDB {
 
   /**
    * Check if we have the database, or part of it, saved locally
-   * @param  {[Cache]} cache [The OrbitDBCache instance containing the local data]
-   * @param  {[OrbitDBAddress]} dbAddress [Address of the database to check]
-   * @return {[Boolean]} [Returns true if we have cached the db locally, false if not]
+   * @param  {Array<Cache>} cache [The OrbitDBCache instance containing the local data]
+   * @param  {Array<OrbitDBAddress>} dbAddress [Address of the database to check]
+   * @return {Array<Boolean>} [Returns true if we have cached the db locally, false if not]
    */
   async _haveLocalData (cache, dbAddress) {
     if (!cache) {
@@ -497,7 +497,7 @@ class OrbitDB {
   /**
    * Returns supported database types as an Array of strings
    * Eg. [ 'counter', 'eventlog', 'feed', 'docstore', 'keyvalue']
-   * @return {[Array]} [Supported database types]
+   * @return {Array<a>} [Supported database types]
    */
   static get databaseTypes () {
     return Object.keys(databaseTypes)
