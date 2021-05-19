@@ -134,6 +134,10 @@ class OrbitDB {
   }
 
   /* Databases */
+  /**
+   * Load or create a new feed database
+   * @param {OrbitDBAddress|string} address or name of the database to open/create
+   */
   async feed (address, options = {}) {
     options = Object.assign({ create: true, type: 'feed' }, options)
     return this.open(address, options)
