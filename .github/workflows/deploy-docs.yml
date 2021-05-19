@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: ibnesayeed/setup-ipfs@0.6.0
-      - run: ipfs pin remote service add pinata https://api.pinata.cloud/psa ${{ secrets.PINATA_JWT }}
+      - run: ipfs pin remote service add pinataPin https://api.pinata.cloud/psa ${{ secrets.PINATA_JWT }}
       - run: ipfs add docs/build/html -r -Q | ipfs pin remote add --service=pinata --name=orbitdb-docs
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
