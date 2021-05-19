@@ -4,6 +4,9 @@ const CID = require('cids')
 
 const notEmpty = e => e !== '' && e !== ' '
 
+/**
+ * OrbitDB Addresses validation, parsing and generation
+ */
 class OrbitDBAddress {
   constructor (root, path) {
     this.root = root
