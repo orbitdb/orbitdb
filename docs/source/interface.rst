@@ -2,4 +2,4 @@ Interface of OrbitDB
 ====================
 The OrbitDB interface.
 
-.. js:autoclass: OrbitDB
+.. js:autofunction:: OrbitDB.createInstance
