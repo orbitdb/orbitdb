@@ -2,5 +2,9 @@ Interface of OrbitDB
 ====================
 The OrbitDB interface.
 
-.. js:autoclass:: OrbitDB(constructor)
+.. js:autoclass:: OrbitDB
+    :members:
+
+
+.. js:autoclass:: OrbitDBAddress
     :members:
