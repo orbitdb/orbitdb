@@ -4,17 +4,5 @@ jobs:
   deploy-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: anantaramdas/ipfs-pinata-deploy-action@v1.6.3
-        with:
-            # Path to directory which should be sent to Pinata
-            path: docs/build/html
-            # Human name for pin
-            pin-name: orbitdb-sphinx-docs
-            # Pinata API key
-            pinata-api-key: ${{ secrets.pinata_api_key }}
-            # Pinata Secret API key
-            pinata-secret-api-key: ${{ secrets.pinata_secret_api_key }}
-            # Remove old pin(-s) with same same
-            remove-old: true
-            # Verbose mode
-            verbose: false # default is false
+      - run ipfs pin remote service add pinata https://api.pinata.cloud/psa ${{ secrets.PINATA_JWT }}
+      - ipfs add docs/build/html -r -Q | ipfs pin remote add --service=pinata --name=orbitdb-docs
