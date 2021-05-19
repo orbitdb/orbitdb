@@ -128,6 +128,14 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(next.payload.key, null)
           assert.equal(next.payload.value, 'hello4')
         })
+        
+        it("Negative limit values return the same as positive limits", () => {
+           let amount = Math.floor(Math.random()*100) + 1
+           let iter = db.iterator({ limit: amount }).collect()
+           let iter1 = db.iterator({ limit: -amount }).collect()
+           
+           assert.equal(iter.length, iter1.length)
+        })
 
         it('implements Iterator interface', () => {
           const iter = db.iterator({ limit: -1 })
