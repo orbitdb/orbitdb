@@ -7,7 +7,7 @@ Welcome to OrbitDB's documentation!
 ===================================
 
 .. toctree::
-   /interface.rst
+   /API.rst
 
 
 Indices and tables
