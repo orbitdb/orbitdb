@@ -31,6 +31,9 @@ const databaseTypes = {
   keyvalue: KeyValueStore
 }
 
+/**
+ * OrbitDB instance
+ */
 class OrbitDB {
   constructor (ipfs, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }

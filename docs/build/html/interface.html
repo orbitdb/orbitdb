@@ -35,6 +35,48 @@
   <section id="interface-of-orbitdb">
 <h1>Interface of OrbitDB<a class="headerlink" href="#interface-of-orbitdb" title="Permalink to this headline">¶</a></h1>
 <p>The OrbitDB interface.</p>
+<dl class="js class">
+<dt class="sig sig-object js" id="OrbitDB">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">OrbitDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">constructor</span></em><span class="sig-paren">)</span><a class="headerlink" href="#OrbitDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>OrbitDB instance</p>
+<dl class="js attribute">
+<dt class="sig sig-object js" id="OrbitDB.databaseTypes">
+<span class="sig-prename descclassname"><span class="pre">OrbitDB.</span></span><span class="sig-name descname"><span class="pre">databaseTypes</span></span><a class="headerlink" href="#OrbitDB.databaseTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns supported database types as an Array of strings
+Eg. [ ‘counter’, ‘eventlog’, ‘feed’, ‘docstore’, ‘keyvalue’]</p>
+</dd></dl>
+
+<dl class="js function">
+<dt class="sig sig-object js" id="OrbitDB._haveLocalData">
+<span class="sig-prename descclassname"><span class="pre">OrbitDB.</span></span><span class="sig-name descname"><span class="pre">_haveLocalData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">cache</span></em>, <em class="sig-param"><span class="pre">dbAddress</span></em><span class="sig-paren">)</span><a class="headerlink" href="#OrbitDB._haveLocalData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if we have the database, or part of it, saved locally</p>
+<dl class="field-list simple">
+<dt class="field-odd">Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cache</strong> (<em>Array.&lt;Cache&gt;</em>) – [The OrbitDBCache instance containing the local data]</p></li>
+<li><p><strong>dbAddress</strong> (<em>Array.&lt;OrbitDBAddress&gt;</em>) – [Address of the database to check]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>Array.&lt;Boolean&gt;</strong> – [Returns true if we have cached the db locally, false if not]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="js function">
+<dt class="sig sig-object js" id="OrbitDB._migrate">
+<span class="sig-prename descclassname"><span class="pre">OrbitDB.</span></span><span class="sig-name descname"><span class="pre">_migrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Object</span></em>, <em class="sig-param"><span class="pre">OrbitDBAddress</span></em><span class="sig-paren">)</span><a class="headerlink" href="#OrbitDB._migrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs all migrations inside the src/migration folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Object</strong> – options  Options to pass into the migration</p></li>
+<li><p><strong>OrbitDBAddress</strong> – dbAddress Address of database in OrbitDBAddress format</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="js function">
 <dt class="sig sig-object js" id="OrbitDB.createInstance">
 <span class="sig-prename descclassname"><span class="pre">OrbitDB.</span></span><span class="sig-name descname"><span class="pre">createInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">ipfs</span></em>, <em class="sig-param"><span class="pre">options</span></em><span class="sig-paren">)</span><a class="headerlink" href="#OrbitDB.createInstance" title="Permalink to this definition">¶</a></dt>
@@ -50,6 +92,8 @@
 <dd class="field-even"><p>instance of orbitdb</p>
 </dd>
 </dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
