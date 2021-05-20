@@ -416,7 +416,7 @@ class OrbitDB {
 
   /**
    * Open a database by it's address.
-   * @param {OrbitDBAddress|string} the address to connect to.
+   * @param {OrbitDBAddress|string} address to connect to.
    * @param {boolean} options.localOnly if set to true, throws an error if database can't be found locally
    * @param {boolean} options.create whether to create the database.
    * @param {} options.type TODO

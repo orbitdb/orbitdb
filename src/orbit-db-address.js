@@ -17,6 +17,13 @@ class OrbitDBAddress {
     return OrbitDBAddress.join(this.root, this.path)
   }
 
+  /**
+   * Validate, that an address follows this format:
+   * /orbitdb/<multihash>/<name>
+   *
+   * @param {OrbitDBAddress|string} address to validate.
+   * @returns {boolean} whether the address has a valid format.
+   */
   static isValid (address) {
     address = address.toString().replace(/\\/g, '/')
 
@@ -50,6 +57,11 @@ class OrbitDBAddress {
     return accessControllerHash !== null
   }
 
+  /**
+   * Parse an address
+   * @param {OrbitDBAddress|string} address to parse.
+   * @return {OrbitDBAddress} parsed address
+   */
   static parse (address) {
     if (!address) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
 
