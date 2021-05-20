@@ -19,7 +19,7 @@ class OrbitDBAddress {
 
   /**
    * Validate, that an address follows this format:
-   * /orbitdb/<multihash>/<name>
+   * `/orbitdb/<multihash>/<name>`
    *
    * @param {OrbitDBAddress|string} address to validate.
    * @returns {boolean} whether the address has a valid format.
@@ -77,6 +77,9 @@ class OrbitDBAddress {
     return new OrbitDBAddress(parts[0], parts.slice(1, parts.length).join('/'))
   }
 
+  /**
+   * Join with prefix /orbitdb
+   */
   static join (...paths) {
     return (path.posix || path).join('/orbitdb', ...paths)
   }
