@@ -135,7 +135,7 @@ class OrbitDB {
 
   /* Databases */
   /**
-   * Load or create a new feed database
+   * Open or create a new feed database
    * @param {OrbitDBAddress|string} address or name of the database to open/create
    */
   async feed (address, options = {}) {
@@ -143,10 +143,14 @@ class OrbitDB {
     return this.open(address, options)
   }
 
+  /**
+   * Open or create a new log database
+   */
   async log (address, options = {}) {
     options = Object.assign({ create: true, type: 'eventlog' }, options)
     return this.open(address, options)
   }
+
 
   async eventlog (address, options = {}) {
     return this.log(address, options)
@@ -175,6 +179,9 @@ class OrbitDB {
     return this.docs(address, options)
   }
 
+  /**
+   * Disconnect OrbitDB instance from the network.
+   */
   async disconnect () {
     // close keystore
     await this.keystore.close()
@@ -407,14 +414,13 @@ class OrbitDB {
     return cache
   }
 
-  /*
-      options = {
-        localOnly: false // if set to true, throws an error if database can't be found locally
-        create: false // whether to create the database
-        type: TODO
-        overwrite: TODO
-
-      }
+  /**
+   * Open a database by it's address.
+   * @param {OrbitDBAddress|string} the address to connect to.
+   * @param {boolean} options.localOnly if set to true, throws an error if database can't be found locally
+   * @param {boolean} options.create whether to create the database.
+   * @param {} options.type TODO
+   * @param {} options.overwrite TODO
    */
   async open (address, options = {}) {
     logger.debug('open()')
