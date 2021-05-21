@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const Store = require('orbit-db-store')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -66,7 +67,8 @@ class OrbitDB {
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
   static get OrbitDBAddress () { return OrbitDBAddress }
-
+  
+  static get Store () { return Store }
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
   static get KeyValueStore () { return KeyValueStore }
