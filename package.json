@@ -30,12 +30,12 @@
     "orbit-db-eventstore": "~1.12.0",
     "orbit-db-feedstore": "~1.12.0",
     "orbit-db-identity-provider": "~0.3.0",
-    "orbit-db-io": "~0.3.0",
+    "orbit-db-io": "^0.5.0",
     "orbit-db-keystore": "~0.3.0",
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
-    "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "~4.0.1"
+    "orbit-db-storage-adapter": "^0.6.0",
+    "orbit-db-store": "^4.1.0"
   },
   "devDependencies": {
     "adm-zip": "^0.5.5",
