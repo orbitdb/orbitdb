@@ -68,7 +68,7 @@
     "remark-cli": "^8.0.1",
     "remark-validate-links": "^10.0.2",
     "rimraf": "^3.0.2",
-    "standard": "^14.3.4",
+    "standard": "^16.0.3",
     "validate-maintainers": "^1.2.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
