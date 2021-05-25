@@ -70,8 +70,8 @@
     "rimraf": "^3.0.2",
     "standard": "^16.0.3",
     "validate-maintainers": "^1.2.2",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0"
   },
   "scripts": {
     "examples:eventlog": "node examples/eventlog.js",
