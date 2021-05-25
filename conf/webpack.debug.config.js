@@ -10,16 +10,9 @@ module.exports = {
     filename: '../dist/orbitdb.js'
   },
   target: 'web',
-  devtool: 'source-map',
   externals: {
     fs: '{}',
     mkdirp: '{}'
-  },
-  node: {
-    console: false,
-    Buffer: true,
-    mkdirp: 'empty',
-    fs: 'empty'
   },
   plugins: [
   ],
@@ -30,13 +23,17 @@ module.exports = {
     ],
     alias: {
       leveldown: 'level-js'
+    },
+    fallback: {
+      path: require.resolve('path-browserify'),
+      stream: require.resolve('stream-browserify'),
+      assert: require.resolve('assert')
     }
   },
   resolveLoader: {
     modules: [
       'node_modules',
       path.resolve(__dirname, '../node_modules')
-    ],
-    moduleExtensions: ['-loader']
+    ]
   }
 }

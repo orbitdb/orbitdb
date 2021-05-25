@@ -9,12 +9,6 @@ module.exports = {
     filename: '../examples/browser/browser-webpack-example/bundle.js'
   },
   target: 'web',
-  devtool: 'none',
-  node: {
-    Buffer: true,
-    mkdirp: 'empty',
-    fs: 'empty'
-  },
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {
@@ -26,13 +20,17 @@ module.exports = {
     modules: [
       'node_modules',
       path.resolve(__dirname, '../node_modules')
-    ]
+    ],
+    fallback: {
+      path: require.resolve('path-browserify'),
+      stream: require.resolve('stream-browserify'),
+      assert: require.resolve('assert')
+    }
   },
   resolveLoader: {
     modules: [
       'node_modules',
       path.resolve(__dirname, '../node_modules')
-    ],
-    moduleExtensions: ['-loader']
+    ]
   }
 }
