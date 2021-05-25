@@ -48,7 +48,7 @@
     "cpy-cli": "^3.1.1",
     "cross-env": "^7.0.2",
     "datastore-level": "^5.0.1",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^10.0.0",
     "go-ipfs": "^0.8.0",
     "ipfs": "^0.55.0",
     "ipfs-http-client": "~50.0.0",
