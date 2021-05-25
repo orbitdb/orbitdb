@@ -22,7 +22,7 @@
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
-    "multihashes": "~3.0.1",
+    "multihashes": "^4.0.2",
     "orbit-db-access-controllers": "^0.3.0",
     "orbit-db-cache": "~0.3.0",
     "orbit-db-counterstore": "~1.12.0",
