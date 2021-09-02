@@ -35,7 +35,7 @@
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
     "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "orbitdb/orbit-db-store#fix/replication-concurrency"
+    "orbit-db-store": "haadcode/orbit-db-store#fix/replication-concurrency"
   },
   "devDependencies": {
     "adm-zip": "^0.4.16",
