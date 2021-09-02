@@ -30,7 +30,7 @@
     "orbit-db-eventstore": "~1.12.0",
     "orbit-db-feedstore": "~1.12.0",
     "orbit-db-identity-provider": "~0.3.0",
-    "orbit-db-io": "~0.3.0",
+    "orbit-db-io": "orbitdb/orbit-db-io#tagv030-add-options-arg",
     "orbit-db-keystore": "~0.3.0",
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
