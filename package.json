@@ -47,7 +47,6 @@
     "babel-preset-env": "^1.7.0",
     "cpy-cli": "^3.1.1",
     "cross-env": "^7.0.2",
-    "datastore-level": "~2.0.0",
     "fs-extra": "^9.0.1",
     "go-ipfs": "^0.10.0-rc1",
     "ipfs": "^0.58.3",
