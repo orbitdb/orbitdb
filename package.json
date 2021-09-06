@@ -21,7 +21,6 @@
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
-    "multiformats": "^9.4.7",
     "multihashes": "~3.0.1",
     "orbit-db-access-controllers": "github:tabcat/orbit-db-access-controllers#upgrade-ipfs",
     "orbit-db-cache": "~0.3.0",
