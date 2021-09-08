@@ -411,7 +411,7 @@ class OrbitDB {
     options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)
 
-    // If address is just the name of database, check the options to crate the database
+    // If address is just the name of database, check the options to create the database
     if (!OrbitDBAddress.isValid(address)) {
       if (!options.create) {
         throw new Error('\'options.create\' set to \'false\'. If you want to create a database, set \'options.create\' to \'true\'.')
