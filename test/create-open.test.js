@@ -124,8 +124,15 @@ Object.keys(testAPIs).forEach(API => {
         it('database has the correct address', async () => {
           assert.equal(db.address.toString().indexOf('/orbitdb'), 0)
           assert.equal(db.address.toString().indexOf('zd'), 9)
-          assert.equal(db.address.toString().indexOf('second'), 59)
-        })
+          
+	  assert.equal(db.address.toString().indexOf('second'), 59)
+	})
+	
+	it("db can be opened without path part", async () => {
+	  let address = new OrbitDBAddress(db.address.root, "")
+	  let openedDb = await orbitdb.open(address.toString())
+	  assert.equal(db.address.toString(), openedDb.address.toString())
+	})
 
         it('saves the database locally', async () => {
           assert.equal(fs.existsSync(localDataPath), true)
@@ -302,7 +309,7 @@ Object.keys(testAPIs).forEach(API => {
         } catch (e) {
           err = e.toString()
         }
-        assert.equal(err, "Error: 'options.create' set to 'false'. If you want to create a database, set 'options.create' to 'true'.")
+        assert.equal(err, `Error: 'options.create' set to 'false'. If you want to create a database with the address: 'XXX', set 'options.create' to 'true'.`)
       })
 
       it('throws an error if trying to open a database with name only and \'create\' is not set to true', async () => {
@@ -337,6 +344,19 @@ Object.keys(testAPIs).forEach(API => {
         const identity = await Identities.createIdentity({ id: 'test-id', keystore: orbitdb.keystore })
         const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true, identity })
         const db2 = await orbitdb.open(db.address)
+        assert.equal(db2.address.toString().indexOf('/orbitdb'), 0)
+        assert.equal(db2.address.toString().indexOf('zd'), 9)
+        assert.equal(db2.address.toString().indexOf('abc'), 59)
+        await db.drop()
+        await db2.drop()
+      })
+      
+      it("opens the same database - from address without path", async () => {
+      	const identity = await Identities.createIdentity({ id: "test-id", keystore: orbitdb.keystore })
+	const db = await orbitdb.open("abc", { create: true, type: "feed", overwrite: true, identity })
+	const address = new OrbitDBAddress(db.address.root, "")
+	const db2 = await orbitdb.open(db.address)
+	
         assert.equal(db2.address.toString().indexOf('/orbitdb'), 0)
         assert.equal(db2.address.toString().indexOf('zd'), 9)
         assert.equal(db2.address.toString().indexOf('abc'), 59)
