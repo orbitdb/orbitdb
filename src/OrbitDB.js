@@ -413,8 +413,9 @@ class OrbitDB {
 
     // If address is just the name of database, check the options to create the database
     if (!OrbitDBAddress.isValid(address)) {
+      console.log(address)
       if (!options.create) {
-        throw new Error('\'options.create\' set to \'false\'. If you want to create a database, set \'options.create\' to \'true\'.')
+        throw new Error(`'options.create' set to 'false'. If you want to create a database with the address: '${address.toString()}', set 'options.create' to 'true'.`)
       } else if (options.create && !options.type) {
         throw new Error(`Database type not provided! Provide a type with 'options.type' (${OrbitDB.databaseTypes.join('|')})`)
       } else {
@@ -426,6 +427,13 @@ class OrbitDB {
 
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
+    
+    // Get the database manifest from IPFSi
+    logger.debug(`Loading Manifest for '${dbAddress}'`)
+
+    const manifest = await io.read(this._ipfs, dbAddress.root)
+    dbAddress.path = manifest.name
+    logger.info(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
@@ -440,12 +448,6 @@ class OrbitDB {
       logger.warn(`Database '${dbAddress}' doesn't exist!`)
       throw new Error(`Database '${dbAddress}' doesn't exist!`)
     }
-
-    logger.debug(`Loading Manifest for '${dbAddress}'`)
-
-    // Get the database manifest from IPFS
-    const manifest = await io.read(this._ipfs, dbAddress.root)
-    logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
     if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
