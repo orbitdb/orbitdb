@@ -29,12 +29,12 @@
     "orbit-db-eventstore": "~1.12.0",
     "orbit-db-feedstore": "~1.12.0",
     "orbit-db-identity-provider": "~0.3.0",
-    "orbit-db-io": "github:tabcat/orbit-db-io#upgrade-ipfs",
+    "orbit-db-io": "^1.0.1-ba7d324.0",
     "orbit-db-keystore": "~0.3.0",
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
     "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "github:tabcat/orbit-db-store#upgrade-ipfs"
+    "orbit-db-store": "^4.1.1-78e849f.0"
   },
   "devDependencies": {
     "adm-zip": "^0.4.16",
@@ -55,7 +55,7 @@
     "mkdirp": "^1.0.4",
     "mocha": "^8.1.1",
     "open-cli": "^6.0.1",
-    "orbit-db-test-utils": "github:tabcat/orbit-db-test-utils#upgrade-ipfs",
+    "orbit-db-test-utils": "^1.2.2-1addf9f.0",
     "p-each-series": "^2.1.0",
     "p-map": "^4.0.0",
     "p-map-series": "^2.1.0",
