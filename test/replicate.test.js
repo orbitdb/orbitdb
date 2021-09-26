@@ -13,7 +13,6 @@ const {
   testAPIs,
   connectPeers,
   waitForPeers,
-  MemStore,
 } = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replication/1'
@@ -37,12 +36,6 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      // Use memory store for quicker tests
-      const memstore = new MemStore()
-      ipfs1.dag.put = memstore.put.bind(memstore)
-      ipfs1.dag.get = memstore.get.bind(memstore)
-      ipfs2.dag.put = memstore.put.bind(memstore)
-      ipfs2.dag.get = memstore.get.bind(memstore)
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
