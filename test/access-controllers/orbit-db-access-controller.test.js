@@ -154,6 +154,12 @@ Object.keys(testAPIs).forEach(API => {
           delete: new Set(['ABCD'])
         })
       })
+      
+      it("granted capability can be checked with hasCapability", async () => {
+          assert.ok(accessController.hasCapability("read", "ABCD"))
+          assert.ok(accessController.hasCapability("delete", "ABCD"))
+          assert.ok(!accessController.hasCapability("read", "invalidKey"))
+      })
 
       it('emit \'updated\' event when a capability was added', async () => {
         return new Promise((resolve, reject) => {
