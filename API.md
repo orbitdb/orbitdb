@@ -699,18 +699,7 @@ Each oplog entry contains these fields:
 ```
 
 Let's got through each of them in turn:
-- [Oplog API](#oplog-api)
-  * [`oplog.values`](#oplogvalues)
-    + `hash`
-    + `id`
-    + `payload`
-    + `next`
-    + `refs`
-    + `v`
-    + `clock`
-    + `key`
-    + `identity`
-    + `sig`
+
 ### `hash`
 Hash of the entry on IPFS. "zd...".
 
@@ -744,3 +733,4 @@ Identity that added this entry.
 
 ### `sig`
 Signature of the entry.
+If the entry is in the oplog, the signature is valid.
