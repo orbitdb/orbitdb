@@ -729,6 +729,13 @@ Array of hashes
 ### `v`
 **TBD**
 
+### `clock`
+Lamport clock instance of the entry.
+A Lamport clock contains a `time`, an integer, 
+taht for all operations depending on each other increases.
+
+If Operation A depends on Operation B, B's time < A's time.
+
 ## `key`
 Public key of the Identity that added this entry.
 
