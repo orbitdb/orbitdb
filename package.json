@@ -18,6 +18,7 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "ipfs-pubsub-1on1": "~0.0.6",
+    "is-electron": "^2.2.0",
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
