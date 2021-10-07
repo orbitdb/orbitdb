@@ -710,7 +710,8 @@ Address of the oplog. (A.k.a. the OrbitDB Address)
 Payload of the operation. Provided by the Store to `_addOperation`. 
 
 ### `next`
-Array of hashes
+Array of hashes of the oplog entries that are before this entry 
+in the oplog and that this entry depends upon.
 
 ### `refs`
 **TBD**
