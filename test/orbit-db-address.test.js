@@ -95,13 +95,6 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(result, true)
       })
 
-      it('handle missing orbitdb prefix', () => {
-        const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
-        const result = OrbitDB.isValidAddress(address)
-
-        assert.equal(result, true)
-      })
-
       it('handle missing db address name', () => {
         const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
         const result = OrbitDB.isValidAddress(address)
