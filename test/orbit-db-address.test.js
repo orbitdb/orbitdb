@@ -24,11 +24,13 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
+      orbitdb = await OrbitDB.createInstance(ipfs, {
+        directory: dbPath
+      })
     })
 
     after(async () => {
-      if(orbitdb)
+      if (orbitdb)
         await orbitdb.stop()
 
       if (ipfsd)
@@ -36,18 +38,21 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('Parse Address', () => {
-      it('throws an error if address is empty', () => {
-        let err
-        try {
-          const result = OrbitDB.parseAddress('')
-        } catch (e) {
-          err = e.toString()
-        }
-        assert.equal(err, 'Error: Not a valid OrbitDB address: ')
+      it('throws an error if address malformatted.', () => {
+        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1", "/orbitdb//first-database"]
+        address.forEach(address => {
+          let err
+          try {
+            const result = OrbitDB.parseAddress(address)
+          } catch (e) {
+            err = e.toString()
+          }
+          assert.equal(err, 'Error: Not a valid OrbitDB address: ')
+        })
       })
 
       it('parse address successfully', () => {
-        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database'
         const result = OrbitDB.parseAddress(address)
 
         const isInstanceOf = result instanceof OrbitDBAddress
@@ -76,9 +81,13 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     describe('isValid Address', () => {
-      it('returns false for empty string', () => {
-        const result = OrbitDB.isValidAddress('')
-        assert.equal(result, false)
+      it('returns false for malformatted addresses', () => {
+        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1", "/orbitdb//first-database"]
+
+        address.forEach(address => {
+          const result = OrbitDB.isValidAddress(address)
+          assert.equal(result, false)
+        })
       })
 
       it('validate address successfully', () => {
