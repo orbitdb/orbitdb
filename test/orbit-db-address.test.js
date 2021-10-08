@@ -24,22 +24,20 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath)
       ipfsd = await startIpfs(API, config.daemon1)
       ipfs = ipfsd.api
-      orbitdb = await OrbitDB.createInstance(ipfs, {
-        directory: dbPath
-      })
+      orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
     })
 
     after(async () => {
-      if (orbitdb)
+      if(orbitdb)
         await orbitdb.stop()
 
-      if (ipfsd)
+      if(ipfsd)
         await stopIpfs(ipfsd)
     })
 
     describe('Parse Address', () => {
       it('throws an error if address malformatted.', () => {
-        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1", "/orbitdb//first-database"]
+        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13", "/orbitdb//first-database"]
         address.forEach(address => {
           let err
           try {
@@ -52,7 +50,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('parse address successfully', () => {
-        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database'
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
         const result = OrbitDB.parseAddress(address)
 
         const isInstanceOf = result instanceof OrbitDBAddress
@@ -82,7 +80,7 @@ Object.keys(testAPIs).forEach(API => {
 
     describe('isValid Address', () => {
       it('returns false for malformatted addresses', () => {
-        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw1", "/orbitdb//first-database"]
+        let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13", "/orbitdb//first-database"]
 
         address.forEach(address => {
           const result = OrbitDB.isValidAddress(address)
@@ -128,3 +126,4 @@ Object.keys(testAPIs).forEach(API => {
 
   })
 })
+
