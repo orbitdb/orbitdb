@@ -38,14 +38,14 @@ Object.keys(testAPIs).forEach(API => {
     describe('Parse Address', () => {
       it('throws an error if address malformatted.', () => {
         let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13", "/orbitdb//first-database"]
-        address.forEach(address => {
+        addresses.forEach(address => {
           let err
           try {
             const result = OrbitDB.parseAddress(address)
           } catch (e) {
             err = e.toString()
           }
-          assert.equal(err, 'Error: Not a valid OrbitDB address: ')
+          assert.equal(err, 'Error: Not a valid OrbitDB address: ' + address)
         })
       })
 
@@ -82,7 +82,7 @@ Object.keys(testAPIs).forEach(API => {
       it('returns false for malformatted addresses', () => {
         let addresses = ["", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database", "zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13", "/orbitdb//first-database"]
 
-        address.forEach(address => {
+        addresses.forEach(address => {
           const result = OrbitDB.isValidAddress(address)
           assert.equal(result, false)
         })
