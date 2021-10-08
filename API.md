@@ -710,8 +710,9 @@ Address of the oplog. (A.k.a. the OrbitDB Address)
 Payload of the operation. Provided by the Store to `_addOperation`. 
 
 ### `next`
-Array of hashes of the oplog entries that are before this entry 
-in the oplog and that this entry depends upon.
+Array of hashes of the oplog entries that happened before this one.
+
+
 
 ### `refs`
 **TBD**
@@ -722,9 +723,11 @@ in the oplog and that this entry depends upon.
 ### `clock`
 Lamport clock instance of the entry.
 A Lamport clock contains a `time`, an integer, 
-taht for all operations depending on each other increases.
+that for all operations depending on each other increases.
 
 If Operation A depends on Operation B, B's time < A's time.
+
+[See the Wikipedia description of Lamport Clocks for more details](https://en.wikipedia.org/wiki/Lamport_timestamp)
 
 ## `key`
 Public key of the Identity that added this entry.
