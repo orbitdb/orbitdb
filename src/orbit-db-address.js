@@ -2,8 +2,6 @@
 const path = require('path')
 const { CID } = require('multiformats/cid')
 
-const notEmpty = e => e !== '' && e !== ' '
-
 class OrbitDBAddress {
   constructor (root, path) {
     this.root = root
@@ -17,34 +15,21 @@ class OrbitDBAddress {
   static isValid (address) {
     address = address.toString().replace(/\\/g, '/')
 
-    const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
+    const parts = address.split('/')
 
-    const parts = address.toString()
-      .split('/')
-      .filter(containsProtocolPrefix)
-      .filter(notEmpty)
+    if (parts.length < 3) return false
 
-    let accessControllerHash
+    const hasProtocol = address.startsWith('/orbitdb/')
 
-    const validateHash = (hash) => {
-      const prefixes = ['zd', 'Qm', 'ba', 'k5']
-      for (const p of prefixes) {
-        if (hash.indexOf(p) > -1) {
-          return true
-        }
-      }
-      return false
-    }
+    let validHash
 
     try {
-      accessControllerHash = validateHash(parts[0])
-        ? CID.parse(parts[0]).toString()
-        : null
+      validHash = !!CID.parse(parts[2])
     } catch (e) {
-      return false
+      validHash = false
     }
 
-    return accessControllerHash !== null
+    return hasProtocol && validHash
   }
 
   static parse (address) {
