@@ -308,7 +308,7 @@ class OrbitDB {
 
     if (cache && cache.handlers.has(address)) {
       cache.handlers.delete(address)
-      // if (!cache.handlers.size) await cache.cache.close()
+      if (!cache.handlers.size) await cache.cache.close()
     }
 
     delete this.stores[address]
