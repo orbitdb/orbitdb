@@ -10,6 +10,7 @@ module.exports = {
     library: 'OrbitDB',
     filename: '../dist/orbitdb.min.js'
   },
+  mode: 'development',
   target: 'web',
   devtool: 'none',
   externals: {

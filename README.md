@@ -4,11 +4,11 @@
   <img src="images/orbit_db_logo_color.png" width="256" />
 </p>
 
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![Matrix](https://img.shields.io/badge/matrix-%23orbit--db%3Amatrix.org-blue.svg)](https://riot.im/app/#/room/#orbit-db:matrix.org) [![Discord](https://img.shields.io/discord/475789330380488707?color=blueviolet&label=discord)](https://discord.gg/v3RNE3M) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/orbitdb/Lobby) [![Matrix](https://img.shields.io/badge/matrix-%23orbit--db%3Amatrix.org-blue.svg)](https://riot.im/app/#/room/#orbit-db:matrix.org) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
 
 OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
 
-**Test it live at [Live demo 1](https://ipfs.io/ipfs/QmUsoSkGzUQnCgzfjL549KKf29m5EMYky3Y6gQp5HptLTG/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/Qme8b6YJrSLsprNAZP3MRLeKP2mxW2WPPDp9VTYkpAtRAE/)**!
+**Test it live at [Live demo 1](https://ipfs.io/ipfs/QmUsoSkGzUQnCgzfjL549KKf29m5EMYky3Y6gQp5HptLTG/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/QmVWQMLUM3o4ZFbLtLMS1PMLfodeEeBkBPR2a2R3hqQ337/)**!
 
 
 OrbitDB provides various types of databases for different data models and use cases:
@@ -189,38 +189,28 @@ See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the ful
 ## Examples
 
 ### Install dependencies
-
 ```
 git clone https://github.com/orbitdb/orbit-db.git
 cd orbit-db
 npm install
 ```
-
-You'll also need babel and webpack, if you don't have them installed already:
-
-```
-npm install --global babel-cli
-npm install --global webpack
-```
-
 Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to
 ```
-make clean && make
+make clean-dependencies && make deps
 ```
 to redo the local package-lock.json with working native dependencies.
 
 ### Browser example
 
-In macOS:
 ```
 npm run build
-npm run examples:browser-macos
+npm run examples:browser
 ```
 
-In Linux:
+Using Webpack:
 ```
 npm run build
-npm run examples:browser-linux
+npm run examples:browser-webpack
 ```
 
 <p align="left">

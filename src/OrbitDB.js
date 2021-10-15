@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const Store = require('orbit-db-store')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -42,11 +43,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = !options.offline
-      ? options.broker
-        ? new options.broker(this._ipfs) // eslint-disable-line
-        : new Pubsub(this._ipfs, this.id)
-      : null
+    this._pubsub = !options.offline ?
+            new (
+                options.broker ?  options.broker : Pubsub
+            )(this._ipfs, this.id)
+        : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -68,7 +69,8 @@ class OrbitDB {
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
   static get OrbitDBAddress () { return OrbitDBAddress }
-
+  
+  static get Store () { return Store }
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
   static get KeyValueStore () { return KeyValueStore }

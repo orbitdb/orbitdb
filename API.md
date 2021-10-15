@@ -272,6 +272,10 @@ Returns an `Object` with the contents of the entry.
 
 Returns an `Array` of `Objects` based on the `options`.
 
+By default the Array is sorted in chronological order,
+such that the element at index 0 is the first element and 
+the element at the last element is the last element in the Feed.
+
 **options** : It is an object which supports the following properties
 
 `gt - (string)`  Greater than, takes an item's `hash`.
@@ -389,7 +393,8 @@ Returns a `Promise` that resolves to the multihash of the entry as a `String`.
   ```
 
 #### get(key)
-Returns an `Array` with a single `Object` if key exists.
+Returns an `Array` of all `Object`s that match the given `key` in their `_id` field or the field specified by `indexBy`.
+If no document with that key exists, this returns an empty array.
   ```javascript
   const profile = db.get('shamb0t')
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
@@ -398,6 +403,7 @@ Returns an `Array` with a single `Object` if key exists.
   // returns all the records
   // [{ _id: 'shamb0t', name: 'shamb0t', followers: 500 }]
   ```
+
 
 #### query(mapper)
 Returns an `Array` of `Objects` based on the `mapper`.

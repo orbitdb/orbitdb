@@ -142,7 +142,7 @@ main()
 
 The second part of the address, the IPFS multihash `Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC`, is the manifest of a database. It's an IPFS object that contains information about the database.
 
-The database manifest can be fetched from IPFS and it looks like this:
+The database manifest can be fetched from IPFS with `ipfs dag get <multihash>` command and it looks like this:
 
 ```json
 {
