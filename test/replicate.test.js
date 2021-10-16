@@ -89,7 +89,7 @@ Object.keys(testAPIs).forEach(API => {
         await orbitdb2.stop()
     })
 
-    it('replicates database of 1 entry', async () => {
+    it.skip('replicates database of 1 entry', async () => {
       // Set 'sync' flag on. It'll prevent creating a new local database and rather
       // fetch the database from the network
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
@@ -107,7 +107,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it('replicates database of 100 entries', async () => {
+    it.skip('replicates database of 100 entries', async () => {
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
