@@ -21,7 +21,7 @@ const dbPath1 = './orbitdb/tests/replication/1/db1'
 const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication (${API})`, function() {
+  describe.only(`orbit-db - Replication (${API})`, function() {
     this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -197,8 +197,9 @@ Object.keys(testAPIs).forEach(API => {
         // Resolve with a little timeout to make sure we
         // don't receive more than one event
         setTimeout(() => {
-          finished = (db2.iterator({ limit: -1 }).collect().length === expectedEventCount && db2._replicator.tasksRunning === 0)
-        }, 200)
+          const all = db2.iterator({ limit: -1 }).collect().length
+          finished = (all === expectedEventCount && db2._replicator.tasksRunning === 0)
+        }, 1000)
       })
 
       return new Promise((resolve, reject) => {
