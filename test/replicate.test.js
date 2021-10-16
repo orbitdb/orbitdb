@@ -50,6 +50,10 @@ Object.keys(testAPIs).forEach(API => {
 
     beforeEach(async () => {
       clearInterval(timer)
+
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
+
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
 
