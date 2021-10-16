@@ -167,22 +167,6 @@ class OrbitDB {
   }
 
   async disconnect () {
-    // close keystore
-    await this.keystore.close()
-
-    // Close all open databases
-    const databases = Object.values(this.stores)
-    for await (const db of databases) {
-      await db.close()
-      delete this.stores[db.address.toString()]
-    }
-
-    const caches = Object.keys(this.caches)
-    for await (const directory of caches) {
-      await this.caches[directory].cache.close()
-      delete this.caches[directory]
-    }
-
     // Close a direct connection and remove it from internal state
     const removeDirectConnect = e => {
       this._directConnections[e].close()
@@ -195,6 +179,22 @@ class OrbitDB {
     // Disconnect from pubsub
     if (this._pubsub) {
       await this._pubsub.disconnect()
+    }
+
+    // close keystore
+    await this.keystore.close()
+
+    // Close all open databases
+    const databases = Object.values(this.stores)
+    for (const db of databases) {
+      await db.close()
+      delete this.stores[db.address.toString()]
+    }
+
+    const caches = Object.keys(this.caches)
+    for (const directory of caches) {
+      await this.caches[directory].cache.close()
+      delete this.caches[directory]
     }
 
     // Remove all databases from the state
@@ -318,7 +318,7 @@ class OrbitDB {
     const address = db.address.toString()
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
-    this.stores[address] = db
+    delete this.stores[address]
   }
 
   async _onLoad (db) {
@@ -430,9 +430,9 @@ class OrbitDB {
     const dbAddress = OrbitDBAddress.parse(address)
 
     // If database is already open, return early by returning the instance
-    if (this.stores[dbAddress]) {
-      return this.stores[dbAddress]
-    }
+    // if (this.stores[dbAddress]) {
+    //   return this.stores[dbAddress]
+    // }
 
     options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
