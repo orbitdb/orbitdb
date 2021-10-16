@@ -20,7 +20,7 @@ const dbPath2 = './orbitdb/tests/replication/2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replication (${API})`, function() {
-    this.timeout(config.timeout)
+    this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -97,7 +97,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(items.length, 1)
           assert.equal(items[0].payload.value, 'hello')
           resolve()
-        }, 100)
+        }, 1000)
       })
     })
 
