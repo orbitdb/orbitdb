@@ -50,20 +50,20 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('has correct initial state', async () => {
-      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
+      assert.deepEqual(db.replicationStatus, { progress: 0, max: 0 })
     })
 
     it('has correct replication info after load', async () => {
       await db.add('hello')
       await db.close()
       await db.load()
-      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 1, max: 1 })
+      assert.deepEqual(db.replicationStatus, { progress: 1, max: 1 })
       await db.close()
     })
 
     it('has correct replication info after close', async () => {
       await db.close()
-      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 0, max: 0 })
+      assert.deepEqual(db.replicationStatus, { progress: 0, max: 0 })
     })
 
     it('has correct replication info after sync', async () => {
@@ -77,7 +77,7 @@ Object.keys(testAPIs).forEach(API => {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
           try {
-            assert.deepEqual(db2.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
+            assert.deepEqual(db2.replicationStatus, { progress: 2, max: 2 })
             resolve()
           } catch (e) {
             reject(e)
@@ -91,7 +91,7 @@ Object.keys(testAPIs).forEach(API => {
       await db.saveSnapshot()
       await db.close()
       await db.loadFromSnapshot()
-      assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
+      assert.deepEqual(db.replicationStatus, { progress: 2, max: 2 })
     })
   })
 })
