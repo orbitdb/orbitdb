@@ -13,7 +13,6 @@ const {
   testAPIs,
   connectPeers,
   waitForPeers,
-  MemStore,
 } = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replication/1'
@@ -21,7 +20,7 @@ const dbPath2 = './orbitdb/tests/replication/2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replication (${API})`, function() {
-    this.timeout(config.timeout)
+    this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -37,12 +36,6 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      // Use memory store for quicker tests
-      const memstore = new MemStore()
-      ipfs1.dag.put = memstore.put.bind(memstore)
-      ipfs1.dag.get = memstore.get.bind(memstore)
-      ipfs2.dag.put = memstore.put.bind(memstore)
-      ipfs2.dag.get = memstore.get.bind(memstore)
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
@@ -57,6 +50,10 @@ Object.keys(testAPIs).forEach(API => {
 
     beforeEach(async () => {
       clearInterval(timer)
+
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
+
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
 
@@ -104,7 +101,7 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal(items.length, 1)
           assert.equal(items[0].payload.value, 'hello')
           resolve()
-        }, 100)
+        }, 1000)
       })
     })
 
@@ -143,7 +140,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info', async () => {
+    it('emits correct replication info', async () => {
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
@@ -248,7 +245,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info on fresh replication', async () => {
+    it('emits correct replication info on fresh replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
         let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0, 'peer.exchanged': 0 }
@@ -280,7 +277,6 @@ Object.keys(testAPIs).forEach(API => {
 
         db2.events.on('replicate', (address, entry) => {
           eventCount['replicate'] ++
-          // console.log("[replicate] ", '#' + eventCount['replicate'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
           events.push({
             event: 'replicate',
             count: eventCount['replicate'],
@@ -290,7 +286,6 @@ Object.keys(testAPIs).forEach(API => {
 
         db2.events.on('replicate.progress', (address, hash, entry) => {
           eventCount['replicate.progress'] ++
-          // console.log("[progress]  ", '#' + eventCount['replicate.progress'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
           // assert.equal(db2.replicationStatus.progress, eventCount['replicate.progress'])
           events.push({
             event: 'replicate.progress',
@@ -305,7 +300,6 @@ Object.keys(testAPIs).forEach(API => {
 
         db2.events.on('peer.exchanged', (address, entry) => {
           eventCount['peer.exchanged'] ++
-          // console.log("[replicate] ", '#' + eventCount['replicate'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished)
           events.push({
             event: 'peer.exchanged',
             count: eventCount['peer.exchanged'],
@@ -315,12 +309,8 @@ Object.keys(testAPIs).forEach(API => {
 
         db2.events.on('replicated', (address, length) => {
           eventCount['replicated'] += length
-          // console.log("[replicated]", '#' + eventCount['replicated'] + ':', db2.replicationStatus.progress, '/', db2.replicationStatus.max, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished, "|")
           try {
-            // Test the replicator state
-            // assert.equal(db2._loader.tasksRequested >= db2.replicationStatus.progress, true)
-            // assert.equal(db2.options.referenceCount, 32)
-            // assert.equal(db2._loader.tasksRunning, 0)
+            assert.equal(db2.options.referenceCount, 32)
           } catch (e) {
             reject(e)
           }
@@ -333,13 +323,7 @@ Object.keys(testAPIs).forEach(API => {
               progress: db2.replicationStatus.progress,
             },
           })
-          // Resolve with a little timeout to make sure we
-          // don't receive more than one event
-          // setTimeout( async () => {
-          //   if (eventCount['replicated'] === expectedEventCount) {
-          //     finished = true
-          //   }
-          // }, 1000)
+
           setTimeout(() => {
             finished = (db2.iterator({ limit: -1 }).collect().length === expectedEventCount && db2._replicator.tasksRunning === 0)
           }, 200)
@@ -354,14 +338,14 @@ Object.keys(testAPIs).forEach(API => {
             console.log("Duration:", et - st, "ms")
 
             try {
-              assert.equal(eventCount['replicate'], expectedEventCount)
+              assert.equal(eventCount['replicate'], 1)
               assert.equal(eventCount['replicate.progress'], expectedEventCount)
               assert.equal(eventCount['peer.exchanged'], expectedPeerExchangeCount)
 
               const replicateEvents = events.filter(e => e.event === 'replicate')
               const maxClock = Math.max(...replicateEvents.filter(e => !!e.entry.clock).map(e => e.entry.clock.time))
-              assert.equal(replicateEvents.length, expectedEventCount)
-              assert.equal(replicateEvents[0].entry.payload.value.split(' ')[0], 'hello')
+              assert.equal(replicateEvents.length, 1)
+              assert.equal(replicateEvents[0].entry.payload.value, 'hello ' + (expectedEventCount - 1))
               assert.equal(maxClock, expectedEventCount)
 
               const replicateProgressEvents = events.filter(e => e.event === 'replicate.progress')
@@ -387,7 +371,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info in two-way replication', async () => {
+    it('emits correct replication info in two-way replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
         let eventCount = { 'replicate': 0, 'replicate.progress': 0, 'replicated': 0, 'peer.exchanged': 0 }
@@ -457,7 +441,7 @@ Object.keys(testAPIs).forEach(API => {
           const values = db2.iterator({limit: -1}).collect()
           // console.log("[replicated]", '#' + eventCount['replicated'] + ':', current, '/', total, '| Tasks (in/queued/running/out):', db2._loader.tasksRequested, '/',  db2._loader.tasksQueued,  '/', db2._loader.tasksRunning, '/', db2._loader.tasksFinished, "|", db2._loader._stats.a, db2._loader._stats.b, db2._loader._stats.c, db2._loader._stats.d)
           try {
-            assert.equal(db2.replicationStatus.progress <= db2.replicationStatus.max, true)
+            // assert.equal(db2.replicationStatus.progress <= db2.replicationStatus.max, true)
           } catch (e) {
             reject(e)
           }

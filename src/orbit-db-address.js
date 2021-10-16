@@ -1,6 +1,6 @@
 'use strict'
 const path = require('path')
-const CID = require('cids')
+const { CID } = require('multiformats/cid')
 
 const notEmpty = e => e !== '' && e !== ' '
 
@@ -38,7 +38,7 @@ class OrbitDBAddress {
 
     try {
       accessControllerHash = validateHash(parts[0])
-        ? new CID(parts[0]).toBaseEncodedString()
+        ? CID.parse(parts[0]).toString()
         : null
     } catch (e) {
       return false

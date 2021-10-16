@@ -1,6 +1,7 @@
 'use strict'
 
 const path = require('path')
+const Store = require('orbit-db-store')
 const EventStore = require('orbit-db-eventstore')
 const FeedStore = require('orbit-db-feedstore')
 const KeyValueStore = require('orbit-db-kvstore')
@@ -31,6 +32,8 @@ const databaseTypes = {
   keyvalue: KeyValueStore
 }
 
+const defaultTimeout = 20000
+
 class OrbitDB {
   constructor (ipfs, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
@@ -40,11 +43,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = !options.offline
-      ? options.broker
-        ? new options.broker(this._ipfs) // eslint-disable-line
-        : new Pubsub(this._ipfs, this.id)
-      : null
+    this._pubsub = !options.offline ?
+            new (
+                options.broker ?  options.broker : Pubsub
+            )(this._ipfs, this.id)
+        : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -66,7 +69,8 @@ class OrbitDB {
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
   static get OrbitDBAddress () { return OrbitDBAddress }
-
+  
+  static get Store () { return Store }
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
   static get KeyValueStore () { return KeyValueStore }
@@ -86,7 +90,7 @@ class OrbitDB {
       throw new Error('Offline mode requires passing an `id` in the options')
     }
 
-    const { id } = options.offline ? ({ id: options.id }) : await ipfs.id()
+    const { id } = options.id || options.offline ? ({ id: options.id }) : await ipfs.id()
 
     if (!options.directory) { options.directory = './orbitdb' }
 
@@ -102,7 +106,7 @@ class OrbitDB {
     }
 
     if (!options.keystore) {
-      const keystorePath = path.join(options.directory, id, '/keystore')
+      const keystorePath = path.join(options.directory, options.id || id, '/keystore')
       const keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
@@ -168,13 +172,13 @@ class OrbitDB {
 
     // Close all open databases
     const databases = Object.values(this.stores)
-    for (const db of databases) {
+    for await (const db of databases) {
       await db.close()
       delete this.stores[db.address.toString()]
     }
 
     const caches = Object.keys(this.caches)
-    for (const directory of caches) {
+    for await (const directory of caches) {
       await this.caches[directory].cache.close()
       delete this.caches[directory]
     }
@@ -425,6 +429,11 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
+    // If database is already open, return early by returning the instance
+    if (this.stores[dbAddress]) {
+      return this.stores[dbAddress]
+    }
+
     options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
     // Check if we have the database
@@ -442,7 +451,7 @@ class OrbitDB {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const manifest = await io.read(this._ipfs, dbAddress.root)
+    const manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option

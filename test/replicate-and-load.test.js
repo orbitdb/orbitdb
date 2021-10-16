@@ -20,7 +20,7 @@ const dbPath2 = './orbitdb/tests/replicate-and-load/2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replicate and Load (${API})`, function() {
-    this.timeout(config.timeout * 2)
+    this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2
@@ -77,7 +77,6 @@ Object.keys(testAPIs).forEach(API => {
         console.log("Waiting for peers...")
         await waitForPeers(ipfs1, [orbitdb2.id], db1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
-        console.log("Found peers")
       })
 
       after(async () => {
