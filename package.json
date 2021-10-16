@@ -59,7 +59,7 @@
     "mocha": "^9.1.3",
     "node-pre-gyp": "^0.13.0",
     "open-cli": "^6.0.1",
-    "orbit-db-test-utils": "^1.3.0",
+    "orbit-db-test-utils": "orbitdb/orbit-db-test-utils#fix/paths-to-keys",
     "p-each-series": "^2.1.0",
     "p-map": "^4.0.0",
     "p-map-series": "^2.1.0",
