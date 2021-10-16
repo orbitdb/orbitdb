@@ -79,6 +79,7 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd)
 
       rmrf.sync(ipfsFixturesDir)
+      rmrf.sync('./orbitdb')
     })
 
     describe('Open & Load - V0 entries', function () {

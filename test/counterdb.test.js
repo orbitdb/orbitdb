@@ -94,7 +94,7 @@ Object.keys(testAPIs).forEach(API => {
         const counter = await orbitdb1.counter(address, { path: dbPath1 })
         await counter.load()
         assert.equal(counter.value, 14)
-        await counter.close()
+        await counter.drop()
       })
 
       it('syncs counters', async () => {

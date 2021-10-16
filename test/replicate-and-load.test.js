@@ -15,8 +15,10 @@ const {
   waitForPeers,
 } = require('orbit-db-test-utils')
 
-const dbPath1 = './orbitdb/tests/replicate-and-load/1'
-const dbPath2 = './orbitdb/tests/replicate-and-load/2'
+const orbitdbPath1 = './orbitdb/tests/replicate-and-load/1'
+const orbitdbPath2 = './orbitdb/tests/replicate-and-load/2'
+const dbPath1 = './orbitdb/tests/replicate-and-load/1/db1'
+const dbPath2 = './orbitdb/tests/replicate-and-load/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replicate and Load (${API})`, function() {
@@ -26,14 +28,16 @@ Object.keys(testAPIs).forEach(API => {
     let orbitdb1, orbitdb2
 
     before(async () => {
+      rmrf.sync(orbitdbPath1)
+      rmrf.sync(orbitdbPath2)
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
-      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: orbitdbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: orbitdbPath2 })
       // Connect the peers manually to speed up test times
       await connectPeers(ipfs1, ipfs2)
     })
@@ -50,6 +54,9 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfsd2)
         await stopIpfs(ipfsd2)
+
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
     })
 
     describe('two peers', function() {

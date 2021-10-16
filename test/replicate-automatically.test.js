@@ -26,6 +26,7 @@ Object.keys(testAPIs).forEach(API => {
     let orbitdb1, orbitdb2, db1, db2, db3, db4
 
     before(async () => {
+      rmrf.sync('./orbitdb')
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)

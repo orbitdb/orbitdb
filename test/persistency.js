@@ -28,7 +28,7 @@ const tests = [
   {
     title: 'Persistency with custom cache',
     type: "custom",
-    orbitDBConfig: { directory: path.join(dbPath, '1') }
+    orbitDBConfig: { directory: path.join(dbPath, '2') }
   }
 ]
 
