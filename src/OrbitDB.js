@@ -43,11 +43,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = !options.offline ?
-            new (
-                options.broker ?  options.broker : Pubsub
-            )(this._ipfs, this.id)
-        : null
+    this._pubsub = !options.offline
+      ? new (
+          options.broker ? options.broker : Pubsub
+        )(this._ipfs, this.id)
+      : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -69,7 +69,7 @@ class OrbitDB {
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
   static get OrbitDBAddress () { return OrbitDBAddress }
-  
+
   static get Store () { return Store }
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
@@ -455,10 +455,10 @@ class OrbitDB {
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option
-    if (manifest.name !== dbAddress.path) { 
+    if (manifest.name !== dbAddress.path) {
       logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
     }
-    if (options.type && manifest.type !== options.type) { 
+    if (options.type && manifest.type !== options.type) {
       logger.warn(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
     }
 
