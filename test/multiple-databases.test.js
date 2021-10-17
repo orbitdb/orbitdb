@@ -55,7 +55,7 @@ const databaseInterfaces = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Multiple Databases (${API})`, function() {
+  describe.skip(`orbit-db - Multiple Databases (${API})`, function() {
     this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
