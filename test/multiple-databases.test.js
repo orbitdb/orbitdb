@@ -56,7 +56,7 @@ const databaseInterfaces = [
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Multiple Databases (${API})`, function() {
-    this.timeout(config.timeout)
+    this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2, db3, db4
@@ -143,20 +143,6 @@ Object.keys(testAPIs).forEach(API => {
       for (let i = 1; i < entryCount + 1; i ++)
         entryArr.push(i)
 
-      // Result state,
-      // we count how many times 'replicated' event was fired per db
-      let replicated = {}
-      localDatabases.forEach(db => {
-        replicated[db.address.toString()] = 0
-      })
-
-      // Listen for the updates from remote peers
-      remoteDatabases.forEach(db => {
-        db.events.on('replicated', (address) => {
-          replicated[address] += 1
-        })
-      })
-
       // Write entries to each database
       console.log("Writing to databases")
       for (let index = 0; index < databaseInterfaces.length; index++) {
@@ -165,8 +151,7 @@ Object.keys(testAPIs).forEach(API => {
         await mapSeries(entryArr, val => dbInterface.write(db, val))
       }
 
-      // Function to check if all databases have been replicated,
-      // we calculate this by checking number of 'replicated' events fired
+      // Function to check if all databases have been replicated
       const allReplicated = () => {
         return remoteDatabases.every(db => db._oplog.length === entryCount)
       }
