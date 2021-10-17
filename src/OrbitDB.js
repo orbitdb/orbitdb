@@ -303,7 +303,8 @@ class OrbitDB {
     }
 
     const store = this.stores[address]
-    const dir = store && store.options.directory ? store.options.directory : this.directory
+    // const dir = store && store.options.directory ? store.options.directory : this.directory
+    const dir = db && db.options.directory ? db.options.directory : this.directory
     const cache = this.caches[dir]
 
     if (cache && cache.handlers.has(address)) {
