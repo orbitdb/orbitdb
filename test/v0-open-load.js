@@ -89,8 +89,8 @@ Object.keys(testAPIs).forEach(API => {
         db = await orbitdb.open('/orbitdb/QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC/v0-db', { directory: dbPath, accessController: { type: 'legacy-ipfs', skipManifest: true } })
         const localFixtures = await db._cache.get('_localHeads')
         const remoteFixtures = await db._cache.get('_remoteHeads')
-        db._cache.set(db.localHeadsPath, localFixtures)
-        db._cache.set(db.remoteHeadsPath, remoteFixtures)
+        await db._cache.set(db.localHeadsPath, localFixtures)
+        await db._cache.set(db.remoteHeadsPath, remoteFixtures)
         await db.load()
       })
 
