@@ -21,8 +21,8 @@ const dbPath1 = './orbitdb/tests/replication/1/db1'
 const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication (${API})`, function() {
-    this.timeout(config.timeout * 3)
+  describe.only(`orbit-db - Replication (${API})`, function() {
+    this.timeout(config.timeout * 5)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -390,6 +390,7 @@ Object.keys(testAPIs).forEach(API => {
               // Database values should match
               const values1 = db1.iterator({limit: -1}).collect()
               const values2 = db2.iterator({limit: -1}).collect()
+              assert.equal(values1.length, values2.length)
               assert.deepEqual(values1, values2)
               // All entries should be in the database
               assert.equal(values1.length, entryCount * 2)
