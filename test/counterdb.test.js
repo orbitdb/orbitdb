@@ -36,7 +36,8 @@ Object.keys(testAPIs).forEach(API => {
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
-      await connectPeers(ipfs1, ipfs2)
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
+      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
     })
 
     after(async () => {
