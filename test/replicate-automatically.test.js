@@ -19,7 +19,7 @@ const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Automatic Replication (${API})`, function() {
+  describe.only(`orbit-db - Automatic Replication (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -52,6 +52,9 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfs2)
         await stopIpfs(ipfsd2)
+
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
     })
 
     beforeEach(async () => {

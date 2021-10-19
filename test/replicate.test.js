@@ -21,7 +21,7 @@ const dbPath1 = './orbitdb/tests/replication/1/db1'
 const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication (${API})`, function() {
+  describe.only(`orbit-db - Replication (${API})`, function() {
     this.timeout(config.timeout * 5)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -37,7 +37,7 @@ Object.keys(testAPIs).forEach(API => {
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
-      const isLocalhostAddress = (addr) => !addr.toString().includes('127.0.0.1')
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
       await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
     })
 
