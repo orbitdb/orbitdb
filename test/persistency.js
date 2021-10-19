@@ -34,7 +34,7 @@ const tests = [
 
 Object.keys(testAPIs).forEach(API => {
   tests.forEach(test => {
-    describe(`orbit-db - ${test.title} (${API})`, function() {
+    describe.only(`orbit-db - ${test.title} (${API})`, function() {
       this.timeout(config.timeout)
 
       const entryCount = 65
