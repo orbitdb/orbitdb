@@ -221,9 +221,6 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
-              // Replicator's queue should be empty
-              assert.equal(db2._replicator.getQueue().length, 0)
-              assert.equal(db2._replicator._queuedCount, 0)
               // Replicator's internal caches should be empty
               assert.equal(db2._replicator._buffer.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
@@ -319,9 +316,6 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
-              // Replicator's queue should be empty
-              assert.equal(db2._replicator.getQueue().length, 0)
-              assert.equal(db2._replicator._queuedCount, 0)
               // Replicator's internal caches should be empty
               assert.equal(db2._replicator._buffer.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
@@ -403,9 +397,6 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
-              // Replicator's queue should be empty
-              assert.equal(db2._replicator.getQueue().length, 0)
-              assert.equal(db2._replicator._queuedCount, 0)
               // Replicator's internal caches should be empty
               assert.equal(db2._replicator._buffer.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
