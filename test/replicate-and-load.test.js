@@ -21,7 +21,7 @@ const dbPath1 = './orbitdb/tests/replicate-and-load/1/db1'
 const dbPath2 = './orbitdb/tests/replicate-and-load/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Replicate and Load (${API})`, function() {
+  describe(`orbit-db - Replicate and Load (${API})`, function() {
     this.timeout(config.timeout * 3)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -107,6 +107,7 @@ Object.keys(testAPIs).forEach(API => {
 
         return new Promise((resolve, reject) => {
           timer = setInterval(async () => {
+            console.log("Replicated:", db2._oplog.length, " / ", entryCount)
             if (db2._oplog.length === entryCount) {
               clearInterval(timer)
 
@@ -153,7 +154,7 @@ Object.keys(testAPIs).forEach(API => {
               }
               resolve()
             }
-          }, 100)
+          }, 1000)
         })
       })
     })

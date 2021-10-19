@@ -19,7 +19,7 @@ const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Automatic Replication (${API})`, function() {
+  describe(`orbit-db - Automatic Replication (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -118,6 +118,7 @@ Object.keys(testAPIs).forEach(API => {
       const entryArr = []
       let options = {}
       let timer
+      let finished = false
 
       // Create the entries in the first database
       for (let i = 0; i < entryCount; i ++)
@@ -137,33 +138,53 @@ Object.keys(testAPIs).forEach(API => {
           reject(new Error("Should not receive the 'replicated' event!"))
         })
 
-        // Can't check this for now as db1 might've sent the heads to db2
-        // before we subscribe to the event
-        db2.events.on('replicate.progress', (address, hash, entry) => {
-          try {
-            // Check that the head we received from the first peer is the latest
-            assert.equal(entry.payload.op, 'ADD')
-            assert.equal(entry.payload.key, null)
-            assert.notEqual(entry.payload.value.indexOf('hello'), -1)
-            assert.notEqual(entry.clock, null)
-          } catch (e) {
-            reject(e)
-          }
+        // db2.events.on('replicate.progress', (address, hash, entry) => {
+        //   try {
+        //     // Check that the head we received from the first peer is the latest
+        //     assert.equal(entry.payload.op, 'ADD')
+        //     assert.equal(entry.payload.key, null)
+        //     assert.notEqual(entry.payload.value.indexOf('hello'), -1)
+        //     assert.notEqual(entry.clock, null)
+        //   } catch (e) {
+        //     reject(e)
+        //   }
+        // })
+
+        db2.events.on('replicated', (address, length) => {
+          // Once db2 has finished replication, make sure it has all elements
+          // and process to the asserts below
+          const all = db2.iterator({ limit: -1 }).collect().length
+          finished = (all === entryCount)
         })
 
-        db2.events.on('replicated', (address) => {
-          try {
-            const result1 = db1.iterator({ limit: -1 }).collect()
-            const result2 = db2.iterator({ limit: -1 }).collect()
-            // Make sure we have all the entries
-            if (result1.length === entryCount && result2.length === entryCount) {
+        try {
+          timer = setInterval(() => {
+            if (finished) {
+              clearInterval(timer)
+              const result1 = db1.iterator({ limit: -1 }).collect()
+              const result2 = db2.iterator({ limit: -1 }).collect()
+              assert.equal(result1.length, result2.length)
               assert.deepEqual(result1, result2)
               resolve()
             }
-          } catch (e) {
-            reject(e)
-          }
-        })
+          }, 1000)
+        } catch (e) {
+          reject(e)
+        }
+
+        // db2.events.on('replicated', (address) => {
+        //   try {
+        //     const result1 = db1.iterator({ limit: -1 }).collect()
+        //     const result2 = db2.iterator({ limit: -1 }).collect()
+        //     // Make sure we have all the entries
+        //     if (result1.length === entryCount && result2.length === entryCount) {
+        //       assert.deepEqual(result1, result2)
+        //       resolve()
+        //     }
+        //   } catch (e) {
+        //     reject(e)
+        //   }
+        // })
       })
     })
   })

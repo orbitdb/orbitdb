@@ -21,7 +21,7 @@ const dbPath1 = './orbitdb/tests/replication/1/db1'
 const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Replication (${API})`, function() {
+  describe(`orbit-db - Replication (${API})`, function() {
     this.timeout(config.timeout * 5)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -372,13 +372,6 @@ Object.keys(testAPIs).forEach(API => {
           } else {
             reject(new Error('Shouldn\'t have started replication twice for entry ' + entry.hash))
           }
-        })
-
-        // Verify that progress count increases monotonically by saving
-        // each event's current progress into an array
-        let progressEvents = []
-        db2.events.on('replicate.progress', (address, hash, entry) => {
-          progressEvents.push(db2.replicationStatus.progress)
         })
 
         db2.events.on('replicated', (address, length) => {
