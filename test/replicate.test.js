@@ -91,11 +91,12 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('replicates database of 1 entry', async () => {
+      console.log("Waiting for peers to connect")
+      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
       // Set 'sync' flag on. It'll prevent creating a new local database and rather
       // fetch the database from the network
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
       let finished = false
 
@@ -125,9 +126,11 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('replicates database of 100 entries', async () => {
+      console.log("Waiting for peers to connect")
+      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
+
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
       let finished = false
       const entryCount = 100
@@ -165,9 +168,11 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     it('emits correct replication info', async () => {
+      console.log("Waiting for peers to connect")
+      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
+
       options = Object.assign({}, options, { directory: dbPath2, sync: true })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
       let finished = false
       let entryCount = 99
@@ -330,6 +335,9 @@ Object.keys(testAPIs).forEach(API => {
 
     it('emits correct replication info in two-way replication', async () => {
       return new Promise(async (resolve, reject) => {
+        console.log("Waiting for peers to connect")
+        await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
+
         let finished = false
         let entryCount = 100
 
@@ -353,7 +361,6 @@ Object.keys(testAPIs).forEach(API => {
 
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
         assert.equal(db1.address.toString(), db2.address.toString())
-        await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
         // Test that none of the entries gets into the replication queue twice
         let replicateSet = new Set()

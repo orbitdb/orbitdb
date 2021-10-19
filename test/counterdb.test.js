@@ -121,7 +121,7 @@ Object.keys(testAPIs).forEach(API => {
 
         // Wait for peers to connect first
         console.log("Waiting for peers to connect")
-        await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
+        // await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
 
         let finished1 = false
