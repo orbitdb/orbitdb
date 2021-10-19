@@ -21,7 +21,7 @@ const dbPath2 = './orbitdb/tests/counters/db2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Counters (${API})`, function () {
-    this.timeout(config.timeout * 3)
+    this.timeout(config.timeout)
 
     let orbitdb1, orbitdb2
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -98,6 +98,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('syncs counters', async () => {
+        console.log("Sync counters")
         let options = {
           accessController: {
             // Set write access for both clients
@@ -119,22 +120,49 @@ Object.keys(testAPIs).forEach(API => {
         const counter2 = await orbitdb2.counter(counter1.address.toString(), options)
 
         // Wait for peers to connect first
+        console.log("Waiting for peers to connect")
         await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
 
+        let finished1 = false
+        let finished2 = false
+
+        counter1.events.on('replicated', () => {
+          finished1 = (counter1.value === 30)
+          finished2 = (counter2.value === 30)
+        })
+        counter2.events.on('replicated', () => {
+          finished1 = (counter1.value === 30)
+          finished2 = (counter2.value === 30)
+        })
+        counter1.events.on('write', () => {
+          finished1 = (counter1.value === 30)
+          finished2 = (counter2.value === 30)
+        })
+        counter2.events.on('write', () => {
+          finished1 = (counter1.value === 30)
+          finished2 = (counter2.value === 30)
+        })
+
         // Increase the counters sequentially
         await mapSeries([counter1, counter2], increaseCounter)
+        console.log("Waiting for replication to finish")
 
-        return new Promise(resolve => {
-          // Wait for a while to make sure db's have been synced
-          setTimeout(async () => {
-            assert.equal(counter1.value, 30)
-            assert.equal(counter2.value, 30)
-
-            await counter1.close()
-            await counter2.close()
-            resolve()
-          }, 1000)
+        return new Promise((resolve, reject) => {
+          let timer = setInterval(async () => {
+            if (finished1 && finished2) {
+              try {
+                clearInterval(timer)
+                assert.equal(counter1.value, 30)
+                assert.equal(counter2.value, 30)
+                await counter1.close()
+                await counter2.close()
+                resolve()
+              } catch (e) {
+                reject(e)
+              }
+            }
+          }, 100)
         })
       })
     })
