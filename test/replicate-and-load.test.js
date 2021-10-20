@@ -64,7 +64,7 @@ Object.keys(testAPIs).forEach(API => {
     describe('two peers', function() {
       let db1, db2
 
-      const openDatabases = async (options) => {
+      const openDatabases = async (options = {}) => {
         // Set write access for both clients
         options.write = [
           orbitdb1.identity.publicKey,
@@ -89,8 +89,13 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       after(async () => {
-        await db1.drop()
-        await db2.drop()
+        if (db1) {
+          await db1.drop()
+        }
+
+        if (db2) {
+          await db2.drop()
+        }
       })
 
       it('replicates database of 100 entries and loads it from the disk', async () => {
