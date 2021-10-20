@@ -80,6 +80,7 @@ Object.keys(testAPIs).forEach(API => {
       let options = {}
       let timer
       let finished = false
+      let all
 
       // Create the entries in the first database
       for (let i = 0; i < entryCount; i ++)
@@ -90,20 +91,20 @@ Object.keys(testAPIs).forEach(API => {
       // Open the second database
       // options = Object.assign({}, options, { path: dbPath2 })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      await db2.load()
-      assert.equal(db2.iterator({ limit: -1 }).collect().length, 0)
-
       db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
-      await db4.load()
-      assert.equal(Object.keys(db4.all).length, 0)
 
-      console.log("Waiting for peers to connect")
-      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
-      console.log("Peers connected")
+      // console.log("Waiting for peers to connect")
+      // await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
+      // console.log("Peers connected")
 
       // Listen for the 'replicated' events and check that all the entries
       // were replicated to the second database
       return new Promise(async (resolve, reject) => {
+        // Check if db2 was already replicated
+        all = db2.iterator({ limit: -1 }).collect().length
+        // Run the test asserts below if replication was done
+        finished = (all === entryCount)
+
         db3.events.on('replicated', (address, hash, entry) => {
           reject(new Error("db3 should not receive the 'replicated' event!"))
         })
@@ -122,7 +123,7 @@ Object.keys(testAPIs).forEach(API => {
         db2.events.on('replicated', (address, length) => {
           // Once db2 has finished replication, make sure it has all elements
           // and process to the asserts below
-          const all = db2.iterator({ limit: -1 }).collect().length
+          all = db2.iterator({ limit: -1 }).collect().length
           console.log("Replicated", all, "/", entryCount, "entries")
           finished = (all === entryCount)
         })
