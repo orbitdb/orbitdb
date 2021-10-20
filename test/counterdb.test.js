@@ -132,8 +132,8 @@ Object.keys(testAPIs).forEach(API => {
         await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
 
-        let finished1 = false
-        let finished2 = false
+        let finished1 = counter1.value === 30
+        let finished2 = counter2.value === 30
 
         counter1.events.on('replicated', () => {
           finished1 = (counter1.value === 30)
