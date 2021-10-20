@@ -302,8 +302,6 @@ class OrbitDB {
       await this._pubsub.unsubscribe(address)
     }
 
-    const store = this.stores[address]
-    // const dir = store && store.options.directory ? store.options.directory : this.directory
     const dir = db && db.options.directory ? db.options.directory : this.directory
     const cache = this.caches[dir]
 
