@@ -317,7 +317,7 @@ class OrbitDB {
     const address = db.address.toString()
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
-    delete this.stores[address]
+    // delete this.stores[address]
   }
 
   async _onLoad (db) {
