@@ -26,7 +26,6 @@ Object.keys(testAPIs).forEach(API => {
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
-    let id1, id2
 
     let timer
     let options
@@ -177,11 +176,11 @@ Object.keys(testAPIs).forEach(API => {
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
 
       let finished = false
-      let entryCount = 99
+      const entryCount = 99
 
       return new Promise(async (resolve, reject) => {
         // Test that none of the entries gets into the replication queue twice
-        let replicateSet = new Set()
+        const replicateSet = new Set()
         db2.events.on('replicate', (address, entry) => {
           if (!replicateSet.has(entry.hash)) {
             replicateSet.add(entry.hash)
@@ -192,7 +191,7 @@ Object.keys(testAPIs).forEach(API => {
 
         // Verify that progress count increases monotonically by saving
         // each event's current progress into an array
-        let progressEvents = []
+        const progressEvents = []
         db2.events.on('replicate.progress', () => {
           progressEvents.push(db2.replicationStatus.progress)
         })
@@ -245,10 +244,10 @@ Object.keys(testAPIs).forEach(API => {
     it('emits correct replication info on fresh replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
-        let entryCount = 512
+        const entryCount = 512
 
         // Trigger replication
-        let adds = []
+        const adds = []
         for (let i = 0; i < entryCount; i ++) {
           adds.push(i)
         }
@@ -271,7 +270,7 @@ Object.keys(testAPIs).forEach(API => {
         db2 = await orbitdb2.eventlog(db1.address.toString(), options)
 
         // Test that none of the entries gets into the replication queue twice
-        let replicateSet = new Set()
+        const replicateSet = new Set()
         db2.events.on('replicate', (address, entry) => {
           if (!replicateSet.has(entry.hash)) {
             replicateSet.add(entry.hash)
@@ -282,12 +281,12 @@ Object.keys(testAPIs).forEach(API => {
 
         // Verify that progress count increases monotonically by saving
         // each event's current progress into an array
-        let progressEvents = []
+        const progressEvents = []
         db2.events.on('replicate.progress', (address, hash, entry) => {
           progressEvents.push(db2.replicationStatus.progress)
         })
 
-        let replicatedEventCount = 0
+        const replicatedEventCount = 0
         db2.events.on('replicated', (address, length) => {
           replicatedEventCount++
           // Once db2 has finished replication, make sure it has all elements
@@ -335,10 +334,10 @@ Object.keys(testAPIs).forEach(API => {
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
         let finished = false
-        let entryCount = 100
+        const entryCount = 100
 
         // Trigger replication
-        let adds = []
+        const adds = []
         for (let i = 0; i < entryCount; i ++) {
           adds.push(i)
         }
@@ -359,7 +358,7 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(db1.address.toString(), db2.address.toString())
 
         // Test that none of the entries gets into the replication queue twice
-        let replicateSet = new Set()
+        const replicateSet = new Set()
         db2.events.on('replicate', (address, entry) => {
           if (!replicateSet.has(entry.hash)) {
             replicateSet.add(entry.hash)

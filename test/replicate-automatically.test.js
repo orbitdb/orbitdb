@@ -12,7 +12,6 @@ const {
   stopIpfs,
   testAPIs,
   connectPeers,
-  waitForPeers,
 } = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/replicate-automatically/1'
@@ -41,7 +40,7 @@ Object.keys(testAPIs).forEach(API => {
       options.write = [
         orbitdb1.identity.publicKey,
         orbitdb2.identity.publicKey
-      ],
+      ]
 
       options = Object.assign({}, options)
       db1 = await orbitdb1.eventlog('replicate-automatically-tests', options)
@@ -49,17 +48,21 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if(orbitdb1)
+      if (orbitdb1) {
         await orbitdb1.stop()
+      }
 
-      if(orbitdb2)
+      if (orbitdb2) {
         await orbitdb2.stop()
+      }
 
-      if (ipfsd1)
+      if (ipfsd1) {
         await stopIpfs(ipfsd1)
+      }
 
-      if (ipfs2)
+      if (ipfs2) {
         await stopIpfs(ipfsd2)
+      }
 
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
@@ -68,14 +71,15 @@ Object.keys(testAPIs).forEach(API => {
     it('starts replicating the database when peers connect', async () => {
       const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
       await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
-      console.log("Peers connected")
+      console.log('Peers connected')
 
       const entryCount = 33
       const entryArr = []
 
       // Create the entries in the first database
-      for (let i = 0; i < entryCount; i ++)
+      for (let i = 0; i < entryCount; i++) {
         entryArr.push(i)
+      }
 
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
@@ -85,7 +89,7 @@ Object.keys(testAPIs).forEach(API => {
 
       // Listen for the 'replicated' events and check that all the entries
       // were replicated to the second database
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         // Check if db2 was already replicated
         let all = db2.iterator({ limit: -1 }).collect().length
         // Run the test asserts below if replication was done

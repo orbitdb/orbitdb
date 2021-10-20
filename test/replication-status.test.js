@@ -1,14 +1,8 @@
 'use strict'
 
 const assert = require('assert')
-const mapSeries = require('p-map-series')
-const fs = require('fs')
-const path = require('path')
 const rmrf = require('rimraf')
 const levelup = require('levelup')
-const leveldown = require('leveldown')
-const OrbitDB = require('../src/OrbitDB')
-const OrbitDBAddress = require('../src/orbit-db-address')
 
 // Include test utilities
 const {
@@ -26,7 +20,6 @@ Object.keys(testAPIs).forEach(API => {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2, db, address
-    let localDataPath
 
     before(async () => {
       rmrf.sync(dbPath1)
