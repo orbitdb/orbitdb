@@ -62,9 +62,8 @@ Object.keys(testAPIs).forEach(API => {
     it('has correct replication info after sync', async () => {
       await db.load()
       await db.add('hello2')
-      // assert.deepEqual(db.replicationStatus, { buffered: 0, queued: 0, progress: 2, max: 2 })
 
-      const db2 = await orbitdb2.log(db.address.toString(), { create: false, sync: false })
+      const db2 = await orbitdb2.log(db.address.toString(), { create: false })
       await db2.sync(db._oplog.heads)
 
       return new Promise((resolve, reject) => {

@@ -114,9 +114,6 @@ Object.keys(testAPIs).forEach(API => {
         localDatabases.push(db)
       }
 
-      // // Open the databases on the second node, set 'sync' flag so that
-      // // the second peer fetches the db manifest from the network
-      // options = Object.assign({}, options, { sync: true })
       for (let [index, dbInterface] of databaseInterfaces.entries()) {
         const address = localDatabases[index].address.toString()
         const db = await dbInterface.open(orbitdb2, address, options)
