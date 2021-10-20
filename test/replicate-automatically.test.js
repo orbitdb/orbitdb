@@ -19,7 +19,7 @@ const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Automatic Replication (${API})`, function() {
+  describe.only(`orbit-db - Automatic Replication (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -35,13 +35,25 @@ Object.keys(testAPIs).forEach(API => {
       ipfs2 = ipfsd2.api
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
-      // Connect the peers manually to speed up test times
-      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
-      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
-      console.log("Peers connected")
+
+      let options = {}
+      // Set write access for both clients
+      options.write = [
+        orbitdb1.identity.publicKey,
+        orbitdb2.identity.publicKey
+      ],
+
+      options = Object.assign({}, options, { path: dbPath1 })
+      db1 = await orbitdb1.eventlog('replicate-automatically-tests', options)
+      db3 = await orbitdb1.keyvalue('replicate-automatically-tests-kv', options)
     })
 
     after(async () => {
+      if (db1) await db1.drop()
+      if (db2) await db2.drop()
+      if (db3) await db3.drop()
+      if (db4) await db4.drop()
+
       if(orbitdb1)
         await orbitdb1.stop()
 
@@ -58,62 +70,11 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath2)
     })
 
-    beforeEach(async () => {
-      let options = {}
-      // Set write access for both clients
-      options.write = [
-        orbitdb1.identity.publicKey,
-        orbitdb2.identity.publicKey
-      ],
-
-      options = Object.assign({}, options, { path: dbPath1 })
-      db1 = await orbitdb1.eventlog('replicate-automatically-tests', options)
-      db3 = await orbitdb1.keyvalue('replicate-automatically-tests-kv', options)
-    })
-
-    afterEach(async () => {
-      if (db1) await db1.drop()
-      if (db2) await db2.drop()
-      if (db3) await db3.drop()
-      if (db4) await db4.drop()
-    })
-
     it('starts replicating the database when peers connect', async () => {
-      const entryCount = 10
-      const entryArr = []
-      let options = {}
-      let timer
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
+      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
+      console.log("Peers connected")
 
-      // Create the entries in the first database
-      for (let i = 0; i < entryCount; i ++)
-        entryArr.push(i)
-
-      await mapSeries(entryArr, (i) => db1.add('hello' + i))
-
-      // Open the second database
-      options = Object.assign({}, options, { path: dbPath2, sync: true })
-      db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-
-      // Listen for the 'replicated' events and check that all the entries
-      // were replicated to the second database
-      return new Promise((resolve, reject) => {
-        db2.events.on('replicated', (address) => {
-          try {
-            const result1 = db1.iterator({ limit: -1 }).collect()
-            const result2 = db2.iterator({ limit: -1 }).collect()
-            // Make sure we have all the entries
-            if (result1.length === entryCount && result2.length === entryCount) {
-              assert.deepEqual(result1, result2)
-              resolve()
-            }
-          } catch (e) {
-            reject(e)
-          }
-        })
-      })
-    })
-
-    it('automatic replication exchanges the correct heads', async () => {
       const entryCount = 33
       const entryArr = []
       let options = {}
@@ -127,33 +88,29 @@ Object.keys(testAPIs).forEach(API => {
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
       // Open the second database
-      options = Object.assign({}, options, { path: dbPath2, sync: true })
+      options = Object.assign({}, options, { path: dbPath2 })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
+
+      console.log("Waiting for peers to connect")
+      await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
       // Listen for the 'replicated' events and check that all the entries
       // were replicated to the second database
       return new Promise(async (resolve, reject) => {
-        db4.events.on('replicated', (address, hash, entry) => {
-          reject(new Error("Should not receive the 'replicated' event!"))
+        db3.events.on('replicated', (address, hash, entry) => {
+          reject(new Error("db3 should not receive the 'replicated' event!"))
         })
 
-        // db2.events.on('replicate.progress', (address, hash, entry) => {
-        //   try {
-        //     // Check that the head we received from the first peer is the latest
-        //     assert.equal(entry.payload.op, 'ADD')
-        //     assert.equal(entry.payload.key, null)
-        //     assert.notEqual(entry.payload.value.indexOf('hello'), -1)
-        //     assert.notEqual(entry.clock, null)
-        //   } catch (e) {
-        //     reject(e)
-        //   }
-        // })
+        db4.events.on('replicated', (address, hash, entry) => {
+          reject(new Error("db4 should not receive the 'replicated' event!"))
+        })
 
         db2.events.on('replicated', (address, length) => {
           // Once db2 has finished replication, make sure it has all elements
           // and process to the asserts below
           const all = db2.iterator({ limit: -1 }).collect().length
+          console.log("Replicated", all, "/", entryCount, "entries")
           finished = (all === entryCount)
         })
 
@@ -171,20 +128,6 @@ Object.keys(testAPIs).forEach(API => {
         } catch (e) {
           reject(e)
         }
-
-        // db2.events.on('replicated', (address) => {
-        //   try {
-        //     const result1 = db1.iterator({ limit: -1 }).collect()
-        //     const result2 = db2.iterator({ limit: -1 }).collect()
-        //     // Make sure we have all the entries
-        //     if (result1.length === entryCount && result2.length === entryCount) {
-        //       assert.deepEqual(result1, result2)
-        //       resolve()
-        //     }
-        //   } catch (e) {
-        //     reject(e)
-        //   }
-        // })
       })
     })
   })
