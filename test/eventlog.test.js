@@ -305,6 +305,7 @@ Object.keys(testAPIs).forEach(API => {
             const messages = db.iterator({ lt: last(hashes) })
               .collect()
               .map((e) => e.hash)
+
             assert.equal(messages.length, 1)
             assert.equal(messages[0], hashes[hashes.length - 2])
           })
