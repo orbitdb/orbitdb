@@ -26,6 +26,8 @@ jobs:
     # VM instead of a container) see https://circleci.com/docs/2.0/executor-types/
     # To see the list of pre-built images that CircleCI provides for most common languages see
     # https://circleci.com/docs/2.0/circleci-images/
+
+    # TODO: update to node 14 or 16?
     docker:
       - image: circleci/node:12-browsers
     steps:
