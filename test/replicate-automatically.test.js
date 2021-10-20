@@ -49,11 +49,6 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      // if (db1) await db1.drop()
-      // if (db2) await db2.drop()
-      // if (db3) await db3.drop()
-      // if (db4) await db4.drop()
-
       if(orbitdb1)
         await orbitdb1.stop()
 
@@ -77,10 +72,6 @@ Object.keys(testAPIs).forEach(API => {
 
       const entryCount = 33
       const entryArr = []
-      let options = {}
-      let timer
-      let finished = false
-      let all
 
       // Create the entries in the first database
       for (let i = 0; i < entryCount; i ++)
@@ -89,21 +80,16 @@ Object.keys(testAPIs).forEach(API => {
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
       // Open the second database
-      // options = Object.assign({}, options, { path: dbPath2 })
-      db2 = await orbitdb2.eventlog(db1.address.toString(), options)
-      db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
-
-      // console.log("Waiting for peers to connect")
-      // await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
-      // console.log("Peers connected")
+      db2 = await orbitdb2.eventlog(db1.address.toString())
+      db4 = await orbitdb2.keyvalue(db3.address.toString())
 
       // Listen for the 'replicated' events and check that all the entries
       // were replicated to the second database
       return new Promise(async (resolve, reject) => {
         // Check if db2 was already replicated
-        all = db2.iterator({ limit: -1 }).collect().length
+        let all = db2.iterator({ limit: -1 }).collect().length
         // Run the test asserts below if replication was done
-        finished = (all === entryCount)
+        let finished = (all === entryCount)
 
         db3.events.on('replicated', (address, hash, entry) => {
           reject(new Error("db3 should not receive the 'replicated' event!"))
@@ -113,23 +99,15 @@ Object.keys(testAPIs).forEach(API => {
           reject(new Error("db4 should not receive the 'replicated' event!"))
         })
 
-        db2.events.on('replicate', (address, entry) => {
-          console.log(">> replicate", db2.replicationStatus.progress, db2.replicationStatus.max, entry)
-        })
-        db2.events.on('replicate.progress', (address, entry) => {
-          console.log(">> replicate.progress", db2.replicationStatus.progress, db2.replicationStatus.max, entry)
-        })
-
         db2.events.on('replicated', (address, length) => {
           // Once db2 has finished replication, make sure it has all elements
           // and process to the asserts below
           all = db2.iterator({ limit: -1 }).collect().length
-          console.log("Replicated", all, "/", entryCount, "entries")
           finished = (all === entryCount)
         })
 
         try {
-          timer = setInterval(() => {
+          const timer = setInterval(() => {
             if (finished) {
               clearInterval(timer)
               const result1 = db1.iterator({ limit: -1 }).collect()
