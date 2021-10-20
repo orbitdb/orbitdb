@@ -16,7 +16,7 @@ const dbPath1 = './orbitdb/tests/create-open/1'
 const dbPath2 = './orbitdb/tests/create-open/2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Replication Status (${API})`, function() {
+  describe(`orbit-db - Replication Status (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2, db, address
