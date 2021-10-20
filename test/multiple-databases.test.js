@@ -55,8 +55,8 @@ const databaseInterfaces = [
 ]
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Multiple Databases (${API})`, function() {
-    this.timeout(config.timeout * 3)
+  describe.only(`orbit-db - Multiple Databases (${API})`, function() {
+    this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2, db3, db4
@@ -68,13 +68,15 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
-      ipfsd1 = await startIpfs(API, config.daemon1)
-      ipfsd2 = await startIpfs(API, config.daemon2)
+
+      ipfsd1 = await startIpfs(API, {...config.daemon1, ...opts})
+      ipfsd2 = await startIpfs(API, {...config.daemon2, ...opts})
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
       const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
       await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
+      console.log("Peers connected")
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
     })
@@ -112,9 +114,9 @@ Object.keys(testAPIs).forEach(API => {
         localDatabases.push(db)
       }
 
-      // Open the databases on the second node, set 'sync' flag so that
-      // the second peer fetches the db manifest from the network
-      options = Object.assign({}, options, { sync: true })
+      // // Open the databases on the second node, set 'sync' flag so that
+      // // the second peer fetches the db manifest from the network
+      // options = Object.assign({}, options, { sync: true })
       for (let [index, dbInterface] of databaseInterfaces.entries()) {
         const address = localDatabases[index].address.toString()
         const db = await dbInterface.open(orbitdb2, address, options)
@@ -123,7 +125,7 @@ Object.keys(testAPIs).forEach(API => {
 
       // Wait for the peers to connect
       await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
-      await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
+      await waitForPeers(ipfs2, [orbitdb1.id], localDatabases[0].address.toString())
 
       console.log("Peers connected")
     })
