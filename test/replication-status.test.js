@@ -2,7 +2,7 @@
 
 const assert = require('assert')
 const rmrf = require('rimraf')
-const levelup = require('levelup')
+const OrbitDB = require('../src/OrbitDB')
 
 // Include test utilities
 const {
@@ -16,7 +16,7 @@ const dbPath1 = './orbitdb/tests/create-open/1'
 const dbPath2 = './orbitdb/tests/create-open/2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication Status (${API})`, function() {
+  describe.only(`orbit-db - Replication Status (${API})`, function() {
     this.timeout(config.timeout)
 
     let ipfsd, ipfs, orbitdb1, orbitdb2, db, address
