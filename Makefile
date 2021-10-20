@@ -25,6 +25,6 @@ clean:
 clean-dependencies: clean
 	rm -f package-lock.json
 
-rebuild: | clean-dependencies test
+rebuild: | clean-dependencies build
 
 .PHONY: test build
