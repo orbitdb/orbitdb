@@ -69,8 +69,8 @@ Object.keys(testAPIs).forEach(API => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
 
-      ipfsd1 = await startIpfs(API, {...config.daemon1, ...opts})
-      ipfsd2 = await startIpfs(API, {...config.daemon2, ...opts})
+      ipfsd1 = await startIpfs(API, config.daemon1)
+      ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
