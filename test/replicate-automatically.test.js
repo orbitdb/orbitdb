@@ -49,10 +49,10 @@ Object.keys(testAPIs).forEach(API => {
     })
 
     after(async () => {
-      if (db1) await db1.drop()
-      if (db2) await db2.drop()
-      if (db3) await db3.drop()
-      if (db4) await db4.drop()
+      // if (db1) await db1.drop()
+      // if (db2) await db2.drop()
+      // if (db3) await db3.drop()
+      // if (db4) await db4.drop()
 
       if(orbitdb1)
         await orbitdb1.stop()
@@ -90,7 +90,12 @@ Object.keys(testAPIs).forEach(API => {
       // Open the second database
       // options = Object.assign({}, options, { path: dbPath2 })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
+      await db2.load()
+      assert.equal(db2.iterator({ limit: -1 }).collect().length, 0)
+
       db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
+      await db4.load()
+      assert.equal(Object.keys(db4.all).length, 0)
 
       console.log("Waiting for peers to connect")
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
