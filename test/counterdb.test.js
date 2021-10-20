@@ -20,7 +20,7 @@ const dbPath1 = './orbitdb/tests/counters/db1'
 const dbPath2 = './orbitdb/tests/counters/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Counters (${API})`, function () {
+  describe(`orbit-db - Counters (${API})`, function () {
     this.timeout(config.timeout)
 
     let orbitdb1, orbitdb2
