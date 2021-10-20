@@ -96,7 +96,7 @@ Object.keys(testAPIs).forEach(API => {
         })
 
 
-        it.skip('throws an error if database type doesn\'t match', async () => {
+        it('throws an error if database type doesn\'t match', async () => {
           let err, log, kv
           try {
             log = await orbitdb.kvstore('keyvalue', { replicate: false })

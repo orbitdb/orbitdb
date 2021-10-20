@@ -317,7 +317,6 @@ class OrbitDB {
     const address = db.address.toString()
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
-    // delete this.stores[address]
   }
 
   async _onLoad (db) {
@@ -453,12 +452,13 @@ class OrbitDB {
     const manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
-    // Make sure the type from the manifest matches the type that was given as an option
     if (manifest.name !== dbAddress.path) {
       logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
     }
+
+    // Make sure the type from the manifest matches the type that was given as an option
     if (options.type && manifest.type !== options.type) {
-      logger.warn(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
+      throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
     }
 
     // Save the database locally
