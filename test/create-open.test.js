@@ -26,7 +26,7 @@ const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Create & Open (${API})`, function () {
+  describe.only(`orbit-db - Create & Open (${API})`, function () {
     let ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
 
     this.retries(1) // windows...
@@ -352,7 +352,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
-        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
+        const db = await orbitdb.open('abcabc', { create: true, type: 'feed', overwrite: true })
         const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'non-existent')
         await db.drop()
         return new Promise((resolve, reject) => {
