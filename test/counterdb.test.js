@@ -100,6 +100,7 @@ Object.keys(testAPIs).forEach(API => {
 
       it('syncs counters', async () => {
         console.log("Sync counters")
+
         let options = {
           accessController: {
             // Set write access for both clients
@@ -110,19 +111,25 @@ Object.keys(testAPIs).forEach(API => {
           }
         }
 
+        const dbName = new Date().getTime().toString()
+
         const numbers = [[13, 10], [2, 5]]
         const increaseCounter = (counterDB, i) => mapSeries(numbers[i], n => counterDB.inc(n))
 
         // Create a new counter database in the first client
         options = Object.assign({}, options, { path: dbPath1 })
-        const counter1 = await orbitdb1.counter(new Date().getTime().toString(), options)
-        // Open the database in the second client
-        options = Object.assign({}, options, { path: dbPath2, sync: true })
-        const counter2 = await orbitdb2.counter(counter1.address.toString(), options)
+        const counter1 = await orbitdb1.counter(dbName, options)
 
-        // Wait for peers to connect first
+        // Open the database in the second client
+        options = Object.assign({}, options, { path: dbPath2 })
+        const counter2 = await orbitdb2.counter(dbName, options)
+
+        // Make sure database addresses match since they're built deterministically
+        assert.equal(counter1.address.toString(), counter2.address.toString())
+
+        // Wait for peers to connect
         console.log("Waiting for peers to connect")
-        // await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
+        await waitForPeers(ipfs1, [orbitdb2.id], counter1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], counter1.address.toString())
 
         let finished1 = false
