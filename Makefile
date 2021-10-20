@@ -5,7 +5,7 @@ deps:
 
 test: deps
 	npm run test:all -- --exit
-	npx validate-maintainers orbit-db --match --ci
+	#npx validate-maintainers orbit-db --match --ci
 
 build: test
 	mkdir -p examples/browser/lib/
@@ -25,6 +25,6 @@ clean:
 clean-dependencies: clean
 	rm -f package-lock.json
 
-rebuild: | clean-dependencies build
+rebuild: | clean-dependencies test
 
 .PHONY: test build
