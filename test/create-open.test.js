@@ -26,7 +26,7 @@ const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
-  describe.only(`orbit-db - Create & Open (${API})`, function () {
+  describe(`orbit-db - Create & Open (${API})`, function () {
     let ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
 
     this.retries(1) // windows...
