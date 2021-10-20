@@ -43,7 +43,7 @@ Object.keys(testAPIs).forEach(API => {
         orbitdb2.identity.publicKey
       ],
 
-      options = Object.assign({}, options, { path: dbPath1 })
+      options = Object.assign({}, options)
       db1 = await orbitdb1.eventlog('replicate-automatically-tests', options)
       db3 = await orbitdb1.keyvalue('replicate-automatically-tests-kv', options)
     })
@@ -88,12 +88,13 @@ Object.keys(testAPIs).forEach(API => {
       await mapSeries(entryArr, (i) => db1.add('hello' + i))
 
       // Open the second database
-      options = Object.assign({}, options, { path: dbPath2 })
+      // options = Object.assign({}, options, { path: dbPath2 })
       db2 = await orbitdb2.eventlog(db1.address.toString(), options)
       db4 = await orbitdb2.keyvalue(db3.address.toString(), options)
 
       console.log("Waiting for peers to connect")
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
+      console.log("Peers connected")
 
       // Listen for the 'replicated' events and check that all the entries
       // were replicated to the second database
@@ -104,6 +105,13 @@ Object.keys(testAPIs).forEach(API => {
 
         db4.events.on('replicated', (address, hash, entry) => {
           reject(new Error("db4 should not receive the 'replicated' event!"))
+        })
+
+        db2.events.on('replicate', (address, entry) => {
+          console.log(">> replicate", db2.replicationStatus.progress, db2.replicationStatus.max, entry)
+        })
+        db2.events.on('replicate.progress', (address, entry) => {
+          console.log(">> replicate.progress", db2.replicationStatus.progress, db2.replicationStatus.max, entry)
         })
 
         db2.events.on('replicated', (address, length) => {
