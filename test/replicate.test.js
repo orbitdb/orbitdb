@@ -21,7 +21,7 @@ const dbPath1 = './orbitdb/tests/replication/1/db1'
 const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
-  describe(`orbit-db - Replication (${API})`, function() {
+  describe.only(`orbit-db - Replication (${API})`, function() {
     this.timeout(config.timeout * 5)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
@@ -220,8 +220,9 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
+              assert.equal(db2._replicator.unfinished, 0)
               // Replicator's internal caches should be empty
-              assert.equal(db2._replicator._buffer.length, 0)
+              assert.equal(db2._replicator._logs.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
 
               resolve()
@@ -315,8 +316,9 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
+              assert.equal(db2._replicator.unfinished, 0)
               // Replicator's internal caches should be empty
-              assert.equal(db2._replicator._buffer.length, 0)
+              assert.equal(db2._replicator._logs.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
 
               resolve()
@@ -396,8 +398,9 @@ Object.keys(testAPIs).forEach(API => {
               // Verify replicator state
               assert.equal(db2._replicator.tasksRunning, 0)
               assert.equal(db2._replicator.tasksQueued, 0)
+              assert.equal(db2._replicator.unfinished, 0)
               // Replicator's internal caches should be empty
-              assert.equal(db2._replicator._buffer.length, 0)
+              assert.equal(db2._replicator._logs.length, 0)
               assert.equal(Object.keys(db2._replicator._fetching).length, 0)
 
               resolve()
