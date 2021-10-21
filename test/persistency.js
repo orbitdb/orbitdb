@@ -117,7 +117,7 @@ Object.keys(testAPIs).forEach(API => {
           }
         })
 
-        it.skip('closes database while loading', async () => {
+        it('closes database while loading', async () => {
           db = await orbitdb1.eventlog(address, { replicationConcurrency: 1 })
           return new Promise(async (resolve, reject) => {
             // don't wait for load to finish
