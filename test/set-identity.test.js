@@ -2,7 +2,6 @@
 
 const fs = require('fs')
 const assert = require('assert')
-const mapSeries = require('p-map-series')
 const rmrf = require('rimraf')
 const OrbitDB = require('../src/OrbitDB')
 const Identities = require('orbit-db-identity-provider')
@@ -27,7 +26,6 @@ Object.keys(testAPIs).forEach(API => {
 
     let ipfsd, ipfs, orbitdb, keystore, options
     let identity1, identity2
-    let localDataPath
 
     before(async () => {
       rmrf.sync(dbPath)

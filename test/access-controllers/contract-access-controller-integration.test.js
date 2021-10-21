@@ -17,7 +17,8 @@ const {
   config,
   startIpfs,
   stopIpfs,
-  testAPIs
+  testAPIs,
+  connectPeers
 } = require('orbit-db-test-utils')
 
 const dbPath1 = './orbitdb/tests/contract-access-controller-integration/1'
@@ -36,7 +37,7 @@ const accessControllers = [
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - ContractAccessController Integration (${API})`, function () {
-    this.timeout(config.timeout)
+    this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2, id1, id2
     let orbitdb1, orbitdb2
@@ -49,6 +50,10 @@ Object.keys(testAPIs).forEach(API => {
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
+
+      // Connect the peers manually to speed up test times
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
+      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
 
       const keystore1 = new Keystore(dbPath1 + '/keys')
       const keystore2 = new Keystore(dbPath2 + '/keys')

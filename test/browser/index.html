@@ -37,8 +37,6 @@
         window.inconsistentLog = inconsistentLog
 
         waitForOpenDB.innerHTML = consistentLog.address.toString() + ' + ' + inconsistentLog.address.toString()
-        await consistentLog.load()
-        await inconsistentLog.load()
 
         addData.addEventListener('click', async event => {
           const data = randStr()
@@ -71,11 +69,9 @@
         return window.inconsistentLog.iterator({ limit: -1 }).collect()
       }
 
-      async function loadLogs () {
+      async function loadConsistentLog () {
         await window.consistentLog.load()
-        await window.inconsistentLog.load()
       }
-
     </script>
   </body>
 </html>

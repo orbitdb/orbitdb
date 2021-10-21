@@ -15,27 +15,33 @@ const {
   waitForPeers,
 } = require('orbit-db-test-utils')
 
-const dbPath1 = './orbitdb/tests/replicate-and-load/1'
-const dbPath2 = './orbitdb/tests/replicate-and-load/2'
+const orbitdbPath1 = './orbitdb/tests/replicate-and-load/1'
+const orbitdbPath2 = './orbitdb/tests/replicate-and-load/2'
+const dbPath1 = './orbitdb/tests/replicate-and-load/1/db1'
+const dbPath2 = './orbitdb/tests/replicate-and-load/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replicate and Load (${API})`, function() {
-    this.timeout(config.timeout * 2)
+    this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2
 
     before(async () => {
+      rmrf.sync(orbitdbPath1)
+      rmrf.sync(orbitdbPath2)
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
-      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
-      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
+      orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: orbitdbPath1 })
+      orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: orbitdbPath2 })
       // Connect the peers manually to speed up test times
-      await connectPeers(ipfs1, ipfs2)
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
+      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
+      console.log("Peers connected")
     })
 
     after(async () => {
@@ -50,17 +56,20 @@ Object.keys(testAPIs).forEach(API => {
 
       if (ipfsd2)
         await stopIpfs(ipfsd2)
+
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
     })
 
     describe('two peers', function() {
       let db1, db2
 
-      const openDatabases = async (options) => {
+      const openDatabases = async (options = {}) => {
         // Set write access for both clients
         options.write = [
           orbitdb1.identity.publicKey,
           orbitdb2.identity.publicKey
-        ],
+        ]
 
         options = Object.assign({}, options, { path: dbPath1, create: true })
         db1 = await orbitdb1.eventlog('tests', options)
@@ -70,19 +79,23 @@ Object.keys(testAPIs).forEach(API => {
       }
 
       before(async () => {
-        await openDatabases({ sync: true })
+        await openDatabases()
 
         assert.equal(db1.address.toString(), db2.address.toString())
 
         console.log("Waiting for peers...")
         await waitForPeers(ipfs1, [orbitdb2.id], db1.address.toString())
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
-        console.log("Found peers")
       })
 
       after(async () => {
-        await db1.drop()
-        await db2.drop()
+        if (db1) {
+          await db1.drop()
+        }
+
+        if (db2) {
+          await db2.drop()
+        }
       })
 
       it('replicates database of 100 entries and loads it from the disk', async () => {
@@ -145,7 +158,7 @@ Object.keys(testAPIs).forEach(API => {
               }
               resolve()
             }
-          }, 100)
+          }, 1000)
         })
       })
     })

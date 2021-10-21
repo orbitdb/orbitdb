@@ -80,7 +80,7 @@ describe(`orbit-db - browser concurrent writes`, function() {
         const interval = setInterval(async () => {
           let logHashes = []
           await mapSeries(tabs, async (page) => {
-            await page.evaluate(() => loadLogs())
+            await page.evaluate(() => loadConsistentLog())
             const hash = await page.evaluate(async () => await getConsistentLogHash())
             logHashes.push(hash)
           })
@@ -106,7 +106,6 @@ describe(`orbit-db - browser concurrent writes`, function() {
         const interval = setInterval(async () => {
           let logHashes = []
           await mapSeries(tabs, async (page) => {
-            await page.evaluate(() => loadLogs())
             const hash = await page.evaluate(async () => await getInconsistentLogHash())
             logHashes.push(hash)
           })
