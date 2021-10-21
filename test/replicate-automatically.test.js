@@ -95,8 +95,6 @@ Object.keys(testAPIs).forEach(API => {
         // Run the test asserts below if replication was done
         let finished = (all === entryCount)
 
-        console.log (">>", all)
-
         db3.events.on('replicated', (address, hash, entry) => {
           reject(new Error("db3 should not receive the 'replicated' event!"))
         })
@@ -106,7 +104,6 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         db2.events.on('replicated', (address, length) => {
-          console.log(":: replicated", db2.replicationStatus.progress, "/", db2.replicationStatus.max)
           // Once db2 has finished replication, make sure it has all elements
           // and process to the asserts below
           all = db2.iterator({ limit: -1 }).collect().length
