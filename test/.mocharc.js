@@ -6,5 +6,5 @@ module.exports = {
   recursive: true,
   exit: true,
   slow: 1000,
-  exclude: ['test/browser/**/*.js', 'test/access-controllers/**/*.js']
+  exclude: ['test/browser/**/*.js']
 }
