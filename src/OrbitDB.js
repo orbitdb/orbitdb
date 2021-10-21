@@ -32,7 +32,7 @@ const databaseTypes = {
   keyvalue: KeyValueStore
 }
 
-const defaultTimeout = 20000
+const defaultTimeout = 30000 // 30 seconds
 
 class OrbitDB {
   constructor (ipfs, identity, options = {}) {
