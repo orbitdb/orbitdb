@@ -66,6 +66,18 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
   * [`peer`](#peer)
   * [`closed`](#closed)
   * [`peer.exchanged`](#peerexchanged)
+- [Oplog API](#oplog-api)
+  * [`oplog.values`](#oplogvalues)
+    + `hash`
+    + `id`
+    + `payload`
+    + `next`
+    + `refs`
+    + `v`
+    + `clock`
+    + `key`
+    + `identity`
+    + `sig`
 
 <!-- tocstop -->
 
@@ -656,3 +668,73 @@ db.events.on('peer.exchanged', (peer, address, heads) => ... )
 ```
 
 Emitted after heads have been exchanged with a peer for a specific database. This will be emitted after every exchange, even if no heads are received from the peer, or if all received heads are already present. (This is in contrast with the `replicated` event, which will only fire when new heads have been received.) Note that `heads` here contains heads *received* as part of the exchange, not heads sent.
+
+# Oplog API
+Oplog or IPFS-Log is the underlying data structure used by the OrbitDB Stores to store,
+replicate and add operations to any of their stores. 
+
+## `oplog.values`
+Each oplog entry contains these fields:
+```js
+ {
+    hash: 'zdpuAuARU9C1MXvHGozGxvpv3rvSzghQg7JmoLQLWbedJzcd7',
+    id: '/orbitdb/zdpuArEpCPwqpgQVMYrFSDQKhHLq5L6Es8HQkhWfhrad5oYdK/example',
+    payload: { op: 'PUT', key: 'abc', value: 'def' },
+    next: [ 'zdpuAzWC4phgt6eQeRPz58p33G1w1J5ciVnCwuoFa7szsDVP2' ],
+    refs: [ 'zdpuAxFR9miMinzetRdZKvy9mBaiZLJByA6DV715Wcmgi7dwx' ],
+    v: 2,
+    clock: LamportClock {
+      id: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
+      time: 3
+    },
+    key: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
+    identity: {
+      id: '0336124289bdb2384ef7f3f5991d25bb1e02bf2a98edb02f94b0bc9f292c41156b',
+      publicKey: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
+      signatures: [Object],
+      type: 'orbitdb'
+    },
+    sig: '3045022100e618887439bcaa8cffe0196d5655c710cc117af7de4390a313d137dd02a993a402205fb0b657600216944a0e7f68d2bb07854e8f47cc01a74d7cc632870ad7055758'
+  }
+```
+
+Let's got through each of them in turn:
+
+### `hash`
+Hash of the entry on IPFS. "zd...".
+
+### `id`
+Address of the oplog. (A.k.a. the OrbitDB Address)
+
+### `payload`
+Payload of the operation. Provided by the Store to `_addOperation`. 
+
+### `next`
+Array of hashes of the oplog entries that happened before this one.
+
+
+
+### `refs`
+**TBD**
+
+### `v`
+**TBD**
+
+### `clock`
+Lamport clock instance of the entry.
+A Lamport clock contains a `time`, an integer, 
+that for all operations depending on each other increases.
+
+If Operation A depends on Operation B, B's time < A's time.
+
+[See the Wikipedia description of Lamport Clocks for more details](https://en.wikipedia.org/wiki/Lamport_timestamp)
+
+## `key`
+Public key of the Identity that added this entry.
+
+### `identity`
+Identity that added this entry.
+
+### `sig`
+Signature of the entry.
+If the entry is in the oplog, the signature is valid.
