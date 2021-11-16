@@ -352,7 +352,7 @@ Object.keys(testAPIs).forEach(API => {
       })
 
       it('doesn\'t open a database if we don\'t have it locally', async () => {
-        const db = await orbitdb.open('abc', { create: true, type: 'feed', overwrite: true })
+        const db = await orbitdb.open('abcabc', { create: true, type: 'feed', overwrite: true })
         const address = new OrbitDBAddress(db.address.root.slice(0, -1) + 'A', 'non-existent')
         await db.drop()
         return new Promise((resolve, reject) => {

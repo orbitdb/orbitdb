@@ -68,12 +68,15 @@ Object.keys(testAPIs).forEach(API => {
     before(async () => {
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
+
       ipfsd1 = await startIpfs(API, config.daemon1)
       ipfsd2 = await startIpfs(API, config.daemon2)
       ipfs1 = ipfsd1.api
       ipfs2 = ipfsd2.api
       // Connect the peers manually to speed up test times
-      await connectPeers(ipfs1, ipfs2)
+      const isLocalhostAddress = (addr) => addr.toString().includes('127.0.0.1')
+      await connectPeers(ipfs1, ipfs2, { filter: isLocalhostAddress })
+      console.log("Peers connected")
       orbitdb1 = await OrbitDB.createInstance(ipfs1, { directory: dbPath1 })
       orbitdb2 = await OrbitDB.createInstance(ipfs2, { directory: dbPath2 })
     })
@@ -111,9 +114,6 @@ Object.keys(testAPIs).forEach(API => {
         localDatabases.push(db)
       }
 
-      // Open the databases on the second node, set 'sync' flag so that
-      // the second peer fetches the db manifest from the network
-      options = Object.assign({}, options, { sync: true })
       for (let [index, dbInterface] of databaseInterfaces.entries()) {
         const address = localDatabases[index].address.toString()
         const db = await dbInterface.open(orbitdb2, address, options)
@@ -122,7 +122,7 @@ Object.keys(testAPIs).forEach(API => {
 
       // Wait for the peers to connect
       await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
-      await waitForPeers(ipfs1, [orbitdb2.id], localDatabases[0].address.toString())
+      await waitForPeers(ipfs2, [orbitdb1.id], localDatabases[0].address.toString())
 
       console.log("Peers connected")
     })
@@ -143,20 +143,6 @@ Object.keys(testAPIs).forEach(API => {
       for (let i = 1; i < entryCount + 1; i ++)
         entryArr.push(i)
 
-      // Result state,
-      // we count how many times 'replicated' event was fired per db
-      let replicated = {}
-      localDatabases.forEach(db => {
-        replicated[db.address.toString()] = 0
-      })
-
-      // Listen for the updates from remote peers
-      remoteDatabases.forEach(db => {
-        db.events.on('replicated', (address) => {
-          replicated[address] += 1
-        })
-      })
-
       // Write entries to each database
       console.log("Writing to databases")
       for (let index = 0; index < databaseInterfaces.length; index++) {
@@ -165,8 +151,7 @@ Object.keys(testAPIs).forEach(API => {
         await mapSeries(entryArr, val => dbInterface.write(db, val))
       }
 
-      // Function to check if all databases have been replicated,
-      // we calculate this by checking number of 'replicated' events fired
+      // Function to check if all databases have been replicated
       const allReplicated = () => {
         return remoteDatabases.every(db => db._oplog.length === entryCount)
       }

@@ -32,6 +32,8 @@ const databaseTypes = {
   keyvalue: KeyValueStore
 }
 
+const defaultTimeout = 30000 // 30 seconds
+
 class OrbitDB {
   constructor (ipfs, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
@@ -41,11 +43,11 @@ class OrbitDB {
     this._ipfs = ipfs
     this.identity = identity
     this.id = options.peerId
-    this._pubsub = !options.offline ?
-            new (
-                options.broker ?  options.broker : Pubsub
-            )(this._ipfs, this.id)
-        : null
+    this._pubsub = !options.offline
+      ? new (
+          options.broker ? options.broker : Pubsub
+        )(this._ipfs, this.id)
+      : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
     this._directConnections = {}
@@ -67,7 +69,7 @@ class OrbitDB {
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
   static get OrbitDBAddress () { return OrbitDBAddress }
-  
+
   static get Store () { return Store }
   static get EventStore () { return EventStore }
   static get FeedStore () { return FeedStore }
@@ -88,7 +90,7 @@ class OrbitDB {
       throw new Error('Offline mode requires passing an `id` in the options')
     }
 
-    const { id } = options.offline ? ({ id: options.id }) : await ipfs.id()
+    const { id } = options.id || options.offline ? ({ id: options.id }) : await ipfs.id()
 
     if (!options.directory) { options.directory = './orbitdb' }
 
@@ -111,7 +113,7 @@ class OrbitDB {
 
     if (!options.identity) {
       options.identity = await Identities.createIdentity({
-        id: options.id || id,
+        id: id,
         keystore: options.keystore
       })
     }
@@ -165,6 +167,20 @@ class OrbitDB {
   }
 
   async disconnect () {
+    // Close a direct connection and remove it from internal state
+    const removeDirectConnect = e => {
+      this._directConnections[e].close()
+      delete this._directConnections[e]
+    }
+
+    // Close all direct connections to peers
+    Object.keys(this._directConnections).forEach(removeDirectConnect)
+
+    // Disconnect from pubsub
+    if (this._pubsub) {
+      await this._pubsub.disconnect()
+    }
+
     // close keystore
     await this.keystore.close()
 
@@ -179,20 +195,6 @@ class OrbitDB {
     for (const directory of caches) {
       await this.caches[directory].cache.close()
       delete this.caches[directory]
-    }
-
-    // Close a direct connection and remove it from internal state
-    const removeDirectConnect = e => {
-      this._directConnections[e].close()
-      delete this._directConnections[e]
-    }
-
-    // Close all direct connections to peers
-    Object.keys(this._directConnections).forEach(removeDirectConnect)
-
-    // Disconnect from pubsub
-    if (this._pubsub) {
-      await this._pubsub.disconnect()
     }
 
     // Remove all databases from the state
@@ -300,8 +302,7 @@ class OrbitDB {
       await this._pubsub.unsubscribe(address)
     }
 
-    const store = this.stores[address]
-    const dir = store && store.options.directory ? store.options.directory : this.directory
+    const dir = db && db.options.directory ? db.options.directory : this.directory
     const cache = this.caches[dir]
 
     if (cache && cache.handlers.has(address)) {
@@ -316,7 +317,6 @@ class OrbitDB {
     const address = db.address.toString()
     const dir = db && db.options.directory ? db.options.directory : this.directory
     await this._requestCache(address, dir, db._cache)
-    this.stores[address] = db
   }
 
   async _onLoad (db) {
@@ -427,6 +427,11 @@ class OrbitDB {
     // Parse the database address
     const dbAddress = OrbitDBAddress.parse(address)
 
+    // If database is already open, return early by returning the instance
+    // if (this.stores[dbAddress]) {
+    //   return this.stores[dbAddress]
+    // }
+
     options.cache = await this._requestCache(dbAddress.toString(), options.directory)
 
     // Check if we have the database
@@ -444,19 +449,24 @@ class OrbitDB {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const manifest = await io.read(this._ipfs, dbAddress.root)
+    const manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
+    if (manifest.name !== dbAddress.path) {
+      logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
+    }
+
     // Make sure the type from the manifest matches the type that was given as an option
-    if (manifest.name !== dbAddress.path) { throw new Error(`Manifest '${manifest.name}' cannot be opened as '${dbAddress.path}'`) }
-    if (options.type && manifest.type !== options.type) { throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`) }
+    if (options.type && manifest.type !== options.type) {
+      throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
+    }
 
     // Save the database locally
     await this._addManifestToCache(options.cache, dbAddress)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController, meta: manifest.meta })
-    return this._createStore(manifest.type, dbAddress, options)
+    return this._createStore(options.type || manifest.type, dbAddress, options)
   }
 
   // Save the database locally

@@ -31,7 +31,6 @@ Object.keys(testAPIs).forEach(API => {
     let localDataPath
 
     before(async () => {
-      rmrf.sync('./orbitdb/tests/offline')
       rmrf.sync(dbPath1)
       rmrf.sync(dbPath2)
       ipfsd1 = await startIpfs(API, config.daemon1)
@@ -48,6 +47,11 @@ Object.keys(testAPIs).forEach(API => {
         await stopIpfs(ipfsd1)
       if (ipfsd2)
         await stopIpfs(ipfsd2)
+    })
+
+    beforeEach(() => {
+      rmrf.sync(dbPath1)
+      rmrf.sync(dbPath2)
     })
 
     it('starts in offline mode', async () => {
