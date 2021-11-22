@@ -60,6 +60,20 @@ Object.keys(testAPIs).forEach(API => {
         assert.equal(result.toString().indexOf('zd'), 9)
       })
 
+      it('parse with missing db address name', () => {
+        const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+        const result = OrbitDB.parseAddress(address)
+
+        const isInstanceOf = result instanceof OrbitDBAddress
+        assert.equal(isInstanceOf, true)
+
+        assert.equal(result.root, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+        assert.equal(result.path, '')
+
+        assert.equal(result.toString().indexOf('/orbitdb'), 0)
+        assert.equal(result.toString().indexOf('zd'), 9)
+      })
+
       it('parse address with backslashes (win32) successfully', () => {
         const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
         const result = OrbitDB.parseAddress(address)
@@ -72,6 +86,26 @@ Object.keys(testAPIs).forEach(API => {
 
         assert.equal(result.toString().indexOf('/orbitdb'), 0)
         assert.equal(result.toString().indexOf('Qm'), 9)
+      })
+
+      it('fail to parse with missing orbitdb prefix', () => {
+        const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
+
+        try {
+          OrbitDB.parseAddress(address)
+        } catch (e) {
+          assert(e.toString(), 'Error: Not a valid OrbitDB address: ' + address)
+        }
+      })
+
+      it('fail to parse with invalid multihash', () => {
+        const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzc/first-database'
+
+        try {
+          OrbitDB.parseAddress(address)
+        } catch (e) {
+          assert(e.toString(), 'Error: Not a valid OrbitDB address: ' + address)
+        }
       })
     })
 
@@ -92,7 +126,7 @@ Object.keys(testAPIs).forEach(API => {
         const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
         const result = OrbitDB.isValidAddress(address)
 
-        assert.equal(result, true)
+        assert.equal(result, false)
       })
 
       it('handle missing db address name', () => {

@@ -1,8 +1,8 @@
 'use strict'
 const path = require('path')
 const { CID } = require('multiformats/cid')
-
-const notEmpty = e => e !== '' && e !== ' '
+const replaceDelimiter = (address) => address.toString().replace(/\\/g, '/')
+const prefix = '/orbitdb/'
 
 class OrbitDBAddress {
   constructor (root, path) {
@@ -15,51 +15,32 @@ class OrbitDBAddress {
   }
 
   static isValid (address) {
-    address = address.toString().replace(/\\/g, '/')
+    address = replaceDelimiter(address)
 
-    const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
-
-    const parts = address.toString()
-      .split('/')
-      .filter(containsProtocolPrefix)
-      .filter(notEmpty)
-
-    let accessControllerHash
-
-    const validateHash = (hash) => {
-      const prefixes = ['zd', 'Qm', 'ba', 'k5']
-      for (const p of prefixes) {
-        if (hash.indexOf(p) > -1) {
-          return true
-        }
-      }
+    const prefixed = address.startsWith(prefix)
+    if (!prefixed) {
       return false
     }
 
     try {
-      accessControllerHash = validateHash(parts[0])
-        ? CID.parse(parts[0]).toString()
-        : null
+      CID.parse(address.split('/')[2])
     } catch (e) {
       return false
     }
 
-    return accessControllerHash !== null
+    return true
   }
 
   static parse (address) {
-    if (!address) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
+    if (!address || !address.toString || !OrbitDBAddress.isValid(address)) {
+      throw new Error(`Not a valid OrbitDB address: ${address}`)
+    }
 
-    if (!OrbitDBAddress.isValid(address)) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
+    address = replaceDelimiter(address)
 
-    address = address.toString().replace(/\\/g, '/')
+    const [root, ...paths] = address.slice(prefix.length).split('/')
 
-    const parts = address.toString()
-      .split('/')
-      .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
-      .filter(e => e !== '' && e !== ' ')
-
-    return new OrbitDBAddress(parts[0], parts.slice(1, parts.length).join('/'))
+    return new OrbitDBAddress(root, paths.join('/'))
   }
 
   static join (...paths) {
