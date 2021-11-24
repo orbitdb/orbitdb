@@ -28,7 +28,7 @@ class Address {
       return address
     }
 
-    const cid = CID.asCID(address.cid)
+    const cid = CID.asCID(address?.cid)
     if (cid) {
       return new Address(cid)
     }
