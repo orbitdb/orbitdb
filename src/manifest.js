@@ -1,10 +1,9 @@
 'use strict'
 const Address = require('./address')
-const { Block } = require('multformats/block')
+const Block = require('multiformats/block')
 const { sha256: hasher } = require('multiformats/hashes/sha2')
 const mhtype = 'sha2-256'
 const codec = require('@ipld/dag-cbor')
-const defaultTimeout = 30000
 const proxyHandler = {
   get: (target, prop) => prop.startsWith('_') ? undefined : target[prop]
 }
@@ -17,19 +16,20 @@ class Manifest {
     this._address = Address.asAddress({ cid: this.cid }, true)
   }
 
-  static async create (orbitdb, { AccessControllers, name, type, ...options } = {}) {
+  static async create (orbitdb, { name, type, ...options } = {}) {
     const value = { name, type }
-    const accessControllerAddress = await AccessControllers.create(
+    const accessController = options.accessController || {}
+    const accessControllerAddress = await orbitdb.AccessControllers.create(
       orbitdb,
-      options.accessController?.type || 'ipfs',
-      options.accessController || {}
+      accessController.type || 'ipfs',
+      accessController
     )
 
     value.accessController = '/ipfs/' + accessControllerAddress
     if (options.meta !== undefined) value.meta = options.meta
 
     const _block = await Block.encode({ value, codec, hasher })
-    await orbitdb._ipfs.put(_block.bytes, {
+    await orbitdb._ipfs.block.put(_block.bytes, {
       cid: _block.cid.bytes,
       version: _block.cid.version,
       format: codec.name,
@@ -41,12 +41,12 @@ class Manifest {
     return new Proxy(new Manifest({ _block }), proxyHandler)
   }
 
-  static async fetch (orbitdb, address, { timeout = defaultTimeout } = {}) {
+  static async fetch (orbitdb, address, { timeout } = {}) {
     if (address.cid.code !== codec.code) {
       throw new Error('unsupported manifest encoding')
     }
 
-    const bytes = orbitdb._ipfs.block.get(address.cid, { timeout })
+    const bytes = await orbitdb._ipfs.block.get(address.cid, { timeout })
     const _block = await Block.decode({ bytes, codec, hasher })
 
     return new Proxy(new Manifest({ _block }), proxyHandler)
@@ -62,6 +62,11 @@ class Manifest {
 
   get address () {
     return this._address
+  }
+
+  get pathkey () {
+    // prep for new manifest cache key
+    return this.address.toString() + this.version && `/${this.name}`
   }
 }
 

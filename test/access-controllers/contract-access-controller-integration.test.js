@@ -103,6 +103,7 @@ Object.keys(testAPIs).forEach(API => {
         let db, db2
         let dbManifest, acManifest, access
         let contract
+        let address
 
         before(async () => {
           contract = await new web3.eth.Contract(ac.contract.abi)
@@ -110,19 +111,25 @@ Object.keys(testAPIs).forEach(API => {
             .send({ from: accounts[i], gas: '1000000' })
 
           // DB creator needs to provide ac-type, abi and contract-address
-          db = await orbitdb1.feed('AABB', {
-            identity: id1,
+          address = await orbitdb1.determineAddress('AABB', 'feed', {
             accessController: {
               type: ac.AccessController.type,
-              web3: web3,
               abi: ac.contract.abi,
               contractAddress: contract._address,
+              web3: web3,
+              defaultAccount: accounts[i]
+            }
+          })
+          db = await orbitdb1.open(address, {
+            identity: id1,
+            accessController: {
+              web3: web3,
               defaultAccount: accounts[i]
             }
           })
 
           // DB peer needs to provide web3 instance
-          db2 = await orbitdb2.feed(db.address, {
+          db2 = await orbitdb2.open(address, {
             identity: id2,
             accessController: {
               web3: web3,
@@ -132,7 +139,7 @@ Object.keys(testAPIs).forEach(API => {
 
           await db2.load()
 
-          dbManifest = await io.read(ipfs1, db.address.root)
+          dbManifest = await io.read(ipfs1, db.address.cid)
           const hash = dbManifest.accessController.split('/').pop()
           acManifest = await io.read(ipfs1, hash)
           access = await io.read(ipfs1, acManifest.params.address)

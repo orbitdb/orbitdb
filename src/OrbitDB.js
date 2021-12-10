@@ -12,10 +12,10 @@ const Cache = require('orbit-db-cache')
 const Keystore = require('orbit-db-keystore')
 const Identities = require('orbit-db-identity-provider')
 let AccessControllers = require('orbit-db-access-controllers')
-const OrbitDBAddress = require('./orbit-db-address')
-const createDBManifest = require('./db-manifest')
+const Address = require('./address')
+const Manifest = require('./manifest')
 const exchangeHeads = require('./exchange-heads')
-const { isDefined, io } = require('./utils')
+const { isDefined } = require('./utils')
 const Storage = require('orbit-db-storage-adapter')
 const migrations = require('./migrations')
 
@@ -45,8 +45,8 @@ class OrbitDB {
     this.id = options.peerId
     this._pubsub = !options.offline
       ? new (
-          options.broker ? options.broker : Pubsub
-        )(this._ipfs, this.id)
+        options.broker ? options.broker : Pubsub
+      )(this._ipfs, this.id)
       : null
     this.directory = options.directory || './orbitdb'
     this.storage = options.storage
@@ -68,7 +68,7 @@ class OrbitDB {
   static get Identities () { return Identities }
   static get AccessControllers () { return AccessControllers }
   static get Storage () { return Storage }
-  static get OrbitDBAddress () { return OrbitDBAddress }
+  // static get OrbitDBAddress () { return Address }
 
   static get Store () { return Store }
   static get EventStore () { return EventStore }
@@ -128,44 +128,6 @@ class OrbitDB {
     return new OrbitDB(ipfs, options.identity, finalOptions)
   }
 
-  /* Databases */
-  async feed (address, options = {}) {
-    options = Object.assign({ create: true, type: 'feed' }, options)
-    return this.open(address, options)
-  }
-
-  async log (address, options = {}) {
-    options = Object.assign({ create: true, type: 'eventlog' }, options)
-    return this.open(address, options)
-  }
-
-  async eventlog (address, options = {}) {
-    return this.log(address, options)
-  }
-
-  async keyvalue (address, options = {}) {
-    options = Object.assign({ create: true, type: 'keyvalue' }, options)
-    return this.open(address, options)
-  }
-
-  async kvstore (address, options = {}) {
-    return this.keyvalue(address, options)
-  }
-
-  async counter (address, options = {}) {
-    options = Object.assign({ create: true, type: 'counter' }, options)
-    return this.open(address, options)
-  }
-
-  async docs (address, options = {}) {
-    options = Object.assign({ create: true, type: 'docstore' }, options)
-    return this.open(address, options)
-  }
-
-  async docstore (address, options = {}) {
-    return this.docs(address, options)
-  }
-
   async disconnect () {
     // Close a direct connection and remove it from internal state
     const removeDirectConnect = e => {
@@ -212,7 +174,8 @@ class OrbitDB {
   }
 
   /* Private methods */
-  async _createStore (type, address, options) {
+  async _createStore (manifest, options) {
+    const { type, address } = manifest
     // Get the type -> class mapping
     const Store = databaseTypes[type]
 
@@ -236,13 +199,14 @@ class OrbitDB {
     store.events.on('write', this._onWrite.bind(this))
 
     // ID of the store is the address as a string
-    const addr = address.toString()
-    this.stores[addr] = store
+    this.stores[address] = store
 
     // Subscribe to pubsub to get updates from peers,
     // this is what hooks us into the message propagation layer
     // and the p2p network
-    if (opts.replicate && this._pubsub) { await this._pubsub.subscribe(addr, this._onMessage.bind(this), this._onPeerConnected.bind(this)) }
+    if (opts.replicate && this._pubsub) {
+      await this._pubsub.subscribe(address.toString(), this._onMessage.bind(this), this._onPeerConnected.bind(this))
+    }
 
     return store
   }
@@ -326,59 +290,17 @@ class OrbitDB {
     this.stores[address] = db
   }
 
-  async _determineAddress (name, type, options = {}) {
-    if (!OrbitDB.isValidType(type)) { throw new Error(`Invalid database type '${type}'`) }
-
-    if (OrbitDBAddress.isValid(name)) { throw new Error('Given database name is an address. Please give only the name of the database!') }
-
-    // Create an AccessController, use IPFS AC as the default
-    options.accessController = Object.assign({}, { name: name, type: 'ipfs' }, options.accessController)
-    const accessControllerAddress = await AccessControllers.create(this, options.accessController.type, options.accessController || {})
-
-    // Save the manifest to IPFS
-    const manifestHash = await createDBManifest(this._ipfs, name, type, accessControllerAddress, options)
-
-    // Create the database address
-    return OrbitDBAddress.parse(OrbitDBAddress.join(manifestHash, name))
-  }
-
-  /* Create and Open databases */
-
-  /*
-    options = {
-      accessController: { write: [] } // array of keys that can write to this database
-      overwrite: false, // whether we should overwrite the existing database if it exists
-    }
-  */
-  async create (name, type, options = {}) {
-    logger.debug('create()')
-
-    logger.debug(`Creating database '${name}' as ${type}`)
-
-    // Create the database address
-    const dbAddress = await this._determineAddress(name, type, options)
-
-    options.cache = await this._requestCache(dbAddress.toString(), options.directory)
-
-    // Check if we have the database locally
-    const haveDB = await this._haveLocalData(options.cache, dbAddress)
-
-    if (haveDB && !options.overwrite) { throw new Error(`Database '${dbAddress}' already exists!`) }
-
-    await this._migrate(options, dbAddress)
-
-    // Save the database locally
-    await this._addManifestToCache(options.cache, dbAddress)
-
-    logger.debug(`Created database '${dbAddress}'`)
-
-    // Open the database
-    return this.open(dbAddress, options)
-  }
+  /* Open databases */
 
   async determineAddress (name, type, options = {}) {
-    const opts = Object.assign({}, { onlyHash: true }, options)
-    return this._determineAddress(name, type, opts)
+    if (!OrbitDB.isValidType(type)) { throw new Error(`Invalid database type '${type}'`) }
+
+    if (Address.asAddress(name)) { throw new Error('Given database name is an address. Please give only the name of the database!') }
+
+    // Save the manifest to IPFS
+    const manifest = await Manifest.create(this, { name, type, ...options })
+
+    return manifest.address.toString()
   }
 
   async _requestCache (address, directory, existingCache) {
@@ -407,72 +329,50 @@ class OrbitDB {
    */
   async open (address, options = {}) {
     logger.debug('open()')
+    address = Address.fromString(address.toString())
 
-    options = Object.assign({ localOnly: false, create: false }, options)
     logger.debug(`Open database '${address}'`)
 
-    // If address is just the name of database, check the options to crate the database
-    if (!OrbitDBAddress.isValid(address)) {
-      if (!options.create) {
-        throw new Error('\'options.create\' set to \'false\'. If you want to create a database, set \'options.create\' to \'true\'.')
-      } else if (options.create && !options.type) {
-        throw new Error(`Database type not provided! Provide a type with 'options.type' (${OrbitDB.databaseTypes.join('|')})`)
-      } else {
-        logger.warn(`Not a valid OrbitDB address '${address}', creating the database`)
-        options.overwrite = options.overwrite ? options.overwrite : true
-        return this.create(address, options.type, options)
-      }
-    }
-
-    // Parse the database address
-    const dbAddress = OrbitDBAddress.parse(address)
-
     // If database is already open, return early by returning the instance
-    // if (this.stores[dbAddress]) {
-    //   return this.stores[dbAddress]
+    // if (this.stores[address]) {
+    //   return this.stores[address]
     // }
 
-    options.cache = await this._requestCache(dbAddress.toString(), options.directory)
+    // Get the database manifest from IPFS
+    logger.debug(`Loading Manifest for '${address}'`)
+    const manifest = await Manifest.fetch(this, address, { timeout: options.timeout || defaultTimeout })
+    logger.debug(`Manifest for '${address}':\n${JSON.stringify(manifest, null, 2)}`)
+
+    // Make sure the type from the manifest matches the type that was given as an option
+    if (options.type && manifest.type !== options.type) {
+      throw new Error(`Database '${address}' is type '${manifest.type}' but was opened as '${options.type}'`)
+    }
+
+    options.cache = await this._requestCache(manifest.pathkey, options.directory)
 
     // Check if we have the database
-    const haveDB = await this._haveLocalData(options.cache, dbAddress)
+    const haveDB = await this._haveLocalData(options.cache, manifest.pathkey)
 
-    logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${dbAddress}'`)
+    logger.debug((haveDB ? 'Found' : 'Didn\'t find') + ` database '${address}'`)
 
     // If we want to try and open the database local-only, throw an error
     // if we don't have the database locally
     if (options.localOnly && !haveDB) {
-      logger.warn(`Database '${dbAddress}' doesn't exist!`)
-      throw new Error(`Database '${dbAddress}' doesn't exist!`)
-    }
-
-    logger.debug(`Loading Manifest for '${dbAddress}'`)
-
-    // Get the database manifest from IPFS
-    const manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
-    logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
-
-    if (manifest.name !== dbAddress.path) {
-      logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
-    }
-
-    // Make sure the type from the manifest matches the type that was given as an option
-    if (options.type && manifest.type !== options.type) {
-      throw new Error(`Database '${dbAddress}' is type '${manifest.type}' but was opened as '${options.type}'`)
+      logger.warn(`Database '${address}' doesn't exist!`)
+      throw new Error(`Database '${address}' doesn't exist!`)
     }
 
     // Save the database locally
-    await this._addManifestToCache(options.cache, dbAddress)
+    await this._addManifestToCache(options.cache, manifest)
 
     // Open the the database
     options = Object.assign({}, options, { accessControllerAddress: manifest.accessController, meta: manifest.meta })
-    return this._createStore(options.type || manifest.type, dbAddress, options)
+    return this._createStore(manifest, options)
   }
 
-  // Save the database locally
-  async _addManifestToCache (cache, dbAddress) {
-    await cache.set(path.join(dbAddress.toString(), '_manifest'), dbAddress.root)
-    logger.debug(`Saved manifest to IPFS as '${dbAddress.root}'`)
+  async _addManifestToCache (cache, manifest) {
+    await cache.set(path.join(manifest.pathkey, '_manifest'), manifest.cid.toString())
+    logger.debug(`Saved manifest to IPFS as '${manifest.cid}'`)
   }
 
   /**
@@ -481,13 +381,12 @@ class OrbitDB {
    * @param  {[OrbitDBAddress]} dbAddress [Address of the database to check]
    * @return {[Boolean]} [Returns true if we have cached the db locally, false if not]
    */
-  async _haveLocalData (cache, dbAddress) {
+  async _haveLocalData (cache, address) {
     if (!cache) {
       return false
     }
 
-    const addr = dbAddress.toString()
-    const data = await cache.get(path.join(addr, '_manifest'))
+    const data = await cache.get(path.join(address, '_manifest'))
     return data !== undefined && data !== null
   }
 
@@ -520,14 +419,6 @@ class OrbitDB {
 
   static getDatabaseTypes () {
     return databaseTypes
-  }
-
-  static isValidAddress (address) {
-    return OrbitDBAddress.isValid(address)
-  }
-
-  static parseAddress (address) {
-    return OrbitDBAddress.parse(address)
   }
 }
 
