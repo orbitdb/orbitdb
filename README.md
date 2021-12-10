@@ -6,7 +6,7 @@
 
 [![Matrix](https://img.shields.io/matrix/orbit-db:matrix.org?label=chat%20on%20matrix)](https://app.element.io/#/room/#orbit-db:matrix.org) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
 
-OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and offline-first web applications.
+OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and [local-first](https://www.inkandswitch.com/local-first/) web applications.
 
 **Test it live at [Live demo 1](https://ipfs.io/ipfs/QmUsoSkGzUQnCgzfjL549KKf29m5EMYky3Y6gQp5HptLTG/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/QmVWQMLUM3o4ZFbLtLMS1PMLfodeEeBkBPR2a2R3hqQ337/)**!
 
@@ -94,70 +94,27 @@ npm install orbit-db ipfs
 const IPFS = require('ipfs')
 const OrbitDB = require('orbit-db')
 
-// For js-ipfs >= 0.38
-
-// Create IPFS instance
-const initIPFSInstance = async () => {
-  return await IPFS.create({ repo: "./path-for-js-ipfs-repo" });
-};
-
-initIPFSInstance().then(async ipfs => {
-  const orbitdb = await OrbitDB.createInstance(ipfs);
+;(async function () {
+  const ipfs = await IPFS.create()
+  const orbitdb = await OrbitDB.createInstance(ipfs)
 
   // Create / Open a database
-  const db = await orbitdb.log("hello");
-  await db.load();
+  const db = await orbitdb.log("hello")
+  await db.load()
 
   // Listen for updates from peers
   db.events.on("replicated", address => {
-    console.log(db.iterator({ limit: -1 }).collect());
-  });
+    console.log(db.iterator({ limit: -1 }).collect())
+  })
 
   // Add an entry
-  const hash = await db.add("world");
-  console.log(hash);
+  const hash = await db.add("world")
+  console.log(hash)
 
   // Query
-  const result = db.iterator({ limit: -1 }).collect();
-  console.log(JSON.stringify(result, null, 2));
-});
-
-
-// For js-ipfs < 0.38
-
-// Create IPFS instance
-const ipfsOptions = {
-    EXPERIMENTAL: {
-      pubsub: true
-    }
-  };
-
-ipfs = new IPFS(ipfsOptions);
-
-initIPFSInstance().then(ipfs => {
-  ipfs.on("error", e => console.error(e));
-  ipfs.on("ready", async () => {
-    const orbitdb = await OrbitDB.createInstance(ipfs);
-
-    // Create / Open a database
-    const db = await orbitdb.log("hello");
-    await db.load();
-
-    // Listen for updates from peers
-    db.events.on("replicated", address => {
-      console.log(db.iterator({ limit: -1 }).collect());
-    });
-
-    // Add an entry
-    const hash = await db.add("world");
-    console.log(hash);
-
-    // Query
-    const result = db.iterator({ limit: -1 }).collect();
-    console.log(JSON.stringify(result, null, 2));
-  });
-});
-
+  const result = db.iterator({ limit: -1 }).collect()
+  console.log(JSON.stringify(result, null, 2))
+})()
 ```
 
 ### Module with IPFS Daemon
@@ -261,8 +218,6 @@ OrbitDB uses the following modules:
 - [orbit-db-docstore](https://github.com/orbitdb/orbit-db-docstore)
 - [orbit-db-counterstore](https://github.com/orbitdb/orbit-db-counterstore)
 
-To understand a little bit about the architecture, check out a visualization of the data flow at https://github.com/haadcode/proto2 or a live demo: http://celebdil.benet.ai:8080/ipfs/Qmezm7g8mBpWyuPk6D84CNcfLKJwU6mpXuEN5GJZNkX3XK/.
-
 Community-maintained Typescript typings are available here: https://github.com/orbitdb/orbit-db-types
 
 ## Development
@@ -303,18 +258,13 @@ Yes! Take a look at these implementations:
   - Golang: [berty/go-orbit-db](https://github.com/berty/go-orbit-db)
   - Python: [orbitdb/py-orbit-db-http-client](https://github.com/orbitdb/py-orbit-db-http-client)
 
-The best place to find out what is out there and what is being actively worked on is likely by asking in the [Gitter](https://gitter.im/orbitdb/Lobby). If you know of any other repos that ought to be included in this section, please open a PR and add them.
+The best place to find out what is out there and what is being actively worked on is likely by asking in the [Matrix](https://app.element.io/#/room/#orbit-db:matrix.org). If you know of any other repos that ought to be included in this section, please open a PR and add them.
 
 ## Contributing
 
 **Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
 
-As far as code goes, we would be happy to accept PRs! If you want to work on something, it'd be good to talk beforehand to make sure nobody else is working on it. You can reach us [on Gitter](https://gitter.im/orbitdb/Lobby), or in the [issues section](https://github.com/orbitdb/orbit-db/issues).
-
-
 If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbit-db/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc).
-
-Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md), and that all activity in the [@orbitdb](https://github.com/orbitdb) organization falls under it. Read it when you get the chance, as being part of this community means that you agree to abide by it. Thanks.
 
 ## Sponsors
 
