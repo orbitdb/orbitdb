@@ -674,7 +674,7 @@ Oplog or IPFS-Log is the underlying data structure used by the OrbitDB Stores to
 replicate and add operations to any of their stores. 
 
 ## `oplog.values`
-An Array of operations sorted in ascending order by their time.
+An Array of operations sorted by how they happened in ascending order.
 If an operation A is before B, A is before B in the Array.
 
 Each oplog entry contains these fields:
