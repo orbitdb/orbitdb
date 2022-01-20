@@ -29,7 +29,7 @@ jobs:
 
     # TODO: update to node 14 or 16?
     docker:
-      - image: circleci/node:12-browsers
+      - image: circleci/node:16-browsers
     steps:
     # Machine Setup
     #   If you break your build into multiple jobs with workflows, you will probably want to do the parts of this that are relevant in each
