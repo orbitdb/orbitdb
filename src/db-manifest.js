@@ -1,8 +1,10 @@
 const path = require('path')
 const io = require('orbit-db-io')
 
-// Creates a DB manifest file and saves it in IPFS
-const createDBManifest = async (ipfs, name, type, accessControllerAddress, options) => {
+/**
+ * Creates a DB manifest file and saves it in IPFS
+ */
+async function createDBManifest(ipfs, name, type, accessControllerAddress, options) {
   const manifest = Object.assign({
     name: name,
     type: type,
