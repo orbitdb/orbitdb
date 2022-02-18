@@ -571,13 +571,13 @@ Returns an instance of [Identity](https://github.com/orbitdb/orbit-db-identity-p
 ```javascript
 const identity = db.identity
 console.log(identity.toJSON())
-{ id: 'QmZyYjpG6SMJJx2rbye8HXNMufGRtpn9yFkdd27uuq6xrR',
-  publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
-  signatures:
+{ _id: 'QmZyYjpG6SMJJx2rbye8HXNMufGRtpn9yFkdd27uuq6xrR',
+  _publicKey: '0446829cbd926ad8e858acdf1988b8d586214a1ca9fa8c7932af1d59f7334d41aa2ec2342ea402e4f3c0195308a4815bea326750de0a63470e711c534932b3131c',
+  _signatures:
    { id: '3045022058bbb2aa415623085124b32b254b8668d95370261ade8718765a8086644fc8ae022100c736b45c6b2ef60c921848027f51020a70ee50afa20bc9853877e994e6121c15',
      publicKey: '3046022100d138ccc0fbd48bd41e74e40ddf05c1fa6ff903a83b2577ef7d6387a33992ea4b022100ca39e8d8aef43ac0c6ec05c1b95b41fce07630b5dc61587a32d90dc8e4cf9766'
    },
-  type: 'orbitdb'
+  _type: 'orbitdb'
 }
 ```
 
@@ -692,10 +692,10 @@ Each oplog entry contains these fields:
     },
     key: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
     identity: {
-      id: '0336124289bdb2384ef7f3f5991d25bb1e02bf2a98edb02f94b0bc9f292c41156b',
-      publicKey: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
-      signatures: [Object],
-      type: 'orbitdb'
+      _id: '0336124289bdb2384ef7f3f5991d25bb1e02bf2a98edb02f94b0bc9f292c41156b',
+      _publicKey: '04f75c96cb240d8b254df96fcc7d9d7a1260fd838cb0d085f009d2f0c78b74f7984c168da6afa1f0ee9400f5022952e70955c10798beb0c168966faf746c7202ad',
+      _signatures: [Object],
+      _type: 'orbitdb'
     },
     sig: '3045022100e618887439bcaa8cffe0196d5655c710cc117af7de4390a313d137dd02a993a402205fb0b657600216944a0e7f68d2bb07854e8f47cc01a74d7cc632870ad7055758'
   }

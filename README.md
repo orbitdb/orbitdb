@@ -24,7 +24,7 @@ All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on to
 #### Project status & support
 
 * Status: **in active development**
-* Compatible with **js-ipfs versions <= 0.52** and **go-ipfs versions <= 0.6.0**
+* Compatible with **js-ipfs versions <= 0.60.2** and **go-ipfs versions <= 0.11.0**
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://app.element.io/#/room/#orbit-db:matrix.org) if you plan to use OrbitDB in mission critical systems.*
 
