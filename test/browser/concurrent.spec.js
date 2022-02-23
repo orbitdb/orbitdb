@@ -1,6 +1,7 @@
 'use strict'
 const assert = require('assert')
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-core')
+const chromium = require('chromium')
 const path = require('path')
 const mapSeries = require('p-map-series')
 const pMap = require('p-map')
@@ -16,13 +17,14 @@ const wait = async (milliseconds) => {
   })
 }
 
-describe(`orbit-db - browser concurrent writes`, function() {
+describe(`orbit-db - browser concurrent writes`, function () {
   this.timeout(numTabs * config.timeout)
 
   let browser
   const options = {
     ignoreHTTPSErrors: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: chromium.path
   }
 
   before(async () => {
@@ -33,7 +35,7 @@ describe(`orbit-db - browser concurrent writes`, function() {
     await browser.close()
   })
 
-  describe('Write concurrently', function() {
+  describe('Write concurrently', function () {
     let tabs = []
     before(async () => {
       const createTab = async () => {
