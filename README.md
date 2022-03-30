@@ -28,7 +28,7 @@ All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on to
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://app.element.io/#/room/#orbit-db:matrix.org) if you plan to use OrbitDB in mission critical systems.*
 
-This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. LTS versions (even numbered versions 8, 10, etc) are supported.
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
 To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
 
