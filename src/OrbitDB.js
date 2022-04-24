@@ -111,6 +111,10 @@ class OrbitDB {
       options.keystore = new Keystore(keyStorage)
     }
 
+    if (options.identity && !options.identity.provider.keystore) {
+      options.identity.provider = { keystore: options.keystore };
+    }
+
     if (!options.identity) {
       options.identity = await Identities.createIdentity({
         id: id,
