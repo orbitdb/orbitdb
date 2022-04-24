@@ -1,6 +1,6 @@
 /* eslint-disable */
-const isElectron = require('is-electron')
+const where = require('wherearewe')
 
-const fs = (!isElectron() && (typeof window === 'object' || typeof self === 'object')) ? null : eval('require("fs")')
+const fs = (!where.isElectronMain && (typeof window === 'object' || typeof self === 'object')) ? null : eval('require("fs")')
 
 module.exports = fs

@@ -18,7 +18,6 @@
   "main": "src/OrbitDB.js",
   "dependencies": {
     "ipfs-pubsub-1on1": "0.0.8",
-    "is-electron": "^2.2.0",
     "is-node": "^1.0.2",
     "localstorage-down": "^0.6.7",
     "logplease": "^1.2.14",
@@ -35,7 +34,8 @@
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
     "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "^4.3.3"
+    "orbit-db-store": "^4.3.3",
+    "wherearewe": "^1.0.2"
   },
   "devDependencies": {
     "adm-zip": "^0.4.16",
