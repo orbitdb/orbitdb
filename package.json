@@ -34,7 +34,7 @@
     "orbit-db-kvstore": "~1.12.0",
     "orbit-db-pubsub": "~0.6.0",
     "orbit-db-storage-adapter": "~0.5.3",
-    "orbit-db-store": "^4.3.3",
+    "orbit-db-store": "^4.3.4",
     "wherearewe": "^1.0.2"
   },
   "devDependencies": {
