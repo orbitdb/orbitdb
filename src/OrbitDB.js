@@ -448,9 +448,19 @@ class OrbitDB {
 
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
-    // Get the database manifest from IPFS
-    const manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
-    logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
+    let manifest
+    try {
+      // Get the database manifest from IPFS
+      manifest = await io.read(this._ipfs, dbAddress.root, { timeout: options.timeout || defaultTimeout })
+      logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
+    } catch (e) {
+      if (e.name === 'TimeoutError' && e.code === 'ERR_TIMEOUT') {
+        console.error(e)
+        throw new Error('ipfs unable to find and fetch manifest for this address.')
+      } else {
+        throw e
+      }
+    }
 
     if (manifest.name !== dbAddress.path) {
       logger.warn(`Manifest name '${manifest.name}' and path name '${dbAddress.path}' do not match`)
