@@ -106,7 +106,7 @@ class OrbitDB {
     }
 
     if (!options.keystore) {
-      const keystorePath = path.join(options.directory, id, '/keystore')
+      const keystorePath = path.join(options.directory, typeof id !== 'object' ? id : id.toString(), '/keystore')
       const keyStorage = await options.storage.createStore(keystorePath)
       options.keystore = new Keystore(keyStorage)
     }
