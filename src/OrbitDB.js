@@ -119,12 +119,12 @@ class OrbitDB {
     }
 
     if (!options.cache) {
-      const cachePath = path.join(options.directory, id, '/cache')
+      const cachePath = path.join(options.directory, typeof id !== 'object' ? id : id.toString(), '/cache')
       const cacheStorage = await options.storage.createStore(cachePath)
       options.cache = new Cache(cacheStorage)
     }
 
-    const finalOptions = Object.assign({}, options, { peerId: id })
+    const finalOptions = Object.assign({}, options, { peerId: typeof id !== 'object' ? id : id.toString() })
     return new OrbitDB(ipfs, options.identity, finalOptions)
   }
 
