@@ -160,17 +160,19 @@ to redo the local package-lock.json with working native dependencies.
 ### Browser example
 
 ```
-make
+npm install # if not yet installed
+make build
 npm run examples:browser # if browser isn't opening, open examples/browser/browser.html in your browser
 ```
 
 Using Webpack:
 ```
+<<<<<<< HEAD
 make
-npm run examples:browser-webpack # if browser isn't opening, open examples/browser/browser-webpack-example/index.html in your browser
+=======
+npm install # if not yet installed
 ```
 
-<p align="left">
   <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/images/example1.png" width="33%">
 </p>
 
