@@ -160,13 +160,15 @@ to redo the local package-lock.json with working native dependencies.
 ### Browser example
 
 ```
-make
+npm install # if not yet installed
+make build
 npm run examples:browser # if browser isn't opening, open examples/browser/browser.html in your browser
 ```
 
 Using Webpack:
 ```
-make
+npm install # if not yet installed
+make build
 npm run examples:browser-webpack # if browser isn't opening, open examples/browser/browser-webpack-example/index.html in your browser
 ```
 
