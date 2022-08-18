@@ -166,15 +166,17 @@ class OrbitDB {
     return this.docs(address, options)
   }
 
+  /**
+   * Close network connections, the keystore, databases and caches opened by this OrbitDB instance.
+   */
   async disconnect () {
     // Close a direct connection and remove it from internal state
-    const removeDirectConnect = e => {
-      this._directConnections[e].close()
-      delete this._directConnections[e]
+
+    for (const connection of Object.values(this._directConnections)) {
+      connection.close()
     }
 
-    // Close all direct connections to peers
-    Object.keys(this._directConnections).forEach(removeDirectConnect)
+    this._directConnections = {}
 
     // Disconnect from pubsub
     if (this._pubsub) {
@@ -188,14 +190,14 @@ class OrbitDB {
     const databases = Object.values(this.stores)
     for (const db of databases) {
       await db.close()
-      delete this.stores[db.address.toString()]
     }
+    this.stores = {}
 
-    const caches = Object.keys(this.caches)
-    for (const directory of caches) {
-      await this.caches[directory].cache.close()
-      delete this.caches[directory]
+    const caches = Object.values(this.caches)
+    for (const cache of caches) {
+      await cache.cache.close()
     }
+    this.caches = {}
 
     // Remove all databases from the state
     this.stores = {}
