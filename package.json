@@ -59,7 +59,7 @@
     "mkdirp": "^1.0.4",
     "mocha": "^9.1.3",
     "node-pre-gyp": "^0.13.0",
-    "open-cli": "^6.0.1",
+    "open-cli": "^7.0.1",
     "orbit-db-test-utils": "^1.3.0",
     "p-each-series": "^2.1.0",
     "p-map": "^4.0.0",
