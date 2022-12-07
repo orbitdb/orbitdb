@@ -52,7 +52,7 @@
     "fs-extra": "^9.0.1",
     "ganache-cli": "^6.12.2",
     "go-ipfs": "^0.9.1",
-    "ipfs": "^0.59.0",
+    "ipfs": "^0.65.0",
     "ipfsd-ctl": "^10.0.3",
     "localstorage-level-migration": "~0.1.0",
     "markdown-toc": "^1.2.0",
