@@ -1,24 +1,25 @@
-'use strict'
+import assert from 'assert'
+import rmrf from 'rimraf'
+import Web3 from 'web3'
+import OrbitDB from '../../src/OrbitDB.js'
 
-const assert = require('assert')
-const rmrf = require('rimraf')
-const Web3 = require('web3')
-const OrbitDB = require('../../src/OrbitDB.js')
-const IdentityProvider = require('orbit-db-identity-provider')
-const Keystore = require('orbit-db-keystore')
-const AccessControllers = require('orbit-db-access-controllers')
-const ContractAccessController = require('orbit-db-access-controllers/src/contract-access-controller.js')
-const ganache = require('ganache-cli')
-const { abi, bytecode } = require('./Access')
+import IdentityProvider from 'orbit-db-identity-provider'
+import Keystore from 'orbit-db-keystore'
+import AccessControllers from 'orbit-db-access-controllers'
+import ContractAccessController from 'orbit-db-access-controllers/contract'
+import ganache from 'ganache-cli'
+import Access from './Access.json' assert {type: "json"}
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
+const abi = Access.abi
+const bytecode = Access.bytecode
 const dbPath1 = './orbitdb/tests/orbitdb-access-controller/1'
 const dbPath2 = './orbitdb/tests/orbitdb-access-controller/2'
 
@@ -121,7 +122,7 @@ Object.keys(testAPIs).forEach(API => {
         } catch (e) {
           err = e.toString()
         }
-        assert.strictEqual(err, 'Error: Given AccessController class needs to implement: static get type() { /* return a string */}.')
+        assert.strictEqual(err, 'Error: Given AccessController class needs to implement: static get type() { /* return a string /}.')
       })
 
       it('creates a custom access controller', async () => {

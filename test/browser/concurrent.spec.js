@@ -1,11 +1,11 @@
 'use strict'
-const assert = require('assert')
-const puppeteer = require('puppeteer-core')
-const chromium = require('chromium')
-const path = require('path')
-const mapSeries = require('p-map-series')
-const pMap = require('p-map')
-const { config } = require('orbit-db-test-utils')
+const assert from 'assert')
+const puppeteer from 'puppeteer-core')
+const chromium from 'chromium')
+const path from 'path')
+const mapSeries from 'p-map-series')
+const pMap from 'p-map')
+const { config } from 'orbit-db-test-utils')
 
 const clicksPerTab = 20
 const numTabs = 3

@@ -1,22 +1,20 @@
-'use strict'
-
-const assert = require('assert')
-const rmrf = require('rimraf')
-const path = require('path')
-const OrbitDB = require('../src/OrbitDB')
-const Identities = require('orbit-db-identity-provider')
+import assert from 'assert'
+import rmrf from 'rimraf'
+import path from 'path'
+import OrbitDB from '../src/OrbitDB.js'
+import Identities from 'orbit-db-identity-provider'
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
-const {
+import {
   CustomTestKeystore,
   databases,
-} = require('./utils')
+} from './utils/index.js'
 
 Identities.addIdentityProvider(CustomTestKeystore().identityProvider)
 

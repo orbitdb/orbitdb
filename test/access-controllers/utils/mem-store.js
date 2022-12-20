@@ -1,13 +1,11 @@
-'use strict'
-
-const multihashing = require('multihashing-async')
-const mh = require('multihashes')
+import multihashing from 'multihashing-async'
+import mh from 'multihashes'
 
 const defaultHashAlg = 'sha2-256'
 
 // 'use strict'
 
-// const ImmutableDB = require('./immutabledb-interface')
+// const ImmutableDB from './immutabledb-interface')
 
 const createMultihash = (data, hashAlg) => {
   return new Promise((resolve, reject) => {
@@ -19,12 +17,12 @@ const createMultihash = (data, hashAlg) => {
   })
 }
 
-// const LRU = require('lru')
-// const ImmutableDB = require('./immutabledb-interface')
-// const createMultihash = require('./create-multihash')
+// const LRU from 'lru')
+// const ImmutableDB from './immutabledb-interface')
+// const createMultihash from './create-multihash')
 
 /* Memory store using an LRU cache */
-class MemStore {
+export default class MemStore {
   constructor () {
     this._store = {}// new LRU(1000)
   }
@@ -66,5 +64,3 @@ class MemStore {
     }
   }
 }
-
-module.exports = MemStore

@@ -1,11 +1,9 @@
-'use strict'
-
 /**
  * Stop an IPFS or ipfsd-ctl instance
  * @param  {Object}  config  [IPFS ipfsd-ctl to stop]
  * @return {None}
  */
-const stopIpfs = (ipfs) => {
+export default (ipfs) => {
   return new Promise((resolve, reject) => {
     ipfs.stop((err) => {
       if (err) { reject(err) }
@@ -13,5 +11,3 @@ const stopIpfs = (ipfs) => {
     })
   })
 }
-
-module.exports = stopIpfs

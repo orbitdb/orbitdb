@@ -1,6 +1,4 @@
 /* eslint-disable */
-const where = require('wherearewe')
+import where from 'wherearewe'
 
-const fs = (!where.isElectronMain && (typeof window === 'object' || typeof self === 'object')) ? null : eval('require("fs")')
-
-module.exports = fs
+export const fs = (!where.isElectronMain && (typeof window === 'object' || typeof self === 'object')) ? null : eval('import("fs")')

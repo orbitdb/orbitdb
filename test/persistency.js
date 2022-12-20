@@ -1,22 +1,19 @@
-'use strict'
-
-const assert = require('assert')
-const mapSeries = require('p-map-series')
-const rmrf = require('rimraf')
-const path = require('path')
-const OrbitDB = require('../src/OrbitDB')
-const Cache = require('orbit-db-cache')
-
-const localdown = require('localstorage-down')
-const Storage = require('orbit-db-storage-adapter')
+import assert from 'assert'
+import mapSeries from 'p-map-series'
+import rmrf from 'rimraf'
+import path from 'path'
+import OrbitDB from '../src/OrbitDB.js'
+import Cache from 'orbit-db-cache'
+import localdown from 'localstorage-down'
+import Storage from 'orbit-db-storage-adapter'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath = './orbitdb/tests/persistency'
 

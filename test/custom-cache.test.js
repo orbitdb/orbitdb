@@ -1,24 +1,22 @@
-'use strict'
-
-const assert = require('assert')
-const rmrf = require('rimraf')
-const path = require('path')
-const OrbitDB = require('../src/OrbitDB')
-const CustomCache = require('orbit-db-cache')
-const localdown = require('localstorage-down')
-const storage = require("orbit-db-storage-adapter")(localdown)
+import assert from 'assert'
+import rmrf from 'rimraf'
+import path from 'path'
+import OrbitDB from '../src/OrbitDB.js'
+import CustomCache from 'orbit-db-cache'
+import localdown from 'localstorage-down'
+import storageAdapter from 'orbit-db-storage-adapter'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
-const {
-  databases
-} = require('./utils')
+import { databases } from './utils/index.js'
+
+const storage = storageAdapter(localdown)
 
 const dbPath = './orbitdb/tests/customKeystore'
 

@@ -1,2 +1,2 @@
-exports.CustomTestKeystore = require('./custom-test-keystore')
-exports.databases = require('./databases')
+export { default as CustomTestKeystore } from './custom-test-keystore.js'
+export { default as databases } from './databases.js'

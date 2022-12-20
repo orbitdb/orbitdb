@@ -1,4 +1,5 @@
-const EC = require('elliptic').ec
+import pkg from 'elliptic'
+const { ec: EC } = pkg
 const ec = new EC('secp256k1')
 
 /**
@@ -50,4 +51,4 @@ class CustomTestKeystore {
   }
 }
 
-module.exports = new CustomTestKeystore()
+export default new CustomTestKeystore()

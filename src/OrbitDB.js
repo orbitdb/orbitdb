@@ -1,25 +1,23 @@
-'use strict'
+import path from 'path'
+import EventStore from 'orbit-db-eventstore'
+import FeedStore from 'orbit-db-feedstore'
+import KeyValueStore from 'orbit-db-kvstore'
+import CounterStore from 'orbit-db-counterstore'
+import Store from 'orbit-db-store'
+import DocumentStore from 'orbit-db-docstore'
+import Pubsub from 'orbit-db-pubsub'
+import Cache from 'orbit-db-cache'
+import Keystore from 'orbit-db-keystore'
+import Identities from 'orbit-db-identity-provider'
+import AccessControllers from 'orbit-db-access-controllers'
+import OrbitDBAddress from './orbit-db-address.js'
+import createDBManifest from './db-manifest.js'
+import exchangeHeads from './exchange-heads.js'
+import { isDefined, io } from './utils/index.js'
+import Storage from 'orbit-db-storage-adapter'
+import * as migrations from './migrations/index.js'
+import Logger from 'logplease'
 
-const path = require('path')
-const Store = require('orbit-db-store')
-const EventStore = require('orbit-db-eventstore')
-const FeedStore = require('orbit-db-feedstore')
-const KeyValueStore = require('orbit-db-kvstore')
-const CounterStore = require('orbit-db-counterstore')
-const DocumentStore = require('orbit-db-docstore')
-const Pubsub = require('orbit-db-pubsub')
-const Cache = require('orbit-db-cache')
-const Keystore = require('orbit-db-keystore')
-const Identities = require('orbit-db-identity-provider')
-let AccessControllers = require('orbit-db-access-controllers')
-const OrbitDBAddress = require('./orbit-db-address')
-const createDBManifest = require('./db-manifest')
-const exchangeHeads = require('./exchange-heads')
-const { isDefined, io } = require('./utils')
-const Storage = require('orbit-db-storage-adapter')
-const migrations = require('./migrations')
-
-const Logger = require('logplease')
 const logger = Logger.create('orbit-db')
 Logger.setLogLevel('ERROR')
 
@@ -34,7 +32,7 @@ const databaseTypes = {
 
 const defaultTimeout = 30000 // 30 seconds
 
-class OrbitDB {
+export default class OrbitDB {
   constructor (ipfs, identity, options = {}) {
     if (!isDefined(ipfs)) { throw new Error('IPFS is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance') }
 
@@ -546,5 +544,3 @@ class OrbitDB {
 OrbitDB.prototype.AccessControllers = AccessControllers
 OrbitDB.prototype.Identities = Identities
 OrbitDB.prototype.Keystore = Keystore
-
-module.exports = OrbitDB

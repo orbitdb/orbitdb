@@ -1,4 +1,4 @@
-const IPFS = require('ipfs')
+import * as IPFS from 'ipfs'
 
 /**
  * IPFS daemons to run the tests with.
@@ -27,4 +27,6 @@ let testAPIs = Object.assign({}, jsIpfs)
 // Eg. 'TEST=go mocha' runs tests with go-ipfs
 if (process.env.TEST === 'all') { testAPIs = Object.assign({}, testAPIs, goIpfs) } else if (process.env.TEST === 'go') { testAPIs = Object.assign({}, goIpfs) }
 
-module.exports = testAPIs
+export {
+  testAPIs
+}

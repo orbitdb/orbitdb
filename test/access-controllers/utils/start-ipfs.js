@@ -1,14 +1,12 @@
-'use strict'
-
-const IPFSFactory = require('ipfsd-ctl')
-const testAPIs = require('./test-apis')
+import IPFSFactory from 'ipfsd-ctl'
+import { testAPIs } from './test-apis.js'
 
 /**
  * Start an IPFS instance
  * @param  {Object}  config  [IPFS configuration to use]
  * @return {[Promise<IPFS>]} [IPFS instance]
  */
-const startIpfs = (type, config = {}) => {
+export default (type, config = {}) => {
   return new Promise((resolve, reject) => {
     if (!testAPIs[type]) {
       reject(new Error(`Wanted API type ${JSON.stringify(type)} is unknown. Available types: ${Object.keys(testAPIs).join(', ')}`))
@@ -39,5 +37,3 @@ const startIpfs = (type, config = {}) => {
       })
   })
 }
-
-module.exports = startIpfs

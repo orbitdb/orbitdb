@@ -1,4 +1,4 @@
-const databases = [
+export default [
   {
     type: 'eventlog',
     create: (orbitdb, name, options) => orbitdb.eventlog(name, options),
@@ -40,5 +40,3 @@ const databases = [
     expectedValue: 8,
   },
 ]
-
-module.exports = databases

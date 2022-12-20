@@ -1,24 +1,24 @@
-'use strict'
-
-const assert = require('assert')
-const rmrf = require('rimraf')
-const OrbitDB = require('../../src/OrbitDB.js')
-const IdentityProvider = require('orbit-db-identity-provider')
-const EthIdentityProvider = require('orbit-db-identity-provider/src/ethereum-identity-provider')
-const Keystore = require('orbit-db-keystore')
-const ContractAccessController = require('orbit-db-access-controllers/src/contract-access-controller')
-const DepositContractAccessController = require('orbit-db-access-controllers/src/deposit-contract-access-controller')
-const AccessControllers = require('orbit-db-access-controllers')
-const Web3 = require('web3')
-const ganache = require('ganache-cli')
-const io = require('orbit-db-io')
+import assert from 'assert'
+import rmrf from 'rimraf'
+import OrbitDB from '../../src/OrbitDB.js'
+import IdentityProvider from 'orbit-db-identity-provider'
+import EthIdentityProvider from 'orbit-db-identity-provider/ethereum'
+import Keystore from 'orbit-db-keystore'
+import ContractAccessController from 'orbit-db-access-controllers/contract'
+import DepositContractAccessController from 'orbit-db-access-controllers/deposit-contract'
+import AccessControllers from 'orbit-db-access-controllers'
+import Web3 from 'web3'
+import ganache from 'ganache-cli'
+import * as io from 'orbit-db-io'
+import Access from './Access.json' assert { 'type': 'json' }
+import PayDeposit from './PayDeposit.json' assert { 'type': 'json' }
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath1 = './orbitdb/tests/contract-access-controller/1'
 const dbPath2 = './orbitdb/tests/contract-access-controller/2'
@@ -26,11 +26,11 @@ const dbPath2 = './orbitdb/tests/contract-access-controller/2'
 const accessControllers = [
   {
     AccessController: ContractAccessController,
-    contract: require('./Access')
+    contract: Access
   },
   {
     AccessController: DepositContractAccessController,
-    contract: require('./PayDeposit')
+    contract: PayDeposit
   }
 ]
 
@@ -110,7 +110,7 @@ Object.keys(testAPIs).forEach(API => {
           await accessController.load()
         })
 
-        it('creates an access controller', () => {
+        it.only('creates an access controller', () => {
           assert.notStrictEqual(accessController, null)
           assert.notStrictEqual(accessController, undefined)
         })

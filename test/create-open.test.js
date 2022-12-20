@@ -1,25 +1,23 @@
-'use strict'
-
-const assert = require('assert')
-const mapSeries = require('p-map-series')
-const fs = require('fs-extra')
-const path = require('path')
-const rmrf = require('rimraf')
-const levelup = require('levelup')
-const leveldown = require('leveldown')
-const Zip = require('adm-zip')
-const OrbitDB = require('../src/OrbitDB')
-const OrbitDBAddress = require('../src/orbit-db-address')
-const Identities = require('orbit-db-identity-provider')
-const io = require('orbit-db-io')
+import assert from 'assert'
+import mapSeries from 'p-map-series'
+import fs from 'fs-extra'
+import path from 'path'
+import rmrf from 'rimraf'
+import levelup from 'levelup'
+import leveldown from 'leveldown'
+import Zip from 'adm-zip'
+import OrbitDB from '../src/OrbitDB.js'
+import OrbitDBAddress from '../src/orbit-db-address.js'
+import Identities from 'orbit-db-identity-provider'
+import * as io from 'orbit-db-io'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
 const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache-schema-test')

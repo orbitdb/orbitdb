@@ -1,8 +1,5 @@
-'use strict'
-
-const Channel = require('ipfs-pubsub-1on1')
-
-const Logger = require('logplease')
+import Channel from 'ipfs-pubsub-1on1'
+import Logger from 'logplease'
 const logger = Logger.create('exchange-heads', { color: Logger.Colors.Yellow })
 Logger.setLogLevel('ERROR')
 
@@ -13,7 +10,7 @@ const getHeadsForDatabase = async store => {
   return [...localHeads, ...remoteHeads]
 }
 
-const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection, onMessage, onChannelCreated) => {
+export default async (ipfs, address, peer, getStore, getDirectConnection, onMessage, onChannelCreated) => {
   const _handleMessage = message => {
     const msg = JSON.parse(Buffer.from(message.data).toString())
     const { address, heads } = msg
@@ -46,5 +43,3 @@ const exchangeHeads = async (ipfs, address, peer, getStore, getDirectConnection,
 
   return channel
 }
-
-module.exports = exchangeHeads
