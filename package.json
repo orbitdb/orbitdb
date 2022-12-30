@@ -55,7 +55,7 @@
     "go-ipfs": "^0.9.1",
     "ipfs": "^0.59.0",
     "ipfsd-ctl": "^10.0.3",
-    "localstorage-level-migration": "~0.1.0",
+    "localstorage-level-migration": "github:haydenyoung/localstorage-level-migration#esm",
     "markdown-toc": "^1.2.0",
     "mkdirp": "^1.0.4",
     "mocha": "^9.1.3",

@@ -122,7 +122,7 @@ Object.keys(testAPIs).forEach(API => {
         } catch (e) {
           err = e.toString()
         }
-        assert.strictEqual(err, 'Error: Given AccessController class needs to implement: static get type() { /* return a string /}.')
+        assert.strictEqual(err, 'Error: Given AccessController class needs to implement: static get type() { /* return a string */}.')
       })
 
       it('creates a custom access controller', async () => {

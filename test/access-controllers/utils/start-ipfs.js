@@ -1,4 +1,4 @@
-import IPFSFactory from 'ipfsd-ctl'
+import * as IPFSFactory from 'ipfsd-ctl'
 import { testAPIs } from './test-apis.js'
 
 /**

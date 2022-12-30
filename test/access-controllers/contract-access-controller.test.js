@@ -110,7 +110,7 @@ Object.keys(testAPIs).forEach(API => {
           await accessController.load()
         })
 
-        it.only('creates an access controller', () => {
+        it('creates an access controller', () => {
           assert.notStrictEqual(accessController, null)
           assert.notStrictEqual(accessController, undefined)
         })

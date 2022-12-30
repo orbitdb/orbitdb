@@ -38,7 +38,7 @@ export default async (ipfs, address, peer, getStore, getDirectConnection, onMess
   const heads = await getHeadsForDatabase(getStore(address))
   logger.debug(`Send latest heads of '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
   if (heads) {
-    await channel.send(JSON.stringify({ address: address, heads: heads }))
+    await channel.send(JSON.stringify({ address, heads }))
   }
 
   return channel

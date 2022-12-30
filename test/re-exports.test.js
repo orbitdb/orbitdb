@@ -1,7 +1,7 @@
 import assert from 'assert'
 import OrbitDB from '../src/OrbitDB.js'
 
-const AccessController = OrbitDB.AccessController
+const AccessControllers = OrbitDB.AccessControllers
 const Identities = OrbitDB.Identities
 const Keystore = OrbitDB.Keystore
 
