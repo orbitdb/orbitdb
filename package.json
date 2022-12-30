@@ -24,7 +24,7 @@
     "logplease": "^1.2.14",
     "multihashes": "~3.0.1",
     "orbit-db-access-controllers": "github:haydenyoung/orbit-db-access-controllers#esm",
-    "orbit-db-cache": "github:haydenyoung/orbit-db-cache#esm",
+    "orbit-db-cache": "github:orbitdb/orbit-db-cache#esm-fixes",
     "orbit-db-counterstore": "github:haydenyoung/orbit-db-counterstore#esm",
     "orbit-db-docstore": "github:haydenyoung/orbit-db-docstore#esm",
     "orbit-db-eventstore": "github:haydenyoung/orbit-db-eventstore#esm",
@@ -34,8 +34,8 @@
     "orbit-db-keystore": "github:haydenyoung/orbit-db-keystore#esm",
     "orbit-db-kvstore": "github:haydenyoung/orbit-db-kvstore#esm",
     "orbit-db-pubsub": "github:haydenyoung/orbit-db-pubsub#esm",
-    "orbit-db-storage-adapter": "github:haydenyoung/orbit-db-storage-adapter#esm",
-    "orbit-db-store": "github:haydenyoung/orbit-db-store#esm",
+    "orbit-db-storage-adapter": "github:orbitdb/orbit-db-storage-adapter#esm-fixes",
+    "orbit-db-store": "github:haadcode/orbit-db-store#esm",
     "wherearewe": "^1.0.2"
   },
   "devDependencies": {
