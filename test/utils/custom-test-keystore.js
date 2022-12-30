@@ -48,6 +48,7 @@ class CustomTestKeystore {
   }
 
   close () {}
+  open () {}
 }
 
 class CustomIdProvider extends IdentityProvider {
