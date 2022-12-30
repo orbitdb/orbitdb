@@ -139,7 +139,7 @@ Object.keys(testAPIs).forEach(API => {
         })
       })
 
-      describe.skip('access controls', () => {
+      describe('access controls', () => {
         it('granting access enables to write to the database', async () => {
           let err
           try {

@@ -33,7 +33,7 @@
     "orbit-db-io": "github:haydenyoung/orbit-db-io#esm",
     "orbit-db-keystore": "github:haydenyoung/orbit-db-keystore#esm",
     "orbit-db-kvstore": "github:haydenyoung/orbit-db-kvstore#esm",
-    "orbit-db-pubsub": "github:haydenyoung/orbit-db-pubsub#esm",
+    "orbit-db-pubsub": "github:orbitdb/orbit-db-pubsub#esm",
     "orbit-db-storage-adapter": "github:orbitdb/orbit-db-storage-adapter#esm-fixes",
     "orbit-db-store": "github:haadcode/orbit-db-store#esm",
     "wherearewe": "^1.0.2"

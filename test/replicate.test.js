@@ -20,7 +20,7 @@ const dbPath2 = './orbitdb/tests/replication/2/db2'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Replication (${API})`, function() {
-    this.timeout(5000)
+    this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2, ipfs1, ipfs2
     let orbitdb1, orbitdb2, db1, db2
@@ -124,7 +124,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('replicates database of 100 entries', async () => {
+    it('replicates database of 100 entries', async () => {
       console.log("Waiting for peers to connect")
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
@@ -139,17 +139,11 @@ Object.keys(testAPIs).forEach(API => {
         entryArr.push(i)
 
       return new Promise(async (resolve, reject) => {
-        let c = 0
-        db2.events.on('replicate', (address, entry) => {
-          c ++
-        })
         db2.events.on('replicated', () => {
           // Once db2 has finished replication, make sure it has all elements
           // and process to the asserts below
-          const items = db2.iterator({ limit: -1 }).collect()
-          const all = items.length
+          const all = db2.iterator({ limit: -1 }).collect().length
           finished = (all === entryCount)
-          console.log(">>", finished, all, entryCount, c)
         })
 
         try {
@@ -172,7 +166,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info', async () => {
+    it('emits correct replication info', async () => {
       console.log("Waiting for peers to connect")
       await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
 
@@ -246,7 +240,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info on fresh replication', async () => {
+    it('emits correct replication info on fresh replication', async () => {
       return new Promise(async (resolve, reject) => {
         let finished = false
         const entryCount = 512
@@ -334,7 +328,7 @@ Object.keys(testAPIs).forEach(API => {
       })
     })
 
-    it.skip('emits correct replication info in two-way replication', async () => {
+    it('emits correct replication info in two-way replication', async () => {
       return new Promise(async (resolve, reject) => {
         console.log("Waiting for peers to connect")
         await waitForPeers(ipfs2, [orbitdb1.id], db1.address.toString())
