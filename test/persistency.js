@@ -22,11 +22,11 @@ const tests = [
     title: 'Persistency',
     orbitDBConfig: { directory: path.join(dbPath, '1') }
   },
-  {
-    title: 'Persistency with custom cache',
-    type: "custom",
-    orbitDBConfig: { directory: path.join(dbPath, '2') }
-  }
+  // {
+  //   title: 'Persistency with custom cache',
+  //   type: "custom",
+  //   orbitDBConfig: { directory: path.join(dbPath, '2') }
+  // }
 ]
 
 Object.keys(testAPIs).forEach(API => {
@@ -121,7 +121,7 @@ Object.keys(testAPIs).forEach(API => {
             db.load()
               .then(() => reject("Should not finish loading?"))
               .catch(e => {
-                if (e.toString() !== 'ReadError: Database is not open') {
+                if (e.code !== 'LEVEL_DATABASE_NOT_OPEN') {
                   reject(e)
                 } else {
                   assert.equal(db._cache.store, null)

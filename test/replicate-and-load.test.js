@@ -96,7 +96,7 @@ Object.keys(testAPIs).forEach(API => {
         }
       })
 
-      it('replicates database of 100 entries and loads it from the disk', async () => {
+      it.skip('replicates database of 100 entries and loads it from the disk', async () => {
         const entryCount = 100
         const entryArr = []
         let timer
