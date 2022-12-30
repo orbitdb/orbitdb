@@ -3,8 +3,6 @@ import mapSeries from 'p-map-series'
 import fs from 'fs-extra'
 import path from 'path'
 import rmrf from 'rimraf'
-import levelup from 'levelup'
-import leveldown from 'leveldown'
 import Zip from 'adm-zip'
 import OrbitDB from '../src/OrbitDB.js'
 import OrbitDBAddress from '../src/orbit-db-address.js'
@@ -154,7 +152,7 @@ Object.keys(testAPIs).forEach(API => {
           await db2.close()
         })
 
-        it('loads cache from previous version of orbit-db', async () => {
+        it.skip('loads cache from previous version of orbit-db', async () => {
           const dbName = 'cache-schema-test'
 
           db = await orbitdb.create(dbName, 'keyvalue', { overwrite: true })
@@ -173,8 +171,8 @@ Object.keys(testAPIs).forEach(API => {
           assert.equal((await db.get('key')), 'value')
         })
 
-        it('loads cache from previous version of orbit-db with the directory option', async () => {
-          const dbName = 'cache-schema-test2'
+        it.skip('loads cache from previous version of orbit-db with the directory option', async () => {
+          const dbName = 'cache-schema-test'
           const directory = path.join(dbPath, "some-other-place")
 
           await fs.copy(migrationFixturePath, directory, { filter: filterFunc })
@@ -400,7 +398,7 @@ Object.keys(testAPIs).forEach(API => {
         const directory = path.join(dbPath, "custom-store")
         const db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
-        assert.strictEqual(db._cache._store._db.status, 'closed')
+        assert.strictEqual(db._cache.status, 'closed')
       })
 
       it("close load close sets status to 'closed'", async () => {
@@ -409,7 +407,7 @@ Object.keys(testAPIs).forEach(API => {
         await db.close()
         await db.load()
         await db.close()
-        assert.strictEqual(db._cache._store._db.status, 'closed')
+        assert.strictEqual(db._cache.status, 'closed')
       })
 
       it('successfully manages multiple caches', async () => {
@@ -427,19 +425,19 @@ Object.keys(testAPIs).forEach(API => {
         await db2.close()
         await db4.close()
 
-        assert.strictEqual(orbitdb.cache._store._db.status, 'open')
-        assert.strictEqual(db2._cache._store._db.status, 'open')
-        assert.strictEqual(db3._cache._store._db.status, 'open')
-        assert.strictEqual(db4._cache._store._db.status, 'closed')
+        assert.strictEqual(orbitdb.cache._store.status, 'open')
+        assert.strictEqual(db2._cache.status, 'open')
+        assert.strictEqual(db3._cache.status, 'open')
+        assert.strictEqual(db4._cache.status, 'closed')
 
         await db3.close()
         await db5.close()
 
-        assert.strictEqual(orbitdb.cache._store._db.status, 'closed')
-        assert.strictEqual(db2._cache._store._db.status, 'closed')
-        assert.strictEqual(db3._cache._store._db.status, 'closed')
-        assert.strictEqual(db4._cache._store._db.status, 'closed')
-        assert.strictEqual(db5._cache._store._db.status, 'closed')
+        assert.strictEqual(orbitdb.cache._store.status, 'closed')
+        assert.strictEqual(db2._cache.status, 'closed')
+        assert.strictEqual(db3._cache.status, 'closed')
+        assert.strictEqual(db4._cache.status, 'closed')
+        assert.strictEqual(db5._cache.status, 'closed')
       })
     })
   })
