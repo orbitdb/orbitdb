@@ -27,7 +27,7 @@ Object.keys(testAPIs).forEach(API => {
     let ipfsd, ipfs, orbitdb1, store
 
     before(async () => {
-      store = await storage.createStore("local")
+      store = await storage.createStore("orbitdb/test/local")
       const cache = new CustomCache(store)
 
       rmrf.sync(dbPath)
