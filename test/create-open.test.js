@@ -152,7 +152,7 @@ Object.keys(testAPIs).forEach(API => {
           await db2.close()
         })
 
-        it.skip('loads cache from previous version of orbit-db', async () => {
+        it('loads cache from previous version of orbit-db', async () => {
           const dbName = 'cache-schema-test'
 
           db = await orbitdb.create(dbName, 'keyvalue', { overwrite: true })
@@ -164,14 +164,14 @@ Object.keys(testAPIs).forEach(API => {
           await db.drop()
 
           await fs.copy(migrationFixturePath, migrationDataPath, { filter: filterFunc })
-          db = await orbitdb.create(dbName, 'keyvalue')
+          db = await orbitdb.create(dbName, 'keyvalue', { directory: migrationDataPath, overwrite: true })
           await db.load()
 
           assert.equal(manifestHash, db.address.root)
           assert.equal((await db.get('key')), 'value')
         })
 
-        it.skip('loads cache from previous version of orbit-db with the directory option', async () => {
+        it('loads cache from previous version of orbit-db with the directory option', async () => {
           const dbName = 'cache-schema-test'
           const directory = path.join(dbPath, "some-other-place")
 
