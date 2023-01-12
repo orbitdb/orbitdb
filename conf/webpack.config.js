@@ -22,15 +22,9 @@ export default (env, argv) => {
     target: 'web',
     externals: {
       fs: '{ existsSync: () => true }',
-      'fs-shim': '{ existsSync: () => true }',
       mkdirp: '{}'
     },
     plugins: [
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-        }
-      }),
       new webpack.ProvidePlugin({
         process: 'process/browser',
         Buffer: ['buffer', 'Buffer']

@@ -4,7 +4,6 @@ import rmrf from 'rimraf'
 import OrbitDB from '../src/OrbitDB.js'
 import Identities from 'orbit-db-identity-provider'
 import Keystore from 'orbit-db-keystore'
-import leveldown from 'leveldown'
 import storageAdapter from 'orbit-db-storage-adapter'
 
 // Include test utilities
@@ -15,7 +14,7 @@ import {
   testAPIs,
 } from 'orbit-db-test-utils'
 
-const storage = storageAdapter(leveldown)
+const storage = storageAdapter()
 
 const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'

@@ -4,7 +4,6 @@ import rmrf from 'rimraf'
 import path from 'path'
 import OrbitDB from '../src/OrbitDB.js'
 import Cache from 'orbit-db-cache'
-import localdown from 'localstorage-down'
 import Storage from 'orbit-db-storage-adapter'
 
 // Include test utilities
@@ -22,11 +21,6 @@ const tests = [
     title: 'Persistency',
     orbitDBConfig: { directory: path.join(dbPath, '1') }
   },
-  // {
-  //   title: 'Persistency with custom cache',
-  //   type: "custom",
-  //   orbitDBConfig: { directory: path.join(dbPath, '2') }
-  // }
 ]
 
 Object.keys(testAPIs).forEach(API => {
@@ -40,12 +34,6 @@ Object.keys(testAPIs).forEach(API => {
 
       before(async () => {
         const options = Object.assign({}, test.orbitDBConfig)
-
-        if(test.type === "custom") {
-          const customStorage = Storage(localdown)
-          const customStore = await customStorage.createStore(dbPath)
-          options.cache = new Cache(customStore)
-        }
 
         rmrf.sync(dbPath)
         ipfsd = await startIpfs(API, config.daemon1)

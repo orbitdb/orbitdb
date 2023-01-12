@@ -3,10 +3,6 @@ import mh from 'multihashes'
 
 const defaultHashAlg = 'sha2-256'
 
-// 'use strict'
-
-// const ImmutableDB from './immutabledb-interface')
-
 const createMultihash = (data, hashAlg) => {
   return new Promise((resolve, reject) => {
     multihashing(data, hashAlg || defaultHashAlg, (err, multihash) => {
@@ -17,26 +13,16 @@ const createMultihash = (data, hashAlg) => {
   })
 }
 
-// const LRU from 'lru')
-// const ImmutableDB from './immutabledb-interface')
-// const createMultihash from './create-multihash')
-
-/* Memory store using an LRU cache */
 export default class MemStore {
   constructor () {
-    this._store = {}// new LRU(1000)
+    this._store = {}
   }
 
   async put (value) {
-    const data = value// new Buffer(JSON.stringify(value))
+    const data = value
     const hash = await createMultihash(data)
-    // console.log(this._store)
-    // this._store.set(hash, data)
     if (!this._store) this._store = {}
-    // console.log(this._store)
-    // console.log(hash, data)
     this._store[hash] = data
-    // return hash
     return {
       toJSON: () => {
         return {
@@ -48,12 +34,6 @@ export default class MemStore {
   }
 
   async get (key) {
-    // if (data) {
-    //   const value = JSON.parse(data)
-    //   return value
-    // }
-
-    // return data
     return {
       toJSON: () => {
         return {

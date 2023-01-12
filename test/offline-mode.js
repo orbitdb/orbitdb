@@ -6,7 +6,6 @@ import rmrf from 'rimraf'
 import OrbitDB from '../src/OrbitDB.js'
 import Identities from 'orbit-db-identity-provider'
 import Keystore from 'orbit-db-keystore'
-import leveldown from 'leveldown'
 import storageAdapter from 'orbit-db-storage-adapter'
 
 // Include test utilities
@@ -17,7 +16,7 @@ import {
   testAPIs,
 } from 'orbit-db-test-utils'
 
-const storage = storageAdapter(leveldown) 
+const storage = storageAdapter() 
 
 const dbPath1 = './orbitdb/tests/offline/db1'
 const dbPath2 = './orbitdb/tests/offline/db2'
