@@ -1,31 +1,39 @@
 import path from 'path'
 import webpack from 'webpack'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 
 export default (env, argv) => {
+  const require = createRequire(import.meta.url)
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+
   return {
+    mode: 'production',
     entry: './src/OrbitDB.js',
     output: {
-      libraryTarget: 'var',
-      library: 'OrbitDB',
-      filename: '../dist/orbitdb.min.js'
+      filename: '../dist/orbitdb.min.js',
+      library: {
+        name: 'OrbitDB',
+        type: 'var',
+        export: 'default'
+      }
     },
-    mode: 'development',
     target: 'web',
-    devtool: 'none',
     externals: {
-      fs: '{}',
+      fs: '{ existsSync: () => true }',
+      'fs-shim': '{ existsSync: () => true }',
       mkdirp: '{}'
-    },
-    node: {
-      console: false,
-      Buffer: true,
-      mkdirp: 'empty'
     },
     plugins: [
       new webpack.DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify(process.env.NODE_ENV)
         }
+      }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+        Buffer: ['buffer', 'Buffer']
       })
     ],
     resolve: {
@@ -33,8 +41,12 @@ export default (env, argv) => {
         'node_modules',
         path.resolve(__dirname, '../node_modules')
       ],
-      alias: {
-        leveldown: 'level-js'
+      fallback: {
+        path: require.resolve('path-browserify'),
+        os: false,
+        fs: false,
+        constants: false,
+        stream: false
       }
     },
     resolveLoader: {
@@ -42,7 +54,8 @@ export default (env, argv) => {
         'node_modules',
         path.resolve(__dirname, '../node_modules')
       ],
-      moduleExtensions: ['-loader']
+      extensions: ['.js', '.json'],
+      mainFields: ['loader', 'main']
     }
   }
 }

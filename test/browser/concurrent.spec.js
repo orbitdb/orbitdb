@@ -23,6 +23,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
   let browser
   const options = {
     ignoreHTTPSErrors: true,
+    dumpio: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     executablePath: chromium.path
   }
@@ -43,6 +44,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
         await page.goto(`file://${path.resolve('test/browser/index.html')}`)
         page.on('dialog', dialog => dialog.dismiss())
         page.on('pageerror', err => console.error(err))
+        page.on('console', message => console.log(message))
         await wait(1000)
         return page
       }

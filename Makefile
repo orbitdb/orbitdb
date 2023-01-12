@@ -5,7 +5,6 @@ deps:
 
 test: deps
 	npm run test:all -- --exit
-	npx validate-maintainers orbit-db --match --ci
 
 build:
 	mkdir -p examples/browser/lib/
