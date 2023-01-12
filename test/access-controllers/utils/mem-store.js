@@ -1,13 +1,7 @@
-'use strict'
-
-const multihashing = require('multihashing-async')
-const mh = require('multihashes')
+import multihashing from 'multihashing-async'
+import mh from 'multihashes'
 
 const defaultHashAlg = 'sha2-256'
-
-// 'use strict'
-
-// const ImmutableDB = require('./immutabledb-interface')
 
 const createMultihash = (data, hashAlg) => {
   return new Promise((resolve, reject) => {
@@ -19,26 +13,16 @@ const createMultihash = (data, hashAlg) => {
   })
 }
 
-// const LRU = require('lru')
-// const ImmutableDB = require('./immutabledb-interface')
-// const createMultihash = require('./create-multihash')
-
-/* Memory store using an LRU cache */
-class MemStore {
+export default class MemStore {
   constructor () {
-    this._store = {}// new LRU(1000)
+    this._store = {}
   }
 
   async put (value) {
-    const data = value// new Buffer(JSON.stringify(value))
+    const data = value
     const hash = await createMultihash(data)
-    // console.log(this._store)
-    // this._store.set(hash, data)
     if (!this._store) this._store = {}
-    // console.log(this._store)
-    // console.log(hash, data)
     this._store[hash] = data
-    // return hash
     return {
       toJSON: () => {
         return {
@@ -50,12 +34,6 @@ class MemStore {
   }
 
   async get (key) {
-    // if (data) {
-    //   const value = JSON.parse(data)
-    //   return value
-    // }
-
-    // return data
     return {
       toJSON: () => {
         return {
@@ -66,5 +44,3 @@ class MemStore {
     }
   }
 }
-
-module.exports = MemStore

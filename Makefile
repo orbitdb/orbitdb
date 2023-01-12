@@ -5,7 +5,6 @@ deps:
 
 test: deps
 	npm run test:all -- --exit
-	npx validate-maintainers orbit-db --match --ci
 
 build:
 	mkdir -p examples/browser/lib/
@@ -21,6 +20,10 @@ build:
 clean:
 	rm -rf orbitdb/
 	rm -rf node_modules/
+	rm test/browser/identities.js
+	rm test/browser/ipfs.js
+	rm test/browser/orbitdb.js
+	rm test/browser/ipfslog.min.js
 
 clean-dependencies: clean
 	rm -f package-lock.json

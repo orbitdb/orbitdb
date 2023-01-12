@@ -1,11 +1,11 @@
 'use strict'
-const assert = require('assert')
-const puppeteer = require('puppeteer-core')
-const chromium = require('chromium')
-const path = require('path')
-const mapSeries = require('p-map-series')
-const pMap = require('p-map')
-const { config } = require('orbit-db-test-utils')
+import assert from 'assert'
+import puppeteer from 'puppeteer-core'
+import chromium from 'chromium'
+import path from 'path'
+import mapSeries from 'p-map-series'
+import pMap from 'p-map'
+import { config } from 'orbit-db-test-utils'
 
 const clicksPerTab = 20
 const numTabs = 3
@@ -23,6 +23,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
   let browser
   const options = {
     ignoreHTTPSErrors: true,
+    dumpio: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     executablePath: chromium.path
   }
@@ -40,9 +41,10 @@ describe(`orbit-db - browser concurrent writes`, function () {
     before(async () => {
       const createTab = async () => {
         const page = await browser.newPage()
-        await page.goto(`file://${path.resolve(__dirname, 'index.html')}`)
+        await page.goto(`file://${path.resolve('test/browser/index.html')}`)
         page.on('dialog', dialog => dialog.dismiss())
         page.on('pageerror', err => console.error(err))
+        page.on('console', message => console.log(message))
         await wait(1000)
         return page
       }

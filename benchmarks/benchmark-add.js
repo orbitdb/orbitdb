@@ -30,7 +30,7 @@ const repoConf = {
 }
 
 const ipfs = new IPFS({
-  repo: new IPFSRepo('./orbitdb/benchmarks/ipfs', repoConf),
+  repo: new IPFSRepo.createRepo('./orbitdb/benchmarks/ipfs', repoConf),
   start: false,
   EXPERIMENTAL: {
     sharding: false,

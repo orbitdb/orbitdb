@@ -1,11 +1,11 @@
-const path = require('path')
-const io = require('orbit-db-io')
+import path from 'path'
+import * as io from 'orbit-db-io'
 
 // Creates a DB manifest file and saves it in IPFS
-const createDBManifest = async (ipfs, name, type, accessControllerAddress, options) => {
+export default async (ipfs, name, type, accessControllerAddress, options) => {
   const manifest = Object.assign({
-    name: name,
-    type: type,
+    name,
+    type,
     accessController: (path.posix || path).join('/ipfs', accessControllerAddress)
   },
   // meta field is only added to manifest if options.meta is defined
@@ -14,5 +14,3 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, optio
 
   return io.write(ipfs, options.format || 'dag-cbor', manifest, options)
 }
-
-module.exports = createDBManifest

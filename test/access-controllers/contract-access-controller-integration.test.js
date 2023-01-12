@@ -1,25 +1,26 @@
-'use strict'
+import assert from 'assert'
+import rmrf from 'rimraf'
+import OrbitDB from '../../src/OrbitDB.js'
+import IdentityProvider from 'orbit-db-identity-provider'
+import EthIdentityProvider from 'orbit-db-identity-provider/ethereum'
+import Keystore from 'orbit-db-keystore'
+import AccessControllers from 'orbit-db-access-controllers'
+import ContractAccessController from 'orbit-db-access-controllers/contract'
+import DepositContractAccessController from 'orbit-db-access-controllers/deposit-contract'
+import ganache from 'ganache-cli'
+import Web3 from 'web3'
+import * as io from 'orbit-db-io'
+import Access from './Access.json' assert {type: "json"}
+import PayDeposit from './PayDeposit.json' assert {type: "json"}
 
-const assert = require('assert')
-const rmrf = require('rimraf')
-const OrbitDB = require('../../src/OrbitDB.js')
-const IdentityProvider = require('orbit-db-identity-provider')
-const EthIdentityProvider = require('orbit-db-identity-provider/src/ethereum-identity-provider')
-const Keystore = require('orbit-db-keystore')
-const AccessControllers = require('orbit-db-access-controllers')
-const ContractAccessController = require('orbit-db-access-controllers/src/contract-access-controller')
-const DepositContractAccessController = require('orbit-db-access-controllers/src/deposit-contract-access-controller')
-const ganache = require('ganache-cli')
-const Web3 = require('web3')
-const io = require('orbit-db-io')
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
   connectPeers
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath1 = './orbitdb/tests/contract-access-controller-integration/1'
 const dbPath2 = './orbitdb/tests/contract-access-controller-integration/2'
@@ -27,11 +28,11 @@ const dbPath2 = './orbitdb/tests/contract-access-controller-integration/2'
 const accessControllers = [
   {
     AccessController: ContractAccessController,
-    contract: require('./Access')
+    contract: Access
   },
   {
     AccessController: DepositContractAccessController,
-    contract: require('./PayDeposit')
+    contract: PayDeposit
   }
 ]
 
@@ -118,7 +119,8 @@ Object.keys(testAPIs).forEach(API => {
               abi: ac.contract.abi,
               contractAddress: contract._address,
               defaultAccount: accounts[i]
-            }
+            },
+            timeout: 1000
           })
 
           // DB peer needs to provide web3 instance
@@ -127,7 +129,8 @@ Object.keys(testAPIs).forEach(API => {
             accessController: {
               web3: web3,
               defaultAccount: accounts[(i + 1) % accessControllers.length] // peer owns different eth-account
-            }
+            },
+            timeout: 1000
           })
 
           await db2.load()

@@ -1,27 +1,28 @@
-'use strict'
+import assert from 'assert'
+import fs from 'fs-extra'
+import path from 'path'
+import rmrf from 'rimraf'
+import leveldown from 'leveldown'
+import Zip from 'adm-zip'
+import OrbitDB from '../src/OrbitDB.js'
+import Identities from 'orbit-db-identity-provider'
+import migrate from 'localstorage-level-migration'
+import Keystore from 'orbit-db-keystore'
+import storageAdapter from 'orbit-db-storage-adapter'
+// Include test utilities
+import {
+    config,
+    startIpfs,
+    stopIpfs,
+    testAPIs,
+} from 'orbit-db-test-utils'
 
-const assert = require('assert')
-const fs = require('fs-extra')
-const path = require('path')
-const rmrf = require('rimraf')
-const leveldown = require('leveldown')
-const Zip = require('adm-zip')
-const OrbitDB = require('../src/OrbitDB')
-const Identities = require('orbit-db-identity-provider')
-const migrate = require('localstorage-level-migration')
-const Keystore = require('orbit-db-keystore')
-const storage = require('orbit-db-storage-adapter')(leveldown)
+const storage = storageAdapter(leveldown)
+
 storage.preCreate = async (directory, options) => {
   fs.mkdirSync(directory, { recursive: true })
 }
 
-// Include test utilities
-const {
-  config,
-  startIpfs,
-  stopIpfs,
-  testAPIs,
-} = require('orbit-db-test-utils')
 
 const dbPath = path.join('./orbitdb', 'tests', 'v0')
 const dbFixturesDir = path.join('./test', 'fixtures', 'v0', 'QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC', 'v0-db')

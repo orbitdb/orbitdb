@@ -1,6 +1,4 @@
-'use strict'
-
-const waitForPeers = (ipfs, peersToWait, topic, callback) => {
+export default (ipfs, peersToWait, topic, callback) => {
   return new Promise((resolve, reject) => {
     const i = setInterval(async () => {
       const peers = await ipfs.pubsub.peers(topic)
@@ -12,5 +10,3 @@ const waitForPeers = (ipfs, peersToWait, topic, callback) => {
     }, 500)
   })
 }
-
-module.exports = waitForPeers

@@ -1,6 +1,9 @@
 /* eslint-disable */
-const where = require('wherearewe')
+import { isElectronMain } from 'wherearewe'
+import * as fs_ from 'fs'
 
-const fs = (!where.isElectronMain && (typeof window === 'object' || typeof self === 'object')) ? null : eval('require("fs")')
+export const fs = (!isElectronMain && (typeof window === 'object' || typeof self === 'object'))
+  ? null
+  : fs_
 
-module.exports = fs
+export default fs

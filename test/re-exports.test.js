@@ -1,7 +1,9 @@
-'use strict'
+import assert from 'assert'
+import OrbitDB from '../src/OrbitDB.js'
 
-const assert = require('assert')
-const { AccessControllers, Identities, Keystore } = require('../src/OrbitDB')
+const AccessControllers = OrbitDB.AccessControllers
+const Identities = OrbitDB.Identities
+const Keystore = OrbitDB.Keystore
 
 describe('Re-exports', function () {
   it('Successfully re-exports AccessControllers', () => {

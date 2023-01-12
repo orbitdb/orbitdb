@@ -1,18 +1,16 @@
-'use strict'
-
-const assert = require('assert')
-const fs = require('fs')
-const path = require('path')
-const rmrf = require('rimraf')
-const OrbitDB = require('../src/OrbitDB')
+import assert from 'assert'
+import fs from 'fs'
+import path from 'path'
+import rmrf from 'rimraf'
+import OrbitDB from '../src/OrbitDB.js'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath = './orbitdb/tests/drop'
 

@@ -1,18 +1,15 @@
-'use strict'
-
-const assert = require('assert')
-const rmrf = require('rimraf')
-const OrbitDB = require('../src/OrbitDB')
-const OrbitDBAddress = require('../src/orbit-db-address')
-
-const dbPath = './orbitdb/tests/orbit-db-address'
-
-const {
+import assert from 'assert'
+import rmrf from 'rimraf'
+import OrbitDB from '../src/OrbitDB.js'
+import OrbitDBAddress from '../src/orbit-db-address.js'
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
+
+const dbPath = './orbitdb/tests/orbit-db-address'
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - OrbitDB Address (${API})`, function() {

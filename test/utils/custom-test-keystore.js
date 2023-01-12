@@ -1,6 +1,8 @@
-const EC = require('elliptic').ec
+import IdentityProvider from 'orbit-db-identity-provider/interface'
+import pkg from 'elliptic'
+const { ec: EC } = pkg
 const ec = new EC('secp256k1')
-const IdentityProvider = require('orbit-db-identity-provider/src/identity-provider-interface')
+
 /**
  * A custom keystore example
  */
@@ -46,6 +48,7 @@ class CustomTestKeystore {
   }
 
   close () {}
+  open () {}
 }
 
 class CustomIdProvider extends IdentityProvider {
@@ -72,7 +75,7 @@ class CustomIdProvider extends IdentityProvider {
   }
 }
 
-module.exports = (LocalStorage, mkdir) => {
+export default (LocalStorage, mkdir) => {
   return {
     create: (directory) => {
       return new CustomTestKeystore()

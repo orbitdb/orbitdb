@@ -1,8 +1,8 @@
-exports.config = require('./config.js')
-exports.testAPIs = require('./test-apis')
-exports.startIpfs = require('./start-ipfs')
-exports.stopIpfs = require('./stop-ipfs')
-exports.waitForPeers = require('./wait-for-peers')
-exports.connectPeers = require('./connect-peers')
-exports.MemStore = require('./mem-store')
-exports.CustomTestKeystore = require('./custom-test-keystore')
+export { default as config } from './config.js'
+export { testAPIs } from './test-apis.js'
+export { default as startIpfs } from './start-ipfs.js'
+export { default as stopIpfs } from './stop-ipfs.js'
+export { default as waitForPeers } from './wait-for-peers.js'
+export { default as connectPeers } from './connect-peers.js'
+export { default as MemStore } from './mem-store.js'
+export { default as CustomTestKeystore } from './custom-test-keystore.js'

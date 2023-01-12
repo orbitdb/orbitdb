@@ -1,48 +1,55 @@
-'use strict'
+import path from 'path'
+import webpack from 'webpack'
+import { fileURLToPath } from 'url'
+import { createRequire } from 'module'
 
-const path = require('path')
-const webpack = require('webpack')
+export default (env, argv) => {
+  const require = createRequire(import.meta.url)
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
 
-module.exports = {
-  entry: './src/OrbitDB.js',
-  output: {
-    libraryTarget: 'var',
-    library: 'OrbitDB',
-    filename: '../dist/orbitdb.min.js'
-  },
-  mode: 'development',
-  target: 'web',
-  devtool: 'none',
-  externals: {
-    fs: '{}',
-    mkdirp: '{}'
-  },
-  node: {
-    console: false,
-    Buffer: true,
-    mkdirp: 'empty'
-  },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+  return {
+    mode: 'production',
+    entry: './src/OrbitDB.js',
+    output: {
+      filename: '../dist/orbitdb.min.js',
+      library: {
+        name: 'OrbitDB',
+        type: 'var',
+        export: 'default'
       }
-    })
-  ],
-  resolve: {
-    modules: [
-      'node_modules',
-      path.resolve(__dirname, '../node_modules')
+    },
+    target: 'web',
+    externals: {
+      fs: '{ existsSync: () => true }',
+      mkdirp: '{}'
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+        Buffer: ['buffer', 'Buffer']
+      })
     ],
-    alias: {
-      leveldown: 'level-js'
+    resolve: {
+      modules: [
+        'node_modules',
+        path.resolve(__dirname, '../node_modules')
+      ],
+      fallback: {
+        path: require.resolve('path-browserify'),
+        os: false,
+        fs: false,
+        constants: false,
+        stream: false
+      }
+    },
+    resolveLoader: {
+      modules: [
+        'node_modules',
+        path.resolve(__dirname, '../node_modules')
+      ],
+      extensions: ['.js', '.json'],
+      mainFields: ['loader', 'main']
     }
-  },
-  resolveLoader: {
-    modules: [
-      'node_modules',
-      path.resolve(__dirname, '../node_modules')
-    ],
-    moduleExtensions: ['-loader']
   }
 }

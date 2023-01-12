@@ -1,21 +1,20 @@
-'use strict'
-
-const fs = require('fs')
-const assert = require('assert')
-const rmrf = require('rimraf')
-const OrbitDB = require('../src/OrbitDB')
-const Identities = require('orbit-db-identity-provider')
-const Keystore = require('orbit-db-keystore')
-const leveldown = require('leveldown')
-const storage = require('orbit-db-storage-adapter')(leveldown)
+import fs from 'fs'
+import assert from 'assert'
+import rmrf from 'rimraf'
+import OrbitDB from '../src/OrbitDB.js'
+import Identities from 'orbit-db-identity-provider'
+import Keystore from 'orbit-db-keystore'
+import storageAdapter from 'orbit-db-storage-adapter'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
+
+const storage = storageAdapter()
 
 const keysPath = './orbitdb/identity/identitykeys'
 const dbPath = './orbitdb/tests/change-identity'

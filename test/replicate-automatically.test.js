@@ -1,18 +1,16 @@
-'use strict'
-
-const assert = require('assert')
-const mapSeries = require('p-each-series')
-const rmrf = require('rimraf')
-const OrbitDB = require('../src/OrbitDB')
+import assert from 'assert'
+import mapSeries from 'p-each-series'
+import rmrf from 'rimraf'
+import OrbitDB from '../src/OrbitDB.js'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
   connectPeers,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath1 = './orbitdb/tests/replicate-automatically/1'
 const dbPath2 = './orbitdb/tests/replicate-automatically/2'

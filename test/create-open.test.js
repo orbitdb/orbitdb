@@ -1,25 +1,21 @@
-'use strict'
-
-const assert = require('assert')
-const mapSeries = require('p-map-series')
-const fs = require('fs-extra')
-const path = require('path')
-const rmrf = require('rimraf')
-const levelup = require('levelup')
-const leveldown = require('leveldown')
-const Zip = require('adm-zip')
-const OrbitDB = require('../src/OrbitDB')
-const OrbitDBAddress = require('../src/orbit-db-address')
-const Identities = require('orbit-db-identity-provider')
-const io = require('orbit-db-io')
+import assert from 'assert'
+import mapSeries from 'p-map-series'
+import fs from 'fs-extra'
+import path from 'path'
+import rmrf from 'rimraf'
+import Zip from 'adm-zip'
+import OrbitDB from '../src/OrbitDB.js'
+import OrbitDBAddress from '../src/orbit-db-address.js'
+import Identities from 'orbit-db-identity-provider'
+import * as io from 'orbit-db-io'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs,
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath = path.join('./orbitdb', 'tests', 'create-open')
 const migrationFixturePath = path.join('./test', 'fixtures', 'migration', 'cache-schema-test')
@@ -168,7 +164,7 @@ Object.keys(testAPIs).forEach(API => {
           await db.drop()
 
           await fs.copy(migrationFixturePath, migrationDataPath, { filter: filterFunc })
-          db = await orbitdb.create(dbName, 'keyvalue')
+          db = await orbitdb.create(dbName, 'keyvalue', { directory: migrationDataPath, overwrite: true })
           await db.load()
 
           assert.equal(manifestHash, db.address.root)
@@ -176,7 +172,7 @@ Object.keys(testAPIs).forEach(API => {
         })
 
         it('loads cache from previous version of orbit-db with the directory option', async () => {
-          const dbName = 'cache-schema-test2'
+          const dbName = 'cache-schema-test'
           const directory = path.join(dbPath, "some-other-place")
 
           await fs.copy(migrationFixturePath, directory, { filter: filterFunc })
@@ -402,7 +398,7 @@ Object.keys(testAPIs).forEach(API => {
         const directory = path.join(dbPath, "custom-store")
         const db = await orbitdb.open('xyz', { create: true, type: 'feed', directory })
         await db.close()
-        assert.strictEqual(db._cache._store._db.status, 'closed')
+        assert.strictEqual(db._cache.status, 'closed')
       })
 
       it("close load close sets status to 'closed'", async () => {
@@ -411,7 +407,7 @@ Object.keys(testAPIs).forEach(API => {
         await db.close()
         await db.load()
         await db.close()
-        assert.strictEqual(db._cache._store._db.status, 'closed')
+        assert.strictEqual(db._cache.status, 'closed')
       })
 
       it('successfully manages multiple caches', async () => {
@@ -429,19 +425,19 @@ Object.keys(testAPIs).forEach(API => {
         await db2.close()
         await db4.close()
 
-        assert.strictEqual(orbitdb.cache._store._db.status, 'open')
-        assert.strictEqual(db2._cache._store._db.status, 'open')
-        assert.strictEqual(db3._cache._store._db.status, 'open')
-        assert.strictEqual(db4._cache._store._db.status, 'closed')
+        assert.strictEqual(orbitdb.cache._store.status, 'open')
+        assert.strictEqual(db2._cache.status, 'open')
+        assert.strictEqual(db3._cache.status, 'open')
+        assert.strictEqual(db4._cache.status, 'closed')
 
         await db3.close()
         await db5.close()
 
-        assert.strictEqual(orbitdb.cache._store._db.status, 'closed')
-        assert.strictEqual(db2._cache._store._db.status, 'closed')
-        assert.strictEqual(db3._cache._store._db.status, 'closed')
-        assert.strictEqual(db4._cache._store._db.status, 'closed')
-        assert.strictEqual(db5._cache._store._db.status, 'closed')
+        assert.strictEqual(orbitdb.cache._store.status, 'closed')
+        assert.strictEqual(db2._cache.status, 'closed')
+        assert.strictEqual(db3._cache.status, 'closed')
+        assert.strictEqual(db4._cache.status, 'closed')
+        assert.strictEqual(db5._cache.status, 'closed')
       })
     })
   })

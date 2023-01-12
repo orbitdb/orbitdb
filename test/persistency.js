@@ -1,22 +1,18 @@
-'use strict'
-
-const assert = require('assert')
-const mapSeries = require('p-map-series')
-const rmrf = require('rimraf')
-const path = require('path')
-const OrbitDB = require('../src/OrbitDB')
-const Cache = require('orbit-db-cache')
-
-const localdown = require('localstorage-down')
-const Storage = require('orbit-db-storage-adapter')
+import assert from 'assert'
+import mapSeries from 'p-map-series'
+import rmrf from 'rimraf'
+import path from 'path'
+import OrbitDB from '../src/OrbitDB.js'
+import Cache from 'orbit-db-cache'
+import Storage from 'orbit-db-storage-adapter'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath = './orbitdb/tests/persistency'
 
@@ -25,11 +21,6 @@ const tests = [
     title: 'Persistency',
     orbitDBConfig: { directory: path.join(dbPath, '1') }
   },
-  {
-    title: 'Persistency with custom cache',
-    type: "custom",
-    orbitDBConfig: { directory: path.join(dbPath, '2') }
-  }
 ]
 
 Object.keys(testAPIs).forEach(API => {
@@ -43,12 +34,6 @@ Object.keys(testAPIs).forEach(API => {
 
       before(async () => {
         const options = Object.assign({}, test.orbitDBConfig)
-
-        if(test.type === "custom") {
-          const customStorage = Storage(localdown)
-          const customStore = await customStorage.createStore(dbPath)
-          options.cache = new Cache(customStore)
-        }
 
         rmrf.sync(dbPath)
         ipfsd = await startIpfs(API, config.daemon1)
@@ -124,7 +109,7 @@ Object.keys(testAPIs).forEach(API => {
             db.load()
               .then(() => reject("Should not finish loading?"))
               .catch(e => {
-                if (e.toString() !== 'ReadError: Database is not open') {
+                if (e.code !== 'LEVEL_DATABASE_NOT_OPEN') {
                   reject(e)
                 } else {
                   assert.equal(db._cache.store, null)

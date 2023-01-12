@@ -1,20 +1,18 @@
-'use strict'
-
-const assert = require('assert')
-const rmrf = require('rimraf')
-const OrbitDB = require('../../src/OrbitDB.js')
-const IdentityProvider = require('orbit-db-identity-provider')
-const Keystore = require('orbit-db-keystore')
-const OrbitDBAccessController = require('orbit-db-access-controllers/src/orbitdb-access-controller')
-const AccessControllers = require('orbit-db-access-controllers')
+import assert from 'assert'
+import rmrf from 'rimraf'
+import OrbitDB from '../../src/OrbitDB.js'
+import IdentityProvider from 'orbit-db-identity-provider'
+import Keystore from 'orbit-db-keystore'
+import OrbitDBAccessController from 'orbit-db-access-controllers/orbitdb'
+import AccessControllers from 'orbit-db-access-controllers'
 
 // Include test utilities
-const {
+import {
   config,
   startIpfs,
   stopIpfs,
   testAPIs
-} = require('orbit-db-test-utils')
+} from 'orbit-db-test-utils'
 
 const dbPath1 = './orbitdb/tests/orbitdb-access-controller/1'
 const dbPath2 = './orbitdb/tests/orbitdb-access-controller/2'
