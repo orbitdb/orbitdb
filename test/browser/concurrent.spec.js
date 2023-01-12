@@ -1,11 +1,11 @@
 'use strict'
-const assert from 'assert')
-const puppeteer from 'puppeteer-core')
-const chromium from 'chromium')
-const path from 'path')
-const mapSeries from 'p-map-series')
-const pMap from 'p-map')
-const { config } from 'orbit-db-test-utils')
+import assert from 'assert'
+import puppeteer from 'puppeteer-core'
+import chromium from 'chromium'
+import path from 'path'
+import mapSeries from 'p-map-series'
+import pMap from 'p-map'
+import { config } from 'orbit-db-test-utils'
 
 const clicksPerTab = 20
 const numTabs = 3
@@ -40,7 +40,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
     before(async () => {
       const createTab = async () => {
         const page = await browser.newPage()
-        await page.goto(`file://${path.resolve(__dirname, 'index.html')}`)
+        await page.goto(`file://${path.resolve('test/browser/index.html')}`)
         page.on('dialog', dialog => dialog.dismiss())
         page.on('pageerror', err => console.error(err))
         await wait(1000)
