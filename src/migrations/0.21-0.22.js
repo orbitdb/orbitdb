@@ -1,5 +1,5 @@
 import path from 'path'
-import * as fs from '../fs-shim.js'
+import fs from '../fs-shim.js'
 import Cache from 'orbit-db-cache'
 import Logger from 'logplease'
 const logger = Logger.create('orbit-db')
