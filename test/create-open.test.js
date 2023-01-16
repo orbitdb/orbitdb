@@ -23,7 +23,7 @@ const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
   describe(`orbit-db - Create & Open (${API})`, function () {
-    let ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
+    let ipfsFixtures = path.join('./test', 'fixtures', `js-ipfs.zip`)
 
     this.retries(1) // windows...
     this.timeout(config.timeout)

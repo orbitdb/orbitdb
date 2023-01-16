@@ -31,7 +31,7 @@ const keyFixtures = path.join('./test', 'fixtures', 'keys','QmRfPsKJs9YqTot5krRi
 const ipfsFixturesDir = path.join('./test', 'fixtures', 'ipfs')
 
 Object.keys(testAPIs).forEach(API => {
-  const ipfsFixtures = path.join('./test', 'fixtures', `${API}.zip`)
+  const ipfsFixtures = path.join('./test', 'fixtures', `js-ipfs.zip`)
 
   describe(`orbit-db - Backward-Compatibility - Open & Load (${API})`, function () {
     this.retries(1) // windows...
@@ -57,7 +57,7 @@ Object.keys(testAPIs).forEach(API => {
       await fs.copy(path.join(ipfsFixturesDir, 'blocks'), path.join(ipfsd.path, 'blocks'))
       await fs.copy(path.join(ipfsFixturesDir, 'datastore'), path.join(ipfsd.path, 'datastore'), { filter: filterFunc })
 
-      const peerId = (await ipfs.id()).id
+      const peerId = String((await ipfs.id()).id)
       const store = await storage.createStore(path.join(dbPath, peerId, 'keys'))
       keystore = new Keystore(store)
 
