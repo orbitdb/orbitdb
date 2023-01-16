@@ -93,7 +93,7 @@ Object.keys(testAPIs).forEach(API => {
       it('has IPFS instance', async () => {
         const peerId1 = await accessController._orbitdb._ipfs.id()
         const peerId2 = await ipfs1.id()
-        assert.strictEqual(peerId1.id, peerId2.id)
+        assert.strictEqual(String(peerId1.id), String(peerId2.id))
       })
 
       it('sets default capabilities', async () => {
