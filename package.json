@@ -28,13 +28,13 @@
     "orbit-db-docstore": "next",
     "orbit-db-eventstore": "next",
     "orbit-db-feedstore": "next",
-    "orbit-db-identity-provider": "next",
-    "orbit-db-io": "next",
-    "orbit-db-keystore": "next",
+    "orbit-db-identity-provider": "github:orbitdb/orbit-db-identity-provider#latest-ipfs",
+    "orbit-db-io": "github:orbitdb/orbit-db-io#dev/latest-multiformats",
+    "orbit-db-keystore": "github:orbitdb/orbit-db-keystore#dev/simplify-level",
     "orbit-db-kvstore": "next",
     "orbit-db-pubsub": "github:orbitdb/orbit-db-pubsub#fix/message-format",
-    "orbit-db-storage-adapter": "next",
-    "orbit-db-store": "next",
+    "orbit-db-storage-adapter": "github:orbitdb/orbit-db-storage-adapter#dev/simplify-level",
+    "orbit-db-store": "github:orbitdb/orbit-db-store#latest-ipfs",
     "wherearewe": "^2.0.1"
   },
   "devDependencies": {
