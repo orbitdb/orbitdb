@@ -13,7 +13,7 @@ jobs:
           node-version: 'lts/*'
           registry-url: https://registry.npmjs.org/
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --force
       - name: Run linter
         run: npm run lint
       - name: Run tests
