@@ -313,7 +313,7 @@ You can create a custom access controller by implementing the `AccessController`
 
 ```javascript
 import AccessControllers from 'orbit-db-access-controllers'
-import AccessController from 'orbit-db-access-controllers/src/access-controller-interface'
+import AccessController from 'orbit-db-access-controllers/interface'
 
 class OtherAccessController extends AccessController {
 
