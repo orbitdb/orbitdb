@@ -7,10 +7,6 @@ Note: OrbitDB follows [semver](https://semver.org/). We are currently in alpha: 
 ### ESM
 In this release we've updated OrbitDB and all of its modules to use [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules), JavaScript Modules.
 
-**Note that this is a breaking change and is not backwards compatible!**
-
-usage
-
 ### Latest js-ipfs
 This release also brings compatibility with the latest version of js-ipfs (v0.66.0).
 
