@@ -116,10 +116,10 @@ npm install orbit-db ipfs-http-client
 ```
 
 ```javascript
-import IpfsClient from 'ipfs-http-client'
+import { create } from 'ipfs-http-client'
 import OrbitDB from 'orbit-db'
 
-const ipfs = IpfsClient('localhost', '5001')
+const ipfs = create(new URL('http://localhost:5001'))
 
 const orbitdb = await OrbitDB.createInstance(ipfs)
 const db = await orbitdb.log('hello')
