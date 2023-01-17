@@ -4,9 +4,9 @@
   <img src="images/orbit_db_logo_color.png" width="256" />
 </p>
 
-[![Matrix](https://img.shields.io/matrix/orbit-db:matrix.org?label=chat%20on%20matrix)](https://app.element.io/#/room/#orbit-db:matrix.org) [![CircleCI Status](https://circleci.com/gh/orbitdb/orbit-db.svg?style=shield)](https://circleci.com/gh/orbitdb/orbit-db) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
+[![Matrix](https://img.shields.io/matrix/orbit-db:matrix.org?label=chat%20on%20matrix)](https://app.element.io/#/room/#orbit-db:matrix.org) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/orbit-db) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/orbit-db)
 
-OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.io) as its data storage and [IPFS Pubsub](https://github.com/ipfs/go-ipfs/blob/master/core/commands/pubsub.go#L23) to automatically sync databases with peers. It's an eventually consistent database that uses [CRDTs](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type) for conflict-free database merges making OrbitDB an excellent choice for decentralized apps (dApps), blockchain applications and [local-first](https://www.inkandswitch.com/local-first/) web applications.
+OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.tech) as its data storage and [Libp2p Pubsub](https://docs.libp2p.io/concepts/pubsub/overview/) to automatically sync databases with peers. It's an eventually consistent database that uses [Merkle-CRDTs](https://arxiv.org/abs/2004.00107) for conflict-free database writes and merges making OrbitDB an excellent choice for p2p and decentralized apps, blockchain applications and [local-first](https://www.inkandswitch.com/local-first/) web applications.
 
 **Test it live at [Live demo 1](https://ipfs.io/ipfs/QmUsoSkGzUQnCgzfjL549KKf29m5EMYky3Y6gQp5HptLTG/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/QmVWQMLUM3o4ZFbLtLMS1PMLfodeEeBkBPR2a2R3hqQ337/)**!
 
@@ -19,28 +19,28 @@ OrbitDB provides various types of databases for different data models and use ca
 - **[docs](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
 - **[counter](https://github.com/orbitdb/orbit-db/blob/master/API.md#orbitdbcounternameaddress)**: Useful for counting events separate from log/feed data.
 
-All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, operation-based conflict-free replicated data structure (CRDT) for distributed systems. If none of the OrbitDB database types match your needs and/or you need case-specific functionality, you can easily [implement and use a custom database store](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#custom-stores) of your own.
+All databases are [implemented](https://github.com/orbitdb/orbit-db-store) on top of [ipfs-log](https://github.com/orbitdb/ipfs-log), an immutable, cryptographically verifiable, operation-based conflict-free replicated data structure ([CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) for distributed systems. ipfs-log is formalized in the paper [Merkle-CRDTs](https://arxiv.org/abs/2004.00107). You can also easily extend OrbitDB by [implementing and using a custom data model](https://github.com/orbitdb/orbit-db/blob/master/GUIDE.md#custom-stores) benefitting from the same properties as the default data models provided by the underlying Merkle-CRDTs.
 
 #### Project status & support
 
 * Status: **in active development**
-* Compatible with **js-ipfs versions <= 0.52** and **go-ipfs versions <= 0.6.0**
+* Compatible with **js-ipfs versions >= 0.66.0** and **go-ipfs versions >= 0.17.0**
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://app.element.io/#/room/#orbit-db:matrix.org) if you plan to use OrbitDB in mission critical systems.*
 
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
-To use with older versions of Node.js, we provide an ES5-compatible build through the npm package, located in `dist/es5/` when installed through npm.
+A Go implementation is developed and maintained by the [Berty](https://github.com/berty) project at [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
 
 ## Table of Contents
 
 <!-- toc -->
 
 - [Usage](#usage)
-  * [Database browser UI](#database-browser-ui)
   * [Module with IPFS Instance](#module-with-ipfs-instance)
   * [Module with IPFS Daemon](#module-with-ipfs-daemon)
 - [API](#api)
+- [Database browser UI](#database-browser-ui)
 - [Examples](#examples)
   * [Install dependencies](#install-dependencies)
   * [Browser example](#browser-example)
@@ -67,18 +67,6 @@ Read the **[GETTING STARTED](https://github.com/orbitdb/orbit-db/blob/master/GUI
 
 For a more in-depth tutorial and exploration of OrbitDB's architecture, please check out the **[OrbitDB Field Manual](https://github.com/orbitdb/field-manual)**.
 
-### Database browser UI
-
-OrbitDB databases can easily be managed using a web UI, see **[OrbitDB Control Center](https://github.com/orbitdb/orbit-db-control-center)**.
-
-Install and run it locally:
-
-```
-git clone https://github.com/orbitdb/orbit-db-control-center.git
-cd orbit-db-control-center/
-npm i && npm start
-```
-
 ### Module with IPFS Instance
 
 If you're using `orbit-db` to develop **browser** or **Node.js** applications, use it as a module with the javascript instance of IPFS
@@ -91,8 +79,8 @@ npm install orbit-db ipfs
 
 
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 ;(async function () {
   const ipfs = await IPFS.create()
@@ -128,10 +116,10 @@ npm install orbit-db ipfs-http-client
 ```
 
 ```javascript
-const IpfsClient = require('ipfs-http-client')
-const OrbitDB = require('orbit-db')
+import { create } from 'ipfs-http-client'
+import OrbitDB from 'orbit-db'
 
-const ipfs = IpfsClient('localhost', '5001')
+const ipfs = create(new URL('http://localhost:5001'))
 
 const orbitdb = await OrbitDB.createInstance(ipfs)
 const db = await orbitdb.log('hello')
@@ -142,6 +130,18 @@ const db = await orbitdb.log('hello')
 ## API
 
 See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the full documentation.
+
+## Database browser UI
+
+OrbitDB databases can easily be managed using a web UI, see **[OrbitDB Control Center](https://github.com/orbitdb/orbit-db-control-center)**.
+
+Install and run it locally:
+
+```
+git clone https://github.com/orbitdb/orbit-db-control-center.git
+cd orbit-db-control-center/
+npm i && npm start
+```
 
 ## Examples
 
@@ -205,10 +205,10 @@ OrbitDB uses the following modules:
 
 - [ipfs](https://github.com/ipfs/js-ipfs)
 - [ipfs-log](https://github.com/orbitdb/ipfs-log)
-- [ipfs-pubsub-room](https://github.com/ipfs-shipyard/ipfs-pubsub-room)
 - [crdts](https://github.com/orbitdb/crdts)
-- [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
+- [ipfs-pubsub-1on1](https://github.com/orbitdb/ipfs-pubsub-1on1)
 - [orbit-db-pubsub](https://github.com/orbitdb/orbit-db-pubsub)
+- [orbit-db-cache](https://github.com/orbitdb/orbit-db-cache)
 - [orbit-db-identity-provider](https://github.com/orbitdb/orbit-db-identity-provider)
 - [orbit-db-access-controllers](https://github.com/orbitdb/orbit-db-access-controllers)
 
@@ -272,12 +272,13 @@ If you want to code but don't know where to start, check out the issues labelled
 
 The development of OrbitDB has been sponsored by:
 
-* [Haja Networks](https://haja.io)
 * [Protocol Labs](https://protocol.ai/)
+* [Haja Networks](https://haja.io)
 * [Maintainer Mountaineer](https://maintainer.io)
+* [OrbitDB Open Collective](https://opencollective.com/orbitdb)
 
 If you want to sponsor developers to work on OrbitDB, please reach out to [@haadcode](https://github.com/haadcode).
 
 ## License
 
-[MIT](LICENSE) © 2015-2019 Protocol Labs Inc., Haja Networks Oy
+[MIT](LICENSE) © 2015-2023 Protocol Labs Inc., Haja Networks Oy, OrbitDB Community

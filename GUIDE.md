@@ -58,8 +58,8 @@ See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the ful
 Require OrbitDB and IPFS in your program and create the instances:
 
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   // Create IPFS instance
@@ -87,8 +87,8 @@ First, choose the data model you want to use. The available data models are:
 Then, create a database instance (we'll use Key-Value database in this example):
 
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   // Create IPFS instance
@@ -123,8 +123,8 @@ const address = db.address
 
 For example:
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   const ipfsOptions = { repo: './ipfs',}
@@ -175,7 +175,7 @@ console.log(identity.toJSON())
 
 #### Creating an identity
 ```javascript
-const Identities = require('orbit-db-identity-provider')
+import Identities from 'orbit-db-identity-provider'
 const options = { id: 'local-id' }
 const identity = await Identities.createIdentity(options)
 ```
@@ -202,8 +202,8 @@ You can specify the peers that have write-access to a database. You can define a
 Access rights are setup by passing an `accessController` object that specifies the access-controller type and access rights of the database when created. OrbitDB currently supports write-access. The access rights are specified as an array of public keys of the peers who can write to the database. The public keys to which access is given can be retrieved from the identity.publicKey property of each peer.
 
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   const ipfsOptions = { repo: './ipfs',}
@@ -230,8 +230,8 @@ The keys look like this:
 
 Give access to another peer to write to the database:
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   const ipfsOptions = { repo: './ipfs', }
@@ -267,8 +267,8 @@ The access control mechanism also support "public" databases to which anyone can
 
 This can be done by adding a `*` to the write access array:
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   const ipfsOptions = { repo: './ipfs', }
@@ -312,8 +312,8 @@ await db.access.grant('write', identity2.publicKey) // grant access to identity2
 You can create a custom access controller by implementing the `AccessController` [interface](https://github.com/orbitdb/orbit-db-access-controllers/blob/master/src/access-controller-interface.js) and adding it to the AccessControllers object before passing it to OrbitDB.
 
 ```javascript
-let AccessControllers = require('orbit-db-access-controllers')
-const AccessController = require('orbit-db-access-controllers/src/access-controller-interface')
+import AccessControllers from 'orbit-db-access-controllers'
+import AccessController from 'orbit-db-access-controllers/interface'
 
 class OtherAccessController extends AccessController {
 
@@ -325,7 +325,7 @@ class OtherAccessController extends AccessController {
         return true
 
       return false
-      }
+    }
 
     async grant (access, identity) {} // Logic for granting access to identity
 
@@ -358,8 +358,8 @@ const db = await orbitdb.keyvalue('first-database', {
 To add an entry to the database, we simply call `db.put(key, value)`.
 
 ```javascript
-const IPFS = require('ipfs')
-const OrbitDB = require('orbit-db')
+import IPFS from 'ipfs'
+import OrbitDB from 'orbit-db'
 
 async function main () {
   const ipfsOptions = { repo: './ipfs'}

@@ -493,7 +493,7 @@ OrbitDB.isValidType('docstore')
 ### OrbitDB.addDatabaseType(type, store)
 Adds a custom database type & store to OrbitDB
 ```js
-const CustomStore = require('./CustomStore')
+import CustomStore from './CustomStore'
 OrbitDB.addDatabaseType(CustomStore.type, CustomStore)
 ```
 
