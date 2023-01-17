@@ -2,6 +2,32 @@
 
 Note: OrbitDB follows [semver](https://semver.org/). We are currently in alpha: backwards-incompatible changes may occur in minor releases.
 
+## v0.29.0
+
+### ESM
+In this release we've updated OrbitDB and all of its modules to use [ESM](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules), JavaScript Modules.
+
+**Note that this is a breaking change and is not backwards compatible!**
+
+usage
+
+### Latest js-ipfs
+This release also brings compatibility with the latest version of js-ipfs (v0.66.0).
+
+### Level v8.0.0
+In addition, we've updated the underlying data storage, [Level](https://github.com/Level), to its latest version v8.0.0. We've dropped the automatic migration from Level < v5.0.0 stores, so if you have databases that use and old version of Level, please see the [Upgrading Guide](https://github.com/Level/level/blob/master/UPGRADING.md) for Level on how to migrate manually.
+
+### Misc
+We've also fixed various bugs across the code base, updated all dependencies to their latest versions and removed the ES5 distribution builds.
+
+Note that there are no API changes to OrbitDB in this release.
+
+For more details, please see the relevant main PRs:
+- https://github.com/orbitdb/orbit-db/pull/1044
+- https://github.com/orbitdb/orbit-db/pull/1050
+- https://github.com/orbitdb/orbit-db-storage-adapter/pull/24
+- https://github.com/search?q=org%3Aorbitdb+esm&type=issues
+
 ## v0.24.1
 
 ### JS-IPFS 0.44 Support
