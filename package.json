@@ -109,6 +109,7 @@
   ],
   "keywords": [
     "crdt",
+    "merkle-crdt",
     "database",
     "decentralized",
     "decentralised",
