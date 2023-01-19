@@ -12,7 +12,7 @@ export default (env, argv) => {
     mode: 'development',
     entry: './src/OrbitDB.js',
     output: {
-      filename: '../dist/orbitdb.min.js',
+      filename: '../dist/orbitdb.js',
       library: {
         name: 'OrbitDB',
         type: 'var',
