@@ -1,19 +1,14 @@
-const KeyValueStore = async (Log, Database, ipfs, identity, databaseId, accessController) => {
-  const database = await Database(Log, ipfs, identity, databaseId, accessController)
+const KeyValue = async ({ OpLog, Database, ipfs, identity, databaseId, accessController, storage }) => {
+  const database = await Database({ OpLog, ipfs, identity, databaseId, accessController, storage })
 
-  const { sync, close, addOperation, log } = database
+  const { addOperation, log } = database
 
-  const all = async function * () {
-    const keys = {}
-    for await (const entry of log.traverse()) {
-      const { op, key, value } = entry.payload
-      if (op === 'PUT' && !keys[key]) {
-        keys[key] = true
-        yield { key, value }
-      } else if (op === 'DEL' && !keys[key]) {
-        keys[key] = true
-      }
-    }
+  const put = async (key, value) => {
+    return addOperation({ op: 'PUT', key, value })
+  }
+
+  const del = async (key) => {
+    return addOperation({ op: 'DEL', key, value: null })
   }
 
   const get = async (key) => {
@@ -27,24 +22,28 @@ const KeyValueStore = async (Log, Database, ipfs, identity, databaseId, accessCo
     }
   }
 
-  const put = async (key, value) => {
-    return addOperation({ op: 'PUT', key, value })
-  }
-
-  const del = async (key) => {
-    return addOperation({ op: 'DEL', key, value: null })
+  const iterator = async function * () {
+    const keys = {}
+    for await (const entry of log.traverse()) {
+      const { op, key, value } = entry.payload
+      if (op === 'PUT' && !keys[key]) {
+        keys[key] = true
+        yield { key, value }
+      } else if (op === 'DEL' && !keys[key]) {
+        keys[key] = true
+      }
+    }
   }
 
   return {
+    ...database,
+    type: 'kv',
     put,
     set: put, // Alias for put()
-    get,
     del,
-    all,
-    sync,
-    close,
-    database
+    get,
+    iterator
   }
 }
 
-export default KeyValueStore
+export default KeyValue

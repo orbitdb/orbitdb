@@ -1,10 +1,10 @@
 class LogCreator {
   static async createLogWithSixteenEntries (Log, ipfs, identities) {
     const create = async () => {
-      const logA = Log(identities[0], { logId: 'X' })
-      const logB = Log(identities[1], { logId: 'X' })
-      const log3 = Log(identities[2], { logId: 'X' })
-      const log = Log(identities[3], { logId: 'X' })
+      const logA = await Log(identities[0], { logId: 'X' })
+      const logB = await Log(identities[1], { logId: 'X' })
+      const log3 = await Log(identities[2], { logId: 'X' })
+      const log = await Log(identities[3], { logId: 'X' })
 
       for (let i = 1; i <= 5; i++) {
         await logA.append('entryA' + i)
@@ -41,8 +41,8 @@ class LogCreator {
     const expectedData = []
 
     const create = async () => {
-      const logA = Log(identities[0], { logId: 'X' })
-      const logB = Log(identities[1], { logId: 'X' })
+      const logA = await Log(identities[0], { logId: 'X' })
+      const logB = await Log(identities[1], { logId: 'X' })
       for (let i = 1; i <= amount; i++) {
         await logA.append('entryA' + i)
         await logB.join(logA)

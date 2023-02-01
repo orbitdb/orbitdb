@@ -41,15 +41,17 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await signingKeystore.close()
     })
 
-    describe('append', () => {
+    describe('append', async () => {
       describe('append one', async () => {
         let log
         let values = []
+        let heads = []
 
         before(async () => {
-          log = Log(testIdentity, 'A')
+          log = await Log(testIdentity, { logId: 'A' })
           await log.append('hello1')
           values = await log.values()
+          heads = await log.heads()
         })
 
         it('added the correct amount of items', () => {
@@ -69,7 +71,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         })
 
         it('has the correct heads', async () => {
-          log.heads().forEach((head) => {
+          heads.forEach((head) => {
             strictEqual(head.hash, values[0].hash)
           })
         })
@@ -88,16 +90,20 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         let log
         let values = []
+        let heads = []
 
         before(async () => {
-          log = Log(testIdentity, 'A')
+          log = await Log(testIdentity, { logId: 'A' })
           for (let i = 0; i < amount; i++) {
             await log.append('hello' + i, { pointerCount: nextPointerAmount })
-            // Make sure the log has the right heads after each append
-            values = await log.values()
-            strictEqual(log.heads().length, 1)
-            deepStrictEqual(log.heads()[0], values[values.length - 1])
           }
+          values = await log.values()
+          heads = await log.heads()
+        })
+
+        it('set the correct heads', () => {
+          strictEqual(heads.length, 1)
+          deepStrictEqual(heads[0], values[values.length - 1])
         })
 
         it('added the correct amount of items', () => {

@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, Entry } from '../src/log.js'
+import { Log, Entry, IPFSBlockStorage } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 
@@ -20,6 +20,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let keystore, signingKeystore
+    let storage1, storage2
 
     before(async () => {
       rmrf(identityKeysPath)
@@ -45,6 +46,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       // Create an identity for each peers
       testIdentity = await createIdentity({ id: 'userB', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userA', keystore, signingKeystore })
+
+      storage1 = await IPFSBlockStorage({ ipfs: ipfs1 })
+      storage2 = await IPFSBlockStorage({ ipfs: ipfs2 })
     })
 
     after(async () => {
@@ -57,7 +61,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await signingKeystore.close()
     })
 
-    describe('replicates logs deterministically', function () {
+    describe('replicates logs deterministically', async function () {
       const amount = 128 + 1
       const logId = 'A'
 
@@ -69,6 +73,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         try {
           if (!messageIsFromMe(message)) {
             const entry = await Entry.decode(message.data)
+            await storage1.put(entry.hash, entry.bytes)
             await log1.joinEntry(entry)
           }
         } catch (e) {
@@ -82,6 +87,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         try {
           if (!messageIsFromMe(message)) {
             const entry = await Entry.decode(message.data)
+            await storage2.put(entry.hash, entry.bytes)
             await log2.joinEntry(entry)
           }
         } catch (e) {
@@ -90,10 +96,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
 
       beforeEach(async () => {
-        log1 = Log(testIdentity, { logId })
-        log2 = Log(testIdentity2, { logId })
-        input1 = Log(testIdentity, { logId })
-        input2 = Log(testIdentity2, { logId })
+        log1 = await Log(testIdentity, { logId, storage: storage1 })
+        log2 = await Log(testIdentity2, { logId, storage: storage2 })
+        input1 = await Log(testIdentity, { logId, storage: storage1 })
+        input2 = await Log(testIdentity2, { logId, storage: storage2 })
         await ipfs1.pubsub.subscribe(logId, handleMessage1)
         await ipfs2.pubsub.subscribe(logId, handleMessage2)
       })
@@ -134,7 +140,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         await whileProcessingMessages(config.timeout)
 
-        const result = Log(testIdentity, { logId })
+        const result = await Log(testIdentity, { logId, storage: storage1 })
         await result.join(log1)
         await result.join(log2)
 

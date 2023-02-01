@@ -22,9 +22,9 @@ const queryLoop = async () => {
   console.log('Starting benchmark...')
 
   const identity = await IdentityProvider.createIdentity({ id: 'userA' })
-  const storage = MemoryStorage()
+  const storage = await MemoryStorage()
 
-  log = Log(identity, { logId: 'A', storage })
+  log = await Log(identity, { logId: 'A', storage })
 
   // Output metrics at 1 second interval
   setInterval(() => {

@@ -74,7 +74,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await signingKeystore.close()
     })
 
-    describe('fromJSON', () => {
+    describe('fromJSON', async () => {
       let identities
 
       before(async () => {
@@ -258,9 +258,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves partial log from an entry hash', async () => {
-        const log1 = Log(testIdentity, { logId: 'X' })
-        const log2 = Log(testIdentity2, { logId: 'X' })
-        const log3 = Log(testIdentity3, { logId: 'X' })
+        const log1 = await Log(testIdentity, { logId: 'X' })
+        const log2 = await Log(testIdentity2, { logId: 'X' })
+        const log3 = await Log(testIdentity3, { logId: 'X' })
         const items1 = []
         const items2 = []
         const items3 = []
@@ -305,9 +305,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves full log from an entry hash', async () => {
-        const log1 = Log(testIdentity, { logId: 'X' })
-        const log2 = Log(testIdentity2, { logId: 'X' })
-        const log3 = Log(testIdentity3, { logId: 'X' })
+        const log1 = await Log(testIdentity, { logId: 'X' })
+        const log2 = await Log(testIdentity2, { logId: 'X' })
+        const log3 = await Log(testIdentity3, { logId: 'X' })
         const items1 = []
         const items2 = []
         const items3 = []
@@ -338,9 +338,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves full log from an entry hash 2', async () => {
-        const log1 = Log(testIdentity, { logId: 'X' })
-        const log2 = Log(testIdentity2, { logId: 'X' })
-        const log3 = Log(testIdentity3, { logId: 'X' })
+        const log1 = await Log(testIdentity, { logId: 'X' })
+        const log2 = await Log(testIdentity2, { logId: 'X' })
+        const log3 = await Log(testIdentity3, { logId: 'X' })
         const items1 = []
         const items2 = []
         const items3 = []
@@ -371,9 +371,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves full log from an entry hash 3', async () => {
-        const log1 = Log(testIdentity, { logId: 'X' })
-        const log2 = Log(testIdentity2, { logId: 'X' })
-        const log3 = Log(testIdentity4, { logId: 'X' })
+        const log1 = await Log(testIdentity, { logId: 'X' })
+        const log2 = await Log(testIdentity2, { logId: 'X' })
+        const log3 = await Log(testIdentity4, { logId: 'X' })
         const items1 = []
         const items2 = []
         const items3 = []
@@ -472,7 +472,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         deepStrictEqual(c.values.map(e => e.payload), tmp)
 
         // make sure logX comes after A, B and C
-        const logX = Log(testIdentity4, { logId: 'X' })
+        const logX = await Log(testIdentity4, { logId: 'X' })
         await logX.append('1')
         await logX.append('2')
         await logX.append('3')
@@ -494,9 +494,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves full log of randomly joined log', async () => {
-        const log1 = Log(testIdentity, { logId: 'X' })
-        const log2 = Log(testIdentity3, { logId: 'X' })
-        const log3 = Log(testIdentity4, { logId: 'X' })
+        const log1 = await Log(testIdentity, { logId: 'X' })
+        const log2 = await Log(testIdentity3, { logId: 'X' })
+        const log3 = await Log(testIdentity4, { logId: 'X' })
 
         for (let i = 1; i <= 5; i++) {
           await log1.append('entryA' + i)
@@ -531,10 +531,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('retrieves randomly joined log deterministically', async () => {
-        const logA = Log(testIdentity, { logId: 'X' })
-        const logB = Log(testIdentity3, { logId: 'X' })
-        const log3 = Log(testIdentity4, { logId: 'X' })
-        const log = Log(testIdentity2, { logId: 'X' })
+        const logA = await Log(testIdentity, { logId: 'X' })
+        const logB = await Log(testIdentity3, { logId: 'X' })
+        const log3 = await Log(testIdentity4, { logId: 'X' })
+        const log = await Log(testIdentity2, { logId: 'X' })
 
         for (let i = 1; i <= 5; i++) {
           await logA.append('entryA' + i)
@@ -659,10 +659,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('retrieves partially joined log deterministically - single next pointer', async () => {
         const nextPointerAmount = 1
 
-        const logA = Log(testIdentity, { logId: 'X' })
-        const logB = Log(testIdentity3, { logId: 'X' })
-        const log3 = Log(testIdentity4, { logId: 'X' })
-        const log = Log(testIdentity2, { logId: 'X' })
+        const logA = await Log(testIdentity, { logId: 'X' })
+        const logB = await Log(testIdentity3, { logId: 'X' })
+        const log3 = await Log(testIdentity4, { logId: 'X' })
+        const log = await Log(testIdentity2, { logId: 'X' })
 
         for (let i = 1; i <= 5; i++) {
           await logA.append('entryA' + i, nextPointerAmount)
@@ -723,10 +723,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('retrieves partially joined log deterministically - multiple next pointers', async () => {
         const nextPointersAmount = 64
 
-        const logA = Log(testIdentity, { logId: 'X' })
-        const logB = Log(testIdentity3, { logId: 'X' })
-        const log3 = Log(testIdentity4, { logId: 'X' })
-        const log = Log(testIdentity2, { logId: 'X' })
+        const logA = await Log(testIdentity, { logId: 'X' })
+        const logB = await Log(testIdentity3, { logId: 'X' })
+        const log3 = await Log(testIdentity4, { logId: 'X' })
+        const log = await Log(testIdentity2, { logId: 'X' })
 
         for (let i = 1; i <= 5; i++) {
           await logA.append('entryA' + i, nextPointersAmount)
@@ -804,9 +804,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         beforeEach(async () => {
           const ts = new Date().getTime()
-          log1 = Log(testIdentity, { logId: 'X' })
-          log2 = Log(testIdentity2, { logId: 'X' })
-          log3 = Log(testIdentity3, { logId: 'X' })
+          log1 = await Log(testIdentity, { logId: 'X' })
+          log2 = await Log(testIdentity2, { logId: 'X' })
+          log3 = await Log(testIdentity3, { logId: 'X' })
           items1 = []
           items2 = []
           items3 = []

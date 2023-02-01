@@ -1,7 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { copy } from 'fs-extra'
-import { Log, MemoryStorage } from '../src/log.js'
+import { Log } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 import LogCreator from './utils/log-creator.js'
@@ -9,29 +8,33 @@ import all from 'it-all'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
 const { createLogWithSixteenEntries } = LogCreator
 
-let ipfsd, ipfs, testIdentity, testIdentity2, testIdentity3
-
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - Iterator (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
-
+    let ipfs
+    let ipfsd
     let keystore, signingKeystore
+    let testIdentity, testIdentity2, testIdentity3
 
     before(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      keystore = new Keystore('./keys_1')
+      await keystore.open()
+      for (const [key, value] of Object.entries(identityKeys)) {
+        await keystore.addKey(key, value)
+      }
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      signingKeystore = new Keystore('./keys_2')
+      await signingKeystore.open()
+      for (const [key, value] of Object.entries(signingKeys)) {
+        await signingKeystore.addKey(key, value)
+      }
 
       testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
@@ -41,23 +44,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     after(async () => {
-      await stopIpfs(ipfsd)
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
-      await keystore.close()
-      await signingKeystore.close()
+      if (ipfsd) {
+        await stopIpfs(ipfsd)
+      }
+      if (keystore) {
+        await keystore.close()
+      }
+      if (signingKeystore) {
+        await signingKeystore.close()
+      }
+      rmrf('./keys_1')
+      rmrf('./keys_2')
     })
 
-    describe('Basic iterator functionality', () => {
+    describe('Basic iterator functionality', async () => {
       let log1
       let startHash
       const hashes = []
       const logSize = 100
-      const storage = MemoryStorage()
 
       beforeEach(async () => {
-        log1 = Log(testIdentity, { logId: 'X', storage })
+        log1 = await Log(testIdentity, { logId: 'X' })
 
         for (let i = 0; i < logSize; i++) {
           const entry = await log1.append('entry' + i)
@@ -395,17 +402,18 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
     })
 
-    describe('Iteration over forked/joined logs', () => {
-      let fixture, identities
+    describe('Iteration over forked/joined logs', async () => {
+      let fixture, identities, heads
 
       before(async () => {
         identities = [testIdentity3, testIdentity2, testIdentity3, testIdentity]
         fixture = await createLogWithSixteenEntries(Log, ipfs, identities)
+        heads = await fixture.log.heads()
       })
 
       it('returns the full length from all heads', async () => {
         const it = fixture.log.iterator({
-          lte: fixture.log.heads()
+          lte: heads
         })
 
         const result = await all(it)
@@ -415,7 +423,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('returns partial entries from all heads', async () => {
         const it = fixture.log.iterator({
-          lte: fixture.log.heads(),
+          lte: heads,
           amount: 6
         })
 
@@ -427,7 +435,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('returns partial logs from single heads #1', async () => {
         const it = fixture.log.iterator({
-          lte: [fixture.log.heads()[0]]
+          lte: [heads[0]]
         })
 
         const result = await all(it)
@@ -437,7 +445,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('returns partial logs from single heads #2', async () => {
         const it = fixture.log.iterator({
-          lte: [fixture.log.heads()[1]]
+          lte: [heads[1]]
         })
 
         const result = await all(it)

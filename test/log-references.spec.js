@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, LRUStorage } from '../src/log.js'
+import { Log } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 
@@ -20,7 +20,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let keystore, signingKeystore
-    const storage = LRUStorage()
 
     before(async () => {
       rmrf(identityKeysPath)
@@ -42,12 +41,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await signingKeystore.close()
     })
 
-    describe('References', () => {
+    describe('References', async () => {
       const amount = 64
 
       it('creates entries with 2 references', async () => {
         const maxReferenceDistance = 2
-        const log1 = Log(testIdentity, { logId: 'A', storage })
+        const log1 = await Log(testIdentity, { logId: 'A' })
 
         for (let i = 0; i < amount; i++) {
           await log1.append(i.toString(), { pointerCount: maxReferenceDistance })
@@ -60,7 +59,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('creates entries with 4 references', async () => {
         const maxReferenceDistance = 2
-        const log2 = Log(testIdentity, { logId: 'B', storage })
+        const log2 = await Log(testIdentity, { logId: 'B' })
 
         for (let i = 0; i < amount * 2; i++) {
           await log2.append(i.toString(), { pointerCount: Math.pow(maxReferenceDistance, 2) })
@@ -73,7 +72,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('creates entries with 8 references', async () => {
         const maxReferenceDistance = 2
-        const log3 = Log(testIdentity, { logId: 'C', storage })
+        const log3 = await Log(testIdentity, { logId: 'C' })
 
         for (let i = 0; i < amount * 3; i++) {
           await log3.append(i.toString(), { pointerCount: Math.pow(maxReferenceDistance, 3) })
@@ -86,7 +85,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('creates entries with 16 references', async () => {
         const maxReferenceDistance = 2
-        const log4 = Log(testIdentity, { logId: 'D', storage })
+        const log4 = await Log(testIdentity, { logId: 'D' })
 
         for (let i = 0; i < amount * 4; i++) {
           await log4.append(i.toString(), { pointerCount: Math.pow(maxReferenceDistance, 4) })
@@ -124,7 +123,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       inputs.forEach(input => {
         it(`has ${input.refLength} references, max distance ${input.referenceCount}, total of ${input.amount} entries`, async () => {
           const test = async (amount, referenceCount, refLength) => {
-            const log1 = Log(testIdentity, { logId: 'A', storage })
+            const log1 = await Log(testIdentity, { logId: 'A' })
             for (let i = 0; i < amount; i++) {
               await log1.append((i + 1).toString(), { pointerCount: referenceCount })
             }

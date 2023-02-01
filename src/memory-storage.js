@@ -1,27 +1,41 @@
-const MemoryStorage = (next) => {
-  let values = {}
-  const add = async (hash, data) => {
-    values[hash] = data
-    if (next) {
-      return next.add(data)
-    }
+const MemoryStorage = async () => {
+  let memory = {}
+
+  const put = async (hash, data) => {
+    memory[hash] = data
   }
+
   const get = async (hash) => {
-    if (values[hash]) {
-      return values[hash]
-    }
-    if (next) {
-      return next.get(hash)
+    if (memory[hash]) {
+      return memory[hash]
     }
   }
+
+  const iterator = async function * () {
+    for await (const [key, value] of Object.entries(memory)) {
+      yield [key, value]
+    }
+  }
+
   const merge = async (other) => {
-    values = Object.assign({}, values, other ? other.values() : {})
+    if (other) {
+      for await (const [key, value] of other.iterator()) {
+        put(key, value)
+      }
+    }
   }
+
+  const clear = async () => (memory = {})
+
+  const close = async () => {}
+
   return {
-    add,
+    put,
     get,
+    iterator,
     merge,
-    values: () => values
+    clear,
+    close
   }
 }
 

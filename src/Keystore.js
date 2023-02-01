@@ -95,6 +95,15 @@ export default class Keystore {
     return hasKey
   }
 
+  async addKey (id, key) {
+    try {
+      await this._store.put(id, JSON.stringify(key))
+    } catch (e) {
+      console.log(e)
+    }
+    this._cache.set(id, key)
+  }
+
   async createKey (id, { entropy } = {}) {
     if (!id) {
       throw new Error('id needed to create a key')

@@ -1,8 +1,12 @@
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 
-const IPFSBlockStorage = (next, { ipfs, timeout, pin }) => {
-  const add = async (hash, data) => {
+const defaultTimeout = 30000
+
+const IPFSBlockStorage = async ({ ipfs, timeout, pin }) => {
+  timeout = timeout || defaultTimeout
+
+  const put = async (hash, data) => {
     const cid = CID.parse(hash, base58btc)
     await ipfs.block.put(data, {
       cid: cid.bytes,
@@ -12,27 +16,31 @@ const IPFSBlockStorage = (next, { ipfs, timeout, pin }) => {
       pin,
       timeout
     })
-    if (next) {
-      return next.add(data)
-    }
   }
+
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
     const block = await ipfs.block.get(cid, { timeout })
     if (block) {
       return block
     }
-    if (next) {
-      return next.get(hash)
-    }
   }
+
+  const iterator = async function * () {}
+
   const merge = async (other) => {}
-  const values = () => ({})
+
+  const clear = async () => {}
+
+  const close = async () => {}
+
   return {
-    add,
+    put,
     get,
+    iterator,
     merge,
-    values
+    clear,
+    close
   }
 }
 

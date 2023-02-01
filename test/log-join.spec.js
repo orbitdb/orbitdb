@@ -1,6 +1,5 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { copy } from 'fs-extra'
 import Clock from '../src/lamport-clock.js'
 import { Log } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
@@ -8,33 +7,35 @@ import Keystore from '../src/Keystore.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
+import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
-
-let testIdentity, testIdentity2, testIdentity3, testIdentity4
 
 const last = (arr) => {
   return arr[arr.length - 1]
 }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('Log - Join (' + IPFS + ')', function () {
+  describe('Log - Join (' + IPFS + ')', async function () {
     this.timeout(config.timeout)
-
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let keystore, signingKeystore
     let log1, log2, log3, log4
+    let testIdentity, testIdentity2, testIdentity3, testIdentity4
 
     before(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      keystore = new Keystore('./keys_1')
+      await keystore.open()
+      for (const [key, value] of Object.entries(identityKeys)) {
+        await keystore.addKey(key, value)
+      }
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      signingKeystore = new Keystore('./keys_2')
+      await signingKeystore.open()
+      for (const [key, value] of Object.entries(signingKeys)) {
+        await signingKeystore.addKey(key, value)
+      }
 
       testIdentity = await createIdentity({ id: 'userC', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
@@ -43,18 +44,21 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     after(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
-      await keystore.close()
-      await signingKeystore.close()
+      if (keystore) {
+        await keystore.close()
+      }
+      if (signingKeystore) {
+        await signingKeystore.close()
+      }
+      rmrf('./keys_1')
+      rmrf('./keys_2')
     })
 
     beforeEach(async () => {
-      log1 = Log(testIdentity, { logId: 'X' })
-      log2 = Log(testIdentity2, { logId: 'X' })
-      log3 = Log(testIdentity3, { logId: 'X' })
-      log4 = Log(testIdentity4, { logId: 'X' })
+      log1 = await Log(testIdentity, { logId: 'X' })
+      log2 = await Log(testIdentity2, { logId: 'X' })
+      log3 = await Log(testIdentity3, { logId: 'X' })
+      log4 = await Log(testIdentity4, { logId: 'X' })
     })
 
     it('joins logs', async () => {
@@ -83,7 +87,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const valuesC = await log1.values()
 
       strictEqual(valuesC.length, amount * 2)
-      strictEqual(log1.heads().length, 2)
+      strictEqual((await log1.heads()).length, 2)
     })
 
     it('throws an error if first log is not defined', async () => {
@@ -113,9 +117,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const logIdB = 'BBB'
       let err
       try {
-        const logA = Log(testIdentity, { logId: logIdA })
+        const logA = await Log(testIdentity, { logId: logIdA })
         await logA.append('entryA')
-        const logB = Log(testIdentity, { logId: logIdB })
+        const logB = await Log(testIdentity, { logId: logIdB })
         await logB.append('entryB')
         const valuesB = await logB.values()
         await logA.joinEntry(last(valuesB))
@@ -131,9 +135,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const logIdB = 'BBB'
       let err
       try {
-        const logA = Log(testIdentity, { logId: logIdA })
+        const logA = await Log(testIdentity, { logId: logIdA })
         await logA.append('entryA')
-        const logB = Log(testIdentity, { logId: logIdB })
+        const logB = await Log(testIdentity, { logId: logIdB })
         await logB.append('entryB')
         await logA.join(logB)
       } catch (e) {
@@ -223,35 +227,42 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     it('joins 2 logs two ways and has the right heads at every step', async () => {
       await log1.append('helloA1')
-      strictEqual(log1.heads().length, 1)
-      strictEqual(log1.heads()[0].payload, 'helloA1')
+      const heads1 = await log1.heads()
+      strictEqual(heads1.length, 1)
+      strictEqual(heads1[0].payload, 'helloA1')
 
       await log2.append('helloB1')
-      strictEqual(log2.heads().length, 1)
-      strictEqual(log2.heads()[0].payload, 'helloB1')
+      const heads2 = await log2.heads()
+      strictEqual(heads2.length, 1)
+      strictEqual(heads2[0].payload, 'helloB1')
 
       await log2.join(log1)
-      strictEqual(log2.heads().length, 2)
-      strictEqual(log2.heads()[0].payload, 'helloB1')
-      strictEqual(log2.heads()[1].payload, 'helloA1')
+      const heads3 = await log2.heads()
+      strictEqual(heads3.length, 2)
+      strictEqual(heads3[0].payload, 'helloB1')
+      strictEqual(heads3[1].payload, 'helloA1')
 
       await log1.join(log2)
-      strictEqual(log1.heads().length, 2)
-      strictEqual(log1.heads()[0].payload, 'helloB1')
-      strictEqual(log1.heads()[1].payload, 'helloA1')
+      const heads4 = await log1.heads()
+      strictEqual(heads4.length, 2)
+      strictEqual(heads4[0].payload, 'helloB1')
+      strictEqual(heads4[1].payload, 'helloA1')
 
       await log1.append('helloA2')
-      strictEqual(log1.heads().length, 1)
-      strictEqual(log1.heads()[0].payload, 'helloA2')
+      const heads5 = await log1.heads()
+      strictEqual(heads5.length, 1)
+      strictEqual(heads5[0].payload, 'helloA2')
 
       await log2.append('helloB2')
-      strictEqual(log2.heads().length, 1)
-      strictEqual(log2.heads()[0].payload, 'helloB2')
+      const heads6 = await log2.heads()
+      strictEqual(heads6.length, 1)
+      strictEqual(heads6[0].payload, 'helloB2')
 
       await log2.join(log1)
-      strictEqual(log2.heads().length, 2)
-      strictEqual(log2.heads()[0].payload, 'helloB2')
-      strictEqual(log2.heads()[1].payload, 'helloA2')
+      const heads7 = await log2.heads()
+      strictEqual(heads7.length, 2)
+      strictEqual(heads7[0].payload, 'helloB2')
+      strictEqual(heads7[1].payload, 'helloA2')
     })
 
     it('joins 4 logs to one', async () => {
@@ -319,15 +330,15 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await log1.append('helloA2')
       await log2.append('helloB2')
 
-      strictEqual(log1.clock().id, testIdentity.publicKey)
-      strictEqual(log2.clock().id, testIdentity2.publicKey)
-      strictEqual(log1.clock().time, 2)
-      strictEqual(log2.clock().time, 2)
+      strictEqual((await log1.clock()).id, testIdentity.publicKey)
+      strictEqual((await log2.clock()).id, testIdentity2.publicKey)
+      strictEqual((await log1.clock()).time, 2)
+      strictEqual((await log2.clock()).time, 2)
 
       await log3.join(log1)
       strictEqual(log3.id, 'X')
-      strictEqual(log3.clock().id, testIdentity3.publicKey)
-      strictEqual(log3.clock().time, 2)
+      strictEqual((await log3.clock()).id, testIdentity3.publicKey)
+      strictEqual((await log3.clock()).time, 2)
 
       await log3.append('helloC1')
       await log3.append('helloC2')
@@ -346,11 +357,11 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await log4.append('helloD5')
       await log1.append('helloA5')
       await log4.join(log1)
-      deepStrictEqual(log4.clock().id, testIdentity4.publicKey)
-      deepStrictEqual(log4.clock().time, 7)
+      strictEqual((await log4.clock()).id, testIdentity4.publicKey)
+      strictEqual((await log4.clock()).time, 7)
 
       await log4.append('helloD6')
-      deepStrictEqual(log4.clock().time, 8)
+      strictEqual((await log4.clock()).time, 8)
 
       const expectedData = [
         { payload: 'helloA1', id: 'X', clock: new Clock(testIdentity.publicKey, 1) },
@@ -388,13 +399,13 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       await log1.join(log3)
       strictEqual(log1.id, 'X')
-      strictEqual(log1.clock().id, testIdentity.publicKey)
-      strictEqual(log1.clock().time, 2)
+      strictEqual((await log1.clock()).id, testIdentity.publicKey)
+      strictEqual((await log1.clock()).time, 2)
 
       await log3.join(log1)
       strictEqual(log3.id, 'X')
-      strictEqual(log3.clock().id, testIdentity3.publicKey)
-      strictEqual(log3.clock().time, 2)
+      strictEqual((await log3.clock()).id, testIdentity3.publicKey)
+      strictEqual((await log3.clock()).time, 2)
 
       await log3.append('helloC1')
       await log3.append('helloC2')
@@ -408,8 +419,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await log4.append('helloD3')
       await log4.append('helloD4')
 
-      strictEqual(log4.clock().id, testIdentity4.publicKey)
-      strictEqual(log4.clock().time, 6)
+      strictEqual((await log4.clock()).id, testIdentity4.publicKey)
+      strictEqual((await log4.clock()).time, 6)
 
       const expectedData = [
         'helloA1',

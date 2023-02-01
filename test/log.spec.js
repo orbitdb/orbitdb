@@ -41,55 +41,77 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await signingKeystore.close()
     })
 
-    describe('constructor', async () => {
+    describe('create', async () => {
       it('creates an empty log with default params', async () => {
-        const log = Log(testIdentity)
+        const log = await Log(testIdentity)
         notStrictEqual(log.heads, undefined)
         notStrictEqual(log.id, undefined)
         notStrictEqual(log.id, undefined)
         notStrictEqual(log.clock(), undefined)
-        notStrictEqual(log.heads(), undefined)
-        deepStrictEqual(log.heads(), [])
+        notStrictEqual(await log.heads(), undefined)
+        deepStrictEqual(await log.heads(), [])
 
         const values = await log.values()
         deepStrictEqual(values, [])
       })
 
-      it('sets an id', () => {
-        const log = Log(testIdentity, { logId: 'ABC' })
+      it('sets an id', async () => {
+        const log = await Log(testIdentity, { logId: 'ABC' })
         strictEqual(log.id, 'ABC')
       })
 
-      it('sets the clock id', () => {
-        const log = Log(testIdentity, { logId: 'ABC' })
+      it('sets the clock id', async () => {
+        const log = await Log(testIdentity, { logId: 'ABC' })
         strictEqual(log.id, 'ABC')
-        strictEqual(log.clock().id, testIdentity.publicKey)
+        strictEqual((await log.clock()).id, testIdentity.publicKey)
       })
 
-      it('generates id string if id is not passed as an argument', () => {
-        const log = Log(testIdentity)
+      it('generates id string if id is not passed as an argument', async () => {
+        const log = await Log(testIdentity)
         strictEqual(typeof log.id === 'string', true)
       })
 
-      it('sets heads if given as params', async () => {
+      it('sets one head if multiple are given as params', async () => {
         const one = await create(testIdentity, 'A', 'entryA', null, [])
         const two = await create(testIdentity, 'A', 'entryB', null, [one.hash])
         const three = await create(testIdentity, 'A', 'entryC', null, [two.hash])
-        const storage = MemoryStorage()
-        await storage.add(one.hash, one.bytes)
-        await storage.add(two.hash, two.bytes)
-        await storage.add(three.hash, three.bytes)
-        const log = Log(testIdentity, { logId: 'A', logHeads: [three], storage })
+        const four = await create(testIdentity, 'A', 'entryD', null, [two.hash])
+        const storage = await MemoryStorage()
+        await storage.put(one.hash, one.bytes)
+        await storage.put(two.hash, two.bytes)
+        await storage.put(three.hash, three.bytes)
+        await storage.put(four.hash, four.bytes)
+        const log = await Log(testIdentity, { logId: 'A', logHeads: [three, three, two, two], storage })
         const values = await log.values()
-        strictEqual(log.heads().length, 1)
-        strictEqual(log.heads()[0].hash, three.hash)
+        const heads = await log.heads()
+        strictEqual(heads.length, 1)
+        strictEqual(heads[0].hash, three.hash)
         strictEqual(values.length, 3)
       })
 
-      it('throws an error if heads is not an array', () => {
+      it('sets two heads if two given as params', async () => {
+        const one = await create(testIdentity, 'A', 'entryA', null, [])
+        const two = await create(testIdentity, 'A', 'entryB', null, [one.hash])
+        const three = await create(testIdentity, 'A', 'entryC', null, [two.hash])
+        const four = await create(testIdentity, 'A', 'entryD', null, [two.hash])
+        const storage = await MemoryStorage()
+        await storage.put(one.hash, one.bytes)
+        await storage.put(two.hash, two.bytes)
+        await storage.put(three.hash, three.bytes)
+        await storage.put(four.hash, four.bytes)
+        const log = await Log(testIdentity, { logId: 'A', logHeads: [three, four, two], storage })
+        const values = await log.values()
+        const heads = await log.heads()
+        strictEqual(heads.length, 2)
+        strictEqual(heads[1].hash, three.hash)
+        strictEqual(heads[0].hash, four.hash)
+        strictEqual(values.length, 4)
+      })
+
+      it('throws an error if heads is not an array', async () => {
         let err
         try {
-          Log(testIdentity, { logId: 'A', entries: [], logHeads: {} })
+          await Log(testIdentity, { logId: 'A', entries: [], logHeads: {} })
         } catch (e) {
           err = e
         }
@@ -98,16 +120,16 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('creates default public AccessController if not defined', async () => {
-        const log = Log(testIdentity)
+        const log = await Log(testIdentity)
         const anyoneCanAppend = await log.access.canAppend('any')
         notStrictEqual(log.access, undefined)
         strictEqual(anyoneCanAppend, true)
       })
 
-      it('throws an error if identity is not defined', () => {
+      it('throws an error if identity is not defined', async () => {
         let err
         try {
-          Log()
+          await Log()
         } catch (e) {
           err = e
         }
@@ -118,7 +140,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     describe('values', () => {
       it('returns all entries in the log', async () => {
-        const log = Log(testIdentity)
+        const log = await Log(testIdentity)
         let values = await log.values()
         strictEqual(values instanceof Array, true)
         strictEqual(values.length, 0)

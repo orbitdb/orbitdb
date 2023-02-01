@@ -45,8 +45,8 @@ Object.keys(testAPIs).forEach(IPFS => {
       let log1, log2
 
       before(async () => {
-        log1 = Log(testIdentity, { logId: 'A' })
-        log2 = Log(testIdentity2, { logId: 'A' })
+        log1 = await Log(testIdentity, { logId: 'A' })
+        log2 = await Log(testIdentity2, { logId: 'A' })
       })
 
       it('joins consistently', async () => {

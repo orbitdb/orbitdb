@@ -1,17 +1,17 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, MemoryStorage, LRUStorage, IPFSBlockStorage } from '../src/log.js'
+import { Log } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 
 // Test utils
-import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import { config, testAPIs } from 'orbit-db-test-utils'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
 
-let ipfsd, ipfs, testIdentity, testIdentity2, testIdentity3
+let testIdentity, testIdentity2, testIdentity3
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - CRDT (' + IPFS + ')', function () {
@@ -33,32 +33,28 @@ Object.keys(testAPIs).forEach((IPFS) => {
       testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
       testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeystore })
-      ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
-      ipfs = ipfsd.api
     })
 
     after(async () => {
-      await stopIpfs(ipfsd)
-      await keystore.close()
       await signingKeystore.close()
+      await keystore.close()
       rmrf(identityKeysPath)
       rmrf(signingKeysPath)
     })
 
-    describe('is a CRDT', () => {
+    describe('is a CRDT', async () => {
       const logId = 'X'
 
       let log1, log2, log3
 
       beforeEach(async () => {
-        log1 = Log(testIdentity, { logId })
-        log2 = Log(testIdentity2, { logId })
-        log3 = Log(testIdentity3, { logId })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
       })
 
       it('join is associative', async () => {
         const expectedElementsCount = 6
-        const storage = MemoryStorage()
 
         await log1.append('helloA1')
         await log1.append('helloA2')
@@ -73,9 +69,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         const res1 = await log1.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -97,7 +93,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('join is commutative', async () => {
         const expectedElementsCount = 4
-        const storage = LRUStorage()
 
         await log1.append('helloA1')
         await log1.append('helloA2')
@@ -108,8 +103,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log2.join(log1)
         const res1 = await log2.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -126,11 +121,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('multiple joins are commutative', async () => {
-        const storage = LRUStorage(MemoryStorage())
-
         // b + a == a + b
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -138,8 +131,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log2.join(log1)
         const resA1 = await log2.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -150,8 +143,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         deepStrictEqual(resA1.map(e => e.hash), resA2.map(e => e.hash))
 
         // a + b == b + a
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -159,8 +152,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log1.join(log2)
         const resB1 = await log1.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -171,8 +164,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         deepStrictEqual(resB1.map(e => e.hash), resB2.map(e => e.hash))
 
         // a + c == c + a
-        log1 = Log(testIdentity, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log3.append('helloC1')
@@ -180,8 +173,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log3.join(log1)
         const resC1 = await log3.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log3.append('helloC1')
@@ -192,8 +185,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         deepStrictEqual(resC1.map(e => e.hash), resC2.map(e => e.hash))
 
         // c + b == b + c
-        log2 = Log(testIdentity2, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
 
         await log2.append('helloB1')
         await log2.append('helloB2')
@@ -202,8 +195,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log3.join(log2)
         const resD1 = await log3.values()
 
-        log2 = Log(testIdentity2, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log2.append('helloB1')
         await log2.append('helloB2')
         await log3.append('helloC1')
@@ -214,9 +207,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
         deepStrictEqual(resD1.map(e => e.hash), resD2.map(e => e.hash))
 
         // a + b + c == c + b + a
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -227,9 +220,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await log1.join(log3)
         const logLeft = await log1.values()
 
-        log1 = Log(testIdentity, { logId, storage })
-        log2 = Log(testIdentity2, { logId, storage })
-        log3 = Log(testIdentity3, { logId, storage })
+        log1 = await Log(testIdentity, { logId })
+        log2 = await Log(testIdentity2, { logId })
+        log3 = await Log(testIdentity3, { logId })
         await log1.append('helloA1')
         await log1.append('helloA2')
         await log2.append('helloB1')
@@ -244,10 +237,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('join is idempotent', async () => {
-        const storage = IPFSBlockStorage(MemoryStorage(LRUStorage()), { ipfs })
         const expectedElementsCount = 3
 
-        const logA = Log(testIdentity, { logId, storage })
+        const logA = await Log(testIdentity, { logId })
         await logA.append('helloA1')
         await logA.append('helloA2')
         await logA.append('helloA3')

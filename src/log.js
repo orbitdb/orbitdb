@@ -1,25 +1,34 @@
+import LRU from 'lru'
 import Entry from './entry.js'
 import Clock from './lamport-clock.js'
 import Sorting from './log-sorting.js'
-import AccessController from './default-access-controller.js'
-import { isDefined } from './utils/index.js'
-import LRU from 'lru'
 import IPFSBlockStorage from './ipfs-block-storage.js'
 import MemoryStorage from './memory-storage.js'
 import LRUStorage from './lru-storage.js'
-import LevelStorage from './level-storage.js'
+import ComposedStorage from './composed-storage.js'
+import { isDefined } from './utils/index.js'
 
 const { LastWriteWins, NoZeroes } = Sorting
 
 const randomId = () => new Date().getTime().toString()
 const maxClockTimeReducer = (res, acc) => Math.max(res, acc.clock.time)
 
-// Default storage for storing the Log. Default: In Memory. Options: Memory, LRU, IPFS,
-const defaultStorage = MemoryStorage()
-// const defaultStorage =  LevelStorage()
-// const defaultStorage = IPFSBlockStorage(null, { ipfs, timeout, pin: true })
-// const defaultStorage = MemoryStorage(IPFSBlockStorage(null, { ipfs, timeout, pin: true }))
-// const defaultStorage = LRUStorage()
+// Default storage for storing the Log and its entries. Default: Memory. Options: Memory, LRU, IPFS.
+const DefaultStorage = MemoryStorage
+// const DefaultStorage = LRUStorage
+// const DefaultStorage = IPFSBlockStorage
+
+// Default AccessController for the Log.
+// Default policy is that anyone can write to the Log.
+// Signature of an entry will always be verified regardless of AccessController policy.
+// Any object that implements the function `canAppend()` that returns true|false can be
+// used as an AccessController.
+const DefaultAccessController = async () => {
+  // An AccessController may do any async initialization stuff here...
+  return {
+    canAppend: async (entry, identityProvider) => true
+  }
+}
 
 /**
  * @description
@@ -43,7 +52,7 @@ const defaultStorage = MemoryStorage()
  * @param {Function} options.sortFn The sort function - by default LastWriteWins
  * @return {Log} The log instance
  */
-const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
+const Log = async (identity, { logId, logHeads, access, storage, stateStorage, sortFn } = {}) => {
   if (!isDefined(identity)) {
     throw new Error('Identity is required')
   }
@@ -52,32 +61,44 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
   }
   // Set Log's id
   const id = logId || randomId()
-  // Set heads
-  // TODO: need to be a LevelStorage()
-  logHeads = Array.from(new Set(logHeads || []))
   // Access Controller
-  access = access || new AccessController()
+  access = access || await DefaultAccessController()
   // Oplog entry storage
-  storage = storage || defaultStorage
+  storage = storage || await DefaultStorage()
+  // Add heads to the state storage, ie. init the log state
+  stateStorage = stateStorage || await DefaultStorage()
+  const newHeads = findHeads(new Set(logHeads || []))
+  for (const head of newHeads) {
+    await stateStorage.put(head.hash, true)
+  }
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
-
-  /**
-   * Returns an array of entries
-   * @returns {Array<Entry>}
-   */
-  const heads = () => {
-    return logHeads.slice().sort(sortFn).reverse()
-  }
 
   /**
    * Returns the clock of the log.
    * @returns {LamportClock}
    */
-  const clock = () => {
+  const clock = async () => {
     // Find the latest clock from the heads
-    const maxTime = Math.max(0, heads().reduce(maxClockTimeReducer, 0))
+    const maxTime = Math.max(0, (await heads()).reduce(maxClockTimeReducer, 0))
     return new Clock(identity.publicKey, maxTime)
+  }
+
+  /**
+   * Returns an array of entries
+   * @returns {Array<Entry>}
+   */
+  const heads = async () => {
+    const res = []
+    for await (const [hash] of stateStorage.iterator()) {
+      if (hash) {
+        const entry = await get(hash)
+        if (entry) {
+          res.push(entry)
+        }
+      }
+    }
+    return res.sort(sortFn).reverse()
   }
 
   /**
@@ -98,7 +119,11 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
    * @returns {Promise<Entry|undefined>}
    */
   const get = async (hash) => {
-    return storage.get(hash).then(Entry.decode)
+    const bytes = await storage.get(hash)
+    if (bytes) {
+      const entry = await Entry.decode(bytes)
+      return entry
+    }
   }
 
   /**
@@ -110,13 +135,13 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     // Get references (entry at every pow2 of distance)
     const refs = await getReferences(options.pointerCount)
     // Create the next pointers from heads
-    const nexts = heads().map(entry => entry.hash)
+    const nexts = (await heads()).map(entry => entry.hash)
     // Create the entry
     const entry = await Entry.create(
       identity,
       id,
       data,
-      clock().tick(),
+      (await clock()).tick(),
       nexts,
       refs
     )
@@ -125,10 +150,12 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     if (!canAppend) {
       throw new Error(`Could not append entry:\nKey "${identity.id}" is not allowed to write to the log`)
     }
+
     // The appended entry is now the latest head
-    logHeads = [entry]
+    await stateStorage.clear()
+    await stateStorage.put(entry.hash, true)
     // Add entry to the storage
-    await storage.add(entry.hash, entry.bytes)
+    await storage.put(entry.hash, entry.bytes)
     // Return the appended entry
     return entry
   }
@@ -150,10 +177,13 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     if (!isLog(log)) {
       throw new Error('Given argument is not an instance of Log')
     }
-    for (const entry of log.heads()) {
+    const heads = await log.heads()
+    for (const entry of heads) {
       await joinEntry(entry)
     }
-    await storage.merge(log.storage)
+    if (storage.merge) {
+      await storage.merge(log.storage)
+    }
   }
 
   /**
@@ -170,6 +200,11 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     if (entry.id !== id) {
       throw new Error(`Entry's id (${entry.id}) doesn't match the log's id (${id}).`)
     }
+    // Return early if entry is already in the current heads
+    const currentHeads = await heads()
+    if (currentHeads.find(e => e.hash === entry.hash)) {
+      return
+    }
     // Verify if entry is allowed to be added to the log
     const canAppend = await access.canAppend(entry, identityProvider)
     if (!canAppend) {
@@ -180,10 +215,15 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     if (!isValid) {
       throw new Error(`Could not validate signature for entry "${entry.hash}"`)
     }
-    // Find the new heads
-    logHeads = findHeads(Array.from(new Set([...heads(), entry])))
+    // Find the new heads and set them as the current state
+    const newHeads = findHeads(new Set([...currentHeads, entry]))
+    await stateStorage.clear()
+    for (const head of newHeads) {
+      await stateStorage.put(head.hash, true)
+    }
     // Add new entry to storage
-    await storage.add(entry.hash, entry.bytes)
+    await storage.put(entry.hash, entry.bytes)
+    return true
   }
 
   /**
@@ -195,7 +235,7 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     const defaultStopFn = () => false
     shouldStopFn = shouldStopFn || defaultStopFn
     // Start traversal from given entries or from current heads
-    rootEntries = rootEntries || heads()
+    rootEntries = rootEntries || (await heads())
     // Sort the given given root entries and use as the starting stack
     let stack = rootEntries.sort(sortFn)
     // Keep a record of all the hashes of entries we've traversed and yielded
@@ -248,7 +288,7 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
    * @examples
    *
    * (async () => {
-   *   log = Log(testIdentity, { logId: 'X' })
+   *   log = await Log(testIdentity, { logId: 'X' })
    *
    *   for (let i = 0; i <= 100; i++) {
    *     await log.append('entry' + i)
@@ -266,7 +306,7 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
    *
    *
    */
-  const iterator = async function * ({ amount = -1, gt, gte, lt, lte }) {
+  const iterator = async function * ({ amount = -1, gt, gte, lt, lte } = {}) {
     // TODO: write comments on how the iterator algorithm works
 
     if (amount === 0) {
@@ -286,7 +326,7 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
     if (isDefined(lt) && !Array.isArray(lt)) throw new Error('lt must be a string or an array of Entries')
     if (isDefined(lte) && !Array.isArray(lte)) throw new Error('lte must be a string or an array of Entries')
 
-    const start = (lt || (lte || heads())).filter(isDefined)
+    const start = (lt || (lte || await heads())).filter(isDefined)
     const end = (gt || gte) ? await get(gt || gte) : null
 
     const amountToIterate = end || amount === -1
@@ -337,33 +377,6 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
         yield entry
       }
     }
-  }
-
-  /**
-   * Find heads from a collection of entries.
-   *
-   * Finds entries that are the heads of this collection,
-   * ie. entries that are not referenced by other entries.
-   *
-   * @param {Array<Entry>} entries Entries to search heads from
-   * @returns {Array<Entry>}
-   */
-  const findHeads = (entries) => {
-    const items = {}
-    for (const entry of entries) {
-      for (const next of entry.next) {
-        items[next] = entry.hash
-      }
-    }
-
-    const res = []
-    for (const entry of entries) {
-      if (!items[entry.hash]) {
-        res.push(entry)
-      }
-    }
-
-    return res
   }
 
   /**
@@ -423,8 +436,37 @@ const Log = (identity, { logId, logHeads, access, storage, sortFn } = {}) => {
   }
 }
 
+/**
+ * Find heads from a collection of entries.
+ *
+ * Finds entries that are the heads of this collection,
+ * ie. entries that are not referenced by other entries.
+ *
+ * This function is provate and not exposed in the Log API
+ *
+ * @param {Array<Entry>} entries Entries to search heads from
+ * @returns {Array<Entry>}
+ */
+const findHeads = (entries) => {
+  const items = {}
+  for (const entry of entries) {
+    for (const next of entry.next) {
+      items[next] = entry.hash
+    }
+  }
+
+  const res = []
+  for (const entry of entries) {
+    if (!items[entry.hash]) {
+      res.push(entry)
+    }
+  }
+
+  return res
+}
+
 export { Log }
 export { Sorting }
 export { Entry }
-export { AccessController }
-export { IPFSBlockStorage, MemoryStorage, LRUStorage, LevelStorage }
+export { DefaultAccessController }
+export { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage }
