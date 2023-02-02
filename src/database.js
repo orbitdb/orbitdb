@@ -40,11 +40,10 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   const sync = async (bytes) => {
     const entry = await Entry.decode(bytes)
     events.emit('sync', entry)
-    await log.joinEntry(entry)
-    // const updated = await log.joinEntry(entry)
-    // if (updated) {
-    events.emit('update', entry)
-    // }
+    const updated = await log.joinEntry(entry)
+    if (updated) {
+      events.emit('update', entry)
+    }
   }
 
   const close = async () => {

@@ -54,7 +54,7 @@ const KeyValuePersisted = async ({ KeyValue, OpLog, Database, ipfs, identity, da
   const drop = async () => {
     events.off('update', updateIndex(index))
     await index.clear()
-    await keyValueStore.clear()
+    await keyValueStore.drop()
   }
 
   // Listen for update events from the database and update the index on every update

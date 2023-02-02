@@ -424,15 +424,15 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
     clock,
     heads,
     values,
-    access,
-    identity,
-    storage,
     get,
     append,
     join,
     joinEntry,
     traverse,
-    iterator
+    iterator,
+    access,
+    identity,
+    storage
   }
 }
 
@@ -442,7 +442,7 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
  * Finds entries that are the heads of this collection,
  * ie. entries that are not referenced by other entries.
  *
- * This function is provate and not exposed in the Log API
+ * This function is private and not exposed in the Log API
  *
  * @param {Array<Entry>} entries Entries to search heads from
  * @returns {Array<Entry>}
