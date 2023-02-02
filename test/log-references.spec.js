@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log } from '../src/log.js'
+import { Log, MemoryStorage } from '../src/log.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 
@@ -110,20 +110,26 @@ Object.keys(testAPIs).forEach((IPFS) => {
         { amount: 32, referenceCount: 16, refLength: 4 },
         { amount: 18, referenceCount: 32, refLength: 5 },
         { amount: 128, referenceCount: 32, refLength: 5 },
+        { amount: 63, referenceCount: 64, refLength: 5 },
         { amount: 64, referenceCount: 64, refLength: 6 },
         { amount: 65, referenceCount: 64, refLength: 6 },
+        { amount: 91, referenceCount: 64, refLength: 6 },
         { amount: 128, referenceCount: 64, refLength: 6 },
         { amount: 128, referenceCount: 1, refLength: 0 },
         { amount: 128, referenceCount: 2, refLength: 1 },
         { amount: 256, referenceCount: 1, refLength: 0 },
-        { amount: 256, referenceCount: 256, refLength: 8 },
-        { amount: 256, referenceCount: 1024, refLength: 8 }
+        { amount: 256, referenceCount: 4, refLength: 2 },
+        { amount: 256, referenceCount: 8, refLength: 3 },
+        { amount: 256, referenceCount: 16, refLength: 4 },
+        { amount: 256, referenceCount: 32, refLength: 5 },
+        { amount: 1024, referenceCount: 2, refLength: 1 }
       ]
 
       inputs.forEach(input => {
         it(`has ${input.refLength} references, max distance ${input.referenceCount}, total of ${input.amount} entries`, async () => {
           const test = async (amount, referenceCount, refLength) => {
-            const log1 = await Log(testIdentity, { logId: 'A' })
+            const storage = await MemoryStorage()
+            const log1 = await Log(testIdentity, { logId: 'A', storage })
             for (let i = 0; i < amount; i++) {
               await log1.append((i + 1).toString(), { pointerCount: referenceCount })
             }
@@ -140,18 +146,20 @@ Object.keys(testAPIs).forEach((IPFS) => {
               // Check the first ref (distance 2)
               if (values[idx].refs.length > 0) { strictEqual(values[idx].refs[0], values[idx - 2].hash) }
 
-              // Check the second ref (distance 2)
-
+              // Check the second ref (distance 4)
               if (values[idx].refs.length > 1 && idx > referenceCount) { strictEqual(values[idx].refs[1], values[idx - 4].hash) }
 
-              // Check the third ref (distance 4)
+              // Check the third ref (distance 8)
               if (values[idx].refs.length > 2 && idx > referenceCount) { strictEqual(values[idx].refs[2], values[idx - 8].hash) }
 
-              // Check the fourth ref (distance 8)
+              // Check the fourth ref (distance 16)
               if (values[idx].refs.length > 3 && idx > referenceCount) { strictEqual(values[idx].refs[3], values[idx - 16].hash) }
 
-              // Check the fifth ref (distance 16)
+              // Check the fifth ref (distance 32)
               if (values[idx].refs.length > 4 && idx > referenceCount) { strictEqual(values[idx].refs[4], values[idx - 32].hash) }
+
+              // Check the fifth ref (distance 64)
+              if (values[idx].refs.length > 5 && idx > referenceCount) { strictEqual(values[idx].refs[5], values[idx - 64].hash) }
 
               // Check the reference of each entry
               if (idx > referenceCount) { strictEqual(values[idx].refs.length, refLength) }

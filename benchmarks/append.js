@@ -22,9 +22,12 @@ const queryLoop = async () => {
   console.log('Starting benchmark...')
 
   const identity = await IdentityProvider.createIdentity({ id: 'userA' })
+  // MemoeryStorage is the default storage for Log but defining them here
+  // in case we want to benchmark different storage modules
   const storage = await MemoryStorage()
+  const stateStorage = await MemoryStorage()
 
-  log = await Log(identity, { logId: 'A', storage })
+  log = await Log(identity, { logId: 'A', storage, stateStorage })
 
   // Output metrics at 1 second interval
   setInterval(() => {

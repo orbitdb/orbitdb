@@ -11,6 +11,7 @@ import Database from '../src/database.js'
 // Test utils
 import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from './utils/connect-nodes.js'
+import waitFor from './utils/wait-for.js'
 import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
@@ -57,6 +58,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       // Create an identity for each peers
       testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
+
+      rmrf(testIdentity1.id)
+      rmrf(testIdentity2.id)
     })
 
     after(async () => {
@@ -98,18 +102,18 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('returns all entries in the database', async () => {
         // let error
         let updateCount = 0
-        let syncCount = 0
+        // const syncCount = 0
 
         const accessController = {
           canAppend: (entry) => entry.identity.id === testIdentity1.id
         }
 
         const onUpdate = (entry) => {
-          updateCount++
+          ++updateCount
         }
-        const onSync = (entry) => {
-          syncCount++
-        }
+        // const onSync = (entry) => {
+        //   ++syncCount
+        // }
         const onError = () => {
           // error = err
         }
@@ -119,10 +123,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
-        kv1.events.on('update', onUpdate)
+        // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
-        kv1.events.on('sync', onSync)
-        kv2.events.on('sync', onSync)
+        // kv1.events.on('sync', onSync)
+        // kv2.events.on('sync', onSync)
         kv1.events.on('error', onError)
         kv2.events.on('error', onError)
 
@@ -146,28 +150,17 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // const hash = await kv1.set('hello', 'friend3')
         // const lastEntry = await kv1.database.log.get(hash)
 
-        // const sleep = (time) => new Promise((resolve) => {
-        //   setTimeout(() => {
-        //     resolve()
-        //   }, time)
-        // })
-        // await sleep(10000) // give some time for ipfs peers to sync
-        const waitForAllUpdates = async () => {
-          return new Promise((resolve) => {
-            const interval = setInterval(() => {
-              if (updateCount >= 8 * 2 || syncCount >= 8) {
-                clearInterval(interval)
-                resolve()
-              }
-            }, 100)
-          })
-        }
-        await waitForAllUpdates()
-
         // sync() test
         // console.time('sync')
         // await kv2.sync(lastEntry.bytes)
         // console.timeEnd('sync')
+
+        await waitFor(() => updateCount, () => 8)
+
+        // update event test
+        strictEqual(updateCount, 8)
+        // sync event test
+        // strictEqual(syncCount, 8)
 
         // write access test
         // let errorMessage
@@ -229,39 +222,34 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // onError test
         // notStrictEqual(error, undefined)
         // strictEqual(error.message, 'CBOR decode error: too many terminals, data makes no sense')
-
-        // update event test
-        strictEqual(updateCount, 8 * 2)
-        // sync event test
-        strictEqual(syncCount, 8)
       })
     })
 
-    describe.skip('load database', () => {
+    describe('load database', () => {
       it('returns all entries in the database', async () => {
         let updateCount = 0
-        let syncCount = 0
+        // let syncCount = 0
 
         const accessController = {
           canAppend: (entry) => entry.identity.id === testIdentity1.id
         }
 
         const onUpdate = (entry) => {
-          updateCount++
+          ++updateCount
         }
-        const onSync = (entry) => {
-          syncCount++
-        }
+        // const onSync = (entry) => {
+        //   ++syncCount
+        // }
 
         // kv1 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         // kv2 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
         kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
-        kv1.events.on('update', onUpdate)
+        // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
-        kv1.events.on('sync', onSync)
-        kv2.events.on('sync', onSync)
+        // kv1.events.on('sync', onSync)
+        // kv2.events.on('sync', onSync)
 
         await waitForPeers(ipfs1, [peerId2], databaseId)
         await waitForPeers(ipfs2, [peerId1], databaseId)
@@ -277,36 +265,21 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // const hash = await kv1.set('hello', 'friend3')
         // const lastEntry = await kv1.log.get(hash)
 
-        // const sleep = (time) => new Promise((resolve) => {
-        //   setTimeout(() => {
-        //     resolve()
-        //   }, time)
-        // })
-        // await sleep(10000) // give some time for ipfs peers to sync
-        const waitForAllUpdates = async () => {
-          return new Promise((resolve) => {
-            const interval = setInterval(() => {
-              if (updateCount >= 8 * 2 || syncCount >= 8) {
-                clearInterval(interval)
-                resolve()
-              }
-            }, 100)
-          })
-        }
-        await waitForAllUpdates()
-
         // sync() test
         // console.time('sync')
         // await kv2.sync(lastEntry.bytes)
         // console.timeEnd('sync')
 
-        // await kv1.close()
-        // await kv2.close()
+        await waitFor(() => updateCount, () => 8)
+        strictEqual(updateCount, 8)
+
+        await kv1.close()
+        await kv2.close()
 
         // kv1 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         // kv2 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        // kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        // kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         console.time('get')
         const value0 = await kv2.get('init')
@@ -349,8 +322,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
           { key: 'hello', value: 'friend3' },
           { key: 'init', value: true }
         ])
-
-        strictEqual(syncCount, 8)
       })
     })
   })

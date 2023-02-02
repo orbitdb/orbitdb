@@ -9,6 +9,10 @@ const LRUStorage = async ({ size } = {}) => {
     lru.set(hash, data)
   }
 
+  const del = async (hash) => {
+    lru.remove(hash)
+  }
+
   const get = async (hash) => {
     if (lru.peek(hash)) {
       return lru.get(hash)
@@ -21,6 +25,8 @@ const LRUStorage = async ({ size } = {}) => {
       yield [key, value]
     }
   }
+
+  // TODO: all()
 
   const merge = async (other) => {
     if (other) {
@@ -38,8 +44,10 @@ const LRUStorage = async ({ size } = {}) => {
 
   return {
     put,
+    del,
     get,
     iterator,
+    // TODO: all,
     merge,
     clear,
     close

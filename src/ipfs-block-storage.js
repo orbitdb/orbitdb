@@ -3,7 +3,7 @@ import { base58btc } from 'multiformats/bases/base58'
 
 const defaultTimeout = 30000
 
-const IPFSBlockStorage = async ({ ipfs, timeout, pin }) => {
+const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
   timeout = timeout || defaultTimeout
 
   const put = async (hash, data) => {
@@ -18,6 +18,10 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin }) => {
     })
   }
 
+  const del = async (hash) => {
+    // TODO?
+  }
+
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
     const block = await ipfs.block.get(cid, { timeout })
@@ -28,6 +32,8 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin }) => {
 
   const iterator = async function * () {}
 
+  // TODO: all()
+
   const merge = async (other) => {}
 
   const clear = async () => {}
@@ -36,8 +42,10 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin }) => {
 
   return {
     put,
+    del,
     get,
     iterator,
+    // TODO: all,
     merge,
     clear,
     close

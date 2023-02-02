@@ -3,17 +3,22 @@ const EventStore = async ({ OpLog, Database, ipfs, identity, databaseId, accessC
 
   const { addOperation, log } = database
 
+  const put = async (key = null, value) => {
+    return add(value)
+  }
+
   const add = async (value) => {
     return addOperation({ op: 'ADD', key: null, value })
   }
 
   const get = async (hash) => {
     const entry = await log.get(hash)
-    return entry.payload
+    return entry.payload.value
   }
 
   const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
-    for await (const event of log.iterator({ gt, gte, lt, lte, amount })) {
+    const it = log.iterator({ gt, gte, lt, lte, amount })
+    for await (const event of it) {
       yield event.payload.value
     }
   }
@@ -29,6 +34,7 @@ const EventStore = async ({ OpLog, Database, ipfs, identity, databaseId, accessC
   return {
     ...database,
     type: 'events',
+    put,
     add,
     get,
     iterator,

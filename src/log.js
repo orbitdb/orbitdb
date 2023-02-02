@@ -5,6 +5,7 @@ import Sorting from './log-sorting.js'
 import IPFSBlockStorage from './ipfs-block-storage.js'
 import MemoryStorage from './memory-storage.js'
 import LRUStorage from './lru-storage.js'
+// import LevelStorage from './level-storage.js'
 import ComposedStorage from './composed-storage.js'
 import { isDefined } from './utils/index.js'
 
@@ -16,6 +17,7 @@ const maxClockTimeReducer = (res, acc) => Math.max(res, acc.clock.time)
 // Default storage for storing the Log and its entries. Default: Memory. Options: Memory, LRU, IPFS.
 const DefaultStorage = MemoryStorage
 // const DefaultStorage = LRUStorage
+// const DefaultStorage = LevelStorage
 // const DefaultStorage = IPFSBlockStorage
 
 // Default AccessController for the Log.
@@ -132,6 +134,11 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
    * @return {Promise<Entry>} Entry that was appended
    */
   const append = async (data, options = { pointerCount: 1 }) => {
+    // 1. Prepare entry
+    // 2. Authorize entry
+    // 3. Store entry
+    // 4. return Entry
+
     // Get references (entry at every pow2 of distance)
     const refs = await getReferences(options.pointerCount)
     // Create the next pointers from heads
@@ -252,7 +259,10 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
       }
       // Get the next entry from the stack
       entry = stack.pop()
-      if (entry) {
+      // If we have an entry that we haven't traversed yet, process it
+      if (entry && !traversed[entry.hash]) {
+        // Add to the hashes we've traversed
+        traversed[entry.hash] = true
         // Yield the current entry
         yield entry
         // Add hashes of next entries to the stack from entry's
@@ -260,8 +270,6 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
         for (const hash of [...entry.next, ...entry.refs]) {
           // Check if we've already traversed this entry
           if (!traversed[hash]) {
-            // Add to the hashes we've traversed
-            traversed[hash] = true
             // Fetch the next entry
             const next = await get(hash)
             if (next) {
@@ -424,6 +432,7 @@ const Log = async (identity, { logId, logHeads, access, storage, stateStorage, s
     clock,
     heads,
     values,
+    all: values, // Alias for values()
     get,
     append,
     join,

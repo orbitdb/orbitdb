@@ -3,6 +3,10 @@ const Feed = async ({ OpLog, Database, ipfs, identity, databaseId, accessControl
 
   const { addOperation, log } = database
 
+  const put = async (key = null, value) => {
+    return add(value)
+  }
+
   const add = async (value) => {
     return addOperation({ op: 'ADD', key: null, value })
   }
@@ -13,12 +17,13 @@ const Feed = async ({ OpLog, Database, ipfs, identity, databaseId, accessControl
 
   const get = async (hash) => {
     const entry = await log.get(hash)
-    return entry.payload
+    return entry.payload.value
   }
 
   const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
     const deleted = {}
-    for await (const entry of log.iterator({ gt, gte, lt, lte, amount })) {
+    const it = log.iterator({ gt, gte, lt, lte, amount })
+    for await (const entry of it) {
       const { hash, payload } = entry
       const { op, key, value } = payload
       if (op === 'ADD' && !deleted[hash]) {
@@ -40,6 +45,7 @@ const Feed = async ({ OpLog, Database, ipfs, identity, databaseId, accessControl
   return {
     ...database,
     type: 'feed',
+    put,
     add,
     del,
     get,

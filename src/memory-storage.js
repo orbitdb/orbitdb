@@ -5,6 +5,10 @@ const MemoryStorage = async () => {
     memory[hash] = data
   }
 
+  const del = async (hash) => {
+    delete memory[hash]
+  }
+
   const get = async (hash) => {
     if (memory[hash]) {
       return memory[hash]
@@ -25,14 +29,18 @@ const MemoryStorage = async () => {
     }
   }
 
+  // TODO: all()
+
   const clear = async () => (memory = {})
 
   const close = async () => {}
 
   return {
     put,
+    del,
     get,
     iterator,
+    // TODO: all,
     merge,
     clear,
     close
