@@ -10,9 +10,11 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
    * @returns {string} The hash of the new oplog entry.
    */
   const put = async (doc) => {
-    if (!doc[indexBy]) { throw new Error(`The provided document doesn't contain field '${indexBy}'`) }
+    const key = doc[indexBy]
     
-    return addOperation({ op: 'PUT', key: doc[indexBy], value: doc })
+    if (!key) { throw new Error(`The provided document doesn't contain field '${indexBy}'`) }
+    
+    return addOperation({ op: 'PUT', key, value: doc })
   }
 
   /**
@@ -34,29 +36,25 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
    * @returns {Object} The doc corresponding to key or null.
    */
   const get = async (key) => {
-    for await (const entry of iterator()) {
-      const { key: k, value } = entry
-      
-      if (key === k) {
-        return value  
+    for await (const doc of iterator()) {
+      if (key === doc[indexBy]) {
+        return doc  
       }
     }
-    
-    return null
   }
   
   /**
    * Queries the document store for documents matching mapper filters.
    *
-   * @param {function(Object)} mapper A function for querying for specific results.
+   * @param {function(Object)} findFn A function for querying for specific results.
    * @returns {Array} Found documents.
    */
-  const query = async (mapper) => {
+  const query = async (findFn) => {
     const results = []
     
-    for await (const entry of iterator()) {
-      if (Object.values(entry).find(mapper)) {
-        results.push(entry.value)  
+    for await (const doc of iterator()) {
+      if (findFn(doc)) {
+        results.push(doc)
       }
     }
 
@@ -69,7 +67,7 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
       const { op, key, value } = entry.payload
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
-        yield { key, value }
+        yield value
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
       }

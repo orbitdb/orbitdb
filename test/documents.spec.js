@@ -105,35 +105,37 @@ Object.keys(testAPIs).forEach((IPFS) => {
     describe('using database', () => {
       it('gets a document', async () => {
          const key = 'hello world 1'
+         
+         const expected = { _id: key, msg: 'writing 1 to db1' }
 
-         await db1.put({ _id: key, doc: 'writing 1 to db1' })
+         await db1.put(expected)
          
          const doc = await db1.get(key)
-         strictEqual(doc._id, key)
+         deepStrictEqual(doc, expected)
       })
       
       it('deletes a document', async () => {
          const key = 'hello world 1'
          
-         await db1.put({ _id: key, doc: 'writing 1 to db1' })
+         await db1.put({ _id: key, msg: 'writing 1 to db1' })
          await db1.del(key)
          
          const doc = await db1.get(key)
-         strictEqual(doc, null)
+         strictEqual(doc, undefined)
       })
 
       it('queries a document', async () => {
-          const expected = { _id: 'hello world 1', doc: 'writing new 1 to db1', views: 10 }
+          const expected = { _id: 'hello world 1', msg: 'writing new 1 to db1', views: 10 }
           
-          const doc3 = { _id: 'hello world 3', doc: 'writing 3 to db1', views: 12 }
-          
-          await db1.put({ _id: 'hello world 1', doc: 'writing 1 to db1', views: 10 })
-          await db1.put({ _id: 'hello world 2', doc: 'writing 2 to db1', views: 5 })
-          await db1.put({ _id: 'hello world 3', doc: 'writing 3 to db1', views: 12 })
+          await db1.put({ _id: 'hello world 1', msg: 'writing 1 to db1', views: 10 })
+          await db1.put({ _id: 'hello world 2', msg: 'writing 2 to db1', views: 5 })
+          await db1.put({ _id: 'hello world 3', msg: 'writing 3 to db1', views: 12 })
           await db1.del('hello world 3')          
           await db1.put(expected)
           
-          deepStrictEqual(await db1.query((e) => e.views > 5), [expected])
+          const findFn = (doc) => doc.views > 5
+          
+          deepStrictEqual(await db1.query(findFn), [expected])
       })
     })
   })
