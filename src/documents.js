@@ -11,9 +11,9 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
    */
   const put = async (doc) => {
     const key = doc[indexBy]
-    
+
     if (!key) { throw new Error(`The provided document doesn't contain field '${indexBy}'`) }
-    
+
     return addOperation({ op: 'PUT', key, value: doc })
   }
 
@@ -24,8 +24,8 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
    * @returns {string} The hash of the new oplog entry.
    */
   const del = async (key) => {
-    if (!get(key)) { throw new Error(`No entry with key '${key}' in the database`) }
-    
+    if (!await get(key)) { throw new Error(`No document with key '${key}' in the database`) }
+
     return addOperation({ op: 'DEL', key, value: null })
   }
 
@@ -38,11 +38,11 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
   const get = async (key) => {
     for await (const doc of iterator()) {
       if (key === doc[indexBy]) {
-        return doc  
+        return doc
       }
     }
   }
-  
+
   /**
    * Queries the document store for documents matching mapper filters.
    *
@@ -51,7 +51,7 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
    */
   const query = async (findFn) => {
     const results = []
-    
+
     for await (const doc of iterator()) {
       if (findFn(doc)) {
         results.push(doc)

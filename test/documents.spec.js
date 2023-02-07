@@ -57,12 +57,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
       // Create an identity for each peers
       testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
-      
+
       const accessController = {
         canAppend: (entry) => entry.identity.id === testIdentity1.id
       }
     })
-    
+
     beforeEach(async () => {
       db1 = await Documents({ OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
     })
@@ -104,38 +104,51 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     describe('using database', () => {
       it('gets a document', async () => {
-         const key = 'hello world 1'
-         
-         const expected = { _id: key, msg: 'writing 1 to db1' }
+        const key = 'hello world 1'
 
-         await db1.put(expected)
-         
-         const doc = await db1.get(key)
-         deepStrictEqual(doc, expected)
+        const expected = { _id: key, msg: 'writing 1 to db1' }
+
+        await db1.put(expected)
+
+        const doc = await db1.get(key)
+        deepStrictEqual(doc, expected)
       })
-      
+
       it('deletes a document', async () => {
-         const key = 'hello world 1'
-         
-         await db1.put({ _id: key, msg: 'writing 1 to db1' })
-         await db1.del(key)
-         
-         const doc = await db1.get(key)
-         strictEqual(doc, undefined)
+        const key = 'hello world 1'
+
+        await db1.put({ _id: key, msg: 'writing 1 to db1' })
+        await db1.del(key)
+
+        const doc = await db1.get(key)
+        strictEqual(doc, undefined)
       })
 
-      it('queries a document', async () => {
-          const expected = { _id: 'hello world 1', msg: 'writing new 1 to db1', views: 10 }
-          
-          await db1.put({ _id: 'hello world 1', msg: 'writing 1 to db1', views: 10 })
-          await db1.put({ _id: 'hello world 2', msg: 'writing 2 to db1', views: 5 })
-          await db1.put({ _id: 'hello world 3', msg: 'writing 3 to db1', views: 12 })
-          await db1.del('hello world 3')          
-          await db1.put(expected)
-          
-          const findFn = (doc) => doc.views > 5
-          
-          deepStrictEqual(await db1.query(findFn), [expected])
+      it('throws an error when deleting a non-existent document', async () => {
+        const key = 'i do not exist'
+        let err
+        
+        try {
+          await db1.del(key)
+        } catch (e) {
+          err = e
+        }
+        
+        strictEqual(err.message, `No document with key \'${key}\' in the database`)
+      })
+
+      it('queries for a document', async () => {
+        const expected = { _id: 'hello world 1', msg: 'writing new 1 to db1', views: 10 }
+
+        await db1.put({ _id: 'hello world 1', msg: 'writing 1 to db1', views: 10 })
+        await db1.put({ _id: 'hello world 2', msg: 'writing 2 to db1', views: 5 })
+        await db1.put({ _id: 'hello world 3', msg: 'writing 3 to db1', views: 12 })
+        await db1.del('hello world 3')
+        await db1.put(expected)
+
+        const findFn = (doc) => doc.views > 5
+
+        deepStrictEqual(await db1.query(findFn), [expected])
       })
     })
   })
