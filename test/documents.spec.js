@@ -119,7 +119,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
          await db1.del(key)
          
          const doc = await db1.get(key)
-         strictEqual(doc, undefined)
+         strictEqual(doc, null)
       })
 
       it('queries a document', async () => {
