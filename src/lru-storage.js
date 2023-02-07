@@ -14,9 +14,7 @@ const LRUStorage = async ({ size } = {}) => {
   }
 
   const get = async (hash) => {
-    if (lru.peek(hash)) {
-      return lru.get(hash)
-    }
+    return lru.get(hash)
   }
 
   const iterator = async function * () {

@@ -10,9 +10,7 @@ const MemoryStorage = async () => {
   }
 
   const get = async (hash) => {
-    if (memory[hash]) {
-      return memory[hash]
-    }
+    return memory[hash]
   }
 
   const iterator = async function * () {
@@ -31,7 +29,9 @@ const MemoryStorage = async () => {
 
   // TODO: all()
 
-  const clear = async () => (memory = {})
+  const clear = async () => {
+    memory = {}
+  }
 
   const close = async () => {}
 

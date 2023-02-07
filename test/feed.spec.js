@@ -18,7 +18,7 @@ const { createIdentity } = IdentityProvider
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Feed Database (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
+    this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2
     let ipfs1, ipfs2

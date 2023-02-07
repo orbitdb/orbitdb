@@ -1,19 +1,16 @@
 import { Level } from 'level'
 
+const defaultValueEncoding = 'view'
+
 const LevelStorage = async ({ path, valueEncoding } = {}) => {
   path = path || './level'
+  valueEncoding = valueEncoding || defaultValueEncoding
 
-  // console.log("Path:", path)
-
-  const db = new Level(path, { valueEncoding: valueEncoding || 'view', passive: true })
+  const db = new Level(path, { valueEncoding, passive: true })
   await db.open()
 
-  const put = async (key = null, value) => {
-    return add(null, value)
-  }
-
-  const add = async (hash, value) => {
-    await db.put(hash, value, { valueEncoding })
+  const put = async (hash, value) => {
+    await db.put(hash, value)
   }
 
   const del = async (hash) => {
@@ -21,20 +18,21 @@ const LevelStorage = async ({ path, valueEncoding } = {}) => {
   }
 
   const get = async (hash) => {
-    const value = await db.get(hash, { valueEncoding })
-    if (value !== undefined) {
-      return value
+    try {
+      const value = await db.get(hash)
+      if (value) {
+        return value
+      }
+    } catch (e) {
+      // LEVEL_NOT_FOUND (ie. key not found)
     }
   }
 
-  // TODO: rename to iterator()
-  // const values = async () => {
-  //   const res = {}
-  //   for await (const [key, value] of await db.iterator({ valueEncoding }).all()) {
-  //     res[key] = value
-  //   }
-  //   return res
-  // }
+  const iterator = async function * () {
+    for await (const [key, value] of db.iterator()) {
+      yield [key, value]
+    }
+  }
 
   // TODO: all()
 
@@ -49,11 +47,10 @@ const LevelStorage = async ({ path, valueEncoding } = {}) => {
   }
 
   return {
-    add,
     put,
     del,
     get,
-    // TODO: iterator,
+    iterator,
     // TODO: all,
     merge,
     clear,

@@ -1,19 +1,16 @@
-import { Level } from 'level'
 import { EventEmitter } from 'events'
 
-const valueEncoding = 'view'
 const defaultPointerCount = 16
 
 const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, storage }) => {
-  const { Log, Entry, IPFSBlockStorage } = OpLog
+  const { Log, Entry, IPFSBlockStorage, LevelStorage } = OpLog
 
-  storage = storage || await IPFSBlockStorage({ ipfs, pin: true })
+  const entryStorage = storage || await IPFSBlockStorage({ ipfs, pin: true })
+  const headsStorage = await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_heads/` })
+  // const indexStorage = await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_index/` })
 
-  const path = `./${identity.id}/${databaseId}/_state`
-  const stateStorage = new Level(path, { valueEncoding })
-  await stateStorage.open()
-
-  const log = await Log(identity, { logId: databaseId, access: accessController, storage, stateStorage })
+  // const log = await Log(identity, { logId: databaseId, access: accessController, entryStorage, headsStorage, indexStorage })
+  const log = await Log(identity, { logId: databaseId, access: accessController, entryStorage, headsStorage })
 
   const events = new EventEmitter()
 
@@ -50,16 +47,14 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   }
 
   const close = async () => {
-    await stateStorage.close()
-    await storage.close()
+    await log.close()
     await ipfs.pubsub.unsubscribe(log.id, handleMessage)
     events.emit('close')
   }
 
   // TODO: rename to clear()
   const drop = async () => {
-    await stateStorage.clear()
-    await storage.clear()
+    await log.clear()
   }
 
   const merge = async (other) => {}
