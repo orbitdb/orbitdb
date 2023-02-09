@@ -48,8 +48,10 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
   const { bytes } = await Block.encode({ value: entry, codec, hasher })
   const signature = await identity.provider.sign(identity, bytes)
 
+  const { cid } = await Block.encode({ value: identity.toJSON(), codec, hasher })
+
   entry.key = identity.publicKey
-  entry.identity = identity.toJSON()
+  entry.identity = cid.toString(hashStringEncoding)
   entry.sig = signature
 
   return _encodeEntry(entry)
