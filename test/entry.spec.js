@@ -5,6 +5,7 @@ import Entry from '../src/entry.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import IPFSBlockStorage from '../src/ipfs-block-storage.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
@@ -17,7 +18,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let testIdentity
-    let keystore, signingKeystore
+    let keystore, signingKeystore, identityStore
     let ipfsd, ipfs
 
     before(async () => {
@@ -29,8 +30,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       keystore = new Keystore(identityKeysPath)
       signingKeystore = new Keystore(signingKeysPath)
+      
+      identityStore = await IPFSBlockStorage({ ipfs, pin: true })
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, ipfs })
+      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, identityStore })
     })
 
     after(async () => {
