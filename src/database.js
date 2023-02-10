@@ -2,11 +2,11 @@ import { EventEmitter } from 'events'
 
 const defaultPointerCount = 16
 
-const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, storage }) => {
+const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, storage, headsStorage, pointerCount }) => {
   const { Log, Entry, IPFSBlockStorage, LevelStorage } = OpLog
 
   const entryStorage = storage || await IPFSBlockStorage({ ipfs, pin: true })
-  const headsStorage = await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_heads/` })
+  headsStorage = headsStorage || await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_heads/` })
   // const indexStorage = await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_index/` })
 
   // const log = await Log(identity, { logId: databaseId, access: accessController, entryStorage, headsStorage, indexStorage })
@@ -14,8 +14,10 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
 
   const events = new EventEmitter()
 
+  pointerCount = pointerCount || defaultPointerCount
+
   const addOperation = async (op) => {
-    const entry = await log.append(op, { pointerCount: defaultPointerCount })
+    const entry = await log.append(op, { pointerCount })
     await ipfs.pubsub.publish(databaseId, entry.bytes)
     events.emit('update', entry)
     return entry.hash
@@ -26,12 +28,13 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
     const messageIsNotFromMe = (message) => String(peerId) !== String(message.from)
     const messageHasData = (message) => message.data !== undefined
     try {
-      if (messageIsNotFromMe(message) && messageHasData(message)) {
+      // if (messageIsNotFromMe(message) && messageHasData(message)) {
+      if (messageHasData(message)) {
         await sync(message.data)
       }
     } catch (e) {
-      events.emit('error', e)
       console.error(e)
+      events.emit('error', e)
     }
   }
 
