@@ -14,3 +14,4 @@ USER node
 
 RUN npm install babel-cli webpack ipfs \
  && npm install
+RUN npm install orbit-db
