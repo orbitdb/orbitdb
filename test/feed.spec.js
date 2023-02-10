@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import * as Log from '../src/log.js'
-import IdentityProvider from 'orbit-db-identity-provider'
+import IdentityProvider from '../src/identities/identities.js'
 import Keystore from '../src/Keystore.js'
 
 import Feed from '../src/feed.js'
@@ -11,7 +11,7 @@ import Database from '../src/database.js'
 import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
-import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
+import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities } from './fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
@@ -42,21 +42,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       peerId1 = await getIpfsPeerId(ipfs1)
       peerId2 = await getIpfsPeerId(ipfs2)
 
-      keystore = new Keystore('./keys_1')
-      await keystore.open()
-      for (const [key, value] of Object.entries(identityKeys)) {
-        await keystore.addKey(key, value)
-      }
-
-      signingKeystore = new Keystore('./keys_2')
-      await signingKeystore.open()
-      for (const [key, value] of Object.entries(signingKeys)) {
-        await signingKeystore.addKey(key, value)
-      }
-
-      // Create an identity for each peers
-      testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
+      const testIdentities = await createTestIdentities(ipfs1, ipfs2)
+      testIdentity1 = testIdentities[0]
+      testIdentity2 = testIdentities[1]
 
       rmrf(testIdentity1.id)
       rmrf(testIdentity2.id)
@@ -74,6 +62,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     after(async () => {
+      await cleanUpTestIdentities([testIdentity1, testIdentity2])
+
       if (ipfsd1) {
         await stopIpfs(ipfsd1)
       }
@@ -103,7 +93,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // let syncCount = 0
 
         const accessController = {
-          canAppend: (entry) => entry.identity.id === testIdentity1.id
+          canAppend: async (entry) => {
+            const identity = await testIdentity1.provider.get(entry.identity)
+            return identity.id === testIdentity1.id
+          }
         }
 
         const onUpdate = (entry) => {
@@ -210,7 +203,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // let syncCount = 0
 
         const accessController = {
-          canAppend: (entry) => entry.identity.id === testIdentity1.id
+          canAppend: async (entry) => {
+            const identity = await testIdentity1.provider.get(entry.identity)
+            return identity.id === testIdentity1.id
+          }
         }
 
         const onUpdate = (entry) => {

@@ -5,8 +5,8 @@ import Sorting from '../src/log-sorting.js'
 import bigLogString from './fixtures/big-log.fixture.js'
 import Entry from '../src/entry.js'
 import { Log } from '../src/log.js'
-import IdentityProvider from 'orbit-db-identity-provider'
-import Keystore from 'orbit-db-keystore'
+import IdentityProvider from '../src/identities/identities.js'
+import Keystore from '../src/Keystore.js'
 import LogCreator from './utils/log-creator.js'
 
 // Test utils

@@ -2,7 +2,7 @@ import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, MemoryStorage } from '../src/log.js'
-import IdentityProvider from 'orbit-db-identity-provider'
+import IdentityProvider from '../src/identities/identities.js'
 import Keystore from '../src/Keystore.js'
 
 // Test utils
@@ -30,7 +30,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       keystore = new Keystore(identityKeysPath)
       signingKeystore = new Keystore(signingKeysPath)
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore })
+      const storage = await MemoryStorage()
+
+      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
     })
 
     after(async () => {

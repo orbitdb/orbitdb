@@ -1,7 +1,7 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { Log } from '../src/log.js'
-import IdentityProvider from 'orbit-db-identity-provider'
+import { Log, MemoryStorage } from '../src/log.js'
+import IdentityProvider from '../src/identities/identities.js'
 import Keystore from '../src/Keystore.js'
 import LogCreator from './utils/log-creator.js'
 import all from 'it-all'
@@ -36,9 +36,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await signingKeystore.addKey(key, value)
       }
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
-      testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeystore })
+      const storage = await MemoryStorage()
+
+      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
+      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore, storage })
+      testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeystore, storage })
+
       ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
       ipfs = ipfsd.api
     })
