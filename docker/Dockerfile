@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:lts
 
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 
@@ -12,5 +12,5 @@ COPY conf/ ./conf
 RUN chown -R node:node package.json examples src conf
 USER node
 
-RUN npm install babel-cli webpack \
+RUN npm install babel-cli webpack ipfs \
  && npm install
