@@ -8,6 +8,7 @@ import MemoryStorage from './memory-storage.js'
 import LRUStorage from './lru-storage.js'
 import LevelStorage from './level-storage.js'
 import ComposedStorage from './composed-storage.js'
+import IdentityStorage from './identity-storage.js'
 import { isDefined } from './utils/index.js'
 
 const { LastWriteWins, NoZeroes } = Sorting
@@ -464,4 +465,4 @@ export { Log }
 export { Sorting }
 export { Entry }
 export { DefaultAccessController }
-export { IPFSBlockStorage, MemoryStorage, LRUStorage, LevelStorage, ComposedStorage }
+export { IPFSBlockStorage, MemoryStorage, LRUStorage, LevelStorage, ComposedStorage, IdentityStorage }

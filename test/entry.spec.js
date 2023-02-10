@@ -1,10 +1,11 @@
-import { strictEqual } from 'assert'
+import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import Entry from '../src/entry.js'
 import IdentityProvider from 'orbit-db-identity-provider'
 import Keystore from '../src/Keystore.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import IdentityStorage from '../src/identity-storage.js'
 import IPFSBlockStorage from '../src/ipfs-block-storage.js'
 
 const { sync: rmrf } = rimraf
@@ -18,7 +19,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let testIdentity
-    let keystore, signingKeystore, identityStore
+    let keystore, signingKeystore, ipfsBlockStore, identityStore
     let ipfsd, ipfs
 
     before(async () => {
@@ -31,7 +32,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       keystore = new Keystore(identityKeysPath)
       signingKeystore = new Keystore(signingKeysPath)
       
-      identityStore = await IPFSBlockStorage({ ipfs, pin: true })
+      ipfsBlockStore = await IPFSBlockStorage({ ipfs, pin: true })
+      identityStore = await IdentityStorage({ storage: ipfsBlockStore })
 
       testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, identityStore })
     })
@@ -75,6 +77,15 @@ Object.keys(testAPIs).forEach((IPFS) => {
         strictEqual(entry.next.length, 0)
         strictEqual(entry.refs.length, 0)
         // strictEqual(entry.hash, expectedHash)
+      })
+      
+      it('retrieves the identity from an entry', async() => {
+        const expected = testIdentity.toJSON()
+        const payload = 'hello world'
+        const entry = await create(testIdentity, 'A', payload)
+        const entryIdentity = await identityStore.get(entry.identity)
+
+        deepStrictEqual(entryIdentity, expected)
       })
 
       it('creates a entry with payload and next', async () => {
