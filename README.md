@@ -181,7 +181,7 @@ Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orb
 ### Node.js example
 
 ```
-npm run examples:node
+npm run examples:eventlog
 ```
 
 <img src="https://raw.githubusercontent.com/orbitdb/orbit-db/master/images/orbit-db-demo3.gif" width="66%">
