@@ -18,7 +18,7 @@ docker build -t orbit-db -f docker/Dockerfile .
 After building local image, run node.js-examples inside container:
 
 ```bash
-docker run -ti --rm orbit-db npm run examples:node
+docker run -ti --rm orbit-db npm run examples:eventlog
 ```
 
 ## Why would you want to run OrbitDB in container?
