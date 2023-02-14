@@ -1,9 +1,10 @@
 import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, Entry, MemoryStorage, IPFSBlockStorage } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import { Log, Entry } from '../src/index.js'
+import { MemoryStorage, IPFSBlockStorage } from '../src/storage/index.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
@@ -19,7 +20,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     let storage1, storage2
 
     before(async () => {
@@ -40,14 +41,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
       id1 = await getIpfsPeerId(ipfs1)
       id2 = await getIpfsPeerId(ipfs2)
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      keystore = new KeyStore(identityKeysPath)
+      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
 
       // Create an identity for each peers
-      testIdentity = await createIdentity({ id: 'userB', keystore, signingKeystore, storage })
-      testIdentity2 = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
+      testIdentity = await createIdentity({ id: 'userB', keystore, signingKeyStore, storage })
+      testIdentity2 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
 
       storage1 = await IPFSBlockStorage({ ipfs: ipfs1 })
       storage2 = await IPFSBlockStorage({ ipfs: ipfs2 })
@@ -60,7 +61,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       rmrf(signingKeysPath)
 
       await keystore.close()
-      await signingKeystore.close()
+      await signingKeyStore.close()
     })
 
     describe('replicates logs deterministically', async function () {

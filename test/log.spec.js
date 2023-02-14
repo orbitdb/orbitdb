@@ -1,10 +1,11 @@
 import { notStrictEqual, deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import Entry from '../src/entry.js'
-import { Log, MemoryStorage } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import Log from '../src/log.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 import { copy } from 'fs-extra'
+import MemoryStorage from '../src/storage/memory.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
@@ -21,18 +22,18 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
 
     before(async () => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, signingKeysPath)
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      keystore = new KeyStore(identityKeysPath)
+      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
+      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
     })
 
     after(async () => {
@@ -40,7 +41,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       rmrf(identityKeysPath)
 
       await keystore.close()
-      await signingKeystore.close()
+      await signingKeyStore.close()
     })
 
     describe('create', async () => {

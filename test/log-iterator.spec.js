@@ -1,10 +1,11 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { Log, MemoryStorage } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import Log from '../src/log.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
 import all from 'it-all'
+import MemoryStorage from '../src/storage/memory.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -20,27 +21,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     let ipfs
     let ipfsd
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     let testIdentity, testIdentity2, testIdentity3
 
     before(async () => {
-      keystore = new Keystore('./keys_1')
+      keystore = new KeyStore('./keys_1')
       await keystore.open()
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }
 
-      signingKeystore = new Keystore('./keys_2')
-      await signingKeystore.open()
+      signingKeyStore = new KeyStore('./keys_2')
+      await signingKeyStore.open()
       for (const [key, value] of Object.entries(signingKeys)) {
-        await signingKeystore.addKey(key, value)
+        await signingKeyStore.addKey(key, value)
       }
 
       const storage = await MemoryStorage()
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore, storage })
-      testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeystore, storage })
+      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, storage })
+      testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeyStore, storage })
 
       ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
       ipfs = ipfsd.api
@@ -53,8 +54,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeystore) {
-        await signingKeystore.close()
+      if (signingKeyStore) {
+        await signingKeyStore.close()
       }
       rmrf('./keys_1')
       rmrf('./keys_2')

@@ -1,5 +1,5 @@
-import Keystore from '../../src/Keystore.js'
-import IdentityProvider from '../../src/identities/identities.js'
+import KeyStore from '../../src/key-store.js'
+import IdentityProvider from '../../src/identities/index.js'
 import rimraf from 'rimraf'
 
 const { createIdentity } = IdentityProvider
@@ -33,21 +33,21 @@ const createTestIdentities = async (ipfs1, ipfs2) => {
   rmrf('./keys_1')
   rmrf('./keys_2')
 
-  const keystore = new Keystore('./keys_1')
+  const keystore = new KeyStore('./keys_1')
   await keystore.open()
   for (const [key, value] of Object.entries(identityKeys)) {
     await keystore.addKey(key, value)
   }
 
-  const signingKeystore = new Keystore('./keys_2')
-  await signingKeystore.open()
+  const signingKeyStore = new KeyStore('./keys_2')
+  await signingKeyStore.open()
   for (const [key, value] of Object.entries(signingKeys)) {
-    await signingKeystore.addKey(key, value)
+    await signingKeyStore.addKey(key, value)
   }
 
   // Create an identity for each peers
-  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore, ipfs: ipfs1 })
-  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore, ipfs: ipfs2 })
+  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs: ipfs1 })
+  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, ipfs: ipfs2 })
 
   return [testIdentity1, testIdentity2]
 }
@@ -56,21 +56,21 @@ const createTestIdentitiesInMemory = async (ipfs1 = null, ipfs2 = null) => {
   rmrf('./keys_1')
   rmrf('./keys_2')
 
-  const keystore = new Keystore('./keys_1')
+  const keystore = new KeyStore('./keys_1')
   // await keystore.open()
   for (const [key, value] of Object.entries(identityKeys)) {
     await keystore.addKey(key, value)
   }
 
-  const signingKeystore = new Keystore('./keys_2')
-  // await signingKeystore.open()
+  const signingKeyStore = new KeyStore('./keys_2')
+  // await signingKeyStore.open()
   for (const [key, value] of Object.entries(signingKeys)) {
-    await signingKeystore.addKey(key, value)
+    await signingKeyStore.addKey(key, value)
   }
 
   // Create an identity for each peers
-  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore, ipfs: ipfs1 })
-  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore, ipfs: ipfs2 })
+  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs: ipfs1 })
+  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, ipfs: ipfs2 })
 
   return [testIdentity1, testIdentity2]
 }
@@ -78,7 +78,7 @@ const createTestIdentitiesInMemory = async (ipfs1 = null, ipfs2 = null) => {
 const cleanUpTestIdentities = async (identities) => {
   for (let identity of identities) {
     await identity.provider._keystore.close()
-    await identity.provider._signingKeystore.close()
+    await identity.provider._signingKeyStore.close()
   }
 }
 

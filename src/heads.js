@@ -1,5 +1,5 @@
 import Entry from './entry.js'
-import MemoryStorage from './memory-storage.js'
+import MemoryStorage from './storage/memory.js'
 
 const DefaultStorage = MemoryStorage
 

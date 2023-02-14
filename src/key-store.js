@@ -49,7 +49,7 @@ function createStore (path = './keystore') {
 
 // const verifiedCache = new LRU(1000)
 
-export default class Keystore {
+export default class KeyStore {
   constructor (input = {}) {
     if (typeof input === 'string') {
       this._store = createStore(input)
@@ -65,7 +65,7 @@ export default class Keystore {
 
   async open () {
     if (!this._store) {
-      throw new Error('Keystore: No store found to open')
+      throw new Error('KeyStore: No store found to open')
     }
     await this._store.open()
   }
@@ -207,7 +207,7 @@ export default class Keystore {
   }
 
   async verify (signature, publicKey, data, v = 'v1') {
-    return Keystore.verify(signature, publicKey, data, v)
+    return KeyStore.verify(signature, publicKey, data, v)
   }
 
   static async verify (signature, publicKey, data, v = 'v1') {

@@ -1,5 +1,5 @@
 import IdentityProvider from './interface.js'
-import Keystore from '../../Keystore.js'
+import KeyStore from '../../key-store.js'
 const type = 'orbitdb'
 
 class OrbitDBIdentityProvider extends IdentityProvider {
@@ -41,7 +41,7 @@ class OrbitDBIdentityProvider extends IdentityProvider {
 
   static async verifyIdentity (identity) {
     // Verify that identity was signed by the ID
-    return Keystore.verify(
+    return KeyStore.verify(
       identity.signatures.publicKey,
       identity.id,
       identity.publicKey + identity.signatures.id

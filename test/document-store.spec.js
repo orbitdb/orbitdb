@@ -1,11 +1,12 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
-import * as Log from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
-
-import Documents from '../src/documents.js'
-import Database from '../src/database.js'
+import Log from '../src/log.js'
+import Entry from '../src/entry.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
+import IPFSBlockStorage from '../src/storage/ipfs-block.js'
+import LevelStorage from '../src/storage/level.js'
+import { DocumentStore, Database } from '../src/db/index.js'
 
 // Test utils
 // import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -16,13 +17,15 @@ import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
 
+const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Documents Database (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2
     let ipfs1, ipfs2
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     // let peerId1, peerId2
     let testIdentity1, testIdentity2
     let db1, db2
@@ -58,7 +61,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         }
       }
 
-      db1 = await Documents({ OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+      db1 = await DocumentStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -84,8 +87,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeystore) {
-        await signingKeystore.close()
+      if (signingKeyStore) {
+        await signingKeyStore.close()
       }
       if (testIdentity1) {
         rmrf(testIdentity1.id)

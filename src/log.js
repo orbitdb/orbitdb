@@ -2,12 +2,12 @@ import LRU from 'lru'
 import Entry from './entry.js'
 import Clock from './lamport-clock.js'
 import Heads from './heads.js'
-import Sorting from './log-sorting.js'
-import IPFSBlockStorage from './ipfs-block-storage.js'
-import MemoryStorage from './memory-storage.js'
-import LRUStorage from './lru-storage.js'
-import LevelStorage from './level-storage.js'
-import ComposedStorage from './composed-storage.js'
+import Sorting from './sorting/log.js'
+import IPFSBlockStorage from './storage/ipfs-block.js'
+import MemoryStorage from './storage/memory.js'
+import LRUStorage from './storage/lru.js'
+import LevelStorage from './storage/level.js'
+import ComposedStorage from './storage/composed.js'
 import { isDefined } from './utils/index.js'
 
 const { LastWriteWins, NoZeroes } = Sorting
@@ -460,8 +460,4 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   }
 }
 
-export { Log }
-export { Sorting }
-export { Entry }
-export { DefaultAccessController }
-export { IPFSBlockStorage, MemoryStorage, LRUStorage, LevelStorage, ComposedStorage }
+export { Log as default, DefaultAccessController }

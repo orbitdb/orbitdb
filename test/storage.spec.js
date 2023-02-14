@@ -1,9 +1,10 @@
 import * as IPFS from 'ipfs'
 import { strictEqual, notStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { Log, IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import Log from '../src/log.js'
+import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 import { copy } from 'fs-extra'
 
 // Test utils
@@ -19,7 +20,7 @@ Object.keys(testAPIs).forEach((_) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let ipfs1
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     let testIdentity1
 
     before(async () => {
@@ -34,12 +35,12 @@ Object.keys(testAPIs).forEach((_) => {
       // Start an IPFS instance
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      keystore = new KeyStore(identityKeysPath)
+      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
 
-      testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeystore, storage })
+      testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
     })
 
     after(async () => {
@@ -49,8 +50,8 @@ Object.keys(testAPIs).forEach((_) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeystore) {
-        await signingKeystore.close()
+      if (signingKeyStore) {
+        await signingKeyStore.close()
       }
       rmrf(identityKeysPath)
       rmrf(signingKeysPath)

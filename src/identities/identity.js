@@ -1,4 +1,4 @@
-import isDefined from './is-defined.js'
+import isDefined from '../utils/is-defined.js'
 
 class Identity {
   constructor (id, publicKey, idSignature, pubKeyIdSignature, type, provider) {

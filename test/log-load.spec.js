@@ -1,13 +1,14 @@
 import { strictEqual, deepStrictEqual, notStrictEqual, throws } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import Sorting from '../src/log-sorting.js'
+import Sorting from '../src/sorting/log.js'
 import bigLogString from './fixtures/big-log.fixture.js'
 import Entry from '../src/entry.js'
-import { Log } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import Log from '../src/log.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
+import MemoryStorage from '../src/storage/memory.js'
 
 // Test utils
 import { config, MemStore, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -42,7 +43,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       'entryA3', 'entryA4', 'entryA5', 'entryC0'
     ]
 
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
 
     before(async () => {
       rmrf(identityKeysPath)
@@ -50,13 +51,13 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, signingKeysPath)
 
-      keystore = new Keystore(identityKeysPath)
-      signingKeystore = new Keystore(signingKeysPath)
+      keystore = new KeyStore(identityKeysPath)
+      signingKeyStore = new KeyStore(signingKeysPath)
 
-      testIdentity = await createIdentity({ id: 'userC', keystore, signingKeystore })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeystore })
-      testIdentity3 = await createIdentity({ id: 'userD', keystore, signingKeystore })
-      testIdentity4 = await createIdentity({ id: 'userA', keystore, signingKeystore })
+      testIdentity = await createIdentity({ id: 'userC', keystore, signingKeyStore })
+      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore })
+      testIdentity3 = await createIdentity({ id: 'userD', keystore, signingKeyStore })
+      testIdentity4 = await createIdentity({ id: 'userA', keystore, signingKeyStore })
       ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
       ipfs = ipfsd.api
 
@@ -71,7 +72,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       rmrf(signingKeysPath)
 
       await keystore.close()
-      await signingKeystore.close()
+      await signingKeyStore.close()
     })
 
     describe('fromJSON', async () => {

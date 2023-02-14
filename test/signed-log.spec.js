@@ -1,8 +1,8 @@
 import { notStrictEqual, strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { Log } from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
+import Log from '../src/log.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
@@ -15,7 +15,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Signed Log (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     let testIdentity, testIdentity2
 
     before(async () => {
@@ -30,8 +30,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeystore) {
-        await signingKeystore.close()
+      if (signingKeyStore) {
+        await signingKeyStore.close()
       }
       rmrf('./keys_1')
       rmrf('./keys_2')

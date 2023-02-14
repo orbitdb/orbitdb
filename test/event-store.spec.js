@@ -1,11 +1,12 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
-import * as Log from '../src/log.js'
-import IdentityProvider from '../src/identities/identities.js'
-import Keystore from '../src/Keystore.js'
-
-import EventStore from '../src/events.js'
-import Database from '../src/database.js'
+import Log from '../src/log.js'
+import Entry from '../src/entry.js'
+import IdentityProvider from '../src/identities/index.js'
+import KeyStore from '../src/key-store.js'
+import IPFSBlockStorage from '../src/storage/ipfs-block.js'
+import LevelStorage from '../src/storage/level.js'
+import { EventStore, Database } from '../src/db/index.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers } from 'orbit-db-test-utils'
@@ -16,13 +17,15 @@ import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider
 
+const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Events Database (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2
     let ipfs1, ipfs2
-    let keystore, signingKeystore
+    let keystore, signingKeyStore
     let peerId1, peerId2
     let testIdentity1, testIdentity2
     let kv1, kv2
@@ -73,8 +76,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeystore) {
-        await signingKeystore.close()
+      if (signingKeyStore) {
+        await signingKeyStore.close()
       }
       if (testIdentity1) {
         rmrf(testIdentity1.id)
@@ -109,8 +112,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const onError = () => {
         }
 
-        kv1 = await EventStore({ OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await EventStore({ OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -217,8 +220,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         //   ++syncCount
         // }
 
-        kv1 = await EventStore({ OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await EventStore({ OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -252,8 +255,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await kv1.close()
         await kv2.close()
 
-        kv1 = await EventStore({ OpLog: Log, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await EventStore({ OpLog: Log, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // all() test
         const all2 = []

@@ -1,4 +1,4 @@
-const EventStore = async ({ OpLog, Database, ipfs, identity, databaseId, accessController, storage }) => {
+const Events = async ({ OpLog, Database, ipfs, identity, databaseId, accessController, storage }) => {
   const database = await Database({ OpLog, ipfs, identity, databaseId, accessController, storage })
 
   const { addOperation, log } = database
@@ -42,4 +42,4 @@ const EventStore = async ({ OpLog, Database, ipfs, identity, databaseId, accessC
   }
 }
 
-export default EventStore
+export default Events

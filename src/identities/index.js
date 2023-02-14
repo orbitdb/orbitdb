@@ -1,10 +1,10 @@
 import Identity from './identity.js'
-import IdentityProvider from './identity-providers/interface.js'
-import OrbitDBIdentityProvider from './identity-providers/orbitdb.js'
+import IdentityProvider from './providers/interface.js'
+import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
-import Keystore from '../Keystore.js'
-import IdentityStorage from '../identity-storage.js'
+import KeyStore from '../key-store.js'
+import IdentityStorage from '../storage/identity.js'
 import LRU from 'lru'
 import path from 'path'
 
@@ -27,7 +27,7 @@ const getHandlerFor = (type) => {
 class Identities {
   constructor (options) {
     this._keystore = options.keystore
-    this._signingKeystore = options.signingKeystore || this._keystore
+    this._signingKeyStore = options.signingKeyStore || this._keystore
     this._knownIdentities = options.cache || new LRU(options.cacheSize || 100)
     this._storage = options.identityStore
   }
@@ -36,12 +36,12 @@ class Identities {
 
   get keystore () { return this._keystore }
 
-  get signingKeystore () { return this._signingKeystore }
+  get signingKeyStore () { return this._signingKeyStore }
 
   async sign (identity, data) {
     const signingKey = await this.keystore.getKey(identity.id)
     if (!signingKey) {
-      throw new Error('Private signing key not found from Keystore')
+      throw new Error('Private signing key not found from KeyStore')
     }
     const sig = await this.keystore.sign(signingKey, data)
     return sig
@@ -54,7 +54,7 @@ class Identities {
   async createIdentity (options = {}) {
     const keystore = options.keystore || this.keystore
     const type = options.type || defaultType
-    const identityProvider = type === defaultType ? new OrbitDBIdentityProvider(options.signingKeystore || keystore) : new (getHandlerFor(type))(options)
+    const identityProvider = type === defaultType ? new OrbitDBIdentityProvider(options.signingKeyStore || keystore) : new (getHandlerFor(type))(options)
     const id = await identityProvider.getId(options)
 
     if (options.migrate) {
@@ -115,7 +115,7 @@ class Identities {
       return false
     }
 
-    const verifyIdSig = await Keystore.verify(
+    const verifyIdSig = await KeyStore.verify(
       identity.signatures.id,
       identity.publicKey,
       identity.id
@@ -129,17 +129,17 @@ class Identities {
 
   static async createIdentity (options = {}) {
     if (!options.keystore) {
-      options.keystore = new Keystore(options.identityKeysPath || identityKeysPath)
+      options.keystore = new KeyStore(options.identityKeysPath || identityKeysPath)
     }
-    if (!options.signingKeystore) {
+    if (!options.signingKeyStore) {
       if (options.signingKeysPath) {
-        options.signingKeystore = new Keystore(options.signingKeysPath)
+        options.signingKeyStore = new KeyStore(options.signingKeysPath)
       } else {
-        options.signingKeystore = options.keystore
+        options.signingKeyStore = options.keystore
       }
     }
     await options.keystore.open()
-    await options.signingKeystore.open()
+    await options.signingKeyStore.open()
 
     let identityStore
     if (options.storage) {
@@ -177,4 +177,4 @@ class Identities {
   }
 }
 
-export default Identities
+export { Identities as default, Identity }

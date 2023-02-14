@@ -1,6 +1,5 @@
-import Entry from './entry.js'
-import IPFSBlockStorage from './ipfs-block-storage.js'
-import MemoryStorage from './memory-storage.js'
+import IPFSBlockStorage from '../storage/ipfs-block.js'
+import MemoryStorage from '../storage/memory.js'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
