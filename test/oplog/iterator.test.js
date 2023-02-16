@@ -1,15 +1,15 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import Log from '../src/log.js'
-import IdentityProvider from '../src/identities/index.js'
-import KeyStore from '../src/key-store.js'
+import Log from '../../src/log.js'
+import IdentityProvider from '../../src/identities/index.js'
+import KeyStore from '../../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
 import all from 'it-all'
-import MemoryStorage from '../src/storage/memory.js'
+import MemoryStorage from '../../src/storage/memory.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
-import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
+import { identityKeys, signingKeys } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider

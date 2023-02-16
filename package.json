@@ -83,7 +83,7 @@
     "examples:browser-webpack": "open-cli examples/browser/browser-webpack-example/index.html",
     "lint:docs": "remark -qf -u validate-links .",
     "test:all": "npm run test:browser-multiple-tabs && npm run test",
-    "test": "cross-env TEST=all mocha --config test/.mocharc.json",
+    "test": "cross-env TEST=js mocha --config test/.mocharc.json",
     "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser/ --rename=orbitdb.js --flat && cpy node_modules/ipfs/dist/index.min.js ./test/browser --rename=ipfs.js --flat && cpy node_modules/orbit-db-identity-provider/dist/orbit-db-identity-provider.min.js ./test/browser --rename=identities.js --flat && cpy node_modules/ipfs-log/dist/ipfslog.min.js ./test/browser --flat && mocha ./test/browser/concurrent.spec.js",
     "build": "npm run build:dist && npm run build:debug",
     "build:examples": "webpack --config conf/webpack.example.config.js",
