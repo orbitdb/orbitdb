@@ -3,7 +3,7 @@ import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry } from '../../src/index.js'
 import { MemoryStorage, IPFSBlockStorage } from '../../src/storage/index.js'
-import IdentityProvider from '../../src/identities/index.js'
+import { IdentityProvider } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 
 // Test utils
