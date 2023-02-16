@@ -1,6 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import Log from '../../src/log.js'
+import { Log } from '../../src/oplog/index.js'
 import IdentityProvider from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
