@@ -28,8 +28,7 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
     const messageIsNotFromMe = (message) => String(peerId) !== String(message.from)
     const messageHasData = (message) => message.data !== undefined
     try {
-      // if (messageIsNotFromMe(message) && messageHasData(message)) {
-      if (messageHasData(message)) {
+      if (messageIsNotFromMe(message) && messageHasData(message)) {
         await sync(message.data)
       }
     } catch (e) {
@@ -50,8 +49,8 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   }
 
   const close = async () => {
-    await log.close()
     await ipfs.pubsub.unsubscribe(log.id, handleMessage)
+    await log.close()
     events.emit('close')
   }
 
