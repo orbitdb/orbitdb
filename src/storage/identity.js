@@ -9,11 +9,9 @@ const codec = dagCbor
 const hasher = sha256
 
 const IdentityStorage = async ({ ipfs, storage } = {}) => {
-  storage = storage
-    ? storage
-    : ipfs
-      ? await IPFSBlockStorage({ ipfs, pin: true })
-      : await MemoryStorage()
+  storage = storage || (ipfs
+    ? await IPFSBlockStorage({ ipfs, pin: true })
+    : await MemoryStorage())
 
   const put = async (value) => {
     const { cid, bytes } = await Block.encode({ value, codec, hasher })
@@ -21,13 +19,13 @@ const IdentityStorage = async ({ ipfs, storage } = {}) => {
     await storage.put(hash, bytes)
     return hash
   }
-  
+
   const get = async (hash) => {
     const bytes = await storage.get(hash)
 
     if (bytes) {
       const { value } = await Block.decode({ bytes, codec, hasher })
-      return value 
+      return value
     }
   }
 

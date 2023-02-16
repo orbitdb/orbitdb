@@ -5,7 +5,7 @@ const defaultTimeout = 30000
 
 const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
-  
+
   timeout = timeout || defaultTimeout
 
   const put = async (hash, data) => {

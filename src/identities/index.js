@@ -12,7 +12,7 @@ const defaultType = 'orbitdb'
 const identityKeysPath = path.join('./orbitdb', 'identity', 'identitykeys')
 
 const supportedTypes = {
-  orbitdb: OrbitDBIdentityProvider,
+  orbitdb: OrbitDBIdentityProvider
   // [DIDIdentityProvider.type]: DIDIdentityProvider,
   // [EthIdentityProvider.type]: EthIdentityProvider
 }
