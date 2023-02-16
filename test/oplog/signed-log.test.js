@@ -1,40 +1,32 @@
 import { notStrictEqual, strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log } from '../../src/oplog/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
-import KeyStore from '../../src/key-store.js'
+import { Identities } from '../../src/identities/index.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
 import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Signed Log (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    let keystore, signingKeyStore
+    let identities1, identities2
     let testIdentity, testIdentity2
 
     before(async () => {
-      const testIdentities = await createTestIdentities()
+      const [identities, testIdentities] = await createTestIdentities()
+      identities1 = identities[0]
+      identities2 = identities[1]
       testIdentity = testIdentities[0]
       testIdentity2 = testIdentities[1]
     })
 
     after(async () => {
-      await cleanUpTestIdentities([testIdentity, testIdentity2])
-
-      if (keystore) {
-        await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
-      rmrf('./keys_1')
-      rmrf('./keys_2')
+      await cleanUpTestIdentities([identities1, identities2])
     })
 
     it('creates a signed log', async () => {
@@ -160,7 +152,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     it('throws an error upon join if entry doesn\'t have append access', async () => {
         const testACL = {
           canAppend: async (entry) => {
-            const identity = await testIdentity.provider.get(entry.identity)
+            const identity = await identities1.getIdentity(entry.identity)
             return identity && identity.id !== testIdentity2.id
           }
         }

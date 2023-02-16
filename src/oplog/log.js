@@ -29,7 +29,7 @@ const DefaultStorage = MemoryStorage
 const DefaultAccessController = async () => {
   // An AccessController may do any async initialization stuff here...
   return {
-    canAppend: async (entry, identityProvider) => true
+    canAppend: async (entry) => true
   }
 }
 
@@ -153,7 +153,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       refs
     )
     // Authorize the entry
-    const canAppend = await access.canAppend(entry, identity.provider)
+    const canAppend = await access.canAppend(entry)
     if (!canAppend) {
       throw new Error(`Could not append entry:\nKey "${identity.hash}" is not allowed to write to the log`)
     }
@@ -208,18 +208,17 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (isAlreadyInTheLog) {
       return false
     }
-    const identityProvider = identity.provider
     // Check that the Entry belongs to this Log
     if (entry.id !== id) {
       throw new Error(`Entry's id (${entry.id}) doesn't match the log's id (${id}).`)
     }
     // Verify if entry is allowed to be added to the log
-    const canAppend = await access.canAppend(entry, identityProvider)
+    const canAppend = await access.canAppend(entry)
     if (!canAppend) {
       throw new Error(`Could not append entry:\nKey "${entry.identity}" is not allowed to write to the log`)
     }
     // Verify signature for the entry
-    const isValid = await Entry.verify(identityProvider, entry)
+    const isValid = await Entry.verify(identity, entry)
     if (!isValid) {
       throw new Error(`Could not validate signature for entry "${entry.hash}"`)
     }

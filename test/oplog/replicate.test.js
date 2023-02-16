@@ -3,24 +3,29 @@ import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry } from '../../src/index.js'
 import { MemoryStorage, IPFSBlockStorage } from '../../src/storage/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
+import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('ipfs-log - Replication (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
-    let ipfsd1, ipfsd2, ipfs1, ipfs2, id1, id2, testIdentity, testIdentity2
-
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
+    let ipfsd1, ipfsd2
+    let ipfs1, ipfs2
+    let id1, id2
+
     let keystore, signingKeyStore
+    let identities1, identities2
+    let testIdentity1, testIdentity2
     let storage1, storage2
 
     before(async () => {
@@ -41,27 +46,22 @@ Object.keys(testAPIs).forEach((IPFS) => {
       id1 = await getIpfsPeerId(ipfs1)
       id2 = await getIpfsPeerId(ipfs2)
 
-      keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
-
-      const storage = await MemoryStorage()
-
-      // Create an identity for each peers
-      testIdentity = await createIdentity({ id: 'userB', keystore, signingKeyStore, storage })
-      testIdentity2 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
+      identities1 = identities[0]
+      identities2 = identities[1]
+      testIdentity2 = testIdentities[0]
+      testIdentity1 = testIdentities[1]
 
       storage1 = await IPFSBlockStorage({ ipfs: ipfs1 })
       storage2 = await IPFSBlockStorage({ ipfs: ipfs2 })
     })
 
     after(async () => {
+      await cleanUpTestIdentities([identities1, identities2])
       await stopIpfs(ipfsd1)
       await stopIpfs(ipfsd2)
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
-      await keystore.close()
-      await signingKeyStore.close()
+      await storage1.close()
+      await storage2.close()
     })
 
     describe('replicates logs deterministically', async function () {
@@ -99,9 +99,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
 
       beforeEach(async () => {
-        log1 = await Log(testIdentity, { logId, storage: storage1 })
+        log1 = await Log(testIdentity1, { logId, storage: storage1 })
         log2 = await Log(testIdentity2, { logId, storage: storage2 })
-        input1 = await Log(testIdentity, { logId, storage: storage1 })
+        input1 = await Log(testIdentity1, { logId, storage: storage1 })
         input2 = await Log(testIdentity2, { logId, storage: storage2 })
         await ipfs1.pubsub.subscribe(logId, handleMessage1)
         await ipfs2.pubsub.subscribe(logId, handleMessage2)
@@ -143,7 +143,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         await whileProcessingMessages(config.timeout)
 
-        const result = await Log(testIdentity, { logId, storage: storage1 })
+        const result = await Log(testIdentity1, { logId, storage: storage1 })
         await result.join(log1)
         await result.join(log2)
 

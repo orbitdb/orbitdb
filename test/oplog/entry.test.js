@@ -2,14 +2,14 @@ import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Entry } from '../../src/oplog/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 // import IdentityStorage from '../src/identity-storage.js'
 // import IPFSBlockStorage from '../src/ipfs-block-storage.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 const { create, isEntry } = Entry
 
 Object.keys(testAPIs).forEach((IPFS) => {
@@ -18,8 +18,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
-    let testIdentity
     let keystore, signingKeyStore, ipfsBlockStore, identityStore
+    let identities
+    let testIdentity
     let ipfsd, ipfs
 
     before(async () => {
@@ -32,7 +33,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       keystore = new KeyStore(identityKeysPath)
       signingKeyStore = new KeyStore(signingKeysPath)
       
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs })
+      identities = await Identities({ keystore, signingKeyStore, ipfs })
+      testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
@@ -76,11 +78,11 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // strictEqual(entry.hash, expectedHash)
       })
       
-      it.skip('retrieves the identity from an entry', async() => {
+      it('retrieves the identity from an entry', async() => {
         const expected = testIdentity.toJSON()
         const payload = 'hello world'
         const entry = await create(testIdentity, 'A', payload)
-        const entryIdentity = await identityStore.get(entry.identity)
+        const entryIdentity = await identities.getIdentity(entry.identity)
 
         deepStrictEqual(entryIdentity, expected)
       })

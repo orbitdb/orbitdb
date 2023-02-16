@@ -2,7 +2,7 @@ import * as IPFS from 'ipfs'
 import { strictEqual, notStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log } from '../src/oplog/index.js'
-import { IdentityProvider } from '../src/identities/index.js'
+import { Identities } from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
 import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
@@ -11,7 +11,7 @@ import { copy } from 'fs-extra'
 import { config, testAPIs } from 'orbit-db-test-utils'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((_) => {
   describe('Storages (' + _ + ')', function () {
@@ -39,8 +39,8 @@ Object.keys(testAPIs).forEach((_) => {
       signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
-
-      testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      const identities = await Identities({ keystore, signingKeyStore, storage })
+      testIdentity1 = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {

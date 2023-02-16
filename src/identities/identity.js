@@ -1,7 +1,7 @@
 import isDefined from '../utils/is-defined.js'
 
 class Identity {
-  constructor (id, publicKey, idSignature, pubKeyIdSignature, type, provider) {
+  constructor (id, publicKey, idSignature, pubKeyIdSignature, type, signFn, verifyFn) {
     if (!isDefined(id)) {
       throw new Error('Identity id is required')
     }
@@ -22,21 +22,18 @@ class Identity {
       throw new Error('Identity type is required')
     }
 
-    if (!isDefined(provider)) {
-      throw new Error('Identity provider is required')
-    }
+    // if (!isDefined(provider)) {
+    //   throw new Error('Identity provider is required')
+    // }
 
     this._id = id
     this._publicKey = publicKey
     this._signatures = Object.assign({}, { id: idSignature }, { publicKey: pubKeyIdSignature })
     this._type = type
-    this._provider = provider
+    // this._provider = provider
     this.hash = null
-  }
-
-  async store () {
-    const value = this.toJSON()
-    this.hash = await this._provider._storage.put(value)
+    this.sign = signFn
+    this.verify = verifyFn
   }
 
   /**
@@ -59,9 +56,9 @@ class Identity {
     return this._type
   }
 
-  get provider () {
-    return this._provider
-  }
+  // get provider () {
+  //   return this._provider
+  // }
 
   toJSON () {
     return {
@@ -70,6 +67,13 @@ class Identity {
       signatures: this.signatures,
       type: this.type
     }
+  }
+
+  static isEqual (a, b) {
+    return a.id === b.id &&
+           a.publicKey === b.publicKey &&
+           a.signatures.id === b.signatures.id &&
+           a.signatures.publicKey === b.signatures.publicKey
   }
 
   static isIdentity (identity) {

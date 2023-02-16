@@ -3,7 +3,7 @@ import KeyStore from '../../key-store.js'
 const type = 'orbitdb'
 
 class OrbitDBIdentityProvider extends IdentityProvider {
-  constructor (keystore) {
+  constructor ({ keystore }) {
     super()
     if (!keystore) {
       throw new Error('OrbitDBIdentityProvider requires a keystore')
@@ -36,7 +36,7 @@ class OrbitDBIdentityProvider extends IdentityProvider {
       throw new Error(`Signing key for '${id}' not found`)
     }
 
-    return keystore.sign(key, data)
+    return KeyStore.sign(key, data)
   }
 
   static async verifyIdentity (identity) {

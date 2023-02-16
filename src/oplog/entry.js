@@ -46,7 +46,7 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
   }
 
   const { bytes } = await Block.encode({ value: entry, codec, hasher })
-  const signature = await identity.provider.sign(identity, bytes)
+  const signature = await identity.sign(identity, bytes)
 
   entry.key = identity.publicKey
   entry.identity = identity.hash

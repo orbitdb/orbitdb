@@ -31,9 +31,9 @@ describe('Identity', function () {
     assert.strictEqual(identity.signatures.publicKey, publicKeyAndIdSignature)
   })
 
-  it('has the correct provider', async () => {
-    assert.deepStrictEqual(identity.provider, provider)
-  })
+  // it('has the correct provider', async () => {
+  //   assert.deepStrictEqual(identity.provider, provider)
+  // })
 
   it('converts identity to a JSON object', async () => {
     const expected = {
@@ -86,15 +86,15 @@ describe('Identity', function () {
       assert.strictEqual(err, 'Error: Signature of (publicKey + idSignature) is required')
     })
 
-    it('throws and error if identity provider was not given in constructor', async () => {
-      let err
-      try {
-        identity = new Identity('abc', publicKey, idSignature, publicKeyAndIdSignature, type)
-      } catch (e) {
-        err = e.toString()
-      }
-      assert.strictEqual(err, 'Error: Identity provider is required')
-    })
+    // it('throws and error if identity provider was not given in constructor', async () => {
+    //   let err
+    //   try {
+    //     identity = new Identity('abc', publicKey, idSignature, publicKeyAndIdSignature, type)
+    //   } catch (e) {
+    //     err = e.toString()
+    //   }
+    //   assert.strictEqual(err, 'Error: Identity provider is required')
+    // })
 
     it('throws and error if identity type was not given in constructor', async () => {
       let err

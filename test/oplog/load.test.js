@@ -3,7 +3,7 @@ import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry, Sorting } from '../../src/oplog/index.js'
 import bigLogString from '../fixtures/big-log.fixture.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
 import MemoryStorage from '../../src/storage/memory.js'
@@ -13,7 +13,7 @@ import { config, MemStore, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-u
 
 const { sync: rmrf } = rimraf
 const { LastWriteWins } = Sorting
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 const { fromJSON, fromEntryHash, fromEntry, fromMultihash: _fromMultihash } = Log
 const { fromMultihash, create, compare } = Entry
 const { createLogWithSixteenEntries, createLogWithTwoHundredEntries } = LogCreator

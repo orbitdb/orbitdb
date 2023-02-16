@@ -1,2 +1,2 @@
-export { default as IdentityProvider } from './identity-provider.js'
+export { default as Identities } from './identities.js'
 export { default as Identity } from './identity.js'

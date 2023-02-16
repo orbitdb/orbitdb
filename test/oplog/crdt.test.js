@@ -2,7 +2,7 @@ import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import MemoryStorage from '../../src/storage/memory.js'
 
@@ -10,7 +10,7 @@ import MemoryStorage from '../../src/storage/memory.js'
 import { config, testAPIs } from 'orbit-db-test-utils'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 let testIdentity, testIdentity2, testIdentity3
 
@@ -21,6 +21,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
 
     let keystore, signingKeyStore
+    let identities1, identities2, identities3
 
     before(async () => {
       rmrf(identityKeysPath)
@@ -30,11 +31,15 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       keystore = new KeyStore(identityKeysPath)
       signingKeyStore = new KeyStore(signingKeysPath)
+
       const storage = await MemoryStorage()
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, storage })
-      testIdentity3 = await createIdentity({ id: 'userC', keystore, signingKeyStore, storage })
+      identities1 = await Identities({ keystore, signingKeyStore, storage })
+      identities2 = await Identities({ keystore, signingKeyStore, storage })
+      identities3 = await Identities({ keystore, signingKeyStore, storage })
+      testIdentity = await identities1.createIdentity({ id: 'userA' })
+      testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+      testIdentity3 = await identities3.createIdentity({ id: 'userC' })
     })
 
     after(async () => {

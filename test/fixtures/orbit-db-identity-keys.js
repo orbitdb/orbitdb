@@ -1,8 +1,7 @@
 import KeyStore from '../../src/key-store.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import rimraf from 'rimraf'
 
-const { createIdentity } = IdentityProvider
 const { sync: rmrf } = rimraf
 
 import userA from "./keys/identity-keys/03e0480538c2a39951d054e17ff31fde487cb1031d0044a037b53ad2e028a3e77c.json" assert { type: "json" }
@@ -46,39 +45,18 @@ const createTestIdentities = async (ipfs1, ipfs2) => {
   }
 
   // Create an identity for each peers
-  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs: ipfs1 })
-  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, ipfs: ipfs2 })
+  const identities1 = await Identities({ keystore, signingKeyStore, ipfs: ipfs1 })
+  const identities2 = await Identities({ keystore, signingKeyStore, ipfs: ipfs2 })
+  const testIdentity1 = await identities1.createIdentity({ id: 'userA' })
+  const testIdentity2 = await identities2.createIdentity({ id: 'userB' })
 
-  return [testIdentity1, testIdentity2]
-}
-
-const createTestIdentitiesInMemory = async (ipfs1 = null, ipfs2 = null) => {
-  rmrf('./keys_1')
-  rmrf('./keys_2')
-
-  const keystore = new KeyStore('./keys_1')
-  // await keystore.open()
-  for (const [key, value] of Object.entries(identityKeys)) {
-    await keystore.addKey(key, value)
-  }
-
-  const signingKeyStore = new KeyStore('./keys_2')
-  // await signingKeyStore.open()
-  for (const [key, value] of Object.entries(signingKeys)) {
-    await signingKeyStore.addKey(key, value)
-  }
-
-  // Create an identity for each peers
-  const testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs: ipfs1 })
-  const testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, ipfs: ipfs2 })
-
-  return [testIdentity1, testIdentity2]
+  return [[identities1, identities2], [testIdentity1, testIdentity2]]
 }
 
 const cleanUpTestIdentities = async (identities) => {
   for (let identity of identities) {
-    await identity.provider._keystore.close()
-    await identity.provider._signingKeyStore.close()
+    await identity.keystore.close()
+    await identity.signingKeyStore.close()
   }
 }
 
