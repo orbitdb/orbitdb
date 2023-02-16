@@ -1,14 +1,14 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import Clock from '../src/lamport-clock.js'
-import Log from '../src/log.js'
-import IdentityProvider from '../src/identities/index.js'
-import KeyStore from '../src/key-store.js'
-import MemoryStorage from '../src/storage/memory.js'
+import Clock from '../../src/lamport-clock.js'
+import Log from '../../src/log.js'
+import IdentityProvider from '../../src/identities/index.js'
+import KeyStore from '../../src/key-store.js'
+import MemoryStorage from '../../src/storage/memory.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
-import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
+import { identityKeys, signingKeys } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = IdentityProvider

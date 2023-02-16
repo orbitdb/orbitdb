@@ -1,10 +1,10 @@
 import { strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, Entry } from '../src/index.js'
-import { MemoryStorage, IPFSBlockStorage } from '../src/storage/index.js'
-import IdentityProvider from '../src/identities/index.js'
-import KeyStore from '../src/key-store.js'
+import { Log, Entry } from '../../src/index.js'
+import { MemoryStorage, IPFSBlockStorage } from '../../src/storage/index.js'
+import IdentityProvider from '../../src/identities/index.js'
+import KeyStore from '../../src/key-store.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
