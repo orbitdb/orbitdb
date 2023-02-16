@@ -1,3 +1,2 @@
-export { default as Log, DefaultAccessController } from './log.js'
-export { default as Entry } from './entry.js'
+export { Log, DefaultAccessController, Entry } from './oplog/index.js'
 export { default as KeyStore } from './key-store.js'

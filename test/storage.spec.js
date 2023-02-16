@@ -1,10 +1,10 @@
 import * as IPFS from 'ipfs'
 import { strictEqual, notStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import Log from '../src/log.js'
-import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
+import { Log } from '../src/oplog/index.js'
 import IdentityProvider from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
+import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
 
 // Test utils

@@ -1,9 +1,9 @@
 import Clock from './lamport-clock.js'
-import { isDefined } from './utils/index.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
+import { isDefined } from '../utils/index.js'
 
 /*
  * @description
