@@ -1,7 +1,7 @@
 import { notStrictEqual, deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
-import IdentityProvider from '../../src/identities/index.js'
+import { IdentityProvider } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import { copy } from 'fs-extra'
 import MemoryStorage from '../../src/storage/memory.js'

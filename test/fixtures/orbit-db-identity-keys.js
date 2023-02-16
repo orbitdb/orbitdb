@@ -1,5 +1,5 @@
 import KeyStore from '../../src/key-store.js'
-import IdentityProvider from '../../src/identities/index.js'
+import { IdentityProvider } from '../../src/identities/index.js'
 import rimraf from 'rimraf'
 
 const { createIdentity } = IdentityProvider
