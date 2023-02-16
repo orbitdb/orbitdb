@@ -23,7 +23,7 @@ const { createIdentity } = IdentityProvider
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('KeyValue Database (' + IPFS + ')', function () {
+  describe.only('KeyValue Database (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
     let ipfsd1, ipfsd2
