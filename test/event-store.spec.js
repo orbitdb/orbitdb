@@ -4,9 +4,8 @@ import Log from '../src/log.js'
 import Entry from '../src/entry.js'
 import IdentityProvider from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
-import IPFSBlockStorage from '../src/storage/ipfs-block.js'
-import LevelStorage from '../src/storage/level.js'
 import { EventStore, Database } from '../src/db/index.js'
+import { IPFSBlockStorage, LevelStorage } from '../src/storage/index.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers } from 'orbit-db-test-utils'

@@ -1,4 +1,4 @@
-export { default as Database } from './interface.js'
+export { default as Database } from './database.js'
 export { default as DocumentStore } from './document-store.js'
 export { default as EventStore } from './event-store.js'
 export { default as Feed } from './feed.js'
