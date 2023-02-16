@@ -1,5 +1,4 @@
 export { default as ComposedStorage } from './composed.js'
-export { default as IdentityStorage } from './identity.js'
 export { default as IPFSBlockStorage } from './ipfs-block.js'
 export { default as LevelStorage } from './level.js'
 export { default as LRUStorage } from './lru.js'
