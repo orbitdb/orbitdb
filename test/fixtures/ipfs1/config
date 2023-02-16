@@ -1,0 +1,82 @@
+{
+  "Addresses": {
+    "Swarm": [
+      "/ip4/0.0.0.0/tcp/0"
+    ],
+    "Announce": [],
+    "NoAnnounce": [],
+    "API": "/ip4/127.0.0.1/tcp/0",
+    "Gateway": "/ip4/0.0.0.0/tcp/0",
+    "RPC": "/ip4/127.0.0.1/tcp/5003",
+    "Delegates": [
+      "/dns4/node0.delegate.ipfs.io/tcp/443/https",
+      "/dns4/node1.delegate.ipfs.io/tcp/443/https",
+      "/dns4/node2.delegate.ipfs.io/tcp/443/https",
+      "/dns4/node3.delegate.ipfs.io/tcp/443/https"
+    ]
+  },
+  "Discovery": {
+    "MDNS": {
+      "Enabled": true,
+      "Interval": 0
+    },
+    "webRTCStar": {
+      "Enabled": false
+    }
+  },
+  "Bootstrap": [],
+  "Pubsub": {
+    "Router": "gossipsub",
+    "Enabled": true
+  },
+  "Swarm": {
+    "ConnMgr": {
+      "LowWater": 50,
+      "HighWater": 200
+    },
+    "DisableNatPortMap": false
+  },
+  "Routing": {
+    "Type": "dhtclient"
+  },
+  "Identity": {
+    "PeerID": "12D3KooWK49VRnddoBhSDsYcwuzeje5XRJ9ZT3r2g5QdLzJbHQwi",
+    "PrivKey": "CAESQBdBLRS/jdSCzti7eJ1aS1khEYTuZgIuOhFyg+2eqfBNiUD6j6fuMapKVqFyuQtQzHXrAEd9bCfZUfhe82wxBqE="
+  },
+  "Datastore": {
+    "Spec": {
+      "type": "mount",
+      "mounts": [
+        {
+          "mountpoint": "/blocks",
+          "type": "measure",
+          "prefix": "flatfs.datastore",
+          "child": {
+            "type": "flatfs",
+            "path": "blocks",
+            "sync": true,
+            "shardFunc": "/repo/flatfs/shard/v1/next-to-last/2"
+          }
+        },
+        {
+          "mountpoint": "/",
+          "type": "measure",
+          "prefix": "leveldb.datastore",
+          "child": {
+            "type": "levelds",
+            "path": "datastore",
+            "compression": "none"
+          }
+        }
+      ]
+    }
+  },
+  "Keychain": {
+    "DEK": {
+      "keyLength": 64,
+      "iterationCount": 10000,
+      "salt": "A2lYMmv0i8H3PlH7ejbma30G",
+      "hash": "sha2-512"
+    }
+  }
+}
