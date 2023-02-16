@@ -4,12 +4,8 @@ import Log from '../src/log.js'
 import Entry from '../src/entry.js'
 import IdentityProvider from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
-
-import KeyValueStore from '../src/db/keyvalue.js'
-import KeyValueStorePersisted from '../src/db/keyvalue-persisted.js'
-import Database from '../src/db/interface.js'
-import IPFSBlockStorage from '../src/storage/ipfs-block.js'
-import LevelStorage from '../src/storage/level.js'
+import { KeyValue, KeyValuePersisted, Database } from '../src/db/index.js'
+import { IPFSBlockStorage, LevelStorage } from '../src/storage/index.js'
 
 // Test utils
 import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -116,10 +112,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
           // error = err
         }
 
-        // kv1 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        // kv2 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -242,10 +238,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         //   ++syncCount
         // }
 
-        // kv1 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        // kv2 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -277,10 +273,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await kv1.close()
         await kv2.close()
 
-        // kv1 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        // kv2 = await KeyValueStore({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValueStorePersisted({ KeyValue: KeyValueStore, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         console.time('get')
         const value0 = await kv2.get('init')
