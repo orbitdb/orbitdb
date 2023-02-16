@@ -8,7 +8,7 @@ import * as Block from 'multiformats/block'
 const codec = dagCbor
 const hasher = sha256
 
-const IdentityStorage = async ({ ipfs, storage } = {}) => {
+const IdentityStore = async ({ ipfs, storage } = {}) => {
   storage = storage || (ipfs
     ? await IPFSBlockStorage({ ipfs, pin: true })
     : await MemoryStorage())
@@ -35,4 +35,4 @@ const IdentityStorage = async ({ ipfs, storage } = {}) => {
   }
 }
 
-export default IdentityStorage
+export default IdentityStore

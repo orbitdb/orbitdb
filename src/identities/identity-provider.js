@@ -4,7 +4,7 @@ import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore from '../key-store.js'
-import IdentityStorage from '../storage/identity.js'
+import IdentityStore from './identity-store.js'
 import LRU from 'lru'
 import path from 'path'
 
@@ -140,11 +140,11 @@ class Identities {
 
     let identityStore
     if (options.storage) {
-      identityStore = await IdentityStorage({ storage: options.storage })
+      identityStore = await IdentityStore({ storage: options.storage })
     } else if (options.ipfs) {
-      identityStore = await IdentityStorage({ ipfs: options.ipfs })
+      identityStore = await IdentityStore({ ipfs: options.ipfs })
     } else {
-      identityStore = await IdentityStorage()
+      identityStore = await IdentityStore()
     }
 
     options = Object.assign({}, { type: defaultType, identityStore }, options)
