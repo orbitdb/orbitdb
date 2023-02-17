@@ -6,18 +6,17 @@ import { Identity, addIdentityProvider } from '../../src/identities/index.js'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import KeyDidResolver from 'key-did-resolver'
 import DIDIdentityProvider from '../../src/identities/providers/did.js'
-const keypath = path.resolve('./test/identities/fixtures/keys')
-let keystore
 
 const seed = new Uint8Array([157, 94, 116, 198, 19, 248, 93, 239, 173, 82, 245, 222, 199, 7, 183, 177, 123, 238, 83, 240, 143, 188, 87, 191, 33, 95, 58, 136, 46, 218, 219, 245])
 const didStr = 'did:key:z6MkpnTJwrrVuphNh1uKb5DB7eRxvqniVaSDUHU6jtGVmn3r'
-
 const type = DIDIdentityProvider.type
+
 describe('DID Identity Provider', function () {
+  let keystore
   let identities
 
   before(async () => {
-    keystore = new KeyStore(keypath)
+    keystore = new KeyStore()
     await keystore.open()
     DIDIdentityProvider.setDIDResolver(KeyDidResolver.getResolver())
     addIdentityProvider(DIDIdentityProvider)
@@ -28,6 +27,8 @@ describe('DID Identity Provider', function () {
     if (keystore) {
       await keystore.close()
     }
+    rmrf.sync('./keystore')
+    rmrf.sync('./orbitdb')
   })
 
   describe('create an DID identity', () => {

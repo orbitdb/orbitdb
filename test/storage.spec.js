@@ -56,7 +56,6 @@ Object.keys(testAPIs).forEach((_) => {
       rmrf(identityKeysPath)
       rmrf(signingKeysPath)
       rmrf(testIdentity1.id)
-      rmrf('./orbitdb')
       rmrf('./ipfs1')
     })
 

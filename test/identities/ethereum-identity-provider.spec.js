@@ -5,15 +5,14 @@ import { KeyStore, Identities } from '../../src/index.js'
 import { Identity, addIdentityProvider } from '../../src/identities/index.js'
 import EthIdentityProvider from '../../src/identities/providers/ethereum.js'
 
-const keypath = path.resolve('./test/identities/fixtures/keys')
-let keystore
-
 const type = EthIdentityProvider.type
+
 describe('Ethereum Identity Provider', function () {
+  let keystore
   let identities
 
   before(async () => {
-    keystore = new KeyStore(keypath)
+    keystore = new KeyStore()
     await keystore.open()
     addIdentityProvider(EthIdentityProvider)
     identities = await Identities({ keystore })
@@ -23,6 +22,8 @@ describe('Ethereum Identity Provider', function () {
     if (keystore) {
       await keystore.close()
     }
+    rmrf.sync('./keystore')
+    rmrf.sync('./orbitdb')
   })
 
   describe('create an ethereum identity', () => {

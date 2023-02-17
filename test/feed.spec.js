@@ -93,9 +93,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (testIdentity2) {
         rmrf(testIdentity2.id)
       }
-      rmrf('./orbitdb')
-      rmrf('./keys_1')
-      rmrf('./keys_2')
     })
 
     describe('using database', () => {

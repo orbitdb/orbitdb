@@ -43,12 +43,7 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
     const publicKeyAndIdSignature = await identityProvider.signIdentity(publicKey + idSignature, options)
     const identity = await Identity({ id, publicKey, idSignature, publicKeyAndIdSignature, type, sign, verify })
 
-    // const { hash, bytes } = await encodeIdentity(identity)
-    // console.log(hash, bytes)
     await storage.put(identity.hash, identity.bytes)
-    // const hash = await storage.put(identity.toJSON())
-    // // TODO: fix this monkey patching
-    // identity.hash = hash
 
     return identity
   }

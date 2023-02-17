@@ -4,7 +4,6 @@ import { copy } from 'fs-extra'
 import { Log, Entry } from '../../src/index.js'
 import { MemoryStorage, IPFSBlockStorage } from '../../src/storage/index.js'
 import { Identities } from '../../src/identities/index.js'
-import KeyStore from '../../src/key-store.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
@@ -23,7 +22,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let ipfs1, ipfs2
     let id1, id2
 
-    let keystore, signingKeyStore
     let identities1, identities2
     let testIdentity1, testIdentity2
     let storage1, storage2
