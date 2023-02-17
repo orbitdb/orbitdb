@@ -2,7 +2,7 @@ import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
 import { KeyStore, Identities } from '../../src/index.js'
-import { Identity } from '../../src/identities/index.js'
+import { Identity, addIdentityProvider } from '../../src/identities/index.js'
 import fs from 'fs-extra'
 const fixturesPath = path.resolve('./test/identities/fixtures/keys')
 const savedKeysPath = path.resolve('./test/identities/fixtures/savedKeys')
@@ -171,7 +171,7 @@ describe('Identity Provider', function () {
       assert.strictEqual(identity.signatures.id, expectedIdSignature)
     })
 
-    it('has a pubKeyIdSignature for the publicKey', async () => {
+    it('has a publicKeyAndIdSignature for the publicKey', async () => {
       assert.strictEqual(identity.signatures.publicKey, expectedPkIdSignature)
     })
 
@@ -179,8 +179,8 @@ describe('Identity Provider', function () {
       const internalSigningKey = await savedKeysKeyStore.getKey(identity.id)
       const externalSigningKey = await savedKeysKeyStore.getKey(id)
       const idSignature = await KeyStore.sign(internalSigningKey, identity.id)
-      const pubKeyIdSignature = await KeyStore.sign(externalSigningKey, identity.publicKey + idSignature)
-      const expectedSignature = { id: idSignature, publicKey: pubKeyIdSignature }
+      const publicKeyAndIdSignature = await KeyStore.sign(externalSigningKey, identity.publicKey + idSignature)
+      const expectedSignature = { id: idSignature, publicKey: publicKeyAndIdSignature }
       assert.deepStrictEqual(identity.signatures, expectedSignature)
     })
   })
@@ -234,7 +234,7 @@ describe('Identity Provider', function () {
         static get type () { return 'fake' }
       }
 
-      identities.addIdentityProvider(IP)
+      addIdentityProvider(IP)
       identity = await identities.createIdentity({ type: IP.type })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
@@ -309,7 +309,14 @@ describe('Identity Provider', function () {
 
     it('throws an error if private key is not found from keystore', async () => {
       // Remove the key from the keystore (we're using a mock storage in these tests)
-      const modifiedIdentity = new Identity('this id does not exist', identity.publicKey, '<sig>', identity.signatures, identity.type)
+      const { publicKey, signatures, type } = identity
+      const modifiedIdentity = await Identity({
+        id: 'this id does not exist',
+        publicKey,
+        idSignature: '<sig>',
+        publicKeyAndIdSignature: signatures,
+        type
+      })
       let signature
       let err
       try {

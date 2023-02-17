@@ -79,7 +79,16 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
       
       it('retrieves the identity from an entry', async() => {
-        const expected = testIdentity.toJSON()
+        const expected = {
+          id: testIdentity.id,
+          publicKey: testIdentity.publicKey,
+          signatures: testIdentity.signatures,
+          type: testIdentity.type,
+          hash: testIdentity.hash,
+          bytes: testIdentity.bytes,
+          sign: undefined,
+          verify: undefined,
+        }
         const payload = 'hello world'
         const entry = await create(testIdentity, 'A', payload)
         const entryIdentity = await identities.getIdentity(entry.identity)

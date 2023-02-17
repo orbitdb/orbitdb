@@ -58,12 +58,12 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
 /**
  * Verifies an entry signature.
  *
- * @param {IdentityProvider} identityProvider The identity provider to use
+ * @param {Identities} identities Identities system to use
  * @param {Entry} entry The entry being verified
  * @return {Promise} A promise that resolves to a boolean value indicating if the signature is valid
  */
-const verify = async (identityProvider, entry) => {
-  if (!identityProvider) throw new Error('Identity-provider is required, cannot verify entry')
+const verify = async (identities, entry) => {
+  if (!identities) throw new Error('Identities is required, cannot verify entry')
   if (!isEntry(entry)) throw new Error('Invalid Log entry')
   if (!entry.key) throw new Error("Entry doesn't have a key")
   if (!entry.sig) throw new Error("Entry doesn't have a signature")
@@ -79,7 +79,7 @@ const verify = async (identityProvider, entry) => {
 
   const { bytes } = await Block.encode({ value, codec, hasher })
 
-  return identityProvider.verify(entry.sig, entry.key, bytes)
+  return identities.verify(entry.sig, entry.key, bytes)
 }
 
 /**

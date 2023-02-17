@@ -2,7 +2,7 @@ import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
 import { KeyStore, Identities } from '../../src/index.js'
-import { Identity } from '../../src/identities/index.js'
+import { Identity, addIdentityProvider } from '../../src/identities/index.js'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import KeyDidResolver from 'key-did-resolver'
 import DIDIdentityProvider from '../../src/identities/providers/did.js'
@@ -19,9 +19,9 @@ describe('DID Identity Provider', function () {
   before(async () => {
     keystore = new KeyStore(keypath)
     await keystore.open()
-    identities = await Identities({ keystore })
     DIDIdentityProvider.setDIDResolver(KeyDidResolver.getResolver())
-    identities.addIdentityProvider(DIDIdentityProvider)
+    addIdentityProvider(DIDIdentityProvider)
+    identities = await Identities({ keystore })
   })
 
   after(async () => {
@@ -82,7 +82,14 @@ describe('DID Identity Provider', function () {
     })
 
     it('DID identity with incorrect id does not verify', async () => {
-      const identity2 = new Identity('NotAnId', identity.publicKey, identity.signatures.id, identity.signatures.publicKey, identity.type, identity.provider)
+      const { publicKey, signatures, type } = identity
+      const identity2 = await Identity({
+        id: 'NotAnId',
+        publicKey,
+        idSignature: signatures.id,
+        publicKeyAndIdSignature: signatures.publicKey,
+        type
+      })
       const verified = await identities.verifyIdentity(identity2)
       assert.strictEqual(verified, false)
     })
@@ -106,7 +113,14 @@ describe('DID Identity Provider', function () {
 
     it('throws an error if private key is not found from keystore', async () => {
       // Remove the key from the keystore (we're using a mock storage in these tests)
-      const modifiedIdentity = new Identity('this id does not exist', identity.publicKey, '<sig>', identity.signatures, identity.type, identity.provider)
+      const { publicKey, signatures, type } = identity
+      const modifiedIdentity = await Identity({
+        id: 'this id does not exist',
+        publicKey,
+        idSignature: '<sig>',
+        publicKeyAndIdSignature: signatures.publicKey,
+        type
+      })
       let signature
       let err
       try {

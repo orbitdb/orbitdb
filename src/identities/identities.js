@@ -1,10 +1,9 @@
-import Identity from './identity.js'
+import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
 import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore from '../key-store.js'
-import IdentityStore from './identity-store.js'
-import { LRUStorage } from '../storage/index.js'
+import { LRUStorage, IPFSBlockStorage, MemoryStorage } from '../storage/index.js'
 import path from 'path'
 
 const DefaultProviderType = 'orbitdb'
@@ -16,15 +15,18 @@ const supportedTypes = {
   // [EthIdentityProvider.type]: EthIdentityProvider
 }
 
-const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signingKeysPath, identityStore, ipfs } = {}) => {
+const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signingKeysPath, storage, ipfs } = {}) => {
   keystore = keystore || new KeyStore(identityKeysPath || DefaultIdentityKeysPath)
   signingKeyStore = signingKeyStore || (signingKeysPath ? new KeyStore(signingKeysPath) : keystore)
-  identityStore = identityStore || await IdentityStore({ ipfs })
+  storage = storage || (ipfs ? await IPFSBlockStorage({ ipfs, pin: true }) : await MemoryStorage())
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
 
   const getIdentity = async (hash) => {
-    return identityStore.get(hash)
+    const bytes = await storage.get(hash)
+    if (bytes) {
+      return decodeIdentity(bytes)
+    }
   }
 
   const createIdentity = async (options = {}) => {
@@ -38,18 +40,21 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
     const privateKey = await keystore.getKey(id) || await keystore.createKey(id)
     const publicKey = keystore.getPublic(privateKey)
     const idSignature = await KeyStore.sign(privateKey, id)
-    const pubKeyIdSignature = await identityProvider.signIdentity(publicKey + idSignature, options)
-    const identity = new Identity(id, publicKey, idSignature, pubKeyIdSignature, type, sign, verify)
+    const publicKeyAndIdSignature = await identityProvider.signIdentity(publicKey + idSignature, options)
+    const identity = await Identity({ id, publicKey, idSignature, publicKeyAndIdSignature, type, sign, verify })
 
-    const hash = await identityStore.put(identity.toJSON())
-    // TODO: fix this monkey patching
-    identity.hash = hash
+    // const { hash, bytes } = await encodeIdentity(identity)
+    // console.log(hash, bytes)
+    await storage.put(identity.hash, identity.bytes)
+    // const hash = await storage.put(identity.toJSON())
+    // // TODO: fix this monkey patching
+    // identity.hash = hash
 
     return identity
   }
 
   const verifyIdentity = async (identity) => {
-    if (!Identity.isIdentity(identity)) {
+    if (!isIdentity(identity)) {
       return false
     }
 
@@ -62,14 +67,14 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
 
     const verifiedIdentity = await verifiedIdentitiesCache.get(signatures.id)
     if (verifiedIdentity) {
-      return Identity.isEqual(identity, verifiedIdentity)
+      return isEqual(identity, verifiedIdentity)
     }
 
     const Provider = getProviderFor(identity.type)
     const identityVerified = await Provider.verifyIdentity(identity)
 
     if (identityVerified) {
-      await verifiedIdentitiesCache.put(signatures.id, identity.toJSON())
+      await verifiedIdentitiesCache.put(signatures.id, identity)
     }
 
     return identityVerified
@@ -89,47 +94,49 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
     return KeyStore.verify(signature, publicKey, data)
   }
 
-  const isSupported = (type) => {
-    return Object.keys(supportedTypes).includes(type)
-  }
-
-  const getProviderFor = (type) => {
-    if (!isSupported(type)) {
-      throw new Error(`IdentityProvider type '${type}' is not supported`)
-    }
-
-    return supportedTypes[type]
-  }
-
-  const addIdentityProvider = (IdentityProvider) => {
-    if (!IdentityProvider) {
-      throw new Error('IdentityProvider must be given as an argument')
-    }
-
-    if (!IdentityProvider.type ||
-      typeof IdentityProvider.type !== 'string') {
-      throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
-    }
-
-    supportedTypes[IdentityProvider.type] = IdentityProvider
-  }
-
-  const removeIdentityProvider = (type) => {
-    delete supportedTypes[type]
-  }
-
   return {
     createIdentity,
     verifyIdentity,
     getIdentity,
     sign,
     verify,
-    isSupported,
-    addIdentityProvider,
-    removeIdentityProvider,
     keystore,
     signingKeyStore
   }
 }
 
-export { Identities as default }
+const isProviderSupported = (type) => {
+  return Object.keys(supportedTypes).includes(type)
+}
+
+const getProviderFor = (type) => {
+  if (!isProviderSupported(type)) {
+    throw new Error(`IdentityProvider type '${type}' is not supported`)
+  }
+
+  return supportedTypes[type]
+}
+
+const addIdentityProvider = (IdentityProvider) => {
+  if (!IdentityProvider) {
+    throw new Error('IdentityProvider must be given as an argument')
+  }
+
+  if (!IdentityProvider.type ||
+    typeof IdentityProvider.type !== 'string') {
+    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
+  }
+
+  supportedTypes[IdentityProvider.type] = IdentityProvider
+}
+
+const removeIdentityProvider = (type) => {
+  delete supportedTypes[type]
+}
+
+export {
+  Identities as default,
+  isProviderSupported,
+  addIdentityProvider,
+  removeIdentityProvider
+}

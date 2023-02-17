@@ -2,7 +2,7 @@ import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
 import { KeyStore, Identities } from '../../src/index.js'
-import { Identity } from '../../src/identities/index.js'
+import { Identity, addIdentityProvider } from '../../src/identities/index.js'
 import EthIdentityProvider from '../../src/identities/providers/ethereum.js'
 
 const keypath = path.resolve('./test/identities/fixtures/keys')
@@ -15,8 +15,8 @@ describe('Ethereum Identity Provider', function () {
   before(async () => {
     keystore = new KeyStore(keypath)
     await keystore.open()
+    addIdentityProvider(EthIdentityProvider)
     identities = await Identities({ keystore })
-    identities.addIdentityProvider(EthIdentityProvider)
   })
 
   after(async () => {
@@ -79,7 +79,14 @@ describe('Ethereum Identity Provider', function () {
     })
 
     it('ethereum identity with incorrect id does not verify', async () => {
-      const identity2 = new Identity('NotAnId', identity.publicKey, identity.signatures.id, identity.signatures.publicKey, identity.type, identity.provider)
+      const { publicKey, signatures, type } = identity
+      const identity2 = await Identity({
+        id: 'NotAnId',
+        publicKey,
+        idSignature: signatures.id,
+        publicKeyAndIdSignature: signatures.publicKey,
+        type
+      })
       const verified = await identities.verifyIdentity(identity2)
       assert.strictEqual(verified, false)
     })
@@ -102,7 +109,14 @@ describe('Ethereum Identity Provider', function () {
 
     it('throws an error if private key is not found from keystore', async () => {
       // Remove the key from the keystore (we're using a mock storage in these tests)
-      const modifiedIdentity = new Identity('this id does not exist', identity.publicKey, '<sig>', identity.signatures, identity.type, identity.provider)
+      const { publicKey, signatures, type } = identity
+      const modifiedIdentity = await Identity({
+        id: 'this id does not exist',
+        publicKey,
+        idSignature: '<sig>',
+        publicKeyAndIdSignature: signatures.publicKey,
+        type
+      })
       let signature
       let err
       try {

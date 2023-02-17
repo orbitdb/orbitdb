@@ -12,7 +12,7 @@ describe('Identity', function () {
   let identity
 
   before(async () => {
-    identity = new Identity(id, publicKey, idSignature, publicKeyAndIdSignature, type, provider)
+    identity = await Identity({ id, publicKey, idSignature, publicKeyAndIdSignature, type })
   })
 
   it('has the correct id', async () => {
@@ -35,21 +35,21 @@ describe('Identity', function () {
   //   assert.deepStrictEqual(identity.provider, provider)
   // })
 
-  it('converts identity to a JSON object', async () => {
-    const expected = {
-      id,
-      publicKey,
-      signatures: { id: idSignature, publicKey: publicKeyAndIdSignature },
-      type
-    }
-    assert.deepStrictEqual(identity.toJSON(), expected)
-  })
+  // it('converts identity to a JSON object', async () => {
+  //   const expected = {
+  //     id,
+  //     publicKey,
+  //     signatures: { id: idSignature, publicKey: publicKeyAndIdSignature },
+  //     type
+  //   }
+  //   assert.deepStrictEqual(identity.toJSON(), expected)
+  // })
 
   describe('Constructor inputs', () => {
     it('throws and error if id was not given in constructor', async () => {
       let err
       try {
-        identity = new Identity()
+        identity = await Identity()
       } catch (e) {
         err = e.toString()
       }
@@ -59,7 +59,7 @@ describe('Identity', function () {
     it('throws and error if publicKey was not given in constructor', async () => {
       let err
       try {
-        identity = new Identity('abc')
+        identity = await Identity({ id: 'abc'})
       } catch (e) {
         err = e.toString()
       }
@@ -69,7 +69,7 @@ describe('Identity', function () {
     it('throws and error if identity signature was not given in constructor', async () => {
       let err
       try {
-        identity = new Identity('abc', publicKey)
+        identity = await Identity({ id: 'abc', publicKey })
       } catch (e) {
         err = e.toString()
       }
@@ -79,7 +79,7 @@ describe('Identity', function () {
     it('throws and error if identity signature was not given in constructor', async () => {
       let err
       try {
-        identity = new Identity('abc', publicKey, idSignature)
+        identity = await Identity({ id: 'abc', publicKey, idSignature })
       } catch (e) {
         err = e.toString()
       }
@@ -99,7 +99,7 @@ describe('Identity', function () {
     it('throws and error if identity type was not given in constructor', async () => {
       let err
       try {
-        identity = new Identity('abc', publicKey, idSignature, publicKeyAndIdSignature, null, provider)
+        identity = await Identity({ id: 'abc', publicKey, idSignature, publicKeyAndIdSignature })
       } catch (e) {
         err = e.toString()
       }
