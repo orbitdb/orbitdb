@@ -1,94 +1,80 @@
+import * as Block from 'multiformats/block'
+import * as dagCbor from '@ipld/dag-cbor'
+import { sha256 } from 'multiformats/hashes/sha2'
+import { base58btc } from 'multiformats/bases/base58'
 import isDefined from '../utils/is-defined.js'
 
-class Identity {
-  constructor (id, publicKey, idSignature, pubKeyIdSignature, type, provider) {
-    if (!isDefined(id)) {
-      throw new Error('Identity id is required')
-    }
+const codec = dagCbor
+const hasher = sha256
+const hashStringEncoding = base58btc
 
-    if (!isDefined(publicKey)) {
-      throw new Error('Invalid public key')
-    }
+const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
+  if (!isDefined(id)) throw new Error('Identity id is required')
+  if (!isDefined(publicKey)) throw new Error('Invalid public key')
+  if (!isDefined(signatures)) throw new Error('Signatures object is required')
+  if (!isDefined(signatures.id)) throw new Error('Signature of id is required')
+  if (!isDefined(signatures.publicKey)) throw new Error('Signature of publicKey+id is required')
+  if (!isDefined(type)) throw new Error('Identity type is required')
 
-    if (!isDefined(idSignature)) {
-      throw new Error('Signature of the id (idSignature) is required')
-    }
+  signatures = Object.assign({}, signatures)
 
-    if (!isDefined(pubKeyIdSignature)) {
-      throw new Error('Signature of (publicKey + idSignature) is required')
-    }
-
-    if (!isDefined(type)) {
-      throw new Error('Identity type is required')
-    }
-
-    if (!isDefined(provider)) {
-      throw new Error('Identity provider is required')
-    }
-
-    this._id = id
-    this._publicKey = publicKey
-    this._signatures = Object.assign({}, { id: idSignature }, { publicKey: pubKeyIdSignature })
-    this._type = type
-    this._provider = provider
-    this.hash = null
+  const identity = {
+    id,
+    publicKey,
+    signatures,
+    type,
+    sign,
+    verify
   }
 
-  async store () {
-    const value = this.toJSON()
-    this.hash = await this._provider._storage.put(value)
-  }
+  const { hash, bytes } = await _encodeIdentity(identity)
+  identity.hash = hash
+  identity.bytes = bytes
 
-  /**
-  * This is only used as a fallback to the clock id when necessary
-  * @return {string} public key hex encoded
-  */
-  get id () {
-    return this._id
-  }
-
-  get publicKey () {
-    return this._publicKey
-  }
-
-  get signatures () {
-    return this._signatures
-  }
-
-  get type () {
-    return this._type
-  }
-
-  get provider () {
-    return this._provider
-  }
-
-  toJSON () {
-    return {
-      id: this.id,
-      publicKey: this.publicKey,
-      signatures: this.signatures,
-      type: this.type
-    }
-  }
-
-  static isIdentity (identity) {
-    return identity.id !== undefined &&
-           identity.publicKey !== undefined &&
-           identity.signatures !== undefined &&
-           identity.signatures.id !== undefined &&
-           identity.signatures.publicKey !== undefined &&
-           identity.type !== undefined
-  }
-
-  static toJSON (identity) {
-    return {
-      id: identity.id,
-      publicKey: identity.publicKey,
-      signatures: identity.signatures,
-      type: identity.type
-    }
-  }
+  return identity
 }
 
-export default Identity
+/**
+ * Encode an Identity to a serializable form
+ * @param {Identity} identity Identity to encode
+ * @returns {Object} Object with fields hash and bytes
+ */
+const _encodeIdentity = async (identity) => {
+  const { id, publicKey, signatures, type } = identity
+  const value = { id, publicKey, signatures, type }
+  const { cid, bytes } = await Block.encode({ value, codec, hasher })
+  const hash = cid.toString(hashStringEncoding)
+  return { hash, bytes: Uint8Array.from(bytes) }
+}
+
+/**
+ * Decode an Identity from bytes
+ * @param {Uint8Array} bytes Bytes from which to decode an Identity from
+ * @returns {Identity}
+ */
+const decodeIdentity = async (bytes) => {
+  const { value } = await Block.decode({ bytes, codec, hasher })
+  return Identity({ ...value })
+}
+
+const isIdentity = (identity) => {
+  return isDefined(identity.id) &&
+    isDefined(identity.hash) &&
+    isDefined(identity.bytes) &&
+    isDefined(identity.publicKey) &&
+    isDefined(identity.signatures) &&
+    isDefined(identity.signatures.id) &&
+    isDefined(identity.signatures.publicKey) &&
+    isDefined(identity.type)
+}
+
+const isEqual = (a, b) => {
+  return a.id === b.id &&
+    a.hash === b.hash &&
+    a.type === b.type &&
+    a.publicKey === b.publicKey &&
+    a.signatures.id === b.signatures.id &&
+    a.signatures.publicKey === b.signatures.publicKey
+}
+
+export { Identity as default, isEqual, isIdentity, decodeIdentity }

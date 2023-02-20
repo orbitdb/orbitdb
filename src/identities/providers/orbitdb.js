@@ -1,51 +1,47 @@
 import IdentityProvider from './interface.js'
 import KeyStore from '../../key-store.js'
+
 const type = 'orbitdb'
 
 class OrbitDBIdentityProvider extends IdentityProvider {
-  constructor (keystore) {
+  constructor ({ keystore }) {
     super()
+
     if (!keystore) {
-      throw new Error('OrbitDBIdentityProvider requires a keystore')
+      throw new Error('OrbitDBIdentityProvider requires a keystore parameter')
     }
+
     this._keystore = keystore
   }
 
   // Returns the type of the identity provider
   static get type () { return type }
 
-  async getId (options = {}) {
-    const id = options.id
+  async getId ({ id } = {}) {
     if (!id) {
       throw new Error('id is required')
     }
-
-    const keystore = this._keystore
-    const key = await keystore.getKey(id) || await keystore.createKey(id)
+    const key = await this._keystore.getKey(id) || await this._keystore.createKey(id)
     return Buffer.from(key.public.marshal()).toString('hex')
   }
 
-  async signIdentity (data, options = {}) {
-    const id = options.id
+  async signIdentity (data, { id } = {}) {
     if (!id) {
       throw new Error('id is required')
     }
-    const keystore = this._keystore
-    const key = await keystore.getKey(id)
+
+    const key = await this._keystore.getKey(id)
     if (!key) {
       throw new Error(`Signing key for '${id}' not found`)
     }
 
-    return keystore.sign(key, data)
+    return KeyStore.sign(key, data)
   }
 
   static async verifyIdentity (identity) {
+    const { id, publicKey, signatures } = identity
     // Verify that identity was signed by the ID
-    return KeyStore.verify(
-      identity.signatures.publicKey,
-      identity.id,
-      identity.publicKey + identity.signatures.id
-    )
+    return KeyStore.verify(signatures.publicKey, id, publicKey + signatures.id)
   }
 }
 

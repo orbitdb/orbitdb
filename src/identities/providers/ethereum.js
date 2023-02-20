@@ -1,11 +1,12 @@
 import IdentityProvider from './interface.js'
 import { Wallet, verifyMessage } from '@ethersproject/wallet'
+
 const type = 'ethereum'
 
 class EthIdentityProvider extends IdentityProvider {
-  constructor (options = {}) {
+  constructor ({ wallet } = {}) {
     super()
-    this.wallet = options.wallet
+    this.wallet = wallet
   }
 
   // Returns the type of the identity provider
@@ -20,16 +21,22 @@ class EthIdentityProvider extends IdentityProvider {
   }
 
   // Returns a signature of pubkeysignature
-  async signIdentity (data, options = {}) {
+  async signIdentity (data) {
     const wallet = this.wallet
-    if (!wallet) { throw new Error('wallet is required') }
+
+    if (!wallet) {
+      throw new Error('wallet is required')
+    }
 
     return wallet.signMessage(data)
   }
 
   static async verifyIdentity (identity) {
     // Verify that identity was signed by the id
-    const signerAddress = verifyMessage(identity.publicKey + identity.signatures.id, identity.signatures.publicKey)
+    const signerAddress = verifyMessage(
+      identity.publicKey + identity.signatures.id,
+      identity.signatures.publicKey
+    )
     return (signerAddress === identity.id)
   }
 
@@ -38,17 +45,24 @@ class EthIdentityProvider extends IdentityProvider {
       if (!options.mnemonicOpts.mnemonic) {
         throw new Error('mnemonic is required')
       }
-      return Wallet.fromMnemonic(options.mnemonicOpts.mnemonic, options.mnemonicOpts.path, options.mnemonicOpts.wordlist)
+
+      const { mnemonic, path, wordlist } = options.mnemonicOpts
+      return Wallet.fromMnemonic(mnemonic, path, wordlist)
     }
+
     if (options.encryptedJsonOpts) {
       if (!options.encryptedJsonOpts.json) {
         throw new Error('encrypted json is required')
       }
+
       if (!options.encryptedJsonOpts.password) {
         throw new Error('password for encrypted json is required')
       }
-      return Wallet.fromEncryptedJson(options.encryptedJsonOpts.json, options.encryptedJsonOpts.password, options.encryptedJsonOpts.progressCallback)
+
+      const { json, password, progressCallback } = options.encryptedJsonOpts
+      return Wallet.fromEncryptedJson(json, password, progressCallback)
     }
+
     return Wallet.createRandom()
   }
 }

@@ -1,13 +1,9 @@
-# Make sure to exclude test data directory
-orbitdb/
-
 # Don't distribute the dependencies
 node_modules/
 
 #Don't track ipfs files
 test/ipfs/
 test/browser/ipfs/
-test/browser/orbitdb/
 test/browser/orbitdb.js
 test/browser/ipfs.js
 test/browser/ipfslog.min.js

@@ -3,13 +3,13 @@ import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
 import MemoryStorage from '../../src/storage/memory.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
 
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 const { sync: rmrf } = rimraf
 
 let testIdentity
@@ -18,29 +18,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - Append (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
-    let keystore, signingKeyStore
+    let keystore
+    let identities
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
+
       const storage = await MemoryStorage()
 
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      identities = await Identities({ keystore, storage })
+      testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
       await keystore.close()
-      await signingKeyStore.close()
+      rmrf(identityKeysPath)
     })
 
     describe('append', async () => {

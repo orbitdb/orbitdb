@@ -108,9 +108,10 @@ export default class KeyStore {
     if (!id) {
       throw new Error('id needed to create a key')
     }
-    if (this._store.status && this._store.status !== 'open') {
-      return null
-    }
+    // if (this._store.status && this._store.status !== 'open') {
+    //   console.log("22::", id)
+    //   return null
+    // }
 
     // Generate a private key
     const privKey = ec.genKeyPair({ entropy }).getPrivate().toArrayLike(Buffer)
@@ -175,22 +176,6 @@ export default class KeyStore {
     return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
   }
 
-  async sign (key, data) {
-    if (!key) {
-      throw new Error('No signing key given')
-    }
-
-    if (!data) {
-      throw new Error('Given input data was undefined')
-    }
-
-    if (!Buffer.isBuffer(data)) {
-      data = Buffer.from(data)
-    }
-
-    return Buffer.from(await key.sign(data)).toString('hex')
-  }
-
   getPublic (keys, options = {}) {
     const formats = ['hex', 'buffer']
     const decompress = typeof options.decompress === 'undefined' ? true : options.decompress
@@ -206,11 +191,23 @@ export default class KeyStore {
     return format === 'buffer' ? pubKey : pubKey.toString('hex')
   }
 
-  async verify (signature, publicKey, data, v = 'v1') {
-    return KeyStore.verify(signature, publicKey, data, v)
+  static async sign (key, data) {
+    if (!key) {
+      throw new Error('No signing key given')
+    }
+
+    if (!data) {
+      throw new Error('Given input data was undefined')
+    }
+
+    if (!Buffer.isBuffer(data)) {
+      data = Buffer.from(data)
+    }
+
+    return Buffer.from(await key.sign(data)).toString('hex')
   }
 
-  static async verify (signature, publicKey, data, v = 'v1') {
+  static async verify (signature, publicKey, data) {
     // const cached = verifiedCache.get(signature)
     const cached = null
     let res = false
@@ -221,16 +218,16 @@ export default class KeyStore {
       //   verifiedCache.set(signature, { publicKey, data })
       // }
     } else {
-      const compare = (cached, data, v) => {
-        let match
-        if (v === 'v0') {
-          match = Buffer.compare(Buffer.alloc(30, cached), Buffer.alloc(30, data)) === 0
-        } else {
-          match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached === data
-        }
+      const compare = (cached, data) => {
+        // let match
+        // if (v === 'v0') {
+        //   match = Buffer.compare(Buffer.alloc(30, cached), Buffer.alloc(30, data)) === 0
+        // } else {
+        const match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached === data
+        // }
         return match
       }
-      res = cached.publicKey === publicKey && compare(cached.data, data, v)
+      res = cached.publicKey === publicKey && compare(cached.data, data)
     }
     return res
   }

@@ -2,7 +2,7 @@ import * as IPFS from 'ipfs'
 import { strictEqual, notStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log } from '../src/oplog/index.js'
-import { IdentityProvider } from '../src/identities/index.js'
+import { Identities } from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
 import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
@@ -11,23 +11,22 @@ import { copy } from 'fs-extra'
 import { config, testAPIs } from 'orbit-db-test-utils'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((_) => {
   describe('Storages (' + _ + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
     let ipfs1
-    let keystore, signingKeyStore
+    let keystore
     let testIdentity1
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       rmrf('./ipfs1')
       await copy('./test/fixtures/ipfs1', './ipfs1')
@@ -36,11 +35,10 @@ Object.keys(testAPIs).forEach((_) => {
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
-
-      testIdentity1 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      const identities = await Identities({ keystore, storage })
+      testIdentity1 = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
@@ -50,14 +48,10 @@ Object.keys(testAPIs).forEach((_) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       rmrf(testIdentity1.id)
-      rmrf('./orbitdb')
       rmrf('./ipfs1')
+      rmrf('./orbitdb')
     })
 
     const runTestWithStorage = async (storage) => {

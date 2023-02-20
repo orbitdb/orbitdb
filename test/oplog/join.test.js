@@ -1,7 +1,7 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log, Clock } from '../../src/oplog/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import MemoryStorage from '../../src/storage/memory.js'
 
@@ -10,7 +10,7 @@ import { config, testAPIs } from 'orbit-db-test-utils'
 import { identityKeys, signingKeys } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 
 const last = (arr) => {
   return arr[arr.length - 1]
@@ -20,8 +20,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - Join (' + IPFS + ')', async function () {
     this.timeout(config.timeout)
 
-    let keystore, signingKeyStore
+    let keystore
     let log1, log2, log3, log4
+    let identities1, identities2, identities3, identities4
     let testIdentity, testIdentity2, testIdentity3, testIdentity4
 
     before(async () => {
@@ -30,30 +31,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }
-
-      signingKeyStore = new KeyStore('./keys_2')
-      await signingKeyStore.open()
       for (const [key, value] of Object.entries(signingKeys)) {
-        await signingKeyStore.addKey(key, value)
+        await keystore.addKey(key, value)
       }
 
       const storage = await MemoryStorage()
 
-      testIdentity = await createIdentity({ id: 'userC', keystore, signingKeyStore, storage })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore, storage })
-      testIdentity3 = await createIdentity({ id: 'userD', keystore, signingKeyStore, storage })
-      testIdentity4 = await createIdentity({ id: 'userA', keystore, signingKeyStore, storage })
+      identities1 = await Identities({ keystore, storage })
+      identities2 = await Identities({ keystore, storage })
+      identities3 = await Identities({ keystore, storage })
+      identities4 = await Identities({ keystore, storage })
+      testIdentity = await identities1.createIdentity({ id: 'userC' })
+      testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+      testIdentity3 = await identities3.createIdentity({ id: 'userD' })
+      testIdentity4 = await identities4.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
       rmrf('./keys_1')
-      rmrf('./keys_2')
     })
 
     beforeEach(async () => {

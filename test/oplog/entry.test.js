@@ -2,24 +2,25 @@ import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Entry } from '../../src/oplog/index.js'
-import { IdentityProvider } from '../../src/identities/index.js'
+import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 // import IdentityStorage from '../src/identity-storage.js'
 // import IPFSBlockStorage from '../src/ipfs-block-storage.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = IdentityProvider
+const { createIdentity } = Identities
 const { create, isEntry } = Entry
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Entry (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
+    let keystore, ipfsBlockStore, identityStore
+    let identities
     let testIdentity
-    let keystore, signingKeyStore, ipfsBlockStore, identityStore
     let ipfsd, ipfs
 
     before(async () => {
@@ -27,25 +28,22 @@ Object.keys(testAPIs).forEach((IPFS) => {
       ipfs = ipfsd.api
         
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
       
-      testIdentity = await createIdentity({ id: 'userA', keystore, signingKeyStore, ipfs })
+      identities = await Identities({ keystore, ipfs })
+      testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await keystore.close()
-      await signingKeyStore.close()
       
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
+
+      rmrf(identityKeysPath)
     })
 
     describe('create', () => {
@@ -76,11 +74,20 @@ Object.keys(testAPIs).forEach((IPFS) => {
         // strictEqual(entry.hash, expectedHash)
       })
       
-      it.skip('retrieves the identity from an entry', async() => {
-        const expected = testIdentity.toJSON()
+      it('retrieves the identity from an entry', async() => {
+        const expected = {
+          id: testIdentity.id,
+          publicKey: testIdentity.publicKey,
+          signatures: testIdentity.signatures,
+          type: testIdentity.type,
+          hash: testIdentity.hash,
+          bytes: testIdentity.bytes,
+          sign: undefined,
+          verify: undefined,
+        }
         const payload = 'hello world'
         const entry = await create(testIdentity, 'A', payload)
-        const entryIdentity = await identityStore.get(entry.identity)
+        const entryIdentity = await identities.getIdentity(entry.identity)
 
         deepStrictEqual(entryIdentity, expected)
       })
