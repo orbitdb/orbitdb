@@ -30,7 +30,6 @@ const signingKeys = {
 
 const createTestIdentities = async (ipfs1, ipfs2) => {
   rmrf('./keys_1')
-  rmrf('./keys_2')
 
   const keystore = new KeyStore('./keys_1')
   await keystore.open()
@@ -38,15 +37,13 @@ const createTestIdentities = async (ipfs1, ipfs2) => {
     await keystore.addKey(key, value)
   }
 
-  const signingKeyStore = new KeyStore('./keys_2')
-  await signingKeyStore.open()
   for (const [key, value] of Object.entries(signingKeys)) {
-    await signingKeyStore.addKey(key, value)
+    await keystore.addKey(key, value)
   }
 
   // Create an identity for each peers
-  const identities1 = await Identities({ keystore, signingKeyStore, ipfs: ipfs1 })
-  const identities2 = await Identities({ keystore, signingKeyStore, ipfs: ipfs2 })
+  const identities1 = await Identities({ keystore, ipfs: ipfs1 })
+  const identities2 = await Identities({ keystore, ipfs: ipfs2 })
   const testIdentity1 = await identities1.createIdentity({ id: 'userA' })
   const testIdentity2 = await identities2.createIdentity({ id: 'userB' })
 
@@ -56,10 +53,8 @@ const createTestIdentities = async (ipfs1, ipfs2) => {
 const cleanUpTestIdentities = async (identities) => {
   for (let identity of identities) {
     await identity.keystore.close()
-    await identity.signingKeyStore.close()
   }
   rmrf('./keys_1')
-  rmrf('./keys_2')
   rmrf('./orbitdb')
 }
 

@@ -18,32 +18,28 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - References (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
     let keystore, signingKeyStore
     let identities
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
+
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
 
-      identities = await Identities({ keystore, signingKeyStore, storage })
+      identities = await Identities({ keystore, storage })
       testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
       await keystore.close()
-      await signingKeyStore.close()
+      rmrf(identityKeysPath)
     })
 
     describe('References', async () => {

@@ -15,9 +15,8 @@ const supportedTypes = {
   // [EthIdentityProvider.type]: EthIdentityProvider
 }
 
-const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signingKeysPath, storage, ipfs } = {}) => {
+const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) => {
   keystore = keystore || new KeyStore(identityKeysPath || DefaultIdentityKeysPath)
-  signingKeyStore = signingKeyStore || (signingKeysPath ? new KeyStore(signingKeysPath) : keystore)
   storage = storage || (ipfs ? await IPFSBlockStorage({ ipfs, pin: true }) : await MemoryStorage())
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
@@ -30,7 +29,7 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
   }
 
   const createIdentity = async (options = {}) => {
-    options.keystore = signingKeyStore || keystore
+    options.keystore = keystore
 
     const type = options.type || DefaultProviderType
     const Provider = getProviderFor(type)
@@ -99,8 +98,7 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
     getIdentity,
     sign,
     verify,
-    keystore,
-    signingKeyStore
+    keystore
   }
 }
 

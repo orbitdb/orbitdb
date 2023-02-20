@@ -18,35 +18,31 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - CRDT (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
-    let keystore, signingKeyStore
+    let keystore
     let identities1, identities2, identities3
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
 
-      identities1 = await Identities({ keystore, signingKeyStore, storage })
-      identities2 = await Identities({ keystore, signingKeyStore, storage })
-      identities3 = await Identities({ keystore, signingKeyStore, storage })
+      identities1 = await Identities({ keystore, storage })
+      identities2 = await Identities({ keystore, storage })
+      identities3 = await Identities({ keystore, storage })
       testIdentity = await identities1.createIdentity({ id: 'userA' })
       testIdentity2 = await identities2.createIdentity({ id: 'userB' })
       testIdentity3 = await identities3.createIdentity({ id: 'userC' })
     })
 
     after(async () => {
-      await signingKeyStore.close()
       await keystore.close()
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
     })
 
     describe('is a CRDT', async () => {

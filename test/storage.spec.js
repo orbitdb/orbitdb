@@ -17,17 +17,16 @@ Object.keys(testAPIs).forEach((_) => {
   describe('Storages (' + _ + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
     let ipfs1
-    let keystore, signingKeyStore
+    let keystore
     let testIdentity1
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       rmrf('./ipfs1')
       await copy('./test/fixtures/ipfs1', './ipfs1')
@@ -36,10 +35,9 @@ Object.keys(testAPIs).forEach((_) => {
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
 
       const storage = await MemoryStorage()
-      const identities = await Identities({ keystore, signingKeyStore, storage })
+      const identities = await Identities({ keystore, storage })
       testIdentity1 = await identities.createIdentity({ id: 'userA' })
     })
 
@@ -50,13 +48,10 @@ Object.keys(testAPIs).forEach((_) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       rmrf(testIdentity1.id)
       rmrf('./ipfs1')
+      rmrf('./orbitdb')
     })
 
     const runTestWithStorage = async (storage) => {

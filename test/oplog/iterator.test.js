@@ -21,7 +21,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     let ipfs
     let ipfsd
-    let keystore, signingKeyStore
+    let keystore
     let identities1, identities2, identities3
     let testIdentity, testIdentity2, testIdentity3
 
@@ -31,18 +31,15 @@ Object.keys(testAPIs).forEach((IPFS) => {
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }
-
-      signingKeyStore = new KeyStore('./keys_2')
-      await signingKeyStore.open()
       for (const [key, value] of Object.entries(signingKeys)) {
-        await signingKeyStore.addKey(key, value)
+        await keystore.addKey(key, value)
       }
 
       const storage = await MemoryStorage()
 
-      identities1 = await Identities({ keystore, signingKeyStore, storage })
-      identities2 = await Identities({ keystore, signingKeyStore, storage })
-      identities3 = await Identities({ keystore, signingKeyStore, storage })
+      identities1 = await Identities({ keystore, storage })
+      identities2 = await Identities({ keystore, storage })
+      identities3 = await Identities({ keystore, storage })
       testIdentity = await identities1.createIdentity({ id: 'userA' })
       testIdentity2 = await identities2.createIdentity({ id: 'userB' })
       testIdentity3 = await identities3.createIdentity({ id: 'userC' })
@@ -58,11 +55,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (keystore) {
         await keystore.close()
       }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
       rmrf('./keys_1')
-      rmrf('./keys_2')
     })
 
     describe('Basic iterator functionality', async () => {

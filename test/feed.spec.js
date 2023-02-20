@@ -10,7 +10,7 @@ import { IPFSBlockStorage, LevelStorage } from '../src/storage/index.js'
 import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
-import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities } from './fixtures/orbit-db-identity-keys.js'
+import { createTestIdentities, cleanUpTestIdentities } from './fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities
@@ -22,7 +22,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     let ipfsd1, ipfsd2
     let ipfs1, ipfs2
-    let keystore, signingKeyStore
+    let keystore
     let peerId1, peerId2
     let identities1, identities2
     let testIdentity1, testIdentity2
@@ -83,9 +83,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
       if (keystore) {
         await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
       }
       if (testIdentity1) {
         rmrf(testIdentity1.id)

@@ -16,8 +16,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('ipfs-log - Replication (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
-
     let ipfsd1, ipfsd2
     let ipfs1, ipfs2
     let id1, id2
@@ -27,11 +25,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let storage1, storage2
 
     before(async () => {
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
-
       // Start two IPFS instances
       ipfsd1 = await startIpfs(IPFS, config.daemon1)
       ipfsd2 = await startIpfs(IPFS, config.daemon2)

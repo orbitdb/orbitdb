@@ -5,7 +5,7 @@ import { Identities } from '../../src/identities/index.js'
 
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
-import { identityKeys, signingKeys, createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
+import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities

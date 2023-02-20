@@ -16,9 +16,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Entry (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
-    let keystore, signingKeyStore, ipfsBlockStore, identityStore
+    let keystore, ipfsBlockStore, identityStore
     let identities
     let testIdentity
     let ipfsd, ipfs
@@ -28,26 +28,22 @@ Object.keys(testAPIs).forEach((IPFS) => {
       ipfs = ipfsd.api
         
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
       
-      identities = await Identities({ keystore, signingKeyStore, ipfs })
+      identities = await Identities({ keystore, ipfs })
       testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
       await keystore.close()
-      await signingKeyStore.close()
       
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
+
+      rmrf(identityKeysPath)
     })
 
     describe('create', () => {

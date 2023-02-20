@@ -18,7 +18,6 @@ build: test
 	@echo "Output: 'dist/', 'examples/browser/'"
 
 clean:
-	rm -rf orbitdb/
 	rm -rf node_modules/
 	rm -f test/browser/identities.js
 	rm -f test/browser/ipfs.js

@@ -32,7 +32,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe.skip('Log - Load (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath, signingKeysPath } = config
+    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
     const firstWriteExpectedData = [
       'entryA6', 'entryA7', 'entryA8', 'entryA9',
@@ -41,21 +41,20 @@ Object.keys(testAPIs).forEach((IPFS) => {
       'entryA3', 'entryA4', 'entryA5', 'entryC0'
     ]
 
-    let keystore, signingKeyStore
+    let keystore
 
     before(async () => {
       rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
+
       await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, signingKeysPath)
+      await copy(signingKeyFixtures, identityKeysPath)
 
       keystore = new KeyStore(identityKeysPath)
-      signingKeyStore = new KeyStore(signingKeysPath)
 
-      testIdentity = await createIdentity({ id: 'userC', keystore, signingKeyStore })
-      testIdentity2 = await createIdentity({ id: 'userB', keystore, signingKeyStore })
-      testIdentity3 = await createIdentity({ id: 'userD', keystore, signingKeyStore })
-      testIdentity4 = await createIdentity({ id: 'userA', keystore, signingKeyStore })
+      testIdentity = await createIdentity({ id: 'userC', keystore })
+      testIdentity2 = await createIdentity({ id: 'userB', keystore })
+      testIdentity3 = await createIdentity({ id: 'userD', keystore })
+      testIdentity4 = await createIdentity({ id: 'userA', keystore })
       ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
       ipfs = ipfsd.api
 
@@ -66,11 +65,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     after(async () => {
       await stopIpfs(ipfsd)
-      rmrf(identityKeysPath)
-      rmrf(signingKeysPath)
-
       await keystore.close()
-      await signingKeyStore.close()
+      rmrf(identityKeysPath)
     })
 
     describe('fromJSON', async () => {
