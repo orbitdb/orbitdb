@@ -44,6 +44,7 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
       id: idSignature,
       publicKey: publicKeyAndIdSignature
     }
+
     const identity = await Identity({ id, publicKey, signatures, type, sign, verify })
 
     await storage.put(identity.hash, identity.bytes)
@@ -57,8 +58,8 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
     }
 
     const { id, publicKey, signatures } = identity
-    const idSignatureVerified = await KeyStore.verify(signatures.id, publicKey, id)
 
+    const idSignatureVerified = await KeyStore.verify(signatures.id, publicKey, id)
     if (!idSignatureVerified) {
       return false
     }
@@ -69,8 +70,8 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
     }
 
     const Provider = getProviderFor(identity.type)
-    const identityVerified = await Provider.verifyIdentity(identity)
 
+    const identityVerified = await Provider.verifyIdentity(identity)
     if (identityVerified) {
       await verifiedIdentitiesCache.put(signatures.id, identity)
     }

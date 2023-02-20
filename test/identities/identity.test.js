@@ -71,7 +71,7 @@ describe('Identity', function () {
       } catch (e) {
         err = e.toString()
       }
-      assert.strictEqual(err, 'Error: Signatures is required')
+      assert.strictEqual(err, 'Error: Signatures object is required')
     })
 
     it('throws and error if signature for id was not given in constructor', async () => {
@@ -81,7 +81,7 @@ describe('Identity', function () {
       } catch (e) {
         err = e.toString()
       }
-      assert.strictEqual(err, 'Error: Signature of the id is required')
+      assert.strictEqual(err, 'Error: Signature of id is required')
     })
 
     it('throws and error if signature for publicKey was not given in constructor', async () => {
@@ -91,7 +91,7 @@ describe('Identity', function () {
       } catch (e) {
         err = e.toString()
       }
-      assert.strictEqual(err, 'Error: Signature of (publicKey + idSignature) is required')
+      assert.strictEqual(err, 'Error: Signature of publicKey+id is required')
     })
 
     it('throws and error if signature for publicKey was not given in constructor', async () => {
@@ -101,7 +101,7 @@ describe('Identity', function () {
       } catch (e) {
         err = e.toString()
       }
-      assert.strictEqual(err, 'Error: Signature of the id is required')
+      assert.strictEqual(err, 'Error: Signature of id is required')
     })
 
     // it('throws and error if identity provider was not given in constructor', async () => {

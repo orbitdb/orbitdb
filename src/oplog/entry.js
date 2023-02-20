@@ -7,7 +7,7 @@ import { isDefined } from '../utils/index.js'
 
 /*
  * @description
- * An ipfs-log entry
+ * A Log entry
  */
 
 const codec = dagCbor

@@ -9,29 +9,12 @@ const hasher = sha256
 const hashStringEncoding = base58btc
 
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
-  if (!isDefined(id)) {
-    throw new Error('Identity id is required')
-  }
-
-  if (!isDefined(publicKey)) {
-    throw new Error('Invalid public key')
-  }
-
-  if (!isDefined(signatures)) {
-    throw new Error('Signatures is required')
-  }
-
-  if (!isDefined(signatures.id)) {
-    throw new Error('Signature of the id is required')
-  }
-
-  if (!isDefined(signatures.publicKey)) {
-    throw new Error('Signature of (publicKey + idSignature) is required')
-  }
-
-  if (!isDefined(type)) {
-    throw new Error('Identity type is required')
-  }
+  if (!isDefined(id)) throw new Error('Identity id is required')
+  if (!isDefined(publicKey)) throw new Error('Invalid public key')
+  if (!isDefined(signatures)) throw new Error('Signatures object is required')
+  if (!isDefined(signatures.id)) throw new Error('Signature of id is required')
+  if (!isDefined(signatures.publicKey)) throw new Error('Signature of publicKey+id is required')
+  if (!isDefined(type)) throw new Error('Identity type is required')
 
   signatures = Object.assign({}, signatures)
 

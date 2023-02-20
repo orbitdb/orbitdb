@@ -14,7 +14,7 @@ class IdentityProvider {
   }
 
   /*
-    Return the type for this identity-procider
+    Return the type for this identity-proider
     NOTE! This is the only property of the interface that
     shouldn't be overridden in the inherited IdentityProvider
   */
