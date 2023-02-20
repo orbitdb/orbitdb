@@ -28,7 +28,7 @@ const signingKeys = {
   userD: userD_,
 }
 
-const createTestIdentities = async (ipfs1, ipfs2) => {
+const createTestIdentities = async (ipfsInstances) => {
   rmrf('./keys_1')
 
   const keystore = new KeyStore('./keys_1')
@@ -41,13 +41,16 @@ const createTestIdentities = async (ipfs1, ipfs2) => {
     await keystore.addKey(key, value)
   }
 
-  // Create an identity for each peers
-  const identities1 = await Identities({ keystore, ipfs: ipfs1 })
-  const identities2 = await Identities({ keystore, ipfs: ipfs2 })
-  const testIdentity1 = await identities1.createIdentity({ id: 'userA' })
-  const testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+  const identities = []
+  const testIdentities = []
 
-  return [[identities1, identities2], [testIdentity1, testIdentity2]]
+  let i = 0
+  for (const ipfsInstance of ipfsInstances) {
+    identities.push(await Identities({ keystore, ipfs: ipfsInstance }))
+    testIdentities.push(await identities[i].createIdentity({ id: 'user'+(++i) }))
+  }
+
+  return [identities, testIdentities]
 }
 
 const cleanUpTestIdentities = async (identities) => {
