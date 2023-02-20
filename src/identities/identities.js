@@ -41,7 +41,11 @@ const Identities = async ({ keystore, signingKeyStore, identityKeysPath, signing
     const publicKey = keystore.getPublic(privateKey)
     const idSignature = await KeyStore.sign(privateKey, id)
     const publicKeyAndIdSignature = await identityProvider.signIdentity(publicKey + idSignature, options)
-    const identity = await Identity({ id, publicKey, idSignature, publicKeyAndIdSignature, type, sign, verify })
+    const signatures = {
+      id: idSignature,
+      publicKey: publicKeyAndIdSignature
+    }
+    const identity = await Identity({ id, publicKey, signatures, type, sign, verify })
 
     await storage.put(identity.hash, identity.bytes)
 

@@ -87,8 +87,7 @@ describe('DID Identity Provider', function () {
       const identity2 = await Identity({
         id: 'NotAnId',
         publicKey,
-        idSignature: signatures.id,
-        publicKeyAndIdSignature: signatures.publicKey,
+        signatures,
         type
       })
       const verified = await identities.verifyIdentity(identity2)
@@ -118,8 +117,10 @@ describe('DID Identity Provider', function () {
       const modifiedIdentity = await Identity({
         id: 'this id does not exist',
         publicKey,
-        idSignature: '<sig>',
-        publicKeyAndIdSignature: signatures.publicKey,
+        signatures: {
+          id: '<sig>',
+          publicKey: signatures.publicKey
+        },
         type
       })
       let signature

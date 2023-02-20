@@ -10,7 +10,7 @@ const signingKeysPath = path.resolve('./test/identities/signingKeys')
 const identityKeysPath = path.resolve('./test/identities/identityKeys')
 const type = 'orbitdb'
 
-describe('Identity Provider', function () {
+describe('Identities', function () {
   before(async () => {
     rmrf.sync(signingKeysPath)
     rmrf.sync(identityKeysPath)
@@ -50,6 +50,35 @@ describe('Identity Provider', function () {
       const key = await identities.keystore.getKey(id)
       const externalId = Buffer.from(key.public.marshal()).toString('hex')
       assert.notStrictEqual(identity.id, externalId)
+    })
+  })
+
+  describe('Get Identity', () => {
+    const id = 'A'
+
+    let identities
+    let identity
+
+    afterEach(async () => {
+      if (identities) {
+        await identities.keystore.close()
+      }
+      if (identities) {
+        await identities.signingKeyStore.close()
+      }
+    })
+
+    it('gets the identity from storage', async () => {
+      identities = await Identities({ identityKeysPath, signingKeysPath })
+      identity = await identities.createIdentity({ id })
+      const result = await identities.getIdentity(identity.hash)
+      assert.strictEqual(result.id, identity.id)
+      assert.strictEqual(result.hash, identity.hash)
+      assert.strictEqual(result.publicKey, identity.publicKey)
+      assert.strictEqual(result.type, identity.type)
+      assert.deepStrictEqual(result.signatures, identity.signatures)
+      assert.strictEqual(result.sign, undefined)
+      assert.strictEqual(result.verify, undefined)
     })
   })
 
@@ -310,13 +339,7 @@ describe('Identity Provider', function () {
     it('throws an error if private key is not found from keystore', async () => {
       // Remove the key from the keystore (we're using a mock storage in these tests)
       const { publicKey, signatures, type } = identity
-      const modifiedIdentity = await Identity({
-        id: 'this id does not exist',
-        publicKey,
-        idSignature: '<sig>',
-        publicKeyAndIdSignature: signatures,
-        type
-      })
+      const modifiedIdentity = await Identity({ id: 'this id does not exist', publicKey, signatures, type })
       let signature
       let err
       try {
