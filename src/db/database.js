@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import PQueue from 'p-queue'
 
 const defaultPointerCount = 16
 
@@ -14,13 +15,18 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
 
   const events = new EventEmitter()
 
+  const queue = new PQueue({ concurrency: 1 })
+
   pointerCount = pointerCount || defaultPointerCount
 
   const addOperation = async (op) => {
-    const entry = await log.append(op, { pointerCount })
-    await ipfs.pubsub.publish(databaseId, entry.bytes)
-    events.emit('update', entry)
-    return entry.hash
+    const task = async () => {
+      const entry = await log.append(op, { pointerCount })
+      await ipfs.pubsub.publish(databaseId, entry.bytes)
+      events.emit('update', entry)
+      return entry.hash
+    }
+    return queue.add(task)
   }
 
   const handleMessage = async (message) => {
@@ -38,24 +44,29 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   }
 
   const sync = async (bytes) => {
-    const entry = await Entry.decode(bytes)
-    if (entry) {
-      events.emit('sync', entry)
-      const updated = await log.joinEntry(entry)
-      if (updated) {
-        events.emit('update', entry)
+    const task = async () => {
+      const entry = await Entry.decode(bytes)
+      if (entry) {
+        events.emit('sync', entry)
+        const updated = await log.joinEntry(entry)
+        if (updated) {
+          events.emit('update', entry)
+        }
       }
     }
+    await queue.add(task)
   }
 
   const close = async () => {
     await ipfs.pubsub.unsubscribe(log.id, handleMessage)
+    await queue.onIdle()
     await log.close()
     events.emit('close')
   }
 
   // TODO: rename to clear()
   const drop = async () => {
+    await queue.onIdle()
     await log.clear()
   }
 

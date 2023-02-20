@@ -34,6 +34,7 @@
     "orbit-db-pubsub": "^0.7.0",
     "orbit-db-storage-adapter": "^0.9.0",
     "orbit-db-store": "^5.0.0",
+    "p-queue": "^7.3.4",
     "wherearewe": "^2.0.1"
   },
   "devDependencies": {
