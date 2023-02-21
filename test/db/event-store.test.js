@@ -105,7 +105,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       const all = await db.all()
 
-      deepStrictEqual(all, events)
+      deepStrictEqual(all.map(e => e.value), events)
     })
 
     it('returns all events with full operation', async () => {
@@ -125,7 +125,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
 
       const hashes = []
-      for await (const entry of db.iterator({}, { fullOp: true })) {
+      for await (const entry of db.iterator()) {
         hashes.unshift(entry.hash)
       }
 
@@ -148,7 +148,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         }
 
         strictEqual(all.length, 4)
-        deepStrictEqual(all, ['hello0', 'hello1', 'hello2', 'hello3'])
+        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3'])
       })
     })
   })
