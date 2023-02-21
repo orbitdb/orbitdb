@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../../src/oplog/index.js'
-import { DocumentStore, Database } from '../../../src/db/index.js'
+import { EventStore, Database } from '../../../src/db/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
 import { getIpfsPeerId, waitForPeers, config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from '../../utils/connect-nodes.js'
@@ -13,7 +13,7 @@ const { sync: rmrf } = rimraf
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('DocumentStore Replication (' + IPFS + ')', function () {
+  describe('EventStore Replication (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2
@@ -59,7 +59,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     after(async () => {
-      await cleanUpTestIdentities([identities1, identities1])
+      await cleanUpTestIdentities([identities1, identities2])
 
       if (ipfsd1) {
         await stopIpfs(ipfsd1)
@@ -82,8 +82,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db1 = await DocumentStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-      db2 = await DocumentStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+      db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+      db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -116,10 +116,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await waitForPeers(ipfs2, [peerId1], databaseId)
 
       const puts = []
-      puts.push(await db1.put({ _id: 1, msg: 'record 1 on db 1' }))
-      puts.push(await db2.put({ _id: 2, msg: 'record 2 on db 2' }))
-      puts.push(await db1.put({ _id: 3, msg: 'record 3 on db 1' }))
-      puts.push(await db2.put({ _id: 4, msg: 'record 4 on db 2' }))
+      puts.push(await db1.add('init'))
+      puts.push(await db2.add(true))
+      puts.push(await db1.add('hello'))
+      puts.push(await db2.add('friend'))
+      puts.push(await db2.add('12345'))
+      puts.push(await db2.add('empty'))
+      puts.push(await db2.add(''))
+      puts.push(await db2.add('friend33'))
 
       await waitFor(() => updateDB1Count, () => puts.length)
       await waitFor(() => updateDB2Count, () => puts.length)

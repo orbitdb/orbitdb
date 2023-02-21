@@ -37,7 +37,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
     }
 
-
     before(async () => {
       // Start two IPFS instances
       ipfsd1 = await startIpfs(IPFS, config.daemon1)

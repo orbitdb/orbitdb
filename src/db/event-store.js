@@ -33,7 +33,7 @@ const Events = async ({ OpLog, Database, ipfs, identity, databaseId, accessContr
 
   return {
     ...database,
-    type: 'events',
+    type: 'eventstore',
     put,
     add,
     get,

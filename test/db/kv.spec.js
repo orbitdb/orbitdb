@@ -110,8 +110,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -229,8 +229,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         // kv1.events.on('update', onUpdate)
         kv2.events.on('update', onUpdate)
@@ -264,8 +264,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         // kv1 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
         // kv2 = await KeyValue({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-        kv1 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-        kv2 = await KeyValuePersisted({ KeyValue: KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+        kv1 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+        kv2 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
 
         console.time('get')
         const value0 = await kv2.get('init')
