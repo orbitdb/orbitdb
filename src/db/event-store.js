@@ -16,10 +16,10 @@ const Events = async ({ OpLog, Database, ipfs, identity, databaseId, accessContr
     return entry.payload.value
   }
 
-  const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
+  const iterator = async function * ({ gt, gte, lt, lte, amount } = {}, options = { fullOp: false }) {
     const it = log.iterator({ gt, gte, lt, lte, amount })
     for await (const event of it) {
-      yield event.payload.value
+      yield options.fullOp ? event : event.payload.value
     }
   }
 
