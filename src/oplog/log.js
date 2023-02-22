@@ -248,33 +248,34 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const traversed = {}
     // Current entry during traversal
     let entry
-    // Start traversal
+    // Start traversal and process stack until it's empty (traversed the full log)
     while (stack.length > 0) {
-      // Process stack until it's empty (traversed the full log)
-      // or until shouldStopFn returns true
-      const done = await shouldStopFn(entry)
-      if (done === true) {
-        break
-      }
       // Get the next entry from the stack
       entry = stack.pop()
-      const hash = entry.hash
-      // If we have an entry that we haven't traversed yet, process it
-      if (entry && !traversed[hash]) {
-        // Add to the hashes we've traversed
-        traversed[hash] = true
-        // Yield the current entry
-        yield entry
-        // Add hashes of next entries to the stack from entry's
-        // causal connection (next) and references to history (refs)
-        for (const nextHash of [...entry.next, ...entry.refs]) {
-          // Check if we've already traversed this entry
-          if (!traversed[nextHash]) {
-            // Fetch the next entry
-            const next = await get(nextHash)
-            if (next) {
-              // Add the next entry in front of the stack and sort
-              stack = [next, ...stack].sort(sortFn)
+      if (entry) {
+        const hash = entry.hash
+        // If we have an entry that we haven't traversed yet, process it
+        if (!traversed[hash]) {
+          // Yield the current entry
+          yield entry
+          // If we should stop traversing, stop here
+          const done = await shouldStopFn(entry)
+          if (done === true) {
+            break
+          }
+          // Add to the hashes we've traversed
+          traversed[hash] = true
+          // Add hashes of next entries to the stack from entry's
+          // causal connection (next) and references to history (refs)
+          for (const nextHash of [...entry.next, ...entry.refs]) {
+            // Check if we've already traversed this entry
+            if (!traversed[nextHash]) {
+              // Fetch the next entry
+              const next = await get(nextHash)
+              if (next) {
+                // Add the next entry in front of the stack and sort
+                stack = [next, ...stack].sort(sortFn)
+              }
             }
           }
         }
@@ -337,12 +338,11 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const start = (lt || (lte || await heads())).filter(isDefined)
     const end = (gt || gte) ? await get(gt || gte) : null
 
-    const amountToIterate = end || amount === -1
-      ? -1
-      : (lte || lt ? amount - 1 : amount)
+    const amountToIterate = (end || amount === -1) ? -1 : amount
 
     let count = 0
     const shouldStopTraversal = async (entry) => {
+      count++
       if (!entry) {
         return false
       }
@@ -352,7 +352,6 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       if (end && Entry.isEqual(entry, end)) {
         return true
       }
-      count++
       return false
     }
 
@@ -376,7 +375,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     }
 
     if (useBuffer) {
-      const endIndex = buffer.keys.length - 1
+      const endIndex = buffer.keys.length
       const startIndex = endIndex - amount
       const keys = buffer.keys.slice(startIndex, endIndex)
       for (const key of keys) {

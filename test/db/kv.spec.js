@@ -1,16 +1,16 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { Log, Entry } from '../src/oplog/index.js'
-import { Identities } from '../src/identities/index.js'
-import KeyStore from '../src/key-store.js'
-import { KeyValue, KeyValuePersisted, Database } from '../src/db/index.js'
-import { IPFSBlockStorage, LevelStorage } from '../src/storage/index.js'
+import { Log, Entry } from '../../src/oplog/index.js'
+import { Identities } from '../../src/identities/index.js'
+import KeyStore from '../../src/key-store.js'
+import { KeyValue, KeyValuePersisted, Database } from '../../src/db/index.js'
+import { IPFSBlockStorage, LevelStorage } from '../../src/storage/index.js'
 
 // Test utils
 import { config, testAPIs, getIpfsPeerId, waitForPeers, startIpfs, stopIpfs } from 'orbit-db-test-utils'
-import connectPeers from './utils/connect-nodes.js'
-import waitFor from './utils/wait-for.js'
-import { createTestIdentities, cleanUpTestIdentities } from './fixtures/orbit-db-identity-keys.js'
+import connectPeers from '../utils/connect-nodes.js'
+import waitFor from '../utils/wait-for.js'
+import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities
