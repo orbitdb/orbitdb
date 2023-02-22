@@ -12,7 +12,7 @@ const { sync: rmrf } = rimraf
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('DocumentStore Database (' + IPFS + ')', function () {
+  describe('EventStore Database (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd
@@ -135,13 +135,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
     describe('Iterator', () => {
       let hashes = []
       const last = arr => arr[arr.length - 1]
+      const first = arr => arr[0]
 
       beforeEach(async () => {
         hashes = []
         hashes = await mapSeries([0, 1, 2, 3, 4], (i) => db.add('hello' + i))
       })
 
-      it('returns all items less than head', async () => {
+      it('returns items less than head', async () => {
         const all = []
         for await (const ev of db.iterator({ lt: last(hashes) })) {
           all.unshift(ev)
@@ -150,6 +151,96 @@ Object.keys(testAPIs).forEach((IPFS) => {
         strictEqual(all.length, 4)
         deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3'])
       })
+      
+      it('returns items less or equal to head', async () => {
+        const all = []
+        for await (const ev of db.iterator({ lte: last(hashes) })) {
+          all.unshift(ev)
+        }
+
+        strictEqual(all.length, 5)
+        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3', 'hello4'])
+      })
+      
+      it('returns items greater than root', async () => {
+        const all = []
+        for await (const ev of db.iterator({ gt: first(hashes) })) {
+          all.unshift(ev)
+        }
+
+        strictEqual(all.length, 4)
+        deepStrictEqual(all.map(e => e.value), ['hello1', 'hello2', 'hello3', 'hello4'])
+      }) 
+      
+      it('returns items greater than or equal to root', async () => {
+        const all = []
+        for await (const ev of db.iterator({ gte: first(hashes) })) {
+          all.unshift(ev)
+        }
+
+        strictEqual(all.length, 5)
+        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3', 'hello4'])
+      })
+
+      it('returns head only', async () => {
+        const all = []
+        for await (const ev of db.iterator({ amount: 1 })) {
+          all.unshift(ev)          
+        }
+      
+        strictEqual(all.length, 1)
+        deepStrictEqual(all.map(e => e.value), ['hello4'])
+      })
+      
+      it('returns head + 1', async () => {
+        const all = []
+        for await (const ev of db.iterator({ amount: 2 })) {
+          all.unshift(ev)          
+        }
+
+        strictEqual(all.length, 2)
+        deepStrictEqual(all.map(e => e.value), ['hello3', 'hello4'])
+      })
+
+      it('returns head + 2', async () => {
+        const all = []
+        for await (const ev of db.iterator({ amount: 3 })) {
+          all.unshift(ev)          
+        }
+
+        strictEqual(all.length, 3)
+        deepStrictEqual(all.map(e => e.value), ['hello2', 'hello3', 'hello4'])
+      })
+
+      it('returns next item greater than root', async () => {
+        const all = []
+        for await (const ev of db.iterator({ gt: first(hashes), amount: 1 })) {
+          all.unshift(ev)          
+        }
+
+        strictEqual(all.length, 1)
+        deepStrictEqual(all.map(e => e.value), ['hello2'])
+      })
+      
+      it('returns next two items greater than root', async () => {
+        const all = []
+        for await (const ev of db.iterator({ gt: first(hashes), amount: 2 })) {
+          all.unshift(ev)          
+        }
+
+        strictEqual(all.length, 2)
+        deepStrictEqual(all.map(e => e.value), ['hello2', 'hello3'])
+      })
+
+      it('returns first item less than head', async () => {
+        const all = []
+        for await (const ev of db.iterator({ lt: last(hashes), amount: 1 })) {
+          all.unshift(ev)          
+        }
+
+        strictEqual(all.length, 1)
+        deepStrictEqual(all.map(e => e.value), ['hello3'])
+      })      
     })
   })
 })
