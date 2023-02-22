@@ -29,7 +29,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
-      const [identities, testIdentities] = await createTestIdentities([ipfs])
+      const [identities, testIdentities] = await createTestIdentities(ipfs)
       identities1 = identities[0]
       testIdentity1 = testIdentities[0]
 

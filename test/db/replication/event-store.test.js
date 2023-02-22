@@ -40,7 +40,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       peerId1 = await getIpfsPeerId(ipfs1)
       peerId2 = await getIpfsPeerId(ipfs2)
 
-      const [identities, testIdentities] = await createTestIdentities([ipfs1, ipfs2])
+      const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
       identities1 = identities[0]
       identities2 = identities[1]
       testIdentity1 = testIdentities[0]

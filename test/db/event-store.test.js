@@ -30,7 +30,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
-      const [identities, testIdentities] = await createTestIdentities([ipfs])
+      const [identities, testIdentities] = await createTestIdentities(ipfs)
       identities1 = identities[0]
       testIdentity1 = testIdentities[0]
 
@@ -185,7 +185,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('returns head only', async () => {
         const all = []
         for await (const ev of db.iterator({ amount: 1 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
       
         strictEqual(all.length, 1)
@@ -195,7 +195,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('returns head + 1', async () => {
         const all = []
         for await (const ev of db.iterator({ amount: 2 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
 
         strictEqual(all.length, 2)
@@ -205,7 +205,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('returns head + 2', async () => {
         const all = []
         for await (const ev of db.iterator({ amount: 3 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
 
         strictEqual(all.length, 3)
@@ -215,27 +215,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
       it('returns next item greater than root', async () => {
         const all = []
         for await (const ev of db.iterator({ gt: first(hashes), amount: 1 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all.map(e => e.value), ['hello2'])
+        deepStrictEqual(all.map(e => e.value), ['hello1'])
       })
       
       it('returns next two items greater than root', async () => {
         const all = []
         for await (const ev of db.iterator({ gt: first(hashes), amount: 2 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all.map(e => e.value), ['hello2', 'hello3'])
+        deepStrictEqual(all.map(e => e.value), ['hello1', 'hello2'])
       })
 
       it('returns first item less than head', async () => {
         const all = []
         for await (const ev of db.iterator({ lt: last(hashes), amount: 1 })) {
-          all.unshift(ev)          
+          all.unshift(ev)
         }
 
         strictEqual(all.length, 1)
