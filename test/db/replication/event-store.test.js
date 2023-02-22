@@ -25,7 +25,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity1, testIdentity2
     let db1, db2
 
-    const databaseId = 'documentstore-AAA'
+    const databaseId = 'eventstore-AAA'
 
     before(async () => {
       // Start two IPFS instances

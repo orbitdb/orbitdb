@@ -23,7 +23,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity1
     let db
 
-    const databaseId = 'documentstore-AAA'
+    const databaseId = 'eventstore-AAA'
 
     before(async () => {
       // Start two IPFS instances
@@ -65,7 +65,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
     })
 
-    it('creates a document store', async () => {
+    it('creates an event store', async () => {
       strictEqual(db.databaseId, databaseId)
       strictEqual(db.type, 'eventstore')
     })
@@ -328,6 +328,20 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+      })
+
+      describe('range', async () => {
+        it('returns all items greater than root and less than head', async () => {
+          const expected = ['hello1', 'hello2', 'hello3']
+
+          const all = []
+          for await (const ev of db.iterator({ gt: first(hashes), lt: last(hashes) })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 3)
           deepStrictEqual(all.map(e => e.value), expected)
         })
       })
