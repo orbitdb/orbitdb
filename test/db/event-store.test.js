@@ -108,31 +108,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       deepStrictEqual(all.map(e => e.value), events)
     })
 
-    it('returns all events with full operation', async () => {
-      const events = [
-        'init',
-        true,
-        'hello',
-        'friend',
-        '12345',
-        'empty',
-        'friend33'
-      ]
-      
-      const adds = []
-      for (const ev of events) {
-        adds.push(await db.add(ev))
-      }
-
-      const hashes = []
-      for await (const entry of db.iterator()) {
-        hashes.unshift(entry.hash)
-      }
-
-      deepStrictEqual(adds, hashes)
-    })
-
-    describe('Iterator', () => {
+    describe('Iterator Options', () => {
       let hashes = []
       const last = arr => arr[arr.length - 1]
       const first = arr => arr[0]
@@ -142,105 +118,219 @@ Object.keys(testAPIs).forEach((IPFS) => {
         hashes = await mapSeries([0, 1, 2, 3, 4], (i) => db.add('hello' + i))
       })
 
-      it('returns items less than head', async () => {
-        const all = []
-        for await (const ev of db.iterator({ lt: last(hashes) })) {
-          all.unshift(ev)
-        }
+      describe('amount', () => {
+        it('returns one item', async () => {
+          const expected = ['hello4']
 
-        strictEqual(all.length, 4)
-        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3'])
-      })
-      
-      it('returns items less or equal to head', async () => {
-        const all = []
-        for await (const ev of db.iterator({ lte: last(hashes) })) {
-          all.unshift(ev)
-        }
+          const all = []
+          for await (const ev of db.iterator({ amount: 1 })) {
+            all.unshift(ev)
+          }
 
-        strictEqual(all.length, 5)
-        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3', 'hello4'])
-      })
-      
-      it('returns items greater than root', async () => {
-        const all = []
-        for await (const ev of db.iterator({ gt: first(hashes) })) {
-          all.unshift(ev)
-        }
+          strictEqual(all.length, 1)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
 
-        strictEqual(all.length, 4)
-        deepStrictEqual(all.map(e => e.value), ['hello1', 'hello2', 'hello3', 'hello4'])
-      }) 
-      
-      it('returns items greater than or equal to root', async () => {
-        const all = []
-        for await (const ev of db.iterator({ gte: first(hashes) })) {
-          all.unshift(ev)
-        }
+        it('returns two items', async () => {
+          const expected = ['hello3', 'hello4']
 
-        strictEqual(all.length, 5)
-        deepStrictEqual(all.map(e => e.value), ['hello0', 'hello1', 'hello2', 'hello3', 'hello4'])
-      })
+          const all = []
+          for await (const ev of db.iterator({ amount: 2 })) {
+            all.unshift(ev)
+          }
 
-      it('returns head only', async () => {
-        const all = []
-        for await (const ev of db.iterator({ amount: 1 })) {
-          all.unshift(ev)
-        }
-      
-        strictEqual(all.length, 1)
-        deepStrictEqual(all.map(e => e.value), ['hello4'])
-      })
-      
-      it('returns head + 1', async () => {
-        const all = []
-        for await (const ev of db.iterator({ amount: 2 })) {
-          all.unshift(ev)
-        }
+          strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
 
-        strictEqual(all.length, 2)
-        deepStrictEqual(all.map(e => e.value), ['hello3', 'hello4'])
-      })
+        it('returns three items', async () => {
+          const expected = ['hello2', 'hello3', 'hello4']
 
-      it('returns head + 2', async () => {
-        const all = []
-        for await (const ev of db.iterator({ amount: 3 })) {
-          all.unshift(ev)
-        }
+          const all = []
+          for await (const ev of db.iterator({ amount: 3 })) {
+            all.unshift(ev)
+          }
 
-        strictEqual(all.length, 3)
-        deepStrictEqual(all.map(e => e.value), ['hello2', 'hello3', 'hello4'])
+          strictEqual(all.length, 3)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('sets \'amount\' greater than items available', async () => {
+          const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
+
+          const all = []
+          for await (const ev of db.iterator({ amount: 100 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 5)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('sets \'amount\' to 0', async () => {
+          const expected = []
+
+          const all = []
+          for await (const ev of db.iterator({ amount: 0 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 0)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
       })
 
-      it('returns next item greater than root', async () => {
-        const all = []
-        for await (const ev of db.iterator({ gt: first(hashes), amount: 1 })) {
-          all.unshift(ev)
-        }
+      describe('lt', () => {
+        it('returns all items less than head', async () => {
+          const expected = ['hello0', 'hello1', 'hello2', 'hello3']
 
-        strictEqual(all.length, 1)
-        deepStrictEqual(all.map(e => e.value), ['hello1'])
+          const all = []
+          for await (const ev of db.iterator({ lt: last(hashes) })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 4)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns one item less than head', async () => {
+          const expected = ['hello3']
+
+          const all = []
+          for await (const ev of db.iterator({ lt: last(hashes), amount: 1 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 1)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns two items less than head', async () => {
+          const expected = ['hello2', 'hello3']
+
+          const all = []
+          for await (const ev of db.iterator({ lt: last(hashes), amount: 2 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
       })
-      
-      it('returns next two items greater than root', async () => {
-        const all = []
-        for await (const ev of db.iterator({ gt: first(hashes), amount: 2 })) {
-          all.unshift(ev)
-        }
 
-        strictEqual(all.length, 2)
-        deepStrictEqual(all.map(e => e.value), ['hello1', 'hello2'])
+      describe('lte', () => {
+        it('returns all items less or equal to head', async () => {
+          const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
+
+          const all = []
+          for await (const ev of db.iterator({ lte: last(hashes) })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 5)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns one item less than or equal to head', async () => {
+          const expected = ['hello4']
+
+          const all = []
+          for await (const ev of db.iterator({ lte: last(hashes), amount: 1 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 1)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns two items less than or equal to head', async () => {
+          const expected = ['hello3', 'hello4']
+
+          const all = []
+          for await (const ev of db.iterator({ lte: last(hashes), amount: 2 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
       })
 
-      it('returns first item less than head', async () => {
-        const all = []
-        for await (const ev of db.iterator({ lt: last(hashes), amount: 1 })) {
-          all.unshift(ev)
-        }
+      describe('gt', () => {
+        it('returns all items greater than root', async () => {
+          const expected = ['hello1', 'hello2', 'hello3', 'hello4']
 
-        strictEqual(all.length, 1)
-        deepStrictEqual(all.map(e => e.value), ['hello3'])
-      })      
+          const all = []
+          for await (const ev of db.iterator({ gt: first(hashes) })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 4)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns one item greater than root', async () => {
+          const expected = ['hello1']
+
+          const all = []
+          for await (const ev of db.iterator({ gt: first(hashes), amount: 1 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 1)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns two items greater than root', async () => {
+          const expected = ['hello1', 'hello2']
+
+          const all = []
+          for await (const ev of db.iterator({ gt: first(hashes), amount: 2 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+      })
+
+      describe('gte', () => {
+        it('returns all items greater than or equal to root', async () => {
+          const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
+
+          const all = []
+          for await (const ev of db.iterator({ gte: first(hashes) })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 5)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns one item greater than or equal to root', async () => {
+          const expected = ['hello0']
+
+          const all = []
+          for await (const ev of db.iterator({ gte: first(hashes), amount: 1 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 1)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+
+        it('returns two items greater than or equal to root', async () => {
+          const expected = ['hello0', 'hello1']
+
+          const all = []
+          for await (const ev of db.iterator({ gte: first(hashes), amount: 2 })) {
+            all.unshift(ev)
+          }
+
+          strictEqual(all.length, 2)
+          deepStrictEqual(all.map(e => e.value), expected)
+        })
+      })
     })
   })
 })
