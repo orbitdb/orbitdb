@@ -2,7 +2,7 @@
 
 OrbitDB, like all code, is in a state of constant development. Doubtless, you're going to have some questions. The purpose of this FAQ is to answer the most common questions regarding how to get OrbitDB up and running, how to address common issues, and how to deal with pitfalls and common errors implementing it.
 
-This is a living document. If you see an answer that could be improved, please [open an issue](https://github.com/orbitdb/orbit-db/issues/new) or submit a PR directly. If you think than a question is missing, please [open an issue](https://github.com/orbitdb/orbit-db/issues/new). If you think that there is a better way to resolve a question - perhaps by improving the  `orbitdb --help` docs or by adding a feature - please [open an issue](https://github.com/orbitdb/orbit-db/issues/new). Sense a theme yet? :)
+This is a living document. If you see an answer that could be improved, please [open an issue](https://github.com/orbitdb/orbit-db/issues/new) or submit a PR directly. If you think that a question is missing, please [open an issue](https://github.com/orbitdb/orbit-db/issues/new). If you think that there is a better way to resolve a question - perhaps by improving the  `orbitdb --help` docs or by adding a feature - please [open an issue](https://github.com/orbitdb/orbit-db/issues/new). Sense a theme yet? :)
 
 This document is seeded by questions from people opening issues in this repository. If enough people ask the same question, we'll add one here and point newcomers to it. Please don't be offended if the maintainers say "read the FAQ" - it's our way of making sure we don't spend all of our time answering the same questions.
 
@@ -37,7 +37,7 @@ A database can't be "recreated" without downloading the database from other peer
 
 When calling `put` or any other update operation on a database, the data is 1) saved locally and persisted to IPFS and 2) send to the network, through IPFS Pubsub, to peers who have the database open (ie. peers).
 
-Upon calling `put` (or other updates), OrbitDB saves the data locally and returns. That is, the operation and its data is saved to the local node only after which `put` returns and *asynchronously* sends a message to pubsub peers. OrbitDB doesn't have a notion of confirming replication status from other peers (although this can be added on user-level) and considers operation a success upon persisting it locally. OrbitDB doesn't use consensus nor does it wait for the network to confirm operations making it an *eventually consistent* system.
+Upon calling `put` (or other updates), OrbitDB saves the data locally and returns. That is, the operation and its data are saved to the local node only after which `put` returns and *asynchronously* sends a message to pubsub peers. OrbitDB doesn't have a notion of confirming replication status from other peers (although this can be added on user-level) and considers operation a success upon persisting it locally. OrbitDB doesn't use consensus nor does it wait for the network to confirm operations making it an *eventually consistent* system.
 
 In short: it can't be assumed that data has been replicated to the network after an update-operation call finishes (eg. `put`, `add`).
 
@@ -79,7 +79,7 @@ To allow specific keys to write to the database, pass the keys as strings like s
 
 `orbitdb.feed('name', { accessController: { write ['key1', 'key2'] }}) // keys cannot be revoked`
 
-Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revocation is a harder and is being worked on by multiple parties, without a solution.
+Allows anyone to write to the db. If you specify keys, the process involves granting and revoking keys. Granting is doable, but revocation is harder and is being worked on by multiple parties, without a solution.
 
 If you want to encrypt the keys or content, it's easier with a single user. If you want to use encryption with multiwriters, that's another bag which also hasn't been solved.
 
