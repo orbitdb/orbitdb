@@ -28,7 +28,7 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, databaseId, accessCon
       const { op, key, value } = entry.payload
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
-        yield { key, value }
+        yield { hash: entry.hash, value: { key, value } }
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
       }
@@ -39,7 +39,7 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, databaseId, accessCon
 
   return {
     ...database,
-    type: 'kv',
+    type: 'keyvalue',
     put,
     set: put, // Alias for put()
     del,

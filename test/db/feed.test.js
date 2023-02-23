@@ -112,7 +112,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       strictEqual(actual, expected)
     })
     
-    it.only('deletes a non-existent feed item', async () => {
+    it('deletes a non-existent feed item', async () => {
       const expected = null
       
       const del = await db.del('zdpuApFgnZNp6qQqeuHRLJhEKsmMnXEEJfSZofLc3ZZXEihWE')
@@ -156,8 +156,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello4']
 
           const all = []
-          for await (const ev of db.iterator({ amount: 1 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ amount: 1 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 1)
@@ -168,8 +168,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ amount: 2 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ amount: 2 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 2)
@@ -180,8 +180,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello2', 'hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ amount: 3 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ amount: 3 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 3)
@@ -192,8 +192,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ amount: 100 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ amount: 100 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 5)
@@ -204,8 +204,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = []
 
           const all = []
-          for await (const ev of db.iterator({ amount: 0 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ amount: 0 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 0)
@@ -218,8 +218,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0', 'hello1', 'hello2', 'hello3']
 
           const all = []
-          for await (const ev of db.iterator({ lt: last(hashes) })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lt: last(hashes) })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 4)
@@ -230,8 +230,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello3']
 
           const all = []
-          for await (const ev of db.iterator({ lt: last(hashes), amount: 1 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lt: last(hashes), amount: 1 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 1)
@@ -242,8 +242,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello2', 'hello3']
 
           const all = []
-          for await (const ev of db.iterator({ lt: last(hashes), amount: 2 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lt: last(hashes), amount: 2 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 2)
@@ -256,8 +256,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ lte: last(hashes) })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lte: last(hashes) })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 5)
@@ -268,8 +268,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello4']
 
           const all = []
-          for await (const ev of db.iterator({ lte: last(hashes), amount: 1 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lte: last(hashes), amount: 1 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 1)
@@ -280,8 +280,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ lte: last(hashes), amount: 2 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ lte: last(hashes), amount: 2 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 2)
@@ -294,8 +294,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello1', 'hello2', 'hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ gt: first(hashes) })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gt: first(hashes) })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 4)
@@ -306,8 +306,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello1']
 
           const all = []
-          for await (const ev of db.iterator({ gt: first(hashes), amount: 1 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gt: first(hashes), amount: 1 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 1)
@@ -318,8 +318,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello1', 'hello2']
 
           const all = []
-          for await (const ev of db.iterator({ gt: first(hashes), amount: 2 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gt: first(hashes), amount: 2 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 2)
@@ -332,8 +332,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0', 'hello1', 'hello2', 'hello3', 'hello4']
 
           const all = []
-          for await (const ev of db.iterator({ gte: first(hashes) })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gte: first(hashes) })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 5)
@@ -344,8 +344,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0']
 
           const all = []
-          for await (const ev of db.iterator({ gte: first(hashes), amount: 1 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gte: first(hashes), amount: 1 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 1)
@@ -356,8 +356,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello0', 'hello1']
 
           const all = []
-          for await (const ev of db.iterator({ gte: first(hashes), amount: 2 })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gte: first(hashes), amount: 2 })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 2)
@@ -370,8 +370,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = ['hello1', 'hello2', 'hello3']
 
           const all = []
-          for await (const ev of db.iterator({ gt: first(hashes), lt: last(hashes) })) {
-            all.unshift(ev)
+          for await (const record of db.iterator({ gt: first(hashes), lt: last(hashes) })) {
+            all.unshift(record)
           }
 
           strictEqual(all.length, 3)

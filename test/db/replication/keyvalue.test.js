@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../../src/oplog/index.js'
-import { DocumentStore, Database } from '../../../src/db/index.js'
+import { KeyValue, Database } from '../../../src/db/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
 import { getIpfsPeerId, waitForPeers, config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from '../../utils/connect-nodes.js'
@@ -13,7 +13,7 @@ const { sync: rmrf } = rimraf
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('DocumentStore Replication (' + IPFS + ')', function () {
+  describe('KeyValue Replication (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2
@@ -25,7 +25,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity1, testIdentity2
     let db1, db2
 
-    const databaseId = 'documentstore-AAA'
+    const databaseId = 'keyvalue-AAA'
 
     before(async () => {
       // Start two IPFS instances
@@ -59,7 +59,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     after(async () => {
-      await cleanUpTestIdentities([identities1, identities1])
+      await cleanUpTestIdentities([identities1, identities2])
 
       if (ipfsd1) {
         await stopIpfs(ipfsd1)
@@ -82,8 +82,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db1 = await DocumentStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-      db2 = await DocumentStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+      db1 = await KeyValue({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+      db2 = await KeyValue({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -97,7 +97,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       }
     })
 
-    it('gets all documents', async () => {
+    it('gets all key/value pairs', async () => {
       let updateDB1Count = 0
       let updateDB2Count = 0
 
@@ -115,23 +115,27 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await waitForPeers(ipfs1, [peerId2], databaseId)
       await waitForPeers(ipfs2, [peerId1], databaseId)
 
-      const puts = []
-      puts.push(await db1.put({ _id: 1, msg: 'record 1 on db 1' }))
-      puts.push(await db2.put({ _id: 2, msg: 'record 2 on db 2' }))
-      puts.push(await db1.put({ _id: 3, msg: 'record 3 on db 1' }))
-      puts.push(await db2.put({ _id: 4, msg: 'record 4 on db 2' }))
+      const ops = []
+      ops.push(await db1.put('key1', 'init'))
+      ops.push(await db2.put('key2', true))
+      ops.push(await db1.put('key3', 'hello'))
+      ops.push(await db2.put('key4', 'friend'))
+      ops.push(await db2.put('key5', '12345'))
+      ops.push(await db2.put('key6', 'empty'))
+      ops.push(await db2.put('key7', ''))
+      ops.push(await db2.put('key8', 'friend33'))
 
-      await waitFor(() => updateDB1Count, () => puts.length)
-      await waitFor(() => updateDB2Count, () => puts.length)
+      await waitFor(() => updateDB1Count, () => ops.length)
+      await waitFor(() => updateDB2Count, () => ops.length)
 
       const all1 = []
-      for await (const item of db1.iterator()) {
-        all1.unshift(item)
+      for await (const record of db1.iterator()) {
+        all1.unshift(record)
       }
 
       const all2 = []
-      for await (const item of db2.iterator()) {
-        all2.unshift(item)
+      for await (const record of db2.iterator()) {
+        all2.unshift(record)
       }
 
       deepStrictEqual(all1, all2)

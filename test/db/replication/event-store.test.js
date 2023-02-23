@@ -129,13 +129,13 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await waitFor(() => updateDB2Count, () => puts.length)
 
       const all1 = []
-      for await (const doc of db1.iterator()) {
-        all1.unshift(doc)
+      for await (const record of db1.iterator()) {
+        all1.unshift(record)
       }
 
       const all2 = []
-      for await (const doc of db2.iterator()) {
-        all2.unshift(doc)
+      for await (const record of db2.iterator()) {
+        all2.unshift(record)
       }
 
       deepStrictEqual(all1, all2)
