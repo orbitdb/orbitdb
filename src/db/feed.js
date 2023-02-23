@@ -27,7 +27,7 @@ const Feed = async ({ OpLog, Database, ipfs, identity, databaseId, accessControl
       const { hash, payload } = entry
       const { op, key, value } = payload
       if (op === 'ADD' && !deleted[hash]) {
-        yield value
+        yield { hash, value }
       } else if (op === 'DEL' && !deleted[key]) {
         deleted[key] = true
       }

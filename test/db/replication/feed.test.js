@@ -115,18 +115,18 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await waitForPeers(ipfs1, [peerId2], databaseId)
       await waitForPeers(ipfs2, [peerId1], databaseId)
 
-      const puts = []
-      puts.push(await db1.add('init'))
-      puts.push(await db2.add(true))
-      puts.push(await db1.add('hello'))
-      puts.push(await db2.add('friend'))
-      puts.push(await db2.add('12345'))
-      puts.push(await db2.add('empty'))
-      puts.push(await db2.add(''))
-      puts.push(await db2.add('friend33'))
+      const ops = []
+      ops.push(await db1.add('init'))
+      ops.push(await db2.add(true))
+      ops.push(await db1.add('hello'))
+      ops.push(await db2.add('friend'))
+      ops.push(await db2.add('12345'))
+      ops.push(await db2.add('empty'))
+      ops.push(await db2.add(''))
+      ops.push(await db2.add('friend33'))
 
-      await waitFor(() => updateDB1Count, () => puts.length)
-      await waitFor(() => updateDB2Count, () => puts.length)
+      await waitFor(() => updateDB1Count, () => ops.length)
+      await waitFor(() => updateDB2Count, () => ops.length)
 
       const all1 = []
       for await (const doc of db1.iterator()) {
