@@ -98,7 +98,6 @@
   "standard": {
     "env": "mocha",
     "ignore": [
-      "test/**",
       "examples/**",
       "benchmarks/**"
     ]
