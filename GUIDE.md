@@ -263,7 +263,7 @@ main()
 
 #### Public databases
 
-The access control mechanism also support "public" databases to which anyone can write to.
+The access control mechanism also supports "public" databases to which anyone can write to.
 
 This can be done by adding a `*` to the write access array:
 ```javascript
