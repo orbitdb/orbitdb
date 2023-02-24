@@ -2,7 +2,7 @@ import { deepStrictEqual, strictEqual } from 'assert'
 import mapSeries from 'p-map-series'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
-import { KeyValue, Database } from '../../src/db/index.js'
+import { KeyValuePersisted, KeyValue, Database } from '../../src/db/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../src/storage/index.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
@@ -12,7 +12,7 @@ const { sync: rmrf } = rimraf
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('KeyValue Database (' + IPFS + ')', function () {
+  describe('KeyValuePersisted Database (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd
@@ -55,7 +55,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, databaseId, accessController })
+      db = await KeyValuePersisted({ OpLog, KeyValue, Database, ipfs, identity: testIdentity1, databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -179,7 +179,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       const all = []
       for await (const pair of db.iterator()) {
-        all.unshift(pair)
+        all.push(pair)
       }
 
       deepStrictEqual(all, keyvalue)
