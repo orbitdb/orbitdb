@@ -105,7 +105,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       const all = await db.all()
 
-      deepStrictEqual(all.map(e => e.value), events)
+      deepStrictEqual(all, events)
     })
 
     describe('Iterator Options', () => {
@@ -128,7 +128,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 1)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns two items', async () => {
@@ -140,7 +140,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns three items', async () => {
@@ -152,7 +152,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 3)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('sets \'amount\' greater than items available', async () => {
@@ -164,7 +164,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 5)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('sets \'amount\' to 0', async () => {
@@ -176,7 +176,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 0)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
 
@@ -190,7 +190,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 4)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns one item less than head', async () => {
@@ -202,7 +202,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 1)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns two items less than head', async () => {
@@ -214,7 +214,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
 
@@ -228,7 +228,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 5)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns one item less than or equal to head', async () => {
@@ -240,7 +240,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 1)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns two items less than or equal to head', async () => {
@@ -252,7 +252,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
 
@@ -266,7 +266,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 4)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns one item greater than root', async () => {
@@ -278,7 +278,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 1)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns two items greater than root', async () => {
@@ -290,7 +290,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
 
@@ -304,7 +304,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 5)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns one item greater than or equal to root', async () => {
@@ -316,7 +316,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 1)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
 
         it('returns two items greater than or equal to root', async () => {
@@ -328,7 +328,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 2)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
 
@@ -342,7 +342,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           }
 
           strictEqual(all.length, 3)
-          deepStrictEqual(all.map(e => e.value), expected)
+          deepStrictEqual(all, expected)
         })
       })
     })

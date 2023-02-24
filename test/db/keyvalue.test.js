@@ -182,7 +182,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         all.unshift(pair)
       }
 
-      deepStrictEqual(all.map(e => e.value), keyvalue)
+      deepStrictEqual(all, keyvalue)
     })
   })
 })

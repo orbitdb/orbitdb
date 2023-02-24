@@ -19,7 +19,7 @@ const Events = async ({ OpLog, Database, ipfs, identity, databaseId, accessContr
   const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
     const it = log.iterator({ gt, gte, lt, lte, amount })
     for await (const event of it) {
-      yield { hash: event.hash, value: event.payload.value }
+      yield event.payload.value
     }
   }
 
