@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../../src/oplog/index.js'
-import { Feed, Database } from '../../../src/db/index.js'
+import { EventStore, Database } from '../../../src/db/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
 import { getIpfsPeerId, waitForPeers, config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from '../../utils/connect-nodes.js'
@@ -13,7 +13,7 @@ const { sync: rmrf } = rimraf
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 Object.keys(testAPIs).forEach((IPFS) => {
-  describe('Feed Replication (' + IPFS + ')', function () {
+  describe('EventStore Replication (' + IPFS + ')', function () {
     this.timeout(config.timeout * 2)
 
     let ipfsd1, ipfsd2
@@ -25,7 +25,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity1, testIdentity2
     let db1, db2
 
-    const databaseId = 'feed-AAA'
+    const databaseId = 'events-AAA'
 
     before(async () => {
       // Start two IPFS instances
@@ -82,8 +82,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db1 = await Feed({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-      db2 = await Feed({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
+      db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
+      db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
     })
 
     afterEach(async () => {
