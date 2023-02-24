@@ -89,6 +89,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const result = await all(it)
 
         strictEqual([...result].length, 10)
+        strictEqual(result[0].hash, startHash)
       })
 
       it('returns entries with lte and amount', async () => {
@@ -146,7 +147,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         let i = 0
         for await (const entry of it) {
-          strictEqual(entry.payload, 'entry' + (73 - i++))
+          strictEqual(entry.payload, 'entry' + (72 - i++))
         }
 
         strictEqual(i, amount)
@@ -163,6 +164,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const result = await all(it)
 
         strictEqual([...result].length, amount)
+        strictEqual(result[result.length - 1].hash, startHash)
       })
 
       it('returns entries with gte and amount', async () => {
@@ -175,7 +177,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
         let i = 0
         for await (const entry of it) {
-          strictEqual(entry.payload, 'entry' + (79 - i++))
+          strictEqual(entry.payload, 'entry' + (78 - i++))
         }
 
         strictEqual(i, amount)

@@ -76,12 +76,13 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, acce
 
   return {
     ...database,
-    type: 'documents',
+    type: 'documentstore',
     put,
     del,
     get,
     iterator,
-    query
+    query,
+    indexBy
   }
 }
 

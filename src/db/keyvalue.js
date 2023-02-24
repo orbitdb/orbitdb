@@ -39,7 +39,7 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, databaseId, accessCon
 
   return {
     ...database,
-    type: 'kv',
+    type: 'keyvalue',
     put,
     set: put, // Alias for put()
     del,
