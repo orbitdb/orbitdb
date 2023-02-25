@@ -11,7 +11,7 @@
  */
 
 // Import IPFS module
-import IPFS from 'ipfs'
+const IPFS = require('ipfs')
 
 // Import OrbitDB module from 'orbit-db', eg. directory to its package.json
 import OrbitDB from '../../..'
