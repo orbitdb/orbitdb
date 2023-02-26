@@ -31,7 +31,7 @@ const signingKeys = {
 const createTestIdentities = async (ipfs1, ipfs2) => {
   rmrf('./keys_1')
 
-  const keystore = new KeyStore('./keys_1')
+  const keystore = await KeyStore()
   await keystore.open()
   for (const [key, value] of Object.entries(identityKeys)) {
     await keystore.addKey(key, value)
