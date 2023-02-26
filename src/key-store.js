@@ -1,6 +1,8 @@
 import * as crypto from '@libp2p/crypto'
 import secp256k1 from 'secp256k1'
 import { Buffer } from 'safe-buffer'
+import LevelStorage from './storage/level.js'
+import LRUStorage from './storage/lru.js'
 import pkg from 'elliptic'
 const { ec: EC } = pkg
 
@@ -80,9 +82,18 @@ const verify = async (signature, publicKey, data) => {
 // const verifiedCache = new LRU(1000)
 
 const KeyStore = async ({ storage, cache }) => {
+  storage = storage || await LevelStorage()
+  cache = cache || await LRUStorage()
+    
   const close = async () => {
     if (!storage) return
     await storage.close()
+  }
+
+  const clear = async () => {
+    if (!storage) return
+    await storage.clear()
+    await cache.clear()
   }
 
   const hasKey = async (id) => {
@@ -202,6 +213,7 @@ const KeyStore = async ({ storage, cache }) => {
   }
 
   return {
+    clear,
     close,
     hasKey,
     addKey,
