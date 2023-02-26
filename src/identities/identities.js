@@ -90,7 +90,7 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
   }
 
   const verify = async (signature, publicKey, data) => {
-    return verify(signature, publicKey, data)
+    return KeyStore.verify(signature, publicKey, data)
   }
 
   return {
