@@ -1,5 +1,5 @@
 import IdentityProvider from './interface.js'
-import KeyStore from '../../key-store.js'
+import * as KeyStore from '../../key-store.js'
 
 const type = 'orbitdb'
 

@@ -1,5 +1,4 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import mapSeries from 'p-map-series'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { KeyValuePersisted, KeyValue, Database } from '../../src/db/index.js'
@@ -97,7 +96,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const key = 'key1'
       const expected = 'value1'
 
-      const hash = await db.put(key, expected)
+      await db.put(key, expected)
       const actual = await db.get(key)
       strictEqual(actual, expected)
     })

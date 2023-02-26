@@ -81,10 +81,10 @@ const verify = async (signature, publicKey, data) => {
 
 // const verifiedCache = new LRU(1000)
 
-const KeyStore = async ({ storage, cache }) => {
+const KeyStore = async ({ storage, cache } = {}) => {
   storage = storage || await LevelStorage()
   cache = cache || await LRUStorage()
-    
+
   const close = async () => {
     if (!storage) return
     await storage.close()
@@ -165,9 +165,6 @@ const KeyStore = async ({ storage, cache }) => {
   const getKey = async (id) => {
     if (!id) {
       throw new Error('id needed to get a key')
-    }
-    if (!storage) {
-      await open()
     }
     if (storage.status && storage.status !== 'open') {
       return null

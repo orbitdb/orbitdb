@@ -1,6 +1,5 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import LevelStorage from '../src/storage/level.js'
-import LRUStorage from '../src/storage/lru.js'
 import KeyStore, { sign, verify } from '../src/key-store.js'
 import { testAPIs } from 'orbit-db-test-utils'
 import path from 'path'
@@ -248,10 +247,10 @@ Object.keys(testAPIs).forEach((IPFS) => {
         }
       })
     })
-    
+
     describe('Verifying', async function () {
       let key, publicKey
-      
+
       beforeEach(async () => {
         key = await keystore.getKey('userA')
         publicKey = await keystore.getPublic(key)
@@ -280,6 +279,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const verified = await verify(signature, publicKey, 'data data data')
         strictEqual(verified, false)
       })
-    })    
+    })
   })
 })

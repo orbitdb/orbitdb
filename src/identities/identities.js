@@ -2,7 +2,7 @@ import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
 import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
-import KeyStore from '../key-store.js'
+import * as KeyStore from '../key-store.js'
 import { LRUStorage, IPFSBlockStorage, MemoryStorage } from '../storage/index.js'
 import path from 'path'
 
@@ -59,7 +59,7 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
 
     const { id, publicKey, signatures } = identity
 
-    const idSignatureVerified = await KeyStore.verify(signatures.id, publicKey, id)
+    const idSignatureVerified = await verify(signatures.id, publicKey, id)
     if (!idSignatureVerified) {
       return false
     }
@@ -90,7 +90,7 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
   }
 
   const verify = async (signature, publicKey, data) => {
-    return KeyStore.verify(signature, publicKey, data)
+    return verify(signature, publicKey, data)
   }
 
   return {
