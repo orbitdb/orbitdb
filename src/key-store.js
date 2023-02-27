@@ -82,7 +82,7 @@ const verifyMessage = async (signature, publicKey, data) => {
 // const verifiedCache = new LRU(1000)
 
 const KeyStore = async ({ storage, cache } = {}) => {
-  storage = storage || await LevelStorage()
+  storage = storage || await LevelStorage('./keystore')
   cache = cache || await LRUStorage()
 
   const close = async () => {
