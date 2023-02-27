@@ -83,7 +83,7 @@ const verifyMessage = async (signature, publicKey, data) => {
 
 const KeyStore = async ({ storage, cache } = {}) => {
   storage = storage || await LevelStorage('./keystore')
-  cache = cache || await LRUStorage()
+  cache = cache || await LRUStorage({ size: 1000 })
 
   const close = async () => {
     if (!storage) return
