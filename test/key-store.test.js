@@ -1,6 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import LevelStorage from '../src/storage/level.js'
-import KeyStore, { sign, verify } from '../src/key-store.js'
+import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
 import { testAPIs } from 'orbit-db-test-utils'
 import path from 'path'
 import fs from 'fs-extra'
@@ -154,14 +154,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const expected = '304402207eb6e4f4b2c56665c505696c41ec0831c6c2998620589d4b6f405d49134dea5102207e71ba37d94b7a70e3d9fb3bea7c8d8b7082c3c880b6831e9613a0a3e7aabd9f'
 
         const key = await keystore.getKey('userA')
-        const actual = await sign(key, 'data data data')
+        const actual = await signMessage(key, 'data data data')
         strictEqual(actual, expected)
       })
 
       it('throws an error if no key is passed', async () => {
         let err
         try {
-          await sign(null, 'data data data')
+          await signMessage(null, 'data data data')
         } catch (e) {
           err = e.toString()
         }
@@ -173,7 +173,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         const key = 'key_1'
         let err
         try {
-          await sign(key)
+          await signMessage(key)
         } catch (e) {
           err = e.toString()
         }
@@ -258,17 +258,17 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('verifies content', async () => {
         const signature = '304402207eb6e4f4b2c56665c505696c41ec0831c6c2998620589d4b6f405d49134dea5102207e71ba37d94b7a70e3d9fb3bea7c8d8b7082c3c880b6831e9613a0a3e7aabd9f'
-        const verified = await verify(signature, publicKey, 'data data data')
+        const verified = await verifyMessage(signature, publicKey, 'data data data')
         strictEqual(verified, true)
       })
 
       it('verifies content with cache', async () => {
         const data = 'data'.repeat(1024 * 1024)
-        const signature = await sign(key, data)
+        const signature = await signMessage(key, data)
         const startTime = new Date().getTime()
-        await verify(signature, publicKey, data)
+        await verifyMessage(signature, publicKey, data)
         const first = new Date().getTime()
-        await verify(signature, publicKey, data)
+        await verifyMessage(signature, publicKey, data)
         const after = new Date().getTime()
         console.log('First pass:', first - startTime, 'ms', 'Cached:', after - first, 'ms')
         strictEqual(first - startTime > after - first, true)
@@ -276,7 +276,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       it('does not verify content with bad signature', async () => {
         const signature = 'xxxxxx'
-        const verified = await verify(signature, publicKey, 'data data data')
+        const verified = await verifyMessage(signature, publicKey, 'data data data')
         strictEqual(verified, false)
       })
     })

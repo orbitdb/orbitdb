@@ -29,7 +29,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = new KeyStore(identityKeysPath)
+      keystore = await KeyStore(identityKeysPath)
 
       const storage = await MemoryStorage()
 

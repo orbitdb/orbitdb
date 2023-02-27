@@ -49,7 +49,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = new KeyStore(identityKeysPath)
+      keystore = await KeyStore(identityKeysPath)
 
       testIdentity = await createIdentity({ id: 'userC', keystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore })

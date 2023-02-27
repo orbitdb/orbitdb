@@ -1,8 +1,9 @@
 import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
-import { KeyStore, Identities } from '../../src/index.js'
-import { Identity, addIdentityProvider } from '../../src/identities/index.js'
+import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
+import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
+import Identity from '../../src/identities/identity.js'
 import EthIdentityProvider from '../../src/identities/providers/ethereum.js'
 
 const type = EthIdentityProvider.type
@@ -12,8 +13,8 @@ describe('Ethereum Identity Provider', function () {
   let identities
 
   before(async () => {
-    keystore = new KeyStore()
-    await keystore.open()
+    keystore = await KeyStore()
+
     addIdentityProvider(EthIdentityProvider)
     identities = await Identities({ keystore })
   })
@@ -53,15 +54,15 @@ describe('Ethereum Identity Provider', function () {
 
     it('has a signature for the id', async () => {
       const signingKey = await keystore.getKey(wallet.address)
-      const idSignature = await KeyStore.sign(signingKey, wallet.address)
-      const verifies = await KeyStore.verify(idSignature, Buffer.from(signingKey.public.marshal()).toString('hex'), wallet.address)
+      const idSignature = await signMessage(signingKey, wallet.address)
+      const verifies = await verifyMessage(idSignature, Buffer.from(signingKey.public.marshal()).toString('hex'), wallet.address)
       assert.strictEqual(verifies, true)
       assert.strictEqual(identity.signatures.id, idSignature)
     })
 
     it('has a signature for the publicKey', async () => {
       const signingKey = await keystore.getKey(wallet.address)
-      const idSignature = await KeyStore.sign(signingKey, wallet.address)
+      const idSignature = await signMessage(signingKey, wallet.address)
       const publicKeyAndIdSignature = await wallet.signMessage(identity.publicKey + idSignature)
       assert.strictEqual(identity.signatures.publicKey, publicKeyAndIdSignature)
     })
@@ -102,7 +103,7 @@ describe('Ethereum Identity Provider', function () {
 
     it('sign data', async () => {
       const signingKey = await keystore.getKey(identity.id)
-      const expectedSignature = await KeyStore.sign(signingKey, data)
+      const expectedSignature = await signMessage(signingKey, data)
       const signature = await identities.sign(identity, data, keystore)
       assert.strictEqual(signature, expectedSignature)
     })

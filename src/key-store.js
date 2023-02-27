@@ -38,7 +38,7 @@ const verifySignature = async (signature, publicKey, data) => {
   return Promise.resolve(res)
 }
 
-const sign = async (key, data) => {
+const signMessage = async (key, data) => {
   if (!key) {
     throw new Error('No signing key given')
   }
@@ -54,7 +54,7 @@ const sign = async (key, data) => {
   return Buffer.from(await key.sign(data)).toString('hex')
 }
 
-const verify = async (signature, publicKey, data) => {
+const verifyMessage = async (signature, publicKey, data) => {
   // const cached = verifiedCache.get(signature)
   const cached = null
   let res = false
@@ -222,6 +222,6 @@ const KeyStore = async ({ storage, cache } = {}) => {
 
 export {
   KeyStore as default,
-  verify,
-  sign
+  verifyMessage,
+  signMessage
 }

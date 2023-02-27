@@ -1,5 +1,5 @@
 import IdentityProvider from './interface.js'
-import * as KeyStore from '../../key-store.js'
+import KeyStore, { signMessage, verifyMessage } from '../../key-store.js'
 
 const type = 'orbitdb'
 
@@ -35,13 +35,13 @@ class OrbitDBIdentityProvider extends IdentityProvider {
       throw new Error(`Signing key for '${id}' not found`)
     }
 
-    return KeyStore.sign(key, data)
+    return signMessage(key, data)
   }
 
   static async verifyIdentity (identity) {
     const { id, publicKey, signatures } = identity
     // Verify that identity was signed by the ID
-    return KeyStore.verify(signatures.publicKey, id, publicKey + signatures.id)
+    return verifyMessage(signatures.publicKey, id, publicKey + signatures.id)
   }
 }
 

@@ -34,7 +34,7 @@ Object.keys(testAPIs).forEach((_) => {
       // Start an IPFS instance
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
-      keystore = new KeyStore(identityKeysPath)
+      keystore = await KeyStore(identityKeysPath)
 
       const storage = await MemoryStorage()
       const identities = await Identities({ keystore, storage })

@@ -26,8 +26,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity, testIdentity2, testIdentity3, testIdentity4
 
     before(async () => {
-      keystore = new KeyStore('./keys_1')
-      await keystore.open()
+      keystore = await KeyStore('./keys_1')
+
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }
