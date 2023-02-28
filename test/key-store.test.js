@@ -35,27 +35,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
       strictEqual(hasKey, true)
     })
 
-    it('creates a new key using provided entropy', async () => {
-      const id = 'key1'
-
-      await keystore.createKey(id, {
-        entropy: 'jANfduGRj4HU9Pk6nJzujANfduGRj4HU9Pk6nJzu'
-      })
-
-      const hasKey = await keystore.hasKey(id)
-
-      strictEqual(hasKey, true)
-
-      // Deterministic public key
-      const keyContent = await keystore.getKey(id)
-      const publicKey = keyContent._publicKey
-
-      strictEqual(
-        Buffer.from(publicKey).toString('hex'),
-        '0328401cd1b561040b87cd66563be722ba429b42d6abfeca9cb4c34e9845c86d2e'
-      )
-    })
-
     it('throws an error when creating a key without an id', async () => {
       let err
 

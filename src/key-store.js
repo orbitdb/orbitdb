@@ -3,10 +3,7 @@ import secp256k1 from 'secp256k1'
 import { Buffer } from 'safe-buffer'
 import LevelStorage from './storage/level.js'
 import LRUStorage from './storage/lru.js'
-import pkg from 'elliptic'
-const { ec: EC } = pkg
 
-const ec = new EC('secp256k1')
 const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
 
 const verifySignature = async (signature, publicKey, data) => {
@@ -135,18 +132,11 @@ const KeyStore = async ({ storage, cache } = {}) => {
     // }
 
     // Generate a private key
-    const privKey = ec.genKeyPair({ entropy }).getPrivate().toArrayLike(Buffer)
-    // Left pad the key to 32 bytes. The module used in libp2p crypto (noble-secp256k1)
-    // verifies the length and will throw an error if key is not 32 bytes.
-    // For more details on why the generated key is not always 32 bytes, see:
-    // https://stackoverflow.com/questions/62938091/why-are-secp256k1-privatekeys-not-always-32-bytes-in-nodejs
-    const buf = Buffer.alloc(32)
-    // Copy the private key buffer to the padded buffer
-    privKey.copy(buf, buf.length - privKey.length)
-
-    const keys = await unmarshal(buf)
+    const pair = await crypto.keys.generateKeyPair('secp256k1')
+    const keys = await crypto.keys.unmarshalPrivateKey(pair.bytes)
     const pubKey = keys.public.marshal()
     const decompressedKey = secp256k1.publicKeyConvert(Buffer.from(pubKey), false)
+
     const key = {
       publicKey: Buffer.from(decompressedKey).toString('hex'),
       privateKey: Buffer.from(keys.marshal()).toString('hex')
@@ -157,6 +147,7 @@ const KeyStore = async ({ storage, cache } = {}) => {
     } catch (e) {
       console.log(e)
     }
+
     cache.put(id, key)
 
     return keys
