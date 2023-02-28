@@ -1,6 +1,7 @@
 import * as crypto from '@libp2p/crypto'
 import secp256k1 from 'secp256k1'
 import { Buffer } from 'safe-buffer'
+import ComposedStorage from './storage/composed.js'
 import LevelStorage from './storage/level.js'
 import LRUStorage from './storage/lru.js'
 
@@ -51,22 +52,25 @@ const signMessage = async (key, data) => {
   return Buffer.from(await key.sign(data)).toString('hex')
 }
 
+const verifiedCache = await LRUStorage({ size: 1000 })
+
 const verifyMessage = async (signature, publicKey, data) => {
-  // const cached = verifiedCache.get(signature)
-  const cached = null
+  const cached = await verifiedCache.get(signature)
+
   let res = false
+
   if (!cached) {
     const verified = await verifySignature(signature, publicKey, data)
     res = verified
-    // if (verified) {
-    //   verifiedCache.set(signature, { publicKey, data })
-    // }
+    if (verified) {
+      await verifiedCache.put(signature, { publicKey, data })
+    }
   } else {
     const compare = (cached, data) => {
-      // let match
-      // if (v === 'v0') {
-      //   match = Buffer.compare(Buffer.alloc(30, cached), Buffer.alloc(30, data)) === 0
-      // } else {
+      /* let match
+        if (v === 'v0') {
+          match = Buffer.compare(Buffer.alloc(30, cached), Buffer.alloc(30, data)) === 0
+      } else { */
       const match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached === data
       // }
       return match
@@ -78,9 +82,8 @@ const verifyMessage = async (signature, publicKey, data) => {
 
 // const verifiedCache = new LRU(1000)
 
-const KeyStore = async ({ storage, cache } = {}) => {
-  storage = storage || await LevelStorage('./keystore')
-  cache = cache || await LRUStorage({ size: 1000 })
+const KeyStore = async ({ storage } = {}) => {
+  storage = storage || await ComposedStorage(LevelStorage('./keystore'), LRUStorage({ size: 1000 }))
 
   const close = async () => {
     if (!storage) return
@@ -90,7 +93,6 @@ const KeyStore = async ({ storage, cache } = {}) => {
   const clear = async () => {
     if (!storage) return
     await storage.clear()
-    await cache.clear()
   }
 
   const hasKey = async (id) => {
@@ -103,7 +105,7 @@ const KeyStore = async ({ storage, cache } = {}) => {
 
     let hasKey = false
     try {
-      const storedKey = await cache.get(id) || await storage.get(id)
+      const storedKey = await storage.get(id)
       hasKey = storedKey !== undefined && storedKey !== null
     } catch (e) {
       // Catches 'Error: ENOENT: no such file or directory, open <path>'
@@ -119,7 +121,6 @@ const KeyStore = async ({ storage, cache } = {}) => {
     } catch (e) {
       console.log(e)
     }
-    cache.put(id, key)
   }
 
   const createKey = async (id, { entropy } = {}) => {
@@ -148,8 +149,6 @@ const KeyStore = async ({ storage, cache } = {}) => {
       console.log(e)
     }
 
-    cache.put(id, key)
-
     return keys
   }
 
@@ -157,14 +156,14 @@ const KeyStore = async ({ storage, cache } = {}) => {
     if (!id) {
       throw new Error('id needed to get a key')
     }
+
     if (storage.status && storage.status !== 'open') {
       return null
     }
 
-    const cachedKey = await cache.get(id)
     let storedKey
     try {
-      storedKey = cachedKey || await storage.get(id)
+      storedKey = await storage.get(id)
     } catch (e) {
       // ignore ENOENT error
     }
@@ -173,13 +172,9 @@ const KeyStore = async ({ storage, cache } = {}) => {
       return
     }
 
-    const deserializedKey = cachedKey || JSON.parse(storedKey)
+    const deserializedKey = JSON.parse(storedKey)
     if (!deserializedKey) {
       return
-    }
-
-    if (!cachedKey) {
-      cache.put(id, deserializedKey)
     }
 
     return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
