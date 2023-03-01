@@ -83,7 +83,7 @@ const verifyMessage = async (signature, publicKey, data) => {
 // const verifiedCache = new LRU(1000)
 
 const KeyStore = async ({ storage } = {}) => {
-  storage = storage || await ComposedStorage(LevelStorage('./keystore'), LRUStorage({ size: 1000 }))
+  storage = storage || await ComposedStorage(await LevelStorage({ path: './keystore', valueEncoding: 'json' }), await LRUStorage({ size: 1000 }))
 
   const close = async () => {
     if (!storage) return
@@ -143,11 +143,7 @@ const KeyStore = async ({ storage } = {}) => {
       privateKey: Buffer.from(keys.marshal()).toString('hex')
     }
 
-    try {
-      await storage.put(id, JSON.stringify(key))
-    } catch (e) {
-      console.log(e)
-    }
+    await addKey(id, key)
 
     return keys
   }
@@ -171,11 +167,12 @@ const KeyStore = async ({ storage } = {}) => {
     if (!storedKey) {
       return
     }
-
+    
     const deserializedKey = JSON.parse(storedKey)
+    
     if (!deserializedKey) {
       return
-    }
+    }    
 
     return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
   }

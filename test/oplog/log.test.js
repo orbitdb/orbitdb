@@ -4,6 +4,7 @@ import { Log, Entry } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import { copy } from 'fs-extra'
+import LevelStorage from '../../src/storage/level.js'
 import MemoryStorage from '../../src/storage/memory.js'
 
 // Test utils
@@ -28,7 +29,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = await KeyStore(identityKeysPath)
+      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
 
       const storage = await MemoryStorage()
 

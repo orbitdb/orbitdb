@@ -4,7 +4,7 @@ import rimraf from 'rimraf'
 import { Log } from '../src/oplog/index.js'
 import { Identities } from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
-import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
+import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage, LevelStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
 
 // Test utils
@@ -34,7 +34,7 @@ Object.keys(testAPIs).forEach((_) => {
       // Start an IPFS instance
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
-      keystore = await KeyStore(identityKeysPath)
+      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
 
       const storage = await MemoryStorage()
       const identities = await Identities({ keystore, storage })

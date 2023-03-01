@@ -132,7 +132,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
         await fs.copy(fixturePath, storagePath)
 
         // load existing keystore
-        const storage = await LevelStorage({ path: storagePath })
+        const storage = await LevelStorage({ path: storagePath, valueEncoding: 'json' })
         const cache = await LRUStorage({ size: 1000 })
         const composedStorage = await ComposedStorage(storage, cache)
         keystore = await KeyStore({ storage: composedStorage })

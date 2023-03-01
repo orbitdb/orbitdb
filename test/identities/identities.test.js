@@ -1,6 +1,7 @@
 import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
+import LevelStorage from '../../src/storage/level.js'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
 import Identity from '../../src/identities/identity.js'
@@ -74,7 +75,8 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore(identityKeysPath)
+      const storage = await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' })
+      keystore = await KeyStore({ storage })
 
       identities = await Identities({ keystore })
     })
@@ -142,8 +144,8 @@ describe('Identities', function () {
 
     before(async () => {
       await fs.copy(fixturesPath, savedKeysPath)
-
-      savedKeysKeyStore = await KeyStore(savedKeysPath)
+      const storage = await LevelStorage({ path: savedKeysPath, valueEncoding: 'json' })
+      savedKeysKeyStore = await KeyStore({ storage })
 
       identities = await Identities({ keystore: savedKeysKeyStore })
       identity = await identities.createIdentity({ id })
@@ -196,7 +198,8 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore(identityKeysPath)
+      const storage = await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' })        
+      keystore = await KeyStore({ storage })
     })
 
     after(async () => {
@@ -245,7 +248,8 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore(identityKeysPath)
+      const storage = await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' })
+      keystore = await KeyStore({ storage })
 
       identities = await Identities({ keystore })
     })
@@ -272,7 +276,8 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore(identityKeysPath)
+      const storage = await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' })
+      keystore = await KeyStore({ storage })
 
       identities = await Identities({ keystore })
       identity = await identities.createIdentity({ id })
@@ -317,7 +322,8 @@ describe('Identities', function () {
     let signature
 
     before(async () => {
-      keystore = await KeyStore(identityKeysPath)
+      const storage = await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' })
+      keystore = await KeyStore({ storage })
     })
 
     after(async () => {

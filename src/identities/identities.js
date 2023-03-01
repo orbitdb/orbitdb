@@ -3,7 +3,7 @@ import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
-import { LRUStorage, IPFSBlockStorage, MemoryStorage } from '../storage/index.js'
+import { LRUStorage, IPFSBlockStorage, MemoryStorage, LevelStorage } from '../storage/index.js'
 import path from 'path'
 
 const DefaultProviderType = 'orbitdb'
@@ -16,7 +16,7 @@ const supportedTypes = {
 }
 
 const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) => {
-  keystore = keystore || await KeyStore(identityKeysPath || DefaultIdentityKeysPath)
+  keystore = keystore || await KeyStore({ storage: LevelStorage(identityKeysPath || DefaultIdentityKeysPath), valueEncoding: 'json' })
   storage = storage || (ipfs ? await IPFSBlockStorage({ ipfs, pin: true }) : await MemoryStorage())
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
@@ -35,7 +35,6 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
     const Provider = getProviderFor(type)
     const identityProvider = new Provider(options)
     const id = await identityProvider.getId(options)
-
     const privateKey = await keystore.getKey(id) || await keystore.createKey(id)
     const publicKey = keystore.getPublic(privateKey)
     const idSignature = await signMessage(privateKey, id)
