@@ -16,7 +16,7 @@ const supportedTypes = {
 }
 
 const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) => {
-  keystore = keystore || await KeyStore({ storage: LevelStorage(identityKeysPath || DefaultIdentityKeysPath), valueEncoding: 'json' })
+  keystore = keystore || await KeyStore({ storage: await LevelStorage(identityKeysPath || DefaultIdentityKeysPath), valueEncoding: 'json' })
   storage = storage || (ipfs ? await IPFSBlockStorage({ ipfs, pin: true }) : await MemoryStorage())
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })

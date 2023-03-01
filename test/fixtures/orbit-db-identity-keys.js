@@ -3,6 +3,7 @@ import { Identities } from '../../src/identities/index.js'
 import rimraf from 'rimraf'
 
 const { sync: rmrf } = rimraf
+import testKeysPath from './test-keys-path.js '
 
 import userA from "./keys/identity-keys/03e0480538c2a39951d054e17ff31fde487cb1031d0044a037b53ad2e028a3e77c.json" assert { type: "json" }
 import userB from "./keys/identity-keys/0358df8eb5def772917748fdf8a8b146581ad2041eae48d66cc6865f11783499a6.json" assert { type: "json" }
@@ -29,16 +30,17 @@ const signingKeys = {
 }
 
 const createTestIdentities = async (ipfs1, ipfs2) => {
-  rmrf('./keys_1')
+  // rmrf('./keys_1')
 
-  const keystore = await KeyStore()
-  for (const [key, value] of Object.entries(identityKeys)) {
-    await keystore.addKey(key, value)
-  }
+  // const keystore = await KeyStore()
+  const keystore = await KeyStore({ path: testKeysPath })
+  // for (const [key, value] of Object.entries(identityKeys)) {
+  //   await keystore.addKey(key, value)
+  // }
 
-  for (const [key, value] of Object.entries(signingKeys)) {
-    await keystore.addKey(key, value)
-  }
+  // for (const [key, value] of Object.entries(signingKeys)) {
+  //   await keystore.addKey(key, value)
+  // }
 
   // Create an identity for each peers
   const identities1 = await Identities({ keystore, ipfs: ipfs1 })

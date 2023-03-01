@@ -6,9 +6,8 @@ import KeyStore from '../../src/key-store.js'
 import { copy } from 'fs-extra'
 import LevelStorage from '../../src/storage/level.js'
 import MemoryStorage from '../../src/storage/memory.js'
-
-// Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
+import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
 const { create } = Entry
@@ -29,7 +28,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
+      keystore = await KeyStore({ path: testKeysPath })
 
       const storage = await MemoryStorage()
 

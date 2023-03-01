@@ -6,9 +6,8 @@ import { Identities } from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
 import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage, LevelStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
-
-// Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
+import testKeysPath from './fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities
@@ -34,7 +33,7 @@ Object.keys(testAPIs).forEach((_) => {
       // Start an IPFS instance
       ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
-      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
+      keystore = await KeyStore({ path: testKeysPath })
 
       const storage = await MemoryStorage()
       const identities = await Identities({ keystore, storage })
@@ -48,8 +47,6 @@ Object.keys(testAPIs).forEach((_) => {
       if (keystore) {
         await keystore.close()
       }
-      rmrf(identityKeysPath)
-      rmrf(testIdentity1.id)
       rmrf('./ipfs1')
       rmrf('./orbitdb')
     })

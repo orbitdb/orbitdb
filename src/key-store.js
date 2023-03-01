@@ -33,6 +33,7 @@ const verifySignature = async (signature, publicKey, data) => {
   } catch (e) {
     // Catch error: sig length wrong
   }
+
   return Promise.resolve(res)
 }
 
@@ -67,12 +68,7 @@ const verifyMessage = async (signature, publicKey, data) => {
     }
   } else {
     const compare = (cached, data) => {
-      /* let match
-        if (v === 'v0') {
-          match = Buffer.compare(Buffer.alloc(30, cached), Buffer.alloc(30, data)) === 0
-      } else { */
-      const match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached === data
-      // }
+      const match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached.toString() === data.toString()
       return match
     }
     res = cached.publicKey === publicKey && compare(cached.data, data)
@@ -80,18 +76,14 @@ const verifyMessage = async (signature, publicKey, data) => {
   return res
 }
 
-// const verifiedCache = new LRU(1000)
-
-const KeyStore = async ({ storage } = {}) => {
-  storage = storage || await ComposedStorage(await LevelStorage({ path: './keystore', valueEncoding: 'json' }), await LRUStorage({ size: 1000 }))
+const KeyStore = async ({ storage, path } = {}) => {
+  storage = storage || await ComposedStorage(await LevelStorage({ path: path || './keystore' }), await LRUStorage({ size: 1000 }))
 
   const close = async () => {
-    if (!storage) return
     await storage.close()
   }
 
   const clear = async () => {
-    if (!storage) return
     await storage.clear()
   }
 
@@ -99,13 +91,10 @@ const KeyStore = async ({ storage } = {}) => {
     if (!id) {
       throw new Error('id needed to check a key')
     }
-    if (storage.status && storage.status !== 'open') {
-      return null
-    }
 
     let hasKey = false
     try {
-      const storedKey = await storage.get(id)
+      const storedKey = await storage.get('private_' + id)
       hasKey = storedKey !== undefined && storedKey !== null
     } catch (e) {
       // Catches 'Error: ENOENT: no such file or directory, open <path>'
@@ -117,7 +106,8 @@ const KeyStore = async ({ storage } = {}) => {
 
   const addKey = async (id, key) => {
     try {
-      await storage.put(id, JSON.stringify(key))
+      await storage.put('public_' + id, key.publicKey)
+      await storage.put('private_' + id, key.privateKey)
     } catch (e) {
       console.log(e)
     }
@@ -127,10 +117,6 @@ const KeyStore = async ({ storage } = {}) => {
     if (!id) {
       throw new Error('id needed to create a key')
     }
-    // if (storage.status && storage.status !== 'open') {
-    //   console.log("22::", id)
-    //   return null
-    // }
 
     // Generate a private key
     const pair = await crypto.keys.generateKeyPair('secp256k1')
@@ -139,8 +125,8 @@ const KeyStore = async ({ storage } = {}) => {
     const decompressedKey = secp256k1.publicKeyConvert(Buffer.from(pubKey), false)
 
     const key = {
-      publicKey: Buffer.from(decompressedKey).toString('hex'),
-      privateKey: Buffer.from(keys.marshal()).toString('hex')
+      publicKey: Buffer.from(decompressedKey),//.toString('hex'),
+      privateKey: Buffer.from(keys.marshal())//.toString('hex')
     }
 
     await addKey(id, key)
@@ -153,13 +139,9 @@ const KeyStore = async ({ storage } = {}) => {
       throw new Error('id needed to get a key')
     }
 
-    if (storage.status && storage.status !== 'open') {
-      return null
-    }
-
     let storedKey
     try {
-      storedKey = await storage.get(id)
+      storedKey = await storage.get('private_' + id)
     } catch (e) {
       // ignore ENOENT error
     }
@@ -168,13 +150,8 @@ const KeyStore = async ({ storage } = {}) => {
       return
     }
     
-    const deserializedKey = JSON.parse(storedKey)
-    
-    if (!deserializedKey) {
-      return
-    }    
-
-    return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
+    // return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
+    return unmarshal(storedKey)
   }
 
   const getPublic = (keys, options = {}) => {
