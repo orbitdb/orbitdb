@@ -79,14 +79,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('sets a key/value pair', async () => {
-      const expected = 'zdpuAyRbzMUs1v7B1gqRRHe6rnxwYbHKzDhxh3rJanEjoucHt'
+      const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
 
       const actual = await db.set('key1', 'value1')
       strictEqual(actual, expected)
     })
 
     it('puts a key/value pair', async () => {
-      const expected = 'zdpuAyRbzMUs1v7B1gqRRHe6rnxwYbHKzDhxh3rJanEjoucHt'
+      const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
 
       const actual = await db.put('key1', 'value1')
       strictEqual(actual, expected)

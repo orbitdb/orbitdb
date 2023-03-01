@@ -6,12 +6,10 @@ import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import LevelStorage from '../../src/storage/level.js'
 import MemoryStorage from '../../src/storage/memory.js'
-
-// Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
+import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 let testIdentity, testIdentity2
 
@@ -25,24 +23,15 @@ Object.keys(testAPIs).forEach(IPFS => {
     let identities1, identities2
 
     before(async () => {
-      rmrf(identityKeysPath)
+      keystore = await KeyStore({ path: testKeysPath })
 
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, identityKeysPath)
-
-      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
-
-      const storage = await MemoryStorage()
-
-      identities1 = await Identities({ keystore, storage })
-      identities2 = await Identities({ keystore, storage })
+      identities1 = await Identities({ keystore })
       testIdentity = await identities1.createIdentity({ id: 'userA' })
-      testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+      testIdentity2 = await identities1.createIdentity({ id: 'userB' })
     })
 
     after(async () => {
       await keystore.close()
-      rmrf(identityKeysPath)
     })
 
     describe('join ', async () => {
