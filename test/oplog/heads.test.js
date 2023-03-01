@@ -5,9 +5,8 @@ import { Log } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import MemoryStorage from '../../src/storage/memory.js'
-
-// Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
+import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities
@@ -33,7 +32,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = new KeyStore(identityKeysPath)
+      keystore = await KeyStore({ path: testKeysPath })
       const storage = await MemoryStorage()
 
       identities = await Identities({ keystore, storage })

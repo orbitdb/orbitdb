@@ -3,6 +3,7 @@ import rimraf from 'rimraf'
 import { Log, Clock } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
+import LevelStorage from '../../src/storage/level.js'
 import MemoryStorage from '../../src/storage/memory.js'
 
 // Test utils
@@ -26,8 +27,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity, testIdentity2, testIdentity3, testIdentity4
 
     before(async () => {
-      keystore = new KeyStore('./keys_1')
-      await keystore.open()
+      keystore = await KeyStore({ storage: await LevelStorage({ path: './keys_1', valueEncoding: 'json' }) })
+
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }

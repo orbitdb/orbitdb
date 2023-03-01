@@ -4,9 +4,9 @@ import { copy } from 'fs-extra'
 import { Entry } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
+import LevelStorage from '../../src/storage/level.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
-// import IdentityStorage from '../src/identity-storage.js'
-// import IPFSBlockStorage from '../src/ipfs-block-storage.js'
+import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
 const { createIdentity } = Identities
@@ -29,9 +29,9 @@ Object.keys(testAPIs).forEach((IPFS) => {
         
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
-
-      keystore = new KeyStore(identityKeysPath)
       
+      keystore = await KeyStore({ path: testKeysPath })
+    
       identities = await Identities({ keystore, ipfs })
       testIdentity = await identities.createIdentity({ id: 'userA' })
     })

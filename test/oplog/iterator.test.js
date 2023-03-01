@@ -6,6 +6,7 @@ import KeyStore from '../../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
 import all from 'it-all'
 import MemoryStorage from '../../src/storage/memory.js'
+import LevelStorage from '../../src/storage/level.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -26,8 +27,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity, testIdentity2, testIdentity3
 
     before(async () => {
-      keystore = new KeyStore('./keys_1')
-      await keystore.open()
+      keystore = await KeyStore({ storage: await LevelStorage({ path: './keys_1', valueEncoding: 'json' })})
+
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)
       }

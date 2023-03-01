@@ -1,8 +1,9 @@
 import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
-import { KeyStore, Identities } from '../../src/index.js'
-import { Identity, addIdentityProvider } from '../../src/identities/index.js'
+import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
+import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
+import Identity from '../../src/identities/identity.js'
 import { Ed25519Provider } from 'key-did-provider-ed25519'
 import KeyDidResolver from 'key-did-resolver'
 import DIDIdentityProvider from '../../src/identities/providers/did.js'
@@ -16,8 +17,7 @@ describe('DID Identity Provider', function () {
   let identities
 
   before(async () => {
-    keystore = new KeyStore()
-    await keystore.open()
+    keystore = await KeyStore()
     DIDIdentityProvider.setDIDResolver(KeyDidResolver.getResolver())
     addIdentityProvider(DIDIdentityProvider)
     identities = await Identities({ keystore })
@@ -56,15 +56,15 @@ describe('DID Identity Provider', function () {
 
     it('has a signature for the id', async () => {
       const signingKey = await keystore.getKey(didStr)
-      const idSignature = await KeyStore.sign(signingKey, didStr)
-      const verifies = await KeyStore.verify(idSignature, identity.publicKey, didStr)
+      const idSignature = await signMessage(signingKey, didStr)
+      const verifies = await verifyMessage(idSignature, identity.publicKey, didStr)
       assert.strictEqual(verifies, true)
       assert.strictEqual(identity.signatures.id, idSignature)
     })
 
     it('has a signature for the publicKey', async () => {
       const signingKey = await keystore.getKey(didStr)
-      const idSignature = await KeyStore.sign(signingKey, didStr)
+      const idSignature = await signMessage(signingKey, didStr)
       assert.notStrictEqual(idSignature, undefined)
     })
   })
@@ -106,7 +106,7 @@ describe('DID Identity Provider', function () {
 
     it('sign data', async () => {
       const signingKey = await keystore.getKey(identity.id)
-      const expectedSignature = await KeyStore.sign(signingKey, data)
+      const expectedSignature = await signMessage(signingKey, data)
       const signature = await identities.sign(identity, data, keystore)
       assert.strictEqual(signature, expectedSignature)
     })

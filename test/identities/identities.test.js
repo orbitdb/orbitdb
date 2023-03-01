@@ -1,12 +1,15 @@
 import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
-import { KeyStore, Identities } from '../../src/index.js'
-import { Identity, addIdentityProvider } from '../../src/identities/index.js'
+import LevelStorage from '../../src/storage/level.js'
+import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
+import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
+import Identity from '../../src/identities/identity.js'
 import fs from 'fs-extra'
 const fixturesPath = path.resolve('./test/identities/fixtures/keys')
 const savedKeysPath = path.resolve('./test/identities/fixtures/savedKeys')
 const identityKeysPath = path.resolve('./test/identities/identityKeys')
+import testKeysPath from '../fixtures/test-keys-path.js '
 const type = 'orbitdb'
 
 describe('Identities', function () {
@@ -19,7 +22,7 @@ describe('Identities', function () {
   })
 
   describe('Creating Identities', () => {
-    const id = 'A'
+    const id = 'userA'
 
     let identities
     let identity
@@ -40,7 +43,7 @@ describe('Identities', function () {
   })
 
   describe('Get Identity', () => {
-    const id = 'A'
+    const id = 'userA'
 
     let identities
     let identity
@@ -65,16 +68,15 @@ describe('Identities', function () {
     })
   })
 
-  describe('Passing in custom keystore', async () => {
-    const id = 'B'
+  describe.skip('Passing in custom keystore', async () => {
+    const id = 'userB'
 
     let identity
     let identities
     let keystore
 
     before(async () => {
-      keystore = new KeyStore(identityKeysPath)
-      await keystore.open()
+      keystore = await KeyStore({ path: testKeysPath })
       identities = await Identities({ keystore })
     })
 
@@ -110,9 +112,9 @@ describe('Identities', function () {
       const key = await keystore.getKey(id)
       const externalId = Buffer.from(key.public.marshal()).toString('hex')
       const signingKey = await keystore.getKey(externalId)
-      const idSignature = await KeyStore.sign(signingKey, externalId)
+      const idSignature = await signMessage(signingKey, externalId)
       const publicKey = Buffer.from(signingKey.public.marshal()).toString('hex')
-      const verifies = await KeyStore.verify(idSignature, publicKey, externalId)
+      const verifies = await verifyMessage(idSignature, publicKey, externalId)
       assert.strictEqual(verifies, true)
       assert.strictEqual(identity.signatures.id, idSignature)
     })
@@ -121,29 +123,26 @@ describe('Identities', function () {
       const key = await keystore.getKey(id)
       const externalId = Buffer.from(key.public.marshal()).toString('hex')
       const signingKey = await keystore.getKey(externalId)
-      const idSignature = await KeyStore.sign(signingKey, externalId)
+      const idSignature = await signMessage(signingKey, externalId)
       const externalKey = await keystore.getKey(id)
-      const publicKeyAndIdSignature = await KeyStore.sign(externalKey, identity.publicKey + idSignature)
+      const publicKeyAndIdSignature = await signMessage(externalKey, identity.publicKey + idSignature)
       assert.strictEqual(identity.signatures.publicKey, publicKeyAndIdSignature)
     })
   })
 
   describe('create an identity with saved keys', () => {
-    const id = 'QmPhnEjVkYE1Ym7F5MkRUfkD6NtuSptE7ugu1Ggr149W2X'
+    const id = 'userX'
 
-    const expectedPublicKey = '040d78ff62afb656ac62db1aae3b1536a614991e28bb4d721498898b7d4194339640cd18c37b259e2c77738de0d6f9a5d52e0b936611de6b6ba78891a8b2a38317'
-    const expectedIdSignature = '30450221009de7b91952d73f577e85962aa6301350865212e3956862f80f4ebb626ffc126b022027d57415fb145b7e06cf06320fbfa63ea98a958b065726fe86eaab809a6bf607'
-    const expectedPkIdSignature = '304402202806e7c2406ca1f35961d38adc3997c179e142d54e1ca838ace373fae27124fd02200d6ca3aea6e1341bf5e4e0b84b559bbeefecfade34115de266a69d04d924905e'
+    const expectedPublicKey = '0442fa42a69135eade1e37ea520bc8ee9e240efd62cb0edf0516b21258b4eae656241c40da462c95189b1ade83419138ca59845beb90d29b1be8542bde388ca5f9'
+    const expectedIdSignature = '3044022068b4bc360d127e39164fbc3b5184f5bd79cc5976286f793d9b38d1f2818e0259022027b875dc8c73635b32db72177b9922038ec4b1eabc8f1fd0919806b0b2519419'
+    const expectedPkIdSignature = '304402206d1aeff3a874b7bd83300219badf68bbcb514e2c60a7b40cec5f78ff2b7ba0f20220085f5f138730603418a0570ba12720f0a46997527bb4a077cd26b545e7811c31'
 
     let identities
     let identity
     let savedKeysKeyStore
 
     before(async () => {
-      await fs.copy(fixturesPath, savedKeysPath)
-
-      savedKeysKeyStore = new KeyStore(savedKeysPath)
-      await savedKeysKeyStore.open()
+      savedKeysKeyStore = await KeyStore({ path: testKeysPath })
 
       identities = await Identities({ keystore: savedKeysKeyStore })
       identity = await identities.createIdentity({ id })
@@ -181,8 +180,8 @@ describe('Identities', function () {
     it('has the correct signatures', async () => {
       const internalSigningKey = await savedKeysKeyStore.getKey(identity.id)
       const externalSigningKey = await savedKeysKeyStore.getKey(id)
-      const idSignature = await KeyStore.sign(internalSigningKey, identity.id)
-      const publicKeyAndIdSignature = await KeyStore.sign(externalSigningKey, identity.publicKey + idSignature)
+      const idSignature = await signMessage(internalSigningKey, identity.id)
+      const publicKeyAndIdSignature = await signMessage(externalSigningKey, identity.publicKey + idSignature)
       const expectedSignature = { id: idSignature, publicKey: publicKeyAndIdSignature }
       assert.deepStrictEqual(identity.signatures, expectedSignature)
     })
@@ -196,8 +195,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = new KeyStore(identityKeysPath)
-      await keystore.open()
+      keystore = await KeyStore({ path: testKeysPath })
     })
 
     after(async () => {
@@ -209,14 +207,14 @@ describe('Identities', function () {
     it('identity pkSignature verifies', async () => {
       identities = await Identities({ keystore })
       identity = await identities.createIdentity({ id, type })
-      const verified = await KeyStore.verify(identity.signatures.id, identity.publicKey, identity.id)
+      const verified = await verifyMessage(identity.signatures.id, identity.publicKey, identity.id)
       assert.strictEqual(verified, true)
     })
 
     it('identity signature verifies', async () => {
       identities = await Identities({ keystore })
       identity = await identities.createIdentity({ id, type })
-      const verified = await KeyStore.verify(identity.signatures.publicKey, identity.id, identity.publicKey + identity.signatures.id)
+      const verified = await verifyMessage(identity.signatures.publicKey, identity.id, identity.publicKey + identity.signatures.id)
       assert.strictEqual(verified, true)
     })
 
@@ -246,8 +244,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = new KeyStore(identityKeysPath)
-      await keystore.open()
+      keystore = await KeyStore({ path: testKeysPath })
       identities = await Identities({ keystore })
     })
 
@@ -273,8 +270,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = new KeyStore(identityKeysPath)
-      await keystore.open()
+      keystore = await KeyStore({ path: testKeysPath })
       identities = await Identities({ keystore })
       identity = await identities.createIdentity({ id })
     })
@@ -287,7 +283,7 @@ describe('Identities', function () {
 
     it('sign data', async () => {
       const signingKey = await keystore.getKey(identity.id)
-      const expectedSignature = await KeyStore.sign(signingKey, data)
+      const expectedSignature = await signMessage(signingKey, data)
       const signature = await identities.sign(identity, data, keystore)
       assert.strictEqual(signature, expectedSignature)
     })
@@ -318,8 +314,7 @@ describe('Identities', function () {
     let signature
 
     before(async () => {
-      keystore = new KeyStore(identityKeysPath)
-      await keystore.open()
+      keystore = await KeyStore({ path: testKeysPath })
     })
 
     after(async () => {

@@ -1,5 +1,4 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import mapSeries from 'p-map-series'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { KeyValuePersisted, KeyValue, Database } from '../../src/db/index.js'
@@ -80,14 +79,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('sets a key/value pair', async () => {
-      const expected = 'zdpuAyRbzMUs1v7B1gqRRHe6rnxwYbHKzDhxh3rJanEjoucHt'
+      const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
 
       const actual = await db.set('key1', 'value1')
       strictEqual(actual, expected)
     })
 
     it('puts a key/value pair', async () => {
-      const expected = 'zdpuAyRbzMUs1v7B1gqRRHe6rnxwYbHKzDhxh3rJanEjoucHt'
+      const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
 
       const actual = await db.put('key1', 'value1')
       strictEqual(actual, expected)
@@ -97,7 +96,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const key = 'key1'
       const expected = 'value1'
 
-      const hash = await db.put(key, expected)
+      await db.put(key, expected)
       const actual = await db.get(key)
       strictEqual(actual, expected)
     })

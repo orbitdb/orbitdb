@@ -1,4 +1,4 @@
-import { Level } from 'level'
+import LevelStorage from '../storage/level.js'
 import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
@@ -10,8 +10,8 @@ const KeyValuePersisted = async ({ KeyValue, OpLog, Database, ipfs, identity, da
   const queue = new PQueue({ concurrency: 1 })
 
   const path = `./${identity.id}/${databaseId}/_index`
-  const index = new Level(path, { valueEncoding })
-  await index.open()
+  const index = await LevelStorage({ path, valueEncoding: 'json' })
+  // await index.open()
 
   let latestOplogHash
 
