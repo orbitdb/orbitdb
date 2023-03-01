@@ -9,7 +9,6 @@ import { config, testAPIs } from 'orbit-db-test-utils'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 let testIdentity
 

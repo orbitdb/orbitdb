@@ -6,10 +6,8 @@ import bigLogString from '../fixtures/big-log.fixture.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import LogCreator from './utils/log-creator.js'
-import MemoryStorage from '../../src/storage/memory.js'
-
-// Test utils
-import { config, MemStore, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import testKeysPath from '../fixtures/test-keys-path.js '
+import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 
 const { sync: rmrf } = rimraf
 const { LastWriteWins } = Sorting
@@ -49,7 +47,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
 
-      keystore = await KeyStore({ storage: await LevelStorage({ path: identityKeysPath, valueEncoding: 'json' }) })
+      keystore = await KeyStore({ path: testKeysPath })
 
       testIdentity = await createIdentity({ id: 'userC', keystore })
       testIdentity2 = await createIdentity({ id: 'userB', keystore })
@@ -57,10 +55,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
       testIdentity4 = await createIdentity({ id: 'userA', keystore })
       ipfsd = await startIpfs(IPFS, config.defaultIpfsConfig)
       ipfs = ipfsd.api
-
-      const memstore = new MemStore()
-      ipfs.object.put = memstore.put.bind(memstore)
-      ipfs.object.get = memstore.get.bind(memstore)
     })
 
     after(async () => {

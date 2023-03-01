@@ -13,7 +13,6 @@ import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import { identityKeys, signingKeys } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 const { createLogWithSixteenEntries } = LogCreator
 
 Object.keys(testAPIs).forEach((IPFS) => {
@@ -27,7 +26,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     let testIdentity, testIdentity2, testIdentity3
 
     before(async () => {
-      keystore = await KeyStore({ storage: await LevelStorage({ path: './keys_1', valueEncoding: 'json' })})
+      keystore = await KeyStore({ storage: await LevelStorage({ path: './keys_1', valueEncoding: 'json' }) })
 
       for (const [key, value] of Object.entries(identityKeys)) {
         await keystore.addKey(key, value)

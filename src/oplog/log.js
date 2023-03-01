@@ -133,7 +133,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @param {data} data Payload to add to the entry
    * @return {Promise<Entry>} Entry that was appended
    */
-  const append = async (data, options = { pointerCount: 1 }) => {
+  const append = async (data, options = { pointerCount: 0 }) => {
     // 1. Prepare entry
     // 2. Authorize entry
     // 3. Store entry

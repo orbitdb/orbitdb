@@ -1,15 +1,12 @@
 import assert from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
-import LevelStorage from '../../src/storage/level.js'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
 import Identity from '../../src/identities/identity.js'
-import fs from 'fs-extra'
-const fixturesPath = path.resolve('./test/identities/fixtures/keys')
+import testKeysPath from '../fixtures/test-keys-path.js '
 const savedKeysPath = path.resolve('./test/identities/fixtures/savedKeys')
 const identityKeysPath = path.resolve('./test/identities/identityKeys')
-import testKeysPath from '../fixtures/test-keys-path.js '
 const type = 'orbitdb'
 
 describe('Identities', function () {
@@ -94,7 +91,6 @@ describe('Identities', function () {
       assert.strictEqual(identity.id, externalId)
     })
 
-
     it('created a key for id in identity-keystore', async () => {
       const key = await keystore.getKey(id)
       assert.notStrictEqual(key, undefined)
@@ -147,7 +143,6 @@ describe('Identities', function () {
       identities = await Identities({ keystore: savedKeysKeyStore })
       identity = await identities.createIdentity({ id })
     })
-
 
     after(async () => {
       if (identities) {

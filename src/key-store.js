@@ -125,8 +125,8 @@ const KeyStore = async ({ storage, path } = {}) => {
     const decompressedKey = secp256k1.publicKeyConvert(Buffer.from(pubKey), false)
 
     const key = {
-      publicKey: Buffer.from(decompressedKey),//.toString('hex'),
-      privateKey: Buffer.from(keys.marshal())//.toString('hex')
+      publicKey: Buffer.from(decompressedKey), // .toString('hex'),
+      privateKey: Buffer.from(keys.marshal())// .toString('hex')
     }
 
     await addKey(id, key)
@@ -149,7 +149,7 @@ const KeyStore = async ({ storage, path } = {}) => {
     if (!storedKey) {
       return
     }
-    
+
     // return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
     return unmarshal(storedKey)
   }

@@ -1,15 +1,9 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import rimraf from 'rimraf'
-import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
-import LevelStorage from '../../src/storage/level.js'
-import MemoryStorage from '../../src/storage/memory.js'
 import { config, testAPIs } from 'orbit-db-test-utils'
 import testKeysPath from '../fixtures/test-keys-path.js '
-
-const { sync: rmrf } = rimraf
 
 let testIdentity, testIdentity2
 
@@ -17,10 +11,8 @@ Object.keys(testAPIs).forEach(IPFS => {
   describe('Log - Join Concurrent Entries (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
-
     let keystore
-    let identities1, identities2
+    let identities1
 
     before(async () => {
       keystore = await KeyStore({ path: testKeysPath })

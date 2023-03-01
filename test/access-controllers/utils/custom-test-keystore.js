@@ -1,54 +1,54 @@
-import pkg from 'elliptic'
-const { ec: EC } = pkg
-const ec = new EC('secp256k1')
+// import pkg from 'elliptic'
+// const { ec: EC } = pkg
+// const ec = new EC('secp256k1')
 
-/**
- * A custom keystore example
- */
-class CustomTestKeystore {
-  constructor (signer) {
-    this.createKey()
-  }
+// /**
+//  * A custom keystore example
+//  */
+// class CustomTestKeystore {
+//   constructor (signer) {
+//     this.createKey()
+//   }
 
-  createKey () {
-    const key = ec.genKeyPair()
-    this.key = ec.keyPair({
-      pub: key.getPublic('hex'),
-      priv: key.getPrivate('hex'),
-      privEnc: 'hex',
-      pubEnc: 'hex'
-    })
+//   createKey () {
+//     const key = ec.genKeyPair()
+//     this.key = ec.keyPair({
+//       pub: key.getPublic('hex'),
+//       priv: key.getPrivate('hex'),
+//       privEnc: 'hex',
+//       pubEnc: 'hex'
+//     })
 
-    return this.key
-  }
+//     return this.key
+//   }
 
-  getKey () {
-    return this.key
-  }
+//   getKey () {
+//     return this.key
+//   }
 
-  // TODO: check if this is really in use
-  generateKey () {
-    return Promise.resolve(this.createKey())
-  }
+//   // TODO: check if this is really in use
+//   generateKey () {
+//     return Promise.resolve(this.createKey())
+//   }
 
-  importPublicKey (key) {
-    return Promise.resolve(ec.keyFromPublic(key, 'hex'))
-  }
+//   importPublicKey (key) {
+//     return Promise.resolve(ec.keyFromPublic(key, 'hex'))
+//   }
 
-  importPrivateKey (key) {
-    return Promise.resolve(ec.keyFromPrivate(key, 'hex'))
-  }
+//   importPrivateKey (key) {
+//     return Promise.resolve(ec.keyFromPrivate(key, 'hex'))
+//   }
 
-  sign (key, data) {
-    const sig = ec.sign(data, key)
-    return Promise.resolve(sig.toDER('hex'))
-  }
+//   sign (key, data) {
+//     const sig = ec.sign(data, key)
+//     return Promise.resolve(sig.toDER('hex'))
+//   }
 
-  verify (signature, key, data) {
-    let res = false
-    res = ec.verify(data, signature, key)
-    return Promise.resolve(res)
-  }
-}
+//   verify (signature, key, data) {
+//     let res = false
+//     res = ec.verify(data, signature, key)
+//     return Promise.resolve(res)
+//   }
+// }
 
-export default new CustomTestKeystore()
+// export default new CustomTestKeystore()

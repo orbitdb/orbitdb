@@ -1,144 +1,188 @@
 import { deepStrictEqual } from 'assert'
-import rimraf from 'rimraf'
+import rmrf from 'rimraf'
 import { Log, Entry } from '../../../src/oplog/index.js'
 import { EventStore, Database } from '../../../src/db/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
-import { getIpfsPeerId, waitForPeers, config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
-import connectPeers from '../../utils/connect-nodes.js'
-import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
-import waitFor from '../../utils/wait-for.js'
 
-const { sync: rmrf } = rimraf
+// Test utils
+import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import connectPeers from '../../utils/connect-nodes.js'
+import waitFor from '../../utils/wait-for.js'
+import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
 
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+const IPFS = 'js-ipfs'
 
-Object.keys(testAPIs).forEach((IPFS) => {
-  describe('EventStore Replication (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
+describe('Events Database Replication', function () {
+  this.timeout(5000)
 
-    let ipfsd1, ipfsd2
-    let ipfs1, ipfs2
-    let keystore, signingKeyStore
-    let peerId1, peerId2
-    let accessController
-    let identities1, identities2
-    let testIdentity1, testIdentity2
-    let db1, db2
+  let ipfsd1, ipfsd2
+  let ipfs1, ipfs2
+  let identities1, identities2
+  let testIdentity1, testIdentity2
+  let db1, db2
 
-    const databaseId = 'events-AAA'
+  const databaseId = 'events-AAA'
 
-    before(async () => {
-      // Start two IPFS instances
-      ipfsd1 = await startIpfs(IPFS, config.daemon1)
-      ipfsd2 = await startIpfs(IPFS, config.daemon2)
-      ipfs1 = ipfsd1.api
-      ipfs2 = ipfsd2.api
+  const accessController = {
+    canAppend: async (entry) => {
+      const identity = await identities1.getIdentity(entry.identity)
+      return identity.id === testIdentity1.id
+    }
+  }
 
-      await connectPeers(ipfs1, ipfs2)
+  const expected = [
+    'init',
+    true,
+    'hello',
+    'friend',
+    12345,
+    'empty',
+    '',
+    'friend33'
+  ]
 
-      // Get the peer IDs
-      peerId1 = await getIpfsPeerId(ipfs1)
-      peerId2 = await getIpfsPeerId(ipfs2)
+  before(async () => {
+    ipfsd1 = await startIpfs(IPFS, config.daemon1)
+    ipfsd2 = await startIpfs(IPFS, config.daemon2)
+    ipfs1 = ipfsd1.api
+    ipfs2 = ipfsd2.api
 
-      const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
-      identities1 = identities[0]
-      identities2 = identities[1]
-      testIdentity1 = testIdentities[0]
-      testIdentity2 = testIdentities[1]
+    await connectPeers(ipfs1, ipfs2)
 
-      accessController = {
-        canAppend: async (entry) => {
-          const identity1 = await identities1.getIdentity(entry.identity)
-          const identity2 = await identities2.getIdentity(entry.identity)
-          return identity1.id === testIdentity1.id || identity2.id === testIdentity2.id
-        }
-      }
+    const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
+    identities1 = identities[0]
+    identities2 = identities[1]
+    testIdentity1 = testIdentities[0]
+    testIdentity2 = testIdentities[1]
 
-      rmrf(testIdentity1.id)
-      rmrf(testIdentity2.id)
-    })
+    await rmrf('./orbitdb1')
+    await rmrf('./orbitdb2')
+  })
 
-    after(async () => {
-      await cleanUpTestIdentities([identities1, identities2])
+  after(async () => {
+    await cleanUpTestIdentities([identities1, identities2])
 
-      if (ipfsd1) {
-        await stopIpfs(ipfsd1)
-      }
-      if (ipfsd2) {
-        await stopIpfs(ipfsd2)
-      }
-      if (keystore) {
-        await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
-      if (testIdentity1) {
-        rmrf(testIdentity1.id)
-      }
-      if (testIdentity2) {
-        rmrf(testIdentity2.id)
-      }
-    })
+    if (ipfsd1) {
+      await stopIpfs(ipfsd1)
+    }
+    if (ipfsd2) {
+      await stopIpfs(ipfsd2)
+    }
 
-    beforeEach(async () => {
-      db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, databaseId, accessController })
-      db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, databaseId, accessController })
-    })
+    await rmrf('./orbitdb1')
+    await rmrf('./orbitdb2')
+  })
 
-    afterEach(async () => {
-      if (db1) {
-        await db1.drop()
-        await db1.close()
-      }
-      if (db2) {
-        await db2.drop()
-        await db2.close()
-      }
-    })
+  afterEach(async () => {
+    if (db1) {
+      await db1.drop()
+      await db1.close()
+    }
+    if (db2) {
+      await db2.drop()
+      await db2.close()
+    }
+  })
 
-    it('gets all documents', async () => {
-      let updateDB1Count = 0
-      let updateDB2Count = 0
+  it('replicates a database', async () => {
+    let connected = false
+    let updateCount = 0
 
-      const onDB1Update = (entry) => {
-        ++updateDB1Count
-      }
+    const onConnected = async (peerId) => {
+      connected = true
+    }
 
-      const onDB2Update = (entry) => {
-        ++updateDB2Count
-      }
+    const onUpdate = async (peerId) => {
+      ++updateCount
+    }
 
-      db1.events.on('update', onDB1Update)
-      db2.events.on('update', onDB2Update)
+    const onError = (err) => {
+      console.error(err)
+    }
 
-      await waitForPeers(ipfs1, [peerId2], databaseId)
-      await waitForPeers(ipfs2, [peerId1], databaseId)
+    db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
-      const puts = []
-      puts.push(await db1.add('init'))
-      puts.push(await db2.add(true))
-      puts.push(await db1.add('hello'))
-      puts.push(await db2.add('friend'))
-      puts.push(await db2.add('12345'))
-      puts.push(await db2.add('empty'))
-      puts.push(await db2.add(''))
-      puts.push(await db2.add('friend33'))
+    db2.events.on('join', onConnected)
+    db1.events.on('join', onConnected)
+    db2.events.on('update', onUpdate)
+    db2.events.on('error', onError)
+    db1.events.on('error', onError)
 
-      await waitFor(() => updateDB1Count, () => puts.length)
-      await waitFor(() => updateDB2Count, () => puts.length)
+    await db1.add(expected[0])
+    await db1.add(expected[1])
+    await db1.add(expected[2])
+    await db1.add(expected[3])
+    await db1.add(expected[4])
+    await db1.add(expected[5])
+    await db1.add(expected[6])
+    await db1.add(expected[7])
 
-      const all1 = []
-      for await (const record of db1.iterator()) {
-        all1.unshift(record)
-      }
+    await waitFor(() => connected, () => true)
+    await waitFor(() => updateCount > 0, () => true)
 
-      const all2 = []
-      for await (const record of db2.iterator()) {
-        all2.unshift(record)
-      }
+    const all2 = []
+    for await (const event of db2.iterator()) {
+      all2.unshift(event)
+    }
+    deepStrictEqual(all2, expected)
 
-      deepStrictEqual(all1, all2)
-    })
+    const all1 = await db2.all()
+    deepStrictEqual(all1, expected)
+  })
+
+  it('loads the database after replication', async () => {
+    db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+
+    let connected = false
+    let updateCount = 0
+
+    const onConnected = async (peerId) => {
+      connected = true
+    }
+
+    const onUpdate = async (peerId) => {
+      ++updateCount
+    }
+
+    const onError = (err) => {
+      console.error(err)
+    }
+
+    db2.events.on('join', onConnected)
+    db2.events.on('update', onUpdate)
+    db2.events.on('error', onError)
+    db1.events.on('error', onError)
+
+    await db1.add(expected[0])
+    await db1.add(expected[1])
+    await db1.add(expected[2])
+    await db1.add(expected[3])
+    await db1.add(expected[4])
+    await db1.add(expected[5])
+    await db1.add(expected[6])
+    await db1.add(expected[7])
+
+    await waitFor(() => connected, () => true)
+    await waitFor(() => updateCount > 0, () => true)
+
+    await db1.drop()
+    await db1.close()
+    db1 = null
+
+    await db2.close()
+
+    db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+
+    const all2 = []
+    for await (const event of db2.iterator()) {
+      all2.unshift(event)
+    }
+    deepStrictEqual(all2, expected)
+
+    const all1 = await db2.all()
+    deepStrictEqual(all1, expected)
   })
 })

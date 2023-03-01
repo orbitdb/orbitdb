@@ -23,7 +23,6 @@
 //   fs.mkdirSync(directory, { recursive: true })
 // }
 
-
 // const dbPath = path.join('./orbitdb', 'tests', 'v0')
 // const dbFixturesDir = path.join('./test', 'fixtures', 'v0', 'QmWDUfC4zcWJGgc9UHn1X3qQ5KZqBv4KCiCtjnpMmBT8JC', 'v0-db')
 // const keyFixtures = path.join('./test', 'fixtures', 'keys','QmRfPsKJs9YqTot5krRibra4gPwoK4kghhU8iKWxBjGDDX')
@@ -43,7 +42,6 @@
 //       ipfsd = await startIpfs(API, config.daemon1)
 //       ipfs = ipfsd.api
 //       rmrf.sync(dbPath)
-
 
 //       const zip = new Zip(ipfsFixtures)
 //       await zip.extractAllToAsync(path.join('./test', 'fixtures'), true)

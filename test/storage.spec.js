@@ -4,13 +4,12 @@ import rimraf from 'rimraf'
 import { Log } from '../src/oplog/index.js'
 import { Identities } from '../src/identities/index.js'
 import KeyStore from '../src/key-store.js'
-import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage, LevelStorage } from '../src/storage/index.js'
+import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
 import { copy } from 'fs-extra'
 import { config, testAPIs } from 'orbit-db-test-utils'
 import testKeysPath from './fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((_) => {
   describe('Storages (' + _ + ')', function () {

@@ -1,3 +1,5 @@
+export { default as OrbitDB } from './OrbitDB.js'
+export { default as OrbitDBAddress, isValidAddress, parseAddress } from './orbit-db-address.js'
 export { Log, DefaultAccessController, Entry } from './oplog/index.js'
 export { default as KeyStore } from './key-store.js'
-export { Identities } from './identities/index.js'
+export { Identities, isIdentity } from './identities/index.js'

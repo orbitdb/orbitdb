@@ -13,15 +13,15 @@ export default (env, argv) => {
     target: 'web',
     mode: 'development',
     devtool: 'source-map',
+    experiments: {
+      topLevelAwait: true
+    },
     plugins: [
       new webpack.ProvidePlugin({
         process: 'process/browser.js',
         Buffer: ['buffer', 'Buffer']
       })
     ],
-    experiments: {
-      topLevelAwait: true
-    },
     resolve: {
       modules: [
         'node_modules'

@@ -12,12 +12,12 @@ const numTabs = 3
 
 const wait = async (milliseconds) => {
   return new Promise((resolve, reject) => {
-    console.log("waiting...")
+    console.log('waiting...')
     setTimeout(resolve, milliseconds)
   })
 }
 
-describe(`orbit-db - browser concurrent writes`, function () {
+describe('orbit-db - browser concurrent writes', function () {
   this.timeout(numTabs * config.timeout)
 
   let browser
@@ -37,7 +37,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
   })
 
   describe('Write concurrently', function () {
-    let tabs = []
+    const tabs = []
     before(async () => {
       const createTab = async () => {
         const page = await browser.newPage()
@@ -82,7 +82,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
       return new Promise((resolve, reject) => {
         let polls = 0
         const interval = setInterval(async () => {
-          let logHashes = []
+          const logHashes = []
           await mapSeries(tabs, async (page) => {
             await page.evaluate(() => loadConsistentLog())
             const hash = await page.evaluate(async () => await getConsistentLogHash())
@@ -96,7 +96,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
             clearInterval(interval)
             resolve()
           } catch (e) {
-            console.log("Repolling...")
+            console.log('Repolling...')
             if (++polls > 5) {
               reject(e)
             }
@@ -108,7 +108,7 @@ describe(`orbit-db - browser concurrent writes`, function () {
     it('no syncLocal option - Multiple tabs do not converge to same log', async () => {
       return new Promise((resolve, reject) => {
         const interval = setInterval(async () => {
-          let logHashes = []
+          const logHashes = []
           await mapSeries(tabs, async (page) => {
             const hash = await page.evaluate(async () => await getInconsistentLogHash())
             logHashes.push(hash)

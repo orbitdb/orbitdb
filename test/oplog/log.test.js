@@ -4,14 +4,12 @@ import { Log, Entry } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
 import { copy } from 'fs-extra'
-import LevelStorage from '../../src/storage/level.js'
 import MemoryStorage from '../../src/storage/memory.js'
 import { config, testAPIs } from 'orbit-db-test-utils'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
 const { create } = Entry
-const { createIdentity } = Identities
 
 let testIdentity
 

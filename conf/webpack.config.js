@@ -20,6 +20,9 @@ export default (env, argv) => {
       }
     },
     target: 'web',
+    experiments: {
+      topLevelAwait: true
+    },
     externals: {
       fs: '{ existsSync: () => true }',
       mkdirp: '{}'

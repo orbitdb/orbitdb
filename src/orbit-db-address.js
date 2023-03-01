@@ -1,67 +1,59 @@
-import path from 'path'
+import * as Path from 'path'
 import { CID } from 'multiformats/cid'
+import { base58btc } from 'multiformats/bases/base58'
 
-const notEmpty = e => e !== '' && e !== ' '
+const isValidAddress = (address) => {
+  address = address.toString()
 
-export default class OrbitDBAddress {
-  constructor (root, path) {
-    this.root = root
-    this.path = path
+  if (!address.startsWith('/orbitdb') && !address.startsWith('\\orbitdb')) {
+    return false
   }
 
-  toString () {
-    return OrbitDBAddress.join(this.root, this.path)
+  address = address.replaceAll('/orbitdb/', '')
+  address = address.replaceAll('\\orbitdb\\', '')
+  address = address.replaceAll('/', '')
+  address = address.replaceAll('\\', '')
+
+  let cid
+  try {
+    cid = CID.parse(address, base58btc)
+  } catch (e) {
+    return false
   }
 
-  static isValid (address) {
-    address = address.toString().replace(/\\/g, '/')
+  return cid !== undefined
+}
 
-    const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
-
-    const parts = address.toString()
-      .split('/')
-      .filter(containsProtocolPrefix)
-      .filter(notEmpty)
-
-    let accessControllerHash
-
-    const validateHash = (hash) => {
-      const prefixes = ['zd', 'Qm', 'ba', 'k5']
-      for (const p of prefixes) {
-        if (hash.indexOf(p) > -1) {
-          return true
-        }
-      }
-      return false
-    }
-
-    try {
-      accessControllerHash = validateHash(parts[0])
-        ? CID.parse(parts[0]).toString()
-        : null
-    } catch (e) {
-      return false
-    }
-
-    return accessControllerHash !== null
+const parseAddress = (address) => {
+  if (!address) {
+    throw new Error(`Not a valid OrbitDB address: ${address}`)
   }
 
-  static parse (address) {
-    if (!address) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
-
-    if (!OrbitDBAddress.isValid(address)) { throw new Error(`Not a valid OrbitDB address: ${address}`) }
-
-    address = address.toString().replace(/\\/g, '/')
-
-    const parts = address.toString()
-      .split('/')
-      .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
-      .filter(e => e !== '' && e !== ' ')
-
-    return new OrbitDBAddress(parts[0], parts.slice(1, parts.length).join('/'))
+  if (!isValidAddress(address)) {
+    throw new Error(`Not a valid OrbitDB address: ${address}`)
   }
 
-  static join (...paths) {
-    return (path.posix || path).join('/orbitdb', ...paths)
+  return OrbitDBAddress(address)
+}
+
+const OrbitDBAddress = (address) => {
+  if (address && address.protocol === 'orbitdb' && address.path) {
+    return address
+  }
+
+  const protocol = 'orbitdb'
+  const path = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
+
+  const toString = () => {
+    return (Path.posix || Path).join('/', protocol, '/', path)
+  }
+
+  return {
+    protocol,
+    path,
+    address,
+    toString
   }
 }
+
+export { OrbitDBAddress as default, isValidAddress, parseAddress }
