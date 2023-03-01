@@ -1,17 +1,18 @@
 import LevelStorage from '../storage/level.js'
+import { KeyValue } from './index.js'
 import PQueue from 'p-queue'
+import path from 'path'
 
 const valueEncoding = 'json'
 
-const KeyValuePersisted = async ({ KeyValue, OpLog, Database, ipfs, identity, databaseId, accessController, storage }) => {
-  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, databaseId, accessController, storage })
+const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage }) => {
+  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage })
   const { events, log } = keyValueStore
 
   const queue = new PQueue({ concurrency: 1 })
 
-  const path = `./${identity.id}/${databaseId}/_index`
-  const index = await LevelStorage({ path, valueEncoding: 'json' })
-  // await index.open()
+  directory = path.join(directory || './orbitdb', `./${address.path}/_index/`)
+  const index = await LevelStorage({ path: directory, valueEncoding })
 
   let latestOplogHash
 
@@ -49,7 +50,7 @@ const KeyValuePersisted = async ({ KeyValue, OpLog, Database, ipfs, identity, da
 
   const iterator = async function * () {
     await queue.onIdle()
-    for await (const [key, value] of index.iterator()) {
+    for await (const { key, value } of keyValueStore.iterator()) {
       yield { key, value }
     }
   }

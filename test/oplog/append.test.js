@@ -10,7 +10,6 @@ import KeyStore from '../../src/key-store.js'
 // Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
 
-const { createIdentity } = Identities
 const { sync: rmrf } = rimraf
 
 let testIdentity

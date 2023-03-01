@@ -43,13 +43,13 @@ Object.keys(testAPIs).forEach(API => {
       id2 = await IdentityProvider.createIdentity({ id: 'B', keystore: keystore2 })
 
       orbitdb1 = await OrbitDB.createInstance(ipfs1, {
-        AccessControllers: AccessControllers,
+        AccessControllers,
         directory: dbPath1,
         identity: id1
       })
 
       orbitdb2 = await OrbitDB.createInstance(ipfs2, {
-        AccessControllers: AccessControllers,
+        AccessControllers,
         directory: dbPath2,
         identity: id2
       })

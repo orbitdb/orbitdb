@@ -91,7 +91,6 @@
 //           await db.close()
 //         })
 
-
 //         it('throws an error if database type doesn\'t match', async () => {
 //           let err, log, kv
 //           try {

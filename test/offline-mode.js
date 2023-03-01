@@ -16,7 +16,7 @@
 //   testAPIs,
 // } from 'orbit-db-test-utils'
 
-// const storage = storageAdapter() 
+// const storage = storageAdapter()
 
 // const dbPath1 = './orbitdb/tests/offline/db1'
 // const dbPath2 = './orbitdb/tests/offline/db2'

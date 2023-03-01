@@ -1,5 +1,6 @@
-import IdentityProvider from 'orbit-db-identity-provider'
-import { Log, MemoryStorage } from '../src/log.js'
+import { Identities } from '../src/index.js'
+import { Log } from '../src/index.js'
+import { MemoryStorage, LevelStorage } from '../src/storage/index.js'
 
 // State
 let log
@@ -21,13 +22,18 @@ const queryLoop = async () => {
 ;(async () => {
   console.log('Starting benchmark...')
 
-  const identity = await IdentityProvider.createIdentity({ id: 'userA' })
-  // MemoeryStorage is the default storage for Log but defining them here
-  // in case we want to benchmark different storage modules
-  const storage = await MemoryStorage()
-  const stateStorage = await MemoryStorage()
+  const identities = await Identities()
+  const testIdentity = await identities.createIdentity({ id: 'userA' })
 
-  log = await Log(identity, { logId: 'A', storage, stateStorage })
+  // MemoryStorage is the default storage for Log but defining them here
+  // in case we want to benchmark different storage modules
+  const entryStorage = await MemoryStorage()
+  const headsStorage = await MemoryStorage()
+  // Test LevelStorage
+  // const entryStorage = await LevelStorage({ path: './logA/entries' })
+  // const headsStorage = await LevelStorage({ path: './logA/heads' })
+
+  log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage })
 
   // Output metrics at 1 second interval
   setInterval(() => {
@@ -37,7 +43,7 @@ const queryLoop = async () => {
       if (lastTenSeconds === 0) throw new Error('Problems!')
       lastTenSeconds = 0
     }
-    console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds (Entry count: ${log.values.length})`)
+    console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
     queriesPerSecond = 0
   }, 1000)
 

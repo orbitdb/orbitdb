@@ -1,20 +1,25 @@
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
+import Path from 'path'
+import Sync from './sync.js'
+import { IPFSBlockStorage, LevelStorage } from '../storage/index.js'
 
 const defaultPointerCount = 16
 
-const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, storage, headsStorage, pointerCount }) => {
-  const { Log, Entry, IPFSBlockStorage, LevelStorage } = OpLog
+const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, storage, headsStorage, pointerCount }) => {
+  const { Log, Entry } = OpLog
 
   const entryStorage = storage || await IPFSBlockStorage({ ipfs, pin: true })
-  headsStorage = headsStorage || await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_heads/` })
-  // const indexStorage = await LevelStorage({ path: `./${identity.id}/${databaseId}/log/_index/` })
 
-  // const log = await Log(identity, { logId: databaseId, access: accessController, entryStorage, headsStorage, indexStorage })
-  const log = await Log(identity, { logId: databaseId, access: accessController, entryStorage, headsStorage })
+  directory = Path.join(directory || './orbitdb', `./${address.path}/`)
+  headsStorage = headsStorage || await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
+
+  const log = await Log(identity, { logId: address.toString(), access: accessController, entryStorage, headsStorage })
+
+  // const indexStorage = await LevelStorage({ path: Path.join(directory, '/log/_index/') })
+  // const log = await Log(identity, { logId: address.toString(), access: accessController, entryStorage, headsStorage, indexStorage })
 
   const events = new EventEmitter()
-
   const queue = new PQueue({ concurrency: 1 })
 
   pointerCount = pointerCount || defaultPointerCount
@@ -22,32 +27,17 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   const addOperation = async (op) => {
     const task = async () => {
       const entry = await log.append(op, { pointerCount })
-      await ipfs.pubsub.publish(databaseId, entry.bytes)
+      await syncProtocol.publish(entry)
       events.emit('update', entry)
       return entry.hash
     }
     return queue.add(task)
   }
 
-  const handleMessage = async (message) => {
-    const { id: peerId } = await ipfs.id()
-    const messageIsNotFromMe = (message) => String(peerId) !== String(message.from)
-    const messageHasData = (message) => message.data !== undefined
-    try {
-      if (messageIsNotFromMe(message) && messageHasData(message)) {
-        await sync(message.data)
-      }
-    } catch (e) {
-      console.error(e)
-      events.emit('error', e)
-    }
-  }
-
-  const sync = async (bytes) => {
+  const applyOperation = async (bytes) => {
     const task = async () => {
       const entry = await Entry.decode(bytes)
       if (entry) {
-        events.emit('sync', entry)
         const updated = await log.joinEntry(entry)
         if (updated) {
           events.emit('update', entry)
@@ -58,7 +48,7 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   }
 
   const close = async () => {
-    await ipfs.pubsub.unsubscribe(log.id, handleMessage)
+    await syncProtocol.stop()
     await queue.onIdle()
     await log.close()
     events.emit('close')
@@ -68,22 +58,23 @@ const Database = async ({ OpLog, ipfs, identity, databaseId, accessController, s
   const drop = async () => {
     await queue.onIdle()
     await log.clear()
+    events.emit('drop')
   }
 
-  const merge = async (other) => {}
-
-  // Automatically subscribe to the pubsub channel for this database
-  await ipfs.pubsub.subscribe(log.id, handleMessage)
+  // Start the Sync protocol
+  // Sync protocol exchanges OpLog heads (latest known entries) between peers when they connect
+  // Sync emits 'join', 'leave' and 'error' events through the given event emitter
+  const syncProtocol = await Sync({ ipfs, log, events, sync: applyOperation })
 
   return {
-    databaseId,
+    address,
+    name,
     identity,
-    sync,
-    merge,
     close,
     drop,
     addOperation,
     log,
+    peers: syncProtocol.peers,
     events
   }
 }

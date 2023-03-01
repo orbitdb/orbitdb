@@ -55,7 +55,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db = await EventStore({ OpLog, Database, ipfs, identity: testIdentity1, databaseId, accessController })
+      db = await EventStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -66,7 +66,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('creates an event store', async () => {
-      strictEqual(db.databaseId, databaseId)
+      strictEqual(db.address.toString(), databaseId)
       strictEqual(db.type, 'eventstore')
     })
 

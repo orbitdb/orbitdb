@@ -54,7 +54,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     beforeEach(async () => {
-      db = await KeyValuePersisted({ OpLog, KeyValue, Database, ipfs, identity: testIdentity1, databaseId, accessController })
+      db = await KeyValuePersisted({ OpLog, KeyValue, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -65,7 +65,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('creates a keyvalue store', async () => {
-      strictEqual(db.databaseId, databaseId)
+      strictEqual(db.address.toString(), databaseId)
       strictEqual(db.type, 'keyvalue')
     })
 
@@ -178,7 +178,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
       const all = []
       for await (const pair of db.iterator()) {
-        all.push(pair)
+        all.unshift(pair)
       }
 
       deepStrictEqual(all, keyvalue)

@@ -11,7 +11,6 @@ import { config, testAPIs } from 'orbit-db-test-utils'
 import { identityKeys, signingKeys } from '../fixtures/orbit-db-identity-keys.js'
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 const last = (arr) => {
   return arr[arr.length - 1]

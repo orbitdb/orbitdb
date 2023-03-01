@@ -1,5 +1,5 @@
-const DocumentStore = async ({ OpLog, Database, ipfs, identity, databaseId, accessController, storage, indexBy = '_id' }) => {
-  const database = await Database({ OpLog, ipfs, identity, databaseId, accessController, storage })
+const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, indexBy = '_id' }) => {
+  const database = await Database({ OpLog, ipfs, identity, address, name, accessController, directory, storage })
 
   const { addOperation, log } = database
 

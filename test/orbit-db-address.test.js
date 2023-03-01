@@ -1,118 +1,149 @@
-// import assert from 'assert'
-// import rmrf from 'rimraf'
-// import OrbitDB from '../src/OrbitDB.js'
-// import OrbitDBAddress from '../src/orbit-db-address.js'
-// import {
-//   config,
-//   startIpfs,
-//   stopIpfs,
-//   testAPIs
-// } from 'orbit-db-test-utils'
+import { strictEqual, notStrictEqual } from 'assert'
+import { OrbitDBAddress, isValidAddress, parseAddress } from '../src/index.js'
 
-// const dbPath = './orbitdb/tests/orbit-db-address'
+describe('OrbitDB Address', function () {
+  describe('Creating an address from full address string', () => {
+    it('creates an address from full address string', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      notStrictEqual(addr, undefined)
+    })
 
-// Object.keys(testAPIs).forEach(API => {
-//   describe(`orbit-db - OrbitDB Address (${API})`, function() {
-//     this.timeout(config.timeout)
+    it('has a protocol prefix', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      strictEqual(addr.protocol, 'orbitdb')
+    })
 
-//     let ipfsd, ipfs, orbitdb
+    it('has a path', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      strictEqual(addr.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+    })
+  })
 
-//     before(async () => {
-//       rmrf.sync(dbPath)
-//       ipfsd = await startIpfs(API, config.daemon1)
-//       ipfs = ipfsd.api
-//       orbitdb = await OrbitDB.createInstance(ipfs, { directory: dbPath })
-//     })
+  describe('Creating an address from hash string', () => {
+    it('creates an address', () => {
+      const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      notStrictEqual(addr, undefined)
+    })
 
-//     after(async () => {
-//       if(orbitdb)
-//         await orbitdb.stop()
+    it('has a protocol prefix', () => {
+      const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      strictEqual(addr.protocol, 'orbitdb')
+    })
 
-//       if (ipfsd)
-//         await stopIpfs(ipfsd)
-//     })
+    it('has a path', () => {
+      const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      strictEqual(addr.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+    })
+  })
 
-//     describe('Parse Address', () => {
-//       it('throws an error if address is empty', () => {
-//         let err
-//         try {
-//           const result = OrbitDB.parseAddress('')
-//         } catch (e) {
-//           err = e.toString()
-//         }
-//         assert.equal(err, 'Error: Not a valid OrbitDB address: ')
-//       })
+  describe('Converting address to a string', () => {
+    it('outputs a valid address string', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      const result = addr.toString()
+      strictEqual(result, address)
+    })
+  })
 
-//       it('parse address successfully', () => {
-//         const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
-//         const result = OrbitDB.parseAddress(address)
+  describe('isValid Address', () => {
+    it('is not valid if address is an empty string', () => {
+      const result = isValidAddress('')
+      strictEqual(result, false)
+    })
 
-//         const isInstanceOf = result instanceof OrbitDBAddress
-//         assert.equal(isInstanceOf, true)
+    it('is a valid address', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const result = isValidAddress(address)
+      strictEqual(result, true)
+    })
 
-//         assert.equal(result.root, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
-//         assert.equal(result.path, 'first-database')
+    it('is a valid address if it\'s another instance of OrbitDBAddress', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const addr = OrbitDBAddress(address)
+      const result = isValidAddress(addr)
+      strictEqual(result, true)
+    })
 
-//         assert.equal(result.toString().indexOf('/orbitdb'), 0)
-//         assert.equal(result.toString().indexOf('zd'), 9)
-//       })
+    it('is not valid address if it\'s missing the /orbitdb prefix', () => {
+      const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const result = isValidAddress(address)
 
-//       it('parse address with backslashes (win32) successfully', () => {
-//         const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
-//         const result = OrbitDB.parseAddress(address)
+      strictEqual(result, false)
+    })
 
-//         const isInstanceOf = result instanceof OrbitDBAddress
-//         assert.equal(isInstanceOf, true)
+    it('is not a valid address if the multihash is invalid - v0', () => {
+      const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzc'
+      const result = isValidAddress(address)
 
-//         assert.equal(result.root, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
-//         assert.equal(result.path, 'first-database')
+      strictEqual(result, false)
+    })
 
-//         assert.equal(result.toString().indexOf('/orbitdb'), 0)
-//         assert.equal(result.toString().indexOf('Qm'), 9)
-//       })
-//     })
+    it('is not a valid address if the multihash is invalid - v2', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw133333'
+      const result = isValidAddress(address)
 
-//     describe('isValid Address', () => {
-//       it('returns false for empty string', () => {
-//         const result = OrbitDB.isValidAddress('')
-//         assert.equal(result, false)
-//       })
+      strictEqual(result, false)
+    })
 
-//       it('validate address successfully', () => {
-//         const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
-//         const result = OrbitDB.isValidAddress(address)
+    it('is a valid address in win32 format', () => {
+      const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'
+      const result = isValidAddress(address)
 
-//         assert.equal(result, true)
-//       })
+      strictEqual(result, true)
+    })
+  })
 
-//       it('handle missing orbitdb prefix', () => {
-//         const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13/first-database'
-//         const result = OrbitDB.isValidAddress(address)
+  describe('Parsing an address', () => {
+    it('parses a valid address', () => {
+      const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+      const result = parseAddress(address)
 
-//         assert.equal(result, true)
-//       })
+      strictEqual(result.protocol, 'orbitdb')
+      strictEqual(result.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
 
-//       it('handle missing db address name', () => {
-//         const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
-//         const result = OrbitDB.isValidAddress(address)
+      strictEqual(result.toString().indexOf('/orbitdb'), 0)
+      strictEqual(result.toString().indexOf('zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'), 9)
+    })
 
-//         assert.equal(result, true)
-//       })
+    it('parses a valid address in win32 format', () => {
+      const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'
+      const result = parseAddress(address)
 
-//       it('handle invalid multihash', () => {
-//         const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzc/first-database'
-//         const result = OrbitDB.isValidAddress(address)
+      strictEqual(result.protocol, 'orbitdb')
+      strictEqual(result.path, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
 
-//         assert.equal(result, false)
-//       })
+      strictEqual(result.toString().indexOf('/orbitdb'), 0)
+      strictEqual(result.toString().indexOf('Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'), 9)
+    })
 
-//       it('validate address with backslashes (win32) successfully', () => {
-//         const address = '\\orbitdb\\Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC\\first-database'
-//         const result = OrbitDB.isValidAddress(address)
+    it('throws an error if address is empty', () => {
+      let err
+      try {
+        parseAddress('')
+      } catch (e) {
+        err = e.toString()
+      }
+      strictEqual(err, 'Error: Not a valid OrbitDB address: ')
+    })
 
-//         assert.equal(result, true)
-//       })
-//     })
+    it('throws an error if address contains too many parts', () => {
+      const address = '/orbitdb/Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzc/this-should-not-be-here'
 
-//   })
-// })
+      let err
+      try {
+        parseAddress(address)
+      } catch (e) {
+        err = e
+      }
+
+      notStrictEqual(err, undefined)
+      strictEqual(err.message, `Not a valid OrbitDB address: ${address}`)
+    })
+  })
+})

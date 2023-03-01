@@ -1,5 +1,5 @@
 import IdentityProvider from './interface.js'
-import KeyStore, { signMessage, verifyMessage } from '../../key-store.js'
+import { signMessage, verifyMessage } from '../../key-store.js'
 
 const type = 'orbitdb'
 

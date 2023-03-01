@@ -1,14 +1,7 @@
-import { notStrictEqual, strictEqual, deepStrictEqual } from 'assert'
-import rimraf from 'rimraf'
+import { notStrictEqual, strictEqual } from 'assert'
 import { Log } from '../../src/oplog/index.js'
-import { Identities } from '../../src/identities/index.js'
-
-// Test utils
 import { config, testAPIs } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
-
-const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('Signed Log (' + IPFS + ')', function () {
@@ -150,12 +143,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('throws an error upon join if entry doesn\'t have append access', async () => {
-        const testACL = {
-          canAppend: async (entry) => {
-            const identity = await identities1.getIdentity(entry.identity)
-            return identity && identity.id !== testIdentity2.id
-          }
+      const testACL = {
+        canAppend: async (entry) => {
+          const identity = await identities1.getIdentity(entry.identity)
+          return identity && identity.id !== testIdentity2.id
         }
+      }
       const log1 = await Log(testIdentity, { logId: 'A', access: testACL })
       const log2 = await Log(testIdentity2, { logId: 'A' })
 

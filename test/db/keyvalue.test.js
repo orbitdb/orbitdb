@@ -1,5 +1,4 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import mapSeries from 'p-map-series'
 import rimraf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { KeyValue, Database } from '../../src/db/index.js'
@@ -17,7 +16,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     let ipfsd
     let ipfs
-    let keystore, signingKeyStore
     let accessController
     let identities1
     let testIdentity1
@@ -26,15 +24,14 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const databaseId = 'keyvalue-AAA'
 
     before(async () => {
-      // Start two IPFS instances
+      rmrf('./orbitdb')
+
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
       const [identities, testIdentities] = await createTestIdentities(ipfs)
       identities1 = identities[0]
       testIdentity1 = testIdentities[0]
-
-      rmrf(testIdentity1.id)
     })
 
     after(async () => {
@@ -43,19 +40,11 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
-      if (keystore) {
-        await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
-      if (testIdentity1) {
-        rmrf(testIdentity1.id)
-      }
+      rmrf('./orbitdb')
     })
 
     beforeEach(async () => {
-      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, databaseId, accessController })
+      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -66,7 +55,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
     })
 
     it('creates a keyvalue store', async () => {
-      strictEqual(db.databaseId, databaseId)
+      strictEqual(db.address.toString(), databaseId)
       strictEqual(db.type, 'keyvalue')
     })
 
@@ -97,7 +86,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       const key = 'key1'
       const expected = 'value1'
 
-      const hash = await db.put(key, expected)
+      await db.put(key, expected)
       const actual = await db.get(key)
       strictEqual(actual, expected)
     })

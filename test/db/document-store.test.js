@@ -55,7 +55,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     describe('Default index \'_id\'', () => {
       beforeEach(async () => {
-        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, databaseId, accessController })
+        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
       })
 
       afterEach(async () => {
@@ -66,7 +66,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('creates a document store', async () => {
-        strictEqual(db.databaseId, databaseId)
+        strictEqual(db.address.toString(), databaseId)
         strictEqual(db.type, 'documentstore')
         strictEqual(db.indexBy, '_id')
       })
@@ -159,7 +159,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     describe('Custom index \'doc\'', () => {
       beforeEach(async () => {
-        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, databaseId, accessController, indexBy: 'doc' })
+        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
       })
 
       afterEach(async () => {
@@ -170,7 +170,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
       })
 
       it('creates a document store', async () => {
-        strictEqual(db.databaseId, databaseId)
+        strictEqual(db.address.toString(), databaseId)
         strictEqual(db.type, 'documentstore')
         strictEqual(db.indexBy, 'doc')
       })

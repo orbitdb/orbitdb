@@ -21,6 +21,8 @@ const Identities = async ({ keystore, identityKeysPath, storage, ipfs } = {}) =>
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
 
+  // await keystore.open()
+
   const getIdentity = async (hash) => {
     const bytes = await storage.get(hash)
     if (bytes) {

@@ -1,14 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import LevelStorage from '../src/storage/level.js'
-import LRUStorage from '../src/storage/lru.js'
-import ComposedStorage from '../src/storage/composed.js'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
 import { testAPIs } from 'orbit-db-test-utils'
-import path from 'path'
-import fs from 'fs-extra'
-import rmrf from 'rimraf'
-import { identityKeys, signingKeys } from './fixtures/orbit-db-identity-keys.js'
-import { Identities } from '../src/identities/index.js'
 import testKeysPath from './fixtures/test-keys-path.js '
 
 Object.keys(testAPIs).forEach((IPFS) => {
@@ -190,12 +182,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = {
             type: 'Buffer',
             data: [
-              4, 231,  36, 122,  76,  21,  91,  99, 209, 130, 162,
-     60, 112, 203, 111, 232, 186,  46,  68, 188, 158, 157,
-     98, 220,  69, 212, 196,  22, 124, 205, 233,  89,  68,
-    241,  61, 179, 199,   7, 218,  46, 224, 227, 253, 107,
-    165,  49, 202, 239, 159, 134, 235, 121,  19,  32,  35,
-    120, 108, 214,  19, 158, 197, 235, 237,  79, 174
+              4, 231, 36, 122, 76, 21, 91, 99, 209, 130, 162,
+              60, 112, 203, 111, 232, 186, 46, 68, 188, 158, 157,
+              98, 220, 69, 212, 196, 22, 124, 205, 233, 89, 68,
+              241, 61, 179, 199, 7, 218, 46, 224, 227, 253, 107,
+              165, 49, 202, 239, 159, 134, 235, 121, 19, 32, 35,
+              120, 108, 214, 19, 158, 197, 235, 237, 79, 174
             ]
           }
           const publicKey = await keystore.getPublic(key, { format: 'buffer' })
@@ -214,11 +206,11 @@ Object.keys(testAPIs).forEach((IPFS) => {
           const expected = {
             type: 'Buffer',
             data: [
-              2, 231,  36, 122,  76,  21,  91,  99,
-    209, 130, 162,  60, 112, 203, 111, 232,
-    186,  46,  68, 188, 158, 157,  98, 220,
-     69, 212, 196,  22, 124, 205, 233,  89,
-     68
+              2, 231, 36, 122, 76, 21, 91, 99,
+              209, 130, 162, 60, 112, 203, 111, 232,
+              186, 46, 68, 188, 158, 157, 98, 220,
+              69, 212, 196, 22, 124, 205, 233, 89,
+              68
             ]
           }
 

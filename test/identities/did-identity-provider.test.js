@@ -1,5 +1,4 @@
 import assert from 'assert'
-import path from 'path'
 import rmrf from 'rimraf'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import Identities, { addIdentityProvider } from '../../src/identities/identities.js'

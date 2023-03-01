@@ -4,12 +4,10 @@ import { copy } from 'fs-extra'
 import { Entry } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
-import LevelStorage from '../../src/storage/level.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 const { create, isEntry } = Entry
 
 Object.keys(testAPIs).forEach((IPFS) => {
@@ -18,7 +16,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
 
     const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
 
-    let keystore, ipfsBlockStore, identityStore
+    let keystore
     let identities
     let testIdentity
     let ipfsd, ipfs
@@ -26,19 +24,19 @@ Object.keys(testAPIs).forEach((IPFS) => {
     before(async () => {
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
-        
+
       await copy(identityKeyFixtures, identityKeysPath)
       await copy(signingKeyFixtures, identityKeysPath)
-      
+
       keystore = await KeyStore({ path: testKeysPath })
-    
+
       identities = await Identities({ keystore, ipfs })
       testIdentity = await identities.createIdentity({ id: 'userA' })
     })
 
     after(async () => {
       await keystore.close()
-      
+
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
@@ -73,8 +71,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
         strictEqual(entry.refs.length, 0)
         // strictEqual(entry.hash, expectedHash)
       })
-      
-      it('retrieves the identity from an entry', async() => {
+
+      it('retrieves the identity from an entry', async () => {
         const expected = {
           id: testIdentity.id,
           publicKey: testIdentity.publicKey,
@@ -83,7 +81,7 @@ Object.keys(testAPIs).forEach((IPFS) => {
           hash: testIdentity.hash,
           bytes: testIdentity.bytes,
           sign: undefined,
-          verify: undefined,
+          verify: undefined
         }
         const payload = 'hello world'
         const entry = await create(testIdentity, 'A', payload)

@@ -54,7 +54,7 @@
 //         address = db.address.toString()
 //         await db.close()
 //         db = await orbitdb1.open(address)
-        
+
 //         //Load 10 items
 //         await db.load(10)
 
@@ -83,7 +83,6 @@
 
 //         assert.equal(Object.keys(db.index).length, 10)
 //       })
-
 
 //       it('reopen store and load 20 items more than exists', async () => {
 

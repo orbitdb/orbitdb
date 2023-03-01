@@ -1,16 +1,12 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rimraf from 'rimraf'
-import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
 import { Identities } from '../../src/identities/index.js'
 import KeyStore from '../../src/key-store.js'
-import MemoryStorage from '../../src/storage/memory.js'
-import LevelStorage from '../../src/storage/level.js'
 import { config, testAPIs } from 'orbit-db-test-utils'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
 const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 let testIdentity, testIdentity2, testIdentity3
 
@@ -18,15 +14,13 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('Log - CRDT (' + IPFS + ')', function () {
     this.timeout(config.timeout)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
+    const { identityKeysPath } = config
 
     let keystore
-    let identities1, identities2, identities3
+    let identities1
 
     before(async () => {
       keystore = await KeyStore({ path: testKeysPath })
-
-      const storage = await MemoryStorage()
 
       identities1 = await Identities({ keystore })
       testIdentity = await identities1.createIdentity({ id: 'userA' })

@@ -56,7 +56,7 @@ const cleanUpTestIdentities = async (identities) => {
     await identity.keystore.close()
   }
   rmrf('./keys_1')
-  rmrf('./orbitdb')
+  // rmrf('./orbitdb')
 }
 
 export {

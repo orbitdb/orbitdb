@@ -1,16 +1,10 @@
 import { strictEqual } from 'assert'
-import rimraf from 'rimraf'
-import { copy } from 'fs-extra'
 import { Log, Entry } from '../../src/index.js'
-import { MemoryStorage, IPFSBlockStorage } from '../../src/storage/index.js'
-import { Identities } from '../../src/identities/index.js'
+import { IPFSBlockStorage } from '../../src/storage/index.js'
 
 // Test utils
 import { config, testAPIs, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
-
-const { sync: rmrf } = rimraf
-const { createIdentity } = Identities
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('ipfs-log - Replication (' + IPFS + ')', function () {
