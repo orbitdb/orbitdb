@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Path from 'path'
 import Sync from './sync.js'
-import { IPFSBlockStorage, LevelStorage } from '../storage/index.js'
+import { IPFSBlockStorage, LevelStorage } from './storage/index.js'
 
 const defaultPointerCount = 16
 

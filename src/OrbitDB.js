@@ -1,18 +1,13 @@
-import {
-  Database,
-  EventStore,
-  KeyValue,
-  // KeyValuePersisted,
-  DocumentStore
-} from './db/index.js'
+import Database from './database.js'
+import { EventStore, KeyValue, DocumentStore } from './db/index.js'
 import { Log, Entry } from './oplog/index.js'
 import { IPFSBlockStorage, LevelStorage } from './storage/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import IPFSAccessController from './access-controllers/ipfs.js'
-import OrbitDBAddress, { isValidAddress } from './orbit-db-address.js'
-import createDBManifest from './db-manifest.js'
-import { isDefined } from './utils/index.js'
+import OrbitDBAddress, { isValidAddress } from './address.js'
+import createDBManifest from './manifest.js'
+import { createId, isDefined } from './utils/index.js'
 // import Logger from 'logplease'
 import path from 'path'
 import * as Block from 'multiformats/block'
@@ -35,18 +30,6 @@ const databaseTypes = {
 // const defaultTimeout = 30000 // 30 seconds
 
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
-
-// Source: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
-const createId = async (length = 32) => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  let counter = 0
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length))
-    counter += 1
-  }
-  return result
-}
 
 const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   if (!isDefined(ipfs)) {

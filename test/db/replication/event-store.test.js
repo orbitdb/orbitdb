@@ -1,7 +1,8 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { Log, Entry } from '../../../src/oplog/index.js'
-import { EventStore, Database } from '../../../src/db/index.js'
+import { EventStore } from '../../../src/db/index.js'
+import { Database } from '../../../src/index.js'
 import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
 
 // Test utils
