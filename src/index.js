@@ -1,6 +1,7 @@
 export { default as OrbitDB } from './OrbitDB.js'
 export { default as OrbitDBAddress, isValidAddress, parseAddress } from './address.js'
 export { Log, Entry, DefaultAccessController } from './oplog/index.js'
+export { default as Database } from './database.js'
 export { default as KeyStore } from './key-store.js'
 export { Identities, isIdentity } from './identities/index.js'
-export { default as Database } from './database.js'
+export { IPFSBlockStorage, LevelStorage, LRUStorage, MemoryStorage, ComposedStorage } from './storage/index.js'
