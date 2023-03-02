@@ -1,17 +1,16 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
+import * as IPFS from 'ipfs'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
 import { DocumentStore } from '../../src/db/index.js'
-import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
-const IPFS = 'js-ipfs'
 
 describe('DocumentStore Database', function () {
-  let ipfsd
   let ipfs
   let keystore
   let accessController
@@ -22,8 +21,7 @@ describe('DocumentStore Database', function () {
   const databaseId = 'documentstore-AAA'
 
   before(async () => {
-    ipfsd = await startIpfs(IPFS, config.daemon1)
-    ipfs = ipfsd.api
+    ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
     await copy(testKeysPath, keysPath)
     keystore = await KeyStore({ path: keysPath })
@@ -32,8 +30,8 @@ describe('DocumentStore Database', function () {
   })
 
   after(async () => {
-    if (ipfsd) {
-      await stopIpfs(ipfsd)
+    if (ipfs) {
+      await ipfs.stop()
     }
 
     if (keystore) {
@@ -42,6 +40,7 @@ describe('DocumentStore Database', function () {
 
     await rmrf(keysPath)
     await rmrf('./orbitdb')
+    await rmrf('./ipfs1')
   })
 
   describe('Default index \'_id\'', () => {

@@ -1,8 +1,9 @@
 export default {
   timeout: 30000,
-  dbname: 'orbit-db-tests',
   defaultIpfsConfig: {
-    start: true,
+    preload: {
+      enabled: false
+    },
     EXPERIMENTAL: {
       pubsub: true
     },
@@ -16,7 +17,7 @@ export default {
       Discovery: {
         MDNS: {
           Enabled: true,
-          Interval: 1
+          Interval: 0
         },
         webRTCStar: {
           Enabled: false
@@ -25,8 +26,6 @@ export default {
     }
   },
   daemon1: {
-    repo: './ipfs/orbitdb/tests/daemon1',
-    start: true,
     EXPERIMENTAL: {
       pubsub: true
     },
@@ -40,7 +39,7 @@ export default {
       Discovery: {
         MDNS: {
           Enabled: true,
-          Interval: 1
+          Interval: 0
         },
         webRTCStar: {
           Enabled: false
@@ -49,8 +48,6 @@ export default {
     }
   },
   daemon2: {
-    repo: './ipfs/orbitdb/tests/daemon2',
-    start: true,
     EXPERIMENTAL: {
       pubsub: true
     },
@@ -64,7 +61,7 @@ export default {
       Discovery: {
         MDNS: {
           Enabled: true,
-          Interval: 1
+          Interval: 0
         },
         webRTCStar: {
           Enabled: false
