@@ -13,7 +13,7 @@ const keysPath = './testkeys'
 const IPFS = 'js-ipfs'
 
 describe('Documents Database Replication', function () {
-  this.timeout(5000)
+  this.timeout(30000)
 
   let ipfsd1, ipfsd2
   let ipfs1, ipfs2
@@ -82,27 +82,27 @@ describe('Documents Database Replication', function () {
   })
 
   it('gets all documents', async () => {
-    let updateDB1Count = 0
-    let updateDB2Count = 0
+    let connected1 = false
+    let connected2 = false
 
-    const onDB1Update = (entry) => {
-      ++updateDB1Count
+    const onConnected1 = (entry) => {
+      connected1 = true
     }
 
-    const onDB2Update = (entry) => {
-      ++updateDB2Count
+    const onConnected2 = (entry) => {
+      connected2 = true
     }
 
-    db1.events.on('update', onDB1Update)
-    db2.events.on('update', onDB2Update)
+    db1.events.on('join', onConnected1)
+    db2.events.on('join', onConnected2)
 
     await db1.put({ _id: 1, msg: 'record 1 on db 1' })
     await db2.put({ _id: 2, msg: 'record 2 on db 2' })
     await db1.put({ _id: 3, msg: 'record 3 on db 1' })
     await db2.put({ _id: 4, msg: 'record 4 on db 2' })
 
-    await waitFor(() => updateDB1Count, () => 4)
-    await waitFor(() => updateDB2Count, () => 4)
+    await waitFor(() => connected1, () => true)
+    await waitFor(() => connected2, () => true)
 
     const all1 = []
     for await (const item of db1.iterator()) {

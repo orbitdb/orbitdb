@@ -1,134 +1,124 @@
-import * as IPFS from 'ipfs'
 import { strictEqual, notStrictEqual } from 'assert'
-import rimraf from 'rimraf'
-import { Log } from '../src/oplog/index.js'
-import { Identities } from '../src/identities/index.js'
-import KeyStore from '../src/key-store.js'
-import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
+import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
-import { config, testAPIs } from 'orbit-db-test-utils'
+import * as IPFS from 'ipfs'
+import { Log, Identities, KeyStore } from '../src/index.js'
+import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
+import { config } from 'orbit-db-test-utils'
 import testKeysPath from './fixtures/test-keys-path.js '
 
-const { sync: rmrf } = rimraf
+const keysPath = './testkeys'
 
-Object.keys(testAPIs).forEach((_) => {
-  describe('Storages (' + _ + ')', function () {
-    this.timeout(config.timeout)
+describe('Storages', function () {
+  this.timeout(5000)
 
-    const { identityKeyFixtures, signingKeyFixtures, identityKeysPath } = config
+  let ipfs1
+  let keystore
+  let testIdentity1
 
-    let ipfs1
-    let keystore
-    let testIdentity1
+  before(async () => {
+    await copy(testKeysPath, keysPath)
 
-    before(async () => {
-      rmrf(identityKeysPath)
-      await copy(identityKeyFixtures, identityKeysPath)
-      await copy(signingKeyFixtures, identityKeysPath)
+    // Start an IPFS instance
+    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
 
-      rmrf('./ipfs1')
-      await copy('./test/fixtures/ipfs1', './ipfs1')
+    keystore = await KeyStore({ path: keysPath })
 
-      // Start an IPFS instance
-      ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    const identities = await Identities({ keystore })
+    testIdentity1 = await identities.createIdentity({ id: 'userA' })
+  })
 
-      keystore = await KeyStore({ path: testKeysPath })
-
-      const storage = await MemoryStorage()
-      const identities = await Identities({ keystore, storage })
-      testIdentity1 = await identities.createIdentity({ id: 'userA' })
-    })
-
-    after(async () => {
-      if (ipfs1) {
-        await ipfs1.stop()
-      }
-      if (keystore) {
-        await keystore.close()
-      }
-      rmrf('./ipfs1')
-      rmrf('./orbitdb')
-    })
-
-    const runTestWithStorage = async (storage) => {
-      const amount = 100
-      const log1 = await Log(testIdentity1, { logId: 'A', storage })
-      const log2 = await Log(testIdentity1, { logId: 'A', storage })
-      for (let i = 0; i < amount; i++) {
-        await log1.append('hello' + i)
-        await log2.append('hello' + i)
-      }
-      // await log2.join(log1)
-      const values = await log1.values()
-      const heads = await log1.heads()
-      strictEqual(heads.length, 1)
-      strictEqual(values.length, amount)
-      await log1.storage.clear()
-      await log2.storage.clear()
-      // const values2 = await log2.values()
-      // const heads2 = await log2.heads()
-      // strictEqual(heads2.length, 0)
-      // strictEqual(values2.length, 0)
-      await log1.storage.close()
-      await log2.storage.close()
+  after(async () => {
+    if (ipfs1) {
+      await ipfs1.stop()
     }
 
-    describe('LRUStorage', () => {
-      it('tests the storage', async () => {
-        const storage = await LRUStorage()
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
+    if (keystore) {
+      await keystore.close()
+    }
+
+    await rmrf('./ipfs1')
+    await rmrf(keysPath)
+  })
+
+  const runTestWithStorage = async (storage) => {
+    const amount = 100
+    const log1 = await Log(testIdentity1, { logId: 'A', storage })
+    const log2 = await Log(testIdentity1, { logId: 'A', storage })
+    for (let i = 0; i < amount; i++) {
+      await log1.append('hello' + i)
+      await log2.append('hello' + i)
+    }
+    // await log2.join(log1)
+    const values = await log1.values()
+    const heads = await log1.heads()
+    strictEqual(heads.length, 1)
+    strictEqual(values.length, amount)
+    await log1.storage.clear()
+    await log2.storage.clear()
+    // const values2 = await log2.values()
+    // const heads2 = await log2.heads()
+    // strictEqual(heads2.length, 0)
+    // strictEqual(values2.length, 0)
+    await log1.storage.close()
+    await log2.storage.close()
+  }
+
+  describe('LRUStorage', () => {
+    it('tests the storage', async () => {
+      const storage = await LRUStorage()
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
+    })
+  })
+
+  describe('MemoryStorage', () => {
+    it('tests the storage', async () => {
+      const storage = await MemoryStorage()
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
+    })
+  })
+
+  describe('IPFSBlockStorage', () => {
+    it('tests the storage', async () => {
+      const storage = await IPFSBlockStorage({ ipfs: ipfs1 })
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
+    })
+  })
+
+  describe('Composed Storages', () => {
+    it('tests Memory + IPFSBlockStorage composition', async () => {
+      const storage1 = await MemoryStorage()
+      const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
+      const storage = await ComposedStorage(storage1, storage2)
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
     })
 
-    describe('MemoryStorage', () => {
-      it('tests the storage', async () => {
-        const storage = await MemoryStorage()
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
+    it('tests LRU + IPFSBlockStorage composition', async () => {
+      const storage1 = await LRUStorage({ size: -1 })
+      const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
+      const storage = await ComposedStorage(storage1, storage2)
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
     })
 
-    describe('IPFSBlockStorage', () => {
-      it('tests the storage', async () => {
-        const storage = await IPFSBlockStorage({ ipfs: ipfs1 })
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
+    it('tests Memory + LRU composition', async () => {
+      const storage1 = await MemoryStorage()
+      const storage2 = await LRUStorage({ size: -1 })
+      const storage = await ComposedStorage(storage1, storage2)
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
     })
 
-    describe('Composed Storages', () => {
-      it('tests Memory + IPFSBlockStorage composition', async () => {
-        const storage1 = await MemoryStorage()
-        const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
-        const storage = await ComposedStorage(storage1, storage2)
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
-
-      it('tests LRU + IPFSBlockStorage composition', async () => {
-        const storage1 = await LRUStorage({ size: -1 })
-        const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
-        const storage = await ComposedStorage(storage1, storage2)
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
-
-      it('tests Memory + LRU composition', async () => {
-        const storage1 = await MemoryStorage()
-        const storage2 = await LRUStorage({ size: -1 })
-        const storage = await ComposedStorage(storage1, storage2)
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
-
-      it('tests LRU + Memory composition', async () => {
-        const storage1 = await LRUStorage({ size: -1 })
-        const storage2 = await MemoryStorage()
-        const storage = await ComposedStorage(storage1, storage2)
-        notStrictEqual(storage, undefined)
-        await runTestWithStorage(storage)
-      })
+    it('tests LRU + Memory composition', async () => {
+      const storage1 = await LRUStorage({ size: -1 })
+      const storage2 = await MemoryStorage()
+      const storage = await ComposedStorage(storage1, storage2)
+      notStrictEqual(storage, undefined)
+      await runTestWithStorage(storage)
     })
   })
 })
