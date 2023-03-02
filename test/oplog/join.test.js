@@ -27,9 +27,9 @@ describe('Log - Join', async function () {
     identities3 = await Identities({ keystore })
     identities4 = await Identities({ keystore })
     testIdentity = await identities1.createIdentity({ id: 'userX' })
-    testIdentity2 = await identities2.createIdentity({ id: 'userA' })
-    testIdentity3 = await identities3.createIdentity({ id: 'userB' })
-    testIdentity4 = await identities4.createIdentity({ id: 'userC' })
+    testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+    testIdentity3 = await identities3.createIdentity({ id: 'userC' })
+    testIdentity4 = await identities4.createIdentity({ id: 'userA' })
   })
 
   after(async () => {
@@ -252,17 +252,18 @@ describe('Log - Join', async function () {
 
   it('joins 4 logs to one', async () => {
     // order determined by identity's publicKey
-    await log1.append('helloA1')
-    await log1.append('helloA2')
+    await log3.append('helloA1')
+    await log3.append('helloA2')
 
-    await log3.append('helloB1')
-    await log3.append('helloB2')
+    await log1.append('helloB1')
+    await log1.append('helloB2')
 
     await log2.append('helloC1')
     await log2.append('helloC2')
 
     await log4.append('helloD1')
     await log4.append('helloD2')
+
     await log1.join(log2)
     await log1.join(log3)
     await log1.join(log4)

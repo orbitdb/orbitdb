@@ -184,50 +184,16 @@ describe('KeyStore', () => {
       })
 
       it('gets the public key', async () => {
-        const expected = '04e7247a4c155b63d182a23c70cb6fe8ba2e44bc9e9d62dc45d4c4167ccde95944f13db3c707da2ee0e3fd6ba531caef9f86eb79132023786cd6139ec5ebed4fae'
+        const expected = '02e7247a4c155b63d182a23c70cb6fe8ba2e44bc9e9d62dc45d4c4167ccde95944'
         const publicKey = await keystore.getPublic(key)
         strictEqual(publicKey, expected)
       })
 
       it('gets the public key buffer', async () => {
-        const expected = {
-          type: 'Buffer',
-          data: [
-            4, 231, 36, 122, 76, 21, 91, 99, 209, 130, 162,
-            60, 112, 203, 111, 232, 186, 46, 68, 188, 158, 157,
-            98, 220, 69, 212, 196, 22, 124, 205, 233, 89, 68,
-            241, 61, 179, 199, 7, 218, 46, 224, 227, 253, 107,
-            165, 49, 202, 239, 159, 134, 235, 121, 19, 32, 35,
-            120, 108, 214, 19, 158, 197, 235, 237, 79, 174
-          ]
-        }
+        const expected = '02e7247a4c155b63d182a23c70cb6fe8ba2e44bc9e9d62dc45d4c4167ccde95944'
         const publicKey = await keystore.getPublic(key, { format: 'buffer' })
 
-        deepStrictEqual(publicKey.toJSON(), expected)
-      })
-
-      it('gets the public key when decompress is false', async () => {
-        // const expectedCompressedKey = signingKeys.userA.publicKey
-        const expectedCompressedKey = '02e7247a4c155b63d182a23c70cb6fe8ba2e44bc9e9d62dc45d4c4167ccde95944'
-        const publicKey = await keystore.getPublic(key, { decompress: false })
-        strictEqual(publicKey, expectedCompressedKey)
-      })
-
-      it('gets the public key buffer when decompressed is false', async () => {
-        const expected = {
-          type: 'Buffer',
-          data: [
-            2, 231, 36, 122, 76, 21, 91, 99,
-            209, 130, 162, 60, 112, 203, 111, 232,
-            186, 46, 68, 188, 158, 157, 98, 220,
-            69, 212, 196, 22, 124, 205, 233, 89,
-            68
-          ]
-        }
-
-        const publicKey = await keystore.getPublic(key, { format: 'buffer', decompress: false })
-
-        deepStrictEqual(publicKey.toJSON(), expected)
+        deepStrictEqual(publicKey.toString('hex'), expected)
       })
 
       it('throws an error if no keys are passed', async () => {
