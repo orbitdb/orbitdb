@@ -13,7 +13,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
   describe('EventStore Database (' + IPFS + ')', function () {
     let ipfsd
     let ipfs
-    let keystore, signingKeyStore
     let accessController
     let identities1
     let testIdentity1
