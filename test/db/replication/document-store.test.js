@@ -1,13 +1,15 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import { Log, Entry, Database } from '../../../src/index.js'
+import { copy } from 'fs-extra'
+import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
 import { DocumentStore } from '../../../src/db/index.js'
 import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import testKeysPath from '../../fixtures/test-keys-path.js '
 import connectPeers from '../../utils/connect-nodes.js'
-import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
 import waitFor from '../../utils/wait-for.js'
 
 const OpLog = { Log, Entry }
+const keysPath = './testkeys'
 const IPFS = 'js-ipfs'
 
 describe('Documents Database Replication', function () {
@@ -15,7 +17,8 @@ describe('Documents Database Replication', function () {
 
   let ipfsd1, ipfsd2
   let ipfs1, ipfs2
-  let identities1, identities2
+  let keystore
+  let identities
   let testIdentity1, testIdentity2
   let db1, db2
 
@@ -23,8 +26,8 @@ describe('Documents Database Replication', function () {
 
   const accessController = {
     canAppend: async (entry) => {
-      const identity1 = await identities1.getIdentity(entry.identity)
-      const identity2 = await identities2.getIdentity(entry.identity)
+      const identity1 = await identities.getIdentity(entry.identity)
+      const identity2 = await identities.getIdentity(entry.identity)
       return identity1.id === testIdentity1.id || identity2.id === testIdentity2.id
     }
   }
@@ -37,22 +40,27 @@ describe('Documents Database Replication', function () {
 
     await connectPeers(ipfs1, ipfs2)
 
-    const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
-    identities1 = identities[0]
-    identities2 = identities[1]
-    testIdentity1 = testIdentities[0]
-    testIdentity2 = testIdentities[1]
+    await copy(testKeysPath, keysPath)
+    keystore = await KeyStore({ path: keysPath })
+    identities = await Identities({ keystore })
+    testIdentity1 = await identities.createIdentity({ id: 'userA' })
+    testIdentity2 = await identities.createIdentity({ id: 'userB' })
   })
 
   after(async () => {
-    await cleanUpTestIdentities([identities1, identities1])
-
     if (ipfsd1) {
       await stopIpfs(ipfsd1)
     }
+
     if (ipfsd2) {
       await stopIpfs(ipfsd2)
     }
+
+    if (keystore) {
+      await keystore.close()
+    }
+
+    await rmrf(keysPath)
     await rmrf('./orbitdb1')
     await rmrf('./orbitdb2')
   })

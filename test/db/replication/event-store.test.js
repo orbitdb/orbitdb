@@ -1,13 +1,15 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import { Log, Entry, Database } from '../../../src/index.js'
+import { copy } from 'fs-extra'
+import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
 import { EventStore } from '../../../src/db/index.js'
 import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import testKeysPath from '../../fixtures/test-keys-path.js '
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
-import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
 
 const OpLog = { Log, Entry }
+const keysPath = './testkeys'
 const IPFS = 'js-ipfs'
 
 describe('Events Database Replication', function () {
@@ -15,7 +17,8 @@ describe('Events Database Replication', function () {
 
   let ipfsd1, ipfsd2
   let ipfs1, ipfs2
-  let identities1, identities2
+  let keystore
+  let identities
   let testIdentity1, testIdentity2
   let db1, db2
 
@@ -23,7 +26,7 @@ describe('Events Database Replication', function () {
 
   const accessController = {
     canAppend: async (entry) => {
-      const identity = await identities1.getIdentity(entry.identity)
+      const identity = await identities.getIdentity(entry.identity)
       return identity.id === testIdentity1.id
     }
   }
@@ -40,9 +43,6 @@ describe('Events Database Replication', function () {
   ]
 
   before(async () => {
-    await rmrf('./orbitdb1')
-    await rmrf('./orbitdb2')
-
     ipfsd1 = await startIpfs(IPFS, config.daemon1)
     ipfsd2 = await startIpfs(IPFS, config.daemon2)
     ipfs1 = ipfsd1.api
@@ -50,23 +50,27 @@ describe('Events Database Replication', function () {
 
     await connectPeers(ipfs1, ipfs2)
 
-    const [identities, testIdentities] = await createTestIdentities(ipfs1, ipfs2)
-    identities1 = identities[0]
-    identities2 = identities[1]
-    testIdentity1 = testIdentities[0]
-    testIdentity2 = testIdentities[1]
+    await copy(testKeysPath, keysPath)
+    keystore = await KeyStore({ path: keysPath })
+    identities = await Identities({ keystore })
+    testIdentity1 = await identities.createIdentity({ id: 'userA' })
+    testIdentity2 = await identities.createIdentity({ id: 'userB' })
   })
 
   after(async () => {
-    await cleanUpTestIdentities([identities1, identities2])
-
     if (ipfsd1) {
       await stopIpfs(ipfsd1)
     }
+
     if (ipfsd2) {
       await stopIpfs(ipfsd2)
     }
 
+    if (keystore) {
+      await keystore.close()
+    }
+
+    await rmrf(keysPath)
     await rmrf('./orbitdb1')
     await rmrf('./orbitdb2')
   })
