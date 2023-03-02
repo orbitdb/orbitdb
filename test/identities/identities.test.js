@@ -129,9 +129,9 @@ describe('Identities', function () {
   describe('create an identity with saved keys', () => {
     const id = 'userX'
 
-    const expectedPublicKey = '0442fa42a69135eade1e37ea520bc8ee9e240efd62cb0edf0516b21258b4eae656241c40da462c95189b1ade83419138ca59845beb90d29b1be8542bde388ca5f9'
+    const expectedPublicKey = '0342fa42a69135eade1e37ea520bc8ee9e240efd62cb0edf0516b21258b4eae656'
     const expectedIdSignature = '3044022068b4bc360d127e39164fbc3b5184f5bd79cc5976286f793d9b38d1f2818e0259022027b875dc8c73635b32db72177b9922038ec4b1eabc8f1fd0919806b0b2519419'
-    const expectedPkIdSignature = '304402206d1aeff3a874b7bd83300219badf68bbcb514e2c60a7b40cec5f78ff2b7ba0f20220085f5f138730603418a0570ba12720f0a46997527bb4a077cd26b545e7811c31'
+    const expectedPkIdSignature = '30440220464cd4a6202dae2d2fb75b47afc7cceafa6b13c310efabbbdaaf38e67f74188b02201bbef8c97b741b4bb9e3e5362edfcd2eb6fe3b93f4e68e5870fcc345a850f366'
 
     let identities
     let identity

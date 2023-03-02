@@ -1,15 +1,13 @@
 import * as crypto from '@libp2p/crypto'
-import secp256k1 from 'secp256k1'
 import { Buffer } from 'safe-buffer'
 import ComposedStorage from './storage/composed.js'
 import LevelStorage from './storage/level.js'
 import LRUStorage from './storage/lru.js'
 
 const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
+const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
 
 const verifySignature = async (signature, publicKey, data) => {
-  const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
-
   if (!signature) {
     throw new Error('No signature given')
   }
@@ -122,11 +120,10 @@ const KeyStore = async ({ storage, path } = {}) => {
     const pair = await crypto.keys.generateKeyPair('secp256k1')
     const keys = await crypto.keys.unmarshalPrivateKey(pair.bytes)
     const pubKey = keys.public.marshal()
-    const decompressedKey = secp256k1.publicKeyConvert(Buffer.from(pubKey), false)
 
     const key = {
-      publicKey: Buffer.from(decompressedKey), // .toString('hex'),
-      privateKey: Buffer.from(keys.marshal())// .toString('hex')
+      publicKey: Buffer.from(pubKey),
+      privateKey: Buffer.from(keys.marshal())
     }
 
     await addKey(id, key)
@@ -150,21 +147,16 @@ const KeyStore = async ({ storage, path } = {}) => {
       return
     }
 
-    // return unmarshal(Buffer.from(deserializedKey.privateKey, 'hex'))
     return unmarshal(storedKey)
   }
 
   const getPublic = (keys, options = {}) => {
     const formats = ['hex', 'buffer']
-    const decompress = typeof options.decompress === 'undefined' ? true : options.decompress
     const format = options.format || 'hex'
     if (formats.indexOf(format) === -1) {
       throw new Error('Supported formats are `hex` and `buffer`')
     }
     let pubKey = keys.public.marshal()
-    if (decompress) {
-      pubKey = secp256k1.publicKeyConvert(Buffer.from(pubKey), false)
-    }
     pubKey = Buffer.from(pubKey)
     return format === 'buffer' ? pubKey : pubKey.toString('hex')
   }

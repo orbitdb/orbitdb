@@ -69,14 +69,14 @@ describe('KeyValuePersisted Database', function () {
   })
 
   it('sets a key/value pair', async () => {
-    const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
+    const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
 
     const actual = await db.set('key1', 'value1')
     strictEqual(actual, expected)
   })
 
   it('puts a key/value pair', async () => {
-    const expected = 'zdpuAuXyxGeC6QC2rykxcdZFUoyRromkc9zMHz3LwLHxVVz2x'
+    const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
 
     const actual = await db.put('key1', 'value1')
     strictEqual(actual, expected)
