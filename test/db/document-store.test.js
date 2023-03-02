@@ -1,247 +1,253 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import rmrf from 'rimraf'
-import { Log, Entry, Database } from '../../src/index.js'
+import { copy } from 'fs-extra'
+import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
 import { DocumentStore } from '../../src/db/index.js'
-import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
-import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
+import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import testKeysPath from '../fixtures/test-keys-path.js '
 
 const OpLog = { Log, Entry }
+const keysPath = './testkeys'
+const IPFS = 'js-ipfs'
 
-Object.keys(testAPIs).forEach((IPFS) => {
-  describe('DocumentStore Database (' + IPFS + ')', function () {
-    let ipfsd
-    let ipfs
-    let accessController
-    let identities1
-    let testIdentity1
-    let db
+describe('DocumentStore Database', function () {
+  let ipfsd
+  let ipfs
+  let keystore
+  let accessController
+  let identities
+  let testIdentity1
+  let db
 
-    const databaseId = 'documentstore-AAA'
+  const databaseId = 'documentstore-AAA'
 
-    before(async () => {
-      ipfsd = await startIpfs(IPFS, config.daemon1)
-      ipfs = ipfsd.api
+  before(async () => {
+    ipfsd = await startIpfs(IPFS, config.daemon1)
+    ipfs = ipfsd.api
 
-      const [identities, testIdentities] = await createTestIdentities(ipfs)
-      identities1 = identities[0]
-      testIdentity1 = testIdentities[0]
+    await copy(testKeysPath, keysPath)
+    keystore = await KeyStore({ path: keysPath })
+    identities = await Identities({ keystore })
+    testIdentity1 = await identities.createIdentity({ id: 'userA' })
+  })
+
+  after(async () => {
+    if (ipfsd) {
+      await stopIpfs(ipfsd)
+    }
+
+    if (keystore) {
+      await keystore.close()
+    }
+
+    await rmrf(keysPath)
+    await rmrf('./orbitdb')
+  })
+
+  describe('Default index \'_id\'', () => {
+    beforeEach(async () => {
+      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
-    after(async () => {
-      await cleanUpTestIdentities([identities1])
+    afterEach(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
 
-      if (ipfsd) {
-        await stopIpfs(ipfsd)
+    it('creates a document store', async () => {
+      strictEqual(db.address.toString(), databaseId)
+      strictEqual(db.type, 'documentstore')
+      strictEqual(db.indexBy, '_id')
+    })
+
+    it('gets a document', async () => {
+      const key = 'hello world 1'
+
+      const expected = { _id: key, msg: 'writing 1 to db' }
+
+      await db.put(expected)
+
+      const doc = await db.get(key)
+      deepStrictEqual(doc, expected)
+    })
+
+    it('throws an error when putting a document with the wrong key', async () => {
+      let err
+      const key = 'hello world 1'
+
+      const expected = { wrong_key: key, msg: 'writing 1 to db' }
+
+      try {
+        await db.put(expected)
+      } catch (e) {
+        err = e
+      }
+      strictEqual(err.message, 'The provided document doesn\'t contain field \'_id\'')
+    })
+
+    it('throws an error when getting a document with the wrong key', async () => {
+      let err
+      const key = 'hello world 1'
+
+      const expected = { wrong_key: key, msg: 'writing 1 to db' }
+
+      try {
+        await db.put(expected)
+      } catch (e) {
+        err = e
+      }
+      strictEqual(err.message, 'The provided document doesn\'t contain field \'_id\'')
+    })
+
+    it('deletes a document', async () => {
+      const key = 'hello world 1'
+
+      await db.put({ _id: key, msg: 'writing 1 to db' })
+      await db.del(key)
+
+      const doc = await db.get(key)
+      strictEqual(doc, undefined)
+    })
+
+    it('throws an error when deleting a non-existent document', async () => {
+      const key = 'i do not exist'
+      let err
+
+      try {
+        await db.del(key)
+      } catch (e) {
+        err = e
       }
 
-      await rmrf('./orbitdb')
+      strictEqual(err.message, `No document with key '${key}' in the database`)
     })
 
-    describe('Default index \'_id\'', () => {
-      beforeEach(async () => {
-        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
-      })
+    it('queries for a document', async () => {
+      const expected = { _id: 'hello world 1', msg: 'writing new 1 to db', views: 10 }
 
-      afterEach(async () => {
-        if (db) {
-          await db.drop()
-          await db.close()
-        }
-      })
+      await db.put({ _id: 'hello world 1', msg: 'writing 1 to db', views: 10 })
+      await db.put({ _id: 'hello world 2', msg: 'writing 2 to db', views: 5 })
+      await db.put({ _id: 'hello world 3', msg: 'writing 3 to db', views: 12 })
+      await db.del('hello world 3')
+      await db.put(expected)
 
-      it('creates a document store', async () => {
-        strictEqual(db.address.toString(), databaseId)
-        strictEqual(db.type, 'documentstore')
-        strictEqual(db.indexBy, '_id')
-      })
+      const findFn = (doc) => doc.views > 5
 
-      it('gets a document', async () => {
-        const key = 'hello world 1'
-
-        const expected = { _id: key, msg: 'writing 1 to db' }
-
-        await db.put(expected)
-
-        const doc = await db.get(key)
-        deepStrictEqual(doc, expected)
-      })
-
-      it('throws an error when putting a document with the wrong key', async () => {
-        let err
-        const key = 'hello world 1'
-
-        const expected = { wrong_key: key, msg: 'writing 1 to db' }
-
-        try {
-          await db.put(expected)
-        } catch (e) {
-          err = e
-        }
-        strictEqual(err.message, 'The provided document doesn\'t contain field \'_id\'')
-      })
-
-      it('throws an error when getting a document with the wrong key', async () => {
-        let err
-        const key = 'hello world 1'
-
-        const expected = { wrong_key: key, msg: 'writing 1 to db' }
-
-        try {
-          await db.put(expected)
-        } catch (e) {
-          err = e
-        }
-        strictEqual(err.message, 'The provided document doesn\'t contain field \'_id\'')
-      })
-
-      it('deletes a document', async () => {
-        const key = 'hello world 1'
-
-        await db.put({ _id: key, msg: 'writing 1 to db' })
-        await db.del(key)
-
-        const doc = await db.get(key)
-        strictEqual(doc, undefined)
-      })
-
-      it('throws an error when deleting a non-existent document', async () => {
-        const key = 'i do not exist'
-        let err
-
-        try {
-          await db.del(key)
-        } catch (e) {
-          err = e
-        }
-
-        strictEqual(err.message, `No document with key '${key}' in the database`)
-      })
-
-      it('queries for a document', async () => {
-        const expected = { _id: 'hello world 1', msg: 'writing new 1 to db', views: 10 }
-
-        await db.put({ _id: 'hello world 1', msg: 'writing 1 to db', views: 10 })
-        await db.put({ _id: 'hello world 2', msg: 'writing 2 to db', views: 5 })
-        await db.put({ _id: 'hello world 3', msg: 'writing 3 to db', views: 12 })
-        await db.del('hello world 3')
-        await db.put(expected)
-
-        const findFn = (doc) => doc.views > 5
-
-        deepStrictEqual(await db.query(findFn), [expected])
-      })
-
-      it('queries for a non-existent document', async () => {
-        await db.put({ _id: 'hello world 1', msg: 'writing 1 to db', views: 10 })
-        await db.del('hello world 1')
-
-        const findFn = (doc) => doc.views > 5
-
-        deepStrictEqual(await db.query(findFn), [])
-      })
+      deepStrictEqual(await db.query(findFn), [expected])
     })
 
-    describe('Custom index \'doc\'', () => {
-      beforeEach(async () => {
-        db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
-      })
+    it('queries for a non-existent document', async () => {
+      await db.put({ _id: 'hello world 1', msg: 'writing 1 to db', views: 10 })
+      await db.del('hello world 1')
 
-      afterEach(async () => {
-        if (db) {
-          await db.drop()
-          await db.close()
-        }
-      })
+      const findFn = (doc) => doc.views > 5
 
-      it('creates a document store', async () => {
-        strictEqual(db.address.toString(), databaseId)
-        strictEqual(db.type, 'documentstore')
-        strictEqual(db.indexBy, 'doc')
-      })
+      deepStrictEqual(await db.query(findFn), [])
+    })
+  })
 
-      it('gets a document', async () => {
-        const key = 'hello world 1'
+  describe('Custom index \'doc\'', () => {
+    beforeEach(async () => {
+      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
+    })
 
-        const expected = { doc: key, msg: 'writing 1 to db' }
+    afterEach(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
 
+    it('creates a document store', async () => {
+      strictEqual(db.address.toString(), databaseId)
+      strictEqual(db.type, 'documentstore')
+      strictEqual(db.indexBy, 'doc')
+    })
+
+    it('gets a document', async () => {
+      const key = 'hello world 1'
+
+      const expected = { doc: key, msg: 'writing 1 to db' }
+
+      await db.put(expected)
+
+      const doc = await db.get(key)
+      deepStrictEqual(doc, expected)
+    })
+
+    it('deletes a document', async () => {
+      const key = 'hello world 1'
+
+      await db.put({ doc: key, msg: 'writing 1 to db' })
+      await db.del(key)
+
+      const doc = await db.get(key)
+      strictEqual(doc, undefined)
+    })
+    it('throws an error when putting a document with the wrong key', async () => {
+      let err
+      const key = 'hello world 1'
+
+      const expected = { _id: key, msg: 'writing 1 to db' }
+
+      try {
         await db.put(expected)
+      } catch (e) {
+        err = e
+      }
+      strictEqual(err.message, 'The provided document doesn\'t contain field \'doc\'')
+    })
 
-        const doc = await db.get(key)
-        deepStrictEqual(doc, expected)
-      })
+    it('throws an error when getting a document with the wrong key', async () => {
+      let err
+      const key = 'hello world 1'
 
-      it('deletes a document', async () => {
-        const key = 'hello world 1'
+      const expected = { _id: key, msg: 'writing 1 to db' }
 
-        await db.put({ doc: key, msg: 'writing 1 to db' })
+      try {
+        await db.put(expected)
+      } catch (e) {
+        err = e
+      }
+      strictEqual(err.message, 'The provided document doesn\'t contain field \'doc\'')
+    })
+
+    it('throws an error when deleting a non-existent document', async () => {
+      const key = 'i do not exist'
+      let err
+
+      try {
         await db.del(key)
+      } catch (e) {
+        err = e
+      }
 
-        const doc = await db.get(key)
-        strictEqual(doc, undefined)
-      })
-      it('throws an error when putting a document with the wrong key', async () => {
-        let err
-        const key = 'hello world 1'
+      strictEqual(err.message, `No document with key '${key}' in the database`)
+    })
 
-        const expected = { _id: key, msg: 'writing 1 to db' }
+    it('queries for a document', async () => {
+      const expected = { doc: 'hello world 1', msg: 'writing new 1 to db', views: 10 }
 
-        try {
-          await db.put(expected)
-        } catch (e) {
-          err = e
-        }
-        strictEqual(err.message, 'The provided document doesn\'t contain field \'doc\'')
-      })
+      await db.put({ doc: 'hello world 1', msg: 'writing 1 to db', views: 10 })
+      await db.put({ doc: 'hello world 2', msg: 'writing 2 to db', views: 5 })
+      await db.put({ doc: 'hello world 3', msg: 'writing 3 to db', views: 12 })
+      await db.del('hello world 3')
+      await db.put(expected)
 
-      it('throws an error when getting a document with the wrong key', async () => {
-        let err
-        const key = 'hello world 1'
+      const findFn = (doc) => doc.views > 5
 
-        const expected = { _id: key, msg: 'writing 1 to db' }
+      deepStrictEqual(await db.query(findFn), [expected])
+    })
 
-        try {
-          await db.put(expected)
-        } catch (e) {
-          err = e
-        }
-        strictEqual(err.message, 'The provided document doesn\'t contain field \'doc\'')
-      })
+    it('queries for a non-existent document', async () => {
+      await db.put({ doc: 'hello world 1', msg: 'writing 1 to db', views: 10 })
+      await db.del('hello world 1')
 
-      it('throws an error when deleting a non-existent document', async () => {
-        const key = 'i do not exist'
-        let err
+      const findFn = (doc) => doc.views > 5
 
-        try {
-          await db.del(key)
-        } catch (e) {
-          err = e
-        }
-
-        strictEqual(err.message, `No document with key '${key}' in the database`)
-      })
-
-      it('queries for a document', async () => {
-        const expected = { doc: 'hello world 1', msg: 'writing new 1 to db', views: 10 }
-
-        await db.put({ doc: 'hello world 1', msg: 'writing 1 to db', views: 10 })
-        await db.put({ doc: 'hello world 2', msg: 'writing 2 to db', views: 5 })
-        await db.put({ doc: 'hello world 3', msg: 'writing 3 to db', views: 12 })
-        await db.del('hello world 3')
-        await db.put(expected)
-
-        const findFn = (doc) => doc.views > 5
-
-        deepStrictEqual(await db.query(findFn), [expected])
-      })
-
-      it('queries for a non-existent document', async () => {
-        await db.put({ doc: 'hello world 1', msg: 'writing 1 to db', views: 10 })
-        await db.del('hello world 1')
-
-        const findFn = (doc) => doc.views > 5
-
-        deepStrictEqual(await db.query(findFn), [])
-      })
+      deepStrictEqual(await db.query(findFn), [])
     })
   })
 })
