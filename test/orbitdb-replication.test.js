@@ -1,126 +1,126 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { OrbitDB } from '../src/index.js'
-import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 
-Object.keys(testAPIs).forEach((IPFS) => {
-  describe('Replicating databases (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
+const IPFS = 'js-ipfs'
 
-    let ipfsd1, ipfsd2
-    let ipfs1, ipfs2
-    let orbitdb1, orbitdb2
+describe('Replicating databases', function () {
+  this.timeout(60000)
+
+  let ipfsd1, ipfsd2
+  let ipfs1, ipfs2
+  let orbitdb1, orbitdb2
+
+  before(async () => {
+    ipfsd1 = await startIpfs(IPFS, config.daemon1)
+    ipfsd2 = await startIpfs(IPFS, config.daemon2)
+    ipfs1 = ipfsd1.api
+    ipfs2 = ipfsd2.api
+    await connectPeers(ipfs1, ipfs2)
+  })
+
+  after(async () => {
+    if (ipfsd1) {
+      await stopIpfs(ipfsd1)
+    }
+    if (ipfsd2) {
+      await stopIpfs(ipfsd2)
+    }
+    await rmrf('./orbitdb1')
+    await rmrf('./orbitdb2')
+  })
+
+  describe('replicating a database', () => {
+    let db1, db2
+
+    const amount = 128 + 1 // Same amount as in oplog replication test
 
     before(async () => {
-      ipfsd1 = await startIpfs(IPFS, config.daemon1)
-      ipfsd2 = await startIpfs(IPFS, config.daemon2)
-      ipfs1 = ipfsd1.api
-      ipfs2 = ipfsd2.api
-      await connectPeers(ipfs1, ipfs2)
+      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
+      db1 = await orbitdb1.open('helloworld')
+      for (let i = 0; i < amount; i++) {
+        await db1.add('hello' + i)
+      }
     })
 
     after(async () => {
-      if (ipfsd1) {
-        await stopIpfs(ipfsd1)
+      if (db1) {
+        await db1.close()
       }
-      if (ipfsd2) {
-        await stopIpfs(ipfsd2)
+      if (db2) {
+        await db2.close()
+      }
+      if (orbitdb1) {
+        await orbitdb1.stop()
+      }
+      if (orbitdb2) {
+        await orbitdb2.stop()
       }
       await rmrf('./orbitdb1')
       await rmrf('./orbitdb2')
     })
 
-    describe('replicating a database', () => {
-      let db1, db2
+    it('returns all entries in the replicated database', async () => {
+      console.time('replicate2')
+      let replicated = false
 
-      const amount = 128 + 1 // Same amount as in oplog replication test
-
-      before(async () => {
-        orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
-        orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
-        db1 = await orbitdb1.open('helloworld')
-        for (let i = 0; i < amount; i++) {
-          await db1.add('hello' + i)
+      const onConnected = async (peerId) => {
+        const head = (await db2.log.heads())[0]
+        if (head && head.clock.time === amount) {
+          replicated = true
         }
-      })
+      }
 
-      after(async () => {
-        if (db1) {
-          await db1.close()
+      const onUpdated = (entry) => {
+        if (entry.clock.time === amount) {
+          replicated = true
         }
-        if (db2) {
-          await db2.close()
-        }
-        if (orbitdb1) {
-          await orbitdb1.stop()
-        }
-        if (orbitdb2) {
-          await orbitdb2.stop()
-        }
-        await rmrf('./orbitdb1')
-        await rmrf('./orbitdb2')
-      })
+      }
 
-      it('returns all entries in the replicated database', async () => {
-        console.time('replicate2')
-        let replicated = false
+      const onError = (err) => {
+        console.error(err)
+      }
 
-        const onConnected = async (peerId) => {
-          const head = (await db2.log.heads())[0]
-          if (head && head.clock.time === amount) {
-            replicated = true
-          }
-        }
+      db1.events.on('error', onError)
 
-        const onUpdated = (entry) => {
-          if (entry.clock.time === amount) {
-            replicated = true
-          }
-        }
+      db2 = await orbitdb2.open(db1.address)
+      db2.events.on('join', onConnected)
+      db2.events.on('update', onUpdated)
+      db2.events.on('error', onError)
 
-        const onError = (err) => {
-          console.error(err)
-        }
+      await waitFor(() => replicated, () => true)
 
-        db1.events.on('error', onError)
+      strictEqual(db1.address, db2.address)
+      strictEqual(db1.name, db2.name)
+      strictEqual(db1.type, db2.type)
 
-        db2 = await orbitdb2.open(db1.address)
-        db2.events.on('join', onConnected)
-        db2.events.on('update', onUpdated)
-        db2.events.on('error', onError)
+      const all2 = []
+      console.time('all2')
+      for await (const event of db2.iterator()) {
+        all2.unshift(event)
+      }
+      console.timeEnd('all2')
+      console.timeEnd('replicate2')
 
-        await waitFor(() => replicated, () => true)
+      const expected = []
+      for (let i = 0; i < amount; i++) {
+        expected.push('hello' + i)
+      }
 
-        strictEqual(db1.address, db2.address)
-        strictEqual(db1.name, db2.name)
-        strictEqual(db1.type, db2.type)
+      deepStrictEqual(all2, expected)
 
-        const all2 = []
-        console.time('all2')
-        for await (const event of db2.iterator()) {
-          all2.unshift(event)
-        }
-        console.timeEnd('all2')
-        console.timeEnd('replicate2')
+      const all1 = []
+      console.time('all1')
+      for await (const event of db1.iterator()) {
+        all1.unshift(event)
+      }
+      console.timeEnd('all1')
 
-        const expected = []
-        for (let i = 0; i < amount; i++) {
-          expected.push('hello' + i)
-        }
-
-        deepStrictEqual(all2, expected)
-
-        const all1 = []
-        console.time('all1')
-        for await (const event of db1.iterator()) {
-          all1.unshift(event)
-        }
-        console.timeEnd('all1')
-
-        deepStrictEqual(all1, expected)
-      })
+      deepStrictEqual(all1, expected)
     })
   })
 })
