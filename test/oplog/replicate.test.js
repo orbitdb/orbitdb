@@ -1,17 +1,19 @@
 import { strictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
+import * as IPFS from 'ipfs'
 import { Log, Entry, Identities, KeyStore, IPFSBlockStorage } from '../../src/index.js'
-import { config, startIpfs, stopIpfs, getIpfsPeerId, waitForPeers, connectPeers } from 'orbit-db-test-utils'
+import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js '
+import connectPeers from '../utils/connect-nodes.js'
+import getIpfsPeerId from '../utils/get-ipfs-peer-id.js'
+import waitForPeers from '../utils/wait-for-peers.js'
 
 const keysPath = './testkeys'
-const IPFS = 'js-ipfs'
 
 describe('Log - Replication', function () {
   this.timeout(60000)
 
-  let ipfsd1, ipfsd2
   let ipfs1, ipfs2
   let id1, id2
   let keystore
@@ -20,11 +22,8 @@ describe('Log - Replication', function () {
   let storage1, storage2
 
   before(async () => {
-    ipfsd1 = await startIpfs(IPFS, config.daemon1)
-    ipfsd2 = await startIpfs(IPFS, config.daemon2)
-    ipfs1 = ipfsd1.api
-    ipfs2 = ipfsd2.api
-
+    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
 
     id1 = await getIpfsPeerId(ipfs1)
@@ -43,14 +42,24 @@ describe('Log - Replication', function () {
   })
 
   after(async () => {
-    await stopIpfs(ipfsd1)
-    await stopIpfs(ipfsd2)
+    if (ipfs1) {
+      await ipfs1.stop()
+    }
+
+    if (ipfs2) {
+      await ipfs2.stop()
+    }
+
     if (keystore) {
       await keystore.close()
     }
+
     await storage1.close()
     await storage2.close()
+
     await rmrf(keysPath)
+    await rmrf('./ipfs1')
+    await rmrf('./ipfs2')
   })
 
   describe('replicates logs deterministically', async function () {

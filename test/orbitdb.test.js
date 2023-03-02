@@ -2,36 +2,32 @@ import { strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import fs from 'fs'
 import path from 'path'
+import * as IPFS from 'ipfs'
 import { OrbitDB, isIdentity } from '../src/index.js'
-import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
-
-const IPFS = 'js-ipfs'
 
 describe('OrbitDB', function () {
   this.timeout(5000)
 
-  let ipfsd1, ipfsd2
   let ipfs1, ipfs2
   let orbitdb1
 
   before(async () => {
-    ipfsd1 = await startIpfs(IPFS, config.daemon1)
-    ipfsd2 = await startIpfs(IPFS, config.daemon2)
-    ipfs1 = ipfsd1.api
-    ipfs2 = ipfsd2.api
-
+    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
   })
 
   after(async () => {
-    if (ipfsd1) {
-      await stopIpfs(ipfsd1)
+    if (ipfs1) {
+      await ipfs1.stop()
     }
-
-    if (ipfsd2) {
-      await stopIpfs(ipfsd2)
+    if (ipfs2) {
+      await ipfs2.stop()
     }
+    await rmrf('./ipfs1')
+    await rmrf('./ipfs2')
   })
 
   describe('OrbitDB instance creation - defaults', () => {

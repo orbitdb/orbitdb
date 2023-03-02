@@ -1,21 +1,20 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
+import * as IPFS from 'ipfs'
 import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
 import { EventStore } from '../../../src/db/index.js'
-import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
+import config from '../../config.js'
 import testKeysPath from '../../fixtures/test-keys-path.js '
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
-const IPFS = 'js-ipfs'
 
 describe('Events Database Replication', function () {
-  this.timeout(5000)
+  this.timeout(30000)
 
-  let ipfsd1, ipfsd2
   let ipfs1, ipfs2
   let keystore
   let identities
@@ -43,11 +42,8 @@ describe('Events Database Replication', function () {
   ]
 
   before(async () => {
-    ipfsd1 = await startIpfs(IPFS, config.daemon1)
-    ipfsd2 = await startIpfs(IPFS, config.daemon2)
-    ipfs1 = ipfsd1.api
-    ipfs2 = ipfsd2.api
-
+    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)
@@ -58,12 +54,12 @@ describe('Events Database Replication', function () {
   })
 
   after(async () => {
-    if (ipfsd1) {
-      await stopIpfs(ipfsd1)
+    if (ipfs1) {
+      await ipfs1.stop()
     }
 
-    if (ipfsd2) {
-      await stopIpfs(ipfsd2)
+    if (ipfs2) {
+      await ipfs2.stop()
     }
 
     if (keystore) {
@@ -73,6 +69,8 @@ describe('Events Database Replication', function () {
     await rmrf(keysPath)
     await rmrf('./orbitdb1')
     await rmrf('./orbitdb2')
+    await rmrf('./ipfs1')
+    await rmrf('./ipfs2')
   })
 
   afterEach(async () => {

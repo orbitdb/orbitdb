@@ -4,7 +4,7 @@ import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
 import { Log, Identities, KeyStore } from '../src/index.js'
 import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
-import { config } from 'orbit-db-test-utils'
+import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js '
 
 const keysPath = './testkeys'
@@ -12,25 +12,23 @@ const keysPath = './testkeys'
 describe('Storages', function () {
   this.timeout(5000)
 
-  let ipfs1
+  let ipfs
   let keystore
-  let testIdentity1
+  let testIdentity
 
   before(async () => {
+    ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+
     await copy(testKeysPath, keysPath)
-
-    // Start an IPFS instance
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-
     keystore = await KeyStore({ path: keysPath })
 
     const identities = await Identities({ keystore })
-    testIdentity1 = await identities.createIdentity({ id: 'userA' })
+    testIdentity = await identities.createIdentity({ id: 'userA' })
   })
 
   after(async () => {
-    if (ipfs1) {
-      await ipfs1.stop()
+    if (ipfs) {
+      await ipfs.stop()
     }
 
     if (keystore) {
@@ -43,8 +41,8 @@ describe('Storages', function () {
 
   const runTestWithStorage = async (storage) => {
     const amount = 100
-    const log1 = await Log(testIdentity1, { logId: 'A', storage })
-    const log2 = await Log(testIdentity1, { logId: 'A', storage })
+    const log1 = await Log(testIdentity, { logId: 'A', storage })
+    const log2 = await Log(testIdentity, { logId: 'A', storage })
     for (let i = 0; i < amount; i++) {
       await log1.append('hello' + i)
       await log2.append('hello' + i)
@@ -82,7 +80,7 @@ describe('Storages', function () {
 
   describe('IPFSBlockStorage', () => {
     it('tests the storage', async () => {
-      const storage = await IPFSBlockStorage({ ipfs: ipfs1 })
+      const storage = await IPFSBlockStorage({ ipfs })
       notStrictEqual(storage, undefined)
       await runTestWithStorage(storage)
     })
@@ -91,7 +89,7 @@ describe('Storages', function () {
   describe('Composed Storages', () => {
     it('tests Memory + IPFSBlockStorage composition', async () => {
       const storage1 = await MemoryStorage()
-      const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
+      const storage2 = await IPFSBlockStorage({ ipfs })
       const storage = await ComposedStorage(storage1, storage2)
       notStrictEqual(storage, undefined)
       await runTestWithStorage(storage)
@@ -99,7 +97,7 @@ describe('Storages', function () {
 
     it('tests LRU + IPFSBlockStorage composition', async () => {
       const storage1 = await LRUStorage({ size: -1 })
-      const storage2 = await IPFSBlockStorage({ ipfs: ipfs1 })
+      const storage2 = await IPFSBlockStorage({ ipfs })
       const storage = await ComposedStorage(storage1, storage2)
       notStrictEqual(storage, undefined)
       await runTestWithStorage(storage)
