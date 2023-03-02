@@ -1,6 +1,6 @@
 import { deepStrictEqual } from 'assert'
-import rimraf from 'rimraf'
-import { Log, Entry } from '../../../src/oplog/index.js'
+import rmrf from 'rimraf'
+import { Log, Entry } from '../../../src/index.js'
 import { DocumentStore } from '../../../src/db/index.js'
 import { Database } from '../../../src/index.js'
 import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
@@ -8,13 +8,11 @@ import connectPeers from '../../utils/connect-nodes.js'
 import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
 import waitFor from '../../utils/wait-for.js'
 
-const { sync: rmrf } = rimraf
-
 const OpLog = { Log, Entry }
 const IPFS = 'js-ipfs'
 
 describe('Documents Database Replication', function () {
-  this.timeout(config.timeout * 2)
+  this.timeout(5000)
 
   let ipfsd1, ipfsd2
   let ipfs1, ipfs2
@@ -33,7 +31,6 @@ describe('Documents Database Replication', function () {
   }
 
   before(async () => {
-    // Start two IPFS instances
     ipfsd1 = await startIpfs(IPFS, config.daemon1)
     ipfsd2 = await startIpfs(IPFS, config.daemon2)
     ipfs1 = ipfsd1.api

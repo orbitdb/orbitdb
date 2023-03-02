@@ -1,20 +1,15 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import rimraf from 'rimraf'
+import rmrf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { KeyValue } from '../../src/db/index.js'
 import { Database } from '../../src/index.js'
-import { IPFSBlockStorage, LevelStorage } from '../../src/storage/index.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
-const { sync: rmrf } = rimraf
-
-const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+const OpLog = { Log, Entry }
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('KeyValue Database (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
-
     let ipfsd
     let ipfs
     let accessController
@@ -25,8 +20,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const databaseId = 'keyvalue-AAA'
 
     before(async () => {
-      rmrf('./orbitdb')
-
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
@@ -41,7 +34,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
-      rmrf('./orbitdb')
+
+      await rmrf('./orbitdb')
     })
 
     beforeEach(async () => {

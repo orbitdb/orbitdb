@@ -1,21 +1,16 @@
 import { deepStrictEqual, strictEqual } from 'assert'
 import mapSeries from 'p-map-series'
-import rimraf from 'rimraf'
+import rmrf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { EventStore } from '../../src/db/index.js'
 import { Database } from '../../src/index.js'
-import { IPFSBlockStorage, LevelStorage } from '../../src/storage/index.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
-const { sync: rmrf } = rimraf
-
-const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+const OpLog = { Log, Entry }
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('EventStore Database (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
-
     let ipfsd
     let ipfs
     let keystore, signingKeyStore
@@ -27,7 +22,6 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const databaseId = 'eventstore-AAA'
 
     before(async () => {
-      // Start two IPFS instances
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
@@ -44,15 +38,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
-      if (keystore) {
-        await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
-      if (testIdentity1) {
-        rmrf(testIdentity1.id)
-      }
+
+      await rmrf('./orbitdb')
     })
 
     beforeEach(async () => {

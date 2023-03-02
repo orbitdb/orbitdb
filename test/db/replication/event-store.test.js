@@ -1,17 +1,14 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import { Log, Entry } from '../../../src/oplog/index.js'
+import { Log, Entry } from '../../../src/index.js'
 import { EventStore } from '../../../src/db/index.js'
 import { Database } from '../../../src/index.js'
-import { IPFSBlockStorage, LevelStorage } from '../../../src/storage/index.js'
-
-// Test utils
 import { config, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
 import { createTestIdentities, cleanUpTestIdentities } from '../../fixtures/orbit-db-identity-keys.js'
 
-const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+const OpLog = { Log, Entry }
 const IPFS = 'js-ipfs'
 
 describe('Events Database Replication', function () {
@@ -44,6 +41,9 @@ describe('Events Database Replication', function () {
   ]
 
   before(async () => {
+    await rmrf('./orbitdb1')
+    await rmrf('./orbitdb2')
+
     ipfsd1 = await startIpfs(IPFS, config.daemon1)
     ipfsd2 = await startIpfs(IPFS, config.daemon2)
     ipfs1 = ipfsd1.api
@@ -56,9 +56,6 @@ describe('Events Database Replication', function () {
     identities2 = identities[1]
     testIdentity1 = testIdentities[0]
     testIdentity2 = testIdentities[1]
-
-    await rmrf('./orbitdb1')
-    await rmrf('./orbitdb2')
   })
 
   after(async () => {

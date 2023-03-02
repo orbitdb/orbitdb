@@ -1,23 +1,17 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import rimraf from 'rimraf'
+import rmrf from 'rimraf'
 import { Log, Entry } from '../../src/oplog/index.js'
 import { KeyValuePersisted, KeyValue } from '../../src/db/index.js'
 import { Database } from '../../src/index.js'
-import { IPFSBlockStorage, LevelStorage } from '../../src/storage/index.js'
 import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 import { createTestIdentities, cleanUpTestIdentities } from '../fixtures/orbit-db-identity-keys.js'
 
-const { sync: rmrf } = rimraf
-
-const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
+const OpLog = { Log, Entry }
 
 Object.keys(testAPIs).forEach((IPFS) => {
   describe('KeyValuePersisted Database (' + IPFS + ')', function () {
-    this.timeout(config.timeout * 2)
-
     let ipfsd
     let ipfs
-    let keystore, signingKeyStore
     let accessController
     let identities1
     let testIdentity1
@@ -26,15 +20,12 @@ Object.keys(testAPIs).forEach((IPFS) => {
     const databaseId = 'keyvalue-AAA'
 
     before(async () => {
-      // Start two IPFS instances
       ipfsd = await startIpfs(IPFS, config.daemon1)
       ipfs = ipfsd.api
 
       const [identities, testIdentities] = await createTestIdentities(ipfs)
       identities1 = identities[0]
       testIdentity1 = testIdentities[0]
-
-      rmrf(testIdentity1.id)
     })
 
     after(async () => {
@@ -43,15 +34,8 @@ Object.keys(testAPIs).forEach((IPFS) => {
       if (ipfsd) {
         await stopIpfs(ipfsd)
       }
-      if (keystore) {
-        await keystore.close()
-      }
-      if (signingKeyStore) {
-        await signingKeyStore.close()
-      }
-      if (testIdentity1) {
-        rmrf(testIdentity1.id)
-      }
+
+      await rmrf('./orbitdb')
     })
 
     beforeEach(async () => {
