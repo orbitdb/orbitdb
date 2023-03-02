@@ -1,21 +1,21 @@
 import assert from 'assert'
-import path from 'path'
 import rmrf from 'rimraf'
+import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
 import Identity from '../../src/identities/identity.js'
 import testKeysPath from '../fixtures/test-keys-path.js '
-const savedKeysPath = path.resolve('./test/identities/fixtures/savedKeys')
-const identityKeysPath = path.resolve('./test/identities/identityKeys')
+
 const type = 'orbitdb'
+const keysPath = './testkeys'
 
 describe('Identities', function () {
   before(async () => {
-    rmrf.sync(identityKeysPath)
+    await copy(testKeysPath, keysPath)
   })
 
   after(async () => {
-    rmrf.sync(identityKeysPath)
+    await rmrf(keysPath)
   })
 
   describe('Creating Identities', () => {
@@ -31,7 +31,7 @@ describe('Identities', function () {
     })
 
     it('has the correct id', async () => {
-      identities = await Identities({ identityKeysPath })
+      identities = await Identities({ path: keysPath })
       identity = await identities.createIdentity({ id })
       const key = await identities.keystore.getKey(id)
       const externalId = Buffer.from(key.public.marshal()).toString('hex')
@@ -52,7 +52,7 @@ describe('Identities', function () {
     })
 
     it('gets the identity from storage', async () => {
-      identities = await Identities({ identityKeysPath })
+      identities = await Identities({ path: keysPath })
       identity = await identities.createIdentity({ id })
       const result = await identities.getIdentity(identity.hash)
       assert.strictEqual(result.id, identity.id)
@@ -73,7 +73,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore({ path: testKeysPath })
+      keystore = await KeyStore({ path: keysPath })
       identities = await Identities({ keystore })
     })
 
@@ -138,17 +138,16 @@ describe('Identities', function () {
     let savedKeysKeyStore
 
     before(async () => {
-      savedKeysKeyStore = await KeyStore({ path: testKeysPath })
+      savedKeysKeyStore = await KeyStore({ path: keysPath })
 
       identities = await Identities({ keystore: savedKeysKeyStore })
       identity = await identities.createIdentity({ id })
     })
 
     after(async () => {
-      if (identities) {
-        await identities.keystore.close()
+      if (savedKeysKeyStore) {
+        await savedKeysKeyStore.close()
       }
-      rmrf.sync(savedKeysPath)
     })
 
     it('has the correct id', async () => {
@@ -190,7 +189,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore({ path: testKeysPath })
+      keystore = await KeyStore({ path: keysPath })
     })
 
     after(async () => {
@@ -239,7 +238,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore({ path: testKeysPath })
+      keystore = await KeyStore({ path: keysPath })
       identities = await Identities({ keystore })
     })
 
@@ -265,7 +264,7 @@ describe('Identities', function () {
     let keystore
 
     before(async () => {
-      keystore = await KeyStore({ path: testKeysPath })
+      keystore = await KeyStore({ path: keysPath })
       identities = await Identities({ keystore })
       identity = await identities.createIdentity({ id })
     })
@@ -309,7 +308,7 @@ describe('Identities', function () {
     let signature
 
     before(async () => {
-      keystore = await KeyStore({ path: testKeysPath })
+      keystore = await KeyStore({ path: keysPath })
     })
 
     after(async () => {
