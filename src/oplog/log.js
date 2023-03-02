@@ -458,4 +458,4 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   }
 }
 
-export { Log as default, DefaultAccessController }
+export { Log as default, DefaultAccessController, Clock }
