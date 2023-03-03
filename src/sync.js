@@ -1,17 +1,13 @@
 import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
+import Path from 'path'
 
 const Sync = async ({ ipfs, log, events, sync }) => {
   const address = log.id
+  const headsSyncAddress = Path.join('/orbitdb/heads/', address)
   const queue = new PQueue({ concurrency: 1 })
-  let peers = new Set()
 
-  const receiveHeads = async (source) => {
-    for await (const value of source) {
-      const headBytes = value.subarray()
-      await sync(headBytes)
-    }
-  }
+  let peers = new Set()
 
   const sendHeads = async (source) => {
     return (async function * () {
@@ -22,11 +18,20 @@ const Sync = async ({ ipfs, log, events, sync }) => {
     })()
   }
 
+  const receiveHeads = (peerId) => async (source) => {
+    for await (const value of source) {
+      const headBytes = value.subarray()
+      await sync(headBytes)
+    }
+    const heads = await log.heads()
+    events.emit('join', peerId, heads)
+  }
+
   const handleReceiveHeads = async ({ connection, stream }) => {
-    peers.add(connection.remotePeer.toString())
     try {
-      await pipe(stream, receiveHeads, sendHeads, stream)
-      events.emit('join', connection.remotePeer)
+      const peerId = connection.remotePeer
+      peers.add(peerId)
+      await pipe(stream, receiveHeads(peerId), sendHeads, stream)
     } catch (e) {
       console.error(e)
       events.emit('error', e)
@@ -41,14 +46,13 @@ const Sync = async ({ ipfs, log, events, sync }) => {
         return
       }
       if (subscription.subscribe) {
-        if (peers.has(peerId.toString())) {
+        if (peers.has(peerId)) {
           return
         }
         try {
-          peers.add(peerId.toString())
-          const stream = await ipfs.libp2p.dialProtocol(peerId, '/heads' + address)
-          await pipe(sendHeads, stream, receiveHeads)
-          events.emit('join', peerId)
+          peers.add(peerId)
+          const stream = await ipfs.libp2p.dialProtocol(peerId, headsSyncAddress)
+          await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
             // Skip peer, they don't have this database currently
@@ -59,7 +63,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
           }
         }
       } else {
-        peers.delete(peerId.toString())
+        peers.delete(peerId)
         events.emit('leave', peerId)
       }
     }
@@ -86,27 +90,32 @@ const Sync = async ({ ipfs, log, events, sync }) => {
   }
 
   const publish = async (entry) => {
-    await ipfs.pubsub.publish(address.toString(), entry.bytes)
+    await ipfs.pubsub.publish(address, entry.bytes)
   }
 
   const stop = async () => {
     await queue.onIdle()
     ipfs.libp2p.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
-    await ipfs.libp2p.unhandle('/heads' + address)
+    await ipfs.libp2p.unhandle(headsSyncAddress)
     await ipfs.pubsub.unsubscribe(address, handleUpdateMessage)
     peers = new Set()
   }
 
-  // Exchange head entries with peers when connected
-  await ipfs.libp2p.handle('/heads' + address, handleReceiveHeads)
-  ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
+  const start = async () => {
+    // Exchange head entries with peers when connected
+    await ipfs.libp2p.handle(headsSyncAddress, handleReceiveHeads)
+    ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
+    // Subscribe to the pubsub channel for this database through which updates are sent
+    await ipfs.pubsub.subscribe(address, handleUpdateMessage)
+  }
 
-  // Subscribe to the pubsub channel for this database through which updates are sent
-  await ipfs.pubsub.subscribe(address, handleUpdateMessage)
+  // Start Sync automatically
+  await start()
 
   return {
     publish,
-    stop
+    stop,
+    start
   }
 }
 
