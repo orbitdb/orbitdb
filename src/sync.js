@@ -2,12 +2,17 @@ import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
 import Path from 'path'
 
-const Sync = async ({ ipfs, log, events, sync }) => {
+const Sync = async ({ ipfs, log, events, onSynced }) => {
   const address = log.id
   const headsSyncAddress = Path.join('/orbitdb/heads/', address)
-  const queue = new PQueue({ concurrency: 1 })
 
-  let peers = new Set()
+  const queue = new PQueue({ concurrency: 1 })
+  const peers = new Set()
+
+  const onPeerJoined = async (peerId) => {
+    const heads = await log.heads()
+    events.emit('join', peerId, heads)
+  }
 
   const sendHeads = async (source) => {
     return (async function * () {
@@ -21,19 +26,19 @@ const Sync = async ({ ipfs, log, events, sync }) => {
   const receiveHeads = (peerId) => async (source) => {
     for await (const value of source) {
       const headBytes = value.subarray()
-      await sync(headBytes)
+      await onSynced(headBytes)
     }
-    const heads = await log.heads()
-    events.emit('join', peerId, heads)
+    await onPeerJoined(peerId)
   }
 
   const handleReceiveHeads = async ({ connection, stream }) => {
+    const peerId = connection.remotePeer
     try {
-      const peerId = connection.remotePeer
       peers.add(peerId)
       await pipe(stream, receiveHeads(peerId), sendHeads, stream)
     } catch (e) {
       console.error(e)
+      peers.delete(peerId)
       events.emit('error', e)
     }
   }
@@ -59,6 +64,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
             console.log(e.message)
           } else {
             console.error(e)
+            peers.delete(peerId)
             events.emit('error', e)
           }
         }
@@ -78,7 +84,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
       const messageHasData = (message) => message.data !== undefined
       try {
         if (messageIsNotFromMe(message) && messageHasData(message)) {
-          await sync(message.data)
+          await onSynced(message.data)
         }
       } catch (e) {
         console.error(e)
@@ -89,7 +95,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
     await queue.add(task)
   }
 
-  const publish = async (entry) => {
+  const add = async (entry) => {
     await ipfs.pubsub.publish(address, entry.bytes)
   }
 
@@ -98,7 +104,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
     ipfs.libp2p.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
     await ipfs.libp2p.unhandle(headsSyncAddress)
     await ipfs.pubsub.unsubscribe(address, handleUpdateMessage)
-    peers = new Set()
+    peers.clear()
   }
 
   const start = async () => {
@@ -113,7 +119,7 @@ const Sync = async ({ ipfs, log, events, sync }) => {
   await start()
 
   return {
-    publish,
+    add,
     stop,
     start
   }
