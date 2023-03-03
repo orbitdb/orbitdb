@@ -27,7 +27,7 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
   const addOperation = async (op) => {
     const task = async () => {
       const entry = await log.append(op, { pointerCount })
-      await syncProtocol.publish(entry)
+      await sync.add(entry)
       events.emit('update', entry)
       return entry.hash
     }
@@ -45,10 +45,11 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
       }
     }
     await queue.add(task)
+    await queue.onIdle()
   }
 
   const close = async () => {
-    await syncProtocol.stop()
+    await sync.stop()
     await queue.onIdle()
     await log.close()
     events.emit('close')
@@ -64,7 +65,7 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
   // Start the Sync protocol
   // Sync protocol exchanges OpLog heads (latest known entries) between peers when they connect
   // Sync emits 'join', 'leave' and 'error' events through the given event emitter
-  const syncProtocol = await Sync({ ipfs, log, events, sync: applyOperation })
+  const sync = await Sync({ ipfs, log, events, onSynced: applyOperation })
 
   return {
     address,
@@ -74,8 +75,8 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     drop,
     addOperation,
     log,
-    sync: syncProtocol,
-    peers: syncProtocol.peers,
+    sync,
+    peers: sync.peers,
     events
   }
 }
