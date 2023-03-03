@@ -74,6 +74,7 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     drop,
     addOperation,
     log,
+    sync: syncProtocol,
     peers: syncProtocol.peers,
     events
   }
