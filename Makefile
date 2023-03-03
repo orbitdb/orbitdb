@@ -19,6 +19,7 @@ build: test
 
 clean:
 	rm -rf node_modules/
+	rm -rf coverage/
 	rm -f test/browser/identities.js
 	rm -f test/browser/ipfs.js
 	rm -f test/browser/orbitdb.js
