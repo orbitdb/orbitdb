@@ -82,7 +82,7 @@ const verifyMessage = async (signature, publicKey, data) => {
  * @return {KeyStore} An instance of KeyStore.
  */
 const KeyStore = async ({ storage, path } = {}) => {
-  const defaultPath = './keystore'    
+  const defaultPath = './keystore'
   storage = storage || await ComposedStorage(await LevelStorage({ path: path || defaultPath }), await LRUStorage({ size: 1000 }))
 
   const close = async () => {
