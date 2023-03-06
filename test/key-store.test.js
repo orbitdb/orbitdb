@@ -1,7 +1,8 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import { copy } from 'fs-extra'
+import { copy, pathExists } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
+import LevelStorage from '../src/storage/level.js'
 import testKeysPath from './fixtures/test-keys-path.js '
 
 const keysPath = './testkeys'
@@ -10,21 +11,23 @@ describe('KeyStore', () => {
   let keystore
 
   describe('Creating and retrieving keys', () => {
+    let id
+
     beforeEach(async () => {
-      await copy(testKeysPath, keysPath)
-      keystore = await KeyStore({ path: keysPath })
+      keystore = await KeyStore()
+
+      id = 'key1'
+      await keystore.createKey(id)
     })
 
     afterEach(async () => {
       if (keystore) {
         await keystore.close()
+        await rmrf(keystore.defaultPath)
       }
-      await rmrf(keysPath)
     })
 
     it('creates a key', async () => {
-      const id = 'key1'
-      await keystore.createKey(id)
       const hasKey = await keystore.hasKey(id)
       strictEqual(hasKey, true)
     })
@@ -120,6 +123,64 @@ describe('KeyStore', () => {
       const actual = await keystore.getKey(id)
 
       strictEqual(actual, expected)
+    })
+  })
+
+  describe('Options', () => {
+    describe('Using default options', () => {
+      beforeEach(async () => {
+        keystore = await KeyStore()
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+          await rmrf(keystore.defaultPath)
+        }
+      })
+
+      it('loads default storage using default path', async () => {
+        strictEqual(await pathExists(keystore.defaultPath), true)
+      })
+    })
+
+    describe('Setting options.storage', () => {
+      const path = './custom-level-key-store'
+
+      beforeEach(async () => {
+        const storage = await LevelStorage({ path })
+        keystore = await KeyStore({ storage })
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+          await rmrf(path)
+        }
+      })
+
+      it('loads custom storage', async () => {
+        strictEqual(await pathExists(path), true)
+      })
+    })
+
+    describe('Setting options.path', () => {
+      beforeEach(async () => {
+        await copy(testKeysPath, keysPath)
+        keystore = await KeyStore({ path: keysPath })
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+        }
+
+        await rmrf(keysPath)
+      })
+
+      it('loads default storage using custom path', async () => {
+        strictEqual(await pathExists(keysPath), true)
+      })
     })
   })
 
