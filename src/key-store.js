@@ -111,12 +111,8 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   const addKey = async (id, key) => {
-    try {
-      await storage.put('public_' + id, key.publicKey)
-      await storage.put('private_' + id, key.privateKey)
-    } catch (e) {
-      console.log(e)
-    }
+    await storage.put('public_' + id, key.publicKey)
+    await storage.put('private_' + id, key.privateKey)
   }
 
   const createKey = async (id, { entropy } = {}) => {

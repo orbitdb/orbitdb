@@ -124,6 +124,18 @@ describe('KeyStore', () => {
 
       strictEqual(actual, expected)
     })
+
+    it('creates a key when storage is closed', async () => {
+      let err
+      await keystore.close()
+      try {
+        await keystore.createKey(id)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      strictEqual(err, 'Error: Database is not open')
+    })
   })
 
   describe('Options', () => {
