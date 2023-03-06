@@ -1,10 +1,13 @@
 import { strictEqual, deepStrictEqual } from 'assert'
+import * as crypto from '@libp2p/crypto'
+import { Buffer } from 'safe-buffer'
 import rmrf from 'rimraf'
-import { copy, pathExists } from 'fs-extra'
+import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
 import LevelStorage from '../src/storage/level.js'
 import testKeysPath from './fixtures/test-keys-path.js '
 
+const defaultPath = './keystore'
 const keysPath = './testkeys'
 
 describe('KeyStore', () => {
@@ -23,7 +26,7 @@ describe('KeyStore', () => {
     afterEach(async () => {
       if (keystore) {
         await keystore.close()
-        await rmrf(keystore.defaultPath)
+        await rmrf(defaultPath)
       }
     })
 
@@ -83,6 +86,7 @@ describe('KeyStore', () => {
     it('gets a key', async () => {
       const id = 'key1'
       const keys = await keystore.createKey(id)
+
       deepStrictEqual(await keystore.getKey(id), keys)
     })
 
@@ -139,20 +143,36 @@ describe('KeyStore', () => {
   })
 
   describe('Options', () => {
+    const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
+    const privateKey = '198594a8de39fd97017d11996d619b3746211605a9d290964badf58bc79bdb33'
+    const publicKey = '0260baeaffa1de1e4135e5b395e0380563a622b9599d1b8e012a0f7603f516bdaa'
+    let privateKeyBuffer, publicKeyBuffer, unmarshalledPrivateKey
+
+    before(async () => {
+      privateKeyBuffer = Buffer.from(privateKey, 'hex')
+      publicKeyBuffer = Buffer.from(publicKey, 'hex')
+      unmarshalledPrivateKey = await unmarshal(privateKeyBuffer)
+    })
+
     describe('Using default options', () => {
       beforeEach(async () => {
+        const storage = await LevelStorage({ path: defaultPath })
+        await storage.put('private_key1', privateKeyBuffer)
+        await storage.put('public_key1', publicKeyBuffer)
+        await storage.close()
+
         keystore = await KeyStore()
       })
 
       afterEach(async () => {
         if (keystore) {
           await keystore.close()
-          await rmrf(keystore.defaultPath)
+          await rmrf(defaultPath)
         }
       })
 
       it('loads default storage using default path', async () => {
-        strictEqual(await pathExists(keystore.defaultPath), true)
+        deepStrictEqual(await keystore.getKey('key1'), unmarshalledPrivateKey)
       })
     })
 
@@ -161,6 +181,9 @@ describe('KeyStore', () => {
 
       beforeEach(async () => {
         const storage = await LevelStorage({ path })
+        await storage.put('private_key2', privateKeyBuffer)
+        await storage.put('public_key2', publicKeyBuffer)
+
         keystore = await KeyStore({ storage })
       })
 
@@ -172,13 +195,19 @@ describe('KeyStore', () => {
       })
 
       it('loads custom storage', async () => {
-        strictEqual(await pathExists(path), true)
+        deepStrictEqual(await keystore.getKey('key2'), unmarshalledPrivateKey)
       })
     })
 
     describe('Setting options.path', () => {
       beforeEach(async () => {
         await copy(testKeysPath, keysPath)
+        
+        const storage = await LevelStorage({ path: keysPath })
+        await storage.put('private_key3', privateKeyBuffer)
+        await storage.put('public_key3', publicKeyBuffer)
+        await storage.close()
+
         keystore = await KeyStore({ path: keysPath })
       })
 
@@ -191,7 +220,7 @@ describe('KeyStore', () => {
       })
 
       it('loads default storage using custom path', async () => {
-        strictEqual(await pathExists(keysPath), true)
+        deepStrictEqual(await keystore.getKey('key3'), unmarshalledPrivateKey)
       })
     })
   })

@@ -74,6 +74,8 @@ const verifyMessage = async (signature, publicKey, data) => {
   return res
 }
 
+const defaultPath = './keystore'
+
 /**
  * Creates an instance of KeyStore.
  * @param {Object} options Various options to use when instantiating KeyStore.
@@ -82,7 +84,6 @@ const verifyMessage = async (signature, publicKey, data) => {
  * @return {KeyStore} An instance of KeyStore.
  */
 const KeyStore = async ({ storage, path } = {}) => {
-  const defaultPath = './keystore'
   storage = storage || await ComposedStorage(await LevelStorage({ path: path || defaultPath }), await LRUStorage({ size: 1000 }))
 
   const close = async () => {
@@ -172,9 +173,7 @@ const KeyStore = async ({ storage, path } = {}) => {
     addKey,
     createKey,
     getKey,
-    getPublic,
-    defaultPath,
-    storage
+    getPublic
   }
 }
 
