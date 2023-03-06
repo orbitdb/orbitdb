@@ -202,7 +202,7 @@ describe('KeyStore', () => {
     describe('Setting options.path', () => {
       beforeEach(async () => {
         await copy(testKeysPath, keysPath)
-        
+
         const storage = await LevelStorage({ path: keysPath })
         await storage.put('private_key3', privateKeyBuffer)
         await storage.put('public_key3', publicKeyBuffer)
