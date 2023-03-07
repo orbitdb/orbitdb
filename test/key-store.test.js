@@ -1,30 +1,36 @@
 import { strictEqual, deepStrictEqual } from 'assert'
+import * as crypto from '@libp2p/crypto'
+import { Buffer } from 'safe-buffer'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
+import LevelStorage from '../src/storage/level.js'
 import testKeysPath from './fixtures/test-keys-path.js '
 
+const defaultPath = './keystore'
 const keysPath = './testkeys'
 
 describe('KeyStore', () => {
   let keystore
 
   describe('Creating and retrieving keys', () => {
+    let id
+
     beforeEach(async () => {
-      await copy(testKeysPath, keysPath)
-      keystore = await KeyStore({ path: keysPath })
+      keystore = await KeyStore()
+
+      id = 'key1'
+      await keystore.createKey(id)
     })
 
     afterEach(async () => {
       if (keystore) {
         await keystore.close()
+        await rmrf(defaultPath)
       }
-      await rmrf(keysPath)
     })
 
     it('creates a key', async () => {
-      const id = 'key1'
-      await keystore.createKey(id)
       const hasKey = await keystore.hasKey(id)
       strictEqual(hasKey, true)
     })
@@ -80,6 +86,7 @@ describe('KeyStore', () => {
     it('gets a key', async () => {
       const id = 'key1'
       const keys = await keystore.createKey(id)
+
       deepStrictEqual(await keystore.getKey(id), keys)
     })
 
@@ -120,6 +127,101 @@ describe('KeyStore', () => {
       const actual = await keystore.getKey(id)
 
       strictEqual(actual, expected)
+    })
+
+    it('doesn\'t create a key when keystore is closed', async () => {
+      let err
+      await keystore.close()
+      try {
+        await keystore.createKey(id)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      strictEqual(err, 'Error: Database is not open')
+    })
+  })
+
+  describe('Options', () => {
+    const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
+    const privateKey = '198594a8de39fd97017d11996d619b3746211605a9d290964badf58bc79bdb33'
+    const publicKey = '0260baeaffa1de1e4135e5b395e0380563a622b9599d1b8e012a0f7603f516bdaa'
+    let privateKeyBuffer, publicKeyBuffer, unmarshalledPrivateKey
+
+    before(async () => {
+      privateKeyBuffer = Buffer.from(privateKey, 'hex')
+      publicKeyBuffer = Buffer.from(publicKey, 'hex')
+      unmarshalledPrivateKey = await unmarshal(privateKeyBuffer)
+    })
+
+    describe('Using default options', () => {
+      beforeEach(async () => {
+        const storage = await LevelStorage({ path: defaultPath })
+        await storage.put('private_key1', privateKeyBuffer)
+        await storage.put('public_key1', publicKeyBuffer)
+        await storage.close()
+
+        keystore = await KeyStore()
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+          await rmrf(defaultPath)
+        }
+      })
+
+      it('uses default storage and default path to retrieve a key', async () => {
+        deepStrictEqual(await keystore.getKey('key1'), unmarshalledPrivateKey)
+      })
+    })
+
+    describe('Setting options.storage', () => {
+      const path = './custom-level-key-store'
+
+      beforeEach(async () => {
+        const storage = await LevelStorage({ path })
+        await storage.put('private_key2', privateKeyBuffer)
+        await storage.put('public_key2', publicKeyBuffer)
+
+        keystore = await KeyStore({ storage })
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+          await rmrf(path)
+        }
+      })
+
+      it('uses the given storage to retrieve a key', async () => {
+        deepStrictEqual(await keystore.getKey('key2'), unmarshalledPrivateKey)
+      })
+    })
+
+    describe('Setting options.path', () => {
+      beforeEach(async () => {
+        await copy(testKeysPath, keysPath)
+
+        const storage = await LevelStorage({ path: keysPath })
+        await storage.put('private_key3', privateKeyBuffer)
+        await storage.put('public_key3', publicKeyBuffer)
+        await storage.close()
+
+        keystore = await KeyStore({ path: keysPath })
+      })
+
+      afterEach(async () => {
+        if (keystore) {
+          await keystore.close()
+        }
+
+        await rmrf(keysPath)
+      })
+
+      it('uses default storage using given path to retrieve a key', async () => {
+        deepStrictEqual(await keystore.getKey('key3'), unmarshalledPrivateKey)
+      })
     })
   })
 

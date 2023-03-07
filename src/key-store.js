@@ -74,8 +74,17 @@ const verifyMessage = async (signature, publicKey, data) => {
   return res
 }
 
+const defaultPath = './keystore'
+
+/**
+ * Creates an instance of KeyStore.
+ * @param {Object} options Various options to use when instantiating KeyStore.
+ * @param {Object} options.storage An instance of a storage class. Can be one of ComposedStorage, IPFSBlockStorage, LevelStorage, etc. Defaults to ComposedStorage.
+ * @param {string} options.path The path to a valid storage. Defaults to ./keystore.
+ * @return {KeyStore} An instance of KeyStore.
+ */
 const KeyStore = async ({ storage, path } = {}) => {
-  storage = storage || await ComposedStorage(await LevelStorage({ path: path || './keystore' }), await LRUStorage({ size: 1000 }))
+  storage = storage || await ComposedStorage(await LRUStorage({ size: 1000 }), await LevelStorage({ path: path || defaultPath }))
 
   const close = async () => {
     await storage.close()
@@ -103,12 +112,8 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   const addKey = async (id, key) => {
-    try {
-      await storage.put('public_' + id, key.publicKey)
-      await storage.put('private_' + id, key.privateKey)
-    } catch (e) {
-      console.log(e)
-    }
+    await storage.put('public_' + id, key.publicKey)
+    await storage.put('private_' + id, key.privateKey)
   }
 
   const createKey = async (id, { entropy } = {}) => {
