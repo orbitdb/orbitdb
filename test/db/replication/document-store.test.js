@@ -127,10 +127,6 @@ describe('Documents Database Replication', function () {
       ++updateCount
     }
 
-    const onError = (err) => {
-      console.error(err)
-    }
-
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
 
