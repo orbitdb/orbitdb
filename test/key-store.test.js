@@ -129,7 +129,7 @@ describe('KeyStore', () => {
       strictEqual(actual, expected)
     })
 
-    it('creates a key when storage is closed', async () => {
+    it('doesn\'t create a key when keystore is closed', async () => {
       let err
       await keystore.close()
       try {
@@ -171,7 +171,7 @@ describe('KeyStore', () => {
         }
       })
 
-      it('loads default storage using default path', async () => {
+      it('uses default storage and default path to retrieve a key', async () => {
         deepStrictEqual(await keystore.getKey('key1'), unmarshalledPrivateKey)
       })
     })
@@ -194,7 +194,7 @@ describe('KeyStore', () => {
         }
       })
 
-      it('loads custom storage', async () => {
+      it('uses the given storage to retrieve a key', async () => {
         deepStrictEqual(await keystore.getKey('key2'), unmarshalledPrivateKey)
       })
     })
@@ -219,7 +219,7 @@ describe('KeyStore', () => {
         await rmrf(keysPath)
       })
 
-      it('loads default storage using custom path', async () => {
+      it('uses default storage using given path to retrieve a key', async () => {
         deepStrictEqual(await keystore.getKey('key3'), unmarshalledPrivateKey)
       })
     })
