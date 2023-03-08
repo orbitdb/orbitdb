@@ -222,8 +222,14 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (!isValid) {
       throw new Error(`Could not validate signature for entry "${entry.hash}"`)
     }
+
     // Add the new entry to heads (union with current heads)
-    await _heads.add(entry)
+    const newHeads = await _heads.add(entry)
+
+    if (!newHeads) {
+      return false
+    }
+
     // Add the new entry to the entry storage
     await _entries.put(entry.hash, entry.bytes)
     // Add the new entry to the entry index

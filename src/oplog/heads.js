@@ -25,6 +25,8 @@ const Heads = async ({ storage, heads }) => {
     }
     const newHeads = findHeads([...currentHeads, head])
     await set(newHeads)
+
+    return newHeads
   }
 
   const iterator = async function * () {
