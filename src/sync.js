@@ -1,13 +1,16 @@
 import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
 import Path from 'path'
+import { EventEmitter } from 'events'
 
-const Sync = async ({ ipfs, log, events, onSynced }) => {
+const Sync = async ({ ipfs, log, events, onSynced, start }) => {
   const address = log.id
   const headsSyncAddress = Path.join('/orbitdb/heads/', address)
 
   const queue = new PQueue({ concurrency: 1 })
   const peers = new Set()
+
+  events = events || new EventEmitter()
 
   const onPeerJoined = async (peerId) => {
     const heads = await log.heads()
@@ -26,13 +29,15 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
   const receiveHeads = (peerId) => async (source) => {
     for await (const value of source) {
       const headBytes = value.subarray()
-      await onSynced(headBytes)
+      if (headBytes && onSynced) {
+        await onSynced(headBytes)
+      }
     }
     await onPeerJoined(peerId)
   }
 
   const handleReceiveHeads = async ({ connection, stream }) => {
-    const peerId = connection.remotePeer
+    const peerId = String(connection.remotePeer)
     try {
       peers.add(peerId)
       await pipe(stream, receiveHeads(peerId), sendHeads, stream)
@@ -45,7 +50,8 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
 
   const handlePeerSubscribed = async (event) => {
     const task = async () => {
-      const { peerId, subscriptions } = event.detail
+      const { peerId: remotePeer, subscriptions } = event.detail
+      const peerId = String(remotePeer)
       const subscription = subscriptions.find(e => e.topic === address)
       if (!subscription) {
         return
@@ -56,7 +62,7 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
         }
         try {
           peers.add(peerId)
-          const stream = await ipfs.libp2p.dialProtocol(peerId, headsSyncAddress)
+          const stream = await ipfs.libp2p.dialProtocol(remotePeer, headsSyncAddress)
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
@@ -83,7 +89,7 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
       const messageIsNotFromMe = (message) => String(peerId) !== String(message.from)
       const messageHasData = (message) => message.data !== undefined
       try {
-        if (messageIsNotFromMe(message) && messageHasData(message)) {
+        if (messageIsNotFromMe(message) && messageHasData(message) && onSynced) {
           await onSynced(message.data)
         }
       } catch (e) {
@@ -99,7 +105,7 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
     await ipfs.pubsub.publish(address, entry.bytes)
   }
 
-  const stop = async () => {
+  const stopSync = async () => {
     await queue.onIdle()
     ipfs.libp2p.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
     await ipfs.libp2p.unhandle(headsSyncAddress)
@@ -107,7 +113,7 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
     peers.clear()
   }
 
-  const start = async () => {
+  const startSync = async () => {
     // Exchange head entries with peers when connected
     await ipfs.libp2p.handle(headsSyncAddress, handleReceiveHeads)
     ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
@@ -116,12 +122,16 @@ const Sync = async ({ ipfs, log, events, onSynced }) => {
   }
 
   // Start Sync automatically
-  await start()
+  if (start !== false) {
+    await startSync()
+  }
 
   return {
     add,
-    stop,
-    start
+    stop: stopSync,
+    start: startSync,
+    events,
+    peers
   }
 }
 
