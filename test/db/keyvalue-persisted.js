@@ -1,9 +1,11 @@
-import { deepStrictEqual, strictEqual } from 'assert'
+import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
+import path from 'path'
+import fs from 'fs'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
-import { KeyValuePersisted, KeyValue } from '../../src/db/index.js'
+import { KeyValuePersisted } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
@@ -43,134 +45,230 @@ describe('KeyValuePersisted Database', function () {
     await rmrf('./ipfs1')
   })
 
-  beforeEach(async () => {
-    db = await KeyValuePersisted({ OpLog, KeyValue, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+  describe('Creating a KeyValuePersisted database', () => {
+    beforeEach(async () => {
+      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    })
+
+    afterEach(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
+
+    it('creates a keyvalue store', async () => {
+      strictEqual(db.address.toString(), databaseId)
+      strictEqual(db.type, 'keyvalue')
+    })
+
+    it('creates a directory for the persisted index', async () => {
+      const expectedPath = path.join('./orbitdb', `./${db.address}`, '/_index')
+      const directoryExists = fs.existsSync(expectedPath)
+      strictEqual(directoryExists, true)
+    })
+
+    it('returns 0 items when it\'s a fresh database', async () => {
+      const all = []
+      for await (const item of db.iterator()) {
+        all.unshift(item)
+      }
+
+      strictEqual(all.length, 0)
+    })
   })
 
-  afterEach(async () => {
-    if (db) {
-      await db.drop()
-      await db.close()
-    }
+  describe('KeyValuePersisted database API', () => {
+    beforeEach(async () => {
+      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    })
+
+    afterEach(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
+
+    it('sets a key/value pair', async () => {
+      const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+
+      const actual = await db.set('key1', 'value1')
+      strictEqual(actual, expected)
+    })
+
+    it('puts a key/value pair', async () => {
+      const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+
+      const actual = await db.put('key1', 'value1')
+      strictEqual(actual, expected)
+    })
+
+    it('gets a key/value pair\'s value', async () => {
+      const key = 'key1'
+      const expected = 'value1'
+
+      await db.put(key, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, expected)
+    })
+
+    it('get key\'s updated value when using put', async () => {
+      const key = 'key1'
+      const expected = 'hello2'
+
+      await db.put(key, 'value1')
+      await db.put(key, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, expected)
+    })
+
+    it('get key\'s updated value when using set', async () => {
+      const key = 'key1'
+      const expected = 'hello2'
+
+      await db.set(key, 'value1')
+      await db.set(key, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, expected)
+    })
+
+    it('get key\'s updated value when using set then put', async () => {
+      const key = 'key1'
+      const expected = 'hello2'
+
+      await db.set(key, 'value1')
+      await db.put(key, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, expected)
+    })
+
+    it('get key\'s updated value when using put then set', async () => {
+      const key = 'key1'
+      const expected = 'hello2'
+
+      await db.put(key, 'value1')
+      await db.set(key, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, expected)
+    })
+
+    it('deletes a key/value pair', async () => {
+      const key = 'key1'
+      const expected = undefined
+
+      await db.put(key, 'value1')
+      const hash = await db.del(key)
+
+      const actual = await db.get(hash)
+      strictEqual(actual, expected)
+    })
+
+    it('deletes a non-existent key/value pair', async () => {
+      const expected = undefined
+
+      const del = await db.del('zdpuApFgnZNp6qQqeuHRLJhEKsmMnXEEJfSZofLc3ZZXEihWE')
+
+      const actual = await db.get(del)
+      strictEqual(actual, expected)
+    })
+
+    it('returns all key/value pairs', async () => {
+      const keyvalue = [
+        { key: 'key1', value: 'init' },
+        { key: 'key2', value: true },
+        { key: 'key3', value: 'hello' },
+        { key: 'key4', value: 'friend' },
+        { key: 'key5', value: '12345' },
+        { key: 'key6', value: 'empty' },
+        { key: 'key7', value: 'friend33' }
+      ]
+
+      for (const { key, value } of Object.values(keyvalue)) {
+        await db.put(key, value)
+      }
+
+      const all = []
+      for await (const pair of db.iterator()) {
+        all.unshift(pair)
+      }
+
+      deepStrictEqual(all, keyvalue)
+    })
   })
 
-  it('creates a keyvalue store', async () => {
-    strictEqual(db.address.toString(), databaseId)
-    strictEqual(db.type, 'keyvalue')
-  })
+  describe('Iterator', () => {
+    before(async () => {
+      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    })
 
-  it('returns 0 items when it\'s a fresh database', async () => {
-    const all = []
-    for await (const item of db.iterator()) {
-      all.unshift(item)
-    }
+    after(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
 
-    strictEqual(all.length, 0)
-  })
+    it('has an iterator function', async () => {
+      notStrictEqual(db.iterator, undefined)
+      strictEqual(typeof db.iterator, 'function')
+    })
 
-  it('sets a key/value pair', async () => {
-    const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+    it('returns no documents when the database is empty', async () => {
+      const all = []
+      for await (const { key, value } of db.iterator()) {
+        all.unshift({ key, value })
+      }
+      strictEqual(all.length, 0)
+    })
 
-    const actual = await db.set('key1', 'value1')
-    strictEqual(actual, expected)
-  })
+    it('returns all documents when the database is not empty', async () => {
+      await db.put('key1', 1)
+      await db.put('key2', 2)
+      await db.put('key3', 3)
+      await db.put('key4', 4)
+      await db.put('key5', 5)
 
-  it('puts a key/value pair', async () => {
-    const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+      // Add one more document and then delete it to count
+      // for the fact that the amount returned should be
+      // the amount of actual documents returned and not
+      // the oplog length, and deleted documents don't
+      // count towards the returned amount.
+      await db.put('key6', 6)
+      await db.del('key6')
 
-    const actual = await db.put('key1', 'value1')
-    strictEqual(actual, expected)
-  })
+      const all = []
+      for await (const { key, value } of db.iterator()) {
+        all.unshift({ key, value })
+      }
+      strictEqual(all.length, 5)
+    })
 
-  it('gets a key/value pair\'s value', async () => {
-    const key = 'key1'
-    const expected = 'value1'
+    it('returns only the amount of documents given as a parameter', async () => {
+      const amount = 3
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
+        all.unshift({ key, value })
+      }
+      strictEqual(all.length, amount)
+    })
 
-    await db.put(key, expected)
-    const actual = await db.get(key)
-    strictEqual(actual, expected)
-  })
+    it('returns only two documents if amount given as a parameter is 2', async () => {
+      const amount = 2
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
+        all.unshift({ key, value })
+      }
+      strictEqual(all.length, amount)
+    })
 
-  it('get key\'s updated value when using put', async () => {
-    const key = 'key1'
-    const expected = 'hello2'
-
-    await db.put(key, 'value1')
-    await db.put(key, expected)
-    const actual = await db.get(key)
-    strictEqual(actual, expected)
-  })
-
-  it('get key\'s updated value when using set', async () => {
-    const key = 'key1'
-    const expected = 'hello2'
-
-    await db.set(key, 'value1')
-    await db.set(key, expected)
-    const actual = await db.get(key)
-    strictEqual(actual, expected)
-  })
-
-  it('get key\'s updated value when using set then put', async () => {
-    const key = 'key1'
-    const expected = 'hello2'
-
-    await db.set(key, 'value1')
-    await db.put(key, expected)
-    const actual = await db.get(key)
-    strictEqual(actual, expected)
-  })
-
-  it('get key\'s updated value when using put then set', async () => {
-    const key = 'key1'
-    const expected = 'hello2'
-
-    await db.put(key, 'value1')
-    await db.set(key, expected)
-    const actual = await db.get(key)
-    strictEqual(actual, expected)
-  })
-
-  it('deletes a key/value pair', async () => {
-    const key = 'key1'
-    const expected = undefined
-
-    await db.put(key, 'value1')
-    const hash = await db.del(key)
-
-    const actual = await db.get(hash)
-    strictEqual(actual, expected)
-  })
-
-  it('deletes a non-existent key/value pair', async () => {
-    const expected = undefined
-
-    const del = await db.del('zdpuApFgnZNp6qQqeuHRLJhEKsmMnXEEJfSZofLc3ZZXEihWE')
-
-    const actual = await db.get(del)
-    strictEqual(actual, expected)
-  })
-
-  it('returns all key/value pairs', async () => {
-    const keyvalue = [
-      { key: 'key1', value: 'init' },
-      { key: 'key2', value: true },
-      { key: 'key3', value: 'hello' },
-      { key: 'key4', value: 'friend' },
-      { key: 'key5', value: '12345' },
-      { key: 'key6', value: 'empty' },
-      { key: 'key7', value: 'friend33' }
-    ]
-
-    for (const { key, value } of Object.values(keyvalue)) {
-      await db.put(key, value)
-    }
-
-    const all = []
-    for await (const pair of db.iterator()) {
-      all.unshift(pair)
-    }
-
-    deepStrictEqual(all, keyvalue)
+    it('returns only one document if amount given as a parameter is 1', async () => {
+      const amount = 1
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
+        all.unshift({ key, value })
+      }
+      strictEqual(all.length, amount)
+    })
   })
 })

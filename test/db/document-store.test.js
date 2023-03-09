@@ -1,4 +1,4 @@
-import { deepStrictEqual, strictEqual } from 'assert'
+import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
@@ -247,6 +247,81 @@ describe('DocumentStore Database', function () {
       const findFn = (doc) => doc.views > 5
 
       deepStrictEqual(await db.query(findFn), [])
+    })
+  })
+
+  describe('Iterator', () => {
+    before(async () => {
+      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    })
+
+    after(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
+
+    it('has an iterator function', async () => {
+      notStrictEqual(db.iterator, undefined)
+      strictEqual(typeof db.iterator, 'function')
+    })
+
+    it('returns no documents when the database is empty', async () => {
+      const all = []
+      for await (const doc of db.iterator()) {
+        all.unshift(doc)
+      }
+      strictEqual(all.length, 0)
+    })
+
+    it('returns all documents when the database is not empty', async () => {
+      await db.put({ _id: 'doc1', something: true })
+      await db.put({ _id: 'doc2', something: true })
+      await db.put({ _id: 'doc3', something: true })
+      await db.put({ _id: 'doc4', something: true })
+      await db.put({ _id: 'doc5', something: true })
+
+      // Add one more document and then delete it to count
+      // for the fact that the amount returned should be
+      // the amount of actual documents returned and not
+      // the oplog length, and deleted documents don't
+      // count towards the returned amount.
+      await db.put({ _id: 'doc6', something: true })
+      await db.del('doc6')
+
+      const all = []
+      for await (const doc of db.iterator()) {
+        all.unshift(doc)
+      }
+      strictEqual(all.length, 5)
+    })
+
+    it('returns only the amount of documents given as a parameter', async () => {
+      const amount = 3
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
+        all.unshift(doc)
+      }
+      strictEqual(all.length, amount)
+    })
+
+    it('returns only two documents if amount given as a parameter is 2', async () => {
+      const amount = 2
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
+        all.unshift(doc)
+      }
+      strictEqual(all.length, amount)
+    })
+
+    it('returns only one document if amount given as a parameter is 1', async () => {
+      const amount = 1
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
+        all.unshift(doc)
+      }
+      strictEqual(all.length, amount)
     })
   })
 })

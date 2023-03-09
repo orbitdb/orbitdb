@@ -1,41 +1,51 @@
-const ComposedStorage = async (...storages) => {
+// Compose storages:
+// const storage1 = await ComposedStorage(await LRUStorage(), await LevelStorage())
+// const storage2 = await ComposedStorage(storage1, await IPFSBlockStorage())
+
+const ComposedStorage = async (storage1, storage2) => {
   const put = async (hash, data) => {
-    for await (const storage of storages) {
-      await storage.put(hash, data)
-    }
+    await storage1.put(hash, data)
+    await storage2.put(hash, data)
   }
 
   const get = async (hash) => {
-    for await (const storage of storages) {
-      const value = await storage.get(hash)
+    let value = await storage1.get(hash)
+    if (!value) {
+      value = await storage2.get(hash)
       if (value) {
-        return value
+        await storage1.put(hash, value)
       }
     }
+    return value
   }
 
   const iterator = async function * () {
-    return storages[0].iterator()
-  }
-
-  const merge = async (other) => {
-    for await (const storage1 of storages) {
-      for await (const storage2 of storages) {
-        await storage1.merge(storage2)
+    const keys = []
+    for (const storage of [storage1, storage2]) {
+      for await (const [key, value] of storage.iterator()) {
+        if (!keys[key]) {
+          keys[key] = true
+          yield [key, value]
+        }
       }
     }
   }
 
+  const merge = async (other) => {
+    await storage1.merge(other)
+    await storage2.merge(other)
+    await other.merge(storage1)
+    await other.merge(storage2)
+  }
+
   const clear = async () => {
-    for await (const storage of storages) {
-      await storage.clear()
-    }
+    await storage1.clear()
+    await storage2.clear()
   }
 
   const close = async () => {
-    for await (const storage of storages) {
-      await storage.close()
-    }
+    await storage1.close()
+    await storage2.close()
   }
 
   return {

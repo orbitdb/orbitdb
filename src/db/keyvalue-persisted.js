@@ -11,7 +11,7 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
 
   const queue = new PQueue({ concurrency: 1 })
 
-  directory = path.join(directory || './orbitdb', `./${address.path}/_index/`)
+  directory = path.join(directory || './orbitdb', `./${address}/_index/`)
   const index = await LevelStorage({ path: directory, valueEncoding })
 
   let latestOplogHash
@@ -48,9 +48,9 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
     return keyValueStore.get(key)
   }
 
-  const iterator = async function * () {
+  const iterator = async function * ({ amount } = {}) {
     await queue.onIdle()
-    for await (const { key, value } of keyValueStore.iterator()) {
+    for await (const { key, value } of keyValueStore.iterator({ amount })) {
       yield { key, value }
     }
   }

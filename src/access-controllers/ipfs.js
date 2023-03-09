@@ -33,7 +33,6 @@ const IPFSAccessController = async ({ ipfs, identities, identity, address, stora
     const manifestBytes = await storage.get(address)
     const { value } = await Block.decode({ bytes: manifestBytes, codec, hasher })
     write = value.write
-    address = await AccessControllerManifest({ storage, type, params: { write } })
   } else {
     address = await AccessControllerManifest({ storage, type, params: { write } })
   }
@@ -53,6 +52,7 @@ const IPFSAccessController = async ({ ipfs, identities, identity, address, stora
   }
 
   return {
+    type,
     address,
     write,
     canAppend
@@ -60,56 +60,3 @@ const IPFSAccessController = async ({ ipfs, identities, identity, address, stora
 }
 
 export { IPFSAccessController as default }
-
-//   constructor (ipfs, options) {
-//     super()
-//     this._ipfs = ipfs
-//     this._write = Array.from(options.write || [])
-//   }
-
-//   // Returns the type of the access controller
-//   static get type () { return type }
-
-//   // Return a Set of keys that have `access` capability
-//   get write () {
-//     return this._write
-//   }
-
-//   async canAppend (entry, identityProvider) {
-//     // Allow if access list contain the writer's publicKey or is '*'
-//     const key = entry.identity.id
-//     if (this.write.includes(key) || this.write.includes('*')) {
-//       // check identity is valid
-//       return identityProvider.verifyIdentity(entry.identity)
-//     }
-//     return false
-//   }
-
-//   async load (address) {
-//     // Transform '/ipfs/QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
-//     // to 'QmPFtHi3cmfZerxtH9ySLdzpg1yFhocYDZgEZywdUXHxFU'
-//     if (address.indexOf('/ipfs') === 0) { address = address.split('/')[2] }
-
-//     try {
-//       this._write = await io.read(this._ipfs, address)
-//     } catch (e) {
-//       console.log('IPFSAccessController.load ERROR:', e)
-//     }
-//   }
-
-//   async save ({ ipfs }) {
-//     let cid
-//     try {
-//       cid = await io.write(this._ipfs, 'dag-cbor', { write: JSON.stringify(this.write, null, 2) })
-//     } catch (e) {
-//       console.log('IPFSAccessController.save ERROR:', e)
-//     }
-//     // return the manifest data
-//     return { address: cid }
-//   }
-
-//   static async create ({ ipfs, identity }, options = {}) {
-//     options = { ...options, ...{ write: options.write || [identity.id] } }
-//     return new IPFSAccessController(ipfs, options)
-//   }
-// }
