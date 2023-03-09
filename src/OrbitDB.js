@@ -6,7 +6,7 @@ import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import IPFSAccessController from './access-controllers/ipfs.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
-import createDBManifest from './manifest.js'
+import DBManifest from './manifest.js'
 import { createId, isDefined } from './utils/index.js'
 // import Logger from 'logplease'
 import path from 'path'
@@ -50,7 +50,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
 
   let databases = {}
 
-  const open = async (address, { type, Store } = {}) => {
+  const open = async (address, { type, meta, Store } = {}) => {
     let name, manifest, accessController
 
     if (databases[address]) {
@@ -67,15 +67,17 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       accessController = await IPFSAccessController({ ipfs, identities, identity, address: acAddress, storage: manifestStorage })
       name = manifest.name
       type = type || manifest.type
+      meta = manifest.meta
     } else {
       // If the address given was not valid, eg. just the name of the database
       type = type || 'events'
       accessController = await IPFSAccessController({ ipfs, identities, identity, storage: manifestStorage })
-      const m = await createDBManifest(manifestStorage, address, type, accessController.address, {})
+      const m = await DBManifest(manifestStorage, address, type, accessController.address, { meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)
       accessController = m.accessController
       name = manifest.name
+      meta = manifest.meta
     }
 
     const DatabaseModel = Store || databaseTypes[type]
@@ -84,7 +86,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       throw new Error(`Unspported database type: '${type}'`)
     }
 
-    const db = await DatabaseModel({ OpLog, Database, ipfs, identity, address: address.toString(), name, accessController, directory })
+    const db = await DatabaseModel({ OpLog, Database, ipfs, identity, address: address.toString(), name, accessController, directory, meta })
 
     db.events.on('close', onDatabaseClosed(address.toString()))
 
