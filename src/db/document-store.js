@@ -61,15 +61,20 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
     return results
   }
 
-  const iterator = async function * () {
+  const iterator = async function * ({ amount } = {}) {
     const keys = {}
-    for await (const entry of log.traverse()) {
+    let count = 0
+    for await (const entry of log.iterator()) {
       const { op, key, value } = entry.payload
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
+        count ++
         yield value
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
+      }
+      if (count >= amount) {
+        break
       }
     }
   }
