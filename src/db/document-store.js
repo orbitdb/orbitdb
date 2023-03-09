@@ -68,7 +68,7 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
       const { op, key, value } = entry.payload
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
-        count ++
+        count++
         yield value
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true

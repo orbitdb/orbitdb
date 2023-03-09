@@ -268,8 +268,8 @@ describe('DocumentStore Database', function () {
     })
 
     it('returns no documents when the database is empty', async () => {
-      let all = []
-      for await (let doc of db.iterator()) {
+      const all = []
+      for await (const doc of db.iterator()) {
         all.unshift(doc)
       }
       strictEqual(all.length, 0)
@@ -290,8 +290,8 @@ describe('DocumentStore Database', function () {
       await db.put({ _id: 'doc6', something: true })
       await db.del('doc6')
 
-      let all = []
-      for await (let doc of db.iterator()) {
+      const all = []
+      for await (const doc of db.iterator()) {
         all.unshift(doc)
       }
       strictEqual(all.length, 5)
@@ -299,8 +299,8 @@ describe('DocumentStore Database', function () {
 
     it('returns only the amount of documents given as a parameter', async () => {
       const amount = 3
-      let all = []
-      for await (let doc of db.iterator({ amount })) {
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
         all.unshift(doc)
       }
       strictEqual(all.length, amount)
@@ -308,8 +308,8 @@ describe('DocumentStore Database', function () {
 
     it('returns only two documents if amount given as a parameter is 2', async () => {
       const amount = 2
-      let all = []
-      for await (let doc of db.iterator({ amount })) {
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
         all.unshift(doc)
       }
       strictEqual(all.length, amount)
@@ -317,8 +317,8 @@ describe('DocumentStore Database', function () {
 
     it('returns only one document if amount given as a parameter is 1', async () => {
       const amount = 1
-      let all = []
-      for await (let doc of db.iterator({ amount })) {
+      const all = []
+      for await (const doc of db.iterator({ amount })) {
         all.unshift(doc)
       }
       strictEqual(all.length, amount)

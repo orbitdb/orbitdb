@@ -5,7 +5,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
-import { KeyValuePersisted, KeyValue } from '../../src/db/index.js'
+import { KeyValuePersisted } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js '
 
@@ -215,8 +215,8 @@ describe('KeyValuePersisted Database', function () {
     })
 
     it('returns no documents when the database is empty', async () => {
-      let all = []
-      for await (let { key, value } of db.iterator()) {
+      const all = []
+      for await (const { key, value } of db.iterator()) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, 0)
@@ -237,8 +237,8 @@ describe('KeyValuePersisted Database', function () {
       await db.put('key6', 6)
       await db.del('key6')
 
-      let all = []
-      for await (let { key, value } of db.iterator()) {
+      const all = []
+      for await (const { key, value } of db.iterator()) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, 5)
@@ -246,8 +246,8 @@ describe('KeyValuePersisted Database', function () {
 
     it('returns only the amount of documents given as a parameter', async () => {
       const amount = 3
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
@@ -255,8 +255,8 @@ describe('KeyValuePersisted Database', function () {
 
     it('returns only two documents if amount given as a parameter is 2', async () => {
       const amount = 2
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
@@ -264,8 +264,8 @@ describe('KeyValuePersisted Database', function () {
 
     it('returns only one document if amount given as a parameter is 1', async () => {
       const amount = 1
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)

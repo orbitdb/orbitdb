@@ -59,4 +59,3 @@ const ComposedStorage = async (storage1, storage2) => {
 }
 
 export default ComposedStorage
-

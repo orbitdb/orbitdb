@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Path from 'path'
 import Sync from './sync.js'
-import { ComposedStorage, LRUStorage, MemoryStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
+import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
 
 const defaultPointerCount = 0
 const defaultCacheSize = 1000

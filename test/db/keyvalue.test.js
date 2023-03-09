@@ -207,8 +207,8 @@ describe('KeyValue Database', function () {
     })
 
     it('returns no key/value pairs when the database is empty', async () => {
-      let all = []
-      for await (let { key, value } of db.iterator()) {
+      const all = []
+      for await (const { key, value } of db.iterator()) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, 0)
@@ -229,8 +229,8 @@ describe('KeyValue Database', function () {
       await db.put('key6', 6)
       await db.del('key6')
 
-      let all = []
-      for await (let { key, value } of db.iterator()) {
+      const all = []
+      for await (const { key, value } of db.iterator()) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, 5)
@@ -238,8 +238,8 @@ describe('KeyValue Database', function () {
 
     it('returns only the amount of key/value pairs given as a parameter', async () => {
       const amount = 3
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
@@ -247,8 +247,8 @@ describe('KeyValue Database', function () {
 
     it('returns only two key/value pairs if amount given as a parameter is 2', async () => {
       const amount = 2
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
@@ -256,8 +256,8 @@ describe('KeyValue Database', function () {
 
     it('returns only one key/value pairs if amount given as a parameter is 1', async () => {
       const amount = 1
-      let all = []
-      for await (let { key, value } of db.iterator({ amount })) {
+      const all = []
+      for await (const { key, value } of db.iterator({ amount })) {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
