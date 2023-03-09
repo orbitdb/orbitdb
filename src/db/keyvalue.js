@@ -40,8 +40,6 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
     }
   }
 
-  // TODO: all()
-
   return {
     ...database,
     type: 'keyvalue',
@@ -50,7 +48,6 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
     del,
     get,
     iterator
-    // TODO: all,
   }
 }
 

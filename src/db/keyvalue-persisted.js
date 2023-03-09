@@ -35,16 +35,10 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
 
   const get = async (key) => {
     await queue.onIdle()
-
-    try {
-      const value = await index.get(key)
-      if (value) {
-        return value
-      }
-    } catch (e) {
-      // LEVEL_NOT_FOUND (ie. key not found)
+    const value = await index.get(key)
+    if (value) {
+      return value
     }
-
     return keyValueStore.get(key)
   }
 
@@ -58,7 +52,6 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
   const task = async () => {
     await queue.add(updateIndex(index))
   }
-  // TODO: all()
 
   const close = async () => {
     events.off('update', task)
@@ -82,7 +75,6 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
     ...keyValueStore,
     get,
     iterator,
-    // TODO: all,
     close,
     drop
   }
