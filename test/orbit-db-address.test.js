@@ -1,4 +1,4 @@
-import { strictEqual, notStrictEqual } from 'assert'
+import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import { OrbitDBAddress, isValidAddress, parseAddress } from '../src/index.js'
 
 describe('OrbitDB Address', function () {
@@ -39,6 +39,29 @@ describe('OrbitDB Address', function () {
       const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
       strictEqual(addr.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+    })
+  })
+
+  describe('Creating an address from another address', () => {
+    const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
+
+    let addr1, addr2
+
+    before(() => {
+      addr1 = OrbitDBAddress(address)
+      addr2 = OrbitDBAddress(addr1)
+    })
+
+    it('creates an address', () => {
+      deepStrictEqual(addr1, addr2)
+    })
+
+    it('has a protocol prefix', () => {
+      strictEqual(addr2.protocol, 'orbitdb')
+    })
+
+    it('has a path', () => {
+      strictEqual(addr2.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
     })
   })
 
