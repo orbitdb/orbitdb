@@ -1,4 +1,6 @@
 import { deepStrictEqual, strictEqual } from 'assert'
+import path from 'path'
+import fs from 'fs'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
@@ -57,6 +59,12 @@ describe('KeyValuePersisted Database', function () {
   it('creates a keyvalue store', async () => {
     strictEqual(db.address.toString(), databaseId)
     strictEqual(db.type, 'keyvalue')
+  })
+
+  it('creates a directory for the persisted index', async () => {
+    const expectedPath = path.join('./orbitdb', `./${db.address}`, '/_index')
+    const directoryExists = fs.existsSync(expectedPath)
+    strictEqual(directoryExists, true)
   })
 
   it('returns 0 items when it\'s a fresh database', async () => {
