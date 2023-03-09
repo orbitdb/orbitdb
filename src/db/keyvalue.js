@@ -22,15 +22,20 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
     }
   }
 
-  const iterator = async function * () {
+  const iterator = async function * ({ amount } = {}) {
     const keys = {}
+    let count = 0
     for await (const entry of log.traverse()) {
       const { op, key, value } = entry.payload
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
+        count ++
         yield { key, value }
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
+      }
+      if (count >= amount) {
+        break
       }
     }
   }
