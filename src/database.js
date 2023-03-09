@@ -2,27 +2,34 @@ import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Path from 'path'
 import Sync from './sync.js'
-import { IPFSBlockStorage, LevelStorage } from './storage/index.js'
+import { ComposedStorage, LRUStorage, MemoryStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
 
-const defaultPointerCount = 16
+const defaultPointerCount = 0
+const defaultCacheSize = 1000
 
 const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, storage, headsStorage, pointerCount }) => {
   const { Log, Entry } = OpLog
 
-  const entryStorage = storage || await IPFSBlockStorage({ ipfs, pin: true })
+  directory = Path.join(directory || './orbitdb', `./${address}/`)
+  pointerCount = pointerCount || defaultPointerCount
 
-  directory = Path.join(directory || './orbitdb', `./${address.path}/`)
-  headsStorage = headsStorage || await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
+  const entryStorage = await ComposedStorage(
+    await LRUStorage({ size: defaultCacheSize }),
+    await IPFSBlockStorage({ ipfs, pin: true })
+  )
 
-  const log = await Log(identity, { logId: address.toString(), access: accessController, entryStorage, headsStorage })
+  headsStorage = await ComposedStorage(
+    await LRUStorage({ size: defaultCacheSize }),
+    await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
+  )
+
+  const log = await Log(identity, { logId: address, access: accessController, entryStorage, headsStorage })
 
   // const indexStorage = await LevelStorage({ path: Path.join(directory, '/log/_index/') })
   // const log = await Log(identity, { logId: address.toString(), access: accessController, entryStorage, headsStorage, indexStorage })
 
   const events = new EventEmitter()
   const queue = new PQueue({ concurrency: 1 })
-
-  pointerCount = pointerCount || defaultPointerCount
 
   const addOperation = async (op) => {
     const task = async () => {
@@ -55,7 +62,6 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     events.emit('close')
   }
 
-  // TODO: rename to clear()
   const drop = async () => {
     await queue.onIdle()
     await log.clear()
