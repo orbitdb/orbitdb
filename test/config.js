@@ -1,3 +1,7 @@
+import { setMaxListeners } from 'events'
+
+setMaxListeners(100)
+
 export default {
   timeout: 30000,
   defaultIpfsConfig: {
