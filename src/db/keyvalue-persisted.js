@@ -11,7 +11,7 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
 
   const queue = new PQueue({ concurrency: 1 })
 
-  directory = path.join(directory || './orbitdb', `./${address.path}/_index/`)
+  directory = path.join(directory || './orbitdb', `./${address}/_index/`)
   const index = await LevelStorage({ path: directory, valueEncoding })
 
   let latestOplogHash

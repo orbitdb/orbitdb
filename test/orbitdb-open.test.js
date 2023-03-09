@@ -134,7 +134,7 @@ describe('Open databases', function () {
     })
 
     it('creates a directory for the database oplog', async () => {
-      const expectedPath = path.join(orbitdb1.directory, `./${db.address.path}`, '/log/_heads')
+      const expectedPath = path.join(orbitdb1.directory, `./${db.address}`, '/log/_heads')
       const directoryExists = fs.existsSync(expectedPath)
       strictEqual(directoryExists, true)
     })
