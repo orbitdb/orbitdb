@@ -155,22 +155,20 @@ describe('KeyValuePersisted Database', function () {
 
     it('deletes a key/value pair', async () => {
       const key = 'key1'
-      const expected = undefined
 
       await db.put(key, 'value1')
-      const hash = await db.del(key)
+      await db.del(key)
 
-      const actual = await db.get(hash)
-      strictEqual(actual, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, undefined)
     })
 
     it('deletes a non-existent key/value pair', async () => {
-      const expected = undefined
+      const key = 'this key doesn\'t exist'
+      await db.del(key)
 
-      const del = await db.del('zdpuApFgnZNp6qQqeuHRLJhEKsmMnXEEJfSZofLc3ZZXEihWE')
-
-      const actual = await db.get(del)
-      strictEqual(actual, expected)
+      const actual = await db.get(key)
+      strictEqual(actual, undefined)
     })
 
     it('returns all key/value pairs', async () => {
