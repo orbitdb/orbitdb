@@ -133,10 +133,40 @@ describe('Open databases', function () {
       strictEqual(typeof db.all, 'function')
     })
 
+    it('has a meta object', async () => {
+      notStrictEqual(db.meta, undefined)
+      strictEqual(typeof db.meta, 'object')
+    })
+
     it('creates a directory for the database oplog', async () => {
       const expectedPath = path.join(orbitdb1.directory, `./${db.address}`, '/log/_heads')
       const directoryExists = fs.existsSync(expectedPath)
       strictEqual(directoryExists, true)
+    })
+  })
+
+  describe('creating a database with meta info in the manifest', () => {
+    let db
+    const expected = { hello: 'world' }
+
+    before(async () => {
+      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      db = await orbitdb1.open('helloworld', { meta: expected })
+    })
+
+    after(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+      if (orbitdb1) {
+        await orbitdb1.stop()
+      }
+      await rmrf('./orbitdb1')
+    })
+
+    it('contains the given meta info', async () => {
+      deepStrictEqual(db.meta, expected)
     })
   })
 

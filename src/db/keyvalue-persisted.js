@@ -5,8 +5,8 @@ import path from 'path'
 
 const valueEncoding = 'json'
 
-const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage }) => {
-  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage })
+const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta }) => {
+  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta })
   const { events, log } = keyValueStore
 
   const queue = new PQueue({ concurrency: 1 })

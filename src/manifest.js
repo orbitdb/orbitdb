@@ -1,5 +1,4 @@
 import path from 'path'
-// import * as io from 'orbit-db-io'
 
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
@@ -11,15 +10,15 @@ const hasher = sha256
 const hashStringEncoding = base58btc
 
 // Creates a DB manifest file and saves it in IPFS
-export default async (storage, name, type, accessControllerAddress, options) => {
+export default async (storage, name, type, accessControllerAddress, { meta } = {}) => {
   const manifest = Object.assign(
     {
       name,
       type,
       accessController: (path.posix || path).join('/ipfs', accessControllerAddress)
     },
-    // meta field is only added to manifest if options.meta is defined
-    options.meta !== undefined ? { meta: options.meta } : {}
+    // meta field is only added to manifest if meta parameter is defined
+    meta !== undefined ? { meta } : {}
   )
 
   const { cid, bytes } = await Block.encode({ value: manifest, codec, hasher })
