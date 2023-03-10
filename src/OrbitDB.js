@@ -20,11 +20,18 @@ const hasher = sha256
 // const logger = Logger.create('orbit-db')
 // Logger.setLogLevel('ERROR')
 
-// Mapping for 'database type' -> Class
+// Mapping for 'database type' -> Store
 const databaseTypes = {
   events: EventStore,
   documents: DocumentStore,
   keyvalue: KeyValue
+}
+
+const addDatabaseType = (type, store) => {
+  if (databaseTypes[type]) {
+    throw new Error(`Type already exists: ${type}`)
+  }
+  databaseTypes[type] = store
 }
 
 // const defaultTimeout = 30000 // 30 seconds
@@ -52,6 +59,10 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
 
   const open = async (address, { type, meta, Store } = {}) => {
     let name, manifest, accessController
+
+    if (type && !databaseTypes[type]) {
+      throw new Error(`Unspported database type: '${type}'`)
+    }
 
     if (databases[address]) {
       return databases[address]
@@ -120,7 +131,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   }
 }
 
-export { OrbitDB as default, OrbitDBAddress }
+export { OrbitDB as default, OrbitDBAddress, addDatabaseType, databaseTypes }
 
 // class OrbitDB2 {
 //   constructor (ipfs, identity, options = {}) {
