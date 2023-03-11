@@ -309,7 +309,7 @@ describe('Open databases', function () {
         console.error(err)
       }
 
-      const onConnected = async (peerId) => {
+      const onConnected = async (peerId, heads) => {
         connected = true
       }
 

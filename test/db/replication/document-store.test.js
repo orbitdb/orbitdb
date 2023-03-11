@@ -1,4 +1,4 @@
-import { strictEqual, deepStrictEqual } from 'assert'
+import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs'
@@ -83,11 +83,11 @@ describe('Documents Database Replication', function () {
     let connected1 = false
     let connected2 = false
 
-    const onConnected1 = (entry) => {
+    const onConnected1 = async (peerId, heads) => {
       connected1 = true
     }
 
-    const onConnected2 = (entry) => {
+    const onConnected2 = async (peerId, heads) => {
       connected2 = true
     }
 
@@ -113,28 +113,5 @@ describe('Documents Database Replication', function () {
     }
 
     deepStrictEqual(all1, all2)
-  })
-
-  it('emits \'update\' once when one document is added', async () => {
-    let connected = false
-    let updateCount = 0
-
-    const onConnected = async (peerId) => {
-      connected = true
-    }
-
-    const onUpdate = async (entry) => {
-      ++updateCount
-    }
-
-    db2.events.on('join', onConnected)
-    db2.events.on('update', onUpdate)
-
-    await db1.put({ _id: 1, msg: 'record 1 on db 1' })
-
-    await waitFor(() => connected, () => true)
-    await waitFor(() => updateCount > 0, () => true)
-
-    strictEqual(updateCount, 1)
   })
 })

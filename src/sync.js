@@ -67,7 +67,6 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
         } catch (e) {
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
             // Skip peer, they don't have this database currently
-            console.log(e.message)
           } else {
             console.error(e)
             peers.delete(peerId)
@@ -79,8 +78,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
         events.emit('leave', peerId)
       }
     }
-    await queue.onIdle()
-    await queue.add(task)
+    queue.add(task)
   }
 
   const handleUpdateMessage = async (message) => {
@@ -97,8 +95,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
         events.emit('error', e)
       }
     }
-    await queue.onIdle()
-    await queue.add(task)
+    queue.add(task)
   }
 
   const add = async (entry) => {

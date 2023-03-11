@@ -77,7 +77,7 @@ describe('KeyValue Database Replication', function () {
     let connected = false
     let updateCount = 0
 
-    const onConnected = async (peerId) => {
+    const onConnected = async (peerId, heads) => {
       connected = true
     }
 
@@ -145,7 +145,7 @@ describe('KeyValue Database Replication', function () {
     let updateCount = 0
     let connected = false
 
-    const onConnected = async (peerId) => {
+    const onConnected = async (peerId, heads) => {
       connected = true
     }
 

@@ -39,7 +39,9 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
       events.emit('update', entry)
       return entry.hash
     }
-    return queue.add(task)
+    const hash = await queue.add(task)
+    await queue.onIdle()
+    return hash
   }
 
   const applyOperation = async (bytes) => {
@@ -53,7 +55,6 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
       }
     }
     await queue.add(task)
-    await queue.onIdle()
   }
 
   const close = async () => {
