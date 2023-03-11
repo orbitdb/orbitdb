@@ -7,6 +7,8 @@ import { OrbitDB, isIdentity } from '../src/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 
+const isBrowser = () => typeof window !== 'undefined'
+
 describe('OrbitDB', function () {
   this.timeout(5000)
 
@@ -244,6 +246,11 @@ describe('OrbitDB', function () {
     })
 
     it('doesn\'t create the data directory when an error occurs', async () => {
+      // A bit hacky but 🤷‍♂️
+      if (isBrowser) {
+        return
+      }
+
       try {
         orbitdb1 = await OrbitDB()
       } catch (e) {

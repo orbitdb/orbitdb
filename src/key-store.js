@@ -112,7 +112,7 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   const addKey = async (id, key) => {
-    await storage.put('public_' + id, key.publicKey)
+    //    await storage.put('public_' + id, key.publicKey)
     await storage.put('private_' + id, key.privateKey)
   }
 

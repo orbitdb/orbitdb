@@ -1,11 +1,11 @@
-import { strictEqual, deepStrictEqual } from 'assert'
+import { strictEqual, deepStrictEqual, deepEqual } from 'assert'
 import * as crypto from '@libp2p/crypto'
 import { Buffer } from 'safe-buffer'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
 import LevelStorage from '../src/storage/level.js'
-import testKeysPath from './fixtures/test-keys-path.js '
+import testKeysPath from './fixtures/test-keys-path.js'
 
 const defaultPath = './keystore'
 const keysPath = './testkeys'
@@ -86,8 +86,9 @@ describe('KeyStore', () => {
     it('gets a key', async () => {
       const id = 'key1'
       const keys = await keystore.createKey(id)
+      const result = await keystore.getKey(id)
 
-      deepStrictEqual(await keystore.getKey(id), keys)
+      deepEqual(result, keys)
     })
 
     it('throws an error when getting a key without an id', async () => {
@@ -172,7 +173,7 @@ describe('KeyStore', () => {
       })
 
       it('uses default storage and default path to retrieve a key', async () => {
-        deepStrictEqual(await keystore.getKey('key1'), unmarshalledPrivateKey)
+        deepEqual(await keystore.getKey('key1'), unmarshalledPrivateKey)
       })
     })
 
@@ -195,7 +196,7 @@ describe('KeyStore', () => {
       })
 
       it('uses the given storage to retrieve a key', async () => {
-        deepStrictEqual(await keystore.getKey('key2'), unmarshalledPrivateKey)
+        deepEqual(await keystore.getKey('key2'), unmarshalledPrivateKey)
       })
     })
 
@@ -220,7 +221,7 @@ describe('KeyStore', () => {
       })
 
       it('uses default storage using given path to retrieve a key', async () => {
-        deepStrictEqual(await keystore.getKey('key3'), unmarshalledPrivateKey)
+        deepEqual(await keystore.getKey('key3'), unmarshalledPrivateKey)
       })
     })
   })

@@ -7,10 +7,7 @@ coverage/
 #Don't track ipfs files
 test/ipfs/
 test/browser/ipfs/
-test/browser/orbitdb.js
-test/browser/ipfs.js
-test/browser/ipfslog.min.js
-test/browser/identities.js
+test/browser/bundle.js*
 
 # Don't track examples' dependencies (libs) in git
 examples/browser/browser-webpack-example/bundle.js

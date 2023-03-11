@@ -223,7 +223,7 @@ describe('Open databases', function () {
 
     before(async () => {
       orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
-      db = await orbitdb1.open('helloworld')
+      db = await orbitdb1.open('helloworld2')
 
       for (let i = 0; i < amount; i++) {
         await db.add('hello' + i)
@@ -251,7 +251,7 @@ describe('Open databases', function () {
       db = await orbitdb2.open(address)
 
       strictEqual(db.type, 'eventstore')
-      strictEqual(db.name, 'helloworld')
+      strictEqual(db.name, 'helloworld2')
 
       const expected = []
       for (let i = 0; i < amount; i++) {

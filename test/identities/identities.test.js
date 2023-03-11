@@ -4,7 +4,7 @@ import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
 import Identity from '../../src/identities/identity.js'
-import testKeysPath from '../fixtures/test-keys-path.js '
+import testKeysPath from '../fixtures/test-keys-path.js'
 
 const type = 'orbitdb'
 const keysPath = './testkeys'

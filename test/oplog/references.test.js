@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
 import { Identities, KeyStore, MemoryStorage } from '../../src/index.js'
-import testKeysPath from '../fixtures/test-keys-path.js '
+import testKeysPath from '../fixtures/test-keys-path.js'
 
 const keysPath = './testkeys'
 

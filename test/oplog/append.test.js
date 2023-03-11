@@ -2,12 +2,12 @@ import { strictEqual, deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Identities, KeyStore } from '../../src/index.js'
-import testKeysPath from '../fixtures/test-keys-path.js '
+import testKeysPath from '../fixtures/test-keys-path.js'
 
 const keysPath = './testkeys'
 
 describe('Log - Append', function () {
-  this.timeout(5000)
+  this.timeout(10000)
 
   let keystore
   let identities

@@ -5,7 +5,7 @@ import * as IPFS from 'ipfs'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
 import { DocumentStore } from '../../src/db/index.js'
 import config from '../config.js'
-import testKeysPath from '../fixtures/test-keys-path.js '
+import testKeysPath from '../fixtures/test-keys-path.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'

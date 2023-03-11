@@ -5,7 +5,7 @@
 // import { Identities, KeyStore } from '../../src/index.js'
 // import bigLogString from '../fixtures/big-log.fixture.js'
 // import LogCreator from './utils/log-creator.js'
-// import testKeysPath from '../fixtures/test-keys-path.js '
+// import testKeysPath from '../fixtures/test-keys-path.js'
 // import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 
 // const { sync: rmrf } = rimraf
