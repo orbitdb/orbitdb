@@ -7,19 +7,19 @@ import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './s
 const defaultPointerCount = 0
 const defaultCacheSize = 1000
 
-const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, storage, meta, headsStorage, pointerCount }) => {
+const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, pointerCount }) => {
   const { Log, Entry } = OpLog
 
   directory = Path.join(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
   pointerCount = pointerCount || defaultPointerCount
 
-  const entryStorage = await ComposedStorage(
+  entryStorage = entryStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
     await IPFSBlockStorage({ ipfs, pin: true })
   )
 
-  headsStorage = await ComposedStorage(
+  headsStorage = headsStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
     await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
   )

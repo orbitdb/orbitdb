@@ -7,6 +7,9 @@ import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
+import ComposedStorage from '../src/storage/composed.js'
+import IPFSBlockStorage from '../src/storage/ipfs-block.js'
+import MemoryStorage from '../src/storage/memory.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
@@ -40,9 +43,6 @@ describe('Database - Replication', function () {
     identities = await Identities({ keystore })
     testIdentity1 = await identities.createIdentity({ id: 'userA' })
     testIdentity2 = await identities.createIdentity({ id: 'userB' })
-
-    db1 = await Database({ OpLog, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
   })
 
   afterEach(async () => {
@@ -76,121 +76,176 @@ describe('Database - Replication', function () {
     await rmrf('./ipfs2')
   })
 
-  it('replicates databases across two peers', async () => {
-    let connected1 = false
-    let connected2 = false
-
-    const onConnected1 = (peerId, heads) => {
-      connected1 = true
-    }
-
-    const onConnected2 = (peerId, heads) => {
-      connected2 = true
-    }
-
-    db1.events.on('join', onConnected1)
-    db2.events.on('join', onConnected2)
-
-    await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
-    await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
-    await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
-    await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
-
-    await waitFor(() => connected1, () => true)
-    await waitFor(() => connected2, () => true)
-
-    const all1 = []
-    for await (const item of db1.log.iterator()) {
-      all1.unshift(item)
-    }
-
-    const all2 = []
-    for await (const item of db2.log.iterator()) {
-      all2.unshift(item)
-    }
-
-    deepStrictEqual(all1, all2)
-  })
-
-  it('replicates databases across two peers with delays', async () => {
-    let connected1 = false
-    let connected2 = false
-
-    const onConnected1 = (peerId, heads) => {
-      connected1 = true
-    }
-
-    const onConnected2 = (peerId, heads) => {
-      connected2 = true
-    }
-
-    db1.events.on('join', onConnected1)
-    db2.events.on('join', onConnected2)
-
-    await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
-
-    await new Promise(resolve => {
-      setTimeout(() => resolve(), 1000)
+  describe('Replicate across peers', () => {
+    beforeEach(async () => {
+      db1 = await Database({ OpLog, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+      db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
     })
 
-    await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
-    await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
+    it('replicates databases across two peers', async () => {
+      let connected1 = false
+      let connected2 = false
 
-    await new Promise(resolve => {
-      setTimeout(() => resolve(), 1000)
+      const onConnected1 = (peerId, heads) => {
+        connected1 = true
+      }
+
+      const onConnected2 = (peerId, heads) => {
+        connected2 = true
+      }
+
+      db1.events.on('join', onConnected1)
+      db2.events.on('join', onConnected2)
+
+      await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
+
+      await waitFor(() => connected1, () => true)
+      await waitFor(() => connected2, () => true)
+
+      const all1 = []
+      for await (const item of db1.log.iterator()) {
+        all1.unshift(item)
+      }
+
+      const all2 = []
+      for await (const item of db2.log.iterator()) {
+        all2.unshift(item)
+      }
+
+      deepStrictEqual(all1, all2)
     })
 
-    await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
+    it('replicates databases across two peers with delays', async () => {
+      let connected1 = false
+      let connected2 = false
 
-    await waitFor(() => connected1, () => true)
-    await waitFor(() => connected2, () => true)
+      const onConnected1 = (peerId, heads) => {
+        connected1 = true
+      }
 
-    const all1 = []
-    for await (const item of db1.log.iterator()) {
-      all1.unshift(item)
-    }
+      const onConnected2 = (peerId, heads) => {
+        connected2 = true
+      }
 
-    const all2 = []
-    for await (const item of db2.log.iterator()) {
-      all2.unshift(item)
-    }
+      db1.events.on('join', onConnected1)
+      db2.events.on('join', onConnected2)
 
-    deepStrictEqual(all1, all2)
+      await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+
+      await new Promise(resolve => {
+        setTimeout(() => resolve(), 1000)
+      })
+
+      await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
+
+      await new Promise(resolve => {
+        setTimeout(() => resolve(), 1000)
+      })
+
+      await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
+
+      await waitFor(() => connected1, () => true)
+      await waitFor(() => connected2, () => true)
+
+      const all1 = []
+      for await (const item of db1.log.iterator()) {
+        all1.unshift(item)
+      }
+
+      const all2 = []
+      for await (const item of db2.log.iterator()) {
+        all2.unshift(item)
+      }
+
+      deepStrictEqual(all1, all2)
+    })
+
+    it('adds an operation before db2 is instantiated', async () => {
+      let connected = false
+      const onConnected = (peerId, heads) => {
+        connected = true
+      }
+
+      await db2.drop()
+      await db2.close()
+
+      await rmrf('./orbitdb2')
+
+      await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+
+      db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+
+      db2.events.on('join', onConnected)
+
+      await waitFor(() => connected, () => true)
+
+      const all1 = []
+      for await (const item of db1.log.iterator()) {
+        all1.unshift(item)
+      }
+
+      const all2 = []
+      for await (const item of db2.log.iterator()) {
+        all2.unshift(item)
+      }
+
+      deepStrictEqual(all1, all2)
+    })
   })
 
-  it('adds an operation before db2 is instantiated', async () => {
-    let connected = false
-    const onConnected = (peerId, heads) => {
-      connected = true
-    }
+  describe('Options', () => {
+    it('uses given ComposedStorage with MemoryStorage/IPFSBlockStorage for entryStorage', async () => {
+      const storage1 = await ComposedStorage(await MemoryStorage(), await IPFSBlockStorage({ ipfs: ipfs1, pin: true }))
+      const storage2 = await ComposedStorage(await MemoryStorage(), await IPFSBlockStorage({ ipfs: ipfs2, pin: true }))
+      db1 = await Database({ OpLog, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1', entryStorage: storage1 })
+      db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2', entryStorage: storage2 })
 
-    await db2.drop()
-    await db2.close()
+      let connected1 = false
+      let connected2 = false
 
-    await rmrf('./orbitdb2')
+      const onConnected1 = (peerId, heads) => {
+        connected1 = true
+      }
 
-    await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+      const onConnected2 = (peerId, heads) => {
+        connected2 = true
+      }
 
-    db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+      db1.events.on('join', onConnected1)
+      db2.events.on('join', onConnected2)
 
-    db2.events.on('join', onConnected)
+      await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
+      await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
 
-    await waitFor(() => connected, () => true)
+      await waitFor(() => connected1, () => true)
+      await waitFor(() => connected2, () => true)
 
-    const all1 = []
-    for await (const item of db1.log.iterator()) {
-      all1.unshift(item)
-    }
+      const all1 = []
+      for await (const item of db1.log.iterator()) {
+        all1.unshift(item)
+      }
 
-    const all2 = []
-    for await (const item of db2.log.iterator()) {
-      all2.unshift(item)
-    }
+      const all2 = []
+      for await (const item of db2.log.iterator()) {
+        all2.unshift(item)
+      }
 
-    deepStrictEqual(all1, all2)
+      deepStrictEqual(all1, all2)
+    })
   })
 
   describe('Events', () => {
+    beforeEach(async () => {
+      db1 = await Database({ OpLog, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+      db2 = await Database({ OpLog, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+    })
+
     it('emits \'update\' once when one operation is added', async () => {
       const expected = 1
       let connected1 = false
