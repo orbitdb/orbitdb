@@ -3,7 +3,45 @@ import PQueue from 'p-queue'
 import Path from 'path'
 import { EventEmitter } from 'events'
 
+/**
+ * @description
+ * Syncs an append-only, conflict-free replicated data type (CRDT) log between
+ * multiple peers.
+ *
+ * The sync protocol synchronizes heads between multiple peers, both during
+ * startup and also when new entries are appended to the log.
+ *
+ * When Sync is started, peers "dial" each other using libp2p's custom protocol
+ * handler and initiate the exchange of heads each peer currently has. Once
+ * initial sync has completed, peers notify one another of updates to heads
+ * using pubsub "subscribe" with the same log.id topic. A peer with new heads
+ * can broadcast changes to other peers using pubsub "publish". Peers
+ * subscribed to the same topic will then be notified and will update their
+ * heads accordingly.
+ *
+ * The sync protocol only guarantees that the message is published; it does not
+ * guarantee the order in which messages are received or even that the message
+ * is recieved at all. The sync protocol only guarantees that heads will
+ * eventually reach consistency between all peers with the same address.
+ */
+
+/**
+ * Creates a Sync instance for sychronizing logs between multiple peers.
+ * @param {Object} params One or more parameters for configuring Sync.
+ * @param {IPFS} params.ipfs An IPFS instance. Used for synchronizing peers.
+ * @param {Log} params.log The Log instance to sync.
+ * @param {Object} params.events An event emitter. Defaults to an instance of
+ * EventEmitter. Events emitted are 'join', 'error' and 'leave'.
+ * @param {Function} params.onSynced A function that is called after the peer
+ * has received heads from another peer.
+ * @param {Boolean} params.start True if sync should start automatically, false
+ * otherwise. Defaults to true.
+ * @return {Sync} The Sync protocol instance.
+ */
 const Sync = async ({ ipfs, log, events, onSynced, start }) => {
+  if (!ipfs) throw new Error('An instance of ipfs is required.')
+  if (!log) throw new Error('An instance of log is required.')
+
   const address = log.id
   const headsSyncAddress = Path.join('/orbitdb/heads/', address)
 
@@ -42,7 +80,6 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
       peers.add(peerId)
       await pipe(stream, receiveHeads(peerId), sendHeads, stream)
     } catch (e) {
-      console.error(e)
       peers.delete(peerId)
       events.emit('error', e)
     }
@@ -68,7 +105,6 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
             // Skip peer, they don't have this database currently
           } else {
-            console.error(e)
             peers.delete(peerId)
             events.emit('error', e)
           }
@@ -91,7 +127,6 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
           await onSynced(message.data)
         }
       } catch (e) {
-        console.error(e)
         events.emit('error', e)
       }
     }
