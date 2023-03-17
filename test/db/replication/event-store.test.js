@@ -125,10 +125,10 @@ describe('Events Database Replication', function () {
     for await (const event of db2.iterator()) {
       all2.unshift(event)
     }
-    deepStrictEqual(all2, expected)
+    deepStrictEqual(all2.map(e => e.value), expected)
 
     const all1 = await db2.all()
-    deepStrictEqual(all1, expected)
+    deepStrictEqual(all1.map(e => e.value), expected)
   })
 
   it('loads the database after replication', async () => {
@@ -179,9 +179,9 @@ describe('Events Database Replication', function () {
     for await (const event of db2.iterator()) {
       all2.unshift(event)
     }
-    deepStrictEqual(all2, expected)
+    deepStrictEqual(all2.map(e => e.value), expected)
 
     const all1 = await db2.all()
-    deepStrictEqual(all1, expected)
+    deepStrictEqual(all1.map(e => e.value), expected)
   })
 })

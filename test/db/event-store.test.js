@@ -95,7 +95,7 @@ describe('EventStore Database', function () {
 
     const all = await db.all()
 
-    deepStrictEqual(all, events)
+    deepStrictEqual(all.map(e => e.value), events)
   })
 
   describe('Iterator Options', () => {
@@ -118,7 +118,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns two items', async () => {
@@ -130,7 +130,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns three items', async () => {
@@ -142,7 +142,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 3)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('sets \'amount\' greater than items available', async () => {
@@ -154,7 +154,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 5)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('sets \'amount\' to 0', async () => {
@@ -166,7 +166,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 0)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
 
@@ -180,7 +180,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 4)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns one item less than head', async () => {
@@ -192,7 +192,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns two items less than head', async () => {
@@ -204,7 +204,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
 
@@ -218,7 +218,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 5)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns one item less than or equal to head', async () => {
@@ -230,7 +230,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns two items less than or equal to head', async () => {
@@ -242,7 +242,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
 
@@ -256,7 +256,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 4)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns one item greater than root', async () => {
@@ -268,7 +268,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns two items greater than root', async () => {
@@ -280,7 +280,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
 
@@ -294,7 +294,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 5)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns one item greater than or equal to root', async () => {
@@ -306,7 +306,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 1)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
 
       it('returns two items greater than or equal to root', async () => {
@@ -318,7 +318,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 2)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
 
@@ -332,7 +332,7 @@ describe('EventStore Database', function () {
         }
 
         strictEqual(all.length, 3)
-        deepStrictEqual(all, expected)
+        deepStrictEqual(all.map(e => e.value), expected)
       })
     })
   })

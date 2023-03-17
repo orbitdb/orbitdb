@@ -30,7 +30,8 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
         count++
-        yield { key, value }
+        const hash = entry.hash
+        yield { hash, key, value }
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
       }

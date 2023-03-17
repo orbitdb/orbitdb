@@ -126,7 +126,7 @@ describe('KeyValue Database Replication', function () {
     for await (const keyValue of kv2.iterator()) {
       all2.push(keyValue)
     }
-    deepStrictEqual(all2, [
+    deepStrictEqual(all2.map(e => { return { key: e.key, value: e.value } }), [
       { key: 'hello', value: 'friend3' },
       { key: 'init', value: true }
     ])
@@ -135,7 +135,7 @@ describe('KeyValue Database Replication', function () {
     for await (const keyValue of kv1.iterator()) {
       all1.push(keyValue)
     }
-    deepStrictEqual(all1, [
+    deepStrictEqual(all1.map(e => { return { key: e.key, value: e.value } }), [
       { key: 'hello', value: 'friend3' },
       { key: 'init', value: true }
     ])
@@ -200,7 +200,7 @@ describe('KeyValue Database Replication', function () {
     for await (const keyValue of kv2.iterator()) {
       all2.push(keyValue)
     }
-    deepStrictEqual(all2, [
+    deepStrictEqual(all2.map(e => { return { key: e.key, value: e.value } }), [
       { key: 'hello', value: 'friend3' },
       { key: 'init', value: true }
     ])
@@ -209,7 +209,7 @@ describe('KeyValue Database Replication', function () {
     for await (const keyValue of kv1.iterator()) {
       all1.push(keyValue)
     }
-    deepStrictEqual(all1, [
+    deepStrictEqual(all1.map(e => { return { key: e.key, value: e.value } }), [
       { key: 'hello', value: 'friend3' },
       { key: 'init', value: true }
     ])

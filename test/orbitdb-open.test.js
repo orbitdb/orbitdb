@@ -212,7 +212,7 @@ describe('Open databases', function () {
         all.unshift(event)
       }
 
-      deepStrictEqual(all, expected)
+      deepStrictEqual(all.map(e => e.value), expected)
     })
   })
 
@@ -263,7 +263,7 @@ describe('Open databases', function () {
         all.unshift(event)
       }
 
-      deepStrictEqual(all, expected)
+      deepStrictEqual(all.map(e => e.value), expected)
     })
   })
 
@@ -337,7 +337,7 @@ describe('Open databases', function () {
       }
       console.timeEnd('replicate')
 
-      deepStrictEqual(all, expected)
+      deepStrictEqual(all.map(e => e.value), expected)
     })
 
     it('opens the replicated database', async () => {
@@ -366,7 +366,7 @@ describe('Open databases', function () {
         all.unshift(event)
       }
 
-      deepStrictEqual(all, expected)
+      deepStrictEqual(all.map(e => e.value), expected)
     })
   })
 
@@ -483,7 +483,7 @@ describe('Open databases', function () {
         all.unshift(doc)
       }
 
-      deepStrictEqual(all, expected)
+      deepStrictEqual(all.map(e => e.value), expected)
     })
   })
 })

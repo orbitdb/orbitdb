@@ -37,7 +37,7 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
    */
   const get = async (key) => {
     for await (const doc of iterator()) {
-      if (key === doc[indexBy]) {
+      if (key === doc.key) {
         return doc
       }
     }
@@ -53,8 +53,8 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
     const results = []
 
     for await (const doc of iterator()) {
-      if (findFn(doc)) {
-        results.push(doc)
+      if (findFn(doc.value)) {
+        results.push(doc.value)
       }
     }
 
@@ -69,7 +69,8 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
       if (op === 'PUT' && !keys[key]) {
         keys[key] = true
         count++
-        yield value
+        const hash = entry.hash
+        yield { hash, key, value }
       } else if (op === 'DEL' && !keys[key]) {
         keys[key] = true
       }

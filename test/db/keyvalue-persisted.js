@@ -173,13 +173,13 @@ describe('KeyValuePersisted Database', function () {
 
     it('returns all key/value pairs', async () => {
       const keyvalue = [
-        { key: 'key1', value: 'init' },
-        { key: 'key2', value: true },
-        { key: 'key3', value: 'hello' },
-        { key: 'key4', value: 'friend' },
-        { key: 'key5', value: '12345' },
-        { key: 'key6', value: 'empty' },
-        { key: 'key7', value: 'friend33' }
+        { hash: 'zdpuAm6QEA29wFnd6re7X2XWe7AmrzVbsvdHhSPXci2CqXryw', key: 'key1', value: 'init' },
+        { hash: 'zdpuAvfTQwogEAhEaAtb85ugEzxvfDVUnALoZeNbrz3s4jMYd', key: 'key2', value: true },
+        { hash: 'zdpuB2CBCwvPBdHjZRKfFtL5JuDo9sc5QinKhbtYu1YkCLq22', key: 'key3', value: 'hello' },
+        { hash: 'zdpuAyWWtvFfxKWMcV3NJ7XXbjiQC6MkA8h6TrhFA2ihLrt82', key: 'key4', value: 'friend' },
+        { hash: 'zdpuB2Z5coKXGMAZtb7X8UQYgo6vWAP4VshBvE4xwBCrR5Laa', key: 'key5', value: '12345' },
+        { hash: 'zdpuAnn2kuStzcTCJ5ULMxCvB7RtgAScJPmg3YAVYju4oPEtC', key: 'key6', value: 'empty' },
+        { hash: 'zdpuAv1jSFz4GHRieAXGvRGnVWdEdxDp2HefREoTJJWYC8Zqw', key: 'key7', value: 'friend33' }
       ]
 
       for (const { key, value } of Object.values(keyvalue)) {

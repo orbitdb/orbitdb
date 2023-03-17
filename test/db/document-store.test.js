@@ -69,7 +69,7 @@ describe('DocumentStore Database', function () {
       await db.put(expected)
 
       const doc = await db.get(key)
-      deepStrictEqual(doc, expected)
+      deepStrictEqual(doc.value, expected)
     })
 
     it('throws an error when putting a document with the wrong key', async () => {
@@ -173,7 +173,7 @@ describe('DocumentStore Database', function () {
       await db.put(expected)
 
       const doc = await db.get(key)
-      deepStrictEqual(doc, expected)
+      deepStrictEqual(doc.value, expected)
     })
 
     it('deletes a document', async () => {

@@ -94,7 +94,7 @@ describe('Replicating databases', function () {
 
       console.timeEnd('replicate')
 
-      deepStrictEqual(eventsFromDb2, expected)
+      deepStrictEqual(eventsFromDb2.map(e => e.value), expected)
 
       console.time('query 2')
       const eventsFromDb1 = []
@@ -103,7 +103,7 @@ describe('Replicating databases', function () {
       }
       console.timeEnd('query 2')
 
-      deepStrictEqual(eventsFromDb1, expected)
+      deepStrictEqual(eventsFromDb1.map(e => e.value), expected)
 
       console.log('events:', amount)
     })

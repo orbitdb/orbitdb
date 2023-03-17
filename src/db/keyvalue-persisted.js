@@ -44,8 +44,8 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
 
   const iterator = async function * ({ amount } = {}) {
     await queue.onIdle()
-    for await (const { key, value } of keyValueStore.iterator({ amount })) {
-      yield { key, value }
+    for await (const { hash, key, value } of keyValueStore.iterator({ amount })) {
+      yield { hash, key, value }
     }
   }
 
