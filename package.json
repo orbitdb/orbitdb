@@ -75,7 +75,6 @@
     ],
     "ignore": [
       "examples/**",
-      "benchmarks/**",
       "test/fixtures/**",
       "test/browser/**"
     ]
