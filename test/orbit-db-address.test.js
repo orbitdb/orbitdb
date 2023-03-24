@@ -1,7 +1,7 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import { OrbitDBAddress, isValidAddress, parseAddress } from '../src/index.js'
 
-describe('OrbitDB Address', function () {
+describe('Address', function () {
   describe('Creating an address from full address string', () => {
     it('creates an address from full address string', () => {
       const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'

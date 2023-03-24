@@ -107,6 +107,7 @@ describe('Database', function () {
       await headsStorage.close()
 
       await rmrf(headsPath)
+      await rmrf('./custom-directory')
     })
 
     it('uses given MemoryStorage for headsStorage', async () => {

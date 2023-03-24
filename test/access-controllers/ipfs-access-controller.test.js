@@ -1,128 +1,106 @@
-// import assert from 'assert'
-// import rmrf from 'rimraf'
-// import OrbitDB from '../../src/OrbitDB.js'
-// import IdentityProvider from 'orbit-db-identity-provider'
-// import Keystore from 'orbit-db-keystore'
-// import IPFSAccessController from 'orbit-db-access-controllers/ipfs'
-// import AccessControllers from 'orbit-db-access-controllers'
+import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
+import rmrf from 'rimraf'
+import * as IPFS from 'ipfs'
+import Keystore from '../../src/key-store.js'
+import Identities from '../../src/identities/identities.js'
+import IPFSAccessController from '../../src/access-controllers/ipfs.js'
+import config from '../config.js'
+import connectPeers from '../utils/connect-nodes.js'
 
-// // Include test utilities
-// import {
-//   config,
-//   startIpfs,
-//   stopIpfs,
-//   testAPIs
-// } from 'orbit-db-test-utils'
+describe('IPFSAccessController', function () {
+  const dbPath1 = './orbitdb/tests/ipfs-access-controller/1'
+  const dbPath2 = './orbitdb/tests/ipfs-access-controller/2'
 
-// const dbPath1 = './orbitdb/tests/ipfs-access-controller/1'
-// const dbPath2 = './orbitdb/tests/ipfs-access-controller/2'
+  this.timeout(config.timeout)
 
-// Object.keys(testAPIs).forEach(API => {
-//   describe(`orbit-db - IPFSAccessController (${API})`, function () {
-//     this.timeout(config.timeout)
+  let ipfs1, ipfs2
+  let identities1, identities2
+  let testIdentity1, testIdentity2
 
-//     let ipfsd1, ipfsd2, ipfs1, ipfs2, id1, id2
-//     let orbitdb1, orbitdb2
+  before(async () => {
+    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    await connectPeers(ipfs1, ipfs2)
 
-//     before(async () => {
-//       rmrf.sync(dbPath1)
-//       rmrf.sync(dbPath2)
-//       ipfsd1 = await startIpfs(API, config.daemon1)
-//       ipfsd2 = await startIpfs(API, config.daemon2)
-//       ipfs1 = ipfsd1.api
-//       ipfs2 = ipfsd2.api
+    const keystore1 = await Keystore({ path: dbPath1 + '/keys' })
+    const keystore2 = await Keystore({ path: dbPath2 + '/keys' })
 
-//       const keystore1 = new Keystore(dbPath1 + '/keys')
-//       const keystore2 = new Keystore(dbPath2 + '/keys')
+    identities1 = await Identities({ keystore: keystore1 })
+    identities2 = await Identities({ keystore: keystore2 })
 
-//       id1 = await IdentityProvider.createIdentity({ id: 'A', keystore: keystore1 })
-//       id2 = await IdentityProvider.createIdentity({ id: 'B', keystore: keystore2 })
+    testIdentity1 = await identities1.createIdentity({ id: 'userA' })
+    testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+  })
 
-//       orbitdb1 = await OrbitDB.createInstance(ipfs1, {
-//         AccessControllers,
-//         directory: dbPath1,
-//         identity: id1
-//       })
+  after(async () => {
+    if (ipfs1) {
+      await ipfs1.stop()
+    }
 
-//       orbitdb2 = await OrbitDB.createInstance(ipfs2, {
-//         AccessControllers,
-//         directory: dbPath2,
-//         identity: id2
-//       })
-//     })
+    if (ipfs2) {
+      await ipfs2.stop()
+    }
 
-//     after(async () => {
-//       if (orbitdb1) {
-//         await orbitdb1.stop()
-//       }
+    await rmrf('./orbitdb')
+    await rmrf('./ipfs1')
+    await rmrf('./ipfs2')
+  })
 
-//       if (orbitdb2) {
-//         await orbitdb2.stop()
-//       }
+  let accessController
 
-//       if (ipfsd1) {
-//         await stopIpfs(ipfsd1)
-//       }
+  before(async () => {
+    accessController = await IPFSAccessController({
+      ipfs: ipfs1,
+      identities: identities1,
+      identity: testIdentity1
+    })
+  })
 
-//       if (ipfsd2) {
-//         await stopIpfs(ipfsd2)
-//       }
-//     })
+  it('creates an access controller', () => {
+    notStrictEqual(accessController, null)
+    notStrictEqual(accessController, undefined)
+  })
 
-//     describe('Constructor', function () {
-//       let accessController
+  it('sets the controller type', () => {
+    strictEqual(accessController.type, 'ipfs')
+  })
 
-//       before(async () => {
-//         accessController = await IPFSAccessController.create(orbitdb1, {
-//           write: [id1.id]
-//         })
-//       })
+  it('sets default write', async () => {
+    deepStrictEqual(accessController.write, [testIdentity1.id])
+  })
 
-//       it('creates an access controller', () => {
-//         assert.notStrictEqual(accessController, null)
-//         assert.notStrictEqual(accessController, undefined)
-//       })
+  it('user with write access can append', async () => {
+    const mockEntry = {
+      identity: testIdentity1.hash,
+      v: 1
+      // ...
+      // doesn't matter what we put here, only identity is used for the check
+    }
+    const canAppend = await accessController.canAppend(mockEntry)
+    strictEqual(canAppend, true)
+  })
 
-//       it('sets the controller type', () => {
-//         assert.strictEqual(accessController.type, 'ipfs')
-//       })
+  it('user without write cannot append', async () => {
+    const mockEntry = {
+      identity: testIdentity2.hash,
+      v: 1
+      // ...
+      // doesn't matter what we put here, only identity is used for the check
+    }
+    const canAppend = await accessController.canAppend(mockEntry)
+    strictEqual(canAppend, false)
+  })
 
-//       it('has IPFS instance', async () => {
-//         const peerId1 = await accessController._ipfs.id()
-//         const peerId2 = await ipfs1.id()
-//         assert.strictEqual(String(peerId1.id), String(peerId2.id))
-//       })
+  it('replicates the access controller', async () => {
+    const replicatedAccessController = await IPFSAccessController({
+      ipfs: ipfs2,
+      identities: identities2,
+      identity: testIdentity2,
+      address: accessController.address
+    })
 
-//       it('sets default capabilities', async () => {
-//         assert.deepStrictEqual(accessController.write, [id1.id])
-//       })
-
-//       it('allows owner to append after creation', async () => {
-//         const mockEntry = {
-//           identity: id1,
-//           v: 1
-//           // ...
-//           // doesn't matter what we put here, only identity is used for the check
-//         }
-//         const canAppend = await accessController.canAppend(mockEntry, id1.provider)
-//         assert.strictEqual(canAppend, true)
-//       })
-//     })
-
-//     describe('save and load', function () {
-//       let accessController, manifest
-
-//       before(async () => {
-//         accessController = await IPFSAccessController.create(orbitdb1, {
-//           write: ['A', 'B', id1.id]
-//         })
-//         manifest = await accessController.save()
-//         await accessController.load(manifest.address)
-//       })
-
-//       it('has correct capabalities', async () => {
-//         assert.deepStrictEqual(accessController.write, ['A', 'B', id1.id])
-//       })
-//     })
-//   })
-// })
+    strictEqual(replicatedAccessController.type, accessController.type)
+    strictEqual(replicatedAccessController.address, accessController.address)
+    deepStrictEqual(replicatedAccessController.write, accessController.write)
+  })
+})

@@ -83,8 +83,8 @@ describe('orbit-db - Multiple Databases', function () {
     let options = {}
     // Set write access for both clients
     options.write = [
-      orbitdb1.identity.publicKey,
-      orbitdb2.identity.publicKey
+      orbitdb1.identity.id,
+      orbitdb2.identity.id
     ]
 
     let connected1Count = 0

@@ -57,7 +57,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
 
   let databases = {}
 
-  const open = async (address, { type, meta, Store } = {}) => {
+  const open = async (address, { type, meta, write, Store } = {}) => {
     let name, manifest, accessController
 
     if (type && !databaseTypes[type]) {
@@ -75,14 +75,14 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       const { value } = await Block.decode({ bytes, codec, hasher })
       manifest = value
       const acAddress = manifest.accessController.replaceAll('/ipfs/', '')
-      accessController = await IPFSAccessController({ ipfs, identities, identity, address: acAddress, storage: manifestStorage })
+      accessController = await IPFSAccessController({ ipfs, identities, identity, address: acAddress, storage: manifestStorage, write })
       name = manifest.name
       type = type || manifest.type
       meta = manifest.meta
     } else {
       // If the address given was not valid, eg. just the name of the database
       type = type || 'events'
-      accessController = await IPFSAccessController({ ipfs, identities, identity, storage: manifestStorage })
+      accessController = await IPFSAccessController({ ipfs, identities, identity, storage: manifestStorage, write })
       const m = await DBManifest(manifestStorage, address, type, accessController.address, { meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)

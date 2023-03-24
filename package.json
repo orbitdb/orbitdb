@@ -77,8 +77,7 @@
       "examples/**",
       "benchmarks/**",
       "test/fixtures/**",
-      "test/browser/**",
-      "test/access-controllers/**"
+      "test/browser/**"
     ]
   },
   "localMaintainers": [

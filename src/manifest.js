@@ -11,6 +11,11 @@ const hashStringEncoding = base58btc
 
 // Creates a DB manifest file and saves it in IPFS
 export default async (storage, name, type, accessControllerAddress, { meta } = {}) => {
+  if (!storage) throw new Error('storage is required')
+  if (!name) throw new Error('name is required')
+  if (!type) throw new Error('type is required')
+  if (!accessControllerAddress) throw new Error('accessControllerAddress is required')
+
   const manifest = Object.assign(
     {
       name,
