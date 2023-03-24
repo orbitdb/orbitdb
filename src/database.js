@@ -7,7 +7,7 @@ import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './s
 const defaultPointerCount = 0
 const defaultCacheSize = 1000
 
-const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, pointerCount }) => {
+const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, pointerCount, syncAutomatically }) => {
   const { Log, Entry } = OpLog
 
   directory = Path.join(directory || './orbitdb', `./${address}/`)
@@ -73,7 +73,7 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
   // Start the Sync protocol
   // Sync protocol exchanges OpLog heads (latest known entries) between peers when they connect
   // Sync emits 'join', 'leave' and 'error' events through the given event emitter
-  const sync = await Sync({ ipfs, log, events, onSynced: applyOperation })
+  const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically })
 
   return {
     address,
