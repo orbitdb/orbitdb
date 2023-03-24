@@ -56,9 +56,11 @@ const ipfsConfig = {
   const db1 = await orbitdb1.open('benchmark-replication', { type: 'events' })
 
   const startTime1 = new Date().getTime()
+
   for (let i = 0; i < entryCount; i++) {
     await db1.add('hello' + i)
   }
+
   const endTime1 = new Date().getTime()
   const duration1 = endTime1 - startTime1
   const operationsPerSecond1 = Math.floor(entryCount / (duration1 / 1000))
@@ -67,22 +69,22 @@ const ipfsConfig = {
 
   const db2 = await orbitdb2.open(db1.address)
 
-  let replicated = false
+  let connected = false
 
-  const onJoin = async (peerId) => {
-    replicated = true
-  }
+  const onJoin = async (peerId) => (connected = true)
 
   db2.events.on('join', onJoin)
 
-  await waitFor(() => replicated, () => true)
+  await waitFor(() => connected, () => true)
 
   console.log(`Iterate ${entryCount} events`)
   const startTime2 = new Date().getTime()
+
   const all = []
   for await (const { value } of db2.iterator()) {
     all.unshift(value)
   }
+
   const endTime2 = new Date().getTime()
   const duration2 = endTime2 - startTime2
   const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))

@@ -1,9 +1,12 @@
 import { Identities, Log } from '../src/index.js'
 import { MemoryStorage } from '../src/storage/index.js'
 // import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
+import rmrf from 'rimraf'
 
 ;(async () => {
   console.log('Starting benchmark...')
+
+  await rmrf('./orbitdb')
 
   const identities = await Identities()
   const testIdentity = await identities.createIdentity({ id: 'userA' })
@@ -48,6 +51,8 @@ import { MemoryStorage } from '../src/storage/index.js'
   const millisecondsPerOp2 = duration2 / entryCount
 
   console.log(`Iterating ${all.length} entries took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+
+  await rmrf('./orbitdb')
 
   process.exit(0)
 })()

@@ -1,6 +1,7 @@
 import { Identities, Log } from '../src/index.js'
 import { MemoryStorage } from '../src/storage/index.js'
 // import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
+import rmrf from 'rimraf'
 
 // State
 let log
@@ -27,6 +28,8 @@ const queryLoop = async () => {
 
   console.log('Benchmark duration is ' + benchmarkDuration + ' seconds')
 
+  await rmrf('./orbitdb')
+
   const identities = await Identities()
   const testIdentity = await identities.createIdentity({ id: 'userA' })
 
@@ -44,7 +47,7 @@ const queryLoop = async () => {
   log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage })
 
   // Output metrics at 1 second interval
-  const interval = setInterval(() => {
+  const interval = setInterval(async () => {
     seconds++
     if (seconds % 10 === 0) {
       console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
@@ -53,6 +56,7 @@ const queryLoop = async () => {
     }
     if (seconds >= benchmarkDuration) {
       clearInterval(interval)
+      await rmrf('./orbitdb')
       process.exit(0)
     }
     console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
