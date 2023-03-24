@@ -41,6 +41,14 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
     }
   }
 
+  const all = async () => {
+    const values = []
+    for await (const entry of iterator()) {
+      values.unshift(entry)
+    }
+    return values
+  }
+
   return {
     ...database,
     type: 'keyvalue',
@@ -48,7 +56,8 @@ const KeyValue = async ({ OpLog, Database, ipfs, identity, address, name, access
     set: put, // Alias for put()
     del,
     get,
-    iterator
+    iterator,
+    all
   }
 }
 

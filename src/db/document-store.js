@@ -80,6 +80,14 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
     }
   }
 
+  const all = async () => {
+    const values = []
+    for await (const entry of iterator()) {
+      values.unshift(entry)
+    }
+    return values
+  }
+
   return {
     ...database,
     type: 'documentstore',
@@ -88,7 +96,8 @@ const DocumentStore = async ({ OpLog, Database, ipfs, identity, address, name, a
     get,
     iterator,
     query,
-    indexBy
+    indexBy,
+    all
   }
 }
 
