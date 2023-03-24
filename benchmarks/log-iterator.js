@@ -31,7 +31,10 @@ import { MemoryStorage } from '../src/storage/index.js'
   }
   const endTime1 = new Date().getTime()
   const duration1 = endTime1 - startTime1
-  console.log(`Appending ${entryCount} entries took ${duration1} ms, ${(entryCount / (duration1 / 1000)).toFixed(0)} ops/s, ${(duration1 / entryCount)} ms/op`)
+  const operationsPerSecond1 = Math.floor(entryCount / (duration1 / 1000))
+  const millisecondsPerOp1 = duration1 / entryCount
+
+  console.log(`Appending ${entryCount} entries took ${duration1} ms, ${operationsPerSecond1} ops/s, ${millisecondsPerOp1} ms/op`)
 
   console.log(`Iterate ${entryCount} entries`)
   const startTime2 = new Date().getTime()
@@ -41,6 +44,10 @@ import { MemoryStorage } from '../src/storage/index.js'
   }
   const endTime2 = new Date().getTime()
   const duration2 = endTime2 - startTime2
+  const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
+  const millisecondsPerOp2 = duration2 / entryCount
 
-  console.log(`Iterating ${all.length} entries took ${duration2} ms, ${(entryCount / (duration2 / 1000)).toFixed(0)} ops/s, ${(duration2 / entryCount)} ms/op`)
+  console.log(`Iterating ${all.length} entries took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+
+  process.exit(0)
 })()
