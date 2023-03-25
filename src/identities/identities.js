@@ -3,7 +3,7 @@ import OrbitDBIdentityProvider from './providers/orbitdb.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
-import { LRUStorage, IPFSBlockStorage, MemoryStorage } from '../storage/index.js'
+import { LRUStorage, IPFSBlockStorage, MemoryStorage, ComposedStorage } from '../storage/index.js'
 import Path from 'path'
 
 const DefaultProviderType = 'orbitdb'
@@ -17,7 +17,12 @@ const supportedTypes = {
 
 const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   keystore = keystore || await KeyStore({ path: path || DefaultIdentityKeysPath })
-  storage = storage || (ipfs ? await IPFSBlockStorage({ ipfs, pin: true }) : await MemoryStorage())
+
+  if (!storage) {
+    storage = ipfs
+      ? await ComposedStorage(await LRUStorage({ size: 1000 }), await IPFSBlockStorage({ ipfs, pin: true }))
+      : await MemoryStorage()
+  }
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
 
