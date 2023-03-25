@@ -1,6 +1,7 @@
-import { Identities } from '../src/index.js'
-import { Log } from '../src/index.js'
-import { MemoryStorage, LevelStorage } from '../src/storage/index.js'
+import { Identities, Log } from '../src/index.js'
+import { MemoryStorage } from '../src/storage/index.js'
+// import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
+import rmrf from 'rimraf'
 
 // State
 let log
@@ -10,6 +11,9 @@ let totalQueries = 0
 let seconds = 0
 let queriesPerSecond = 0
 let lastTenSeconds = 0
+
+// Settings
+const benchmarkDuration = 20 // seconds
 
 const queryLoop = async () => {
   await log.append(totalQueries.toString())
@@ -22,6 +26,10 @@ const queryLoop = async () => {
 ;(async () => {
   console.log('Starting benchmark...')
 
+  console.log('Benchmark duration is ' + benchmarkDuration + ' seconds')
+
+  await rmrf('./orbitdb')
+
   const identities = await Identities()
   const testIdentity = await identities.createIdentity({ id: 'userA' })
 
@@ -29,6 +37,9 @@ const queryLoop = async () => {
   // in case we want to benchmark different storage modules
   const entryStorage = await MemoryStorage()
   const headsStorage = await MemoryStorage()
+  // Test LRUStorage
+  // const entryStorage = await LRUStorage()
+  // const headsStorage = await LRUStorage()
   // Test LevelStorage
   // const entryStorage = await LevelStorage({ path: './logA/entries' })
   // const headsStorage = await LevelStorage({ path: './logA/heads' })
@@ -36,12 +47,17 @@ const queryLoop = async () => {
   log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage })
 
   // Output metrics at 1 second interval
-  setInterval(() => {
+  const interval = setInterval(async () => {
     seconds++
     if (seconds % 10 === 0) {
       console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
       if (lastTenSeconds === 0) throw new Error('Problems!')
       lastTenSeconds = 0
+    }
+    if (seconds >= benchmarkDuration) {
+      clearInterval(interval)
+      await rmrf('./orbitdb')
+      process.exit(0)
     }
     console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
     queriesPerSecond = 0

@@ -1,5 +1,5 @@
-const Events = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta }) => {
-  const database = await Database({ OpLog, ipfs, identity, address, name, accessController, directory, storage, meta })
+const Events = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta, syncAutomatically }) => {
+  const database = await Database({ OpLog, ipfs, identity, address, name, accessController, directory, storage, meta, syncAutomatically })
 
   const { addOperation, log } = database
 
