@@ -26,12 +26,13 @@
     "lru": "^3.1.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.4",
-    "safe-buffer": "^5.2.1"
+    "safe-buffer": "^5.2.1",
+    "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
-    "c8": "^7.13.0",
     "assert": "^2.0.0",
     "babel-loader": "^9.1.2",
+    "c8": "^7.13.0",
     "cpy-cli": "^4.2.0",
     "cross-env": "^7.0.3",
     "fs-extra": "^11.1.0",
