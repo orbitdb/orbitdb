@@ -51,9 +51,8 @@ const signMessage = async (key, data) => {
   return Buffer.from(await key.sign(data)).toString('hex')
 }
 
-const verifiedCache = await LRUStorage({ size: 1000 })
-
 const verifyMessage = async (signature, publicKey, data) => {
+  const verifiedCache = await LRUStorage({ size: 1000 })
   const cached = await verifiedCache.get(signature)
 
   let res = false
