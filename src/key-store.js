@@ -1,5 +1,7 @@
 import * as crypto from '@libp2p/crypto'
-import { Buffer } from 'safe-buffer'
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
+import { compare as uint8ArrayCompare } from 'uint8arrays/compare'
 import ComposedStorage from './storage/composed.js'
 import LevelStorage from './storage/level.js'
 import LRUStorage from './storage/lru.js'
@@ -18,16 +20,16 @@ const verifySignature = async (signature, publicKey, data) => {
     throw new Error('Given input data was undefined')
   }
 
-  if (!Buffer.isBuffer(data)) {
-    data = Buffer.from(data)
+  if (!(data instanceof Uint8Array)) {
+    data = typeof data === "string" ? uint8ArrayFromString(data) : new Uint8Array(data)
   }
 
   const isValid = (key, msg, sig) => key.verify(msg, sig)
 
   let res = false
   try {
-    const pubKey = unmarshalPubKey(Buffer.from(publicKey, 'hex'))
-    res = await isValid(pubKey, data, Buffer.from(signature, 'hex'))
+    const pubKey = unmarshalPubKey(uint8ArrayFromString(publicKey, 'base16'))
+    res = await isValid(pubKey, data, uint8ArrayFromString(signature, 'base16'))
   } catch (e) {
     // Catch error: sig length wrong
   }
@@ -44,11 +46,11 @@ const signMessage = async (key, data) => {
     throw new Error('Given input data was undefined')
   }
 
-  if (!Buffer.isBuffer(data)) {
-    data = Buffer.from(data)
+	if (!(data instanceof Uint8Array)) {
+    data = typeof data === "string" ? uint8ArrayFromString(data) : new Uint8Array(data)
   }
 
-  return Buffer.from(await key.sign(data)).toString('hex')
+  return uint8ArrayToString(await key.sign(data), 'base16')
 }
 
 const verifiedCache = await LRUStorage({ size: 1000 })
@@ -66,7 +68,7 @@ const verifyMessage = async (signature, publicKey, data) => {
     }
   } else {
     const compare = (cached, data) => {
-      const match = Buffer.isBuffer(data) ? Buffer.compare(cached, data) === 0 : cached.toString() === data.toString()
+      const match = data instanceof Uint8Array ? uint8ArrayCompare(cached, data) === 0 : cached.toString() === data.toString()
       return match
     }
     res = cached.publicKey === publicKey && compare(cached.data, data)
@@ -127,8 +129,8 @@ const KeyStore = async ({ storage, path } = {}) => {
     const pubKey = keys.public.marshal()
 
     const key = {
-      publicKey: Buffer.from(pubKey),
-      privateKey: Buffer.from(keys.marshal())
+      publicKey: pubKey,
+      privateKey: keys.marshal()
     }
 
     await addKey(id, key)
@@ -161,9 +163,10 @@ const KeyStore = async ({ storage, path } = {}) => {
     if (formats.indexOf(format) === -1) {
       throw new Error('Supported formats are `hex` and `buffer`')
     }
-    let pubKey = keys.public.marshal()
-    pubKey = Buffer.from(pubKey)
-    return format === 'buffer' ? pubKey : pubKey.toString('hex')
+
+    const pubKey = keys.public.marshal()
+
+    return format === 'buffer' ? pubKey : uint8ArrayToString(pubKey, 'base16')
   }
 
   return {

@@ -1,3 +1,4 @@
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import IdentityProvider from './interface.js'
 import { signMessage, verifyMessage } from '../../key-store.js'
 
@@ -22,7 +23,7 @@ class OrbitDBIdentityProvider extends IdentityProvider {
       throw new Error('id is required')
     }
     const key = await this._keystore.getKey(id) || await this._keystore.createKey(id)
-    return Buffer.from(key.public.marshal()).toString('hex')
+    return uint8ArrayToString(key.public.marshal(), 'base16')
   }
 
   async signIdentity (data, { id } = {}) {
