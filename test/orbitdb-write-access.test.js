@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 import rmrf from 'rimraf'
 import path from 'path'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import OrbitDB from '../src/OrbitDB.js'
 import config from './config.js'
 import waitFor from './utils/wait-for.js'

@@ -1,7 +1,7 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import path from 'path'
 import rmrf from 'rimraf'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import Manifest from '../src/manifest.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import config from './config.js'
