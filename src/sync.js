@@ -153,12 +153,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
   }
 
   const startSync = async () => {
-    // Exchange head entries with peers when connected
-    await ipfs.libp2p.handle(headsSyncAddress, handleReceiveHeads)
-    ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
-    // Subscribe to the pubsub channel for this database through which updates are sent
-    await ipfs.pubsub.subscribe(address, handleUpdateMessage)
-    started = true
+    if (!started) {
+      // Exchange head entries with peers when connected
+      await ipfs.libp2p.handle(headsSyncAddress, handleReceiveHeads)
+      ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
+      // Subscribe to the pubsub channel for this database through which updates are sent
+      await ipfs.pubsub.subscribe(address, handleUpdateMessage)
+      started = true
+    }
   }
 
   // Start Sync automatically
