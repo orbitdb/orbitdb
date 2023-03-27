@@ -9,7 +9,7 @@ import OrbitDBAddress, { isValidAddress } from './address.js'
 import DBManifest from './manifest.js'
 import { createId, isDefined } from './utils/index.js'
 // import Logger from 'logplease'
-import path from 'path'
+import pathJoin from './utils/path-join.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -46,7 +46,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   id = id || await createId()
   const { id: peerId } = await ipfs.id()
   directory = directory || './orbitdb'
-  keystore = keystore || await KeyStore({ path: path.join(directory, './keystore') })
+  keystore = keystore || await KeyStore({ path: pathJoin(directory, './keystore') })
   const identities = await Identities({ ipfs, keystore })
   identity = identity || await identities.createIdentity({ id })
 

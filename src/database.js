@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
-import Path from 'path'
 import Sync from './sync.js'
 import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
+import pathJoin from './utils/path-join.js'
 
 const defaultPointerCount = 0
 const defaultCacheSize = 1000
@@ -10,7 +10,7 @@ const defaultCacheSize = 1000
 const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, indexStorage, pointerCount, syncAutomatically }) => {
   const { Log, Entry } = OpLog
 
-  directory = Path.join(directory || './orbitdb', `./${address}/`)
+  directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
   pointerCount = pointerCount || defaultPointerCount
 
@@ -21,12 +21,12 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
 
   headsStorage = headsStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
-    await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
+    await LevelStorage({ path: pathJoin(directory, '/log/_heads/') })
   )
 
   indexStorage = indexStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
-    await LevelStorage({ path: Path.join(directory, '/log/_index/') })
+    await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
   const log = await Log(identity, { logId: address, access: accessController, entryStorage, headsStorage, indexStorage })
