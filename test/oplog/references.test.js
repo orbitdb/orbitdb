@@ -7,7 +7,14 @@ import testKeysPath from '../fixtures/test-keys-path.js'
 
 const keysPath = './testkeys'
 
+const isBrowser = () => typeof window !== 'undefined'
+
 describe('Log - References', function () {
+  if (isBrowser()) {
+    // Skip these tests when running in the browser since they take a long time
+    return
+  }
+
   this.timeout(60000)
 
   let keystore

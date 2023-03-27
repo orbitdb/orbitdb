@@ -12,7 +12,7 @@ import waitFor from '../../utils/wait-for.js'
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
-describe('KeyValue Database Replication', function () {
+describe('KeyValue-persisted Database Replication', function () {
   this.timeout(30000)
 
   let ipfs1, ipfs2
@@ -74,15 +74,15 @@ describe('KeyValue Database Replication', function () {
   })
 
   it('replicates a database', async () => {
-    let connected = false
-    let updateCount = 0
+    let replicated = false
+    let expectedEntryHash = null
 
-    const onConnected = async (peerId, heads) => {
-      connected = true
+    const onConnected = (peerId, heads) => {
+      replicated = expectedEntryHash !== null && heads.map(e => e.hash).includes(expectedEntryHash)
     }
 
     const onUpdate = (entry) => {
-      ++updateCount
+      replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
     }
 
     const onError = (err) => {
@@ -93,8 +93,8 @@ describe('KeyValue Database Replication', function () {
     kv2 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     kv2.events.on('join', onConnected)
-    kv1.events.on('join', onConnected)
     kv2.events.on('update', onUpdate)
+
     kv2.events.on('error', onError)
     kv1.events.on('error', onError)
 
@@ -105,10 +105,9 @@ describe('KeyValue Database Replication', function () {
     await kv1.del('hello')
     await kv1.set('empty', '')
     await kv1.del('empty')
-    await kv1.set('hello', 'friend3')
+    expectedEntryHash = await kv1.set('hello', 'friend3')
 
-    await waitFor(() => connected, () => true)
-    await waitFor(() => updateCount > 0, () => true)
+    await waitFor(() => replicated, () => true)
 
     const value0 = await kv2.get('init')
     deepStrictEqual(value0, true)
@@ -142,15 +141,15 @@ describe('KeyValue Database Replication', function () {
   })
 
   it('loads the database after replication', async () => {
-    let updateCount = 0
-    let connected = false
+    let replicated = false
+    let expectedEntryHash = null
 
-    const onConnected = async (peerId, heads) => {
-      connected = true
+    const onConnected = (peerId, heads) => {
+      replicated = expectedEntryHash !== null && heads.map(e => e.hash).includes(expectedEntryHash)
     }
 
     const onUpdate = (entry) => {
-      ++updateCount
+      replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
     }
 
     const onError = (err) => {
@@ -161,8 +160,8 @@ describe('KeyValue Database Replication', function () {
     kv2 = await KeyValuePersisted({ KeyValue, OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     kv2.events.on('join', onConnected)
-    kv1.events.on('join', onConnected)
     kv2.events.on('update', onUpdate)
+
     kv2.events.on('error', onError)
     kv1.events.on('error', onError)
 
@@ -173,10 +172,9 @@ describe('KeyValue Database Replication', function () {
     await kv1.del('hello')
     await kv1.set('empty', '')
     await kv1.del('empty')
-    await kv1.set('hello', 'friend3')
+    expectedEntryHash = await kv1.set('hello', 'friend3')
 
-    await waitFor(() => connected, () => true)
-    await waitFor(() => updateCount > 0, () => true)
+    await waitFor(() => replicated, () => true)
 
     await kv1.close()
     await kv2.close()

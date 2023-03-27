@@ -2,6 +2,9 @@ import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
 import Path from 'path'
 import { EventEmitter } from 'events'
+import { TimeoutController } from 'timeout-abort-controller'
+
+const DefaultTimeout = 30000 // 30 seconds
 
 /**
  * @description
@@ -38,7 +41,7 @@ import { EventEmitter } from 'events'
  * otherwise. Defaults to true.
  * @return {Sync} The Sync protocol instance.
  */
-const Sync = async ({ ipfs, log, events, onSynced, start }) => {
+const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
   if (!log) throw new Error('An instance of log is required.')
 
@@ -49,6 +52,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
   const peers = new Set()
 
   events = events || new EventEmitter()
+  timeout = timeout || DefaultTimeout
 
   let started = false
 
@@ -99,9 +103,11 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
         if (peers.has(peerId)) {
           return
         }
+        const timeoutController = new TimeoutController(timeout)
+        const { signal } = timeoutController
         try {
           peers.add(peerId)
-          const stream = await ipfs.libp2p.dialProtocol(remotePeer, headsSyncAddress)
+          const stream = await ipfs.libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
@@ -109,6 +115,10 @@ const Sync = async ({ ipfs, log, events, onSynced, start }) => {
           } else {
             peers.delete(peerId)
             events.emit('error', e)
+          }
+        } finally {
+          if (timeoutController) {
+            timeoutController.clear()
           }
         }
       } else {

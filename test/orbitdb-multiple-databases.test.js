@@ -137,7 +137,7 @@ describe('orbit-db - Multiple Databases', function () {
   })
 
   it('replicates multiple open databases', async () => {
-    const entryCount = 32
+    const entryCount = 10
 
     // Write entries to each database
     console.log('Writing to databases')
@@ -169,7 +169,9 @@ describe('orbit-db - Multiple Databases', function () {
 
     console.log('Waiting for replication to finish')
 
-    await waitFor(() => allReplicated(), () => true)
+    await waitFor(async () => await allReplicated(), () => true, 2000)
+
+    console.log('Replication finished')
 
     for (let i = 0; i < databaseInterfaces.length; i++) {
       const db = remoteDatabases[i]

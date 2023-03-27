@@ -141,9 +141,11 @@ describe('Sync protocol', function () {
       log2 = await Log(testIdentity2, { logId: 'synclog1', entryStorage: entryStorage2 })
 
       const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
-        await log2.joinEntry(syncedHead)
-        syncedEventFired = true
+        const entry = await Entry.decode(bytes)
+        if (await log2.joinEntry(entry)) {
+          syncedHead = entry
+          syncedEventFired = true
+        }
       }
 
       const onJoin = (peerId, heads) => {
@@ -154,7 +156,9 @@ describe('Sync protocol', function () {
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, onSynced: () => {} })
       sync2 = await Sync({ ipfs: ipfs2, log: log2, onSynced })
+
       sync1.events.on('join', onJoin)
+      sync2.events.on('join', onJoin)
 
       await waitFor(() => joinEventFired, () => true)
       await waitFor(() => syncedEventFired, () => true)
@@ -177,13 +181,66 @@ describe('Sync protocol', function () {
       strictEqual(sync2.peers.has(String(peerId1)), true)
       strictEqual(sync1.peers.has(String(peerId2)), true)
     })
+  })
+
+  describe('Eventual Consistency', () => {
+    let sync1, sync2
+    let log1, log2
+    let joinEventFired = false
+    let syncedHead
+
+    before(async () => {
+      const entryStorage1 = await ComposedStorage(
+        await LRUStorage({ size: 1000 }),
+        await IPFSBlockStorage({ ipfs: ipfs1, pin: true })
+      )
+
+      const entryStorage2 = await ComposedStorage(
+        await LRUStorage({ size: 1000 }),
+        await IPFSBlockStorage({ ipfs: ipfs2, pin: true })
+      )
+
+      log1 = await Log(testIdentity1, { logId: 'synclog7', entryStorage: entryStorage1 })
+      log2 = await Log(testIdentity2, { logId: 'synclog7', entryStorage: entryStorage2 })
+
+      const onSynced = async (bytes) => {
+        const entry = await Entry.decode(bytes)
+        if (await log2.joinEntry(entry)) {
+          syncedHead = entry
+        }
+      }
+
+      const onJoin = (peerId, heads) => {
+        joinEventFired = true
+      }
+
+      sync1 = await Sync({ ipfs: ipfs1, log: log1, onSynced: () => {} })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, onSynced })
+
+      sync1.events.on('join', onJoin)
+      sync2.events.on('join', onJoin)
+
+      await waitFor(() => joinEventFired, () => true)
+    })
+
+    after(async () => {
+      if (sync1) {
+        await sync1.stop()
+      }
+      if (sync2) {
+        await sync2.stop()
+      }
+    })
 
     it('is eventually consistent', async () => {
-      await sync1.add(await log1.append('hello2'))
-      await sync1.add(await log1.append('hello3'))
-      await sync1.add(await log1.append('hello4'))
+      const e2 = await log1.append('hello2')
+      const e3 = await log1.append('hello3')
+      const e4 = await log1.append('hello4')
       const expected = await log1.append('hello5')
 
+      await sync1.add(e3)
+      await sync1.add(e2)
+      await sync1.add(e4)
       await sync1.add(expected)
 
       await waitFor(() => Entry.isEqual(expected, syncedHead), () => true)
@@ -201,6 +258,13 @@ describe('Sync protocol', function () {
       for await (const item of log2.iterator()) {
         all2.unshift(item)
       }
+
+      deepStrictEqual(all1.map(e => e.payload), [
+        'hello2',
+        'hello3',
+        'hello4',
+        'hello5'
+      ])
 
       deepStrictEqual(all1, all2)
     })
@@ -478,6 +542,51 @@ describe('Sync protocol', function () {
       expectedEntry = expectedEntry2
       await waitFor(() => syncedEventFired, () => true)
       deepStrictEqual(syncedHead, expectedEntry2)
+    })
+  })
+
+  describe('Timeouts', () => {
+    let sync1, sync2
+    let log1, log2
+
+    const timeoutTime = 1 // 1 millisecond
+
+    before(async () => {
+      log1 = await Log(testIdentity1, { logId: 'synclog5' })
+      log2 = await Log(testIdentity2, { logId: 'synclog5' })
+
+      sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
+
+      await log1.append('hello1')
+    })
+
+    after(async () => {
+      if (sync1) {
+        await sync1.stop()
+      }
+      if (sync2) {
+        await sync2.stop()
+      }
+    })
+
+    it('emits an error when connecting to peer was cancelled due to timeout', async () => {
+      let err = null
+
+      const onError = (error) => {
+        err = error
+      }
+
+      sync1.events.on('error', onError)
+      sync2.events.on('error', onError)
+
+      await sync2.start()
+
+      await waitFor(() => err !== null, () => true)
+
+      notStrictEqual(err, null)
+      strictEqual(err.type, 'aborted')
+      strictEqual(err.message, 'The operation was aborted')
     })
   })
 

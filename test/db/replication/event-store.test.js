@@ -85,15 +85,15 @@ describe('Events Database Replication', function () {
   })
 
   it('replicates a database', async () => {
-    let connected = false
-    let updateCount = 0
+    let replicated = false
+    let expectedEntryHash = null
 
-    const onConnected = async (peerId, heads) => {
-      connected = true
+    const onConnected = (peerId, heads) => {
+      replicated = expectedEntryHash !== null && heads.map(e => e.hash).includes(expectedEntryHash)
     }
 
-    const onUpdate = async (peerId) => {
-      ++updateCount
+    const onUpdate = (entry) => {
+      replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
     }
 
     const onError = (err) => {
@@ -104,8 +104,8 @@ describe('Events Database Replication', function () {
     db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     db2.events.on('join', onConnected)
-    db1.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
+
     db2.events.on('error', onError)
     db1.events.on('error', onError)
 
@@ -116,10 +116,9 @@ describe('Events Database Replication', function () {
     await db1.add(expected[4])
     await db1.add(expected[5])
     await db1.add(expected[6])
-    await db1.add(expected[7])
+    expectedEntryHash = await db1.add(expected[7])
 
-    await waitFor(() => connected, () => true)
-    await waitFor(() => updateCount > 0, () => true)
+    await waitFor(() => replicated, () => true)
 
     const all2 = []
     for await (const event of db2.iterator()) {
@@ -135,15 +134,15 @@ describe('Events Database Replication', function () {
     db1 = await EventStore({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
     db2 = await EventStore({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
-    let connected = false
-    let updateCount = 0
+    let replicated = false
+    let expectedEntryHash = null
 
-    const onConnected = async (peerId, heads) => {
-      connected = true
+    const onConnected = (peerId, heads) => {
+      replicated = expectedEntryHash !== null && heads.map(e => e.hash).includes(expectedEntryHash)
     }
 
-    const onUpdate = async (peerId) => {
-      ++updateCount
+    const onUpdate = (entry) => {
+      replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
     }
 
     const onError = (err) => {
@@ -152,6 +151,7 @@ describe('Events Database Replication', function () {
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
+
     db2.events.on('error', onError)
     db1.events.on('error', onError)
 
@@ -162,10 +162,9 @@ describe('Events Database Replication', function () {
     await db1.add(expected[4])
     await db1.add(expected[5])
     await db1.add(expected[6])
-    await db1.add(expected[7])
+    expectedEntryHash = await db1.add(expected[7])
 
-    await waitFor(() => connected, () => true)
-    await waitFor(() => updateCount > 0, () => true)
+    await waitFor(() => replicated, () => true)
 
     await db1.drop()
     await db1.close()

@@ -26,9 +26,11 @@
     "lru": "^3.1.0",
     "multiformats": "^11.0.1",
     "p-queue": "^7.3.4",
+    "timeout-abort-controller": "^3.0.0",
     "uint8arrays": "^4.0.3"
   },
   "devDependencies": {
+    "@libp2p/webrtc-star-signalling-server": "^3.0.0",
     "assert": "^2.0.0",
     "babel-loader": "^9.1.2",
     "c8": "^7.13.0",
@@ -67,7 +69,9 @@
     "build:tests": "rm -f test/browser/bundle.js* && webpack --config ./conf/webpack.tests.config.js",
     "prepublishOnly": "npm run build",
     "lint": "standard --env=mocha",
-    "lint:fix": "standard --fix"
+    "lint:fix": "standard --fix",
+    "webrtc": "webrtc-star --port=12345",
+    "webrtc:background": "webrtc-star --port=12345 &"
   },
   "standard": {
     "env": [
