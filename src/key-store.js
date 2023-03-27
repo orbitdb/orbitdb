@@ -21,7 +21,7 @@ const verifySignature = async (signature, publicKey, data) => {
   }
 
   if (!(data instanceof Uint8Array)) {
-    data = typeof data === "string" ? uint8ArrayFromString(data) : new Uint8Array(data)
+    data = typeof data === 'string' ? uint8ArrayFromString(data) : new Uint8Array(data)
   }
 
   const isValid = (key, msg, sig) => key.verify(msg, sig)
@@ -46,8 +46,8 @@ const signMessage = async (key, data) => {
     throw new Error('Given input data was undefined')
   }
 
-	if (!(data instanceof Uint8Array)) {
-    data = typeof data === "string" ? uint8ArrayFromString(data) : new Uint8Array(data)
+  if (!(data instanceof Uint8Array)) {
+    data = typeof data === 'string' ? uint8ArrayFromString(data) : new Uint8Array(data)
   }
 
   return uint8ArrayToString(await key.sign(data), 'base16')

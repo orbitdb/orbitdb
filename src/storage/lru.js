@@ -24,8 +24,6 @@ const LRUStorage = async ({ size } = {}) => {
     }
   }
 
-  // TODO: all()
-
   const merge = async (other) => {
     if (other) {
       for await (const [key, value] of other.iterator()) {
@@ -45,7 +43,6 @@ const LRUStorage = async ({ size } = {}) => {
     del,
     get,
     iterator,
-    // TODO: all,
     merge,
     clear,
     close

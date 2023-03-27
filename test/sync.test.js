@@ -142,7 +142,7 @@ describe('Sync protocol', function () {
 
       const onSynced = async (bytes) => {
         syncedHead = await Entry.decode(bytes)
-        log2.joinEntry(syncedHead)
+        await log2.joinEntry(syncedHead)
         syncedEventFired = true
       }
 
@@ -178,16 +178,17 @@ describe('Sync protocol', function () {
       strictEqual(sync1.peers.has(String(peerId2)), true)
     })
 
-    it('eventually reaches consistency', async () => {
+    it('is eventually consistent', async () => {
       await sync1.add(await log1.append('hello2'))
       await sync1.add(await log1.append('hello3'))
       await sync1.add(await log1.append('hello4'))
-      expectedEntry = await log1.append('hello5')
-      await sync1.add(expectedEntry)
+      const expected = await log1.append('hello5')
 
-      await waitFor(() => syncedEventFired, () => true)
+      await sync1.add(expected)
 
-      deepStrictEqual(syncedHead, expectedEntry)
+      await waitFor(() => Entry.isEqual(expected, syncedHead), () => true)
+
+      deepStrictEqual(syncedHead, expected)
 
       deepStrictEqual(await log1.heads(), await log2.heads())
 
@@ -348,8 +349,8 @@ describe('Sync protocol', function () {
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
       const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
-        if (expectedEntry) {
+        if (expectedEntry && !syncedEventFired) {
+          syncedHead = await Entry.decode(bytes)
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
       }
@@ -491,8 +492,8 @@ describe('Sync protocol', function () {
     let leavingPeerId
 
     before(async () => {
-      const log1 = await Log(testIdentity1, { logId: 'synclog2' })
-      const log2 = await Log(testIdentity2, { logId: 'synclog2' })
+      const log1 = await Log(testIdentity1, { logId: 'synclog3' })
+      const log2 = await Log(testIdentity2, { logId: 'synclog3' })
 
       const onJoin = (peerId, heads) => {
         joinEventFired = true
@@ -511,12 +512,12 @@ describe('Sync protocol', function () {
       }
 
       const onSynced = (bytes) => {
-        throw new Error('Sync Error')
+        sync2.events.emit('error', new Error('Sync Error'))
       }
 
       await log1.append('hello!')
 
-      sync1 = await Sync({ ipfs: ipfs1, log: log1 })
+      sync1 = await Sync({ ipfs: ipfs1, log: log1, onSynced })
       sync2 = await Sync({ ipfs: ipfs2, log: log2, onSynced })
       sync1.events.on('join', onJoin)
       sync1.events.on('leave', onLeave)

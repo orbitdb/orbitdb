@@ -97,10 +97,10 @@ describe('Log - Replication', function () {
     }
 
     beforeEach(async () => {
-      log1 = await Log(testIdentity1, { logId, storage: storage1 })
-      log2 = await Log(testIdentity2, { logId, storage: storage2 })
-      input1 = await Log(testIdentity1, { logId, storage: storage1 })
-      input2 = await Log(testIdentity2, { logId, storage: storage2 })
+      log1 = await Log(testIdentity1, { logId, entryStorage: storage1 })
+      log2 = await Log(testIdentity2, { logId, entryStorage: storage2 })
+      input1 = await Log(testIdentity1, { logId, entryStorage: storage1 })
+      input2 = await Log(testIdentity2, { logId, entryStorage: storage2 })
       await ipfs1.pubsub.subscribe(logId, handleMessage1)
       await ipfs2.pubsub.subscribe(logId, handleMessage2)
     })
@@ -141,7 +141,7 @@ describe('Log - Replication', function () {
 
       await whileProcessingMessages(config.timeout)
 
-      const result = await Log(testIdentity1, { logId, storage: storage1 })
+      const result = await Log(testIdentity1, { logId, entryStorage: storage1 })
       await result.join(log1)
       await result.join(log2)
 

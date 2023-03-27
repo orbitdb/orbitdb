@@ -20,9 +20,7 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
     })
   }
 
-  const del = async (hash) => {
-    // TODO?
-  }
+  const del = async (hash) => {}
 
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
@@ -33,8 +31,6 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
   }
 
   const iterator = async function * () {}
-
-  // TODO: all()
 
   const merge = async (other) => {}
 
@@ -47,7 +43,6 @@ const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
     del,
     get,
     iterator,
-    // TODO: all,
     merge,
     clear,
     close

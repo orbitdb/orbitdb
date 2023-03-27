@@ -426,4 +426,20 @@ describe('Log - Join', async function () {
     strictEqual(values.length, 10)
     deepStrictEqual(values.map((e) => e.payload), expectedData)
   })
+
+  it('has correct heads after joining logs', async () => {
+    const e1 = await log1.append('hello1')
+    await log1.append('hello2')
+    const e3 = await log1.append('hello3')
+
+    await log2.join(log1)
+
+    const heads1 = await log2.heads()
+    deepStrictEqual(heads1, [e3])
+
+    await log2.joinEntry(e1)
+
+    const heads2 = await log2.heads()
+    deepStrictEqual(heads2, [e3])
+  })
 })

@@ -37,14 +37,17 @@ const queryLoop = async () => {
   // in case we want to benchmark different storage modules
   const entryStorage = await MemoryStorage()
   const headsStorage = await MemoryStorage()
+  const indexStorage = await MemoryStorage()
   // Test LRUStorage
   // const entryStorage = await LRUStorage()
   // const headsStorage = await LRUStorage()
+  // const indexStorage = await LRUStorage()
   // Test LevelStorage
   // const entryStorage = await LevelStorage({ path: './logA/entries' })
   // const headsStorage = await LevelStorage({ path: './logA/heads' })
+  // const indexStorage = await LevelStorage({ path: './logA/index' })
 
-  log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage })
+  log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage, indexStorage })
 
   // Output metrics at 1 second interval
   const interval = setInterval(async () => {

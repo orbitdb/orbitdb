@@ -157,7 +157,15 @@ describe('orbit-db - Multiple Databases', function () {
     }
 
     // Function to check if all databases have been replicated
-    const allReplicated = () => remoteDatabases.every(isReplicated)
+    const allReplicated = async () => {
+      for (const db of remoteDatabases) {
+        const replicated = await isReplicated(db)
+        if (!replicated) {
+          return false
+        }
+      }
+      return true
+    }
 
     console.log('Waiting for replication to finish')
 

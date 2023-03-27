@@ -83,27 +83,25 @@ describe('Database - Replication', function () {
     })
 
     it('replicates databases across two peers', async () => {
-      let connected1 = false
-      let connected2 = false
+      let replicated = false
+      let expectedEntryHash = null
 
-      const onConnected1 = (peerId, heads) => {
-        connected1 = true
+      const onConnected = (peerId, heads) => {
+        replicated = expectedEntryHash && heads.map(e => e.hash).includes(expectedEntryHash)
+      }
+      const onUpdate = (entry) => {
+        replicated = expectedEntryHash && entry.hash === expectedEntryHash
       }
 
-      const onConnected2 = (peerId, heads) => {
-        connected2 = true
-      }
-
-      db1.events.on('join', onConnected1)
-      db2.events.on('join', onConnected2)
+      db2.events.on('join', onConnected)
+      db2.events.on('update', onUpdate)
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
       await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
       await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
-      await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
+      expectedEntryHash = await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
 
-      await waitFor(() => connected1, () => true)
-      await waitFor(() => connected2, () => true)
+      await waitFor(() => replicated, () => true)
 
       const all1 = []
       for await (const item of db1.log.iterator()) {
@@ -119,19 +117,19 @@ describe('Database - Replication', function () {
     })
 
     it('replicates databases across two peers with delays', async () => {
-      let connected1 = false
-      let connected2 = false
+      let replicated = false
+      let expectedEntryHash = null
 
-      const onConnected1 = (peerId, heads) => {
-        connected1 = true
+      const onConnected = (peerId, heads) => {
+        replicated = expectedEntryHash && heads.map(e => e.hash).includes(expectedEntryHash)
       }
 
-      const onConnected2 = (peerId, heads) => {
-        connected2 = true
+      const onUpdate = (entry) => {
+        replicated = expectedEntryHash && entry.hash === expectedEntryHash
       }
 
-      db1.events.on('join', onConnected1)
-      db2.events.on('join', onConnected2)
+      db2.events.on('join', onConnected)
+      db2.events.on('update', onUpdate)
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
 
@@ -146,10 +144,9 @@ describe('Database - Replication', function () {
         setTimeout(() => resolve(), 1000)
       })
 
-      await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
+      expectedEntryHash = await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
 
-      await waitFor(() => connected1, () => true)
-      await waitFor(() => connected2, () => true)
+      await waitFor(() => replicated, () => true)
 
       const all1 = []
       for await (const item of db1.log.iterator()) {
@@ -166,6 +163,7 @@ describe('Database - Replication', function () {
 
     it('adds an operation before db2 is instantiated', async () => {
       let connected = false
+
       const onConnected = (peerId, heads) => {
         connected = true
       }

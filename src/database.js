@@ -7,7 +7,7 @@ import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './s
 const defaultPointerCount = 0
 const defaultCacheSize = 1000
 
-const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, pointerCount, syncAutomatically }) => {
+const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, indexStorage, pointerCount, syncAutomatically }) => {
   const { Log, Entry } = OpLog
 
   directory = Path.join(directory || './orbitdb', `./${address}/`)
@@ -24,10 +24,12 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     await LevelStorage({ path: Path.join(directory, '/log/_heads/') })
   )
 
-  const log = await Log(identity, { logId: address, access: accessController, entryStorage, headsStorage })
+  indexStorage = indexStorage || await ComposedStorage(
+    await LRUStorage({ size: defaultCacheSize }),
+    await LevelStorage({ path: Path.join(directory, '/log/_index/') })
+  )
 
-  // const indexStorage = await LevelStorage({ path: Path.join(directory, '/log/_index/') })
-  // const log = await Log(identity, { logId: address.toString(), access: accessController, entryStorage, headsStorage, indexStorage })
+  const log = await Log(identity, { logId: address, access: accessController, entryStorage, headsStorage, indexStorage })
 
   const events = new EventEmitter()
   const queue = new PQueue({ concurrency: 1 })

@@ -15,14 +15,17 @@ import rmrf from 'rimraf'
   // in case we want to benchmark different storage modules
   const entryStorage = await MemoryStorage()
   const headsStorage = await MemoryStorage()
+  const indexStorage = await MemoryStorage()
   // Test LRUStorage
   // const entryStorage = await LRUStorage()
   // const headsStorage = await LRUStorage()
+  // const indexStorage = await LRUStorage()
   // Test LevelStorage
   // const entryStorage = await LevelStorage({ path: './logA/entries' })
   // const headsStorage = await LevelStorage({ path: './logA/heads' })
+  // const indexStorage = await LevelStorage({ path: './logA/index' })
 
-  const log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage })
+  const log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage, indexStorage })
 
   const entryCount = 10000
 

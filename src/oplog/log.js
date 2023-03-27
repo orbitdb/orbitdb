@@ -4,10 +4,6 @@ import Clock from './lamport-clock.js'
 import Heads from './heads.js'
 import Sorting from './sorting.js'
 import MemoryStorage from '../storage/memory.js'
-// import LRUStorage from './storage/lru.js'
-// import LevelStorage from './storage/level.js'
-// import IPFSBlockStorage from './storage/ipfs-block.js'
-// import ComposedStorage from './storage/composed.js'
 import { isDefined } from '../utils/index.js'
 
 const { LastWriteWins, NoZeroes } = Sorting
@@ -17,9 +13,6 @@ const maxClockTimeReducer = (res, acc) => Math.max(res, acc.clock.time)
 
 // Default storage for storing the Log and its entries. Default: Memory. Options: Memory, LRU, IPFS.
 const DefaultStorage = MemoryStorage
-// const DefaultStorage = LRUStorage
-// const DefaultStorage = LevelStorage
-// const DefaultStorage = IPFSBlockStorage
 
 // Default AccessController for the Log.
 // Default policy is that anyone can write to the Log.
@@ -69,7 +62,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   // Oplog entry storage
   const _entries = entryStorage || await DefaultStorage()
   // Entry index for keeping track which entries are already in the log
-  // const _index = indexStorage || await DefaultStorage()
+  const _index = indexStorage || await DefaultStorage()
   // Heads storage
   headsStorage = headsStorage || await DefaultStorage()
   // Add heads to the state storage, ie. init the log state
@@ -117,15 +110,14 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const bytes = await _entries.get(hash)
     if (bytes) {
       const entry = await Entry.decode(bytes)
-      // await _index.put(hash, true)
+      await _index.put(hash, true)
       return entry
     }
   }
 
   const has = async (hash) => {
-    return false
-    // const entry = await _index.get(hash)
-    // return isDefined(entry)
+    const entry = await _index.get(hash)
+    return isDefined(entry)
   }
 
   /**
@@ -163,7 +155,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     // Add entry to the entry storage
     await _entries.put(entry.hash, entry.bytes)
     // Add entry to the entry index
-    // await _index.put(entry.hash, true)
+    await _index.put(entry.hash, true)
     // Return the appended entry
     return entry
   }
@@ -207,6 +199,15 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const isAlreadyInTheLog = await has(entry.hash)
     if (isAlreadyInTheLog) {
       return false
+    } else {
+      // Check that the entry is not an entry that hasn't been indexed
+      const it = traverse(await heads(), (e) => e.next.includes(entry.hash))
+      for await (const e of it) {
+        if (e.next.includes(entry.hash)) {
+          await _index.put(entry.hash, true)
+          return false
+        }
+      }
     }
     // Check that the Entry belongs to this Log
     if (entry.id !== id) {
@@ -233,7 +234,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     // Add the new entry to the entry storage
     await _entries.put(entry.hash, entry.bytes)
     // Add the new entry to the entry index
-    // await _index.put(entry.hash, true)
+    await _index.put(entry.hash, true)
     // We've added the entry to the log
     return true
   }
@@ -393,13 +394,13 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   }
 
   const clear = async () => {
-    // await _index.clear()
+    await _index.clear()
     await _heads.clear()
     await _entries.clear()
   }
 
   const close = async () => {
-    // await _index.close()
+    await _index.close()
     await _heads.close()
     await _entries.close()
   }
@@ -451,6 +452,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     values,
     all: values, // Alias for values()
     get,
+    has,
     append,
     join,
     joinEntry,

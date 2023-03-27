@@ -34,8 +34,6 @@ const LevelStorage = async ({ path, valueEncoding } = {}) => {
     }
   }
 
-  // TODO: all()
-
   const merge = async (other) => {}
 
   const clear = async () => {
@@ -51,7 +49,6 @@ const LevelStorage = async ({ path, valueEncoding } = {}) => {
     del,
     get,
     iterator,
-    // TODO: all,
     merge,
     clear,
     close

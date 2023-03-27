@@ -14,6 +14,7 @@ describe('IPFSAccessController', function () {
   this.timeout(config.timeout)
 
   let ipfs1, ipfs2
+  let keystore1, keystore2
   let identities1, identities2
   let testIdentity1, testIdentity2
 
@@ -22,8 +23,8 @@ describe('IPFSAccessController', function () {
     ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
 
-    const keystore1 = await Keystore({ path: dbPath1 + '/keys' })
-    const keystore2 = await Keystore({ path: dbPath2 + '/keys' })
+    keystore1 = await Keystore({ path: dbPath1 + '/keys' })
+    keystore2 = await Keystore({ path: dbPath2 + '/keys' })
 
     identities1 = await Identities({ keystore: keystore1 })
     identities2 = await Identities({ keystore: keystore2 })
@@ -39,6 +40,14 @@ describe('IPFSAccessController', function () {
 
     if (ipfs2) {
       await ipfs2.stop()
+    }
+
+    if (keystore1) {
+      await keystore1.close()
+    }
+
+    if (keystore2) {
+      await keystore2.close()
     }
 
     await rmrf('./orbitdb')

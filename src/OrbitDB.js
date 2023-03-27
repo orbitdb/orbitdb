@@ -48,7 +48,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   directory = directory || './orbitdb'
   keystore = keystore || await KeyStore({ path: path.join(directory, './keystore') })
   const identities = await Identities({ ipfs, keystore })
-  identity = identity || await identities.createIdentity({ id, keystore })
+  identity = identity || await identities.createIdentity({ id })
 
   const manifestStorage = await ComposedStorage(
     await LRUStorage({ size: 1000 }),

@@ -27,8 +27,6 @@ const MemoryStorage = async () => {
     }
   }
 
-  // TODO: all()
-
   const clear = async () => {
     memory = {}
   }
@@ -40,7 +38,6 @@ const MemoryStorage = async () => {
     del,
     get,
     iterator,
-    // TODO: all,
     merge,
     clear,
     close

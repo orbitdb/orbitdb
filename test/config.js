@@ -32,6 +32,7 @@ export default {
     }
   },
   daemon1: {
+    silent: true,
     EXPERIMENTAL: {
       pubsub: true
     },
@@ -54,6 +55,7 @@ export default {
     }
   },
   daemon2: {
+    silent: true,
     EXPERIMENTAL: {
       pubsub: true
     },
