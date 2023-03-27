@@ -1,6 +1,6 @@
 import { strictEqual } from 'assert'
 // import mapSeries from 'p-each-series'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import rmrf from 'rimraf'
 import OrbitDB from '../src/OrbitDB.js'
 import config from './config.js'

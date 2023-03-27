@@ -1,6 +1,6 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import { OrbitDB, addDatabaseType, databaseTypes } from '../src/index.js'
 import config from './config.js'
 

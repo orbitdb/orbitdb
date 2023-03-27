@@ -1,7 +1,7 @@
 import { strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import { Log, Identities, KeyStore } from '../src/index.js'
 import { IPFSBlockStorage, MemoryStorage, LRUStorage, ComposedStorage } from '../src/storage/index.js'
 import config from './config.js'

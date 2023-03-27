@@ -1,6 +1,6 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import { OrbitDB } from '../src/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'

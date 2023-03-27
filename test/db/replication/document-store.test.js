@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
 import { DocumentStore } from '../../../src/db/index.js'
 import config from '../../config.js'
