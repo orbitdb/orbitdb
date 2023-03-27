@@ -1,6 +1,6 @@
 import { OrbitDB } from '../src/index.js'
 import rmrf from 'rimraf'
-import * as IPFS from 'ipfs'
+import * as IPFS from 'ipfs-core'
 import connectPeers from '../test/utils/connect-nodes.js'
 import waitFor from '../test/utils/wait-for.js'
 
