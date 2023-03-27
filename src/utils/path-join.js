@@ -1,4 +1,11 @@
-const s = process?.platform === 'win32' ? '\\' : '/'
-const reg = new RegExp(`((?<=\\${s})\\${s}+)|(^\\.\\${s})|((?<=\\${s})\\.\\${s})`, 'g')
+const posixReg = /((?<=\/)\/+)|(^\.\/)|((?<=\/)\.\/)/g
+const win32Reg = /((?<=\\)\\+)|(^\.\\)|((?<=\\)\.\\)/g
 
-export default (...paths) => paths.join(s).replace(reg, '')
+const createJoin = isWin => (...paths) => paths.join(isWin ? '\\' : '/').replace(isWin ? win32Reg : posixReg, '')
+
+export const join = createJoin(process?.platform === 'win32')
+
+export const posixJoin = createJoin(false)
+export const win32Join = createJoin(true)
+
+export default join
