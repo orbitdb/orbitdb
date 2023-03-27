@@ -1,6 +1,7 @@
 import { strictEqual, deepStrictEqual, deepEqual } from 'assert'
 import * as crypto from '@libp2p/crypto'
-import { Buffer } from 'safe-buffer'
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
@@ -150,8 +151,8 @@ describe('KeyStore', () => {
     let privateKeyBuffer, publicKeyBuffer, unmarshalledPrivateKey
 
     before(async () => {
-      privateKeyBuffer = Buffer.from(privateKey, 'hex')
-      publicKeyBuffer = Buffer.from(publicKey, 'hex')
+      privateKeyBuffer = uint8ArrayFromString(privateKey, 'base16')
+      publicKeyBuffer = uint8ArrayFromString(publicKey, 'base16')
       unmarshalledPrivateKey = await unmarshal(privateKeyBuffer)
     })
 
@@ -296,7 +297,7 @@ describe('KeyStore', () => {
         const expected = '02e7247a4c155b63d182a23c70cb6fe8ba2e44bc9e9d62dc45d4c4167ccde95944'
         const publicKey = await keystore.getPublic(key, { format: 'buffer' })
 
-        deepStrictEqual(publicKey.toString('hex'), expected)
+        deepStrictEqual(uint8ArrayToString(publicKey, 'base16'), expected)
       })
 
       it('throws an error if no keys are passed', async () => {
