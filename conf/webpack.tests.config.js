@@ -27,7 +27,6 @@ export default (env, argv) => {
     },
     plugins: [
       new webpack.ProvidePlugin({
-        process: 'process/browser',
         Buffer: ['buffer', 'Buffer']
       })
     ],
@@ -38,10 +37,6 @@ export default (env, argv) => {
       ],
       fallback: {
         path: require.resolve('path-browserify'),
-        os: false,
-        fs: false,
-        constants: false,
-        stream: false
       }
     },
     resolveLoader: {

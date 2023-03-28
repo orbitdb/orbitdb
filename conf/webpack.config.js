@@ -27,24 +27,11 @@ export default (env, argv) => {
       fs: '{ existsSync: () => true }',
       mkdirp: '{}'
     },
-    plugins: [
-      new webpack.ProvidePlugin({
-        process: 'process/browser',
-        Buffer: ['buffer', 'Buffer']
-      })
-    ],
     resolve: {
       modules: [
         'node_modules',
         path.resolve(__dirname, '../node_modules')
-      ],
-      fallback: {
-        path: require.resolve('path-browserify'),
-        os: false,
-        fs: false,
-        constants: false,
-        stream: false
-      }
+      ]
     },
     resolveLoader: {
       modules: [
