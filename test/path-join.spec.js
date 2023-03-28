@@ -1,8 +1,6 @@
 import { equal } from 'assert'
 import Path from 'path'
-import { posixJoin, win32Join } from '../src/utils/path-join.js'
-
-const platform = process.platform
+import { join, posixJoin, win32Join } from '../src/utils/path-join.js'
 
 const createTestData = s => [
   [],
@@ -27,13 +25,13 @@ const posixTestData = createTestData('/')
 const win32TestData = createTestData('\\')
 
 describe('Path posix join', () => {
-  it('gives the same results as Path using posix join on posix paths', () => {
+  it('gives the same results as \'path\' using posix join on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.posix.join(...data), posixJoin(...data))
     }
   })
 
-  it('gives the same results as Path using posix join on win32 paths', () => {
+  it('gives the same results as \'path\' using posix join on win32 paths', () => {
     for (const data of win32TestData) {
       equal(Path.posix.join(...data), posixJoin(...data))
     }
@@ -41,63 +39,27 @@ describe('Path posix join', () => {
 })
 
 describe('Path win32 join', () => {
-  it('gives the same results as Path using win32 join on posix paths', () => {
+  it('gives the same results as \'path\' using win32 join on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.win32.join(...data), win32Join(...data))
     }
   })
 
-  it('gives the same results as Path using win32 join on win32 paths', () => {
+  it('gives the same results as \'path\' using win32 join on win32 paths', () => {
     for (const data of win32TestData) {
       equal(Path.win32.join(...data), win32Join(...data))
     }
   })
 })
 
-describe('Path join on win32', () => {
-  let join;
-
-  before(async () => {
-    Object.defineProperty(process, 'platform', { value: 'win32', writable: true })
-    join = (await import('../src/utils/path-join.js?win32')).join
-  });
-
-  after(() => {
-    Object.defineProperty(process, 'platform', { value: platform, writable: false })
-  });
-
-  it('gives the same results as Path using posix paths', () => {
+describe('Path join', () => {
+  it('gives the same results as \'path\' on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.join(...data), join(...data))
     }
   })
 
-  it('gives the same results as Path using win32 paths', () => {
-    for (const data of win32TestData) {
-      equal(Path.join(...data), join(...data))
-    }
-  })
-})
-
-describe('Path join on posix', () => {
-  let join;
-
-  before(async () => {
-    Object.defineProperty(process, 'platform', { value: 'linux', writable: true })
-    join = (await import('../src/utils/path-join.js?linux')).join
-  });
-
-  after(() => {
-    Object.defineProperty(process, 'platform', { value: platform, writable: false })
-  });
-
-  it('gives the same results as Path using posix paths', () => {
-    for (const data of posixTestData) {
-      equal(Path.join(...data), join(...data))
-    }
-  })
-
-  it('gives the same results as Path using win32 paths', () => {
+  it('gives the same results as \'path\' in win32 paths', () => {
     for (const data of win32TestData) {
       equal(Path.join(...data), join(...data))
     }
