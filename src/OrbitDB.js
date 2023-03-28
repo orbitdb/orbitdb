@@ -7,7 +7,7 @@ import { Identities } from './identities/index.js'
 import IPFSAccessController from './access-controllers/ipfs.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
 import DBManifest from './manifest.js'
-import { createId, isDefined } from './utils/index.js'
+import { createId } from './utils/index.js'
 // import Logger from 'logplease'
 import path from 'path'
 import * as Block from 'multiformats/block'
@@ -39,7 +39,7 @@ const addDatabaseType = (type, store) => {
 const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
-  if (!isDefined(ipfs)) {
+  if (ipfs == null) {
     throw new Error('IPFS instance is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
   }
 
@@ -97,7 +97,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       throw new Error(`Unspported database type: '${type}'`)
     }
 
-    const db = await DatabaseModel({ OpLog, Database, ipfs, identity, address: address.toString(), name, accessController, directory, meta, syncAutomatically: isDefined(sync) ? sync : true })
+    const db = await DatabaseModel({ OpLog, Database, ipfs, identity, address: address.toString(), name, accessController, directory, meta, syncAutomatically: sync != null ? sync : true })
 
     db.events.on('close', onDatabaseClosed(address.toString()))
 
