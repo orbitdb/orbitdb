@@ -194,16 +194,17 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * await log.join(entry)
    */
   const joinEntry = async (entry) => {
+    const { hash } = entry
     // Check if the entry is already in the log and return early if it is
-    const isAlreadyInTheLog = await has(entry.hash)
+    const isAlreadyInTheLog = await has(hash)
     if (isAlreadyInTheLog) {
       return false
     } else {
       // Check that the entry is not an entry that hasn't been indexed
-      const it = traverse(await heads(), (e) => e.next.includes(entry.hash))
+      const it = traverse(await heads(), (e) => e.next.includes(hash) || entry.next.includes(e.hash))
       for await (const e of it) {
-        if (e.next.includes(entry.hash)) {
-          await _index.put(entry.hash, true)
+        if (e.next.includes(hash)) {
+          await _index.put(hash, true)
           return false
         }
       }
@@ -220,7 +221,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     // Verify signature for the entry
     const isValid = await Entry.verify(identity, entry)
     if (!isValid) {
-      throw new Error(`Could not validate signature for entry "${entry.hash}"`)
+      throw new Error(`Could not validate signature for entry "${hash}"`)
     }
 
     // Add the new entry to heads (union with current heads)
@@ -231,9 +232,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     }
 
     // Add the new entry to the entry storage
-    await _entries.put(entry.hash, entry.bytes)
+    await _entries.put(hash, entry.bytes)
     // Add the new entry to the entry index
-    await _index.put(entry.hash, true)
+    await _index.put(hash, true)
     // We've added the entry to the log
     return true
   }
