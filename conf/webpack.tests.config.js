@@ -17,9 +17,6 @@ export default (env, argv) => {
     target: 'web',
     mode: 'development',
     devtool: 'source-map',
-    experiments: {
-      topLevelAwait: true
-    },
     externals: {
       fs: '{ existsSync: () => true }',
       'fs-extra': '{ copy: () => {} }',
