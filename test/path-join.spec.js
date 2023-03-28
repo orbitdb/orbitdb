@@ -24,7 +24,7 @@ const createTestData = s => [
 const posixTestData = createTestData('/')
 const win32TestData = createTestData('\\')
 
-describe('Path posix join', () => {
+;(Path.posix != null ? describe : describe.skip)('Path posix join', () => {
   it('gives the same results as \'path\' using posix join on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.posix.join(...data), posixJoin(...data))
@@ -38,7 +38,7 @@ describe('Path posix join', () => {
   })
 })
 
-describe('Path win32 join', () => {
+;(Path.win32 != null ? describe : describe.skip)('Path win32 join', () => {
   it('gives the same results as \'path\' using win32 join on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.win32.join(...data), win32Join(...data))
