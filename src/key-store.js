@@ -53,9 +53,10 @@ const signMessage = async (key, data) => {
   return uint8ArrayToString(await key.sign(data), 'base16')
 }
 
-const verifiedCache = await LRUStorage({ size: 1000 })
+const verifiedCachePromise = LRUStorage({ size: 1000 })
 
 const verifyMessage = async (signature, publicKey, data) => {
+  const verifiedCache = await verifiedCachePromise
   const cached = await verifiedCache.get(signature)
 
   let res = false

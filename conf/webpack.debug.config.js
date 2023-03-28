@@ -21,9 +21,6 @@ export default (env, argv) => {
     },
     target: 'web',
     devtool: 'source-map',
-    experiments: {
-      topLevelAwait: true
-    },
     externals: {
       fs: '{ existsSync: () => true }',
       mkdirp: '{}'
