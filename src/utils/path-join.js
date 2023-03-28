@@ -1,7 +1,9 @@
 const posixReg = /((?<=\/)\/+)|(^\.\/)|((?<=\/)\.\/)/g
 const win32Reg = /((?<=\\)\\+)|(^\.\\)|((?<=\\)\.\\)/g
 
-const createJoin = isWin => (...paths) => paths.join(isWin ? '\\' : '/').replace(isWin ? win32Reg : posixReg, '')
+const createJoin = isWin => (...paths) => isWin ?
+  paths.join('\\').replace(/\//g, '\\').replace(win32Reg, '') :
+  paths.join('/').replace(posixReg, '')
 
 export const join = createJoin(typeof process !== 'undefined' && process?.platform === 'win32')
 
