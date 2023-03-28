@@ -4,7 +4,6 @@ import Clock from './lamport-clock.js'
 import Heads from './heads.js'
 import Sorting from './sorting.js'
 import MemoryStorage from '../storage/memory.js'
-import { isDefined } from '../utils/index.js'
 
 const { LastWriteWins, NoZeroes } = Sorting
 
@@ -49,10 +48,10 @@ const DefaultAccessController = async () => {
  * @return {Log} The log instance
  */
 const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn } = {}) => {
-  if (!isDefined(identity)) {
+  if (identity == null) {
     throw new Error('Identity is required')
   }
-  if (isDefined(logHeads) && !Array.isArray(logHeads)) {
+  if (logHeads != null && !Array.isArray(logHeads)) {
     throw new Error('\'logHeads\' argument must be an array')
   }
   // Set Log's id
@@ -117,7 +116,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
   const has = async (hash) => {
     const entry = await _index.get(hash)
-    return isDefined(entry)
+    return entry != null
   }
 
   /**
@@ -339,10 +338,10 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       lt = nexts
     }
 
-    if (isDefined(lt) && !Array.isArray(lt)) throw new Error('lt must be a string or an array of Entries')
-    if (isDefined(lte) && !Array.isArray(lte)) throw new Error('lte must be a string or an array of Entries')
+    if (lt != null && !Array.isArray(lt)) throw new Error('lt must be a string or an array of Entries')
+    if (lte != null && !Array.isArray(lte)) throw new Error('lte must be a string or an array of Entries')
 
-    const start = (lt || (lte || await heads())).filter(isDefined)
+    const start = (lt || (lte || await heads())).filter(i => i != null)
     const end = (gt || gte) ? await get(gt || gte) : null
 
     const amountToIterate = (end || amount === -1) ? -1 : amount

@@ -2,19 +2,18 @@ import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
-import isDefined from '../utils/is-defined.js'
 
 const codec = dagCbor
 const hasher = sha256
 const hashStringEncoding = base58btc
 
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
-  if (!isDefined(id)) throw new Error('Identity id is required')
-  if (!isDefined(publicKey)) throw new Error('Invalid public key')
-  if (!isDefined(signatures)) throw new Error('Signatures object is required')
-  if (!isDefined(signatures.id)) throw new Error('Signature of id is required')
-  if (!isDefined(signatures.publicKey)) throw new Error('Signature of publicKey+id is required')
-  if (!isDefined(type)) throw new Error('Identity type is required')
+  if (id == null) throw new Error('Identity id is required')
+  if (publicKey == null) throw new Error('Invalid public key')
+  if (signatures == null) throw new Error('Signatures object is required')
+  if (signatures.id == null) throw new Error('Signature of id is required')
+  if (signatures.publicKey == null) throw new Error('Signature of publicKey+id is required')
+  if (type == null) throw new Error('Identity type is required')
 
   signatures = Object.assign({}, signatures)
 
@@ -58,14 +57,14 @@ const decodeIdentity = async (bytes) => {
 }
 
 const isIdentity = (identity) => {
-  return isDefined(identity.id) &&
-    isDefined(identity.hash) &&
-    isDefined(identity.bytes) &&
-    isDefined(identity.publicKey) &&
-    isDefined(identity.signatures) &&
-    isDefined(identity.signatures.id) &&
-    isDefined(identity.signatures.publicKey) &&
-    isDefined(identity.type)
+  return identity.id != null &&
+    identity.hash != null &&
+    identity.bytes != null &&
+    identity.publicKey != null &&
+    identity.signatures != null &&
+    identity.signatures.id != null &&
+    identity.signatures.publicKey != null &&
+    identity.type != null
 }
 
 const isEqual = (a, b) => {

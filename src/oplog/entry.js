@@ -3,7 +3,6 @@ import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
-import { isDefined } from '../utils/index.js'
 
 /*
  * @description
@@ -29,10 +28,10 @@ const hashStringEncoding = base58btc
  * // { payload: "hello", next: [], ... }
  */
 const create = async (identity, id, payload, clock = null, next = [], refs = []) => {
-  if (!isDefined(identity)) throw new Error('Identity is required, cannot create entry')
-  if (!isDefined(id)) throw new Error('Entry requires an id')
-  if (!isDefined(payload)) throw new Error('Entry requires a payload')
-  if (!isDefined(next) || !Array.isArray(next)) throw new Error("'next' argument is not an array")
+  if (identity == null) throw new Error('Identity is required, cannot create entry')
+  if (id == null) throw new Error('Entry requires an id')
+  if (payload == null) throw new Error('Entry requires a payload')
+  if (next == null || !Array.isArray(next)) throw new Error("'next' argument is not an array")
 
   clock = clock || new Clock(identity.publicKey)
 
