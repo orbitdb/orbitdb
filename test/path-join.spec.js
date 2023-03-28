@@ -53,13 +53,13 @@ const win32TestData = createTestData('\\')
 })
 
 describe('Path join', () => {
-  it('gives the same results as \'path\' on posix paths', () => {
+  it('gives the same results as \'path\' using join on posix paths', () => {
     for (const data of posixTestData) {
       equal(Path.join(...data), join(...data))
     }
   })
 
-  it('gives the same results as \'path\' in win32 paths', () => {
+  it('gives the same results as \'path\' using join on win32 paths', () => {
     for (const data of win32TestData) {
       equal(Path.join(...data), join(...data))
     }
