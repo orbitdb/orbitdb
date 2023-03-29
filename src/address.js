@@ -1,6 +1,6 @@
-import * as Path from 'path'
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
+import { posixJoin } from './utils/path-join.js'
 
 const isValidAddress = (address) => {
   address = address.toString()
@@ -45,7 +45,7 @@ const OrbitDBAddress = (address) => {
   const path = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
 
   const toString = () => {
-    return (Path.posix || Path).join('/', protocol, '/', path)
+    return posixJoin('/', protocol, path)
   }
 
   return {

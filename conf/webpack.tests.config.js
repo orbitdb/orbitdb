@@ -35,10 +35,7 @@ export default (env, argv) => {
       ],
       fallback: {
         path: require.resolve('path-browserify'),
-        os: false,
-        fs: false,
-        constants: false,
-        stream: false
+        process: false
       }
     },
     resolveLoader: {

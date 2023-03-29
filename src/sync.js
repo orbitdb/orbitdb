@@ -1,8 +1,8 @@
 import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
-import Path from 'path'
 import { EventEmitter } from 'events'
 import { TimeoutController } from 'timeout-abort-controller'
+import pathJoin from './utils/path-join.js'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -46,7 +46,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   if (!log) throw new Error('An instance of log is required.')
 
   const address = log.id
-  const headsSyncAddress = Path.join('/orbitdb/heads/', address)
+  const headsSyncAddress = pathJoin('/orbitdb/heads/', address)
 
   const queue = new PQueue({ concurrency: 1 })
   const peers = new Set()

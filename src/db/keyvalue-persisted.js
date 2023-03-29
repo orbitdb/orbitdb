@@ -1,7 +1,7 @@
 import LevelStorage from '../storage/level.js'
 import { KeyValue } from './index.js'
+import pathJoin from '../utils/path-join.js'
 import PQueue from 'p-queue'
-import path from 'path'
 
 const valueEncoding = 'json'
 
@@ -11,7 +11,7 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
 
   const queue = new PQueue({ concurrency: 1 })
 
-  directory = path.join(directory || './orbitdb', `./${address}/_index/`)
+  directory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
   const index = await LevelStorage({ path: directory, valueEncoding })
 
   let latestOplogHash
