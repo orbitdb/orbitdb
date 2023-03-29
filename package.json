@@ -25,6 +25,7 @@
     "logplease": "^1.2.15",
     "lru": "^3.1.0",
     "multiformats": "^11.0.1",
+    "p-map": "^5.5.0",
     "p-queue": "^7.3.4",
     "timeout-abort-controller": "^3.0.0",
     "uint8arrays": "^4.0.3"

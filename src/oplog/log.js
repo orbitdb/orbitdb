@@ -4,6 +4,7 @@ import Clock from './lamport-clock.js'
 import Heads from './heads.js'
 import Sorting from './sorting.js'
 import MemoryStorage from '../storage/memory.js'
+import pMap from 'p-map'
 
 const { LastWriteWins, NoZeroes } = Sorting
 
@@ -124,16 +125,21 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @param {data} data Payload to add to the entry
    * @return {Promise<Entry>} Entry that was appended
    */
-  const append = async (data, options = { pointerCount: 0 }) => {
+  const append = async (data, options = { referencesCount: 0 }) => {
     // 1. Prepare entry
     // 2. Authorize entry
     // 3. Store entry
     // 4. return Entry
-
-    // Get references (entry at every pow2 of distance)
-    const refs = await getReferences(options.pointerCount)
+    // Get current heads of the log
+    const heads_ = await heads()
+    // Get references (we skip the heads which are covered by the next field)
+    let refs = []
+    for await (const { hash } of iterator({ amount: options.referencesCount + heads_.length })) {
+      refs.push(hash)
+    }
+    refs = refs.slice(heads_.length, options.referencesCount + heads_.length)
     // Create the next pointers from heads
-    const nexts = (await heads()).map(entry => entry.hash)
+    const nexts = heads_.map(entry => entry.hash)
     // Create the entry
     const entry = await Entry.create(
       identity,
@@ -253,14 +259,20 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     let stack = rootEntries.sort(sortFn)
     // Keep a record of all the hashes of entries we've traversed and yielded
     const traversed = {}
+    // Keep a record of all the hashes we are fetching or have already fetched
+    let toFetch = []
+    const fetched = {}
+    // A function to check if we've seen a hash
+    const notIndexed = (hash) => !(traversed[hash] || fetched[hash])
     // Current entry during traversal
     let entry
     // Start traversal and process stack until it's empty (traversed the full log)
     while (stack.length > 0) {
+      stack = stack.sort(sortFn)
       // Get the next entry from the stack
       entry = stack.pop()
       if (entry) {
-        const hash = entry.hash
+        const { hash, next, refs } = entry
         // If we have an entry that we haven't traversed yet, process it
         if (!traversed[hash]) {
           // Yield the current entry
@@ -270,21 +282,28 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
           if (done === true) {
             break
           }
-          // Add to the hashes we've traversed
+          // Add to the hash indices
           traversed[hash] = true
-          // Add hashes of next entries to the stack from entry's
-          // causal connection (next) and references to history (refs)
-          for (const nextHash of [...entry.next, ...entry.refs]) {
-            // Check if we've already traversed this entry
-            if (!traversed[nextHash]) {
-              // Fetch the next entry
-              const next = await get(nextHash)
-              if (next) {
-                // Add the next entry in front of the stack and sort
-                stack = [next, ...stack].sort(sortFn)
-              }
+          fetched[hash] = true
+          // Add the next and refs hashes to the list of hashes to fetch next,
+          // filter out traversed and fetched hashes
+          toFetch = [...toFetch, ...next, ...refs].filter(notIndexed)
+          // Function to fetch an entry and making sure it's not a duplicate (check the hash indices)
+          const fetchEntries = async (hash) => {
+            if (!traversed[hash] && !fetched[hash]) {
+              fetched[hash] = true
+              return get(hash)
             }
           }
+          // Fetch the next/reference entries
+          const nexts = await pMap(toFetch, fetchEntries)
+          // Add the next and refs fields from the fetched entries to the next round
+          toFetch = nexts
+            .filter(e => e != null)
+            .reduce((res, acc) => [...res, ...acc.next, ...acc.refs], [])
+            .filter(notIndexed)
+          // Add the fetched entries to the stack to be processed
+          stack = [...nexts, ...stack]
         }
       }
     }
@@ -403,31 +422,6 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     await _index.close()
     await _heads.close()
     await _entries.close()
-  }
-
-  /**
-   * TODO
-   * Get references at every pow2 distance
-   * If pointer count is 4, returns 2
-   * If pointer count is 8, returns 3 references
-   * If pointer count is 512, returns 9 references
-   * If pointer count is 2048, returns 11 references
-   */
-  const getReferences = async (pointerCount = 1) => {
-    let nextPointerDistance = 2
-    let distance = 0
-    const refs = []
-    const shouldStopFn = () => distance >= pointerCount
-    for await (const entry of traverse(null, shouldStopFn)) {
-      distance++
-      if (distance === nextPointerDistance) {
-        if (entry.hash) {
-          refs.push(entry.hash)
-        }
-        nextPointerDistance *= 2
-      }
-    }
-    return refs
   }
 
   /**

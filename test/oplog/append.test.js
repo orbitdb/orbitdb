@@ -72,7 +72,7 @@ describe('Log - Append', function () {
 
     describe('append 100 items to a log', async () => {
       const amount = 100
-      const nextPointerAmount = 64
+      const referencesCount = 64
 
       let log
       let values = []
@@ -81,7 +81,7 @@ describe('Log - Append', function () {
       before(async () => {
         log = await Log(testIdentity, { logId: 'A' })
         for (let i = 0; i < amount; i++) {
-          await log.append('hello' + i, { pointerCount: nextPointerAmount })
+          await log.append('hello' + i, { referencesCount })
         }
         values = await log.values()
         heads = await log.heads()
@@ -110,8 +110,12 @@ describe('Log - Append', function () {
       })
 
       it('added the correct amount of refs pointers', async () => {
-        values.forEach((entry, index) => {
-          strictEqual(entry.refs.length, index > 0 ? Math.floor(Math.log2(Math.min(nextPointerAmount, index))) : 0)
+        values.reverse().forEach((entry, index) => {
+          index = values.length - index - 1
+          const expectedRefCount = index < referencesCount
+            ? Math.max(0, index - 1)
+            : Math.max(0, Math.min(referencesCount, index - 1))
+          strictEqual(entry.refs.length, expectedRefCount)
         })
       })
     })

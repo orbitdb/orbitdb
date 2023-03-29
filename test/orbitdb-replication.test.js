@@ -44,9 +44,11 @@ describe('Replicating databases', function () {
     before(async () => {
       db1 = await orbitdb1.open('helloworld')
 
+      console.time('write')
       for (let i = 0; i < expected.length; i++) {
         await db1.add(expected[i])
       }
+      console.timeEnd('write')
     })
 
     after(async () => {
@@ -59,7 +61,7 @@ describe('Replicating databases', function () {
 
       let replicated = false
 
-      const onJoin = async (peerId) => {
+      const onJoin = async (peerId, heads) => {
         const head = (await db2.log.heads())[0]
         if (head && head.clock.time === amount) {
           replicated = true

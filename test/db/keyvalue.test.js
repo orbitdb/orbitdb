@@ -167,11 +167,11 @@ describe('KeyValue Database', function () {
       const keyvalue = [
         { hash: 'zdpuAm6QEA29wFnd6re7X2XWe7AmrzVbsvdHhSPXci2CqXryw', key: 'key1', value: 'init' },
         { hash: 'zdpuAvfTQwogEAhEaAtb85ugEzxvfDVUnALoZeNbrz3s4jMYd', key: 'key2', value: true },
-        { hash: 'zdpuB2CBCwvPBdHjZRKfFtL5JuDo9sc5QinKhbtYu1YkCLq22', key: 'key3', value: 'hello' },
-        { hash: 'zdpuAyWWtvFfxKWMcV3NJ7XXbjiQC6MkA8h6TrhFA2ihLrt82', key: 'key4', value: 'friend' },
-        { hash: 'zdpuB2Z5coKXGMAZtb7X8UQYgo6vWAP4VshBvE4xwBCrR5Laa', key: 'key5', value: '12345' },
-        { hash: 'zdpuAnn2kuStzcTCJ5ULMxCvB7RtgAScJPmg3YAVYju4oPEtC', key: 'key6', value: 'empty' },
-        { hash: 'zdpuAv1jSFz4GHRieAXGvRGnVWdEdxDp2HefREoTJJWYC8Zqw', key: 'key7', value: 'friend33' }
+        { hash: 'zdpuB2ZCXwfkbgXQDHaP13rGSLVzZdZXuFPAk988VCZyMV1Er', key: 'key3', value: 'hello' },
+        { hash: 'zdpuAnDHm5qkyzkdtEiedF2VwyuUvrgsgM7mCVrjLya3G7nFS', key: 'key4', value: 'friend' },
+        { hash: 'zdpuB2XjqLhSEEB6CxCwCLWoas77Db6T9TJDNKcyX35kwbNmb', key: 'key5', value: '12345' },
+        { hash: 'zdpuB1GyECVHxwFBxa9QYeTYRFJRLDnujyekhXAmStG26stU9', key: 'key6', value: 'empty' },
+        { hash: 'zdpuAsj9ZgSCWSuRYFkQ56Eiffpi6j6761ueHHNwNf3VaZfms', key: 'key7', value: 'friend33' }
       ]
 
       for (const { key, value } of Object.values(keyvalue)) {
