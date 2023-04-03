@@ -7,7 +7,7 @@ import pathJoin from './utils/path-join.js'
 const defaultReferencesCount = 16
 const defaultCacheSize = 1000
 
-const Database = async ({ OpLog, ipfs, identity, address, name, accessController, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically }) => {
+const Database = async ({ OpLog, ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically }) => {
   const { Log, Entry } = OpLog
 
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
@@ -29,7 +29,7 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
-  const log = await Log(identity, { logId: address, access: accessController, entryStorage, headsStorage, indexStorage })
+  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
 
   const events = new EventEmitter()
   const queue = new PQueue({ concurrency: 1 })
@@ -88,7 +88,8 @@ const Database = async ({ OpLog, ipfs, identity, address, name, accessController
     log,
     sync,
     peers: sync.peers,
-    events
+    events,
+    access
   }
 }
 

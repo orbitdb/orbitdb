@@ -1,19 +1,15 @@
-// import * as io from '../utils/index.js'
-// import AccessController from './interface.js'
-// import AccessControllerManifest from './manifest.js'
 import { IPFSBlockStorage } from '../storage/index.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
+import pathJoin from '../utils/path-join.js'
 
 const codec = dagCbor
 const hasher = sha256
 const hashStringEncoding = base58btc
 
-const type = 'ipfs'
-
-const AccessControllerManifest = async ({ storage, type, params }) => {
+const AccessControlList = async ({ storage, type, params }) => {
   const manifest = {
     type,
     ...params
@@ -24,17 +20,19 @@ const AccessControllerManifest = async ({ storage, type, params }) => {
   return hash
 }
 
-const IPFSAccessController = async ({ ipfs, identities, identity, address, storage, write }) => {
-  storage = storage || await IPFSBlockStorage({ ipfs, pin: true })
+const type = 'ipfs'
 
-  write = write || [identity.id]
+const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, identities, address }) => {
+  storage = storage || await IPFSBlockStorage({ ipfs: orbitdb.ipfs, pin: true })
+  write = write || [orbitdb.identity.id]
 
   if (address) {
-    const manifestBytes = await storage.get(address)
+    const manifestBytes = await storage.get(address.replaceAll('/ipfs/', ''))
     const { value } = await Block.decode({ bytes: manifestBytes, codec, hasher })
     write = value.write
   } else {
-    address = await AccessControllerManifest({ storage, type, params: { write } })
+    address = await AccessControlList({ storage, type, params: { write } })
+    address = pathJoin('/', type, address)
   }
 
   const canAppend = async (entry) => {
@@ -59,4 +57,4 @@ const IPFSAccessController = async ({ ipfs, identities, identity, address, stora
   }
 }
 
-export { IPFSAccessController as default }
+export default IPFSAccessController

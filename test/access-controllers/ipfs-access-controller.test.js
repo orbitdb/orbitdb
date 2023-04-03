@@ -17,6 +17,7 @@ describe('IPFSAccessController', function () {
   let keystore1, keystore2
   let identities1, identities2
   let testIdentity1, testIdentity2
+  let orbitdb1, orbitdb2
 
   before(async () => {
     ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
@@ -31,6 +32,9 @@ describe('IPFSAccessController', function () {
 
     testIdentity1 = await identities1.createIdentity({ id: 'userA' })
     testIdentity2 = await identities2.createIdentity({ id: 'userB' })
+
+    orbitdb1 = { ipfs: ipfs1, identity: testIdentity1 }
+    orbitdb2 = { ipfs: ipfs2, identity: testIdentity2 }
   })
 
   after(async () => {
@@ -57,59 +61,72 @@ describe('IPFSAccessController', function () {
 
   let accessController
 
-  before(async () => {
-    accessController = await IPFSAccessController({
-      ipfs: ipfs1,
-      identities: identities1,
-      identity: testIdentity1
+  describe('Default write access', () => {
+    before(async () => {
+      accessController = await IPFSAccessController()({
+        orbitdb: orbitdb1,
+        identities: identities1
+      })
+    })
+
+    it('creates an access controller', () => {
+      notStrictEqual(accessController, null)
+      notStrictEqual(accessController, undefined)
+    })
+
+    it('sets the controller type', () => {
+      strictEqual(accessController.type, 'ipfs')
+    })
+
+    it('sets default write', async () => {
+      deepStrictEqual(accessController.write, [testIdentity1.id])
+    })
+
+    it('user with write access can append', async () => {
+      const mockEntry = {
+        identity: testIdentity1.hash,
+        v: 1
+      // ...
+      // doesn't matter what we put here, only identity is used for the check
+      }
+      const canAppend = await accessController.canAppend(mockEntry)
+      strictEqual(canAppend, true)
+    })
+
+    it('user without write cannot append', async () => {
+      const mockEntry = {
+        identity: testIdentity2.hash,
+        v: 1
+      // ...
+      // doesn't matter what we put here, only identity is used for the check
+      }
+      const canAppend = await accessController.canAppend(mockEntry)
+      strictEqual(canAppend, false)
+    })
+
+    it('replicates the access controller', async () => {
+      const replicatedAccessController = await IPFSAccessController()({
+        orbitdb: orbitdb2,
+        identities: identities2,
+        address: accessController.address
+      })
+
+      strictEqual(replicatedAccessController.type, accessController.type)
+      strictEqual(replicatedAccessController.address, accessController.address)
+      deepStrictEqual(replicatedAccessController.write, accessController.write)
     })
   })
 
-  it('creates an access controller', () => {
-    notStrictEqual(accessController, null)
-    notStrictEqual(accessController, undefined)
-  })
-
-  it('sets the controller type', () => {
-    strictEqual(accessController.type, 'ipfs')
-  })
-
-  it('sets default write', async () => {
-    deepStrictEqual(accessController.write, [testIdentity1.id])
-  })
-
-  it('user with write access can append', async () => {
-    const mockEntry = {
-      identity: testIdentity1.hash,
-      v: 1
-      // ...
-      // doesn't matter what we put here, only identity is used for the check
-    }
-    const canAppend = await accessController.canAppend(mockEntry)
-    strictEqual(canAppend, true)
-  })
-
-  it('user without write cannot append', async () => {
-    const mockEntry = {
-      identity: testIdentity2.hash,
-      v: 1
-      // ...
-      // doesn't matter what we put here, only identity is used for the check
-    }
-    const canAppend = await accessController.canAppend(mockEntry)
-    strictEqual(canAppend, false)
-  })
-
-  it('replicates the access controller', async () => {
-    const replicatedAccessController = await IPFSAccessController({
-      ipfs: ipfs2,
-      identities: identities2,
-      identity: testIdentity2,
-      address: accessController.address
+  describe('Write all access', () => {
+    before(async () => {
+      accessController = await IPFSAccessController({ write: ['*'] })({
+        orbitdb: orbitdb1,
+        identities: identities1
+      })
     })
 
-    strictEqual(replicatedAccessController.type, accessController.type)
-    strictEqual(replicatedAccessController.address, accessController.address)
-    deepStrictEqual(replicatedAccessController.write, accessController.write)
+    it('sets write to \'Anyone\'', async () => {
+      deepStrictEqual(accessController.write, ['*'])
+    })
   })
 })

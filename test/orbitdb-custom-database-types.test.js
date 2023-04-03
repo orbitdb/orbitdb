@@ -61,7 +61,7 @@ describe('Add a custom database type', function () {
         err = e
       }
       notStrictEqual(err, undefined)
-      strictEqual(err.message, 'Unspported database type: \'custom!\'')
+      strictEqual(err.message, 'Unsupported database type: \'custom!\'')
     })
   })
 

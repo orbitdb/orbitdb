@@ -5,8 +5,8 @@ import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
 
-const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta }) => {
-  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta })
+const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta }) => {
+  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta })
   const { events, log } = keyValueStore
 
   const queue = new PQueue({ concurrency: 1 })
