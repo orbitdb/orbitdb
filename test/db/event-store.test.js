@@ -1,5 +1,4 @@
 import { deepStrictEqual, strictEqual } from 'assert'
-import mapSeries from 'p-map-series'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
@@ -104,8 +103,7 @@ describe('EventStore Database', function () {
     const first = arr => arr[0]
 
     beforeEach(async () => {
-      hashes = []
-      hashes = await mapSeries([0, 1, 2, 3, 4], (i) => db.add('hello' + i))
+      hashes = await Promise.all([0, 1, 2, 3, 4].map(i => db.add('hello' + i)))
     })
 
     describe('amount', () => {

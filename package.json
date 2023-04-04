@@ -40,7 +40,6 @@
     "mocha": "^10.2.0",
     "mocha-headless-chrome": "^4.0.0",
     "open-cli": "^7.1.0",
-    "p-map-series": "^3.0.0",
     "path-browserify": "^1.0.1",
     "remark-cli": "^11.0.0",
     "rimraf": "^4.1.3",
