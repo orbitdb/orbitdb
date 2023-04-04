@@ -4,7 +4,6 @@ import Clock from './lamport-clock.js'
 import Heads from './heads.js'
 import Sorting from './sorting.js'
 import MemoryStorage from '../storage/memory.js'
-import pMap from 'p-map'
 
 const { LastWriteWins, NoZeroes } = Sorting
 
@@ -289,14 +288,15 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
           // filter out traversed and fetched hashes
           toFetch = [...toFetch, ...next, ...refs].filter(notIndexed)
           // Function to fetch an entry and making sure it's not a duplicate (check the hash indices)
-          const fetchEntries = async (hash) => {
+          const fetchEntries = (hash) => {
             if (!traversed[hash] && !fetched[hash]) {
               fetched[hash] = true
               return get(hash)
             }
           }
           // Fetch the next/reference entries
-          const nexts = await pMap(toFetch, fetchEntries)
+          const nexts = await Promise.all(toFetch.map(p => Promise.resolve(p).then(fetchEntries)))
+
           // Add the next and refs fields from the fetched entries to the next round
           toFetch = nexts
             .filter(e => e != null)
