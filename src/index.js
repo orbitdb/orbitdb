@@ -1,5 +1,5 @@
-export { default as OrbitDB } from './OrbitDB.js'
-export { databaseTypes, addDatabaseType } from './OrbitDB.js'
+export { default as OrbitDB } from './orbitdb.js'
+export { databaseTypes, addDatabaseType } from './orbitdb.js'
 export { default as OrbitDBAddress, isValidAddress, parseAddress } from './address.js'
 export { Log, Entry, DefaultAccessController } from './oplog/index.js'
 export { default as Database } from './database.js'

@@ -1,7 +1,7 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import OrbitDB, { AccessControllers } from '../src/OrbitDB.js'
+import OrbitDB, { AccessControllers } from '../src/orbitdb.js'
 import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 
