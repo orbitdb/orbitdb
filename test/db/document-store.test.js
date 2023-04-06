@@ -2,12 +2,11 @@ import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
+import { KeyStore, Identities } from '../../src/index.js'
 import { Documents } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('Documents Database', function () {
@@ -45,7 +44,7 @@ describe('Documents Database', function () {
 
   describe('Default index \'_id\'', () => {
     beforeEach(async () => {
-      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await Documents()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -149,7 +148,7 @@ describe('Documents Database', function () {
 
   describe('Custom index \'doc\'', () => {
     beforeEach(async () => {
-      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
+      db = await Documents({ indexBy: 'doc' })({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -252,7 +251,7 @@ describe('Documents Database', function () {
 
   describe('Iterator', () => {
     before(async () => {
-      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await Documents()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     after(async () => {

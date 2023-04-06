@@ -8,7 +8,7 @@ import pathJoin from './utils/path-join.js'
 const defaultReferencesCount = 16
 const defaultCacheSize = 1000
 
-const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically }) => {
+const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
   referencesCount = referencesCount || defaultReferencesCount
@@ -37,6 +37,9 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     const task = async () => {
       const entry = await log.append(op, { referencesCount })
       await sync.add(entry)
+      if (onUpdate) {
+        await onUpdate(entry)
+      }
       events.emit('update', entry)
       return entry.hash
     }
@@ -51,6 +54,9 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
       if (entry) {
         const updated = await log.joinEntry(entry)
         if (updated) {
+          if (onUpdate) {
+            await onUpdate(entry)
+          }
           events.emit('update', entry)
         }
       }

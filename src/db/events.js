@@ -1,6 +1,6 @@
 import Database from '../database.js'
 
-const Events = async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
+const Events = () => async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically })
 
   const { addOperation, log } = database

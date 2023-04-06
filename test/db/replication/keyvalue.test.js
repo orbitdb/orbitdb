@@ -2,14 +2,13 @@ import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
+import { KeyStore, Identities } from '../../../src/index.js'
 import { KeyValue } from '../../../src/db/index.js'
 import config from '../../config.js'
 import testKeysPath from '../../fixtures/test-keys-path.js'
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('KeyValue Database Replication', function () {
@@ -89,8 +88,8 @@ describe('KeyValue Database Replication', function () {
       console.error(err)
     }
 
-    kv1 = await KeyValue({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    kv2 = await KeyValue({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+    kv1 = await KeyValue()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    kv2 = await KeyValue()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     kv2.events.on('join', onConnected)
     kv2.events.on('update', onUpdate)
@@ -156,8 +155,8 @@ describe('KeyValue Database Replication', function () {
       console.error(err)
     }
 
-    kv1 = await KeyValue({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    kv2 = await KeyValue({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+    kv1 = await KeyValue()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    kv2 = await KeyValue()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     kv2.events.on('join', onConnected)
     kv1.events.on('join', onConnected)
@@ -179,8 +178,8 @@ describe('KeyValue Database Replication', function () {
     await kv1.close()
     await kv2.close()
 
-    kv1 = await KeyValue({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    kv2 = await KeyValue({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+    kv1 = await KeyValue()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    kv2 = await KeyValue()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     const value0 = await kv2.get('init')
     deepStrictEqual(value0, true)

@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, isValidAddress } from '../src/index.js'
+import { OrbitDB, isValidAddress, LevelStorage } from '../src/index.js'
 import { KeyValueIndexed } from '../src/db/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
@@ -415,13 +415,43 @@ describe('Open databases', function () {
 
       deepStrictEqual(all, expected)
     })
+  })
 
-    it('opens the database with a custom Store - KeyValueIndexed', async () => {
+  describe('opening an indexed keyvalue database', () => {
+    let indexStorage
+    let db, address
+
+    const amount = 10
+
+    before(async () => {
+      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+
+      indexStorage = await LevelStorage({ path: './index', valueEncoding: 'json' })
+      db = await orbitdb1.open('helloworld', { Database: KeyValueIndexed({ indexStorage }) })
+
+      address = db.address
+
+      for (let i = 0; i < amount; i++) {
+        await db.put('hello' + i, 'hello' + i)
+      }
+
+      await db.close()
+    })
+
+    after(async () => {
       if (db) {
         await db.close()
       }
+      if (orbitdb1) {
+        await orbitdb1.stop()
+      }
+      await rmrf('./index')
+      await rmrf('./orbitdb')
+    })
 
-      db = await orbitdb1.open(address, { Store: KeyValueIndexed })
+    it('returns all entries in the database and in the index', async () => {
+      indexStorage = await LevelStorage({ path: './index', valueEncoding: 'json' })
+      db = await orbitdb1.open(address, { Database: KeyValueIndexed({ indexStorage }) })
 
       strictEqual(db.type, 'keyvalue')
       strictEqual(db.name, 'helloworld')
@@ -437,6 +467,13 @@ describe('Open databases', function () {
       }
 
       deepStrictEqual(all, expected)
+
+      const result = []
+      for await (const [key, value] of indexStorage.iterator()) {
+        result.push({ key, value })
+      }
+
+      deepStrictEqual(result, expected)
     })
   })
 

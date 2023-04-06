@@ -4,12 +4,11 @@ import fs from 'fs'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
+import { KeyStore, Identities, MemoryStorage } from '../../src/index.js'
 import { KeyValueIndexed } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('KeyValueIndexed Database', function () {
@@ -47,7 +46,7 @@ describe('KeyValueIndexed Database', function () {
 
   describe('Creating a KeyValueIndexed database', () => {
     beforeEach(async () => {
-      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -80,7 +79,7 @@ describe('KeyValueIndexed Database', function () {
 
   describe('KeyValueIndexed database API', () => {
     beforeEach(async () => {
-      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -197,7 +196,7 @@ describe('KeyValueIndexed Database', function () {
 
   describe('Iterator', () => {
     before(async () => {
-      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     after(async () => {
@@ -267,6 +266,22 @@ describe('KeyValueIndexed Database', function () {
         all.unshift({ key, value })
       }
       strictEqual(all.length, amount)
+    })
+  })
+
+  describe('Parameters', () => {
+    it('can use a custom indexStorage', async () => {
+      const indexStorage = await MemoryStorage()
+      const db = await KeyValueIndexed({ indexStorage })({ ipfs, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+
+      await db.put('key', 'value')
+
+      let result
+      for await (const [key, value] of indexStorage.iterator()) {
+        result = [key, value]
+      }
+
+      deepStrictEqual(result, ['key', 'value'])
     })
   })
 })

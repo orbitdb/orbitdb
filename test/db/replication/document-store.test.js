@@ -2,14 +2,13 @@ import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../../src/index.js'
+import { KeyStore, Identities } from '../../../src/index.js'
 import { Documents } from '../../../src/db/index.js'
 import config from '../../config.js'
 import testKeysPath from '../../fixtures/test-keys-path.js'
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('Documents Database Replication', function () {
@@ -64,8 +63,8 @@ describe('Documents Database Replication', function () {
   })
 
   beforeEach(async () => {
-    db1 = await Documents({ OpLog, Database, ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    db2 = await Documents({ OpLog, Database, ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+    db1 = await Documents()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    db2 = await Documents()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
   })
 
   afterEach(async () => {

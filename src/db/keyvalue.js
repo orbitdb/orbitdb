@@ -1,7 +1,7 @@
 import Database from '../database.js'
 
-const KeyValue = async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
-  const database = await Database({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically })
+const KeyValue = () => async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically, onUpdate }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically, onUpdate })
 
   const { addOperation, log } = database
 

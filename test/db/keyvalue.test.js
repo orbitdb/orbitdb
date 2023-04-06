@@ -2,12 +2,11 @@ import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
+import { KeyStore, Identities } from '../../src/index.js'
 import { KeyValue } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('KeyValue Database', function () {
@@ -45,7 +44,7 @@ describe('KeyValue Database', function () {
 
   describe('Creating a KeyValue database', () => {
     beforeEach(async () => {
-      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValue()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -72,7 +71,7 @@ describe('KeyValue Database', function () {
 
   describe('KeyValue database API', () => {
     beforeEach(async () => {
-      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValue()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -189,7 +188,7 @@ describe('KeyValue Database', function () {
 
   describe('Iterator', () => {
     before(async () => {
-      db = await KeyValue({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValue()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     after(async () => {

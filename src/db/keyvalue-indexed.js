@@ -5,18 +5,11 @@ import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
 
-const KeyValueIndexed = async ({ ipfs, identity, address, name, access, directory, storage, meta }) => {
-  const keyValueStore = await KeyValue({ ipfs, identity, address, name, access, directory, storage, meta })
-  const { events, log } = keyValueStore
-
-  const queue = new PQueue({ concurrency: 1 })
-
+const KeyValueIndexed = ({ indexStorage } = {}) => async ({ ipfs, identity, address, name, access, directory, storage, meta }) => {
   directory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
-  const index = await LevelStorage({ path: directory, valueEncoding })
+  const index = indexStorage || await LevelStorage({ path: directory, valueEncoding })
 
-  let latestOplogHash
-
-  const updateIndex = (index) => async (entry) => {
+  const updateIndex = async (entry) => {
     const keys = {}
 
     for await (const entry of log.iterator({ gt: latestOplogHash })) {
@@ -32,6 +25,13 @@ const KeyValueIndexed = async ({ ipfs, identity, address, name, access, director
     }
     latestOplogHash = entry.hash
   }
+
+  const keyValueStore = await KeyValue()({ ipfs, identity, address, name, access, directory, storage, meta, onUpdate: updateIndex })
+  const { events, log } = keyValueStore
+
+  const queue = new PQueue({ concurrency: 1 })
+
+  let latestOplogHash
 
   const get = async (key) => {
     await queue.onIdle()
@@ -69,7 +69,7 @@ const KeyValueIndexed = async ({ ipfs, identity, address, name, access, director
   }
 
   // Listen for update events from the database and update the index on every update
-  events.on('update', task)
+  // events.on('update', task)
 
   return {
     ...keyValueStore,

@@ -3,12 +3,11 @@ import mapSeries from 'p-map-series'
 import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
-import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
+import { KeyStore, Identities } from '../../src/index.js'
 import { Events } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('Events Database', function () {
@@ -45,7 +44,7 @@ describe('Events Database', function () {
   })
 
   beforeEach(async () => {
-    db = await Events({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    db = await Events()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
   })
 
   afterEach(async () => {

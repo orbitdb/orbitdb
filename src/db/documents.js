@@ -1,6 +1,8 @@
 import Database from '../database.js'
 
-const Documents = async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically, indexBy = '_id' }) => {
+const DefaultOptions = { indexBy: '_id' }
+
+const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically })
 
   const { addOperation, log } = database
