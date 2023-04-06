@@ -295,7 +295,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
             }
           }
           // Fetch the next/reference entries
-          const nexts = await Promise.all(toFetch.map(p => Promise.resolve(p).then(fetchEntries)))
+          const nexts = await Promise.all(toFetch.map(fetchEntries))
 
           // Add the next and refs fields from the fetched entries to the next round
           toFetch = nexts
