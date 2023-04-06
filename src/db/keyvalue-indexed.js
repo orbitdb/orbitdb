@@ -1,25 +1,20 @@
-import LevelStorage from '../storage/level.js'
 import { KeyValue } from './index.js'
+import LevelStorage from '../storage/level.js'
 import pathJoin from '../utils/path-join.js'
-import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
 
-const KeyValueIndexed = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta }) => {
-  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta })
-  const { events, log } = keyValueStore
-
-  const queue = new PQueue({ concurrency: 1 })
-
-  directory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
-  const index = await LevelStorage({ path: directory, valueEncoding })
+const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+  const indexDirectory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
+  const index = storage || await LevelStorage({ path: indexDirectory, valueEncoding })
 
   let latestOplogHash
 
-  const updateIndex = (index) => async (entry) => {
+  const _updateIndex = async (log, entry) => {
     const keys = {}
+    const it = await log.iterator({ gt: latestOplogHash })
 
-    for await (const entry of log.iterator({ gt: latestOplogHash })) {
+    for await (const entry of it) {
       const { op, key, value } = entry.payload
 
       if (op === 'PUT' && !keys[key]) {
@@ -30,11 +25,17 @@ const KeyValueIndexed = async ({ OpLog, Database, ipfs, identity, address, name,
         await index.del(key)
       }
     }
-    latestOplogHash = entry.hash
+
+    latestOplogHash = entry ? entry.hash : null
   }
 
+  // Create the underlying KeyValue database
+  const keyValueStore = await KeyValue()({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate: _updateIndex })
+
+  // Compute the index
+  await _updateIndex(keyValueStore.log)
+
   const get = async (key) => {
-    await queue.onIdle()
     const value = await index.get(key)
     if (value) {
       return value
@@ -43,33 +44,21 @@ const KeyValueIndexed = async ({ OpLog, Database, ipfs, identity, address, name,
   }
 
   const iterator = async function * ({ amount } = {}) {
-    await queue.onIdle()
-    for await (const { hash, key, value } of keyValueStore.iterator({ amount })) {
-      yield { hash, key, value }
+    const it = keyValueStore.iterator({ amount })
+    for await (const { key, value, hash } of it) {
+      yield { key, value, hash }
     }
   }
 
-  const task = async () => {
-    await queue.add(updateIndex(index))
-  }
-
   const close = async () => {
-    events.off('update', task)
-    await queue.onIdle()
     await index.close()
     await keyValueStore.close()
   }
 
-  // TOD: rename to clear()
   const drop = async () => {
-    events.off('update', task)
-    await queue.onIdle()
     await index.clear()
     await keyValueStore.drop()
   }
-
-  // Listen for update events from the database and update the index on every update
-  events.on('update', task)
 
   return {
     ...keyValueStore,

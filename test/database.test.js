@@ -4,13 +4,12 @@ import { existsSync } from 'fs'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import Path from 'path'
-import { Log, Entry, Database, KeyStore, Identities } from '../src/index.js'
+import { Database, Entry, KeyStore, Identities } from '../src/index.js'
 import LevelStorage from '../src/storage/level.js'
 import MemoryStorage from '../src/storage/memory.js'
 import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 
-const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
 describe('Database', function () {
@@ -58,7 +57,7 @@ describe('Database', function () {
   })
 
   it('adds an operation', async () => {
-    db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb' })
+    db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb' })
     const expected = 'zdpuAwhx6xVpnMPUA7Q4JrvZsyoti5wZ18iDeFwBjPAwsRNof'
     const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
     const actual = await db.addOperation(op)
@@ -70,7 +69,7 @@ describe('Database', function () {
 
   describe('Options', () => {
     it('uses default directory for headsStorage', async () => {
-      db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController })
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController })
       const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
       const hash = await db.addOperation(op)
 
@@ -90,7 +89,7 @@ describe('Database', function () {
     })
 
     it('uses given directory for headsStorage', async () => {
-      db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './custom-directory' })
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './custom-directory' })
       const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
       const hash = await db.addOperation(op)
 
@@ -112,7 +111,7 @@ describe('Database', function () {
 
     it('uses given MemoryStorage for headsStorage', async () => {
       const headsStorage = await MemoryStorage()
-      db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', headsStorage })
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', headsStorage })
       const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
       const hash = await db.addOperation(op)
 
@@ -123,7 +122,7 @@ describe('Database', function () {
 
     it('uses given MemoryStorage for entryStorage', async () => {
       const entryStorage = await MemoryStorage()
-      db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', entryStorage })
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', entryStorage })
       const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
       const hash = await db.addOperation(op)
 
@@ -135,7 +134,7 @@ describe('Database', function () {
 
   describe('Events', () => {
     beforeEach(async () => {
-      db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb' })
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb' })
     })
 
     it('emits \'close\' when the database is closed', async () => {

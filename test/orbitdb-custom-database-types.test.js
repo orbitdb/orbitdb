@@ -1,13 +1,13 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, addDatabaseType, databaseTypes } from '../src/index.js'
+import { OrbitDB, addDatabaseType, databaseTypes, Database } from '../src/index.js'
 import config from './config.js'
 
 const type = 'custom!'
 
-const CustomStore = async ({ OpLog, Database, ipfs, identity, address, name, accessController, directory, storage, meta }) => {
-  const database = await Database({ OpLog, ipfs, identity, address, name, accessController, directory, storage, meta })
+const CustomStore = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
 
   return {
     ...database,
