@@ -5,7 +5,7 @@ import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
 
-const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta }) => {
+const KeyValueIndexed = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta }) => {
   const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta })
   const { events, log } = keyValueStore
 
@@ -80,4 +80,4 @@ const KeyValuePersisted = async ({ OpLog, Database, ipfs, identity, address, nam
   }
 }
 
-export default KeyValuePersisted
+export default KeyValueIndexed

@@ -30,7 +30,7 @@ describe('Entry', function () {
 
   describe('create', () => {
     it('creates a an empty entry', async () => {
-      const expectedHash = 'zdpuAyX6yUV5BQMGPaLEvQRa5SDxebEYvQPni6FHyPsRZ7San'
+      const expectedHash = 'zdpuAsKzwUEa8cz9pkJxxFMxLuP3cutA9PDGoLZytrg4RSVEa'
       const entry = await create(testIdentity, 'A', 'hello')
       strictEqual(entry.hash, expectedHash)
       strictEqual(entry.id, 'A')
@@ -43,7 +43,7 @@ describe('Entry', function () {
     })
 
     it('creates a entry with payload', async () => {
-      const expectedHash = 'zdpuAs4V7Wq9smdoHrzYQA46nFfqCF8iWaz98rZJC56bst3kx'
+      const expectedHash = 'zdpuAmthfqpHRQjdSpKN5etr1GrreJb7QcU1Hshm6pERnzsxi'
       const payload = 'hello world'
       const entry = await create(testIdentity, 'A', payload)
       strictEqual(entry.hash, expectedHash)

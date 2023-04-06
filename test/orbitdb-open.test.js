@@ -4,7 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
 import { OrbitDB, isValidAddress } from '../src/index.js'
-import { KeyValuePersisted } from '../src/db/index.js'
+import { KeyValueIndexed } from '../src/db/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
@@ -105,7 +105,7 @@ describe('Open databases', function () {
     })
 
     it('has a type that equals the database type', async () => {
-      strictEqual(db.type, 'eventstore')
+      strictEqual(db.type, 'events')
     })
 
     it('has a put function', async () => {
@@ -199,7 +199,7 @@ describe('Open databases', function () {
     it('returns all entries in the database', async () => {
       db = await orbitdb1.open('helloworld')
 
-      strictEqual(db.type, 'eventstore')
+      strictEqual(db.type, 'events')
       strictEqual(db.name, 'helloworld')
 
       const expected = []
@@ -250,7 +250,7 @@ describe('Open databases', function () {
     it('returns all entries in the database', async () => {
       db = await orbitdb2.open(address)
 
-      strictEqual(db.type, 'eventstore')
+      strictEqual(db.type, 'events')
       strictEqual(db.name, 'helloworld2')
 
       const expected = []
@@ -416,12 +416,12 @@ describe('Open databases', function () {
       deepStrictEqual(all, expected)
     })
 
-    it('opens the database with a custom Store - KeyValuePersisted', async () => {
+    it('opens the database with a custom Store - KeyValueIndexed', async () => {
       if (db) {
         await db.close()
       }
 
-      db = await orbitdb1.open(address, { Store: KeyValuePersisted })
+      db = await orbitdb1.open(address, { Store: KeyValueIndexed })
 
       strictEqual(db.type, 'keyvalue')
       strictEqual(db.name, 'helloworld')
@@ -470,7 +470,7 @@ describe('Open databases', function () {
     it('returns all entries in the database', async () => {
       db = await orbitdb1.open(address)
 
-      strictEqual(db.type, 'documentstore')
+      strictEqual(db.type, 'documents')
       strictEqual(db.name, 'helloworld')
 
       const expected = []

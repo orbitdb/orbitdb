@@ -22,7 +22,7 @@ describe('Database', function () {
   let testIdentity
   let db
 
-  const databaseId = 'documentstore-AAA'
+  const databaseId = 'database-AAA'
 
   const accessController = {
     canAppend: async (entry) => {
@@ -59,7 +59,7 @@ describe('Database', function () {
 
   it('adds an operation', async () => {
     db = await Database({ OpLog, ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb' })
-    const expected = 'zdpuAqQ9TJpMhPShuT315m2D9LUBkBPy8YX9zatjEynd2suZv'
+    const expected = 'zdpuAwhx6xVpnMPUA7Q4JrvZsyoti5wZ18iDeFwBjPAwsRNof'
     const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
     const actual = await db.addOperation(op)
 

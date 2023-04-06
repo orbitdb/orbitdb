@@ -1,7 +1,7 @@
-import Clock from '../../src/oplog/lamport-clock.js'
+import Clock from '../../src/oplog/clock.js'
 import { strictEqual } from 'assert'
 
-describe('Lamport Clock', () => {
+describe('Clock', () => {
   it('creates a new clock', () => {
     const id = 'A'
     const time = 0

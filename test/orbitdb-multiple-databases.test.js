@@ -12,7 +12,7 @@ const dbPath2 = './orbitdb/tests/multiple-databases/2'
 
 const databaseInterfaces = [
   {
-    name: 'event-store',
+    name: 'events',
     open: async (orbitdb, address, options) => await orbitdb.open(address, options),
     write: async (db, index) => {
       await db.add('hello' + index)
