@@ -65,7 +65,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
 
   let databases = {}
 
-  const open = async (address, { type, meta, sync, Database, AccessController } = {}) => {
+  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount } = {}) => {
     let name, manifest, accessController
 
     if (type && !databaseTypes[type]) {
@@ -108,7 +108,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
     if (!Database) {
       throw new Error(`Unsupported database type: '${type}'`)
     }
-    const db = await Database({ ipfs, identity, address: address.toString(), name, access: accessController, directory, meta, syncAutomatically: sync != null ? sync : true })
+    const db = await Database({ ipfs, identity, address: address.toString(), name, access: accessController, directory, meta, syncAutomatically: sync != null ? sync : true, headsStorage, entryStorage, indexStorage, referencesCount })
 
     db.events.on('close', onDatabaseClosed(address.toString()))
 

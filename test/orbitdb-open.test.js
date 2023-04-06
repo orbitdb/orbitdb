@@ -108,11 +108,6 @@ describe('Open databases', function () {
       strictEqual(db.type, 'events')
     })
 
-    it('has a put function', async () => {
-      notStrictEqual(db.put, undefined)
-      strictEqual(typeof db.put, 'function')
-    })
-
     it('has a add function', async () => {
       notStrictEqual(db.add, undefined)
       strictEqual(typeof db.add, 'function')
@@ -381,7 +376,7 @@ describe('Open databases', function () {
       address = db.address
 
       for (let i = 0; i < amount; i++) {
-        await db.put('hello' + i, 'hello' + i)
+        await db.put('key' + i, 'hello' + i)
       }
 
       await db.close()
@@ -405,7 +400,7 @@ describe('Open databases', function () {
 
       const expected = []
       for (let i = 0; i < amount; i++) {
-        expected.push({ key: 'hello' + i, value: 'hello' + i })
+        expected.push({ key: 'key' + i, value: 'hello' + i })
       }
 
       const all = []
@@ -418,27 +413,27 @@ describe('Open databases', function () {
   })
 
   describe('opening an indexed keyvalue database', () => {
-    let indexStorage
+    let storage
     let db, address
 
     const amount = 10
 
     before(async () => {
       orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
-
-      indexStorage = await LevelStorage({ path: './index', valueEncoding: 'json' })
-      db = await orbitdb1.open('helloworld', { Database: KeyValueIndexed({ indexStorage }) })
-
+      db = await orbitdb1.open('helloworld', { type: 'keyvalue' })
       address = db.address
 
       for (let i = 0; i < amount; i++) {
-        await db.put('hello' + i, 'hello' + i)
+        await db.put('key' + i, 'hello' + i)
       }
 
       await db.close()
     })
 
     after(async () => {
+      if (storage) {
+        await storage.close()
+      }
       if (db) {
         await db.close()
       }
@@ -450,16 +445,24 @@ describe('Open databases', function () {
     })
 
     it('returns all entries in the database and in the index', async () => {
-      indexStorage = await LevelStorage({ path: './index', valueEncoding: 'json' })
-      db = await orbitdb1.open(address, { Database: KeyValueIndexed({ indexStorage }) })
+      storage = await LevelStorage({ path: './index', valueEncoding: 'json' })
+      db = await orbitdb1.open(address, { Database: KeyValueIndexed({ storage }) })
 
+      strictEqual(db.address, address)
       strictEqual(db.type, 'keyvalue')
       strictEqual(db.name, 'helloworld')
 
       const expected = []
       for (let i = 0; i < amount; i++) {
-        expected.push({ key: 'hello' + i, value: 'hello' + i })
+        expected.push({ key: 'key' + i, value: 'hello' + i })
       }
+
+      const result = []
+      for await (const [key, value] of storage.iterator()) {
+        result.push({ key, value })
+      }
+
+      deepStrictEqual(result, expected)
 
       const all = []
       for await (const { key, value } of db.iterator()) {
@@ -467,13 +470,6 @@ describe('Open databases', function () {
       }
 
       deepStrictEqual(all, expected)
-
-      const result = []
-      for await (const [key, value] of indexStorage.iterator()) {
-        result.push({ key, value })
-      }
-
-      deepStrictEqual(result, expected)
     })
   })
 

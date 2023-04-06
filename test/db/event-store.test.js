@@ -59,10 +59,10 @@ describe('Events Database', function () {
     strictEqual(db.type, 'events')
   })
 
-  it('puts an event', async () => {
+  it('adds an event', async () => {
     const expected = 'init'
 
-    const hash = await db.put(null, expected)
+    const hash = await db.add(expected)
 
     const actual = await db.get(hash)
     strictEqual(actual, expected)

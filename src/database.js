@@ -38,7 +38,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
       const entry = await log.append(op, { referencesCount })
       await sync.add(entry)
       if (onUpdate) {
-        await onUpdate(entry)
+        await onUpdate(log, entry)
       }
       events.emit('update', entry)
       return entry.hash
@@ -55,7 +55,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
         const updated = await log.joinEntry(entry)
         if (updated) {
           if (onUpdate) {
-            await onUpdate(entry)
+            await onUpdate(log, entry)
           }
           events.emit('update', entry)
         }

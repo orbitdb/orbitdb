@@ -6,8 +6,8 @@ import config from './config.js'
 
 const type = 'custom!'
 
-const CustomStore = () => async ({ ipfs, identity, address, name, accessController, directory, storage, meta }) => {
-  const database = await Database({ ipfs, identity, address, name, accessController, directory, storage, meta })
+const CustomStore = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
 
   return {
     ...database,

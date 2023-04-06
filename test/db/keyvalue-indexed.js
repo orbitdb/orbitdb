@@ -35,6 +35,10 @@ describe('KeyValueIndexed Database', function () {
       await ipfs.stop()
     }
 
+    if (db) {
+      await db.close()
+    }
+
     if (keystore) {
       await keystore.close()
     }
@@ -270,14 +274,21 @@ describe('KeyValueIndexed Database', function () {
   })
 
   describe('Parameters', () => {
+    after(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
+
     it('can use a custom indexStorage', async () => {
-      const indexStorage = await MemoryStorage()
-      const db = await KeyValueIndexed({ indexStorage })({ ipfs, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+      const storage = await MemoryStorage()
+      db = await KeyValueIndexed({ storage })({ ipfs, identity: testIdentity1, address: databaseId, accessController })
 
       await db.put('key', 'value')
 
       let result
-      for await (const [key, value] of indexStorage.iterator()) {
+      for await (const [key, value] of storage.iterator()) {
         result = [key, value]
       }
 
