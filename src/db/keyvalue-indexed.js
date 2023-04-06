@@ -1,12 +1,12 @@
-import LevelStorage from '../storage/level.js'
 import { KeyValue } from './index.js'
+import LevelStorage from '../storage/level.js'
 import pathJoin from '../utils/path-join.js'
 import PQueue from 'p-queue'
 
 const valueEncoding = 'json'
 
-const KeyValueIndexed = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta }) => {
-  const keyValueStore = await KeyValue({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta })
+const KeyValueIndexed = async ({ ipfs, identity, address, name, access, directory, storage, meta }) => {
+  const keyValueStore = await KeyValue({ ipfs, identity, address, name, access, directory, storage, meta })
   const { events, log } = keyValueStore
 
   const queue = new PQueue({ concurrency: 1 })

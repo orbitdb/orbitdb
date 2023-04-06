@@ -1,7 +1,5 @@
-import Database from './database.js'
 import { Events, KeyValue, Documents } from './db/index.js'
-import { Log, Entry } from './oplog/index.js'
-import { ComposedStorage, IPFSBlockStorage, LevelStorage, LRUStorage } from './storage/index.js'
+import { ComposedStorage, IPFSBlockStorage, LRUStorage } from './storage/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
@@ -47,8 +45,6 @@ const addDatabaseType = (type, store) => {
 // }
 
 // const defaultTimeout = 30000 // 30 seconds
-
-const OpLog = { Log, Entry, IPFSBlockStorage, LevelStorage }
 
 const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   if (ipfs == null) {
@@ -113,7 +109,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       throw new Error(`Unsupported database type: '${type}'`)
     }
 
-    const db = await DatabaseModel({ OpLog, Database, ipfs, identity, address: address.toString(), name, access: accessController, directory, meta, syncAutomatically: sync != null ? sync : true })
+    const db = await DatabaseModel({ ipfs, identity, address: address.toString(), name, access: accessController, directory, meta, syncAutomatically: sync != null ? sync : true })
 
     db.events.on('close', onDatabaseClosed(address.toString()))
 
