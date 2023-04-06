@@ -1,16 +1,16 @@
 import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
-import OrbitDBIdentityProvider from './providers/orbitdb.js'
+import { PublicKeyIdentityProvider } from './providers/index.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
 import { LRUStorage, IPFSBlockStorage, MemoryStorage, ComposedStorage } from '../storage/index.js'
 import pathJoin from '../utils/path-join.js'
 
-const DefaultProviderType = 'orbitdb'
+const DefaultProviderType = PublicKeyIdentityProvider.type
 const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
 
 const supportedTypes = {
-  orbitdb: OrbitDBIdentityProvider
+  publickey: PublicKeyIdentityProvider
   // [DIDIdentityProvider.type]: DIDIdentityProvider,
   // [EthIdentityProvider.type]: EthIdentityProvider
 }

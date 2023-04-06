@@ -1,4 +1,4 @@
-import Clock from './lamport-clock.js'
+import Clock from './clock.js'
 
 /**
  * Sort two entries as Last-Write-Wins (LWW).

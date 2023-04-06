@@ -3,14 +3,14 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
-import { DocumentStore } from '../../src/db/index.js'
+import { Documents } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
-describe('DocumentStore Database', function () {
+describe('Documents Database', function () {
   let ipfs
   let keystore
   let accessController
@@ -18,7 +18,7 @@ describe('DocumentStore Database', function () {
   let testIdentity1
   let db
 
-  const databaseId = 'documentstore-AAA'
+  const databaseId = 'documents-AAA'
 
   before(async () => {
     ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
@@ -45,7 +45,7 @@ describe('DocumentStore Database', function () {
 
   describe('Default index \'_id\'', () => {
     beforeEach(async () => {
-      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -57,7 +57,7 @@ describe('DocumentStore Database', function () {
 
     it('creates a document store', async () => {
       strictEqual(db.address.toString(), databaseId)
-      strictEqual(db.type, 'documentstore')
+      strictEqual(db.type, 'documents')
       strictEqual(db.indexBy, '_id')
     })
 
@@ -149,7 +149,7 @@ describe('DocumentStore Database', function () {
 
   describe('Custom index \'doc\'', () => {
     beforeEach(async () => {
-      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
+      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController, indexBy: 'doc' })
     })
 
     afterEach(async () => {
@@ -161,7 +161,7 @@ describe('DocumentStore Database', function () {
 
     it('creates a document store', async () => {
       strictEqual(db.address.toString(), databaseId)
-      strictEqual(db.type, 'documentstore')
+      strictEqual(db.type, 'documents')
       strictEqual(db.indexBy, 'doc')
     })
 
@@ -252,7 +252,7 @@ describe('DocumentStore Database', function () {
 
   describe('Iterator', () => {
     before(async () => {
-      db = await DocumentStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await Documents({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     after(async () => {

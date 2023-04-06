@@ -23,7 +23,7 @@ describe('Database - Replication', function () {
   let testIdentity1, testIdentity2
   let db1, db2
 
-  const databaseId = 'documentstore-AAA'
+  const databaseId = 'documents-AAA'
 
   const accessController = {
     canAppend: async (entry) => {

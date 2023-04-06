@@ -2,14 +2,14 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import IdentityProvider from './interface.js'
 import { signMessage, verifyMessage } from '../../key-store.js'
 
-const type = 'orbitdb'
+const type = 'publickey'
 
-class OrbitDBIdentityProvider extends IdentityProvider {
+class PublicKeyIdentityProvider extends IdentityProvider {
   constructor ({ keystore }) {
     super()
 
     if (!keystore) {
-      throw new Error('OrbitDBIdentityProvider requires a keystore parameter')
+      throw new Error('PublicKeyIdentityProvider requires a keystore parameter')
     }
 
     this._keystore = keystore
@@ -46,4 +46,4 @@ class OrbitDBIdentityProvider extends IdentityProvider {
   }
 }
 
-export default OrbitDBIdentityProvider
+export default PublicKeyIdentityProvider

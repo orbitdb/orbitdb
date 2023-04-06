@@ -3,11 +3,10 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import Identities, { addIdentityProvider } from '../../src/identities/identities.js'
-import Identity from '../../src/identities/identity.js'
+import { Identities, addIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
-const type = 'orbitdb'
+const type = PublicKeyIdentityProvider.type
 const keysPath = './testkeys'
 
 describe('Identities', function () {

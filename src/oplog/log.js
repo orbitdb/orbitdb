@@ -1,12 +1,12 @@
 import LRU from 'lru'
 import Entry from './entry.js'
-import Clock from './lamport-clock.js'
+import Clock from './clock.js'
 import Heads from './heads.js'
-import Sorting from './sorting.js'
+import ConflictResolution from './conflict-resolution.js'
 import MemoryStorage from '../storage/memory.js'
 import pMap from 'p-map'
 
-const { LastWriteWins, NoZeroes } = Sorting
+const { LastWriteWins, NoZeroes } = ConflictResolution
 
 const randomId = () => new Date().getTime().toString()
 const maxClockTimeReducer = (res, acc) => Math.max(res, acc.clock.time)
@@ -72,7 +72,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
   /**
    * Returns the clock of the log.
-   * @returns {LamportClock}
+   * @returns {Clock}
    */
   const clock = async () => {
     // Find the latest clock from the heads

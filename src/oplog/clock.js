@@ -1,20 +1,21 @@
-class LamportClock {
+/* Lamport Clock */
+class Clock {
   constructor (id, time) {
     this.id = id
     this.time = time || 0
   }
 
   tick () {
-    return new LamportClock(this.id, ++this.time)
+    return new Clock(this.id, ++this.time)
   }
 
   merge (clock) {
     this.time = Math.max(this.time, clock.time)
-    return new LamportClock(this.id, this.time)
+    return new Clock(this.id, this.time)
   }
 
   clone () {
-    return new LamportClock(this.id, this.time)
+    return new Clock(this.id, this.time)
   }
 
   static compare (a, b) {
@@ -29,4 +30,4 @@ class LamportClock {
   }
 }
 
-export default LamportClock
+export default Clock

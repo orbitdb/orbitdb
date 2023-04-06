@@ -4,14 +4,14 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
-import { EventStore } from '../../src/db/index.js'
+import { Events } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
-describe('EventStore Database', function () {
+describe('Events Database', function () {
   let ipfs
   let keystore
   let accessController
@@ -19,7 +19,7 @@ describe('EventStore Database', function () {
   let testIdentity1
   let db
 
-  const databaseId = 'eventstore-AAA'
+  const databaseId = 'events-AAA'
 
   before(async () => {
     ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
@@ -45,7 +45,7 @@ describe('EventStore Database', function () {
   })
 
   beforeEach(async () => {
-    db = await EventStore({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+    db = await Events({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
   })
 
   afterEach(async () => {
@@ -57,7 +57,7 @@ describe('EventStore Database', function () {
 
   it('creates an event store', async () => {
     strictEqual(db.address.toString(), databaseId)
-    strictEqual(db.type, 'eventstore')
+    strictEqual(db.type, 'events')
   })
 
   it('puts an event', async () => {

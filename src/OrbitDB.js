@@ -1,5 +1,5 @@
 import Database from './database.js'
-import { EventStore, KeyValue, DocumentStore } from './db/index.js'
+import { Events, KeyValue, Documents } from './db/index.js'
 import { Log, Entry } from './oplog/index.js'
 import { ComposedStorage, IPFSBlockStorage, LevelStorage, LRUStorage } from './storage/index.js'
 import KeyStore from './key-store.js'
@@ -22,8 +22,8 @@ const hasher = sha256
 
 // Mapping for 'database type' -> Store
 const databaseTypes = {
-  events: EventStore,
-  documents: DocumentStore,
+  events: Events,
+  documents: Documents,
   keyvalue: KeyValue
 }
 //

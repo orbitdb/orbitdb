@@ -5,14 +5,14 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { Log, Entry, Database, KeyStore, Identities } from '../../src/index.js'
-import { KeyValuePersisted } from '../../src/db/index.js'
+import { KeyValueIndexed } from '../../src/db/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 
 const OpLog = { Log, Entry }
 const keysPath = './testkeys'
 
-describe('KeyValuePersisted Database', function () {
+describe('KeyValueIndexed Database', function () {
   let ipfs
   let keystore
   let accessController
@@ -45,9 +45,9 @@ describe('KeyValuePersisted Database', function () {
     await rmrf('./ipfs1')
   })
 
-  describe('Creating a KeyValuePersisted database', () => {
+  describe('Creating a KeyValueIndexed database', () => {
     beforeEach(async () => {
-      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -78,9 +78,9 @@ describe('KeyValuePersisted Database', function () {
     })
   })
 
-  describe('KeyValuePersisted database API', () => {
+  describe('KeyValueIndexed database API', () => {
     beforeEach(async () => {
-      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     afterEach(async () => {
@@ -91,14 +91,14 @@ describe('KeyValuePersisted Database', function () {
     })
 
     it('sets a key/value pair', async () => {
-      const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+      const expected = 'zdpuAwr2JfE9TNMoXwupvsssCzemc3g8MTKRfVTG7ZS5gH6md'
 
       const actual = await db.set('key1', 'value1')
       strictEqual(actual, expected)
     })
 
     it('puts a key/value pair', async () => {
-      const expected = 'zdpuAqEDJtUf3Kxg6qZgGv8XFqjtSyyxjF8qbz176Kcro5zwr'
+      const expected = 'zdpuAwr2JfE9TNMoXwupvsssCzemc3g8MTKRfVTG7ZS5gH6md'
 
       const actual = await db.put('key1', 'value1')
       strictEqual(actual, expected)
@@ -173,13 +173,13 @@ describe('KeyValuePersisted Database', function () {
 
     it('returns all key/value pairs', async () => {
       const keyvalue = [
-        { hash: 'zdpuAm6QEA29wFnd6re7X2XWe7AmrzVbsvdHhSPXci2CqXryw', key: 'key1', value: 'init' },
-        { hash: 'zdpuAvfTQwogEAhEaAtb85ugEzxvfDVUnALoZeNbrz3s4jMYd', key: 'key2', value: true },
-        { hash: 'zdpuB2ZCXwfkbgXQDHaP13rGSLVzZdZXuFPAk988VCZyMV1Er', key: 'key3', value: 'hello' },
-        { hash: 'zdpuAnDHm5qkyzkdtEiedF2VwyuUvrgsgM7mCVrjLya3G7nFS', key: 'key4', value: 'friend' },
-        { hash: 'zdpuB2XjqLhSEEB6CxCwCLWoas77Db6T9TJDNKcyX35kwbNmb', key: 'key5', value: '12345' },
-        { hash: 'zdpuB1GyECVHxwFBxa9QYeTYRFJRLDnujyekhXAmStG26stU9', key: 'key6', value: 'empty' },
-        { hash: 'zdpuAsj9ZgSCWSuRYFkQ56Eiffpi6j6761ueHHNwNf3VaZfms', key: 'key7', value: 'friend33' }
+        { hash: 'zdpuAnpWUWQFo7E7Q4fredrBdHWHTtSzMmo8CG7HRkWCu8Pbq', key: 'key1', value: 'init' },
+        { hash: 'zdpuAwTM75uy1xbBJzHRHUeYTJR67rhHND1w6EpHVH6ThHdos', key: 'key2', value: true },
+        { hash: 'zdpuAvYtscmvsQT7sgsJVsK7Gf7S3HweRJzs2D5TWBqz8wPGq', key: 'key3', value: 'hello' },
+        { hash: 'zdpuAqAGnfa8eryZZm4z4UHcGQKZe4ACwoe1bwfq1AnJRwcPC', key: 'key4', value: 'friend' },
+        { hash: 'zdpuAxHZs93Ys31jktM28GCwzrGP2vwuotr7MrSzLacGAS3dS', key: 'key5', value: '12345' },
+        { hash: 'zdpuAuGJ6UoncMuTjkknG4ySjxvAgkdMiRNecR6nDbLoPFDXX', key: 'key6', value: 'empty' },
+        { hash: 'zdpuAyi1oGLiYbH2UmRvXdGGC7z1vQYGE8oCvrfUvR5bGx6PN', key: 'key7', value: 'friend33' }
       ]
 
       for (const { key, value } of Object.values(keyvalue)) {
@@ -197,7 +197,7 @@ describe('KeyValuePersisted Database', function () {
 
   describe('Iterator', () => {
     before(async () => {
-      db = await KeyValuePersisted({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
+      db = await KeyValueIndexed({ OpLog, Database, ipfs, identity: testIdentity1, address: databaseId, accessController })
     })
 
     after(async () => {

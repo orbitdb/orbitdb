@@ -1,4 +1,4 @@
-import Clock from './lamport-clock.js'
+import Clock from './clock.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -18,7 +18,7 @@ const hashStringEncoding = base58btc
  * @param {Identity} identity The identity instance
  * @param {string} logId The unique identifier for this log
  * @param {*} data Data of the entry to be added. Can be any JSON.stringifyable data
- * @param {LamportClock} [clock] The lamport clock
+ * @param {Clock} [clock] The clock
  * @param {Array<string|Entry>} [next=[]] An array of CIDs as base58btc encoded strings
  * @param {Array<string|Entry>} [refs=[]] An array of CIDs as base58btc encoded strings
  * @returns {Promise<Entry>}
@@ -40,7 +40,7 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
     payload, // Can be any dag-cbor encodeable data
     next, // Array of strings of CIDs
     refs, // Array of strings of CIDs
-    clock, // Lamport Clock
+    clock, // Clock
     v: 2 // To tag the version of this data structure
   }
 

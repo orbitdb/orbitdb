@@ -1,13 +1,13 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import Clock from '../../src/oplog/lamport-clock.js'
-import Sorting from '../../src/oplog/sorting.js'
+import Clock from '../../src/oplog/clock.js'
+import ConflictResolution from '../../src/oplog/conflict-resolution.js'
 
-describe('Sorting', () => {
+describe('ConflictResolution', () => {
   describe('NoZeroes', () => {
     it('passed function cannot return 0', () => {
       let err
       const func = (a, b) => { return 0 }
-      const sortFn = Sorting.NoZeroes(func)
+      const sortFn = ConflictResolution.NoZeroes(func)
       const expected = 'Error: Your log\'s tiebreaker function, func, has returned zero and therefore cannot be'
 
       const record1 = 1
@@ -33,21 +33,21 @@ describe('Sorting', () => {
       const expected = -1
       const record1 = { clock: new Clock('A') }
       const record2 = { clock: new Clock('B') }
-      strictEqual(Sorting.SortByClockId(record1, record2, fallbackFn), expected)
+      strictEqual(ConflictResolution.SortByClockId(record1, record2, fallbackFn), expected)
     })
 
     it('returns 1 when first clock\'s id is greater than second clock\'s', () => {
       const expected = 1
       const record1 = { clock: new Clock('B') }
       const record2 = { clock: new Clock('A') }
-      strictEqual(Sorting.SortByClockId(record1, record2, fallbackFn), expected)
+      strictEqual(ConflictResolution.SortByClockId(record1, record2, fallbackFn), expected)
     })
 
     it('returns the clock when clocks have the same id', () => {
       const expected = { clock: new Clock('A') }
       const record1 = { clock: new Clock('A') }
       const record2 = { clock: new Clock('A') }
-      deepStrictEqual(Sorting.SortByClockId(record1, record2, fallbackFn), expected)
+      deepStrictEqual(ConflictResolution.SortByClockId(record1, record2, fallbackFn), expected)
     })
   })
 
@@ -61,21 +61,21 @@ describe('Sorting', () => {
       const expected = -1
       const record1 = { clock: new Clock('A', 1) }
       const record2 = { clock: new Clock('B', 2) }
-      strictEqual(Sorting.SortByClocks(record1, record2, fallbackFn), expected)
+      strictEqual(ConflictResolution.SortByClocks(record1, record2, fallbackFn), expected)
     })
 
     it('returns 1 when a\'s time is greater than b\'s', () => {
       const expected = 1
       const record1 = { clock: new Clock('A', 2) }
       const record2 = { clock: new Clock('B', 1) }
-      strictEqual(Sorting.SortByClocks(record1, record2, fallbackFn), expected)
+      strictEqual(ConflictResolution.SortByClocks(record1, record2, fallbackFn), expected)
     })
 
     it('returns -1 when a\'s time is equal to b\'s', () => {
       const expected = -1
       const record1 = { clock: new Clock('A', 1) }
       const record2 = { clock: new Clock('B', 1) }
-      strictEqual(Sorting.SortByClocks(record1, record2, fallbackFn), expected)
+      strictEqual(ConflictResolution.SortByClocks(record1, record2, fallbackFn), expected)
     })
   })
 
@@ -84,32 +84,32 @@ describe('Sorting', () => {
       const expected = -1
       const record1 = { clock: new Clock('A', 1) }
       const record2 = { clock: new Clock('B', 2) }
-      strictEqual(Sorting.LastWriteWins(record1, record2), expected)
+      strictEqual(ConflictResolution.LastWriteWins(record1, record2), expected)
     })
 
     it('returns 1 when a\'s time is greater than b\'s', () => {
       const expected = 1
       const record1 = { clock: new Clock('A', 2) }
       const record2 = { clock: new Clock('B', 1) }
-      strictEqual(Sorting.LastWriteWins(record1, record2), expected)
+      strictEqual(ConflictResolution.LastWriteWins(record1, record2), expected)
     })
 
     it('returns -1 when a\'s time is equal to b\'s', () => {
       const expected = -1
       const record1 = { clock: new Clock('A', 1) }
       const record2 = { clock: new Clock('B', 1) }
-      strictEqual(Sorting.LastWriteWins(record1, record2), expected)
+      strictEqual(ConflictResolution.LastWriteWins(record1, record2), expected)
     })
 
     it('returns the clock when a and b are the same', () => {
       const expected = { clock: new Clock('A') }
       const record1 = { clock: new Clock('A') }
       const record2 = { clock: new Clock('A') }
-      deepStrictEqual(Sorting.LastWriteWins(record1, record2), expected)
+      deepStrictEqual(ConflictResolution.LastWriteWins(record1, record2), expected)
     })
   })
 
-  describe('Sorting records', () => {
+  describe('ConflictResolution records', () => {
     it('sorts by clock time', () => {
       const expected = [
         { clock: new Clock('A', 1) },
@@ -125,7 +125,7 @@ describe('Sorting', () => {
         { clock: new Clock('B', 2) }
       ]
 
-      deepStrictEqual(records.sort(Sorting.LastWriteWins), expected)
+      deepStrictEqual(records.sort(ConflictResolution.LastWriteWins), expected)
     })
 
     it('sorts by clock time when id is the same', () => {
@@ -143,7 +143,7 @@ describe('Sorting', () => {
         { clock: new Clock('A', 2) }
       ]
 
-      deepStrictEqual(records.sort(Sorting.LastWriteWins), expected)
+      deepStrictEqual(records.sort(ConflictResolution.LastWriteWins), expected)
     })
 
     it('sorts by clock id', () => {
@@ -161,7 +161,7 @@ describe('Sorting', () => {
         { clock: new Clock('B') }
       ]
 
-      deepStrictEqual(records.sort(Sorting.LastWriteWins), expected)
+      deepStrictEqual(records.sort(ConflictResolution.LastWriteWins), expected)
     })
 
     it('sorts the same clock', () => {
@@ -179,7 +179,7 @@ describe('Sorting', () => {
         { clock: new Clock('A') }
       ]
 
-      deepStrictEqual(records.sort(Sorting.LastWriteWins), expected)
+      deepStrictEqual(records.sort(ConflictResolution.LastWriteWins), expected)
     })
   })
 })
