@@ -65,7 +65,7 @@ describe('Identities', function () {
     })
   })
 
-  describe.skip('Passing in custom keystore', async () => {
+  describe('Passing in custom keystore', async () => {
     const id = 'userB'
 
     let identity

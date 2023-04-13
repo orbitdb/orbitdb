@@ -7,7 +7,7 @@ import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 
 describe('Replicating databases', function () {
-  this.timeout(60000)
+  this.timeout(30000)
 
   let ipfs1, ipfs2
   let orbitdb1, orbitdb2
