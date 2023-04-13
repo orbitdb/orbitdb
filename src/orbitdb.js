@@ -1,18 +1,12 @@
 import { Events, KeyValue, Documents } from './db/index.js'
-import { ComposedStorage, IPFSBlockStorage, LRUStorage } from './storage/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
-import DBManifest from './manifest.js'
+import Manifests from './manifest.js'
 import { createId } from './utils/index.js'
 import pathJoin from './utils/path-join.js'
-import * as Block from 'multiformats/block'
-import * as dagCbor from '@ipld/dag-cbor'
-import { sha256 } from 'multiformats/hashes/sha2'
 import * as AccessControllers from './access-controllers/index.js'
-
-const codec = dagCbor
-const hasher = sha256
+import IPFSAccessController from './access-controllers/ipfs.js'
 
 // Mapping for database types
 const databaseTypes = {
@@ -28,6 +22,8 @@ const addDatabaseType = (type, store) => {
   databaseTypes[type] = store
 }
 
+const DefaultAccessController = IPFSAccessController
+
 const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   if (ipfs == null) {
     throw new Error('IPFS instance is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
@@ -40,10 +36,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   const identities = await Identities({ ipfs, keystore })
   identity = identity || await identities.createIdentity({ id })
 
-  const manifestStorage = await ComposedStorage(
-    await LRUStorage({ size: 1000 }),
-    await IPFSBlockStorage({ ipfs, pin: true })
-  )
+  const manifests = await Manifests({ ipfs })
 
   let databases = {}
 
@@ -61,23 +54,20 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      const bytes = await manifestStorage.get(addr.path)
-      const { value } = await Block.decode({ bytes, codec, hasher })
-      manifest = value
+      manifest = await manifests.get(addr.path)
       const acType = manifest.accessController.split('/', 2).pop()
-
       const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
-      accessController = await AccessControllers.get(acType)()({ orbitdb: { open, identity, ipfs }, identities, address: acAddress })
+      AccessController = AccessControllers.get(acType)()
+      accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: acAddress })
       name = manifest.name
       type = type || manifest.type
       meta = manifest.meta
     } else {
       // If the address given was not valid, eg. just the name of the database
       type = type || 'events'
-      AccessController = AccessController || AccessControllers.get('ipfs')({ storage: manifestStorage })
+      AccessController = AccessController || DefaultAccessController()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities })
-      const m = await DBManifest({ storage: manifestStorage, name: address, type, accessController: accessController.address, meta })
-
+      const m = await manifests.create({ name: address, type, accessController: accessController.address, meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)
       name = manifest.name
@@ -89,11 +79,14 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
     if (!Database) {
       throw new Error(`Unsupported database type: '${type}'`)
     }
-    const db = await Database({ ipfs, identity, address: address.toString(), name, access: accessController, directory, meta, syncAutomatically: sync != null ? sync : true, headsStorage, entryStorage, indexStorage, referencesCount })
 
-    db.events.on('close', onDatabaseClosed(address.toString()))
+    address = address.toString()
 
-    databases[address.toString()] = db
+    const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount })
+
+    db.events.on('close', onDatabaseClosed(address))
+
+    databases[address] = db
 
     return db
   }
@@ -106,8 +99,8 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
     if (keystore) {
       await keystore.close()
     }
-    if (manifestStorage) {
-      await manifestStorage.close()
+    if (manifests) {
+      await manifests.close()
     }
     databases = {}
   }
