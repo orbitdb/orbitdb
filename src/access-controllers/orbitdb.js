@@ -1,24 +1,15 @@
-import { EventEmitter } from 'events'
 import ensureACAddress from '../utils/ensure-ac-address.js'
 import IPFSAccessController from './ipfs.js'
 
 const type = 'orbitdb'
 
 const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities, address }) => {
-  const events = new EventEmitter()
-
   address = address || 'default-access-controller'
   write = write || [orbitdb.identity.id]
 
   // Force '<address>/_access' naming for the database
   const db = await orbitdb.open(ensureACAddress(address), { type: 'keyvalue', AccessController: IPFSAccessController({ write }) })
   address = db.address
-
-  const onUpdate = (entry) => {
-    events.emit('update', entry)
-  }
-
-  db.events.on('update', onUpdate)
 
   // Return true if entry is allowed to be added to the database
   const canAppend = async (entry) => {
@@ -101,7 +92,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
     grant,
     revoke,
     close,
-    events
+    events: db.events
   }
 }
 
