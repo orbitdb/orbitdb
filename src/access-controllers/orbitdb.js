@@ -1,3 +1,7 @@
+/**
+ * @namespace AccessControllers-OrbitDB
+ * @memberof module:AccessControllers
+ */
 import ensureACAddress from '../utils/ensure-ac-address.js'
 import IPFSAccessController from './ipfs.js'
 

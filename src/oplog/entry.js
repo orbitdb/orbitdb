@@ -1,13 +1,13 @@
+/**
+ * @namespace module:Log~Entry
+ * @memberof module:Log
+ * @description Log Entry
+ */
 import Clock from './clock.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
-
-/*
- * @description
- * A Log entry
- */
 
 const codec = dagCbor
 const hasher = sha256

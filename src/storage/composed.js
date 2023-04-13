@@ -1,3 +1,8 @@
+/**
+ * @namespace Storage-Composed
+ * @memberof module:Storage
+ */
+
 // Compose storages:
 // const storage1 = await ComposedStorage(await LRUStorage(), await LevelStorage())
 // const storage2 = await ComposedStorage(storage1, await IPFSBlockStorage())

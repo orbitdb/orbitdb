@@ -1,3 +1,8 @@
+/**
+ * @namespace Database-Documents
+ * @memberof module:Database
+ * @description Documents Database
+ */
 import Database from '../database.js'
 
 const DefaultOptions = { indexBy: '_id' }

@@ -1,3 +1,8 @@
+/**
+ * @namespace Database-KeyValueIndexed
+ * @memberof module:Database
+ * @description KeyValueIndexed Database
+ */
 import { KeyValue } from './index.js'
 import LevelStorage from '../storage/level.js'
 import pathJoin from '../utils/path-join.js'

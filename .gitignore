@@ -20,3 +20,6 @@ dist/
 
 # Don't track Visual Studio Code settings
 .vscode
+
+# JSDoc output folder
+out/

@@ -7,41 +7,105 @@ import pathJoin from './utils/path-join.js'
 const DefaultTimeout = 30000 // 30 seconds
 
 /**
+ * @module Sync
  * @description
- * Syncs an append-only, conflict-free replicated data type (CRDT) log between
- * multiple peers.
+ * The Sync Protocol for OrbitDB synchronizes the database operations {@link module:Log} between multiple peers.
  *
- * The sync protocol synchronizes heads between multiple peers, both during
- * startup and also when new entries are appended to the log.
+ * The Sync Protocol sends and receives heads between multiple peers,
+ * both when opening a database and when a database is updated, ie.
+ * new entries are appended to the log.
  *
- * When Sync is started, peers "dial" each other using libp2p's custom protocol
- * handler and initiate the exchange of heads each peer currently has. Once
- * initial sync has completed, peers notify one another of updates to heads
- * using pubsub "subscribe" with the same log.id topic. A peer with new heads
- * can broadcast changes to other peers using pubsub "publish". Peers
- * subscribed to the same topic will then be notified and will update their
- * heads accordingly.
+ * When Sync is started, a peer subscribes to a pubsub topic of the log's id.
+ * Upon subscribing to the topic, peers already connected to the topic receive
+ * the subscription message and "dial" the subscribing peer using a libp2p
+ * custom protocol. Once connected to the subscribing peer on a direct peer-to-peer
+ * connection, the dialing peer and the subscribing peer exchange the heads of the Log
+ * each peer currently has. Once completed, the peers have the same "local state".
  *
- * The sync protocol only guarantees that the message is published; it does not
- * guarantee the order in which messages are received or even that the message
- * is recieved at all. The sync protocol only guarantees that heads will
- * eventually reach consistency between all peers with the same address.
+ * Once the initial sync has completed, peers notify one another of updates to the
+ * log, ie. updates to the database, using the initially opened pubsub topic subscription.
+ * A peer with new heads broadcasts changes to other peers by publishing the updated heads
+ * to the pubsub topic. Peers subscribed to the same topic will then receive the update and
+ * will update their log's state, the heads, accordingly.
+ *
+ * The Sync Protocol is eventually consistent. It guarantees that once all messages
+ * have been sent and received, peers will observe the same log state and values.
+ * The Sync Protocol does not guarantee the order in which messages are received or
+ * even that a message is recieved at all, nor any timing on when messages are received.
+ *
+ * Note that the Sync Protocol does not retrieve the full log when synchronizing the
+ * heads. Rather only the "latest entries" in the log, the heads, are exchanged. In order
+ * to retrieve the full log and each entry, the user would call the log.traverse() or
+ * log.iterator() functions, which go through the log and retrieve each missing
+ * log entry from IPFS.
+ *
+ * @example
+ * // Using defaults
+ * const sync = await Sync({ ipfs, log, onSynced: (peerId, heads) => ... })
+ *
+ * @example
+ * // Using all parameters
+ * const sync = await Sync({ ipfs, log, events, onSynced: (peerId, heads) => ..., start: false })
+ * sync.events.on('join', (peerId, heads) => ...)
+ * sync.events.on('leave', (peerId) => ...)
+ * sync.events.on('error', (err) => ...)
+ * await sync.start()
  */
 
 /**
  * Creates a Sync instance for sychronizing logs between multiple peers.
+ *
+ * @function
  * @param {Object} params One or more parameters for configuring Sync.
- * @param {IPFS} params.ipfs An IPFS instance. Used for synchronizing peers.
- * @param {Log} params.log The Log instance to sync.
- * @param {Object} params.events An event emitter. Defaults to an instance of
- * EventEmitter. Events emitted are 'join', 'error' and 'leave'.
- * @param {Function} params.onSynced A function that is called after the peer
+ * @param {IPFS} params.ipfs An IPFS instance.
+ * @param {Log} params.log The log instance to sync.
+ * @param {EventEmitter} [params.events] An event emitter to use. Events emitted are 'join', 'leave' and 'error'. If the parameter is not provided, an EventEmitter will be created.
+ * @param {onSynced} [params.onSynced] A callback function that is called after the peer
  * has received heads from another peer.
- * @param {Boolean} params.start True if sync should start automatically, false
+ * @param {Boolean} [params.start] True if sync should start automatically, false
  * otherwise. Defaults to true.
- * @return {Sync} The Sync protocol instance.
+ * @return {module:Sync~Sync} sync An instance of the Sync Protocol.
+ * @memberof module:Sync
+ * @instance
  */
 const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
+  /**
+   * @namespace module:Sync~Sync
+   * @description The instance returned by {@link module:Sync}.
+   */
+
+  /**
+   * Callback function when new heads have been received from other peers.
+   * @callback module:Sync~onSynced
+   * @param {PeerID} peerId PeerID of the peer who we received heads from
+   * @param {Entry[]} heads An array of Log entries
+   */
+
+  /**
+   * Event fired when new heads have been received from other peers.
+   * @event module:Sync~Sync#join
+   * @param {PeerID} peerId PeerID of the peer who we received heads from
+   * @param {Entry[]} heads An array of Log entries
+   * @example
+   * sync.events.on('join', (peerID, heads) => ...)
+   */
+
+  /**
+   * Event fired when a peer leaves the sync protocol.
+   * @event module:Sync~Sync#leave
+   * @param {PeerID} peerId PeerID of the peer who we received heads from
+   * @example
+   * sync.events.on('leave', (peerID) => ...)
+   */
+
+  /**
+   * Event fired when an error occurs.
+   * @event module:Sync~Sync#error
+   * @param {Error} error The error that occured
+   * @example
+   * sync.events.on('error', (error) => ...)
+   */
+
   if (!ipfs) throw new Error('An instance of ipfs is required.')
   if (!log) throw new Error('An instance of log is required.')
 
@@ -49,9 +113,29 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const headsSyncAddress = pathJoin('/orbitdb/heads/', address)
 
   const queue = new PQueue({ concurrency: 1 })
+
+  /**
+   * Set of currently connected peers for the log for this Sync instance.
+   * @name peers
+   * @†ype Set
+   * @return Set set of PeerIDs
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   const peers = new Set()
 
+  /**
+   * Event emitter that emits updates.
+   * @name events
+   * @†ype EventEmitter
+   * @fires join when a peer has connected and heads were exchanged
+   * @fires leave when a peer disconnects
+   * @fires error when an error occurs
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   events = events || new EventEmitter()
+
   timeout = timeout || DefaultTimeout
 
   let started = false
@@ -145,12 +229,25 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     queue.add(task)
   }
 
+  /**
+   * Add a log entry to the Sync Protocol to be sent to peers.
+   * @function add
+   * @param {Entry} entry Log entry
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   const add = async (entry) => {
     if (started) {
       await ipfs.pubsub.publish(address, entry.bytes)
     }
   }
 
+  /**
+   * Stop the Sync Protocol.
+   * @function stop
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   const stopSync = async () => {
     if (started) {
       await queue.onIdle()
@@ -162,6 +259,12 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     }
   }
 
+  /**
+   * Start the Sync Protocol.
+   * @function start
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   const startSync = async () => {
     if (!started) {
       // Exchange head entries with peers when connected

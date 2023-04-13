@@ -1,3 +1,4 @@
+/** @module Identities */
 import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
 import { PublicKeyIdentityProvider } from './providers/index.js'
 // import DIDIdentityProvider from './identity-providers/did.js'

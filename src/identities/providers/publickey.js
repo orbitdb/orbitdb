@@ -1,3 +1,7 @@
+/**
+ * @namespace module:IdentityProviders.IdentityProviders-PublicKey
+ * @description PublicKey Identity Provider
+ */
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import IdentityProvider from './interface.js'
 import { signMessage, verifyMessage } from '../../key-store.js'

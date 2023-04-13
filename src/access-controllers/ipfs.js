@@ -1,3 +1,7 @@
+/**
+ * @namespace AccessControllers-IPFS
+ * @memberof module:AccessControllers
+ */
 import { IPFSBlockStorage, LRUStorage, ComposedStorage } from '../storage/index.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'

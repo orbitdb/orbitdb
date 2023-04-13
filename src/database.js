@@ -1,3 +1,4 @@
+/** @module Database */
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Sync from './sync.js'
@@ -9,6 +10,11 @@ const defaultReferencesCount = 16
 const defaultCacheSize = 1000
 
 const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+  /**
+   * @namespace module:Database~Database
+   * @description The instance returned by {@link module:Database}.
+   */
+
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
   referencesCount = referencesCount || defaultReferencesCount

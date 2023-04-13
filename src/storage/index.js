@@ -1,3 +1,4 @@
+/** @module Storage */
 export { default as ComposedStorage } from './composed.js'
 export { default as IPFSBlockStorage } from './ipfs-block.js'
 export { default as LevelStorage } from './level.js'

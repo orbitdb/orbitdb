@@ -37,6 +37,7 @@
     "fs-extra": "^11.1.0",
     "ipfs-core": "^0.18.0",
     "it-all": "^2.0.0",
+    "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",
     "mocha-headless-chrome": "^4.0.0",
     "open-cli": "^7.1.0",
@@ -61,7 +62,7 @@
     "build:examples": "webpack --config conf/webpack.example.config.js",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
-    "build:docs/toc": "echo 'TODO'",
+    "build:docs": "jsdoc -r src/**",
     "build:tests": "rm -f test/browser/bundle.js* && webpack --config ./conf/webpack.tests.config.js",
     "prepublishOnly": "npm run build",
     "lint": "standard --env=mocha",
@@ -74,6 +75,7 @@
       "mocha"
     ],
     "ignore": [
+      "out/**",
       "examples/**",
       "test/fixtures/**",
       "test/browser/**"

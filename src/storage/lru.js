@@ -1,3 +1,7 @@
+/**
+ * @namespace Storage-LRU
+ * @memberof module:Storage
+ */
 import LRU from 'lru'
 
 const defaultSize = 1000000

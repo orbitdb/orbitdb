@@ -1,3 +1,8 @@
+/**
+ * @namespace Database-KeyValue
+ * @memberof module:Database
+ * @description KeyValue Database
+ */
 import Database from '../database.js'
 
 const KeyValue = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
