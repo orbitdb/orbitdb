@@ -1,3 +1,7 @@
+/**
+ * @namespace Storage-Memory
+ * @memberof module:Storage
+ */
 const MemoryStorage = async () => {
   let memory = {}
 

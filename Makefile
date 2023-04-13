@@ -20,6 +20,7 @@ build: test
 clean:
 	rm -rf node_modules/
 	rm -rf coverage/
+	rm -rf out/
 	rm -f test/browser/bundle.js*
 
 clean-dependencies: clean

@@ -1,3 +1,7 @@
+/**
+ * @namespace Storage-IPFS
+ * @memberof module:Storage
+ */
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 

@@ -1,3 +1,4 @@
+/** @module OrbitDB */
 import { Events, KeyValue, Documents } from './db/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'

@@ -1,3 +1,7 @@
+/**
+ * @namespace Storage-Level
+ * @memberof module:Storage
+ */
 import { Level } from 'level'
 
 const defaultValueEncoding = 'view'

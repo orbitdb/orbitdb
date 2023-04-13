@@ -1,3 +1,4 @@
+/** @module IdentityProviders */
 export {
   default as Identities,
   addIdentityProvider,

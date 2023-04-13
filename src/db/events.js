@@ -1,3 +1,8 @@
+/**
+ * @namespace Database-Events
+ * @memberof module:Database
+ * @description Events Database
+ */
 import Database from '../database.js'
 
 const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {

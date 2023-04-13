@@ -1,3 +1,4 @@
+/** @module AccessControllers */
 import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
 

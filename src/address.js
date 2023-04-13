@@ -1,3 +1,4 @@
+/** @namespace Address */
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 import { posixJoin } from './utils/path-join.js'
