@@ -22,6 +22,7 @@ const addDatabaseType = (type, store) => {
   databaseTypes[type] = store
 }
 
+const DefaultDatabaseType = 'events'
 const DefaultAccessController = IPFSAccessController
 
 const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
@@ -64,7 +65,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       meta = manifest.meta
     } else {
       // If the address given was not valid, eg. just the name of the database
-      type = type || 'events'
+      type = type || DefaultDatabaseType
       AccessController = AccessController || DefaultAccessController()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities })
       const m = await manifests.create({ name: address, type, accessController: accessController.address, meta })

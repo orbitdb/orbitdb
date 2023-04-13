@@ -3,6 +3,7 @@
   "colors": true,
   "recursive": true,
   "exit": true,
+  "bail": false,
   "slow": 1000,
   "exclude": ["test/browser/**/*.js"]
 }
