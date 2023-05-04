@@ -209,6 +209,14 @@ describe('Open databases', function () {
 
       deepStrictEqual(all.map(e => e.value), expected)
     })
+
+    it('re-opens a database by address', async () => {
+      const dbReopened = await orbitdb1.open(db.address)
+
+      strictEqual(dbReopened.address, db.address)
+
+      dbReopened.close()
+    })
   })
 
   describe('opening a database as a different user', () => {
