@@ -231,7 +231,7 @@ describe('OrbitDB', function () {
         err = e
       }
       notStrictEqual(err, undefined)
-      strictEqual(err.message, 'IPFS instance is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+      strictEqual(err.message, 'IPFS instance is a required argument.')
     })
 
     it('throws an error if IPFS instance is not given', async () => {
@@ -242,7 +242,7 @@ describe('OrbitDB', function () {
         err = e
       }
       notStrictEqual(err, undefined)
-      strictEqual(err.message, 'IPFS instance is a required argument. See https://github.com/orbitdb/orbit-db/blob/master/API.md#createinstance')
+      strictEqual(err.message, 'IPFS instance is a required argument.')
     })
 
     it('doesn\'t create the data directory when an error occurs', async () => {

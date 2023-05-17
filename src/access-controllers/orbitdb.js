@@ -7,6 +7,30 @@ import IPFSAccessController from './ipfs.js'
 
 const type = 'orbitdb'
 
+/**
+ * Creates an instance of OrbitDBAccessController.
+ * @callback OrbitDBAccessController
+ * @param {Object} params Various parameters for configuring the access
+ * controller.
+ * @param {module:OrbitDB} params.orbitdb An OrbitDB instance.
+ * @param {module:Identities} params.identities An Identities instance.
+ * @param {string} [params.address] The address of the database.
+ * @function
+ * @instance
+ * @async
+ * @memberof module:AccessControllers.AccessControllers-OrbitDB
+ */
+
+/**
+ * Defines an OrbitDB access controller.
+ * @param {Object} options Various options for configuring the
+ * IPFSAccessController.
+ * @param {Array} [params.write] An array of identity ids who can write to the
+ * database.
+ * @returns {module:AccessControllers.AccessControllers-OrbitDB} An
+ * IPFSAccessController function.
+ * @memberof module:AccessControllers
+ */
 const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities, address }) => {
   address = address || 'default-access-controller'
   write = write || [orbitdb.identity.id]
@@ -15,7 +39,14 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   const db = await orbitdb.open(ensureACAddress(address), { type: 'keyvalue', AccessController: IPFSAccessController({ write }) })
   address = db.address
 
-  // Return true if entry is allowed to be added to the database
+  /**
+   * Verifies the write permission of an entry.
+   * @param {module:Log~Entry} entry An entry to verify.
+   * @returns {boolean} True if the entry's identity has write permission,
+   * false otherwise.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const canAppend = async (entry) => {
     const writerIdentity = await identities.getIdentity(entry.identity)
     if (!writerIdentity) {
@@ -32,6 +63,15 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
     return false
   }
 
+  /**
+   * Gets the access capabilities of the OrbitDB access controller.
+   *
+   * The returned capabilities will be a mixture of admin and write access
+   * addresses.
+   * @returns {Array} A list of addresses with admin and write access.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const capabilities = async () => {
     const _capabilities = []
     for await (const entry of db.iterator()) {
@@ -55,27 +95,64 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
     return _capabilities
   }
 
+  /**
+   * Gets a list of addresses with the specified capability.
+   * @param {string} capability A capability (e.g. write).
+   * @returns {Array} One or more addresses with the spcified capability.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const get = async (capability) => {
     const _capabilities = await capabilities()
     return _capabilities[capability] || new Set([])
   }
 
+  /**
+   * Close the underlying access control database.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const close = async () => {
     await db.close()
   }
 
+  /**
+   * Checks whether an address has a capability.
+   * @param {string} capability A capability (e.g. write).
+   * @param {string} key An address.
+   * @returns {boolean} True if the address has the capability, false
+   * otherwise.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const hasCapability = async (capability, key) => {
     // Write keys and admins keys are allowed
     const access = new Set(await get(capability))
     return access.has(key) || access.has('*')
   }
 
+  /**
+   * Grants a capability to an address, storing it to the access control
+   * database.
+   * @param {string} capability A capability (e.g. write).
+   * @param {string} key An address.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const grant = async (capability, key) => {
     // Merge current keys with the new key
     const capabilities = new Set([...(await db.get(capability) || []), ...[key]])
     await db.put(capability, Array.from(capabilities.values()))
   }
 
+  /**
+   * Revokes a capability from an address, removing it from the access control
+   * database.
+   * @param {string} capability A capability (e.g. write).
+   * @param {string} key An address.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
   const revoke = async (capability, key) => {
     const capabilities = new Set(await db.get(capability) || [])
     capabilities.delete(key)

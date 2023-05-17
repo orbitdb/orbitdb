@@ -1,4 +1,10 @@
-// Source: https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
+/**
+ * Creates an id from an alphanumeric character list.
+ * @param {number} [length=32] The length of the id.
+ * @returns {string} An id.
+ * @see {@link https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript}
+ * @memberof module:Utils
+ */
 const createId = async (length = 32) => {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   let result = ''

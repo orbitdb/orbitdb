@@ -1,4 +1,10 @@
-/** @module Identities */
+/**
+ * @module Identities
+ * @description
+ * Identities provides a framework for generating and managing identity
+ * details and providers.
+ */
+
 import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
 import { PublicKeyIdentityProvider } from './providers/index.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
@@ -16,7 +22,29 @@ const supportedTypes = {
   // [EthIdentityProvider.type]: EthIdentityProvider
 }
 
+/**
+ * Creates an instance of Identities.
+ * @function
+ * @param {Object} params One or more parameters for configuring Identities.
+ * @param {module:KeyStore} [params.keystore] A preconfigured KeyStore.
+ * A KeyStore will be created in the path defined by the path param. If neither
+ * Keystore nor path are defined, a new KeyStore is stored in ./orbitdb
+ * identities.
+ * @param {string} [params.path] The path to a KeyStore. If no path is
+ * provided, the default is ./orbitdb/identities.
+ * @param {module:Storage} [params.storage] An instance of a compatible storage
+ * module.
+ * @param {IPFS} [params.ipfs] An instance of IPFS. This param is not required
+ * if storage is provided.
+ * @returns {module:Identities~Identities} An instance of Identities.
+ * @instance
+ */
 const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
+  /**
+   * @namespace module:Identities~Identities
+   * @description The instance returned by {@link module:Identities~Identities}.
+   */
+
   keystore = keystore || await KeyStore({ path: path || DefaultIdentityKeysPath })
 
   if (!storage) {
@@ -27,6 +55,13 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
 
   const verifiedIdentitiesCache = await LRUStorage({ size: 1000 })
 
+  /**
+   * Gets an identity by hash.
+   * @param {string} hash An identity hash.
+   * @returns {Identity} An instance of identity.
+   * @memberof module:Identities~Identities
+   * @instance
+   */
   const getIdentity = async (hash) => {
     const bytes = await storage.get(hash)
     if (bytes) {
@@ -34,6 +69,14 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     }
   }
 
+  /**
+   * Creates an identity, adding it to storage.
+   * @param {Object} options Various options for configuring a new identity.
+   * @param {string} [options.type=PublicKeyIdentityProvider.type] The type of provider to use for generating an identity.
+   * @returns {Identity} An instance of identity.
+   * @memberof module:Identities~Identities
+   * @instance
+   */
   const createIdentity = async (options = {}) => {
     options.keystore = keystore
 
@@ -57,6 +100,12 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     return identity
   }
 
+  /**
+   * Verifies an identity using the identity's provider.
+   * @param {Identity} identity The identity to verify.
+   * @returns {boolean} True the identity is valid, false otherwise.
+   * @memberof module:Identities~Identities
+   */
   const verifyIdentity = async (identity) => {
     if (!isIdentity(identity)) {
       return false
@@ -84,6 +133,16 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     return identityVerified
   }
 
+  /**
+   * Signs data using an identity.
+   * @param {Identity} identity The identity to use for signing.
+   * @param {string} data The data to sign.
+   * @returns {string} The signed data.
+   * @throws Private signing key not fund from KeyStore when no signing key can
+   * be retrieved.
+   * @memberof module:Identities~Identities
+   * @instance
+   */
   const sign = async (identity, data) => {
     const signingKey = await keystore.getKey(identity.id)
 
@@ -108,10 +167,26 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   }
 }
 
+/**
+ * Checks whether an identity provider is supported.
+ * @param {string} type The identity provider type.
+ * @returns {boolean} True if the identity provider is supported, false
+ * otherwise.
+ * @static
+ */
 const isProviderSupported = (type) => {
   return Object.keys(supportedTypes).includes(type)
 }
 
+/**
+ * Gets an identity provider.
+ * @param {string} type The identity provider type.
+ * @returns {IdentityProvider} The IdentityProvider module corresponding to
+ * type.
+ * @throws IdentityProvider type is not supported if the identity provider is
+ * not supported.
+ * @static
+ */
 const getProviderFor = (type) => {
   if (!isProviderSupported(type)) {
     throw new Error(`IdentityProvider type '${type}' is not supported`)
@@ -120,6 +195,15 @@ const getProviderFor = (type) => {
   return supportedTypes[type]
 }
 
+/**
+ * Adds an identity provider.
+ * @param {IdentityProvider} IdentityProvider The identity provider to add.
+ * @throws IdentityProvider must be given as an argument if no module is
+ * provided.
+ * @throws 'Given IdentityProvider doesn't have a field 'type' if the
+ * IdentityProvider does not include a type property.
+ * @static
+ */
 const addIdentityProvider = (IdentityProvider) => {
   if (!IdentityProvider) {
     throw new Error('IdentityProvider must be given as an argument')
@@ -133,6 +217,11 @@ const addIdentityProvider = (IdentityProvider) => {
   supportedTypes[IdentityProvider.type] = IdentityProvider
 }
 
+/**
+ * Removes an identity provider.
+ * @param {string} type The identity provider type.
+ * @static
+ */
 const removeIdentityProvider = (type) => {
   delete supportedTypes[type]
 }

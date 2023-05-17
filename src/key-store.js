@@ -1,3 +1,13 @@
+/**
+* @module KeyStore
+* @description
+* Provides a local key manager for OrbitDB.
+* @example <caption>Create a keystore with defaults.</caption>
+* const keystore = await KeyStore()
+* @example <caption>Create a keystore with custom storage.</caption>
+* const storage = await MemoryStorage()
+* const keystore = await KeyStore({ storage })
+*/
 import * as crypto from '@libp2p/crypto'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
@@ -9,6 +19,17 @@ import LRUStorage from './storage/lru.js'
 const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
 const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
 
+/**
+ * Verifies a signature used for signing data.
+ * @params {string} signature The generated signature.
+ * @params {string} publicKey The derived public key of the key pair.
+ * @params {string} data The data to be verified.
+ * @return {boolean} True if the signature is valid, false otherwise.
+ * @throws No signature given if no signature is provided.
+ * @throws Given publicKey was undefined if no publicKey is provided.
+ * @throws Given input data was undefined if no data is provided.
+ * @static
+ */
 const verifySignature = async (signature, publicKey, data) => {
   if (!signature) {
     throw new Error('No signature given')
@@ -37,6 +58,15 @@ const verifySignature = async (signature, publicKey, data) => {
   return Promise.resolve(res)
 }
 
+/**
+ * Signs data using a key pair.
+ * @params {string} key The key to use for signing data.
+ * @params {string} data The data to sign.
+ * @return {string} A signature.
+ * @throws No signing key given if no key is provided.
+ * @throws Given input data was undefined if no data is provided.
+ * @static
+ */
 const signMessage = async (key, data) => {
   if (!key) {
     throw new Error('No signing key given')
@@ -55,6 +85,14 @@ const signMessage = async (key, data) => {
 
 const verifiedCachePromise = LRUStorage({ size: 1000 })
 
+/**
+ * Verifies input data against a cached version of the signed message.
+ * @params {string} signature The generated signature.
+ * @params {string} publicKey The derived public key of the key pair.
+ * @params {string} data The data to be verified.
+ * @return {boolean} True if the the data and cache match, false otherwise.
+ * @static
+ */
 const verifyMessage = async (signature, publicKey, data) => {
   const verifiedCache = await verifiedCachePromise
   const cached = await verifiedCache.get(signature)
@@ -81,22 +119,50 @@ const defaultPath = './keystore'
 
 /**
  * Creates an instance of KeyStore.
- * @param {Object} options Various options to use when instantiating KeyStore.
- * @param {Object} options.storage An instance of a storage class. Can be one of ComposedStorage, IPFSBlockStorage, LevelStorage, etc. Defaults to ComposedStorage.
- * @param {string} options.path The path to a valid storage. Defaults to ./keystore.
- * @return {KeyStore} An instance of KeyStore.
+ * @param {Object} params One or more parameters for configuring KeyStore.
+ * @param {Object} [params.storage] An instance of a storage class. Can be one
+ * of ComposedStorage, IPFSBlockStorage, LevelStorage, etc. Defaults to
+ * ComposedStorage.
+ * @param {string} [params.path=./keystore] The path to a valid storage.
+ * @return {module:KeyStore~KeyStore} An instance of KeyStore.
+ * @instance
  */
 const KeyStore = async ({ storage, path } = {}) => {
+  /**
+   * @namespace module:KeyStore~KeyStore
+   * @description The instance returned by {@link module:KeyStore}.
+   */
   storage = storage || await ComposedStorage(await LRUStorage({ size: 1000 }), await LevelStorage({ path: path || defaultPath }))
 
+  /**
+   * Closes the KeyStore's underlying storage.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const close = async () => {
     await storage.close()
   }
 
+  /**
+   * Clears the KeyStore's underlying storage.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const clear = async () => {
     await storage.clear()
   }
 
+  /**
+   * Checks if the key exists in the key store.
+   * @param {string} id The id of the private key in the key store.
+   * @return {boolean} True if the key exists, false otherwise.
+   * @throws id needed to check a key if no id is specified.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const hasKey = async (id) => {
     if (!id) {
       throw new Error('id needed to check a key')
@@ -114,12 +180,27 @@ const KeyStore = async ({ storage, path } = {}) => {
     return hasKey
   }
 
+  /**
+   * Adds a key to the keystore.
+   * @param {string} id A storage id for the key.
+   * @param {Uint8Array} key The key to store.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const addKey = async (id, key) => {
-    //    await storage.put('public_' + id, key.publicKey)
     await storage.put('private_' + id, key.privateKey)
   }
 
-  const createKey = async (id, { entropy } = {}) => {
+  /**
+   * Creates a key, storing it to the keystore.
+   * @param {string} id A storage id for the key.
+   * @throws id needed to create a key if no id is specified.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
+  const createKey = async (id) => {
     if (!id) {
       throw new Error('id needed to create a key')
     }
@@ -139,6 +220,15 @@ const KeyStore = async ({ storage, path } = {}) => {
     return keys
   }
 
+  /**
+   * Gets the key from keystore.
+   * @param {string} id A storage id of the key.
+   * @return {Uint8Array} The key specified by id.
+   * @throws id needed to get a key if no id is specified.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const getKey = async (id) => {
     if (!id) {
       throw new Error('id needed to get a key')
@@ -158,6 +248,19 @@ const KeyStore = async ({ storage, path } = {}) => {
     return unmarshal(storedKey)
   }
 
+  /**
+   * Gets th serialized public key from a key pair.
+   * @param {*} keys A key pair.
+   * @param {Object} options One or more options.
+   * @param {Object} [options.format=hex] The format the public key should be
+   * returned in.
+   * @return {Uint8Array|String} The public key.
+   * @throws Supported formats are `hex` and `buffer` if an invalid format is
+   * passed in options.
+   * @memberof module:KeyStore~KeyStore
+   * @async
+   * @instance
+   */
   const getPublic = (keys, options = {}) => {
     const formats = ['hex', 'buffer']
     const format = options.format || 'hex'

@@ -144,7 +144,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    *
    * @param {data} data Payload to add to the entry
    * @param {Object} options
-   * @param {Integer} options.referencesCount TODO
+   * @param {number} options.referencesCount TODO
    * @return {module:Log~Entry} Entry that was appended
    * @memberof module:Log~Log
    * @instance

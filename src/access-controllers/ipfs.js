@@ -26,6 +26,31 @@ const AccessControlList = async ({ storage, type, params }) => {
 
 const type = 'ipfs'
 
+/**
+ * Creates an instance of IPFSAccessController.
+ * @callback IPFSAccessController
+ * @param {Object} params Various parameters for configuring the access
+ * controller.
+ * @param {module:OrbitDB} params.orbitdb An OrbitDB instance.
+ * @param {module:Identities} params.identities An Identities instance.
+ * @param {string} [params.address] The address of the database.
+ * @function
+ * @instance
+ * @async
+ * @memberof module:AccessControllers.AccessControllers-IPFS
+ */
+
+/**
+ * Defines an IPFS access controller.
+ * @param {Object} options Various options for configuring the
+ * IPFSAccessController.
+ * @param {Array} [params.write] An array of identity ids who can write to the
+ * database.
+ * @param {module:Storage} [params.storage] An instance of a compatible storage.
+ * @returns {module:AccessControllers.AccessControllers-IPFS} An
+ * IPFSAccessController function.
+ * @memberof module:AccessControllers
+ */
 const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, identities, address }) => {
   storage = storage || await ComposedStorage(
     await LRUStorage({ size: 1000 }),
@@ -42,6 +67,13 @@ const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, iden
     address = pathJoin('/', type, address)
   }
 
+  /**
+   * Verifies the write permission of an entry.
+   * @param {module:Log~Entry} entry An entry to verify.
+   * @returns {boolean} True if the entry's identity has write permission,
+   * false otherwise.
+   * @memberof module:AccessControllers.AccessControllers-IPFS
+   */
   const canAppend = async (entry) => {
     const writerIdentity = await identities.getIdentity(entry.identity)
     if (!writerIdentity) {
