@@ -8,7 +8,7 @@
 /**
   * Creates an instance of MemoryStorage.
   * @function
-  * @returns {module:Storage.Storage-Memory} An instance of LRUStorage.
+  * @return {module:Storage.Storage-Memory} An instance of LRUStorage.
   * @memberof module:Storage
   * @instance
   */

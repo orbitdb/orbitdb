@@ -37,7 +37,7 @@ import Database from '../database.js'
 
 /**
  * Defines an KeyValue database.
- * @returns {module:Database.Database-KeyValue} A KeyValue function.
+ * @return {module:Database.Database-KeyValue} A KeyValue function.
  * @memberof module:Database
  */
 const KeyValue = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
@@ -50,7 +50,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * @function
    * @param {string} key The key to store.
    * @param {*} value The value to store.
-   * @returns {string} The hash of the new oplog entry.
+   * @return {string} The hash of the new oplog entry.
    * @memberof module:Database.Database-KeyValue
    * @instance
    */
@@ -73,7 +73,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * Gets a value from the store by key.
    * @function
    * @param {string} key The key of the value to get.
-   * @returns {*} The value corresponding to key or null.
+   * @return {*} The value corresponding to key or null.
    * @memberof module:Database.Database-KeyValue
    * @instance
    */
@@ -91,8 +91,8 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
   /**
    * Iterates over keyvalue pairs.
    * @function
-   * @params {Object} [filters={}] Various filters to apply to the iterator.
-   * @params {string} [filters.amount=-1] The number of results to fetch.
+   * @param {Object} [filters={}] Various filters to apply to the iterator.
+   * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next key/value as key/value/hash.
    * @memberof module:Database.Database-KeyValue
    * @instance
@@ -119,7 +119,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
   /**
    * Returns all key/value pairs.
    * @function
-   * @returns [][string, string, string] An array of key/value pairs as
+   * @return [][string, string, string] An array of key/value pairs as
    * key/value/hash entries.
    * @memberof module:Database.Database-KeyValue
    * @instance

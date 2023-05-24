@@ -54,7 +54,7 @@ const DefaultOptions = { indexBy: '_id' }
  * Defines a Documents database.
  * @param {Object} options Various options for configuring the Document store.
  * @param {string} [params.indexBy=_id] An index.
- * @returns {module:Database.Database-Documents} A Documents function.
+ * @return {module:Database.Database-Documents} A Documents function.
  * @memberof module:Database
  */
 const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
@@ -66,7 +66,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * Stores a document to the store.
    * @function
    * @param {Object} doc An object representing a key/value list of fields.
-   * @returns {string} The hash of the new oplog entry.
+   * @return {string} The hash of the new oplog entry.
    * @memberof module:Database.Database-Documents
    * @instance
    */
@@ -82,7 +82,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * Deletes a document from the store.
    * @function
    * @param {string} key The key of the doc to delete.
-   * @returns {string} The hash of the new oplog entry.
+   * @return {string} The hash of the new oplog entry.
    * @memberof module:Database.Database-Documents
    * @instance
    */
@@ -96,7 +96,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * Gets a document from the store by key.
    * @function
    * @param {string} key The key of the doc to get.
-   * @returns {Object} The doc corresponding to key or null.
+   * @return {Object} The doc corresponding to key or null.
    * @memberof module:Database.Database-Documents
    * @instance
    */
@@ -113,7 +113,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {function(Object)} findFn A function for querying for specific
    * results.
-   * @returns {Array} Found documents.
+   * @return {Array} Found documents.
    * @memberof module:Database.Database-Documents
    * @instance
    */
@@ -132,8 +132,8 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
   /**
    * Iterates over documents.
    * @function
-   * @params {Object} [filters={}] Various filters to apply to the iterator.
-   * @params {string} [filters.amount=-1] The number of results to fetch.
+   * @param {Object} [filters={}] Various filters to apply to the iterator.
+   * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next document as hash/key/value.
    * @memberof module:Database.Database-Documents
    * @instance
@@ -160,7 +160,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
   /**
    * Returns all documents.
    * @function
-   * @returns [][string, string, string] An array of documents as hash/key
+   * @return [][string, string, string] An array of documents as hash/key
    * value entries.
    * @memberof module:Database.Database-Documents
    * @instance

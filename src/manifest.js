@@ -20,7 +20,7 @@ const hashStringEncoding = base58btc
  * @param {Object} params One or more parameters for configuring Manifest.
  * @param {IPFS} params.ipfs An instance of IPFS.
  * @param {module:Storage} [param.storage=module:Storage.Storage-ComposedStorage] An instance of Storage.
- * @returns {module:Manifest} An instance of Manifest.
+ * @return {module:Manifest} An instance of Manifest.
  * @instance
  */
 const Manifest = async ({ ipfs, storage } = {}) => {
@@ -37,7 +37,7 @@ const Manifest = async ({ ipfs, storage } = {}) => {
   /**
    * Gets the manifest data from the underlying storage.
    * @param {string} address The address of the manifest.
-   * @returns {*} The manifest data.
+   * @return {*} The manifest data.
    * @memberof module:Manifest~Manifest
    */
   const get = async (address) => {
@@ -53,7 +53,7 @@ const Manifest = async ({ ipfs, storage } = {}) => {
    * @param {string} type The type of the database.
    * @param {string} accessController The type of access controller.
    * @param {Object} meta Metadata.
-   * @returns {Object} A hash and manifest.
+   * @return {Object} A hash and manifest.
    * @throws name is required if no name is provided.
    * @throws type is required if no type is provided.
    * @throws accessController is required if no access controller is provided.

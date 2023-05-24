@@ -21,9 +21,9 @@ const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1Pu
 
 /**
  * Verifies a signature used for signing data.
- * @params {string} signature The generated signature.
- * @params {string} publicKey The derived public key of the key pair.
- * @params {string} data The data to be verified.
+ * @param {string} signature The generated signature.
+ * @param {string} publicKey The derived public key of the key pair.
+ * @param {string} data The data to be verified.
  * @return {boolean} True if the signature is valid, false otherwise.
  * @throws No signature given if no signature is provided.
  * @throws Given publicKey was undefined if no publicKey is provided.
@@ -60,8 +60,8 @@ const verifySignature = async (signature, publicKey, data) => {
 
 /**
  * Signs data using a key pair.
- * @params {string} key The key to use for signing data.
- * @params {string} data The data to sign.
+ * @param {string} key The key to use for signing data.
+ * @param {string} data The data to sign.
  * @return {string} A signature.
  * @throws No signing key given if no key is provided.
  * @throws Given input data was undefined if no data is provided.
@@ -87,9 +87,9 @@ const verifiedCachePromise = LRUStorage({ size: 1000 })
 
 /**
  * Verifies input data against a cached version of the signed message.
- * @params {string} signature The generated signature.
- * @params {string} publicKey The derived public key of the key pair.
- * @params {string} data The data to be verified.
+ * @param {string} signature The generated signature.
+ * @param {string} publicKey The derived public key of the key pair.
+ * @param {string} data The data to be verified.
  * @return {boolean} True if the the data and cache match, false otherwise.
  * @static
  */

@@ -54,7 +54,7 @@ const valueEncoding = 'json'
  * @param {Object} options Various options for configuring the KeyValueIndexed
  * store.
  * @param {module:Storage} [storage=LevelStorage] A compatible storage.
- * @returns {module:Database.Database-KeyValueIndexed} A KeyValueIndexed
+ * @return {module:Database.Database-KeyValueIndexed} A KeyValueIndexed
  * function.
  * @memberof module:Database
  */
@@ -93,7 +93,7 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    * Gets a value from the store by key.
    * @function
    * @param {string} key The key of the value to get.
-   * @returns {*} The value corresponding to key or null.
+   * @return {*} The value corresponding to key or null.
    * @memberof module:Database.Database-KeyValueIndexed
    * @instance
    */
@@ -108,8 +108,8 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
   /**
    * Iterates over keyvalue pairs.
    * @function
-   * @params {Object} [filters={}] Various filters to apply to the iterator.
-   * @params {string} [filters.amount=-1] The number of results to fetch.
+   * @param {Object} [filters={}] Various filters to apply to the iterator.
+   * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next key/value as key/value/hash.
    * @memberof module:Database.Database-KeyValueIndexed
    * @instance

@@ -350,19 +350,19 @@ describe('Log - Join', async function () {
     strictEqual((await log4.clock()).time, 8)
 
     const expectedData = [
-      { payload: 'helloA1', id: 'X', clock: new Clock(testIdentity.publicKey, 1) },
-      { payload: 'helloB1', id: 'X', clock: new Clock(testIdentity2.publicKey, 1) },
-      { payload: 'helloD1', id: 'X', clock: new Clock(testIdentity4.publicKey, 1) },
-      { payload: 'helloA2', id: 'X', clock: new Clock(testIdentity.publicKey, 2) },
-      { payload: 'helloB2', id: 'X', clock: new Clock(testIdentity2.publicKey, 2) },
-      { payload: 'helloD2', id: 'X', clock: new Clock(testIdentity4.publicKey, 2) },
-      { payload: 'helloC1', id: 'X', clock: new Clock(testIdentity3.publicKey, 3) },
-      { payload: 'helloC2', id: 'X', clock: new Clock(testIdentity3.publicKey, 4) },
-      { payload: 'helloD3', id: 'X', clock: new Clock(testIdentity4.publicKey, 5) },
-      { payload: 'helloD4', id: 'X', clock: new Clock(testIdentity4.publicKey, 6) },
-      { payload: 'helloA5', id: 'X', clock: new Clock(testIdentity.publicKey, 7) },
-      { payload: 'helloD5', id: 'X', clock: new Clock(testIdentity4.publicKey, 7) },
-      { payload: 'helloD6', id: 'X', clock: new Clock(testIdentity4.publicKey, 8) }
+      { payload: 'helloA1', id: 'X', clock: Clock(testIdentity.publicKey, 1) },
+      { payload: 'helloB1', id: 'X', clock: Clock(testIdentity2.publicKey, 1) },
+      { payload: 'helloD1', id: 'X', clock: Clock(testIdentity4.publicKey, 1) },
+      { payload: 'helloA2', id: 'X', clock: Clock(testIdentity.publicKey, 2) },
+      { payload: 'helloB2', id: 'X', clock: Clock(testIdentity2.publicKey, 2) },
+      { payload: 'helloD2', id: 'X', clock: Clock(testIdentity4.publicKey, 2) },
+      { payload: 'helloC1', id: 'X', clock: Clock(testIdentity3.publicKey, 3) },
+      { payload: 'helloC2', id: 'X', clock: Clock(testIdentity3.publicKey, 4) },
+      { payload: 'helloD3', id: 'X', clock: Clock(testIdentity4.publicKey, 5) },
+      { payload: 'helloD4', id: 'X', clock: Clock(testIdentity4.publicKey, 6) },
+      { payload: 'helloA5', id: 'X', clock: Clock(testIdentity.publicKey, 7) },
+      { payload: 'helloD5', id: 'X', clock: Clock(testIdentity4.publicKey, 7) },
+      { payload: 'helloD6', id: 'X', clock: Clock(testIdentity4.publicKey, 8) }
     ]
 
     const values = await log4.values()

@@ -1,7 +1,7 @@
 /**
  * Creates an id from an alphanumeric character list.
  * @param {number} [length=32] The length of the id.
- * @returns {string} An id.
+ * @return {string} An id.
  * @see {@link https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript}
  * @memberof module:Utils
  */

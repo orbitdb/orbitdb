@@ -47,7 +47,7 @@ const type = 'ipfs'
  * @param {Array} [params.write] An array of identity ids who can write to the
  * database.
  * @param {module:Storage} [params.storage] An instance of a compatible storage.
- * @returns {module:AccessControllers.AccessControllers-IPFS} An
+ * @return {module:AccessControllers.AccessControllers-IPFS} An
  * IPFSAccessController function.
  * @memberof module:AccessControllers
  */
@@ -70,7 +70,7 @@ const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, iden
   /**
    * Verifies the write permission of an entry.
    * @param {module:Log~Entry} entry An entry to verify.
-   * @returns {boolean} True if the entry's identity has write permission,
+   * @return {boolean} True if the entry's identity has write permission,
    * false otherwise.
    * @memberof module:AccessControllers.AccessControllers-IPFS
    */

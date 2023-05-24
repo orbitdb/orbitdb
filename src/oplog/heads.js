@@ -76,7 +76,7 @@ const Heads = async ({ storage, heads }) => {
  * This function is private and not exposed in the Log API
  *
  * @param {Array<Entry>} entries Entries to search heads from
- * @returns {Array<Entry>}
+ * @return {Array<Entry>}
  */
 const findHeads = (entries) => {
   entries = new Set(entries)

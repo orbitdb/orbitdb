@@ -1,4 +1,4 @@
-import Clock from './clock.js'
+import { compareClocks } from './clock.js'
 
 /**
  * Sort two entries as Last-Write-Wins (LWW).
@@ -8,7 +8,7 @@ import Clock from './clock.js'
  *
  * @param {Entry} a First entry
  * @param {Entry} b Second entry
- * @returns {number} 1 if a is latest, -1 if b is latest
+ * @return {number} 1 if a is latest, -1 if b is latest
  */
 function LastWriteWins (a, b) {
   // Ultimate conflict resolution (take the first/left arg)
@@ -27,11 +27,11 @@ function LastWriteWins (a, b) {
  * @param {Entry} a First entry to compare
  * @param {Entry} b Second entry to compare
  * @param {function(a, b)} resolveConflict A function to call if entries are concurrent (happened at the same time). The function should take in two entries and return 1 if the first entry should be chosen and -1 if the second entry should be chosen.
- * @returns {number} 1 if a is greater, -1 if b is greater
+ * @return {number} 1 if a is greater, -1 if b is greater
  */
 function SortByClocks (a, b, resolveConflict) {
   // Compare the clocks
-  const diff = Clock.compare(a.clock, b.clock)
+  const diff = compareClocks(a.clock, b.clock)
   // If the clocks are concurrent, use the provided
   // conflict resolution function to determine which comes first
   return diff === 0 ? resolveConflict(a, b) : diff
@@ -42,7 +42,7 @@ function SortByClocks (a, b, resolveConflict) {
  * @param {Entry} a First entry to compare
  * @param {Entry} b Second entry to compare
  * @param {function(a, b)} resolveConflict A function to call if the clocks ids are the same. The function should take in two entries and return 1 if the first entry should be chosen and -1 if the second entry should be chosen.
- * @returns {number} 1 if a is greater, -1 if b is greater
+ * @return {number} 1 if a is greater, -1 if b is greater
  */
 function SortByClockId (a, b, resolveConflict) {
   // Sort by ID if clocks are concurrent,
@@ -55,7 +55,7 @@ function SortByClockId (a, b, resolveConflict) {
 /**
  * A wrapper function to throw an error if the results of a passed function return zero
  * @param {function(a, b)} [tiebreaker] The tiebreaker function to validate.
- * @returns {function(a, b)} 1 if a is greater, -1 if b is greater
+ * @return {function(a, b)} 1 if a is greater, -1 if b is greater
  * @throws {Error} if func ever returns 0
  */
 function NoZeroes (func) {

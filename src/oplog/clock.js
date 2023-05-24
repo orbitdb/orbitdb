@@ -1,33 +1,26 @@
 /* Lamport Clock */
-class Clock {
-  constructor (id, time) {
-    this.id = id
-    this.time = time || 0
-  }
+const compareClocks = (a, b) => {
+  // Calculate the "distance" based on the clock, ie. lower or greater
+  const dist = a.time - b.time
 
-  tick () {
-    return new Clock(this.id, ++this.time)
-  }
+  // If the sequence number is the same (concurrent events),
+  // and the IDs are different, take the one with a "lower" id
+  if (dist === 0 && a.id !== b.id) return a.id < b.id ? -1 : 1
 
-  merge (clock) {
-    this.time = Math.max(this.time, clock.time)
-    return new Clock(this.id, this.time)
-  }
+  return dist
+}
 
-  clone () {
-    return new Clock(this.id, this.time)
-  }
+const tickClock = (clock) => {
+  return Clock(clock.id, ++clock.time)
+}
 
-  static compare (a, b) {
-    // Calculate the "distance" based on the clock, ie. lower or greater
-    const dist = a.time - b.time
+const Clock = (id, time) => {
+  time = time || 0
 
-    // If the sequence number is the same (concurrent events),
-    // and the IDs are different, take the one with a "lower" id
-    if (dist === 0 && a.id !== b.id) return a.id < b.id ? -1 : 1
-
-    return dist
+  return {
+    id,
+    time
   }
 }
 
-export default Clock
+export { Clock as default, compareClocks, tickClock }

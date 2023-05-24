@@ -23,7 +23,7 @@ const hashStringEncoding = base58btc
  * @param {string} params.type The type of identity provider.
  * @param {function} params.sign A sign function.
  * @param {function} params.verify A verify function.
- * @returns {module:Identity~Identity} An instance of Identity.
+ * @return {module:Identity~Identity} An instance of Identity.
  * @throws Identity id is required if id is not provided.
  * @throws Invalid public key if publicKey is not provided.
  * @throws Signatures object is required if signature is not provided.
@@ -62,7 +62,7 @@ const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) 
 /**
  * Encode an Identity to a serializable form.
  * @param {Identity} identity Identity to encode,
- * @returns {Object} Object with fields hash and bytes.
+ * @return {Object} Object with fields hash and bytes.
  * @static
  */
 const _encodeIdentity = async (identity) => {
@@ -76,7 +76,7 @@ const _encodeIdentity = async (identity) => {
 /**
  * Decode an Identity from bytes
  * @param {Uint8Array} bytes Bytes from which to decode an Identity from
- * @returns {Identity}
+ * @return {Identity}
  * @static
  */
 const decodeIdentity = async (bytes) => {

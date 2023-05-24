@@ -3,6 +3,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { Entry, Identities, KeyStore } from '../../src/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
+import { tickClock } from '../../src/oplog/clock.js'
 
 const { create, isEntry } = Entry
 const keysPath = './testkeys'
@@ -79,7 +80,7 @@ describe('Entry', function () {
       const payload1 = 'hello world'
       const payload2 = 'hello again'
       const entry1 = await create(testIdentity, 'A', payload1)
-      entry1.clock.tick()
+      entry1.clock = tickClock(entry1.clock)
       const entry2 = await create(testIdentity, 'A', payload2, entry1.clock, [entry1])
       strictEqual(entry2.payload, payload2)
       strictEqual(entry2.next.length, 1)

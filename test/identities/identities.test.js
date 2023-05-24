@@ -213,18 +213,30 @@ describe('Identities', function () {
     })
 
     it('false signature doesn\'t verify', async () => {
-      class IP {
-        async getId () { return 'pubKey' }
+      const IP = () => {
+        const verifyIdentity = async (data) => { return false }
 
-        async signIdentity (data) { return `false signature '${data}'` }
+        const FakeIdentityProvider = () => {
+          const getId = () => { return 'pubKey' }
 
-        static async verifyIdentity (data) { return false }
+          const signIdentity = (data) => { return `false signature '${data}'` }
 
-        static get type () { return 'fake' }
+          return {
+            getId,
+            signIdentity,
+            type: 'fake'
+          }
+        }
+
+        return {
+          default: FakeIdentityProvider,
+          verifyIdentity,
+          type: 'fake'
+        }
       }
 
-      addIdentityProvider(IP)
-      identity = await identities.createIdentity({ type: IP.type })
+      addIdentityProvider(IP())
+      identity = await identities.createIdentity({ type: IP().type })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
     })

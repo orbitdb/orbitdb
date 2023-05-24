@@ -27,7 +27,7 @@ const type = 'orbitdb'
  * IPFSAccessController.
  * @param {Array} [params.write] An array of identity ids who can write to the
  * database.
- * @returns {module:AccessControllers.AccessControllers-OrbitDB} An
+ * @return {module:AccessControllers.AccessControllers-OrbitDB} An
  * IPFSAccessController function.
  * @memberof module:AccessControllers
  */
@@ -42,7 +42,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   /**
    * Verifies the write permission of an entry.
    * @param {module:Log~Entry} entry An entry to verify.
-   * @returns {boolean} True if the entry's identity has write permission,
+   * @return {boolean} True if the entry's identity has write permission,
    * false otherwise.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
@@ -68,7 +68,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
    *
    * The returned capabilities will be a mixture of admin and write access
    * addresses.
-   * @returns {Array} A list of addresses with admin and write access.
+   * @return {Array} A list of addresses with admin and write access.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
    */
@@ -98,7 +98,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   /**
    * Gets a list of addresses with the specified capability.
    * @param {string} capability A capability (e.g. write).
-   * @returns {Array} One or more addresses with the spcified capability.
+   * @return {Array} One or more addresses with the spcified capability.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
    */
@@ -120,7 +120,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
    * Checks whether an address has a capability.
    * @param {string} capability A capability (e.g. write).
    * @param {string} key An address.
-   * @returns {boolean} True if the address has the capability, false
+   * @return {boolean} True if the address has the capability, false
    * otherwise.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance

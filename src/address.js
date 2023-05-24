@@ -61,7 +61,7 @@ const parseAddress = (address) => {
  * Creates an instance of OrbitDBAddress.
  * @function
  * @param {OrbitDBAddress|string} address A valid OrbitDB database address.
- * @returns {OrbitDBAddress} An instance of OrbitDBAddress.
+ * @return {OrbitDBAddress} An instance of OrbitDBAddress.
  * @instance
  */
 const OrbitDBAddress = (address) => {
@@ -89,7 +89,7 @@ const OrbitDBAddress = (address) => {
   /**
    * Returns OrbitDBAddress as a string.
    * @function
-   * @returns {string} The string form of OrbitDBAddress.
+   * @return {string} The string form of OrbitDBAddress.
    * @memberof module:Address~OrbitDBAddress
    */
   const toString = () => {

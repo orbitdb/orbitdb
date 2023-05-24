@@ -18,7 +18,7 @@ const defaultValueEncoding = 'view'
  * LevelStorage.
  * @param {string} [params.path=defaultPath] The Level path.
  * @param {string} [params.valueEncoding=defaultValueEncoding] Value encoding.
- * @returns {module:Storage.Storage-Level} An instance of LevelStorage.
+ * @return {module:Storage.Storage-Level} An instance of LevelStorage.
  * @memberof module:Storage
  * @instance
  */

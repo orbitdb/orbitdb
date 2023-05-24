@@ -37,7 +37,7 @@ import Database from '../database.js'
 
 /**
  * Defines an Events database.
- * @returns {module:Database.Database-Events} A Events function.
+ * @return {module:Database.Database-Events} A Events function.
  * @memberof module:Database
  */
 const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
@@ -49,7 +49,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * Adds an event to the store.
    * @function
    * @param {*} value The event to be added.
-   * @returns {string} The hash of the new oplog entry.
+   * @return {string} The hash of the new oplog entry.
    * @memberof module:Database.Database-Events
    * @instance
    */
@@ -61,7 +61,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * Gets an event from the store by hash.
    * @function
    * @param {string} hash The hash of the event to get.
-   * @returns {*} The value corresponding to hash or null.
+   * @return {*} The value corresponding to hash or null.
    * @memberof module:Database.Database-Events
    * @instance
    */
@@ -73,16 +73,16 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
   /**
    * Iterates over events.
    * @function
-   * @params {Object} [filters={}] Various filters to apply to the iterator.
-   * @params {string} [filters.gt] All events which are greater than the
+   * @param {Object} [filters={}] Various filters to apply to the iterator.
+   * @param {string} [filters.gt] All events which are greater than the
    * given hash.
-   * @params {string} [filters.gte] All events which are greater than or equal
+   * @param {string} [filters.gte] All events which are greater than or equal
    * to the given hash.
-   * @params {string} [filters.lt] All events which are less than the given
+   * @param {string} [filters.lt] All events which are less than the given
    * hash.
-   * @params {string} [filters.lte] All events which are less than or equal to
+   * @param {string} [filters.lte] All events which are less than or equal to
    * the given hash.
-   * @params {string} [filters.amount=-1] The number of results to fetch.
+   * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string] The next event as hash/value.
    * @memberof module:Database.Database-Events
    * @instance
@@ -99,7 +99,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
   /**
    * Returns all events.
    * @function
-   * @returns [][string, string] An array of events as hash/value entries.
+   * @return [][string, string] An array of events as hash/value entries.
    * @memberof module:Database.Database-Events
    * @instance
    */

@@ -18,7 +18,7 @@ const defaultTimeout = 30000
  * @param {number} [params.timeout=defaultTimeout] A timeout in ms.
  * @param {boolean} [params.pin=false] True, if the block should be pinned,
  * false otherwise.
- * @returns {module:Storage.Storage-IPFS} An instance of IPFSBlockStorage.
+ * @return {module:Storage.Storage-IPFS} An instance of IPFSBlockStorage.
  * @memberof module:Storage
  * @throw An instance of ipfs is required if params.ipfs is not specified.
  * @instance

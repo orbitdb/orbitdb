@@ -4,7 +4,7 @@ import pathJoin from './path-join.js'
  * Checks that the given address has '/_access' as the last part.
  * @function
  * @param {string} address The address to check.
- * @returns {string} The address appended with /_access.
+ * @return {string} The address appended with /_access.
  * @memberof module:Utils
  */
 export default address => {

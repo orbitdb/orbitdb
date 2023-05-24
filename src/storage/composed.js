@@ -17,7 +17,7 @@
   * @function
   * @param {module:Storage} storage1 A storage instance.
   * @param {module:Storage} storage2 A storage instance.
-  * @returns {module:Storage.Storage-Composed} An instance of ComposedStorage.
+  * @return {module:Storage.Storage-Composed} An instance of ComposedStorage.
   * @memberof module:Storage
   * @instance
   */
