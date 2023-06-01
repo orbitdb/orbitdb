@@ -1,7 +1,8 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import OrbitDB, { AccessControllers } from '../src/orbitdb.js'
+import OrbitDB from '../src/orbitdb.js'
+import { accessControllers, addAccessController, removeAccessController } from '../src/access-controllers/index.js'
 import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 
@@ -38,7 +39,7 @@ describe('Add a custom access controller', function () {
     }
 
     // Remove the added custom database type from OrbitDB import
-    AccessControllers.remove(type)
+    removeAccessController(type)
 
     await rmrf('./orbitdb')
     await rmrf('./ipfs1')
@@ -51,7 +52,7 @@ describe('Add a custom access controller', function () {
         'orbitdb'
       ]
 
-      deepStrictEqual(Object.keys(AccessControllers.types), expected)
+      deepStrictEqual(Object.keys(accessControllers), expected)
     })
 
     it('throws and error if custom access controller hasn\'t been added', async () => {
@@ -71,7 +72,7 @@ describe('Add a custom access controller', function () {
 
   describe('Custom access controller', function () {
     before(() => {
-      AccessControllers.add(CustomAccessController)
+      addAccessController(CustomAccessController)
     })
 
     it('create a database with the custom access controller', async () => {
@@ -83,7 +84,7 @@ describe('Add a custom access controller', function () {
     it('throws and error if custom access controller already exists', async () => {
       let err
       try {
-        AccessControllers.add(CustomAccessController)
+        addAccessController(CustomAccessController)
       } catch (e) {
         err = e.toString()
       }
@@ -98,7 +99,7 @@ describe('Add a custom access controller', function () {
         type
       ]
 
-      deepStrictEqual(Object.keys(AccessControllers.types), expected)
+      deepStrictEqual(Object.keys(accessControllers), expected)
     })
 
     it('can be removed from supported access controllers', async () => {
@@ -107,9 +108,9 @@ describe('Add a custom access controller', function () {
         'orbitdb'
       ]
 
-      AccessControllers.remove(type)
+      removeAccessController(type)
 
-      deepStrictEqual(Object.keys(AccessControllers.types), expected)
+      deepStrictEqual(Object.keys(accessControllers), expected)
     })
   })
 })

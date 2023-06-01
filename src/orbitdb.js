@@ -35,7 +35,7 @@ import OrbitDBAddress, { isValidAddress } from './address.js'
 import Manifests from './manifest.js'
 import { createId } from './utils/index.js'
 import pathJoin from './utils/path-join.js'
-import * as AccessControllers from './access-controllers/index.js'
+import { getAccessController } from './access-controllers/index.js'
 import IPFSAccessController from './access-controllers/ipfs.js'
 
 /**
@@ -168,7 +168,7 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
       manifest = await manifests.get(addr.path)
       const acType = manifest.accessController.split('/', 2).pop()
       const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
-      AccessController = AccessControllers.get(acType)()
+      AccessController = getAccessController(acType)()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: acAddress })
       name = manifest.name
       type = type || manifest.type
@@ -234,4 +234,4 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   }
 }
 
-export { OrbitDB as default, OrbitDBAddress, addDatabaseType, databaseTypes, AccessControllers }
+export { OrbitDB as default, OrbitDBAddress, addDatabaseType, databaseTypes }

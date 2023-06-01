@@ -4,9 +4,8 @@
  * Identities provides a framework for generating and managing identity
  * details and providers.
  */
-
 import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
-import { PublicKeyIdentityProvider } from './providers/index.js'
+import { getProviderFor } from './providers/index.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
@@ -14,13 +13,8 @@ import { LRUStorage, IPFSBlockStorage, MemoryStorage, ComposedStorage } from '..
 import pathJoin from '../utils/path-join.js'
 
 const DefaultProviderType = 'publickey'
-const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
 
-const supportedTypes = {
-  publickey: PublicKeyIdentityProvider
-  // [DIDIdentityProvider.type]: DIDIdentityProvider,
-  // [EthIdentityProvider.type]: EthIdentityProvider
-}
+const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
 
 /**
  * Creates an instance of Identities.
@@ -167,68 +161,6 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   }
 }
 
-/**
- * Checks whether an identity provider is supported.
- * @param {string} type The identity provider type.
- * @return {boolean} True if the identity provider is supported, false
- * otherwise.
- * @static
- */
-const isProviderSupported = (type) => {
-  return Object.keys(supportedTypes).includes(type)
-}
-
-/**
- * Gets an identity provider.
- * @param {string} type The identity provider type.
- * @return {IdentityProvider} The IdentityProvider module corresponding to
- * type.
- * @throws IdentityProvider type is not supported if the identity provider is
- * not supported.
- * @static
- */
-const getProviderFor = (type) => {
-  if (!isProviderSupported(type)) {
-    throw new Error(`IdentityProvider type '${type}' is not supported`)
-  }
-
-  return supportedTypes[type]
-}
-
-/**
- * Adds an identity provider.
- * @param {IdentityProvider} IdentityProvider The identity provider to add.
- * @throws IdentityProvider must be given as an argument if no module is
- * provided.
- * @throws 'Given IdentityProvider doesn't have a field 'type' if the
- * IdentityProvider does not include a type property.
- * @static
- */
-const addIdentityProvider = (IdentityProvider) => {
-  if (!IdentityProvider) {
-    throw new Error('IdentityProvider must be given as an argument')
-  }
-
-  if (!IdentityProvider.type ||
-    typeof IdentityProvider.type !== 'string') {
-    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
-  }
-
-  supportedTypes[IdentityProvider.type] = IdentityProvider
-}
-
-/**
- * Removes an identity provider.
- * @param {string} type The identity provider type.
- * @static
- */
-const removeIdentityProvider = (type) => {
-  delete supportedTypes[type]
-}
-
 export {
-  Identities as default,
-  isProviderSupported,
-  addIdentityProvider,
-  removeIdentityProvider
+  Identities as default
 }
