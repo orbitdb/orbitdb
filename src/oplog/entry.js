@@ -17,10 +17,13 @@ const hashStringEncoding = base58btc
  * Create an Entry
  * @param {Identity} identity The identity instance
  * @param {string} logId The unique identifier for this log
- * @param {*} data Data of the entry to be added. Can be any JSON.stringifyable data
- * @param {Clock} [clock] The clock
- * @param {Array<string|Entry>} [next=[]] An array of CIDs as base58btc encoded strings
- * @param {Array<string|Entry>} [refs=[]] An array of CIDs as base58btc encoded strings
+ * @param {*} data Data of the entry to be added. Can be any JSON.stringifyable
+ * data.
+ * @param {module:Clock} [clock] The clock
+ * @param {Array<string|Entry>} [next=[]] An array of CIDs as base58btc encoded
+ * strings.
+ * @param {Array<string|Entry>} [refs=[]] An array of CIDs as base58btc encoded
+ * strings.
  * @return {Promise<Entry>}
  * @example
  * const entry = await Entry.create(identity, 'log1', 'hello')
@@ -59,7 +62,8 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
  *
  * @param {Identities} identities Identities system to use
  * @param {Entry} entry The entry being verified
- * @return {Promise} A promise that resolves to a boolean value indicating if the signature is valid
+ * @return {Promise} A promise that resolves to a boolean value indicating if
+ * the signature is valid.
  */
 const verify = async (identities, entry) => {
   if (!identities) throw new Error('Identities is required, cannot verify entry')

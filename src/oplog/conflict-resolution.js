@@ -26,7 +26,10 @@ function LastWriteWins (a, b) {
  * Sort two entries by their clock time.
  * @param {Entry} a First entry to compare
  * @param {Entry} b Second entry to compare
- * @param {function(a, b)} resolveConflict A function to call if entries are concurrent (happened at the same time). The function should take in two entries and return 1 if the first entry should be chosen and -1 if the second entry should be chosen.
+ * @param {function(a, b)} resolveConflict A function to call if entries are
+ * concurrent (happened at the same time). The function should take in two
+ * entries and return 1 if the first entry should be chosen and -1 if the
+ * second entry should be chosen.
  * @return {number} 1 if a is greater, -1 if b is greater
  */
 function SortByClocks (a, b, resolveConflict) {
@@ -41,7 +44,9 @@ function SortByClocks (a, b, resolveConflict) {
  * Sort two entries by their clock id.
  * @param {Entry} a First entry to compare
  * @param {Entry} b Second entry to compare
- * @param {function(a, b)} resolveConflict A function to call if the clocks ids are the same. The function should take in two entries and return 1 if the first entry should be chosen and -1 if the second entry should be chosen.
+ * @param {function(a, b)} resolveConflict A function to call if the clocks ids
+ * are the same. The function should take in two entries and return 1 if the
+ * first entry should be chosen and -1 if the second entry should be chosen.
  * @return {number} 1 if a is greater, -1 if b is greater
  */
 function SortByClockId (a, b, resolveConflict) {
@@ -53,7 +58,8 @@ function SortByClockId (a, b, resolveConflict) {
 }
 
 /**
- * A wrapper function to throw an error if the results of a passed function return zero
+ * A wrapper function to throw an error if the results of a passed function
+ * return zero
  * @param {function(a, b)} [tiebreaker] The tiebreaker function to validate.
  * @return {function(a, b)} 1 if a is greater, -1 if b is greater
  * @throws {Error} if func ever returns 0

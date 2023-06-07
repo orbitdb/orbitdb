@@ -3,8 +3,9 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import { Identities, addIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
+import { Identities, identityProviders, addIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
+import { CustomIdentityProvider, FakeIdentityProvider } from '../fixtures/providers.js'
 
 const type = PublicKeyIdentityProvider.type
 const keysPath = './testkeys'
@@ -12,6 +13,15 @@ const keysPath = './testkeys'
 describe('Identities', function () {
   before(async () => {
     await copy(testKeysPath, keysPath)
+  })
+
+  afterEach(async () => {
+    // reset the identityProviders.
+    for (const [key] of Object.entries(identityProviders)) {
+      if (key !== 'publickey') {
+        delete identityProviders[key]
+      }
+    }
   })
 
   after(async () => {
@@ -213,30 +223,8 @@ describe('Identities', function () {
     })
 
     it('false signature doesn\'t verify', async () => {
-      const IP = () => {
-        const verifyIdentity = async (data) => { return false }
-
-        const FakeIdentityProvider = () => {
-          const getId = () => { return 'pubKey' }
-
-          const signIdentity = (data) => { return `false signature '${data}'` }
-
-          return {
-            getId,
-            signIdentity,
-            type: 'fake'
-          }
-        }
-
-        return {
-          default: FakeIdentityProvider,
-          verifyIdentity,
-          type: 'fake'
-        }
-      }
-
-      addIdentityProvider(IP())
-      identity = await identities.createIdentity({ type: IP().type })
+      addIdentityProvider(FakeIdentityProvider)
+      identity = await identities.createIdentity({ type: FakeIdentityProvider.type })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
     })
@@ -343,6 +331,18 @@ describe('Identities', function () {
     it('doesn\'t verify invalid signature', async () => {
       const verified = await identities.verify('invalid', identity.publicKey, data)
       assert.strictEqual(verified, false)
+    })
+  })
+
+  describe('manage identity providers', () => {
+    it('has default identity providers', () => {
+      assert.deepStrictEqual(identityProviders, { publickey: PublicKeyIdentityProvider })
+    })
+
+    it('can add an identity provider', () => {
+      addIdentityProvider(CustomIdentityProvider)
+
+      assert.deepStrictEqual(identityProviders, { publickey: PublicKeyIdentityProvider, custom: CustomIdentityProvider })
     })
   })
 })

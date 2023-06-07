@@ -21,12 +21,12 @@ import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
 
 /**
- * An array of available access controller types.
- * @name types
+ * An array of available access controllers.
+ * @name accessControllers
  * @†ype []
- * @return [] An array of access controller types.
+ * @return [] An array of access controllers.
  */
-const types = {
+const accessControllers = {
   ipfs: IPFSAccessController,
   orbitdb: OrbitDBAccessController
 }
@@ -36,25 +36,15 @@ const types = {
  * @param {string} type A valid access controller type.
  * @return {AccessController} The access controller module.
  */
-const get = (type) => {
-  if (!isSupported(type)) {
+const getAccessController = (type) => {
+  if (!Object.keys(accessControllers).includes(type)) {
     throw new Error(`AccessController type '${type}' is not supported`)
   }
-  return types[type]
+  return accessControllers[type]
 }
 
 /**
- * Checks whether the access controller exists.
- * @param {string} type A valid access controller type.
- * @return {boolean} True if the access controller exists, false otherwise.
- */
-const isSupported = type => {
-  return Object.keys(types).includes(type)
-}
-
-/**
- * Adds an access controller module to the list of supported access controller
- * types.
+ * Adds an access controller module to the list of supported access controller.
  * @param {AccessController} accessController A compatible access controller
  * module.
  * @throws Access controller `type` already added if the access controller is
@@ -62,8 +52,8 @@ const isSupported = type => {
  * @throws Given AccessController class needs to implement: type if the access
  * controller module does not implement a type property.
  */
-const add = (accessController) => {
-  if (types[accessController.type]) {
+const addAccessController = (accessController) => {
+  if (accessControllers[accessController.type]) {
     throw new Error(`Access controller '${accessController.type}' already added.`)
   }
 
@@ -71,21 +61,20 @@ const add = (accessController) => {
     throw new Error('Given AccessController class needs to implement: type.')
   }
 
-  types[accessController.type] = accessController
+  accessControllers[accessController.type] = accessController
 }
 
 /**
- * Removes an access controller from the types list.
+ * Removes an access controller from the list.
  * @param {string} type A valid access controller type.
  */
-const remove = type => {
-  delete types[type]
+const removeAccessController = type => {
+  delete accessControllers[type]
 }
 
 export {
-  types,
-  get,
-  isSupported,
-  add,
-  remove
+  accessControllers,
+  getAccessController,
+  addAccessController,
+  removeAccessController
 }

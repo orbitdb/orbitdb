@@ -3,7 +3,6 @@
  * @description
  * An identity.
  */
-
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'

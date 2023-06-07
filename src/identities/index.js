@@ -1,9 +1,4 @@
-export {
-  default as Identities,
-  addIdentityProvider,
-  removeIdentityProvider,
-  isProviderSupported
-} from './identities.js'
+export { default as Identities } from './identities.js'
 
 export {
   default as Identity,
@@ -11,4 +6,8 @@ export {
   isEqual
 } from './identity.js'
 
-export { PublicKeyIdentityProvider } from './providers/index.js'
+export {
+  PublicKeyIdentityProvider,
+  addIdentityProvider,
+  identityProviders
+} from './providers/index.js'

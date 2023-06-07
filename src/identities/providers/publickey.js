@@ -44,8 +44,8 @@ const PublicKeyIdentityProvider = ({ keystore }) => {
   /**
    * Gets the id.
    * @memberof module:IdentityProviders.IdentityProvider-PublicKey
-   * @param {String} id The id to retrieve.
-   * @return {String} The identity's id.
+   * @param {string} id The id to retrieve.
+   * @return {string} The identity's id.
    * @instance
    */
   const getId = async ({ id } = {}) => {
