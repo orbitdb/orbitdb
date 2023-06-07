@@ -1,6 +1,6 @@
 // import assert from 'assert'
 // import rmrf from 'rimraf'
-// import OrbitDB from '../../src/OrbitDB.js'
+// import OrbitDB from '../../src/orbitdb.js'
 // import IdentityProvider from 'orbit-db-identity-provider'
 // import Keystore from 'orbit-db-keystore'
 // import AccessControllers from 'orbit-db-access-controllers'

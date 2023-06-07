@@ -7,7 +7,7 @@ export default (env, argv) => {
 
   return {
     mode: 'production',
-    entry: './src/OrbitDB.js',
+    entry: './src/orbitdb.js',
     output: {
       filename: '../dist/orbitdb.min.js',
       library: {
