@@ -19,7 +19,7 @@
 * ```
 * @example <caption>Instantiate OrbitDB and open a new database:</caption>
 * import { create } from 'ipfs-core'
-* import OrbitDB from 'orbit-db'
+* import { OrbitDB } from 'orbit-db'
 *
 * const ipfs = await create() // IPFS is required for storage and syncing
 * const orbitdb = await OrbitDB({ ipfs })
@@ -27,6 +27,26 @@
 * const dbAddress = mydb.address // E.g. /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
 * @example <caption>Open an existing database using its multiformat address:</caption>
 * const mydb = await orbitdb.open(dbAddress)
+* @example <caption>Use with pre-configured identities:</caption>
+* import { create } from 'ipfs-core'
+* import { OrbitDB, Identities } from 'orbit-db'
+* import CustomStorage from './custom-storage.js'
+*
+* const storage = await CustomStorage()
+* const identities = await Identities({ storage })
+* const ipfs = await create() // IPFS is required for storage and syncing
+* const orbitdb = await OrbitDB({ ipfs, identities })
+* const mydb = await orbitdb.open('mydb')
+* @example <caption>Use with existing identities:</caption>
+* import { create } from 'ipfs-core'
+* import { OrbitDB, Identities } from 'orbit-db'
+*
+* const identities = await Identities()
+* await identities.createIdentity('userA')
+*
+* const ipfs = await create() // IPFS is required for storage and syncing
+* const orbitdb = await OrbitDB({ ipfs, identities, id: 'userA' })
+* const mydb = await orbitdb.open('mydb')
 */
 import { Events, KeyValue, Documents } from './db/index.js'
 import KeyStore from './key-store.js'
@@ -82,15 +102,14 @@ const DefaultAccessController = IPFSAccessController
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
  * @param {string} [params.id] The id of the OrbitDB instance.
- * @param {Identity} [params.identity] An Identity instance.
- * @param {namespace:KeyStore} [params.keystore] A KeyStore instance.
+ * @param {module:Identities} [params.identities] An Identities instance.
  * @param {string} [params.directory] A location for storing OrbitDB-related
  * data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
  * @throws IPFSinstance is required argument if no IPFS instance is provided.
  * @instance
  */
-const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
+const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
   /**
    * @namespace module:OrbitDB~OrbitDB
    * @description The instance returned by {@link module:OrbitDB}.
@@ -103,9 +122,17 @@ const OrbitDB = async ({ ipfs, id, identity, keystore, directory } = {}) => {
   id = id || await createId()
   const { id: peerId } = await ipfs.id()
   directory = directory || './orbitdb'
-  keystore = keystore || await KeyStore({ path: pathJoin(directory, './keystore') })
-  const identities = await Identities({ ipfs, keystore })
-  identity = identity || await identities.createIdentity({ id })
+
+  let keystore
+
+  if (identities) {
+    keystore = identities.keystore
+  } else {
+    keystore = await KeyStore({ path: pathJoin(directory, './keystore') })
+    identities = await Identities({ ipfs, keystore })
+  }
+
+  const identity = await identities.createIdentity({ id })
 
   const manifests = await Manifests({ ipfs })
 

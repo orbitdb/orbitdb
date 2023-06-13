@@ -32,8 +32,8 @@ describe('OrbitDBAccessController', function () {
     testIdentity1 = await identities1.createIdentity({ id: 'userA' })
     testIdentity2 = await identities2.createIdentity({ id: 'userB' })
 
-    orbitdb1 = await OrbitDB({ ipfs: ipfs1, identity: testIdentity1, directory: dbPath1, keystore: keystore1 })
-    orbitdb2 = await OrbitDB({ ipfs: ipfs2, identity: testIdentity2, directory: dbPath2, keystore: keystore2 })
+    orbitdb1 = await OrbitDB({ ipfs: ipfs1, identities: identities1, id: 'userA', directory: dbPath1 })
+    orbitdb2 = await OrbitDB({ ipfs: ipfs2, identities: identities2, id: 'userB', directory: dbPath2 })
   })
 
   after(async () => {

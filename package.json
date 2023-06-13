@@ -16,7 +16,7 @@
     "dist"
   ],
   "type": "module",
-  "main": "src/orbitdb.js",
+  "main": "src/index.js",
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.0",
     "@libp2p/crypto": "^1.0.12",
@@ -62,7 +62,7 @@
     "build:examples": "webpack --config conf/webpack.example.config.js",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
-    "build:docs": "jsdoc -c ./jsdoc.json -r src/**",
+    "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/**",
     "build:tests": "rm -f test/browser/bundle.js* && webpack --config ./conf/webpack.tests.config.js",
     "prepublishOnly": "npm run build",
     "lint": "standard --env=mocha",
