@@ -45,7 +45,6 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
   * [Install dependencies](#install-dependencies)
   * [Browser example](#browser-example)
   * [Node.js example](#nodejs-example)
-  * [Workshop](#workshop)
 - [Development](#development)
   * [Run Tests](#run-tests)
   * [Build](#build)
@@ -88,12 +87,8 @@ import OrbitDB from 'orbit-db'
   // Listen for updates from peers
   db.events.on("update", entry => {
     console.log(entry)
-<<<<<<< HEAD
     const all = await db.all()
     console.log(all)
-=======
-    console.log(await db.all({ limit: 1 }))
->>>>>>> 582c826 (docs: Correctly print out db query results.)
   })
 
   // Add an entry
@@ -101,13 +96,9 @@ import OrbitDB from 'orbit-db'
   console.log(hash)
 
   // Query
-<<<<<<< HEAD
   for await (const record of db.iterator()) {
     console.log(record)
   }
-=======
-  console.log(await db.all({ limit: 1 }))
->>>>>>> 582c826 (docs: Correctly print out db query results.)
   
   await db.close()
   await orbitdb.stop()
