@@ -7,20 +7,24 @@ OrbitDB peers connect to one another using js-libp2p. Connection settings will v
 Node.js allows libp2p to open connections with other Node.js daemons.
 
 ```javascript
-ipfs1 = await IPFS.create({ repo: './ipfs1' })
-ipfs2 = await IPFS.create({ repo: './ipfs2' })
+import { create } from 'ipfs-core'
+
+const ipfs1 = await create({ repo: './ipfs1' })
+const ipfs2 = await create({ repo: './ipfs2' })
 
 const cid = await ipfs1.block.put('here is some data')
 const block = await ipfs2.block.get(cid)
 ```
 
-On localhost or a local network, both ipfs nodes should discover each other quickly enough that ipfs2 will retrieve the block added to ipfs1.
+On localhost or a local network, both ipfs nodes should discover each other quickly enough so that ipfs2 will retrieve the block added to ipfs1.
 
-In remote networks, retrieval of content across peers may take significantly longer. To speed up communication between the two peers, connect one peer to another directly using the swarm API and a peer's publicly accessible address. For example, assuming ipfs1 is listening on the address /ip4/1.2.3.4/tcp/12345/p2p/ipfs1-peer-hash:
+In remote networks, retrieval of content across peers may take significantly longer. To speed up communication between the two peers, one peer can be directly connected to another using the swarm API and a peer's publicly accessible address. For example, assuming ipfs1 is listening on the address /ip4/1.2.3.4/tcp/12345/p2p/ipfs1-peer-hash:
 
 ```javascript
-ipfs1 = await IPFS.create({ repo: './ipfs1' })
-ipfs2 = await IPFS.create({ repo: './ipfs2' })
+import { create } from 'ipfs-core'
+
+const ipfs1 = await create({ repo: './ipfs1' })
+const ipfs2 = await create({ repo: './ipfs2' })
 
 await ipfs2.swarm.connect('/ip4/1.2.3.4/tcp/12345/p2p/ipfs1-peer-hash')
 
@@ -35,17 +39,17 @@ For various security reasons, a browser cannot dial another peer over a raw TCP 
 On the server, listen for incoming websocket connections:
 
 ```javascript
-import { WebSockets } from '@libp2p/websockets'
+import { webSockets } from '@libp2p/websockets'
 import { create } from 'ipfs-core'
 
-ipfs1 = await IPFS.create({ 
+ipfs1 = await create({ 
   libp2p: { 
     addresses: {
       listen: [
-        '/ip4/0.0.0.0/tcp/0/ws'
+        '/ip4/0.0.0.0/tcp/0/wss'
       ]
     },
-    transports: [new WebSockets()] 
+    transports: [webSockets()] 
   },
   repo: './ipfs1'
 })
@@ -55,19 +59,25 @@ Within the browser, dial into the server using the server's exposed web socket:
 
 ```javascript
 // import the following libraries if using a build environment such as vite.
-import { WebSockets } from '@libp2p/websockets'
+import { webSockets } from '@libp2p/websockets'
 import { create } from 'ipfs-core'
-import { all } from '@libp2p/websockets/filters'
 
-// uncomment { filter: all } if no tls certificate is deployed. Only do this in development environments.
-const ws = new webSockets(/* { filter: all } */)
+const ws = new webSockets()
 
-ipfs1 = await IPFS.create({
+ipfs1 = await create({
   libp2p: {
-    transports: [new webSockets()] 
+    transports: [ws] 
   }},
   repo: './ipfs1'
 })
+```
+
+You may find IPFS is unable to connect to a local WebRTC Star server. This will likely to due to the local WebSockets transport being insecure (ws instead of wss). To solve this issue, pass the `all` filter to the `webSockets` function:
+
+```
+import { all } from '@libp2p/websockets/filters'
+
+const ws = webSockets({ filter: all })
 ```
 
 ## Browser to Browser and Node Daemon to Browser
@@ -86,7 +96,7 @@ In the first browser peer, configure
 import { create } from 'ipfs-core'
 import { multiaddr } from 'multiaddr'
 
-ipfs = await IPFS.create({
+ipfs = await create({
   config: {
     Addresses: { 
       Swarm: ['/ip4/0.0.0.0/tcp/12345/ws/p2p-webrtc-star']
@@ -101,7 +111,7 @@ Configure the second browser node in the same way as the first, then dial in to 
 import { create } from 'ipfs-core'
 import { multiaddr } from 'multiaddr'
 
-ipfs = await IPFS.create({
+ipfs = await create({
   config: {
     Addresses: { 
       Swarm: ['/ip4/0.0.0.0/tcp/12345/ws/p2p-webrtc-star']

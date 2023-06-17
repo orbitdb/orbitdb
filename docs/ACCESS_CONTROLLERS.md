@@ -6,8 +6,17 @@ An access controller is passed when a database is opened for the first time. Onc
 
 Different access controllers can be assigned to the database using the `AccessController` param and passing it to OrbitDB's `open` function.
 
-```
-const orbitdb = await OrbitDB()
+```js
+import { create } from 'ipfs-core'
+import { OrbitDB, getAccessController } from 'orbit-db'
+
+const ipfs = create({ options })
+
+const orbitdb = await OrbitDB({ ipfs })
+
+// SomeAccessController must already be available in the AC list.
+const SomeAccessController = getAccessController('some-access-controller')
+
 const db = orbitdb.open('my-db', { AccessController: SomeAccessController() })
 ```
 
@@ -17,65 +26,99 @@ OrbitDB is bundled with two AccessControllers; IPFSAccessController, an immutabl
 
 By default, the database `db` will use the IPFSAccessController and allow only the creator to write to the database.
 
-```
-const orbitdb = await OrbitDB()
+```js
+const orbitdb = await OrbitDB({ ipfs })
 const db = orbitdb.open('my-db')
+
+await db.add('hello world') // only orbitdb.identity.id can write to the db.
 ```
 
-To change write access, pass the IPFSAccessController with the `write ` parameter and an array of one or more Identity ids:
+To change write access, pass the IPFSAccessController with the `write` parameter and an array of one or more Identity ids:
 
-```
+```js
+import { create } from 'ipfs-core'
+import { OrbitDB, Identities, getAccessController } from 'orbit-db'
+
+const ipfs = create({ options })
+
 const identities = await Identities()
-const identity1 = identities.createIdentity('userA')
-const identity2 = identities.createIdentity('userB')
+const anotherIdentity = identities.createIdentity('userB')
 
-const orbitdb = await OrbitDB()
-const db = orbitdb.open('my-db', { AccessController: IPFSAccessController(write: [identity1.id, identity2.id]) })
+// OrbitDB will create an identity using the id 'UserA'.
+const orbitdb = await OrbitDB({ ipfs, id: 'userA' })
+
+// Retrieve the access controller from the list of preloaded ACs.
+const IPFSAccessController = getAccessController('ipfs')
+
+// Open a db with write access for userA and userB.
+const db = orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: [orbitdb.identity.id, anotherIdentity.id]) })
 ```
 
 To allow anyone to write to the database, specify the wildcard '*':
 
+```js
+import { create } from 'ipfs-core'
+import { OrbitDB, Identities, getAccessController } from 'orbit-db'
+
+const ipfs = create({ options })
+
+const orbitdb = await OrbitDB({ ipfs })
+
+const IPFSAccessController = getAccessController('ipfs')
+
+const db = orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: ['*'] }) })
 ```
-const orbitdb = await OrbitDB()
-const db = orbitdb.open('my-db', { AccessController: IPFSAccessController(write: ['*']) })
-```
+
+**The access information cannot be changed after the initial setup (as it is immutable).** If different write access is needed, you will need to set up a new database and associated IPFSAccessController. It is important to note that this will change the address of the database.
 
 ## OrbitDB Access Controller
 
 The OrbitDB access controller provides configurable write access using grant and revoke.
 
-```
+```js
+import { create } from 'ipfs-core'
+import { OrbitDB, Identities, getAccessController } from 'orbit-db'
+
+const ipfs = create({ options })
+
+const orbitdb = await OrbitDB({ ipfs })
+
 const identities = await Identities()
-const identity1 = identities.createIdentity('userA')
-const identity2 = identities.createIdentity('userB')
+const anotherIdentity = identities.createIdentity('userB')
 
-const orbitdb = await OrbitDB()
-const db = orbitdb.open('my-db', { AccessController: OrbitDBAccessController(write: [identity1.id]) })
+// Retrieve the access controller from the list of preloaded ACs.
+const OrbitDBAccessController = getAccessController('orbitdb')
 
-db.access.grant('write', identity2.id)
-db.access.revoke('write', identity2.id)
+const db = orbitdb.open('my-db', { AccessController: OrbitDBAccessController({ write: [orbitdb.identity.id, anotherIdentity.id]) })
+
+db.access.grant('write', anotherIdentity.id)
+db.access.revoke('write', anotherIdentity.id)
 ```
 
 When granting or revoking access, a capability and the identity's id must be defined.
 
 Grant and revoke are not limited to 'write' access only. A custom access capability can be specified, for example, `db.access.grant('custom-access', identity1.id)`.
 
+The OrbitDBAccessController is a mutable access controller. Granting and revoking access does not change the address of the database.
+
 ## Custom Access Controller
 
 Access can be customized by implementing a custom access controller. To implement a custom access controller, specify:
 
-- A curried function with the function signature `async ({ orbitdb, identities, address })`,
+- A partial function with the function signature `async ({ orbitdb, identities, address })`,
 - A `type` constant,
-- A canAppend function with the param `entry`.
+- A canAppend function with the param `entry` and a boolean return type.
 
-```
+The canAppend function must return true if the entry can be appended to the log or false otherwise.
+
+```js
 const type = 'custom'
 
 const CustomAccessController = () => async ({ orbitdb, identities, address }) => {
   address = '/custom/access-controller'
 
   const canAppend = (entry) => {
-
+    // return true if the entry can be appended to the log, false otherwise.
   }
 }
 
@@ -84,7 +127,7 @@ CustomAccessController.type = type
 
 Additional configuration can be passed to the access controller by adding one or more parameters to the `CustomAccessController` function. For example, passing a configurable object parameter with the variable `write`:
 
-```
+```js
 const CustomAccessController = ({ write }) => async ({ orbitdb, identities, address }) => {
 }
 ```
@@ -95,7 +138,7 @@ The main driver of the access controller is the canAppend function. This specifi
 
 How the custom access controller evaluates access will be determined by its use case, but in most instances, the canAppend function will want to check whether the entry being created can be written to the database (and underlying operations log). Therefore, the entry's identity will need to be used to retrieve the identity's id:
 
-```
+```js
 write = [identity.id]
 
 const canAppend = async (entry) => {
@@ -119,8 +162,11 @@ In the above example, the `entry.identity` will be the hash of the identity. Usi
 
 Before passing the custom access controller to the `open` function, it must be added to OrbitDB's AccessControllers:
 
-```
-AccessControllers.add(CustomAccessController)
-const orbitdb = await OrbitDB()
+```js
+import { create } from 'ipfs-core'
+import { OrbitDB, addAccessController } from 'orbit-db'
+
+addAccessController(CustomAccessController)
+const orbitdb = await OrbitDB({ ipfs })
 const db = await orbitdb.open('my-db', { AccessController: CustomAccessController(params) })
 ```
