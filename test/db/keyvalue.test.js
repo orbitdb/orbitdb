@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities } from '../../src/index.js'
-import { KeyValue } from '../../src/db/index.js'
+import KeyValue from '../../src/db/keyvalue.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 

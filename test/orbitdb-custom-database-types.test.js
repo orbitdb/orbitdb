@@ -1,7 +1,7 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, addDatabaseType, databaseTypes, Database } from '../src/index.js'
+import { OrbitDB, addDatabaseType, getDatabaseType, Database } from '../src/index.js'
 import config from './config.js'
 
 const type = 'custom!'
@@ -35,24 +35,11 @@ describe('Add a custom database type', function () {
       await ipfs.stop()
     }
 
-    // Remove the added custom database type from OrbitDB import
-    delete databaseTypes[CustomStore.type]
-
     await rmrf('./orbitdb')
     await rmrf('./ipfs1')
   })
 
   describe('Default supported database types', function () {
-    it('returns default supported database types', async () => {
-      const expected = [
-        'events',
-        'documents',
-        'keyvalue'
-      ]
-
-      deepStrictEqual(Object.keys(databaseTypes), expected)
-    })
-
     it('throws and error if custom database type hasn\'t been added', async () => {
       let err
       try {
@@ -90,26 +77,7 @@ describe('Add a custom database type', function () {
     })
 
     it('returns custom database type after adding it', async () => {
-      const expected = [
-        'events',
-        'documents',
-        'keyvalue',
-        type
-      ]
-
-      deepStrictEqual(Object.keys(databaseTypes), expected)
-    })
-
-    it('can be removed from supported database types', async () => {
-      const expected = [
-        'events',
-        'documents',
-        'keyvalue'
-      ]
-
-      delete databaseTypes[type]
-
-      deepStrictEqual(Object.keys(databaseTypes), expected)
+      deepStrictEqual(getDatabaseType(type), CustomStore)
     })
   })
 })

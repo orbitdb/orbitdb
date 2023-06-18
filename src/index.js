@@ -1,8 +1,11 @@
 export {
-  default as OrbitDB,
-  databaseTypes,
-  addDatabaseType
+  default as OrbitDB
 } from './orbitdb.js'
+
+export {
+  addDatabaseType,
+  getDatabaseType
+} from './db/index.js'
 
 export {
   default as OrbitDBAddress,
