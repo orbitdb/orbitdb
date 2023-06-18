@@ -22,4 +22,4 @@ dist/
 .vscode
 
 # JSDoc output folder
-out/
+docs/api
