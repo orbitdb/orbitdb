@@ -5,7 +5,7 @@
  * details and providers.
  */
 import Identity, { isIdentity, isEqual, decodeIdentity } from './identity.js'
-import { getProviderFor } from './providers/index.js'
+import { getIdentityProvider } from './providers/index.js'
 // import DIDIdentityProvider from './identity-providers/did.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
@@ -75,7 +75,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     options.keystore = keystore
 
     const type = options.type || DefaultProviderType
-    const Provider = getProviderFor(type).default
+    const Provider = getIdentityProvider(type).default
     const identityProvider = Provider(options)
     const id = await identityProvider.getId(options)
     const privateKey = await keystore.getKey(id) || await keystore.createKey(id)
@@ -117,7 +117,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
       return isEqual(identity, verifiedIdentity)
     }
 
-    const Provider = getProviderFor(identity.type)
+    const Provider = getIdentityProvider(identity.type)
 
     const identityVerified = await Provider.verifyIdentity(identity)
     if (identityVerified) {

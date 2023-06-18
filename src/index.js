@@ -22,15 +22,14 @@ export { default as KeyStore } from './key-store.js'
 export {
   addAccessController,
   removeAccessController,
-  getAccessController,
-  accessControllers
+  getAccessController
 } from './access-controllers/index.js'
 
 export {
   Identities,
   isIdentity,
-  identityProviders,
-  addIdentityProvider
+  addIdentityProvider,
+  getIdentityProvider
 } from './identities/index.js'
 
 export {

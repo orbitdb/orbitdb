@@ -2,7 +2,9 @@ import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import OrbitDB from '../src/orbitdb.js'
-import { accessControllers, addAccessController, removeAccessController } from '../src/access-controllers/index.js'
+import { getAccessController, addAccessController, removeAccessController } from '../src/access-controllers/index.js'
+import IPFSAccessController from '../src/access-controllers/ipfs.js'
+import OrbitDBAccessController from '../src/access-controllers/orbitdb.js'
 import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 
@@ -47,12 +49,8 @@ describe('Add a custom access controller', function () {
 
   describe('Default supported access controllers', function () {
     it('returns default supported access controllers', async () => {
-      const expected = [
-        'ipfs',
-        'orbitdb'
-      ]
-
-      deepStrictEqual(Object.keys(accessControllers), expected)
+      deepStrictEqual(getAccessController('ipfs'), IPFSAccessController)
+      deepStrictEqual(getAccessController('orbitdb'), OrbitDBAccessController)
     })
 
     it('throws and error if custom access controller hasn\'t been added', async () => {
@@ -93,24 +91,20 @@ describe('Add a custom access controller', function () {
     })
 
     it('returns custom access controller after adding it', async () => {
-      const expected = [
-        'ipfs',
-        'orbitdb',
-        type
-      ]
-
-      deepStrictEqual(Object.keys(accessControllers), expected)
+      deepStrictEqual(getAccessController(type), CustomAccessController)
     })
 
     it('can be removed from supported access controllers', async () => {
-      const expected = [
-        'ipfs',
-        'orbitdb'
-      ]
-
+      let err
       removeAccessController(type)
 
-      deepStrictEqual(Object.keys(accessControllers), expected)
+      try {
+        getAccessController(type)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      deepStrictEqual(err, 'Error: AccessController type \'custom!\' is not supported')
     })
   })
 })

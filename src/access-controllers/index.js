@@ -73,7 +73,6 @@ const removeAccessController = type => {
 }
 
 export {
-  accessControllers,
   getAccessController,
   addAccessController,
   removeAccessController
