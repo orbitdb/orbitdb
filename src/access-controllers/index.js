@@ -4,18 +4,6 @@
  * Provides a platform for managing access controllers. Supported access
  * controllers can be added and removed from the access controller list, and
  * can load the associated module if they are supported.
- *
- * An AccessController module needs to only expose one function,
- * canAppend(entry) which returns true if the entry can be appended to the
- * oplog, or false otherwise:
- * ```javascript
- * const CustomAccessController = ({ write } = {}) => async => {
- *   const canAppend = async (entry) => {
- *     // Use entry.identity to determine whether the entry can be appended.
- *     // Return true if entry can be appended to OpLog.
- *     // Or return false otherwise.
- *   }
- * }
  */
 import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
