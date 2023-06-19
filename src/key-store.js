@@ -19,17 +19,6 @@ import LRUStorage from './storage/lru.js'
 const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
 const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
 
-/**
- * Verifies a signature used for signing data.
- * @param {string} signature The generated signature.
- * @param {string} publicKey The derived public key of the key pair.
- * @param {string} data The data to be verified.
- * @return {boolean} True if the signature is valid, false otherwise.
- * @throws No signature given if no signature is provided.
- * @throws Given publicKey was undefined if no publicKey is provided.
- * @throws Given input data was undefined if no data is provided.
- * @static
- */
 const verifySignature = async (signature, publicKey, data) => {
   if (!signature) {
     throw new Error('No signature given')
