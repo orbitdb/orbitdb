@@ -1,8 +1,3 @@
-/**
- * @module Identity
- * @description
- * An identity.
- */
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -12,27 +7,20 @@ const codec = dagCbor
 const hasher = sha256
 const hashStringEncoding = base58btc
 
-/**
- * Creates an instance of Identity.
- * @function
- * @param {Object} params One or more parameters for configuring an Identity.
- * @param {string} params.id A unique identitifer for the identity.
- * @param {string} params.publicKey A public key.
- * @param {Object} params.signatures A signed identity id and public key.
- * @param {string} params.type The type of identity provider.
- * @param {function} params.sign A sign function.
- * @param {function} params.verify A verify function.
- * @return {module:Identity~Identity} An instance of Identity.
- * @throws Identity id is required if id is not provided.
- * @throws Invalid public key if publicKey is not provided.
- * @throws Signatures object is required if signature is not provided.
- * @throws Signature of id is required if signature's id is not provided.
- * @throws Signature of publicKey+id is required if signature's publicKey+id is
- * not provided.
- * @throws Identity type is required if type is not provided.
- * @instance
- */
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
+  /**
+   * @namespace module:Identities~Identity
+   * @description The Identity instance. Returned by
+   * [Identities.createIdentity()]{@link module:Identities~Identities#createIdentity}.
+   *
+   * Available Identity instance properties and functions are:
+   * - **id:** A unique identifer for the identity.
+   * - **publicKey:** A public key.
+   * - **signatures:** A signed identity id and public key.
+   * - **type:** The type of identity provider.
+   * - **sign:** A sign function.
+   * - **verify:** A verify function.
+   */
   if (id == null) throw new Error('Identity id is required')
   if (publicKey == null) throw new Error('Invalid public key')
   if (signatures == null) throw new Error('Signatures object is required')

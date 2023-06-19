@@ -67,7 +67,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
    * Creates an identity, adding it to storage.
    * @param {Object} options Various options for configuring a new identity.
    * @param {string} [options.type=publickey] The type of provider to use for generating an identity.
-   * @return {Identity} An instance of identity.
+   * @return {module:Identities~Identity} An instance of identity.
    * @memberof module:Identities~Identities
    * @instance
    */
@@ -96,7 +96,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
 
   /**
    * Verifies an identity using the identity's provider.
-   * @param {Identity} identity The identity to verify.
+   * @param {module:Identities~Identity} identity The identity to verify.
    * @return {boolean} True the identity is valid, false otherwise.
    * @memberof module:Identities~Identities
    */
@@ -129,10 +129,11 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
 
   /**
    * Signs data using an identity.
-   * @param {Identity} identity The identity to use for signing.
+   * @param {module:Identities~Identity} identity The identity to use for
+   * signing.
    * @param {string} data The data to sign.
    * @return {string} The signed data.
-   * @throws Private signing key not fund from KeyStore when no signing key can
+   * @throws Private signing key not found from KeyStore when no signing key can
    * be retrieved.
    * @memberof module:Identities~Identities
    * @instance
@@ -147,6 +148,16 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     return await signMessage(signingKey, data)
   }
 
+  /**
+   * Verifies data using a valid signature and publicKey.
+   * @param {string} signature A signature.
+   * @param {string} publicKey A public key.
+   * @param {string} data The data to be verified.
+   * @return {boolean} True if the the data is signed by the publicKey, false
+   * otherwise.
+   * @memberof module:Identities~Identities
+   * @instance
+   */
   const verify = async (signature, publicKey, data) => {
     return await verifyMessage(signature, publicKey, data)
   }
