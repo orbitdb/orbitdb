@@ -58,12 +58,6 @@ const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) 
   return identity
 }
 
-/**
- * Encode an Identity to a serializable form.
- * @param {Identity} identity Identity to encode,
- * @return {Object} Object with fields hash and bytes.
- * @static
- */
 const _encodeIdentity = async (identity) => {
   const { id, publicKey, signatures, type } = identity
   const value = { id, publicKey, signatures, type }
@@ -72,12 +66,6 @@ const _encodeIdentity = async (identity) => {
   return { hash, bytes: Uint8Array.from(bytes) }
 }
 
-/**
- * Decode an Identity from bytes
- * @param {Uint8Array} bytes Bytes from which to decode an Identity from
- * @return {Identity}
- * @static
- */
 const decodeIdentity = async (bytes) => {
   const { value } = await Block.decode({ bytes, codec, hasher })
   return Identity({ ...value })
