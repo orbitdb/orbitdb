@@ -19,7 +19,7 @@ const hashStringEncoding = base58btc
  * @function
  * @param {Object} params One or more parameters for configuring Manifest.
  * @param {IPFS} params.ipfs An instance of IPFS.
- * @param {module:Storage} [param.storage=module:Storage.Storage-ComposedStorage] An instance of Storage.
+ * @param {module:Storage} [param.storage=module:Storage.Storage-ComposedStorage] A Storage instance that stores the Manifest.
  * @return {module:Manifest} An instance of Manifest.
  * @instance
  */
