@@ -1,5 +1,4 @@
 /**
- * @module PublicKeyIdentityProvider
  * @memberof module:IdentityProviders
  * @description
  * The PublicKey Identity Provider signs and verifies an identity using the
