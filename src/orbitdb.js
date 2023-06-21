@@ -121,7 +121,8 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * the name of a new database.
    * @param {Object} params One or more database configuration parameters.
    * @param {string} [params.type=events] The database's type.
-   * @param {*} [params.meta={}] The database's metadata.
+   * @param {*} [params.meta={}] The database's metadata. Only applies when 
+   * creating a database and is not used when opening an existing database.
    * @param {boolean} [params.sync=true] If true, sync databases automatically.
    * Otherwise, false.
    * @param {module:Database} [params.Database=[Events]{@link module:Database.Database-Events}] A Database-compatible
