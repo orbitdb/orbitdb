@@ -130,9 +130,9 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * [params.AccessController=[IPFSAccessController]{@link module:AccessControllers.AccessControllers-IPFS}]
    * An AccessController-compatible module.
    * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
-   * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
+   * log heads. Defaults to ComposedStorage(LRUStorage, LevelStorage).
    * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
-   * log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
+   * log entries. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
    * @param {number} [params.referencesCount]  The maximum distance between
    * references to other entries.
