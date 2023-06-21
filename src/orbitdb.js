@@ -127,7 +127,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * @param {module:Database} [params.Database=[Events]{@link module:Database.Database-Events}] A Database-compatible
    * module.
    * @param {module:AccessControllers}
-   * [params.AccessController=IPFSAccessController]
+   * [params.AccessController=[IPFSAccessController]{@link module:AccessControllers.AccessControllers-IPFS}]
    * An AccessController-compatible module.
    * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
    * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
