@@ -3,25 +3,16 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import { Identities, identityProviders, addIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
+import { Identities, addIdentityProvider, getIdentityProvider, Identity } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 import { CustomIdentityProvider, FakeIdentityProvider } from '../fixtures/providers.js'
 
-const type = PublicKeyIdentityProvider.type
+const type = 'publickey'
 const keysPath = './testkeys'
 
 describe('Identities', function () {
   before(async () => {
     await copy(testKeysPath, keysPath)
-  })
-
-  afterEach(async () => {
-    // reset the identityProviders.
-    for (const [key] of Object.entries(identityProviders)) {
-      if (key !== 'publickey') {
-        delete identityProviders[key]
-      }
-    }
   })
 
   after(async () => {
@@ -335,14 +326,10 @@ describe('Identities', function () {
   })
 
   describe('manage identity providers', () => {
-    it('has default identity providers', () => {
-      assert.deepStrictEqual(identityProviders, { publickey: PublicKeyIdentityProvider })
-    })
-
     it('can add an identity provider', () => {
       addIdentityProvider(CustomIdentityProvider)
 
-      assert.deepStrictEqual(identityProviders, { publickey: PublicKeyIdentityProvider, custom: CustomIdentityProvider })
+      assert.deepStrictEqual(getIdentityProvider('custom'), CustomIdentityProvider)
     })
   })
 })

@@ -74,7 +74,7 @@ const isProviderSupported = (type) => {
   * not supported.
   * @static
   */
-const getProviderFor = (type) => {
+const getIdentityProvider = (type) => {
   if (!isProviderSupported(type)) {
     throw new Error(`IdentityProvider type '${type}' is not supported`)
   }
@@ -108,6 +108,4 @@ const addIdentityProvider = (IdentityProvider) => {
   identityProviders[IdentityProvider.type] = IdentityProvider
 }
 
-// export { default as DIDIdentityProvider } from './did.js'
-// export { default as EthIdentityProvider } from './ethereum.js'
-export { identityProviders, addIdentityProvider, getProviderFor, PublicKeyIdentityProvider }
+export { addIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }

@@ -5,7 +5,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities, MemoryStorage } from '../../src/index.js'
-import { KeyValueIndexed } from '../../src/db/index.js'
+import KeyValueIndexed from '../../src/db/keyvalue-indexed.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 

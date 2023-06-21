@@ -48,7 +48,7 @@
 * const orbitdb = await OrbitDB({ ipfs, identities, id: 'userA' })
 * const mydb = await orbitdb.open('mydb')
 */
-import { Events, KeyValue, Documents } from './db/index.js'
+import { getDatabaseType } from './db/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
@@ -57,40 +57,6 @@ import { createId } from './utils/index.js'
 import pathJoin from './utils/path-join.js'
 import { getAccessController } from './access-controllers/index.js'
 import IPFSAccessController from './access-controllers/ipfs.js'
-
-/**
- * An array of available database types.
- * @name databaseTypes
- * @†ype []
- * @return [] An array of database types.
- * @memberof module:OrbitDB
- */
-const databaseTypes = {
-  events: Events,
-  documents: Documents,
-  keyvalue: KeyValue
-}
-
-/**
- * Add a new database type.
- * @example
- * import { addDatabaseType } from 'orbit-db'
- * const CustomDBTypeModule = async (params) => {
- *   const database = await Database(...params)
- *   ...
- * }
- * addDatabaseType('customDBType', CustomDBTypeModule)
- * @function addDatabaseType
- * @param {string} type The database type.
- * @param {module:Database} store A Database-compatible module.
- * @memberof module:OrbitDB
- */
-const addDatabaseType = (type, store) => {
-  if (databaseTypes[type]) {
-    throw new Error(`Type already exists: ${type}`)
-  }
-  databaseTypes[type] = store
-}
 
 const DefaultDatabaseType = 'events'
 
@@ -181,10 +147,6 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
   const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount } = {}) => {
     let name, manifest, accessController
 
-    if (type && !databaseTypes[type]) {
-      throw new Error(`Unsupported database type: '${type}'`)
-    }
-
     if (databases[address]) {
       return databases[address]
     }
@@ -212,7 +174,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       meta = manifest.meta
     }
 
-    Database = Database || databaseTypes[type]()
+    Database = Database || getDatabaseType(type)()
 
     if (!Database) {
       throw new Error(`Unsupported database type: '${type}'`)
@@ -261,4 +223,4 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
   }
 }
 
-export { OrbitDB as default, OrbitDBAddress, addDatabaseType, databaseTypes }
+export { OrbitDB as default, OrbitDBAddress }

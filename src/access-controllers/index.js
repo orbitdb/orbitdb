@@ -25,7 +25,7 @@ const accessControllers = {
  * @return {AccessController} The access controller module.
  */
 const getAccessController = (type) => {
-  if (!Object.keys(accessControllers).includes(type)) {
+  if (!accessControllers[type]) {
     throw new Error(`AccessController type '${type}' is not supported`)
   }
   return accessControllers[type]
@@ -41,12 +41,12 @@ const getAccessController = (type) => {
  * controller module does not implement a type property.
  */
 const addAccessController = (accessController) => {
-  if (accessControllers[accessController.type]) {
-    throw new Error(`Access controller '${accessController.type}' already added.`)
+  if (!accessController.type) {
+    throw new Error('Access controller does not contain required field \'type\'')
   }
 
-  if (!accessController.type) {
-    throw new Error('Given AccessController class needs to implement: type.')
+  if (accessControllers[accessController.type]) {
+    throw new Error(`Access controller '${accessController.type}' already added.`)
   }
 
   accessControllers[accessController.type] = accessController
@@ -61,8 +61,9 @@ const removeAccessController = type => {
 }
 
 export {
-  accessControllers,
   getAccessController,
   addAccessController,
-  removeAccessController
+  removeAccessController,
+  IPFSAccessController,
+  OrbitDBAccessController
 }

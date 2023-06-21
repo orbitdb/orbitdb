@@ -21,12 +21,12 @@ const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) 
    * - **sign:** A sign function.
    * - **verify:** A verify function.
    */
-  if (id == null) throw new Error('Identity id is required')
-  if (publicKey == null) throw new Error('Invalid public key')
-  if (signatures == null) throw new Error('Signatures object is required')
-  if (signatures.id == null) throw new Error('Signature of id is required')
-  if (signatures.publicKey == null) throw new Error('Signature of publicKey+id is required')
-  if (type == null) throw new Error('Identity type is required')
+  if (!id) throw new Error('Identity id is required')
+  if (!publicKey) throw new Error('Invalid public key')
+  if (!signatures) throw new Error('Signatures object is required')
+  if (!signatures.id) throw new Error('Signature of id is required')
+  if (!signatures.publicKey) throw new Error('Signature of publicKey+id is required')
+  if (!type) throw new Error('Identity type is required')
 
   signatures = Object.assign({}, signatures)
 
@@ -66,14 +66,14 @@ const decodeIdentity = async (bytes) => {
  * @static
  */
 const isIdentity = (identity) => {
-  return identity.id != null &&
-    identity.hash != null &&
-    identity.bytes != null &&
-    identity.publicKey != null &&
-    identity.signatures != null &&
-    identity.signatures.id != null &&
-    identity.signatures.publicKey != null &&
-    identity.type != null
+  return Boolean(identity.id &&
+    identity.hash &&
+    identity.bytes &&
+    identity.publicKey &&
+    identity.signatures &&
+    identity.signatures.id &&
+    identity.signatures.publicKey &&
+    identity.type)
 }
 
 /**
