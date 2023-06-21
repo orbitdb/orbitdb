@@ -135,8 +135,8 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
    * log entries. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
-   * @param {number} [params.referencesCount]  The maximum distance between
-   * references to other entries.
+   * @param {number} [params.referencesCount]  The number of references to 
+   * previous entries that should be stored with this entry.
    * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
    * @throws Unsupported database type if the type specified is not in the list
