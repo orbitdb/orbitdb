@@ -116,12 +116,18 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * const mydb = await orbitdb.open('mydb', {type: 'documents'})
    * ```
    * The type must be listed in [databaseTypes]{@link module:OrbitDB.databaseTypes} or an error is thrown.
+   * To open an existing database, pass its address to the `open` function:
+   * ```
+   * const existingDB = await orbitdb.open(dbAddress)
+   * ```
+   * The address of a newly created database can be retrieved using
+   * `db.address`.
    * @function
    * @param {string} address The address of an existing database to open, or
    * the name of a new database.
    * @param {Object} params One or more database configuration parameters.
    * @param {string} [params.type=events] The database's type.
-   * @param {*} [params.meta={}] The database's metadata. Only applies when 
+   * @param {*} [params.meta={}] The database's metadata. Only applies when
    * creating a database and is not used when opening an existing database.
    * @param {boolean} [params.sync=true] If true, sync databases automatically.
    * Otherwise, false.
@@ -135,7 +141,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
    * log entries. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
-   * @param {number} [params.referencesCount]  The number of references to 
+   * @param {number} [params.referencesCount]  The number of references to
    * previous entries that should be stored with this entry.
    * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
