@@ -13,7 +13,7 @@
  * const Partial = KeyValueIndexed({ storage })
  * const keyValueIndexed = await Partial({ ipfs })
  */
-import { KeyValue } from './index.js'
+import KeyValue from './keyvalue.js'
 import LevelStorage from '../storage/level.js'
 import pathJoin from '../utils/path-join.js'
 
