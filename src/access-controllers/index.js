@@ -84,5 +84,7 @@ const removeAccessController = type => {
 export {
   getAccessController,
   addAccessController,
-  removeAccessController
+  removeAccessController,
+  IPFSAccessController,
+  OrbitDBAccessController
 }

@@ -1,7 +1,8 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, addDatabaseType, getDatabaseType, Database } from '../src/index.js'
+import { getDatabaseType } from '../src/db/index.js'
+import { OrbitDB, addDatabaseType, Database } from '../src/index.js'
 import config from './config.js'
 
 const type = 'custom!'

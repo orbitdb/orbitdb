@@ -50,4 +50,4 @@ const getDatabaseType = (type) => {
   return databaseTypes[type]
 }
 
-export { addDatabaseType, getDatabaseType }
+export { addDatabaseType, getDatabaseType, Documents, Events, KeyValue, KeyValueIndexed }

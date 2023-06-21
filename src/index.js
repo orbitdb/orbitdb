@@ -3,8 +3,11 @@ export {
 } from './orbitdb.js'
 
 export {
-  addDatabaseType,
-  getDatabaseType
+  Documents,
+  Events,
+  KeyValue,
+  KeyValueIndexed,
+  addDatabaseType
 } from './db/index.js'
 
 export {
@@ -22,14 +25,15 @@ export { default as KeyStore } from './key-store.js'
 export {
   addAccessController,
   removeAccessController,
-  getAccessController
+  IPFSAccessController,
+  OrbitDBAccessController
 } from './access-controllers/index.js'
 
 export {
   Identities,
   isIdentity,
   addIdentityProvider,
-  getIdentityProvider
+  PublicKeyIdentityProvider
 } from './identities/index.js'
 
 export {

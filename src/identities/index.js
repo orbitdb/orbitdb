@@ -8,5 +8,6 @@ export {
 
 export {
   addIdentityProvider,
-  getIdentityProvider
+  getIdentityProvider,
+  PublicKeyIdentityProvider
 } from './providers/index.js'
