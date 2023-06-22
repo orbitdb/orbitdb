@@ -23,7 +23,7 @@ const hashStringEncoding = base58btc
  * @return {module:Manifest} An instance of Manifest.
  * @instance
  */
-const Manifest = async ({ ipfs, storage } = {}) => {
+const ManifestStore = async ({ ipfs, storage } = {}) => {
   /**
    * @namespace module:Manifest~Manifest
    * @description The instance returned by {@link module:Manifest~Manifest}.
@@ -99,4 +99,4 @@ const Manifest = async ({ ipfs, storage } = {}) => {
   }
 }
 
-export default Manifest
+export default ManifestStore

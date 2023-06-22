@@ -52,7 +52,7 @@ import { getDatabaseType } from './db/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
-import Manifests from './manifest.js'
+import ManifestStore from './manifest-store.js'
 import { createId } from './utils/index.js'
 import pathJoin from './utils/path-join.js'
 import { getAccessController } from './access-controllers/index.js'
@@ -100,7 +100,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
 
   const identity = await identities.createIdentity({ id })
 
-  const manifests = await Manifests({ ipfs })
+  const manifestStore = await ManifestStore({ ipfs })
 
   let databases = {}
 
@@ -161,7 +161,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      manifest = await manifests.get(addr.path)
+      manifest = await manifestStore.get(addr.path)
       const acType = manifest.accessController.split('/', 2).pop()
       const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
       AccessController = getAccessController(acType)()
@@ -174,7 +174,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       type = type || DefaultDatabaseType
       AccessController = AccessController || DefaultAccessController()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities })
-      const m = await manifests.create({ name: address, type, accessController: accessController.address, meta })
+      const m = await manifestStore.create({ name: address, type, accessController: accessController.address, meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)
       name = manifest.name
@@ -213,8 +213,8 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     if (keystore) {
       await keystore.close()
     }
-    if (manifests) {
-      await manifests.close()
+    if (manifestStore) {
+      await manifestStore.close()
     }
     databases = {}
   }
