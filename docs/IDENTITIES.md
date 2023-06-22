@@ -48,3 +48,50 @@ const id = 'userA'
 const identities = await Identities({ keystore })
 const identity = identities.createIdentity({ id })
 ```
+
+## Identity as a linked data object
+
+The identity object is stored just like any other [IPLD data structure](https://ipld.io/docs/) and can therefore be retrieved from IPFS using the identity's hash:
+
+```js
+import { create } from 'ipfs-core'
+import * as Block from 'multiformats/block'
+import { Identities } from 'orbit-db'
+import * as dagCbor from '@ipld/dag-cbor'
+import { sha256 } from 'multiformats/hashes/sha2'
+import { base58btc } from 'multiformats/bases/base58'
+import { CID } from 'multiformats/cid'
+
+const ipfs = await create()
+
+const identities = await Identities({ ipfs })
+const identity = await identities.createIdentity({ id: 'me'})
+
+const cid = CID.parse(identity.hash, base58btc)
+
+// Extract the hash from the full db path.
+const bytes = await ipfs.block.get(cid)
+
+// Defines how we serialize/hash the data.
+const codec = dagCbor
+const hasher = sha256
+
+// Retrieve the block data, decoding it to human-readable JSON text.
+const { value } = await Block.decode({ bytes, codec, hasher })
+
+console.log('identity', value)
+```
+
+The resulting output is a JSON object containing the identity information:
+
+```json
+{
+  id: '031a7bf5f233ad9dccb2a305edfd939f0c54f0ed2e270c4ac390d91ecd33d0c28f',
+  type: 'publickey',
+  publicKey: '02343cbdd3a5deaacc115f8f241db979f59864aad5b4fbf1561e19d5d04d7b1d14',
+  signatures: {
+    id: '30440220492ed7bc2945bd6859e96fa929870343bcda188b481248dfa51c7dd7a1eb59ef022049542399338e66454f523dc4033723bc4ff4365f17537171361e128f10703be1',
+    publicKey: '30450221008291e9e12d586129de2882e731f286b4168cbed43d2ecf90d8ae9c53e15c56110220204ac640b22e75bf6083a6715a7e6c988659fc08f79022fab8af62563e9fdd67'
+  }
+}
+```
