@@ -3,35 +3,6 @@
  * @description
  * Database is the base class for OrbitDB data stores and handles all lower
  * level add operations and database sync-ing using IPFS.
- *
- * Database should be instantiated and initialized when implementing a
- * compatible datastore:
- * ```
- * const CustomDataStore = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
- *   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
- *   const { addOperation, log } = database
- *
- *   const put = async (key, value) => {
- *     return addOperation({ op: 'ADD', key, value })
- *   }
- *
- *   const get = async (hash) => {
- *     const entry = await log.get(hash)
- *     return entry.payload.value
- *   }
- *
- *   return {
- *     ...database,
- *     type: 'custom-data-store',
- *     put,
- *     get
- *   }
- * }
- *
- * export default CustomDataStore
- * ```
- * The functions put and get are recommended but not mandatory. For example,
- * the Events data store uses a function called `add`.
  */
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
