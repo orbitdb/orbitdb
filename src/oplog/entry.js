@@ -1,7 +1,7 @@
 /**
  * @namespace module:Log~Entry
  * @memberof module:Log
- * @description Log Entry
+ * @description A log entry.
  */
 import Clock from './clock.js'
 import * as Block from 'multiformats/block'
@@ -14,17 +14,32 @@ const hasher = sha256
 const hashStringEncoding = base58btc
 
 /**
- * Create an Entry
- * @param {Identity} identity The identity instance
+ * Creates an Entry.
+ * @param {module:Identities~Identity} identity The identity instance
  * @param {string} logId The unique identifier for this log
  * @param {*} data Data of the entry to be added. Can be any JSON.stringifyable
  * data.
- * @param {module:Clock} [clock] The clock
+ * @param {module:Log~Clock} [clock] The clock
  * @param {Array<string|Entry>} [next=[]] An array of CIDs as base58btc encoded
- * strings.
- * @param {Array<string|Entry>} [refs=[]] An array of CIDs as base58btc encoded
- * strings.
- * @return {Promise<Entry>}
+ * strings which point to the next entries in a chain of entries.
+ * @param {Array<string|module:Log~Entry>} [refs=[]] An array of CIDs as
+ * base58btc encoded strings pointing to various entries which come before
+ * this entry.
+ * @return {Promise<module:Log~Entry>} A promise which contains an instance of
+ * Entry.
+ * Entry consists of the following properties:
+ *
+ * - id: A string linking multiple entries together,
+ * - payload: An arbitrary chunk of data,
+ * - next: One or more hashes pointing to the next entries in a chain of
+ * entries,
+ * - refs: One or more hashes which reference other entries in the chain,
+ * - clock: A logical clock. See {@link module:Log~Clock},
+ * - v: The version of the entry,
+ * - key: The public key of the identity,
+ * - identity: The identity of the entry's owner,
+ * - sig: The signature of the entry signed by the owner.
+ * @memberof module:Log~Entry
  * @example
  * const entry = await Entry.create(identity, 'log1', 'hello')
  * console.log(entry)
@@ -59,11 +74,11 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
 
 /**
  * Verifies an entry signature.
- *
  * @param {Identities} identities Identities system to use
- * @param {Entry} entry The entry being verified
- * @return {Promise} A promise that resolves to a boolean value indicating if
+ * @param {module:Log~Entry} entry The entry being verified
+ * @return {Promise<boolean>} A promise that resolves to a boolean value indicating if
  * the signature is valid.
+ * @memberof module:Log~Entry
  */
 const verify = async (identities, entry) => {
   if (!identities) throw new Error('Identities is required, cannot verify entry')
@@ -86,9 +101,10 @@ const verify = async (identities, entry) => {
 }
 
 /**
- * Check if an object is an Entry.
- * @param {Entry} obj
+ * Checks if an object is an Entry.
+ * @param {module:Log~Entry} obj
  * @return {boolean}
+ * @memberof module:Log~Entry
  */
 const isEntry = (obj) => {
   return obj && obj.id !== undefined &&
@@ -99,25 +115,28 @@ const isEntry = (obj) => {
     obj.refs !== undefined
 }
 
+/**
+ * Determines whether two entries are equal.
+ * @param {module:Log~Entry} a An entry to compare.
+ * @param {module:Log~Entry} b An entry to compare.
+ * @return {boolean} True if a and b are equal, false otherwise.
+ * @memberof module:Log~Entry
+ */
 const isEqual = (a, b) => {
   return a && b && a.hash === b.hash
 }
 
 /**
- * Decode a serialized Entry from bytes
+ * Decodes a serialized Entry from bytes
  * @param {Uint8Array} bytes
- * @return {Entry}
+ * @return {module:Log~Entry}
+ * @memberof module:Log~Entry
  */
 const decode = async (bytes) => {
   const { value } = await Block.decode({ bytes, codec, hasher })
   return _encodeEntry(value)
 }
 
-/**
- * Encode an Entry to a serializable form
- * @param {Entry} entry
- * @return {TODO}
- */
 const _encodeEntry = async (entry) => {
   const { cid, bytes } = await Block.encode({ value: entry, codec, hasher })
   const hash = cid.toString(hashStringEncoding)
