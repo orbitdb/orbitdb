@@ -1,6 +1,6 @@
 /**
- * @namespace Database-KeyValue
- * @memberof module:Database
+ * @namespace Databases-KeyValue
+ * @memberof module:Databases
  * @description KeyValue database.
  */
 import Database from '../database.js'
@@ -32,13 +32,13 @@ import Database from '../database.js'
  * @function
  * @instance
  * @async
- * @memberof module:Database.Database-KeyValue
+ * @memberof module:Databases.Databases-KeyValue
  */
 
 /**
  * Defines an KeyValue database.
- * @return {module:Database.Database-KeyValue} A KeyValue function.
- * @memberof module:Database
+ * @return {module:Databases.Databases-KeyValue} A KeyValue function.
+ * @memberof module:Databases
  */
 const KeyValue = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
@@ -51,7 +51,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * @param {string} key The key to store.
    * @param {*} value The value to store.
    * @return {string} The hash of the new oplog entry.
-   * @memberof module:Database.Database-KeyValue
+   * @memberof module:Databases.Databases-KeyValue
    * @instance
    */
   const put = async (key, value) => {
@@ -62,7 +62,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * Deletes a key/value pair from the store.
    * @function
    * @param {string} key The key of the key/value pair to delete.
-   * @memberof module:Database.Database-KeyValue
+   * @memberof module:Databases.Databases-KeyValue
    * @instance
    */
   const del = async (key) => {
@@ -74,7 +74,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * @function
    * @param {string} key The key of the value to get.
    * @return {*} The value corresponding to key or null.
-   * @memberof module:Database.Database-KeyValue
+   * @memberof module:Databases.Databases-KeyValue
    * @instance
    */
   const get = async (key) => {
@@ -94,7 +94,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * @param {Object} [filters={}] Various filters to apply to the iterator.
    * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next key/value as key/value/hash.
-   * @memberof module:Database.Database-KeyValue
+   * @memberof module:Databases.Databases-KeyValue
    * @instance
    */
   const iterator = async function * ({ amount } = {}) {
@@ -121,7 +121,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
    * @function
    * @return [][string, string, string] An array of key/value pairs as
    * key/value/hash entries.
-   * @memberof module:Database.Database-KeyValue
+   * @memberof module:Databases.Databases-KeyValue
    * @instance
    */
   const all = async () => {

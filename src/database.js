@@ -39,18 +39,18 @@ const defaultCacheSize = 1000
  * automatically. Otherwise, false.
  * @param {function} [params.onUpdate] A function callback. Fired when an
  * entry is added to the oplog.
- * @return {module:Database~Database} An instance of Database.
+ * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
 const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   /**
-   * @namespace module:Database~Database
+   * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
    */
 
   /**
    * Event fired when an update occurs.
-   * @event module:Database~Database#update
+   * @event module:Databases~Database#update
    * @param {module:Entry} entry An entry.
    * @example
    * database.events.on('update', (entry) => ...)
@@ -58,14 +58,14 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Event fired when a close occurs.
-   * @event module:Database~Database#close
+   * @event module:Databases~Database#close
    * @example
    * database.events.on('close', () => ...)
    */
 
   /**
    * Event fired when a drop occurs.
-   * @event module:Database~Database#drop
+   * @event module:Databases~Database#drop
    * @example
    * database.events.on('drop', () => ...)
    */
@@ -91,16 +91,6 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
 
-  /**
-   * Event emitter that emits updates.
-   * @name events
-   * @†ype EventEmitter
-   * @fires update when an entry is added to the database.
-   * @fires close When the database is closed.
-   * @fires drop When the database is dropped.
-   * @memberof module:Database~Database
-   * @instance
-   */
   const events = new EventEmitter()
 
   const queue = new PQueue({ concurrency: 1 })
@@ -110,7 +100,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
    * @function addOperation
    * @param {*} op Some operation to add to the oplog.
    * @return {string} The hash of the operation.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -147,7 +137,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Closes the database, stopping sync and closing the oplog.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -160,7 +150,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Drops the database, clearing the oplog.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -170,15 +160,6 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     events.emit('drop')
   }
 
-  /**
-   * Starts the [Sync protocol]{@link module:Sync~Sync}.
-   *
-   * Sync protocol exchanges OpLog heads (latest known entries) between peers
-   * when they connect.
-   * @memberof module:Database~Database
-   * @instance
-   * @async
-   */
   const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically })
 
   return {

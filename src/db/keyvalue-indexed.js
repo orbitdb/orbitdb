@@ -1,6 +1,6 @@
 /**
- * @namespace Database-KeyValueIndexed
- * @memberof module:Database
+ * @namespace Databases-KeyValueIndexed
+ * @memberof module:Databases
  * @description
  * KeyValueIndexed database.
  *
@@ -46,7 +46,7 @@ const valueEncoding = 'json'
  * @function
  * @instance
  * @async
- * @memberof module:Database.Database-KeyValueIndexed
+ * @memberof module:Databases.Databases-KeyValueIndexed
  */
 
 /**
@@ -54,9 +54,9 @@ const valueEncoding = 'json'
  * @param {Object} options Various options for configuring the KeyValueIndexed
  * store.
  * @param {module:Storage} [storage=LevelStorage] A compatible storage.
- * @return {module:Database.Database-KeyValueIndexed} A KeyValueIndexed
+ * @return {module:Databases.Databases-KeyValueIndexed} A KeyValueIndexed
  * function.
- * @memberof module:Database
+ * @memberof module:Databases
  */
 const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const indexDirectory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
@@ -94,7 +94,7 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    * @function
    * @param {string} key The key of the value to get.
    * @return {*} The value corresponding to key or null.
-   * @memberof module:Database.Database-KeyValueIndexed
+   * @memberof module:Databases.Databases-KeyValueIndexed
    * @instance
    */
   const get = async (key) => {
@@ -111,7 +111,7 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    * @param {Object} [filters={}] Various filters to apply to the iterator.
    * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next key/value as key/value/hash.
-   * @memberof module:Database.Database-KeyValueIndexed
+   * @memberof module:Databases.Databases-KeyValueIndexed
    * @instance
    */
   const iterator = async function * ({ amount } = {}) {

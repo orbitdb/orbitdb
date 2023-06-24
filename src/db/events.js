@@ -1,6 +1,6 @@
 /**
- * @namespace Database-Events
- * @memberof module:Database
+ * @namespace Databases-Events
+ * @memberof module:Databases
  * @description Events database.
  */
 import Database from '../database.js'
@@ -32,13 +32,13 @@ import Database from '../database.js'
  * @function
  * @instance
  * @async
- * @memberof module:Database.Database-Events
+ * @memberof module:Databases.Databases-Events
  */
 
 /**
  * Defines an Events database.
- * @return {module:Database.Database-Events} A Events function.
- * @memberof module:Database
+ * @return {module:Databases.Databases-Events} A Events function.
+ * @memberof module:Databases
  */
 const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
@@ -50,7 +50,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @function
    * @param {*} value The event to be added.
    * @return {string} The hash of the new oplog entry.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const add = async (value) => {
@@ -62,7 +62,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @function
    * @param {string} hash The hash of the event to get.
    * @return {*} The value corresponding to hash or null.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const get = async (hash) => {
@@ -84,7 +84,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * the given hash.
    * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string] The next event as hash/value.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
@@ -100,7 +100,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * Returns all events.
    * @function
    * @return [][string, string] An array of events as hash/value entries.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const all = async () => {
