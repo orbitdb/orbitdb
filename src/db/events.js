@@ -6,36 +6,6 @@
 import Database from '../database.js'
 
 /**
- * Creates an instance of Events.
- * @callback Events
- * @param {Object} params One or more parameters for configuring Database.
- * @param {IPFS} params.ipfs An IPFS instance.
- * @param {Identity} [params.identity] An Identity instance.
- * @param {string} [params.address] The address of the database.
- * @param {string} [params.name] The name of the database.
- * @param {module:AccessControllers} [params.access] An AccessController
- * instance.
- * @param {string} [params.directory] A location for storing Database-related
- * data. Defaults to ./orbitdb/[params.address].
- * @param {*} [params.meta={}] The database's metadata.
- * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
- * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {number} [params.referencesCount]  The maximum distance between
- * references to other entries.
- * @param {boolean} [params.syncAutomatically=false] If true, sync databases
- * automatically. Otherwise, false.
- * @param {function} [params.onUpdate] A function callback. Fired when an
- * entry is added to the oplog.
- * @function
- * @instance
- * @async
- * @memberof module:Databases.Databases-Events
- */
-
-/**
  * Defines an Events database.
  * @return {module:Databases.Databases-Events} A Events function.
  * @memberof module:Databases
