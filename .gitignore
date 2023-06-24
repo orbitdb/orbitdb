@@ -22,4 +22,5 @@ dist/
 .vscode
 
 # JSDoc output folder
-docs/api
+docs/api/*
+!docs/api/README.md
