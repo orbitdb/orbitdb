@@ -55,4 +55,61 @@ const indexStorage = await CustomStorage()
 const db = await orbitdb.open('my-db', { entryStorage, headsStorage, indexStorage })
 ```
 
+## Custom Storage
+
+Custom storage modules can be created for special use cases. A storage
+module must take the following form:
+
+```js
+const CustomStorage = async (params) => { // Drop params if not required
+  
+  const put = async (hash, data) => {
+    // Puts the hash and data to the underlying storage. This is not required.
+    // For example, the Events database uses add() to add a value without a 
+    // key.
+  }
+
+  const get = async (hash) => {
+     // Gets a record identified by hash from the underlying storage
+  }
+
+  const del = async (hash) => {
+    // Deletes a record identified by hash from the underlying storage
+  }
+
+  const iterator = async function * () {
+    // Iterates over the underlying storage's records
+    // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator
+  }
+
+  const merge = async (other) => {
+    // Merges the records from two storages
+  }
+
+  const clear = async () => {
+    // Clears all records from the underlying storage
+  }
+
+  const close = async () => {
+    // Closes the underlying storage
+  }
+
+  return {
+    put,
+    del,
+    get,
+    iterator,
+    merge,
+    clear,
+    close
+  }
+}
+```
+
+It is recommended that all functions be defined for API consistency, but do not necessarily need to be implemented. For example, if the storage does not require closing, the close function can remain empty. For example:
+
+```js
+const close = async () => {}
+```
+
 See the [various storage implementations](../src/storage) to see how custom storage should be structured for compatibility with OrbitDB.
