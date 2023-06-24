@@ -83,8 +83,8 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {function(Object)} findFn A function for querying for specific
    * results.
-   * 
-   * The findFn function's signature takes the form `function(doc)` where doc 
+   *
+   * The findFn function's signature takes the form `function(doc)` where doc
    * is a document's value property. The function should return true if the
    * document is found, false otherwise.
    * @return {Array} Found documents.

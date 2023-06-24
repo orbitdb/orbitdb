@@ -91,6 +91,15 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
 
+  /**
+   * Event emitter that emits Database changes.
+   * @†ype EventEmitter
+   * @fires update when addOperation or applyOperation completes.
+   * @fires close when the database is successfully closed.
+   * @fires drop when the database is successfully dropped.
+   * @memberof module:Sync~Sync
+   * @instance
+   */
   const events = new EventEmitter()
 
   const queue = new PQueue({ concurrency: 1 })
