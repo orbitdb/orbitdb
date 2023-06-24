@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
-import { OrbitDBAddress, isValidAddress, parseAddress } from '../src/index.js'
+import { default as OrbitDBAddress, isValidAddress, parseAddress } from '../src/address.js'
 
 describe('Address', function () {
   describe('Creating an address from full address string', () => {

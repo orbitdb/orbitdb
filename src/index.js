@@ -11,7 +11,6 @@ export {
 } from './db/index.js'
 
 export {
-  default as OrbitDBAddress,
   isValidAddress,
   parseAddress
 } from './address.js'
