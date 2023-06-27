@@ -8,7 +8,7 @@ export {
   KeyValue,
   KeyValueIndexed,
   addDatabaseType
-} from './db/index.js'
+} from './databases/index.js'
 
 export {
   isValidAddress,

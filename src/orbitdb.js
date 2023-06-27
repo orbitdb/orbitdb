@@ -2,7 +2,7 @@
 * @module OrbitDB
 * @description Provides an interface for users to interact with OrbitDB.
 */
-import { getDatabaseType } from './db/index.js'
+import { getDatabaseType } from './databases/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
