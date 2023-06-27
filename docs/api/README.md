@@ -13,46 +13,32 @@ IPFS is also required:
 npm install ipfs-core
 ```
 
-Instantiate OrbitDB and open a new database:
+Instantiate OrbitDB and create a database:
 
 ```js
 import { create } from 'ipfs-core'
 import { OrbitDB } from 'orbit-db'
 
-const ipfs = await create() // IPFS is required for storage and syncing
+const ipfs = await create() // IPFS is required for storage and network communication
 const orbitdb = await OrbitDB({ ipfs })
 const mydb = await orbitdb.open('mydb')
-const dbAddress = mydb.address // E.g. /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
-@example <caption>Open an existing database using its multiformat address:</caption>
-const mydb = await orbitdb.open(dbAddress)
+console.log(mydb.address) // /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
+await mydb.add("hello world!")
 ```
 
-Use with pre-configured identities:
+Open and replicate an existing database:
 
 ```js
+// In another process
 import { create } from 'ipfs-core'
-import { OrbitDB, Identities } from 'orbit-db'
-import CustomStorage from './custom-storage.js'
+import { OrbitDB } from 'orbit-db'
 
-const storage = await CustomStorage()
-const identities = await Identities({ storage })
-const ipfs = await create() // IPFS is required for storage and syncing
-const orbitdb = await OrbitDB({ ipfs, identities })
-const mydb = await orbitdb.open('mydb')
-```
-
-Use with existing identities:
-
-```js
-import { create } from 'ipfs-core'
-import { OrbitDB, Identities } from 'orbit-db'
-
-const identities = await Identities()
-await identities.createIdentity('userA')
-
-const ipfs = await create() // IPFS is required for storage and syncing
-const orbitdb = await OrbitDB({ ipfs, identities, id: 'userA' })
-const mydb = await orbitdb.open('mydb')
+const ipfs = await create()
+const orbitdb = await OrbitDB({ ipfs })
+const theirdb = await orbitdb.open('/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+for await (let record of theirdb.iterator()) {
+  console.log(record)
+}
 ```
 
 See the [OrbitDB module](./module-OrbitDB.html) for more information about how to open databases.

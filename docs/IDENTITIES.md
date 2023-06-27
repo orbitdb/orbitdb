@@ -1,14 +1,14 @@
 # Identities
 
-An identity is a cryptographically signed public key which can be used to sign and verify various data. Within OrbitDB, the main objective of an identity is verify write access to a database's log and, if allowed, to sign each entry as it is added to the log.
+In OrbitDB, an identity is a cryptographically signed public key which is used to verify write access to a database's operations log and, if allowed, to sign each database update as it is added to the operations log.
 
-`Identities` provides methods to manage one or more identities and includes functionality for creating, retrieving, signing and verifying an identity as well as signing and verifying messages using an existing identity.
+`Identities` provides methods to manage one or more identities and includes functionality for creating, retrieving, signing and verifying an identity and, internally, it is used to sign and verify database updates.
 
 ## Creating an identity
 
 An identity can be created by using the `createIdentity` function.
 
-A root key is used to create a new key with the "id" of the root key's public key, Using the derived private key, the root public key is signed. This is known as the "signed message".
+A root key is used to create a new key with the "id" of the root key's public key. Using the derived private key, the root public key is signed.
 
 A new identity is signed using the root key's private key. The identity is consists of the signed message and the derived public key concatenated together ("signed identity")
 
@@ -60,16 +60,16 @@ const identity = identities.createIdentity({ id })
 There are different ways to customize the location of the key store.
 
 To change the keystore using `OrbitDB`, pass a custom directory:
-```
+```js
 // This will create a key store under ./different-path/key-store
 const orbitdb = await OrbitDB({ directory: './different-path' })
 // Be aware that this will change the base path to the database as well.
 ```
 
 To change the keystore using the KeyStore function, pass a custom path to the `KeyStore` function:
-```
+```js
 // This will create a key store under ./different-key-store.
-const path = ./different-key-store
+const path = './different-key-store'
 const keystore = await KeyStore({ path })
 
 // keystore can now be used with other functions, for example:
@@ -77,15 +77,15 @@ const identities = await Identities({ keystore })
 ```
 
 To specify a different keystore path using `Identities`, pass a custom path to the `Identities` function:
-```
+```js
 /// This will create a KeyStore under ./different-identities-path
-const path = ./different-identities-path
+const path = './different-identities-path'
 const identities = await Identities({ path })
 ```
 
 ## Identity as a linked data object
 
-The identity object is stored just like any other [IPLD data structure](https://ipld.io/docs/) and can therefore be retrieved from IPFS using the identity's hash:
+The identity object is stored like any other [IPLD data structure](https://ipld.io/docs/) and can therefore be retrieved from IPFS using the identity's hash:
 
 ```js
 import { create } from 'ipfs-core'
@@ -99,7 +99,7 @@ import { CID } from 'multiformats/cid'
 const ipfs = await create()
 
 const identities = await Identities({ ipfs })
-const identity = await identities.createIdentity({ id: 'me'})
+const identity = await identities.createIdentity({ id: 'me' })
 
 const cid = CID.parse(identity.hash, base58btc)
 
@@ -116,9 +116,9 @@ const { value } = await Block.decode({ bytes, codec, hasher })
 console.log('identity', value)
 ```
 
-The resulting output is a JSON object containing the identity information:
+The resulting output is an object containing the identity information:
 
-```json
+```js
 {
   id: '031a7bf5f233ad9dccb2a305edfd939f0c54f0ed2e270c4ac390d91ecd33d0c28f',
   type: 'publickey',
@@ -139,16 +139,18 @@ const type = 'custom'
 
 // check whether the identity was signed by the identity's id.
 const verifyIdentity = identity => {
-
+  // ...
 }
+
 // The identity provider.
 const MyCustomIdentityProvider = ({ keystore }) => {
   const getId = async ({ id } = {}) => {
-
+    // return the "root" identity managed by the custom identity provider,
+    // eg. a public key or a wallet address
   }
 
-  const signIdentity = async (data, { id } = {}) => {
-
+  const signIdentity = async (publicKeyAndIdSignature) => {
+    // sign the publicKeyAndIdSignature using the custom identity provider system
   }
 
   return {
@@ -162,9 +164,11 @@ export { MyCustomIdentityProvider as default, verifyIdentity, type }
 
 To use it, add it to the list of known identity providers:
 
-```javascript
-import as MyCustomIdentityProvider from 'my-custom-identity-provider'
+```js
+import { addIdentityProvider } from 'orbit-db'
+import MyCustomIdentityProvider from 'my-custom-identity-provider'
 addIdentityProvider(MyCustomIdentityProvider)
+const identity = await createIdentity({ id: 'some id', type: 'custom' })
 ```
 
 where my-custom-identity-provider is the custom module.

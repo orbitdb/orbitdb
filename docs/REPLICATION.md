@@ -1,8 +1,8 @@
 # Replication
 
-Below is a simple replication example. Both peers run within the same Node daemon.
+Below is a simple replication example. Both peers run within the same Nodejs process.
 
-```
+```js
 import { OrbitDB } from 'orbit-db'
 import { create } from 'ipfs-core'
 
@@ -19,9 +19,6 @@ const config1 = {
     MDNS: {
       Enabled: true,
       Interval: 0
-    },
-    webRTCStar: {
-      Enabled: false
     }
   }
 }
@@ -37,9 +34,6 @@ const config2 = {
     MDNS: {
       Enabled: true,
       Interval: 0
-    },
-    webRTCStar: {
-      Enabled: false
     }
   }
 }
