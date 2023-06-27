@@ -132,7 +132,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   /**
    * Event emitter that emits Sync changes.
    * @†ype EventEmitter
-   * @fires module:Sync~Sync#join when a peer has connected and the exchange of 
+   * @fires module:Sync~Sync#join when a peer has connected and the exchange of
    * heads has been completed.
    * @fires module:Sync~Sync#leave when a peer disconnects
    * @fires module:Sync~Sync#error when an error occurs
