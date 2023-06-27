@@ -7,19 +7,20 @@ const codec = dagCbor
 const hasher = sha256
 const hashStringEncoding = base58btc
 
+/**
+ * @typedef {Object} module:Identities~Identity
+ * @property {string} id A unique identifer for the identity.
+ * @property {object} publicKey A public key.
+ * @property {object} signatures A signed identity id and public key.
+ * @property {string} type The type of identity provider.
+ * @property {function} sign A sign function.
+ * @property {function} verify A verify function.
+ */
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
   /**
    * @namespace module:Identities~Identity
    * @description The Identity instance. Returned by
    * [Identities.createIdentity()]{@link module:Identities~Identities#createIdentity}.
-   *
-   * Available Identity instance properties and functions are:
-   * - **id:** A unique identifer for the identity.
-   * - **publicKey:** A public key.
-   * - **signatures:** A signed identity id and public key.
-   * - **type:** The type of identity provider.
-   * - **sign:** A sign function.
-   * - **verify:** A verify function.
    */
   if (!id) throw new Error('Identity id is required')
   if (!publicKey) throw new Error('Invalid public key')
@@ -64,6 +65,7 @@ const decodeIdentity = async (bytes) => {
  * @param {Identity} identity The identity to verify.
  * @return {boolean} True if the identity is valid, false otherwise.
  * @static
+ * @private
  */
 const isIdentity = (identity) => {
   return Boolean(identity.id &&
@@ -82,6 +84,7 @@ const isIdentity = (identity) => {
  * @param {Identity} b Second identity.
  * @return {boolean} True if identity a and b are equal, false otherwise.
  * @static
+ * @private
  */
 const isEqual = (a, b) => {
   return a.id === b.id &&

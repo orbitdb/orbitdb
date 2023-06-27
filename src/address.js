@@ -9,7 +9,7 @@ import { posixJoin } from './utils/path-join.js'
 /**
  * Validates an OrbitDB database address.
  * @function
- * @param {OrbitDBAddress|string} address An OrbitDB database address.
+ * @param {module:Address~OrbitDBAddress|string} address An OrbitDB database address.
  * @return {boolean} True if the address is a valid OrbitDB database address,
  * false otherwise.
  * @static
@@ -39,8 +39,8 @@ const isValidAddress = (address) => {
 /**
  * Parses an OrbitDB database address.
  * @function
- * @param {OrbitDBAddress|string} address A valid OrbitDB database address.
- * @return {OrbitDBAddress} An instance of OrbitDBAddress.
+ * @param {module:Address~OrbitDBAddress|string} address A valid OrbitDB database address.
+ * @return {module:Address~OrbitDBAddress} An instance of OrbitDBAddress.
  * @throws Not a valid OrbitDB address if no address if provided.
  * @throws Not a valid OrbitDB address if address is invalid.
  * @static
@@ -57,6 +57,12 @@ const parseAddress = (address) => {
   return OrbitDBAddress(address)
 }
 
+/**
+ * @typedef {Object} OrbitDBAddress
+ * @property {string} protocol The address protocol (/orbitdb/).
+ * @property {string} hash The hash of the database.
+ * @property {string} address The full database address.
+ */
 const OrbitDBAddress = (address) => {
   if (address && address.protocol === 'orbitdb' && address.hash) {
     return address
@@ -66,6 +72,11 @@ const OrbitDBAddress = (address) => {
 
   const hash = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
 
+  /**
+   * Returns address as a string.
+   * @typedef {Function} toString
+   * @returns {string} Address as a string.
+   */
   const toString = () => {
     return posixJoin('/', protocol, hash)
   }
