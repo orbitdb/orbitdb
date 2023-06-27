@@ -94,7 +94,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
   /**
    * Event emitter that emits Database changes.
    * @†ype EventEmitter
-   * @fires update when addOperation or applyOperation completes.
+   * @fires update when an entry is added to the database.
    * @fires close when the database is successfully closed.
    * @fires drop when the database is successfully dropped.
    * @memberof module:Sync~Sync
