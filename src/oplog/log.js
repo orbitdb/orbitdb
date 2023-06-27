@@ -6,6 +6,7 @@
  * Implemented as a Merkle-CRDT as per the paper:
  * "Merkle-CRDTs: Merkle-DAGs meet CRDTs"
  * https://arxiv.org/abs/2004.00107
+ * @private
  */
 import LRU from 'lru'
 import Entry from './entry.js'
@@ -55,6 +56,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   /**
    * @namespace Log
    * @description The instance returned by {@link module:Log}.
+   * @private
    */
 
   if (identity == null) {

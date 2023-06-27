@@ -8,12 +8,6 @@
 import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
 
-/**
- * An array of available access controllers.
- * @name accessControllers
- * @†ype []
- * @return [] An array of access controllers.
- */
 const accessControllers = {
   ipfs: IPFSAccessController,
   orbitdb: OrbitDBAccessController
@@ -23,6 +17,7 @@ const accessControllers = {
  * Gets an access controller module specified by type.
  * @param {string} type A valid access controller type.
  * @return {AccessController} The access controller module.
+ * @private
  */
 const getAccessController = (type) => {
   if (!accessControllers[type]) {
@@ -39,6 +34,7 @@ const getAccessController = (type) => {
  * already supported.
  * @throws Given AccessController class needs to implement: type if the access
  * controller module does not implement a type property.
+ * @static
  */
 const addAccessController = (accessController) => {
   if (!accessController.type) {
@@ -55,6 +51,7 @@ const addAccessController = (accessController) => {
 /**
  * Removes an access controller from the list.
  * @param {string} type A valid access controller type.
+ * @static
  */
 const removeAccessController = type => {
   delete accessControllers[type]

@@ -1,3 +1,9 @@
+/**
+ * @namespace module:Log~Heads
+ * @memberof module:Log
+ * @description The log's heads.
+ * @private
+ */
 import Entry from './entry.js'
 import MemoryStorage from '../storage/memory.js'
 
@@ -77,6 +83,7 @@ const Heads = async ({ storage, heads }) => {
  *
  * @param {Array<Entry>} entries Entries to search heads from
  * @return {Array<Entry>}
+ * @private
  */
 const findHeads = (entries) => {
   entries = new Set(entries)

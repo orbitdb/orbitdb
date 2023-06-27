@@ -19,6 +19,7 @@ const type = 'orbitdb'
  * @instance
  * @async
  * @memberof module:AccessControllers.AccessControllers-OrbitDB
+ * @private
  */
 
 /**

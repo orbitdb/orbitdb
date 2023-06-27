@@ -2,6 +2,7 @@
  * @namespace module:Log~Entry
  * @memberof module:Log
  * @description A log entry.
+ * @private
  */
 import Clock from './clock.js'
 import * as Block from 'multiformats/block'

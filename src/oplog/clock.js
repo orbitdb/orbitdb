@@ -3,6 +3,7 @@
  * @memberof module:Log
  * @description
  * The lamport clock.
+ * @private
  */
 
 /**

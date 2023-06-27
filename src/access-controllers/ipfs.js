@@ -38,6 +38,7 @@ const type = 'ipfs'
  * @instance
  * @async
  * @memberof module:AccessControllers.AccessControllers-IPFS
+ * @private
  */
 
 /**

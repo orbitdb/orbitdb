@@ -12,6 +12,7 @@ const ManifestStore = async ({ ipfs, storage } = {}) => {
   /**
    * @namespace module:Manifest~Manifest
    * @description The instance returned by {@link module:Manifest~Manifest}.
+   * @private
    */
 
   storage = storage || await ComposedStorage(
