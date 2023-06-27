@@ -23,7 +23,8 @@ const valueEncoding = 'json'
  * Defines a KeyValueIndexed database.
  * @param {Object} options Various options for configuring the KeyValueIndexed
  * store.
- * @param {module:Storage} [storage=LevelStorage] A compatible storage.
+ * @param {module:Storage} [storage=LevelStorage] A compatible storage where 
+ * the key/value pairs are indexed.
  * @return {module:Databases.Databases-KeyValueIndexed} A KeyValueIndexed
  * function.
  * @memberof module:Databases
