@@ -1,7 +1,7 @@
 /**
  * @module AccessControllers
  * @description
- * Provides a platform for managing access controllers. Supported access
+ * Provides a system for managing access controllers. Supported access
  * controllers can be added and removed from the access controller list, and
  * can load the associated module if they are supported.
  */
