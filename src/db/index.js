@@ -13,7 +13,7 @@ import KeyValueIndexed from './keyvalue-indexed.js'
  * @name databaseTypes
  * @†ype []
  * @return [] An array of database types.
- * @memberof module:OrbitDB
+ * @memberof module:Databases
  */
 const databaseTypes = {
   events: Events,
@@ -34,7 +34,7 @@ const databaseTypes = {
  * @function addDatabaseType
  * @param {string} type The database type.
  * @param {module:Databases} store A Database-compatible module.
- * @memberof module:OrbitDB
+ * @memberof module:Databases
  */
 const addDatabaseType = (type, store) => {
   if (databaseTypes[type]) {
