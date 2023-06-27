@@ -115,7 +115,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      manifest = await manifestStore.get(addr.path)
+      manifest = await manifestStore.get(addr.hash)
       const acType = manifest.accessController.split('/', 2).pop()
       const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
       AccessController = getAccessController(acType)()

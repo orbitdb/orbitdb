@@ -58,21 +58,21 @@ const parseAddress = (address) => {
 }
 
 const OrbitDBAddress = (address) => {
-  if (address && address.protocol === 'orbitdb' && address.path) {
+  if (address && address.protocol === 'orbitdb' && address.hash) {
     return address
   }
 
   const protocol = 'orbitdb'
 
-  const path = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
+  const hash = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
 
   const toString = () => {
-    return posixJoin('/', protocol, path)
+    return posixJoin('/', protocol, hash)
   }
 
   return {
     protocol,
-    path,
+    hash,
     address,
     toString
   }
