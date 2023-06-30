@@ -1,9 +1,3 @@
-/**
- * @namespace module:Log~Entry
- * @memberof module:Log
- * @description A log entry.
- * @private
- */
 import Clock from './clock.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
@@ -13,6 +7,20 @@ import { base58btc } from 'multiformats/bases/base58'
 const codec = dagCbor
 const hasher = sha256
 const hashStringEncoding = base58btc
+
+/**
+ * @typedef {Object} module:Log~Entry
+ * @property {string} id A string linking multiple entries together.
+ * @property {*} payload An arbitrary chunk of data.
+ * @property {Array<string>} next One or more hashes pointing to the next entries in a chain of
+ * entries.
+ * @property {Array<string>} refs One or more hashes which reference other entries in the chain.
+ * @property {Clock} clock A logical clock. See {@link module:Log~Clock}.
+ * @property {integer} v The version of the entry.
+ * @property {string} key The public key of the identity.
+ * @property {string} identity The identity of the entry's owner.
+ * @property {string} sig The signature of the entry signed by the owner.
+ */
 
 /**
  * Creates an Entry.
@@ -45,6 +53,7 @@ const hashStringEncoding = base58btc
  * const entry = await Entry.create(identity, 'log1', 'hello')
  * console.log(entry)
  * // { payload: "hello", next: [], ... }
+ * @private
  */
 const create = async (identity, id, payload, clock = null, next = [], refs = []) => {
   if (identity == null) throw new Error('Identity is required, cannot create entry')
@@ -80,6 +89,7 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
  * @return {Promise<boolean>} A promise that resolves to a boolean value indicating if
  * the signature is valid.
  * @memberof module:Log~Entry
+ * @private
  */
 const verify = async (identities, entry) => {
   if (!identities) throw new Error('Identities is required, cannot verify entry')
@@ -106,6 +116,7 @@ const verify = async (identities, entry) => {
  * @param {module:Log~Entry} obj
  * @return {boolean}
  * @memberof module:Log~Entry
+ * @private
  */
 const isEntry = (obj) => {
   return obj && obj.id !== undefined &&
@@ -122,6 +133,7 @@ const isEntry = (obj) => {
  * @param {module:Log~Entry} b An entry to compare.
  * @return {boolean} True if a and b are equal, false otherwise.
  * @memberof module:Log~Entry
+ * @private
  */
 const isEqual = (a, b) => {
   return a && b && a.hash === b.hash
@@ -132,6 +144,7 @@ const isEqual = (a, b) => {
  * @param {Uint8Array} bytes
  * @return {module:Log~Entry}
  * @memberof module:Log~Entry
+ * @private
  */
 const decode = async (bytes) => {
   const { value } = await Block.decode({ bytes, codec, hasher })
