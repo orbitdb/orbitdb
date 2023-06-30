@@ -146,8 +146,8 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   /**
-   * Checks if the key exists in the key store.
-   * @param {string} id The id of the private key in the key store.
+   * Checks if a key exists in the key store .
+   * @param {string} id The id of an [Identity]{@link module:Identities~Identity} to check the key for.
    * @return {boolean} True if the key exists, false otherwise.
    * @throws id needed to check a key if no id is specified.
    * @memberof module:KeyStore~KeyStore
@@ -172,9 +172,9 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   /**
-   * Adds a key to the keystore.
-   * @param {string} id A storage id for the key.
-   * @param {Uint8Array} key The key to store.
+   * Adds a private key to the keystore.
+   * @param {string} id An id of the [Identity]{@link module:Identities~Identity} to whom the key belongs to.
+   * @param {Uint8Array} key The private key to store.
    * @memberof module:KeyStore~KeyStore
    * @async
    * @instance
@@ -184,8 +184,8 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   /**
-   * Creates a key, storing it to the keystore.
-   * @param {string} id A storage id for the key.
+   * Creates a key pair and stores it to the keystore.
+   * @param {string} id An id of the [Identity]{@link module:Identities~Identity} to generate the key pair for.
    * @throws id needed to create a key if no id is specified.
    * @memberof module:KeyStore~KeyStore
    * @async
@@ -212,8 +212,8 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   /**
-   * Gets the key from keystore.
-   * @param {string} id A storage id of the key.
+   * Gets a key from keystore.
+   * @param {string} id An id of the [Identity]{@link module:Identities~Identity} whose key to retrieve.
    * @return {Uint8Array} The key specified by id.
    * @throws id needed to get a key if no id is specified.
    * @memberof module:KeyStore~KeyStore
@@ -240,7 +240,7 @@ const KeyStore = async ({ storage, path } = {}) => {
   }
 
   /**
-   * Gets th serialized public key from a key pair.
+   * Gets the serialized public key from a key pair.
    * @param {*} keys A key pair.
    * @param {Object} options One or more options.
    * @param {Object} [options.format=hex] The format the public key should be
