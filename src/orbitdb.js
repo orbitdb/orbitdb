@@ -21,12 +21,11 @@ const DefaultAccessController = IPFSAccessController
  * @function
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
- * @param {string} [params.id] The id of the OrbitDB instance.
- * @param {module:Identities} [params.identities] An Identities instance.
- * @param {string} [params.directory] A location for storing OrbitDB-related
- * data.
+ * @param {string} [params.id] The id of the user to use for this OrbitDB instance.
+ * @param {module:Identities} [params.identities] An Identities system instance.
+ * @param {string} [params.directory] A location for storing OrbitDB data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
- * @throws IPFSinstance is required argument if no IPFS instance is provided.
+ * @throws "IPFS instance is required argument" if no IPFS instance is provided.
  * @instance
  */
 const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
@@ -95,11 +94,11 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
    * log entries. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
-   * @param {number} [params.referencesCount]  The number of references to
-   * previous entries that should be stored with this entry.
+   * @param {number} [params.referencesCount] The number of references to
+   * use for [Log]{@link module:Log} entries.
    * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
-   * @throws Unsupported database type if the type specified is not in the list
+   * @throws "Unsupported database type" if the type specified is not in the list
    * of known databaseTypes.
    * @memberof module:OrbitDB~OrbitDB
    * @instance
@@ -157,7 +156,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
   }
 
   /**
-   * Stops OrbitDB, closing the underlying keystore and manifest.
+   * Stops OrbitDB, closing the underlying keystore and manifest store.
    * @function stop
    * @memberof module:OrbitDB~OrbitDB
    * @instance
