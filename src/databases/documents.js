@@ -15,6 +15,8 @@
  * const options = { indexBy: 'myCustomId'}
  * const Partial = Documents(options)
  * const documents = await Partial({ ipfs })
+ *
+ * @augments module:Databases~Database
  */
 import Database from '../database.js'
 
@@ -23,7 +25,7 @@ const DefaultOptions = { indexBy: '_id' }
 /**
  * Defines a Documents database.
  * @param {Object} options Various options for configuring the Document store.
- * @param {string} [params.indexBy=_id] An index.
+ * @param {string} [options.indexBy=_id] An index.
  * @return {module:Databases.Databases-Documents} A Documents function.
  * @memberof module:Databases
  */
@@ -86,7 +88,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    *
    * The findFn function's signature takes the form `function(doc)` where doc
    * is a document's value property. The function should return true if the
-   * document is found, false otherwise.
+   * document should be included in the results, false otherwise.
    * @return {Array} Found documents.
    * @memberof module:Databases.Databases-Documents
    * @instance
