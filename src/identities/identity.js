@@ -13,12 +13,11 @@ const hashStringEncoding = base58btc
  * @property {object} publicKey A public key.
  * @property {object} signatures A signed identity id and public key.
  * @property {string} type The type of identity provider.
- * @property {function} sign A sign function.
- * @property {function} verify A verify function.
+ * @property {function} sign A sign function to sign data using this identity.
+ * @property {function} verify A verify function to verify data signed by this identity.
  */
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
   /**
-   * @namespace module:Identities~Identity
    * @description The Identity instance. Returned by
    * [Identities.createIdentity()]{@link module:Identities~Identities#createIdentity}.
    */

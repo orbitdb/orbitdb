@@ -52,7 +52,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   /**
    * Gets an identity by hash.
    * @param {string} hash An identity hash.
-   * @return {Identity} An instance of identity.
+   * @return {module:Identities~Identity} An instance of identity.
    * @memberof module:Identities~Identities
    * @instance
    */
