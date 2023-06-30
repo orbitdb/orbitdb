@@ -36,7 +36,7 @@ const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
 const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   /**
    * @namespace module:Identities~Identities
-   * @description The instance returned by {@link module:Identities~Identities}.
+   * @description The instance returned by {@link module:Identities}.
    */
 
   keystore = keystore || await KeyStore({ path: path || DefaultIdentityKeysPath })
@@ -137,6 +137,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
    * be retrieved.
    * @memberof module:Identities~Identities
    * @instance
+   * @private
    */
   const sign = async (identity, data) => {
     const signingKey = await keystore.getKey(identity.id)
@@ -157,6 +158,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
    * otherwise.
    * @memberof module:Identities~Identities
    * @instance
+   * @private
    */
   const verify = async (signature, publicKey, data) => {
     return await verifyMessage(signature, publicKey, data)
