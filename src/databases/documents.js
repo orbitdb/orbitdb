@@ -2,20 +2,14 @@
  * @namespace Databases-Documents
  * @memberof module:Databases
  * @description Documents database.
- * @example <caption>Create documents db with default options</caption>
- * import { create } from 'IPFS'
- *
- * const ipfs = create()
- * const Partial = Documents()
- * const documents = await Partial({ ipfs })
  * @example <caption>Create documents db with custom index</caption>
  * import { create } from 'IPFS'
+ * import { OrbitDB, Documents } from 'orbit-db'
  *
  * const ipfs = create()
- * const options = { indexBy: 'myCustomId'}
- * const Partial = Documents(options)
- * const documents = await Partial({ ipfs })
- *
+ * const orbitdb = await OrbitDB({ ipfs })
+ * const db = await orbitdb.open('my-docs', { Database: Documents({ indexBy: 'myCustomId'} ) }
+ * 
  * @augments module:Databases~Database
  */
 import Database from '../database.js'

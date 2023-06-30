@@ -7,11 +7,12 @@
  * Key-value pairs are stored to the configured storage.
  * @example <caption>Specify a custom storage</caption>
  * import { create } from 'IPFS'
+ * import { OrbitDB, KeyValueIndexed, IPFSBlockStorage } from 'orbit-db'
  *
  * const ipfs = create()
- * const storage = await IPFSBlockStorage()
- * const Partial = KeyValueIndexed({ storage })
- * const keyValueIndexed = await Partial({ ipfs })
+ * const storage = await IPFSBlockStorage({ ipfs })
+ * const orbitdb = await OrbitDB({ ipfs })
+ * const db = await orbitdb.open('my-kv', { Database: KeyValueIndexed({ storage }) })
  *
  * @augments module:Databases~Database
  * @augments module:Databases.Databases-KeyValue
