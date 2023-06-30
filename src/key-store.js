@@ -55,6 +55,7 @@ const verifySignature = async (signature, publicKey, data) => {
  * @throws No signing key given if no key is provided.
  * @throws Given input data was undefined if no data is provided.
  * @static
+ * @private
  */
 const signMessage = async (key, data) => {
   if (!key) {
@@ -81,6 +82,7 @@ const verifiedCachePromise = LRUStorage({ size: 1000 })
  * @param {string} data The data to be verified.
  * @return {boolean} True if the the data and cache match, false otherwise.
  * @static
+ * @private
  */
 const verifyMessage = async (signature, publicKey, data) => {
   const verifiedCache = await verifiedCachePromise
