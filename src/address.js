@@ -59,8 +59,8 @@ const parseAddress = (address) => {
 
 /**
  * @typedef {Object} OrbitDBAddress
- * @property {string} protocol The address protocol (/orbitdb/).
- * @property {string} hash The hash of the database.
+ * @property {string} protocol Protocol prefix "/orbitdb/".
+ * @property {string} hash The hash of the database manifest.
  * @property {string} address The full database address.
  */
 const OrbitDBAddress = (address) => {
