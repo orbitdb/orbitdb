@@ -2,7 +2,7 @@
  * @namespace Storage-Composed
  * @memberof module:Storage
  * @description
- * ComposedStorage stores data to multiple storage mechanisms.
+ * ComposedStorage stores data to multiple storage backends.
  * @example <caption>Store to LRU and Level</caption>
  * await ComposedStorage(await LRUStorage(), await LevelStorage())
  * @example <caption>Store to memory and IPFS</caption>

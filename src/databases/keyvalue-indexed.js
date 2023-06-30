@@ -2,9 +2,9 @@
  * @namespace Databases-KeyValueIndexed
  * @memberof module:Databases
  * @description
- * KeyValueIndexed database.
+ * Key-Value database that uses an index in order to provide fast queries.
  *
- * Key/value pairs are stored to the configured storage.
+ * Key-value pairs are stored to the configured storage.
  * @example <caption>Specify a custom storage</caption>
  * import { create } from 'IPFS'
  *
@@ -12,6 +12,9 @@
  * const storage = await IPFSBlockStorage()
  * const Partial = KeyValueIndexed({ storage })
  * const keyValueIndexed = await Partial({ ipfs })
+ *
+ * @augments module:Databases~Database
+ * @augments module:Databases.Databases-KeyValue
  */
 import KeyValue from './keyvalue.js'
 import LevelStorage from '../storage/level.js'
@@ -21,8 +24,6 @@ const valueEncoding = 'json'
 
 /**
  * Defines a KeyValueIndexed database.
- * @param {Object} options Various options for configuring the KeyValueIndexed
- * store.
  * @param {module:Storage} [storage=LevelStorage] A compatible storage where
  * the key/value pairs are indexed.
  * @return {module:Databases.Databases-KeyValueIndexed} A KeyValueIndexed

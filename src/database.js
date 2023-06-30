@@ -70,6 +70,25 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
    * database.events.on('drop', () => ...)
    */
 
+  /** Events inherited from Sync */
+
+  /**
+   * Event fired when when a peer has connected to the database.
+   * @event module:Databases~Database#join
+   * @param {PeerID} peerId PeerID of the peer who connected
+   * @param {Entry[]} heads An array of Log entries
+   * @example
+   * database.events.on('join', (peerID, heads) => ...)
+   */
+
+  /**
+   * Event fired when a peer has disconnected from the database.
+   * @event module:Databases~Database#leave
+   * @param {PeerID} peerId PeerID of the peer who disconnected
+   * @example
+   * database.events.on('leave', (peerID) => ...)
+   */
+
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
   referencesCount = referencesCount || defaultReferencesCount
@@ -91,15 +110,6 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
 
-  /**
-   * Event emitter that emits Database changes.
-   * @†ype EventEmitter
-   * @fires update when an entry is added to the database.
-   * @fires close when the database is successfully closed.
-   * @fires drop when the database is successfully dropped.
-   * @memberof module:Sync~Sync
-   * @instance
-   */
   const events = new EventEmitter()
 
   const queue = new PQueue({ concurrency: 1 })
@@ -172,17 +182,58 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
   const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically })
 
   return {
+    /**
+     * The address of the database.
+     * @†ype string
+     * @memberof module:Databases~Database
+     * @instance
+     */
     address,
+    /**
+     * The name of the database.
+     * @†ype string
+     * @memberof module:Databases~Database
+     * @instance
+     */
     name,
     identity,
     meta,
     close,
     drop,
     addOperation,
+    /**
+     * The underlying [operations log]{@link module:Log~Log} of the database.
+     * @†ype {module:Log~Log}
+     * @memberof module:Databases~Database
+     * @instance
+     */
     log,
+    /**
+     * A [sync]{@link module:Sync~Sync} instance of the database.
+     * @†ype {module:Sync~Sync}
+     * @memberof module:Databases~Database
+     * @instance
+     */
     sync,
+    /**
+     * Set of currently connected peers for this Database instance.
+     * @†ype Set
+     * @memberof module:Databases~Database
+     * @instance
+     */
     peers: sync.peers,
+    /**
+     * Event emitter that emits Database changes. See Events section for details.
+     * @†ype EventEmitter
+     * @memberof module:Databases~Database
+     * @instance
+     */
     events,
+    /**
+     * The [access controller]{@link module:AccessControllers} instance of the database.
+     * @memberof module:Databases~Database
+     * @instance
+     */
     access
   }
 }

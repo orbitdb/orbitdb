@@ -1,7 +1,10 @@
 /**
  * @namespace Databases-Events
  * @memberof module:Databases
- * @description Events database.
+ * @description
+ * Events database is an immutable, append-only event log database.
+ *
+ * @augments module:Databases~Database
  */
 import Database from '../database.js'
 

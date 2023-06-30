@@ -1,7 +1,7 @@
 /**
  * @module Storage
  * @description
- * Various storage mechanisms with a common interface.
+ * Storage backends for OrbitDB.
  */
 export { default as ComposedStorage } from './composed.js'
 export { default as IPFSBlockStorage } from './ipfs-block.js'

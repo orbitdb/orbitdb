@@ -1,7 +1,10 @@
 /**
  * @namespace Databases-KeyValue
  * @memberof module:Databases
- * @description KeyValue database.
+ * @description
+ * Key-Value database.
+ *
+ * @augments module:Databases~Database
  */
 import Database from '../database.js'
 
