@@ -91,7 +91,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
-  referencesCount = referencesCount || defaultReferencesCount
+  referencesCount = Number(referencesCount) > -1 ? referencesCount : defaultReferencesCount
 
   entryStorage = entryStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
