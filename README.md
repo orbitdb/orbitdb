@@ -38,9 +38,9 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 <!-- toc -->
 
 - [Installation](#installation)
+  * [Browser <script> tag](#browser-script-tag)
 - [Usage](#usage)
 - [API](#api)
-- [Database browser UI](#database-browser-ui)
 - [Examples](#examples)
   * [Install dependencies](#install-dependencies)
   * [Browser example](#browser-example)
@@ -63,6 +63,12 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 ```
 npm install orbit-db
 ```
+
+### Browser <script> tag
+
+OrbitDB can be loaded in the browser using the distributed js file with the `<script/>` tag. OrbitDB is the global namespace and all external functions are available via this namespace:
+
+`<script>/path/to/orbitdb.min.js</script>`
 
 ## Usage
 

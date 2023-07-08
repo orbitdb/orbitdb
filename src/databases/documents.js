@@ -9,7 +9,7 @@
  * const ipfs = create()
  * const orbitdb = await OrbitDB({ ipfs })
  * const db = await orbitdb.open('my-docs', { Database: Documents({ indexBy: 'myCustomId'} ) }
- * 
+ *
  * @augments module:Databases~Database
  */
 import Database from '../database.js'
