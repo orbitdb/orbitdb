@@ -50,6 +50,7 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
   * [Build](#build)
   * [Benchmark](#benchmark)
   * [Logging](#logging)
+  * [API](#api)
 - [Frequently Asked Questions](#frequently-asked-questions)
   * [Are there implementations in other languages?](#are-there-implementations-in-other-languages)
 - [Contributing](#contributing)
@@ -120,27 +121,27 @@ See [API.md](https://github.com/orbitdb/orbit-db/blob/master/API.md) for the ful
 ## Examples
 
 ### Install dependencies
-```
+```sh
 git clone https://github.com/orbitdb/orbit-db.git
 cd orbit-db
 npm install
 ```
 Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to
-```
+```sh
 make clean-dependencies && make deps
 ```
 to redo the local package-lock.json with working native dependencies.
 
 ### Browser example
 
-```
+```sh
 npm install # if not yet installed
 make build
 npm run examples:browser # if browser isn't opening, open examples/browser/browser.html in your browser
 ```
 
 Using Webpack:
-```
+```sh
 npm install # if not yet installed
 make build
 npm run examples:browser-webpack # if browser isn't opening, open examples/browser/browser-webpack-example/index.html in your browser
@@ -154,7 +155,7 @@ Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orb
 
 ### Node.js example
 
-```
+```sh
 npm run examples:node
 ```
 
@@ -163,24 +164,24 @@ npm run examples:node
 **Eventlog**
 
 See the code in [examples/eventlog.js](https://github.com/orbitdb/orbit-db/blob/master/examples/eventlog.js) and run it with:
-```
+```sh
 node examples/eventlog.js
 ```
 
 ## Development
 
 ### Run Tests
-```
+```sh
 npm run test
 ```
 
 ### Build
-```
+```sh
 npm run build
 ```
 
 ### Benchmark
-```
+```sh
 node benchmarks/benchmark-add.js
 ```
 
@@ -190,9 +191,19 @@ See [benchmarks/](https://github.com/orbitdb/orbit-db/tree/master/benchmarks) fo
 
 To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `debug`,`warn` or `error`:
 
-```
+```sh
 LOG=debug node <file>
 ```
+
+### API
+
+To build the API documentation, run:
+
+```sh
+npm run build:docs
+```
+
+Documentation is output to ./docs/api.
 
 ## Frequently Asked Questions
 
