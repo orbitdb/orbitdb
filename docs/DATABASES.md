@@ -1,10 +1,10 @@
 # Databases
 
-DB provides a variety of different data stores with a common interface.
+OrbitDB is a multi-model database which means various different types of data models can be used and custom data models can be created.
 
 ## Types
 
-OrbitDB provides four types of data stores:
+By default OrbitDB provides four types of databases:
 
 - Events
 - Documents
@@ -18,7 +18,7 @@ const type = 'documents'
 orbitdb.open('my-db', { type })
 ```
 
-If no type is specified, Events will the default database type.
+If no type is specified, Events will the default database type. The type of a database, when created, is stored in the database's manifest. When opening a database, OrbitDB will read the type from the manifest and return the correct database type automatically.
 
 ## Address
 
@@ -28,7 +28,9 @@ When a database is created, it is assigned an address by OrbitDB. The address co
 /orbitdb/zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6moTcDL
 ```
 
-The first part, `/orbitdb`, specifies the protocol in use. The second part, an IPFS multihash `zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6moTcDL`, is the database manifest which contains the database info such as the name and type, and a pointer to the access controller.
+The first part, `/orbitdb`, specifies the protocol in use.
+
+The second part, an IPFS multihash `zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6moTcDL`, is the database manifest which contains the database info such as the name and type, and a pointer to the access controller.
 
 In order to replicate the database with peers, the address is what you need to give to other peers in order for them to start replicating the database.
 
@@ -49,7 +51,7 @@ The second part of the address, the IPFS multihash `zdpuAmrcSRUhkQcnRQ6p4bphs7DJ
 
 An example of a manifest is given below:
 
-```json
+```js
 {
   name: 'my-db',
   type: 'events',
@@ -57,12 +59,16 @@ An example of a manifest is given below:
 }
 ```
 
-The manifest is simply an [IPLD data structure](https://ipld.io/docs/) which can be retrived from IPFS just like any other hash:
+The manifest is an [IPLD data structure](https://ipld.io/docs/) which can be retrived from IPFS using the manifest's hash:
 
 ```js
 import { create } from 'ipfs-core'
 import * as Block from 'multiformats/block'
-import OrbitDB from 'orbit-db'
+import { OrbitDB, OrbitDBAddress } from 'orbit-db'
+import * as dagCbor from '@ipld/dag-cbor'
+import { sha256 } from 'multiformats/hashes/sha2'
+import { base58btc } from 'multiformats/bases/base58'
+import { CID } from 'multiformats/cid'
 
 const ipfs = await create()
 
@@ -73,9 +79,10 @@ await db.close()
 
 // Get the db address.
 const addr = OrbitDBAddress(db.address)
+const cid = CID.parse(addr.path, base58btc)
 
 // Extract the hash from the full db path.
-const bytes = await ipfs.get(addr.path)
+const bytes = await ipfs.block.get(cid)
 
 // Defines how we serialize/hash the data.
 const codec = dagCbor
@@ -84,33 +91,33 @@ const hasher = sha256
 // Retrieve the block data, decoding it to human-readable JSON text.
 const { value } = await Block.decode({ bytes, codec, hasher })
 
-console.log(value)
+console.log('manifest', value)
 ```
 
-## Opening a new database
+## Creating a new database
 
-Opening a default event store:
+Creating a default event store:
 
 ```js
 const orbitdb = await OrbitDB()
 await orbitdb.open('my-db')
 ```
 
-Opening a documents database:
+Creating a documents database:
 
 ```js
 const orbitdb = await OrbitDB()
 await orbitdb.open('my-db', { type: 'documents' })
 ```
 
-Opening a keyvalue database:
+Creating a keyvalue database:
 
 ```js
 const orbitdb = await OrbitDB()
 await orbitdb.open('my-db', { type: 'keyvalue' })
 ```
 
-Opening a database and adding meta
+Creating a database and adding meta
 
 ```js
 const meta = { description: 'A database with metadata.' }
@@ -118,7 +125,7 @@ const orbitdb = await OrbitDB()
 await orbitdb.open('my-db', { meta })
 ```
 
-## Loading an existing database
+## Opening an existing database
 
 ```js
 const orbitdb = await OrbitDB()
@@ -135,7 +142,7 @@ Database types such as **documents** and **keyvalue** expose the `put` function 
 
 ```js
 const orbitdb = await OrbitDB()
-const db = await orbitdb.open('my-db', { type: keyvalue })
+const db = await orbitdb.open('my-db', { type: 'keyvalue' })
 const hash = await db.put('key', 'value')
 ```
 
@@ -153,7 +160,7 @@ To delete an item from a database, use the `del` function:
 
 ```js
 const orbitdb = await OrbitDB()
-const db = await orbitdb.open('my-db', { type: keyvalue })
+const db = await orbitdb.open('my-db', { type: 'keyvalue' })
 const hash = await db.put('key', 'value')
 await db.del(hash)
 ```
@@ -162,7 +169,7 @@ await db.del(hash)
 
 The power of OrbitDB lies in its ability to replicate databases across distributed systems that may not always be connected.
 
-A simple replication process between two databases can be accomplished by listening for updates and iterating over the record set as those updates occur.
+A simple way to replicate a database between peers can be accomplished by opening a database, listening for updates and iterating over the records as those updates occur.
 
 ```js
 import { create } from 'ipfs-core'
@@ -182,10 +189,10 @@ await db1.add('hello world')
 // database heads will be synchronized.
 const db2 = await orbitdb2.open(db1.address)
 
-// We only have the heads of db1. To replicate all of db1's records, we will 
+// We only have the latest record of db1. To replicate all of db1's records, we will 
 // need to iterate over db1's entire record set.
 // We can determine when heads have been synchronized from db1 to db2 by 
-// listening for the "update" event and iterating over the record set.  
+// listening for the "update" event and iterating over the record set.
 db2.events.on('update', async (entry) => {
   for await (const record of db2.iterator()) {
     console.log(record)
@@ -200,10 +207,10 @@ To learn more, check out [OrbitDB's sychronization protocol](https://orbitdb.org
 
 ## Building a custom database
 
-OrbitDB can be extended to use custom or third party data stores. To implement a custom database, ensure the Database object is extended and that the OrbitDB database interface is implement. The database will also require a unique type.
+OrbitDB can be extended to use custom data models and database types. To implement a custom database, ensure the Database object is extended and that the OrbitDB database interface is implement. The database will also require a unique type.
 
 ```js
-const CustomStore = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically, indexBy = '_id' }) => {
+const CustomDB = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
   const database = await Database({ OpLog, ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically })
 
   const { addOperation, log } = database
@@ -237,7 +244,7 @@ const CustomStore = async ({ OpLog, Database, ipfs, identity, address, name, acc
 
   return {
     ...database,
-    type: 'customstore',
+    type: 'customdb',
     put,
     del,
     get,
@@ -246,4 +253,4 @@ const CustomStore = async ({ OpLog, Database, ipfs, identity, address, name, acc
 }
 ```
 
-[Documents](../src/db/documents.js), [Events](../src/db/events.js) and [KeyValue](../src/db/keyvalue.js) provide good examples of how a database is implemented in OrbitDB.
+[Documents](../src/db/documents.js), [Events](../src/db/events.js) and [KeyValue](../src/db/keyvalue.js) provide good examples of how a database is implemented in OrbitDB and how to add the logic for returning records from the database (the state of the database).

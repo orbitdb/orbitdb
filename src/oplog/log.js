@@ -3,9 +3,8 @@
  * @description
  * Log is a verifiable, append-only log CRDT.
  *
- * Implemented as a Merkle-CRDT as per the paper:
- * "Merkle-CRDTs: Merkle-DAGs meet CRDTs"
- * https://arxiv.org/abs/2004.00107
+ * Implemented as a Merkle-CRDT as per the paper
+ * ["Merkle-CRDTs: Merkle-DAGs meet CRDTs"]{@link https://arxiv.org/abs/2004.00107}
  */
 import LRU from 'lru'
 import Entry from './entry.js'
@@ -54,7 +53,7 @@ const DefaultAccessController = async () => {
 const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn } = {}) => {
   /**
    * @namespace Log
-   * @description The instance returned by {@link module:Log}.
+   * @description The instance returned by {@link module:Log}
    */
 
   if (identity == null) {

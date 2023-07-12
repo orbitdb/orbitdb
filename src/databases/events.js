@@ -1,44 +1,17 @@
 /**
- * @namespace Database-Events
- * @memberof module:Database
- * @description Events database.
+ * @namespace Databases-Events
+ * @memberof module:Databases
+ * @description
+ * Events database is an immutable, append-only event log database.
+ *
+ * @augments module:Databases~Database
  */
 import Database from '../database.js'
 
 /**
- * Creates an instance of Events.
- * @callback Events
- * @param {Object} params One or more parameters for configuring Database.
- * @param {IPFS} params.ipfs An IPFS instance.
- * @param {Identity} [params.identity] An Identity instance.
- * @param {string} [params.address] The address of the database.
- * @param {string} [params.name] The name of the database.
- * @param {module:AccessControllers} [params.access] An AccessController
- * instance.
- * @param {string} [params.directory] A location for storing Database-related
- * data. Defaults to ./orbitdb/[params.address].
- * @param {*} [params.meta={}] The database's metadata.
- * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
- * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {number} [params.referencesCount]  The maximum distance between
- * references to other entries.
- * @param {boolean} [params.syncAutomatically=false] If true, sync databases
- * automatically. Otherwise, false.
- * @param {function} [params.onUpdate] A function callback. Fired when an
- * entry is added to the oplog.
- * @function
- * @instance
- * @async
- * @memberof module:Database.Database-Events
- */
-
-/**
  * Defines an Events database.
- * @return {module:Database.Database-Events} A Events function.
- * @memberof module:Database
+ * @return {module:Databases.Databases-Events} A Events function.
+ * @memberof module:Databases
  */
 const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
@@ -50,7 +23,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @function
    * @param {*} value The event to be added.
    * @return {string} The hash of the new oplog entry.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const add = async (value) => {
@@ -62,7 +35,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @function
    * @param {string} hash The hash of the event to get.
    * @return {*} The value corresponding to hash or null.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const get = async (hash) => {
@@ -84,7 +57,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * the given hash.
    * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string] The next event as hash/value.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const iterator = async function * ({ gt, gte, lt, lte, amount } = {}) {
@@ -100,7 +73,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * Returns all events.
    * @function
    * @return [][string, string] An array of events as hash/value entries.
-   * @memberof module:Database.Database-Events
+   * @memberof module:Databases.Databases-Events
    * @instance
    */
   const all = async () => {

@@ -9,6 +9,7 @@ import { compareClocks } from './clock.js'
  * @param {Entry} a First entry
  * @param {Entry} b Second entry
  * @return {number} 1 if a is latest, -1 if b is latest
+ * @private
  */
 function LastWriteWins (a, b) {
   // Ultimate conflict resolution (take the first/left arg)
@@ -31,6 +32,7 @@ function LastWriteWins (a, b) {
  * entries and return 1 if the first entry should be chosen and -1 if the
  * second entry should be chosen.
  * @return {number} 1 if a is greater, -1 if b is greater
+ * @private
  */
 function SortByClocks (a, b, resolveConflict) {
   // Compare the clocks
@@ -48,6 +50,7 @@ function SortByClocks (a, b, resolveConflict) {
  * are the same. The function should take in two entries and return 1 if the
  * first entry should be chosen and -1 if the second entry should be chosen.
  * @return {number} 1 if a is greater, -1 if b is greater
+ * @private
  */
 function SortByClockId (a, b, resolveConflict) {
   // Sort by ID if clocks are concurrent,
@@ -63,6 +66,7 @@ function SortByClockId (a, b, resolveConflict) {
  * @param {function(a, b)} [tiebreaker] The tiebreaker function to validate.
  * @return {function(a, b)} 1 if a is greater, -1 if b is greater
  * @throws {Error} if func ever returns 0
+ * @private
  */
 function NoZeroes (func) {
   const msg = `Your log's tiebreaker function, ${func.name}, has returned zero and therefore cannot be`

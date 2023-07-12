@@ -1,21 +1,21 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import Manifests from '../src/manifest.js'
+import ManifestStore from '../src/manifest-store.js'
 import config from './config.js'
 
 describe('Manifest', () => {
   const repo = './ipfs'
   let ipfs
-  let manifests
+  let manifestStore
 
   before(async () => {
     ipfs = await IPFS.create({ ...config.daemon1, repo })
-    manifests = await Manifests({ ipfs })
+    manifestStore = await ManifestStore({ ipfs })
   })
 
   after(async () => {
-    await manifests.close()
+    await manifestStore.close()
     await ipfs.stop()
     await rmrf(repo)
   })
@@ -31,7 +31,7 @@ describe('Manifest', () => {
       accessController
     }
 
-    const { hash, manifest } = await manifests.create({ name, type, accessController })
+    const { hash, manifest } = await manifestStore.create({ name, type, accessController })
 
     strictEqual(hash, expectedHash)
     deepStrictEqual(manifest, expectedManifest)
@@ -48,7 +48,7 @@ describe('Manifest', () => {
       accessController
     }
 
-    const manifest = await manifests.get(expectedHash)
+    const manifest = await manifestStore.get(expectedHash)
 
     deepStrictEqual(manifest, expectedManifest)
   })
@@ -60,7 +60,7 @@ describe('Manifest', () => {
     const expectedHash = 'zdpuAyWPs4yAXS6W7CY4UM68pV2NCpzAJr98aMA4zS5XRq5ga'
     const meta = { name, description: 'more information about the database' }
 
-    const { hash, manifest } = await manifests.create({ name, type, accessController, meta })
+    const { hash, manifest } = await manifestStore.create({ name, type, accessController, meta })
 
     strictEqual(hash, expectedHash)
     deepStrictEqual(manifest.meta, meta)
@@ -70,7 +70,7 @@ describe('Manifest', () => {
     let err
 
     try {
-      await manifests.create({})
+      await manifestStore.create({})
     } catch (e) {
       err = e.toString()
     }
@@ -82,7 +82,7 @@ describe('Manifest', () => {
     let err
 
     try {
-      await manifests.create({ name: 'database' })
+      await manifestStore.create({ name: 'database' })
     } catch (e) {
       err = e.toString()
     }
@@ -94,7 +94,7 @@ describe('Manifest', () => {
     let err
 
     try {
-      await manifests.create({ name: 'database', type: 'keyvalue' })
+      await manifestStore.create({ name: 'database', type: 'keyvalue' })
     } catch (e) {
       err = e.toString()
     }

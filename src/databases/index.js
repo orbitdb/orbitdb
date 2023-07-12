@@ -1,14 +1,19 @@
+/**
+ * @module Databases
+ * @description
+ * Provides various database structures for storing data.
+ */
 import Documents from './documents.js'
 import Events from './events.js'
 import KeyValue from './keyvalue.js'
 import KeyValueIndexed from './keyvalue-indexed.js'
-
 /**
+
  * An array of available database types.
  * @name databaseTypes
  * @†ype []
  * @return [] An array of database types.
- * @memberof module:OrbitDB
+ * @memberof module:Databases
  */
 const databaseTypes = {
   events: Events,
@@ -28,8 +33,8 @@ const databaseTypes = {
  * addDatabaseType('customDBType', CustomDBTypeModule)
  * @function addDatabaseType
  * @param {string} type The database type.
- * @param {module:Database} store A Database-compatible module.
- * @memberof module:OrbitDB
+ * @param {module:Databases} store A Database-compatible module.
+ * @memberof module:Databases
  */
 const addDatabaseType = (type, store) => {
   if (databaseTypes[type]) {

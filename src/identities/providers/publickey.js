@@ -1,5 +1,4 @@
 /**
- * @module PublicKeyIdentityProvider
  * @memberof module:IdentityProviders
  * @description
  * The PublicKey Identity Provider signs and verifies an identity using the
@@ -8,11 +7,6 @@
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { signMessage, verifyMessage } from '../../key-store.js'
 
-/**
- * The type of identity provider.
- * @return string
- * @const
- */
 const type = 'publickey'
 
 /**
@@ -20,6 +14,7 @@ const type = 'publickey'
  * @param {module:Identity} identity
  * @return {boolean} True if the identity is valid, false otherwise.
  * @static
+ * @private
  */
 const verifyIdentity = identity => {
   const { id, publicKey, signatures } = identity
@@ -28,13 +23,16 @@ const verifyIdentity = identity => {
 
 /**
  * Instantiates the publickey identity provider.
- * @return {module:IdentityProviders.IdentityProvider-PublicKey} A public key identity provider function.
+ * @return {module:IdentityProviders.IdentityProvider-PublicKey} A public key
+ * identity provider function.
+ * @private
  */
 const PublicKeyIdentityProvider = ({ keystore }) => {
   /**
    * @namespace module:IdentityProviders.IdentityProvider-PublicKey
    * @memberof module:IdentityProviders
    * @description The instance returned by {@link module:IdentityProviders.IdentityProvider-PublicKey}.
+   * @private
    */
 
   if (!keystore) {

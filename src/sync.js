@@ -81,13 +81,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
 
   /**
    * Callback function when new heads have been received from other peers.
-   * @callback module:Sync~onSynced
+   * @callback module:Sync~Sync#onSynced
    * @param {PeerID} peerId PeerID of the peer who we received heads from
    * @param {Entry[]} heads An array of Log entries
    */
 
   /**
-   * Event fired when new heads have been received from other peers.
+   * Event fired when when a peer has connected and the exchange of
+   * heads has been completed.
    * @event module:Sync~Sync#join
    * @param {PeerID} peerId PeerID of the peer who we received heads from
    * @param {Entry[]} heads An array of Log entries
@@ -98,7 +99,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   /**
    * Event fired when a peer leaves the sync protocol.
    * @event module:Sync~Sync#leave
-   * @param {PeerID} peerId PeerID of the peer who we received heads from
+   * @param {PeerID} peerId PeerID of the peer who left
    * @example
    * sync.events.on('leave', (peerID) => ...)
    */
@@ -123,19 +124,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    * Set of currently connected peers for the log for this Sync instance.
    * @name peers
    * @†ype Set
-   * @return Set set of PeerIDs
    * @memberof module:Sync~Sync
    * @instance
    */
   const peers = new Set()
 
   /**
-   * Event emitter that emits updates.
-   * @name events
+   * Event emitter that emits Sync changes. See Events section for details.
    * @†ype EventEmitter
-   * @fires join when a peer has connected and heads were exchanged
-   * @fires leave when a peer disconnects
-   * @fires error when an error occurs
    * @memberof module:Sync~Sync
    * @instance
    */

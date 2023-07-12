@@ -4,37 +4,10 @@
  * Provides a system for managing access controllers. Supported access
  * controllers can be added and removed from the access controller list, and
  * can load the associated module if they are supported.
- *
- * An AccessController module needs to only expose one constant, type, and one function, canAppend(entry), which returns true if the entry can be appended to
- * the oplog, or false otherwise:
- * ```js
- * type = 'custom'
- *
- * const CustomAccessController = ({ write } = {}) => async ({ orbitdb, identities, address }) => {
- *   const canAppend = async (entry) => {
- *     // Use entry.identity to determine whether the entry can be appended.
- *     // Return true if entry can be appended to OpLog.
- *     // Or return false otherwise.
- *   }
- *
- *   return {
- *     canAppend,
- *     type
- *   }
- * }
- *
- * export default CustomAccessController
- * ```
  */
 import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
 
-/**
- * An array of available access controllers.
- * @name accessControllers
- * @†ype []
- * @return [] An array of access controllers.
- */
 const accessControllers = {
   ipfs: IPFSAccessController,
   orbitdb: OrbitDBAccessController
@@ -44,6 +17,7 @@ const accessControllers = {
  * Gets an access controller module specified by type.
  * @param {string} type A valid access controller type.
  * @return {AccessController} The access controller module.
+ * @private
  */
 const getAccessController = (type) => {
   if (!accessControllers[type]) {
@@ -60,6 +34,7 @@ const getAccessController = (type) => {
  * already supported.
  * @throws Given AccessController class needs to implement: type if the access
  * controller module does not implement a type property.
+ * @static
  */
 const addAccessController = (accessController) => {
   if (!accessController.type) {
@@ -76,6 +51,7 @@ const addAccessController = (accessController) => {
 /**
  * Removes an access controller from the list.
  * @param {string} type A valid access controller type.
+ * @static
  */
 const removeAccessController = type => {
   delete accessControllers[type]

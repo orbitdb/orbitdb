@@ -1,58 +1,12 @@
 /**
 * @module OrbitDB
-* @description
-* OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses
-* IPFS as its data storage and Libp2p Pubsub to automatically sync databases
-* with peers. It's an eventually consistent database that uses Merkle-CRDTs
-* for conflict-free database writes and merges making OrbitDB an excellent
-* choice for p2p and decentralized apps, blockchain applications and local
-* first web applications.
-*
-* To install OrbitDB:
-* ```bash
-* npm install orbit-db
-* ```
-*
-* IPFS is also required:
-* ```bash
-* npm install ipfs-core
-* ```
-* @example <caption>Instantiate OrbitDB and open a new database:</caption>
-* import { create } from 'ipfs-core'
-* import { OrbitDB } from 'orbit-db'
-*
-* const ipfs = await create() // IPFS is required for storage and syncing
-* const orbitdb = await OrbitDB({ ipfs })
-* const mydb = await orbitdb.open('mydb')
-* const dbAddress = mydb.address // E.g. /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
-* @example <caption>Open an existing database using its multiformat address:</caption>
-* const mydb = await orbitdb.open(dbAddress)
-* @example <caption>Use with pre-configured identities:</caption>
-* import { create } from 'ipfs-core'
-* import { OrbitDB, Identities } from 'orbit-db'
-* import CustomStorage from './custom-storage.js'
-*
-* const storage = await CustomStorage()
-* const identities = await Identities({ storage })
-* const ipfs = await create() // IPFS is required for storage and syncing
-* const orbitdb = await OrbitDB({ ipfs, identities })
-* const mydb = await orbitdb.open('mydb')
-* @example <caption>Use with existing identities:</caption>
-* import { create } from 'ipfs-core'
-* import { OrbitDB, Identities } from 'orbit-db'
-*
-* const identities = await Identities()
-* await identities.createIdentity('userA')
-*
-* const ipfs = await create() // IPFS is required for storage and syncing
-* const orbitdb = await OrbitDB({ ipfs, identities, id: 'userA' })
-* const mydb = await orbitdb.open('mydb')
+* @description Provides an interface for users to interact with OrbitDB.
 */
-import { getDatabaseType } from './db/index.js'
+import { getDatabaseType } from './databases/index.js'
 import KeyStore from './key-store.js'
 import { Identities } from './identities/index.js'
 import OrbitDBAddress, { isValidAddress } from './address.js'
-import Manifests from './manifest.js'
+import ManifestStore from './manifest-store.js'
 import { createId } from './utils/index.js'
 import pathJoin from './utils/path-join.js'
 import { getAccessController } from './access-controllers/index.js'
@@ -67,12 +21,11 @@ const DefaultAccessController = IPFSAccessController
  * @function
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
- * @param {string} [params.id] The id of the OrbitDB instance.
- * @param {module:Identities} [params.identities] An Identities instance.
- * @param {string} [params.directory] A location for storing OrbitDB-related
- * data.
+ * @param {string} [params.id] The id of the user to use for this OrbitDB instance.
+ * @param {module:Identities} [params.identities] An Identities system instance.
+ * @param {string} [params.directory] A location for storing OrbitDB data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
- * @throws IPFSinstance is required argument if no IPFS instance is provided.
+ * @throws "IPFS instance is required argument" if no IPFS instance is provided.
  * @instance
  */
 const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
@@ -100,7 +53,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
 
   const identity = await identities.createIdentity({ id })
 
-  const manifests = await Manifests({ ipfs })
+  const manifestStore = await ManifestStore({ ipfs })
 
   let databases = {}
 
@@ -116,29 +69,36 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
    * const mydb = await orbitdb.open('mydb', {type: 'documents'})
    * ```
    * The type must be listed in [databaseTypes]{@link module:OrbitDB.databaseTypes} or an error is thrown.
+   * To open an existing database, pass its address to the `open` function:
+   * ```
+   * const existingDB = await orbitdb.open(dbAddress)
+   * ```
+   * The address of a newly created database can be retrieved using
+   * `db.address`.
    * @function
    * @param {string} address The address of an existing database to open, or
    * the name of a new database.
    * @param {Object} params One or more database configuration parameters.
    * @param {string} [params.type=events] The database's type.
-   * @param {*} [params.meta={}] The database's metadata.
-   * @param {boolean} [params.sync=false] If true, sync databases automatically.
+   * @param {*} [params.meta={}] The database's metadata. Only applies when
+   * creating a database and is not used when opening an existing database.
+   * @param {boolean} [params.sync=true] If true, sync databases automatically.
    * Otherwise, false.
    * @param {module:Database} [params.Database=[Events]{@link module:Database.Database-Events}] A Database-compatible
    * module.
    * @param {module:AccessControllers}
-   * [params.AccessController=IPFSAccessController]
+   * [params.AccessController=[IPFSAccessController]{@link module:AccessControllers.AccessControllers-IPFS}]
    * An AccessController-compatible module.
    * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
-   * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
+   * log heads. Defaults to ComposedStorage(LRUStorage, LevelStorage).
    * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
-   * log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
+   * log entries. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
-   * @param {number} [params.referencesCount]  The maximum distance between
-   * references to other entries.
+   * @param {number} [params.referencesCount] The number of references to
+   * use for [Log]{@link module:Log} entries.
    * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
-   * @throws Unsupported database type if the type specified is not in the list
+   * @throws "Unsupported database type" if the type specified is not in the list
    * of known databaseTypes.
    * @memberof module:OrbitDB~OrbitDB
    * @instance
@@ -154,7 +114,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      manifest = await manifests.get(addr.path)
+      manifest = await manifestStore.get(addr.hash)
       const acType = manifest.accessController.split('/', 2).pop()
       const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
       AccessController = getAccessController(acType)()
@@ -167,7 +127,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       type = type || DefaultDatabaseType
       AccessController = AccessController || DefaultAccessController()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities })
-      const m = await manifests.create({ name: address, type, accessController: accessController.address, meta })
+      const m = await manifestStore.create({ name: address, type, accessController: accessController.address, meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)
       name = manifest.name
@@ -196,7 +156,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
   }
 
   /**
-   * Stops OrbitDB, closing the underlying keystore and manifest.
+   * Stops OrbitDB, closing the underlying keystore and manifest store.
    * @function stop
    * @memberof module:OrbitDB~OrbitDB
    * @instance
@@ -206,8 +166,8 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     if (keystore) {
       await keystore.close()
     }
-    if (manifests) {
-      await manifests.close()
+    if (manifestStore) {
+      await manifestStore.close()
     }
     databases = {}
   }

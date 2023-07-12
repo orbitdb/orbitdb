@@ -3,35 +3,6 @@
  * @description
  * Database is the base class for OrbitDB data stores and handles all lower
  * level add operations and database sync-ing using IPFS.
- *
- * Database should be instantiated and initialized when implementing a
- * compatible datastore:
- * ```
- * const CustomDataStore = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
- *   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
- *   const { addOperation, log } = database
- *
- *   const put = async (key, value) => {
- *     return addOperation({ op: 'ADD', key, value })
- *   }
- *
- *   const get = async (hash) => {
- *     const entry = await log.get(hash)
- *     return entry.payload.value
- *   }
- *
- *   return {
- *     ...database,
- *     type: 'custom-data-store',
- *     put,
- *     get
- *   }
- * }
- *
- * export default CustomDataStore
- * ```
- * The functions put and get are recommended but not mandatory. For example,
- * the Events data store uses a function called `add`.
  */
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
@@ -68,18 +39,18 @@ const defaultCacheSize = 1000
  * automatically. Otherwise, false.
  * @param {function} [params.onUpdate] A function callback. Fired when an
  * entry is added to the oplog.
- * @return {module:Database~Database} An instance of Database.
+ * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
 const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   /**
-   * @namespace module:Database~Database
+   * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
    */
 
   /**
    * Event fired when an update occurs.
-   * @event module:Database~Database#update
+   * @event module:Databases~Database#update
    * @param {module:Entry} entry An entry.
    * @example
    * database.events.on('update', (entry) => ...)
@@ -87,21 +58,40 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Event fired when a close occurs.
-   * @event module:Database~Database#close
+   * @event module:Databases~Database#close
    * @example
    * database.events.on('close', () => ...)
    */
 
   /**
    * Event fired when a drop occurs.
-   * @event module:Database~Database#drop
+   * @event module:Databases~Database#drop
    * @example
    * database.events.on('drop', () => ...)
    */
 
+  /** Events inherited from Sync */
+
+  /**
+   * Event fired when when a peer has connected to the database.
+   * @event module:Databases~Database#join
+   * @param {PeerID} peerId PeerID of the peer who connected
+   * @param {Entry[]} heads An array of Log entries
+   * @example
+   * database.events.on('join', (peerID, heads) => ...)
+   */
+
+  /**
+   * Event fired when a peer has disconnected from the database.
+   * @event module:Databases~Database#leave
+   * @param {PeerID} peerId PeerID of the peer who disconnected
+   * @example
+   * database.events.on('leave', (peerID) => ...)
+   */
+
   directory = pathJoin(directory || './orbitdb', `./${address}/`)
   meta = meta || {}
-  referencesCount = referencesCount || defaultReferencesCount
+  referencesCount = Number(referencesCount) > -1 ? referencesCount : defaultReferencesCount
 
   entryStorage = entryStorage || await ComposedStorage(
     await LRUStorage({ size: defaultCacheSize }),
@@ -120,16 +110,6 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
 
-  /**
-   * Event emitter that emits updates.
-   * @name events
-   * @†ype EventEmitter
-   * @fires update when an entry is added to the database.
-   * @fires close When the database is closed.
-   * @fires drop When the database is dropped.
-   * @memberof module:Database~Database
-   * @instance
-   */
   const events = new EventEmitter()
 
   const queue = new PQueue({ concurrency: 1 })
@@ -139,7 +119,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
    * @function addOperation
    * @param {*} op Some operation to add to the oplog.
    * @return {string} The hash of the operation.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -176,7 +156,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Closes the database, stopping sync and closing the oplog.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -189,7 +169,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   /**
    * Drops the database, clearing the oplog.
-   * @memberof module:Database~Database
+   * @memberof module:Databases~Database
    * @instance
    * @async
    */
@@ -199,29 +179,61 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     events.emit('drop')
   }
 
-  /**
-   * Starts the [Sync protocol]{@link module:Sync~Sync}.
-   *
-   * Sync protocol exchanges OpLog heads (latest known entries) between peers
-   * when they connect.
-   * @memberof module:Database~Database
-   * @instance
-   * @async
-   */
   const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically })
 
   return {
+    /**
+     * The address of the database.
+     * @†ype string
+     * @memberof module:Databases~Database
+     * @instance
+     */
     address,
+    /**
+     * The name of the database.
+     * @†ype string
+     * @memberof module:Databases~Database
+     * @instance
+     */
     name,
     identity,
     meta,
     close,
     drop,
     addOperation,
+    /**
+     * The underlying [operations log]{@link module:Log~Log} of the database.
+     * @†ype {module:Log~Log}
+     * @memberof module:Databases~Database
+     * @instance
+     */
     log,
+    /**
+     * A [sync]{@link module:Sync~Sync} instance of the database.
+     * @†ype {module:Sync~Sync}
+     * @memberof module:Databases~Database
+     * @instance
+     */
     sync,
+    /**
+     * Set of currently connected peers for this Database instance.
+     * @†ype Set
+     * @memberof module:Databases~Database
+     * @instance
+     */
     peers: sync.peers,
+    /**
+     * Event emitter that emits Database changes. See Events section for details.
+     * @†ype EventEmitter
+     * @memberof module:Databases~Database
+     * @instance
+     */
     events,
+    /**
+     * The [access controller]{@link module:AccessControllers} instance of the database.
+     * @memberof module:Databases~Database
+     * @instance
+     */
     access
   }
 }

@@ -62,7 +62,7 @@
     "build:examples": "webpack --config conf/webpack.example.config.js",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
-    "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/**",
+    "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/** -d ./docs/api -R ./docs/jsdoc/README.md",
     "build:tests": "rm -f test/browser/bundle.js* && webpack --config ./conf/webpack.tests.config.js",
     "prepublishOnly": "npm run build",
     "lint": "standard --env=mocha",

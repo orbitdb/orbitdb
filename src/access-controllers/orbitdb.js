@@ -19,13 +19,14 @@ const type = 'orbitdb'
  * @instance
  * @async
  * @memberof module:AccessControllers.AccessControllers-OrbitDB
+ * @private
  */
 
 /**
  * Defines an OrbitDB access controller.
  * @param {Object} options Various options for configuring the
  * IPFSAccessController.
- * @param {Array} [params.write] An array of identity ids who can write to the
+ * @param {Array} [params.write] An array of ids of identities who can write to the
  * database.
  * @return {module:AccessControllers.AccessControllers-OrbitDB} An
  * IPFSAccessController function.
@@ -68,7 +69,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
    *
    * The returned capabilities will be a mixture of admin and write access
    * addresses.
-   * @return {Array} A list of addresses with admin and write access.
+   * @return {Array} A list of ids of identities with admin and write access.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
    */
@@ -96,7 +97,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   }
 
   /**
-   * Gets a list of addresses with the specified capability.
+   * Gets a list of identities with the specified capability.
    * @param {string} capability A capability (e.g. write).
    * @return {Array} One or more addresses with the spcified capability.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
@@ -117,10 +118,10 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   }
 
   /**
-   * Checks whether an address has a capability.
+   * Checks whether an identity has a capability.
    * @param {string} capability A capability (e.g. write).
-   * @param {string} key An address.
-   * @return {boolean} True if the address has the capability, false
+   * @param {string} key An id of an identity.
+   * @return {boolean} True if the identity has the capability, false
    * otherwise.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
@@ -132,10 +133,10 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   }
 
   /**
-   * Grants a capability to an address, storing it to the access control
+   * Grants a capability to an identity, storing it to the access control
    * database.
    * @param {string} capability A capability (e.g. write).
-   * @param {string} key An address.
+   * @param {string} key An id of an identity.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
    */
@@ -146,10 +147,10 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   }
 
   /**
-   * Revokes a capability from an address, removing it from the access control
+   * Revokes a capability from an identity, removing it from the access control
    * database.
    * @param {string} capability A capability (e.g. write).
-   * @param {string} key An address.
+   * @param {string} key An id of an identity.
    * @memberof module:AccessControllers.AccessControllers-OrbitDB
    * @instance
    */

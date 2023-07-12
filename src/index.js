@@ -8,10 +8,9 @@ export {
   KeyValue,
   KeyValueIndexed,
   addDatabaseType
-} from './db/index.js'
+} from './databases/index.js'
 
 export {
-  default as OrbitDBAddress,
   isValidAddress,
   parseAddress
 } from './address.js'

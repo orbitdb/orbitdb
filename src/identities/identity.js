@@ -1,8 +1,3 @@
-/**
- * @module Identity
- * @description
- * An identity.
- */
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -13,26 +8,19 @@ const hasher = sha256
 const hashStringEncoding = base58btc
 
 /**
- * Creates an instance of Identity.
- * @function
- * @param {Object} params One or more parameters for configuring an Identity.
- * @param {string} params.id A unique identitifer for the identity.
- * @param {string} params.publicKey A public key.
- * @param {Object} params.signatures A signed identity id and public key.
- * @param {string} params.type The type of identity provider.
- * @param {function} params.sign A sign function.
- * @param {function} params.verify A verify function.
- * @return {module:Identity~Identity} An instance of Identity.
- * @throws Identity id is required if id is not provided.
- * @throws Invalid public key if publicKey is not provided.
- * @throws Signatures object is required if signature is not provided.
- * @throws Signature of id is required if signature's id is not provided.
- * @throws Signature of publicKey+id is required if signature's publicKey+id is
- * not provided.
- * @throws Identity type is required if type is not provided.
- * @instance
+ * @typedef {Object} module:Identities~Identity
+ * @property {string} id A unique identifer for the identity.
+ * @property {object} publicKey A public key.
+ * @property {object} signatures A signed identity id and public key.
+ * @property {string} type The type of identity provider.
+ * @property {function} sign A sign function to sign data using this identity.
+ * @property {function} verify A verify function to verify data signed by this identity.
  */
 const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) => {
+  /**
+   * @description The Identity instance. Returned by
+   * [Identities.createIdentity()]{@link module:Identities~Identities#createIdentity}.
+   */
   if (!id) throw new Error('Identity id is required')
   if (!publicKey) throw new Error('Invalid public key')
   if (!signatures) throw new Error('Signatures object is required')
@@ -58,12 +46,6 @@ const Identity = async ({ id, publicKey, signatures, type, sign, verify } = {}) 
   return identity
 }
 
-/**
- * Encode an Identity to a serializable form.
- * @param {Identity} identity Identity to encode,
- * @return {Object} Object with fields hash and bytes.
- * @static
- */
 const _encodeIdentity = async (identity) => {
   const { id, publicKey, signatures, type } = identity
   const value = { id, publicKey, signatures, type }
@@ -72,12 +54,6 @@ const _encodeIdentity = async (identity) => {
   return { hash, bytes: Uint8Array.from(bytes) }
 }
 
-/**
- * Decode an Identity from bytes
- * @param {Uint8Array} bytes Bytes from which to decode an Identity from
- * @return {Identity}
- * @static
- */
 const decodeIdentity = async (bytes) => {
   const { value } = await Block.decode({ bytes, codec, hasher })
   return Identity({ ...value })
@@ -88,6 +64,7 @@ const decodeIdentity = async (bytes) => {
  * @param {Identity} identity The identity to verify.
  * @return {boolean} True if the identity is valid, false otherwise.
  * @static
+ * @private
  */
 const isIdentity = (identity) => {
   return Boolean(identity.id &&
@@ -106,6 +83,7 @@ const isIdentity = (identity) => {
  * @param {Identity} b Second identity.
  * @return {boolean} True if identity a and b are equal, false otherwise.
  * @static
+ * @private
  */
 const isEqual = (a, b) => {
   return a.id === b.id &&

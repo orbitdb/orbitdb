@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
-import { OrbitDBAddress, isValidAddress, parseAddress } from '../src/index.js'
+import OrbitDBAddress, { isValidAddress, parseAddress } from '../src/address.js'
 
 describe('Address', function () {
   describe('Creating an address from full address string', () => {
@@ -18,7 +18,7 @@ describe('Address', function () {
     it('has a path', () => {
       const address = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      strictEqual(addr.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+      strictEqual(addr.hash, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
     })
   })
 
@@ -38,7 +38,7 @@ describe('Address', function () {
     it('has a path', () => {
       const address = 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      strictEqual(addr.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+      strictEqual(addr.hash, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
     })
   })
 
@@ -61,7 +61,7 @@ describe('Address', function () {
     })
 
     it('has a path', () => {
-      strictEqual(addr2.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+      strictEqual(addr2.hash, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
     })
   })
 
@@ -128,7 +128,7 @@ describe('Address', function () {
       const result = parseAddress(address)
 
       strictEqual(result.protocol, 'orbitdb')
-      strictEqual(result.path, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
+      strictEqual(result.hash, 'zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
 
       strictEqual(result.toString().indexOf('/orbitdb'), 0)
       strictEqual(result.toString().indexOf('zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'), 9)
@@ -139,7 +139,7 @@ describe('Address', function () {
       const result = parseAddress(address)
 
       strictEqual(result.protocol, 'orbitdb')
-      strictEqual(result.path, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
+      strictEqual(result.hash, 'Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC')
 
       strictEqual(result.toString().indexOf('/orbitdb'), 0)
       strictEqual(result.toString().indexOf('Qmdgwt7w4uBsw8LXduzCd18zfGXeTmBsiR8edQ1hSfzcJC'), 9)

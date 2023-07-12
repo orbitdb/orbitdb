@@ -1,61 +1,27 @@
 /**
- * @namespace Database-Documents
- * @memberof module:Database
+ * @namespace Databases-Documents
+ * @memberof module:Databases
  * @description Documents database.
- * @example <caption>Create documents db with default options</caption>
- * import { create } from 'IPFS'
- *
- * const ipfs = create()
- * const Partial = Documents()
- * const documents = await Partial({ ipfs })
  * @example <caption>Create documents db with custom index</caption>
  * import { create } from 'IPFS'
+ * import { OrbitDB, Documents } from 'orbit-db'
  *
  * const ipfs = create()
- * const options = { indexBy: 'myCustomId'}
- * const Partial = Documents(options)
- * const documents = await Partial({ ipfs })
+ * const orbitdb = await OrbitDB({ ipfs })
+ * const db = await orbitdb.open('my-docs', { Database: Documents({ indexBy: 'myCustomId'} ) }
+ *
+ * @augments module:Databases~Database
  */
 import Database from '../database.js'
 
 const DefaultOptions = { indexBy: '_id' }
 
 /**
- * Creates an instance of Documents.
- * @callback Documents
- * @param {Object} params One or more parameters for configuring Database.
- * @param {IPFS} params.ipfs An IPFS instance.
- * @param {Identity} [params.identity] An Identity instance.
- * @param {string} [params.address] The address of the database.
- * @param {string} [params.name] The name of the database.
- * @param {module:AccessControllers} [params.access] An AccessController
- * instance.
- * @param {string} [params.directory] A location for storing Database-related
- * data. Defaults to ./orbitdb/[params.address].
- * @param {*} [params.meta={}] The database's metadata.
- * @param {module:Storage} [params.headsStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log heads. Defaults to ComposedStorage(LRUStorage, IPFSBlockStorage).
- * @param {module:Storage} [params.entryStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing
- * log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
- * @param {number} [params.referencesCount]  The maximum distance between
- * references to other entries.
- * @param {boolean} [params.syncAutomatically=false] If true, sync databases
- * automatically. Otherwise, false.
- * @param {function} [params.onUpdate] A function callback. Fired when an
- * entry is added to the oplog.
- * @function
- * @instance
- * @async
- * @memberof module:Database.Database-Documents
- */
-
-/**
  * Defines a Documents database.
  * @param {Object} options Various options for configuring the Document store.
- * @param {string} [params.indexBy=_id] An index.
- * @return {module:Database.Database-Documents} A Documents function.
- * @memberof module:Database
+ * @param {string} [options.indexBy=_id] An index.
+ * @return {module:Databases.Databases-Documents} A Documents function.
+ * @memberof module:Databases
  */
 const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically })
@@ -67,7 +33,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {Object} doc An object representing a key/value list of fields.
    * @return {string} The hash of the new oplog entry.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const put = async (doc) => {
@@ -83,7 +49,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {string} key The key of the doc to delete.
    * @return {string} The hash of the new oplog entry.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const del = async (key) => {
@@ -97,7 +63,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {string} key The key of the doc to get.
    * @return {Object} The doc corresponding to key or null.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const get = async (key) => {
@@ -113,8 +79,12 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @param {function(Object)} findFn A function for querying for specific
    * results.
+   *
+   * The findFn function's signature takes the form `function(doc)` where doc
+   * is a document's value property. The function should return true if the
+   * document should be included in the results, false otherwise.
    * @return {Array} Found documents.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const query = async (findFn) => {
@@ -135,7 +105,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @param {Object} [filters={}] Various filters to apply to the iterator.
    * @param {string} [filters.amount=-1] The number of results to fetch.
    * @yields [string, string, string] The next document as hash/key/value.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const iterator = async function * ({ amount } = {}) {
@@ -162,7 +132,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
    * @function
    * @return [][string, string, string] An array of documents as hash/key
    * value entries.
-   * @memberof module:Database.Database-Documents
+   * @memberof module:Databases.Databases-Documents
    * @instance
    */
   const all = async () => {

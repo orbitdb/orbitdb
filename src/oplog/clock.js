@@ -1,7 +1,9 @@
 /**
- * @module Clock
+ * @namespace module:Log~Clock
+ * @memberof module:Log
  * @description
  * The lamport clock.
+ * @private
  */
 
 /**
@@ -13,6 +15,7 @@
  * @param {module:Clock} b The second clock.
  * @return {number} Returns a negative integer if clock a is less than clock b
  * otherwise a positive integer is returned.
+ * @memberof module:Log~Clock
  */
 const compareClocks = (a, b) => {
   // Calculate the "distance" based on the clock, ie. lower or greater
@@ -29,6 +32,7 @@ const compareClocks = (a, b) => {
  * Advances a clock's time by 1, returning a new instance of Clock.
  * @param {module:Clock} clock The clock to advance.
  * @return {module:Clock} A new instance of clock with time advanced by 1.
+ * @memberof module:Log~Clock
  */
 const tickClock = (clock) => {
   return Clock(clock.id, ++clock.time)
@@ -39,6 +43,7 @@ const tickClock = (clock) => {
  * @function
  * @param {string} id A unique identifier.
  * @param {number} [time=0] A natural number (including 0).
+ * @memberof module:Log~Clock
  * @instance
  */
 const Clock = (id, time) => {

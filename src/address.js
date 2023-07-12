@@ -9,7 +9,7 @@ import { posixJoin } from './utils/path-join.js'
 /**
  * Validates an OrbitDB database address.
  * @function
- * @param {OrbitDBAddress|string} address An OrbitDB database address.
+ * @param {module:Address~OrbitDBAddress|string} address An OrbitDB database address.
  * @return {boolean} True if the address is a valid OrbitDB database address,
  * false otherwise.
  * @static
@@ -39,8 +39,8 @@ const isValidAddress = (address) => {
 /**
  * Parses an OrbitDB database address.
  * @function
- * @param {OrbitDBAddress|string} address A valid OrbitDB database address.
- * @return {OrbitDBAddress} An instance of OrbitDBAddress.
+ * @param {module:Address~OrbitDBAddress|string} address A valid OrbitDB database address.
+ * @return {module:Address~OrbitDBAddress} An instance of OrbitDBAddress.
  * @throws Not a valid OrbitDB address if no address if provided.
  * @throws Not a valid OrbitDB address if address is invalid.
  * @static
@@ -58,47 +58,32 @@ const parseAddress = (address) => {
 }
 
 /**
- * Creates an instance of OrbitDBAddress.
- * @function
- * @param {OrbitDBAddress|string} address A valid OrbitDB database address.
- * @return {OrbitDBAddress} An instance of OrbitDBAddress.
- * @instance
+ * @typedef {Object} OrbitDBAddress
+ * @property {string} protocol Protocol prefix "/orbitdb/".
+ * @property {string} hash The hash of the database manifest.
+ * @property {string} address The full database address.
  */
 const OrbitDBAddress = (address) => {
-  /**
-   * @namespace module:Address~OrbitDBAddress
-   * @description The instance returned by {@link module:Address~OrbitDBAddress}.
-   */
-
-  if (address && address.protocol === 'orbitdb' && address.path) {
+  if (address && address.protocol === 'orbitdb' && address.hash) {
     return address
   }
 
-  /**
-   * The 'orbitdb' protocol.
-   * @memberof module:Address~OrbitDBAddress
-   */
   const protocol = 'orbitdb'
 
-  /**
-   * The path without the /orbitdb/ prefix.
-   * @memberof module:Address~OrbitDBAddress
-   */
-  const path = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
+  const hash = address.replace('/orbitdb/', '').replace('\\orbitdb\\', '')
 
   /**
-   * Returns OrbitDBAddress as a string.
-   * @function
-   * @return {string} The string form of OrbitDBAddress.
-   * @memberof module:Address~OrbitDBAddress
+   * Returns address as a string.
+   * @typedef {Function} toString
+   * @returns {string} Address as a string.
    */
   const toString = () => {
-    return posixJoin('/', protocol, path)
+    return posixJoin('/', protocol, hash)
   }
 
   return {
     protocol,
-    path,
+    hash,
     address,
     toString
   }
