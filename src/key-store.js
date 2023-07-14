@@ -49,8 +49,8 @@ const verifySignature = async (signature, publicKey, data) => {
 
 /**
  * Signs data using a key pair.
- * @param {string} key The key to use for signing data.
- * @param {string} data The data to sign.
+ * @param {Secp256k1PrivateKey} key The key to use for signing data.
+ * @param {string|Uint8Array} data The data to sign.
  * @return {string} A signature.
  * @throws No signing key given if no key is provided.
  * @throws Given input data was undefined if no data is provided.
