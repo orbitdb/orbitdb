@@ -4,7 +4,7 @@
  * @description Documents database.
  * @example <caption>Create documents db with custom index</caption>
  * import { create } from 'IPFS'
- * import { OrbitDB, Documents } from 'orbit-db'
+ * import { OrbitDB, Documents } from 'orbitdb'
  *
  * const ipfs = create()
  * const orbitdb = await OrbitDB({ ipfs })

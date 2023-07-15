@@ -7,7 +7,7 @@
  * Key-value pairs are stored to the configured storage.
  * @example <caption>Specify a custom storage</caption>
  * import { create } from 'IPFS'
- * import { OrbitDB, KeyValueIndexed, IPFSBlockStorage } from 'orbit-db'
+ * import { OrbitDB, KeyValueIndexed, IPFSBlockStorage } from 'orbitdb'
  *
  * const ipfs = create()
  * const storage = await IPFSBlockStorage({ ipfs })

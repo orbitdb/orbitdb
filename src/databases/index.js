@@ -25,7 +25,7 @@ const databaseTypes = {
 /**
  * Add a new database type.
  * @example
- * import { addDatabaseType } from 'orbit-db'
+ * import { addDatabaseType } from 'orbitdb'
  * const CustomDBTypeModule = async (params) => {
  *   const database = await Database(...params)
  *   ...

@@ -38,7 +38,7 @@ const DefaultAccessController = async () => {
 
  * @function
  * @param {IPFS} ipfs An IPFS instance
- * @param {Object} identity Identity (https://github.com/orbitdb/orbit-db-identity-provider/blob/master/src/identity.js)
+ * @param {Object} identity Identity.
  * @param {Object} options
  * @param {string} options.logId ID of the log
  * @param {Object} options.access AccessController (./default-access-controller)
