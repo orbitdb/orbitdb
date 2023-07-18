@@ -16,7 +16,7 @@ let lastTenSeconds = 0
 const benchmarkDuration = 20 // seconds
 
 const queryLoop = async () => {
-  await log.append(totalQueries.toString())
+  await log.append(totalQueries.toString(), { referencesCount: 0 })
   totalQueries++
   lastTenSeconds++
   queriesPerSecond++
