@@ -116,9 +116,8 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       const addr = OrbitDBAddress(address)
       manifest = await manifestStore.get(addr.hash)
       const acType = manifest.accessController.split('/', 2).pop()
-      const acAddress = manifest.accessController.replaceAll(`/${acType}/`, '')
       AccessController = getAccessController(acType)()
-      accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: acAddress })
+      accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: manifest.accessController })
       name = manifest.name
       type = type || manifest.type
       meta = manifest.meta
@@ -126,7 +125,7 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       // If the address given was not valid, eg. just the name of the database
       type = type || DefaultDatabaseType
       AccessController = AccessController || DefaultAccessController()
-      accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities })
+      accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, name: address })
       const m = await manifestStore.create({ name: address, type, accessController: accessController.address, meta })
       manifest = m.manifest
       address = OrbitDBAddress(m.hash)
