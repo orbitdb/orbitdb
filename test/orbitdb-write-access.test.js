@@ -229,6 +229,7 @@ describe('Write Permissions', function () {
   it('uses an OrbitDB access controller to manage access - two writers', async () => {
     let connected = false
     let updateCount = 0
+    let accessUpdated = false
 
     const onConnected = async (peerId, heads) => {
       connected = true
@@ -236,6 +237,10 @@ describe('Write Permissions', function () {
 
     const onUpdate = async (entry) => {
       ++updateCount
+    }
+
+    const onAccessUpdated = async (entry) => {
+      accessUpdated = true
     }
 
     const db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
@@ -246,7 +251,11 @@ describe('Write Permissions', function () {
 
     await waitFor(() => connected, () => true)
 
+    db2.access.events.on('update', onAccessUpdated)
+
     await db1.access.grant('write', db2.identity.id)
+
+    await waitFor(() => accessUpdated, () => true)
 
     await db1.add('record 1')
     await db2.add('record 2')
