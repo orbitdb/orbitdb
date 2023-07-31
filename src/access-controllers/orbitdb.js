@@ -2,8 +2,8 @@
  * @namespace AccessControllers-OrbitDB
  * @memberof module:AccessControllers
  */
-import ensureACAddress from '../utils/ensure-ac-address.js'
 import IPFSAccessController from './ipfs.js'
+import { createId } from '../utils/index.js'
 
 const type = 'orbitdb'
 
@@ -32,12 +32,12 @@ const type = 'orbitdb'
  * IPFSAccessController function.
  * @memberof module:AccessControllers
  */
-const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities, address }) => {
-  address = address || 'default-access-controller'
+const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities, address, name }) => {
+  address = address || name || await createId(64)
   write = write || [orbitdb.identity.id]
 
-  // Force '<address>/_access' naming for the database
-  const db = await orbitdb.open(ensureACAddress(address), { type: 'keyvalue', AccessController: IPFSAccessController({ write }) })
+  // Open the database used for access information
+  const db = await orbitdb.open(address, { type: 'keyvalue', AccessController: IPFSAccessController({ write }) })
   address = db.address
 
   /**
@@ -90,7 +90,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
       ..._capabilities,
       // Add the root access controller's 'write' access list
       // as admins on this controller
-      ...{ admin: new Set([...(_capabilities.admin || []), ...write]) }
+      ...{ admin: new Set([...(_capabilities.admin || []), ...db.access.write]) }
     }).forEach(toSet)
 
     return _capabilities
@@ -115,6 +115,15 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
    */
   const close = async () => {
     await db.close()
+  }
+
+  /**
+   * Drop the underlying access control database.
+   * @memberof module:AccessControllers.AccessControllers-OrbitDB
+   * @instance
+   */
+  const drop = async () => {
+    await db.drop()
   }
 
   /**
@@ -174,6 +183,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
     grant,
     revoke,
     close,
+    drop,
     events: db.events
   }
 }

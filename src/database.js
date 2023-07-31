@@ -164,6 +164,9 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     await sync.stop()
     await queue.onIdle()
     await log.close()
+    if (access && access.close) {
+      await access.close()
+    }
     events.emit('close')
   }
 
@@ -176,6 +179,9 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
   const drop = async () => {
     await queue.onIdle()
     await log.clear()
+    if (access && access.drop) {
+      await access.drop()
+    }
     events.emit('drop')
   }
 

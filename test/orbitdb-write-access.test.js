@@ -1,4 +1,4 @@
-import { strictEqual } from 'assert'
+import { strictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
@@ -185,7 +185,7 @@ describe('Write Permissions', function () {
     await db2.close()
   })
 
-  it('uses an OrbitDB access controller to manage access', async () => {
+  it('uses an OrbitDB access controller to manage access - one writer', async () => {
     let connected = false
     let updateCount = 0
 
@@ -198,15 +198,64 @@ describe('Write Permissions', function () {
     }
 
     const db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
-    const db2 = await orbitdb2.open(db1.address, { AccessController: OrbitDBAccessController() })
+    const db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
 
     await waitFor(() => connected, () => true)
 
+    await db1.add('record 1')
+
+    let err
+
+    try {
+      await db2.add('record 2')
+    } catch (e) {
+      err = e
+    }
+
+    await waitFor(() => updateCount === 1, () => true)
+
+    strictEqual((await db1.all()).length, (await db2.all()).length)
+
+    notStrictEqual(err, undefined)
+    strictEqual(err.toString().endsWith('is not allowed to write to the log'), true)
+
+    await db1.close()
+    await db2.close()
+  })
+
+  it('uses an OrbitDB access controller to manage access - two writers', async () => {
+    let connected = false
+    let updateCount = 0
+    let accessUpdated = false
+
+    const onConnected = async (peerId, heads) => {
+      connected = true
+    }
+
+    const onUpdate = async (entry) => {
+      ++updateCount
+    }
+
+    const onAccessUpdated = async (entry) => {
+      accessUpdated = true
+    }
+
+    const db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    const db2 = await orbitdb2.open(db1.address)
+
+    db2.events.on('join', onConnected)
+    db2.events.on('update', onUpdate)
+
+    await waitFor(() => connected, () => true)
+
+    db2.access.events.on('update', onAccessUpdated)
+
     await db1.access.grant('write', db2.identity.id)
-    await db2.access.grant('write', db1.identity.id)
+
+    await waitFor(() => accessUpdated, () => true)
 
     await db1.add('record 1')
     await db2.add('record 2')
@@ -217,5 +266,42 @@ describe('Write Permissions', function () {
 
     await db1.close()
     await db2.close()
+  })
+
+  it('OrbitDB access controller address is deterministic', async () => {
+    let connected = false
+    let updateCount = 0
+
+    const onConnected = async (peerId, heads) => {
+      connected = true
+    }
+
+    const onUpdate = async (entry) => {
+      ++updateCount
+    }
+
+    let db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    let db2 = await orbitdb2.open(db1.address)
+
+    const addr = db1.address
+
+    db2.events.on('join', onConnected)
+    db2.events.on('update', onUpdate)
+
+    await waitFor(() => connected, () => true)
+
+    await db1.add('record 1')
+
+    await waitFor(() => updateCount === 1, () => true)
+
+    strictEqual((await db1.all()).length, (await db2.all()).length)
+
+    await db1.close()
+    await db2.close()
+
+    db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    db2 = await orbitdb2.open(db1.address)
+
+    strictEqual(db1.address, addr)
   })
 })
