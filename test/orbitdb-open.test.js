@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, isValidAddress, LevelStorage } from '../src/index.js'
+import { createOrbitDB, isValidAddress, LevelStorage } from '../src/index.js'
 import KeyValueIndexed from '../src/databases/keyvalue-indexed.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
@@ -38,7 +38,7 @@ describe('Open databases', function () {
     let db
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
       db = await orbitdb1.open('helloworld')
     })
 
@@ -145,7 +145,7 @@ describe('Open databases', function () {
     const expected = { hello: 'world' }
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
       db = await orbitdb1.open('helloworld', { meta: expected })
     })
 
@@ -171,7 +171,7 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
       db = await orbitdb1.open('helloworld')
 
       for (let i = 0; i < amount; i++) {
@@ -225,7 +225,7 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
       db = await orbitdb1.open('helloworld2')
 
       for (let i = 0; i < amount; i++) {
@@ -237,7 +237,7 @@ describe('Open databases', function () {
       await db.close()
       await orbitdb1.stop()
 
-      orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2' })
+      orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2' })
     })
 
     after(async () => {
@@ -277,8 +277,8 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
-      orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
       db1 = await orbitdb1.open('helloworld2')
       for (let i = 0; i < amount; i++) {
         await db1.add('hello' + i)
@@ -379,7 +379,7 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
       db = await orbitdb1.open('helloworld', { type: 'keyvalue' })
       address = db.address
 
@@ -427,7 +427,7 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
       db = await orbitdb1.open('helloworld', { type: 'keyvalue' })
       address = db.address
 
@@ -487,7 +487,7 @@ describe('Open databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
       db = await orbitdb1.open('helloworld', { type: 'documents' })
       address = db.address
 

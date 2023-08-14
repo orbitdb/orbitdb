@@ -3,7 +3,7 @@
 Below is a simple replication example. Both peers run within the same Nodejs process.
 
 ```js
-import { OrbitDB } from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 import { create } from 'ipfs-core'
 
 // The config will set up a TCP connection when dialling other node.js peers.
@@ -47,8 +47,8 @@ const ipfs2 = await create({ config: config2, repo: './ipfs/2' })
 // const ipfs1PeerId = await ipfs1.id()
 // await ipfs2.swarm.connect(ipfs1PeerId.id)
 
-const orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'userA', directory: './orbitdb/1' })
-const orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'userB', directory: './orbitdb/2' })
+const orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'userA', directory: './orbitdb/1' })
+const orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'userB', directory: './orbitdb/2' })
 
 // This opens a new db. Default db type will be 'events'.
 const db1 = await orbitdb1.open('my-db')

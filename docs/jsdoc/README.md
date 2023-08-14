@@ -17,10 +17,10 @@ Instantiate OrbitDB and create a database:
 
 ```js
 import { create } from 'ipfs-core'
-import { OrbitDB } from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 
 const ipfs = await create() // IPFS is required for storage and network communication
-const orbitdb = await OrbitDB({ ipfs })
+const orbitdb = await createOrbitDB({ ipfs })
 const mydb = await orbitdb.open('mydb')
 console.log(mydb.address) // /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
 await mydb.add("hello world!")
@@ -31,10 +31,10 @@ Open and replicate an existing database:
 ```js
 // In another process
 import { create } from 'ipfs-core'
-import { OrbitDB } from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 
 const ipfs = await create()
-const orbitdb = await OrbitDB({ ipfs })
+const orbitdb = await createOrbitDB({ ipfs })
 const theirdb = await orbitdb.open('/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
 for await (let record of theirdb.iterator()) {
   console.log(record)

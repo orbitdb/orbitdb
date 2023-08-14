@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB } from '../src/index.js'
+import { createOrbitDB } from '../src/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
@@ -16,8 +16,8 @@ describe('Replicating databases', function () {
     ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
-    orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
-    orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
+    orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+    orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
   })
 
   after(async () => {

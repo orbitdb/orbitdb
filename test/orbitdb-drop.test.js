@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB } from '../src/index.js'
+import { createOrbitDB } from '../src/index.js'
 import config from './config.js'
 
 describe('Drop databases', function () {
@@ -27,7 +27,7 @@ describe('Drop databases', function () {
     const amount = 10
 
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs, id: 'user1' })
       db = await orbitdb1.open('helloworld')
     })
 
@@ -89,7 +89,7 @@ describe('Drop databases', function () {
 
   describe('dropping an empty database', () => {
     before(async () => {
-      orbitdb1 = await OrbitDB({ ipfs, id: 'user1' })
+      orbitdb1 = await createOrbitDB({ ipfs, id: 'user1' })
       db = await orbitdb1.open('helloworld')
     })
 
