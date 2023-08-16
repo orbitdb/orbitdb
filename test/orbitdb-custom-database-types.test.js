@@ -2,7 +2,7 @@ import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
-import { OrbitDB, addDatabaseType, Database } from '../src/index.js'
+import { createOrbitDB, addDatabaseType, Database } from '../src/index.js'
 import config from './config.js'
 
 const type = 'custom!'
@@ -24,7 +24,7 @@ describe('Add a custom database type', function () {
 
   before(async () => {
     ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    orbitdb = await OrbitDB({ ipfs })
+    orbitdb = await createOrbitDB({ ipfs })
   })
 
   after(async () => {

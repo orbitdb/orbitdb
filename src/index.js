@@ -1,5 +1,5 @@
 export {
-  default as OrbitDB
+  default as createOrbitDB
 } from './orbitdb.js'
 
 export {

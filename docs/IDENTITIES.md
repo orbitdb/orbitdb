@@ -17,7 +17,7 @@ A "signatures object" is then created to hold both the signed message and signed
 Finally, a new identity consisting of the root public key and derived public key plus the signatures object is generated and stored to the Identities storage.
 
 ```js
-import { Identities } from 'orbit-db'
+import { Identities } from '@orbitdb/core'
 
 const id = 'userA'
 const identities = await Identities() 
@@ -31,7 +31,7 @@ The PublicKeyIdentityProvider stores the id and the root keys as a key/value pai
 Once created, `identities` and the associated `id` can be passed to OrbitDB:
 
 ```js
-const orbitdb = await OrbitDB({ identities, id: 'userA' })
+const orbitdb = await createOrbitDB({ identities, id: 'userA' })
 ```
 
 This identity can now be used by OrbitDB to control access to database actions such as write.
@@ -47,7 +47,7 @@ The key store is a local key manager for OrbitDB and is used to store the privat
 An existing keystore can be passed to `Identities`:
 
 ```js
-import { Identities, KeyStore } from 'orbit-db'
+import { Identities, KeyStore } from '@orbitdb/core'
 
 const keystore = await KeyStore()
 const id = 'userA'
@@ -62,7 +62,7 @@ There are different ways to customize the location of the key store.
 To change the keystore using `OrbitDB`, pass a custom directory:
 ```js
 // This will create a key store under ./different-path/key-store
-const orbitdb = await OrbitDB({ directory: './different-path' })
+const orbitdb = await createOrbitDB({ directory: './different-path' })
 // Be aware that this will change the base path to the database as well.
 ```
 
@@ -90,7 +90,7 @@ The identity object is stored like any other [IPLD data structure](https://ipld.
 ```js
 import { create } from 'ipfs-core'
 import * as Block from 'multiformats/block'
-import { Identities } from 'orbit-db'
+import { Identities } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
@@ -165,7 +165,7 @@ export { MyCustomIdentityProvider as default, verifyIdentity, type }
 To use it, add it to the list of known identity providers:
 
 ```js
-import { addIdentityProvider } from 'orbit-db'
+import { addIdentityProvider } from '@orbitdb/core'
 import MyCustomIdentityProvider from 'my-custom-identity-provider'
 addIdentityProvider(MyCustomIdentityProvider)
 const identity = await createIdentity({ id: 'some id', type: 'custom' })

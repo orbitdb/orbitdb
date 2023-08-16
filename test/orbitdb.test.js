@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
-import { OrbitDB, isIdentity } from '../src/index.js'
+import { createOrbitDB, isIdentity } from '../src/index.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 
@@ -35,7 +35,7 @@ describe('OrbitDB', function () {
   describe('OrbitDB instance creation - defaults', () => {
     before(async () => {
       await rmrf('./orbitdb')
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1 })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1 })
     })
 
     after(async () => {
@@ -127,7 +127,7 @@ describe('OrbitDB', function () {
   describe('OrbitDB instance creation - user given parameters', () => {
     before(async () => {
       await rmrf('./orbitdb1')
-      orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
     })
 
     after(async () => {
@@ -226,7 +226,7 @@ describe('OrbitDB', function () {
     it('throws an error if given an empty parameters object', async () => {
       let err
       try {
-        orbitdb1 = await OrbitDB({})
+        orbitdb1 = await createOrbitDB({})
       } catch (e) {
         err = e
       }
@@ -237,7 +237,7 @@ describe('OrbitDB', function () {
     it('throws an error if IPFS instance is not given', async () => {
       let err
       try {
-        orbitdb1 = await OrbitDB()
+        orbitdb1 = await createOrbitDB()
       } catch (e) {
         err = e
       }
@@ -252,7 +252,7 @@ describe('OrbitDB', function () {
       }
 
       try {
-        orbitdb1 = await OrbitDB()
+        orbitdb1 = await createOrbitDB()
       } catch (e) {
       }
       const dataDirectoryExists = fs.existsSync(path.join('./orbitdb'))

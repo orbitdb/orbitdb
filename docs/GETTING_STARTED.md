@@ -31,13 +31,13 @@ npm init
 Create a file in your project called index.js and add the following code to it:
 
 ```js
-import { OrbitDB } from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 import { create } from 'ipfs-core'
 
 // Create an IPFS instance with defaults.
 const ipfs = await create()
 
-const orbitdb = await OrbitDB({ ipfs })
+const orbitdb = await createOrbitDB({ ipfs })
 
 const db = await orbitdb.open('my-db')
 
@@ -117,7 +117,7 @@ npm init
 Create a new file called index.js and paste in the following code:
 
 ```js
-import { OrbitDB, getAccessController } from 'orbit-db'
+import { OrbitDB, getAccessController } from '@orbitdb/core'
 import { create } from 'ipfs-core'
 
 const main = async () => {
@@ -137,7 +137,7 @@ const main = async () => {
 
   // This will create all OrbitDB-related databases (keystore, my-db, etc) in 
   // ./[randDir]/ipfs.
-  const orbitdb = await OrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
+  const orbitdb = await createOrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
   
   // Get the IPFS AccessController function. We will need it to ensure everyone 
   // can write to the database.

@@ -36,10 +36,10 @@ In order to replicate the database with peers, the address is what you need to g
 
 ```js
 import IPFS from 'ipfs-core'
-import OrbitDB from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 
 const ipfs = await IPFS.create()
-const orbitdb = await OrbitDB({ ipfs })
+const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db')
 console.log(db.address)
 // /orbitdb/zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6moTcDL
@@ -64,7 +64,7 @@ The manifest is an [IPLD data structure](https://ipld.io/docs/) which can be ret
 ```js
 import { create } from 'ipfs-core'
 import * as Block from 'multiformats/block'
-import { OrbitDB, OrbitDBAddress } from 'orbit-db'
+import { createOrbitDB, OrbitDBAddress } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
@@ -73,7 +73,7 @@ import { CID } from 'multiformats/cid'
 const ipfs = await create()
 
 // Create the db then close.
-const orbitdb = await OrbitDB({ ipfs })
+const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db')
 await db.close()
 
@@ -99,21 +99,21 @@ console.log('manifest', value)
 Creating a default event store:
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 await orbitdb.open('my-db')
 ```
 
 Creating a documents database:
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 await orbitdb.open('my-db', { type: 'documents' })
 ```
 
 Creating a keyvalue database:
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 await orbitdb.open('my-db', { type: 'keyvalue' })
 ```
 
@@ -121,14 +121,14 @@ Creating a database and adding meta
 
 ```js
 const meta = { description: 'A database with metadata.' }
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 await orbitdb.open('my-db', { meta })
 ```
 
 ## Opening an existing database
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 const db = await orbitdb.open('my-db')
 await db.close()
 const dbReopened = await orbitdb.open(db.address)
@@ -141,7 +141,7 @@ const dbReopened = await orbitdb.open(db.address)
 Database types such as **documents** and **keyvalue** expose the `put` function which is used to add items as a key/value combination to the database.
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 const db = await orbitdb.open('my-db', { type: 'keyvalue' })
 const hash = await db.put('key', 'value')
 ```
@@ -149,7 +149,7 @@ const hash = await db.put('key', 'value')
 Alternatively, append-only database types such as **events** expose the `add` function which adds a value to the database:
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 const db = await orbitdb.open('my-db')
 const hash = await db.add('event')
 ```
@@ -159,7 +159,7 @@ const hash = await db.add('event')
 To delete an item from a database, use the `del` function:
 
 ```js
-const orbitdb = await OrbitDB()
+const orbitdb = await createOrbitDB()
 const db = await orbitdb.open('my-db', { type: 'keyvalue' })
 const hash = await db.put('key', 'value')
 await db.del(hash)
@@ -173,13 +173,13 @@ A simple way to replicate a database between peers can be accomplished by openin
 
 ```js
 import { create } from 'ipfs-core'
-import { OrbitDB } from 'orbit-db'
+import { createOrbitDB } from '@orbitdb/core'
 
 const ipfs1 = await create({ config1, repo: './ipfs1' })
 const ipfs2 = await create({ config2, repo: './ipfs2' })
 
-orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
-orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
+orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
+orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
 
 const db1 = await orbitdb1.open('my-db')
 

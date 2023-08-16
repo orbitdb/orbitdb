@@ -12,8 +12,7 @@ export default (env, argv) => {
       filename: '../dist/orbitdb.min.js',
       library: {
         name: 'OrbitDB',
-        type: 'var',
-        export: 'default'
+        type: 'var'
       }
     },
     target: 'web',
