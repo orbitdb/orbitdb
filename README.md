@@ -8,9 +8,6 @@
 
 OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.tech) as its data storage and [Libp2p Pubsub](https://docs.libp2p.io/concepts/pubsub/overview/) to automatically sync databases with peers. It's an eventually consistent database that uses [Merkle-CRDTs](https://arxiv.org/abs/2004.00107) for conflict-free database writes and merges making OrbitDB an excellent choice for p2p and decentralized apps, blockchain applications and [local-first](https://www.inkandswitch.com/local-first/) web applications.
 
-**Test it live at [Live demo 1](https://ipfs.io/ipfs/QmUsoSkGzUQnCgzfjL549KKf29m5EMYky3Y6gQp5HptLTG/), [Live demo 2](https://ipfs.io/ipfs/QmasHFRj6unJ3nSmtPn97tWDaQWEZw3W9Eh3gUgZktuZDZ/), or [P2P TodoMVC app](https://ipfs.io/ipfs/QmVWQMLUM3o4ZFbLtLMS1PMLfodeEeBkBPR2a2R3hqQ337/)**!
-
-
 OrbitDB provides various types of databases for different data models and use cases:
 
 - **[events](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdblognameaddress)**: an immutable (append-only) log with traversable history. Useful for *"latest N"* use cases or as a message queue.
@@ -27,8 +24,6 @@ All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src
 
 ***NOTE!*** *js-ipfs and related packages are now superseded by IPFS's Helia project and are no longer being maintained. As part of this migration, OrbitDB will be [switching to Helia](https://github.com/orbitdb/orbitdb/tree/helia).*
 
-***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://app.element.io/#/room/#orbit-db:matrix.org) if you plan to use OrbitDB in mission critical systems.*
-
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
 A Go implementation is developed and maintained by the [Berty](https://github.com/berty) project at [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
@@ -41,15 +36,10 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
   * [Browser <script> tag](#browser-script-tag)
 - [Usage](#usage)
 - [API](#api)
-- [Examples](#examples)
-  * [Install dependencies](#install-dependencies)
-  * [Browser example](#browser-example)
-  * [Node.js example](#nodejs-example)
 - [Development](#development)
   * [Run Tests](#run-tests)
   * [Build](#build)
   * [Benchmark](#benchmark)
-  * [Logging](#logging)
   * [API](#api)
 - [Frequently Asked Questions](#frequently-asked-questions)
   * [Are there implementations in other languages?](#are-there-implementations-in-other-languages)
@@ -118,56 +108,6 @@ Use the **[Getting Started](https://github.com/orbitdb/orbitdb/docs/GETTING_STAR
 
 See [API.md](https://github.com/orbitdb/orbitdb/blob/master/API.md) for the full documentation.
 
-## Examples
-
-### Install dependencies
-```sh
-git clone https://github.com/orbitdb/orbitdb.git
-cd orbit-db
-npm install
-```
-Some dependencies depend on native addon modules, so you'll also need to meet [node-gyp's](https://github.com/nodejs/node-gyp#installation) installation prerequisites. Therefore, Linux users may need to
-```sh
-make clean-dependencies && make deps
-```
-to redo the local package-lock.json with working native dependencies.
-
-### Browser example
-
-```sh
-npm install # if not yet installed
-make build
-npm run examples:browser # if browser isn't opening, open examples/browser/browser.html in your browser
-```
-
-Using Webpack:
-```sh
-npm install # if not yet installed
-make build
-npm run examples:browser-webpack # if browser isn't opening, open examples/browser/browser-webpack-example/index.html in your browser
-```
-
-<p align="left">
-  <img src="https://raw.githubusercontent.com/orbitdb/orbitdb/master/images/example1.png" width="33%">
-</p>
-
-Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orbitdb/blob/master/examples/browser/browser.html) and try the [live example](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/).
-
-### Node.js example
-
-```sh
-npm run examples:node
-```
-
-<img src="https://raw.githubusercontent.com/orbitdb/orbitdb/master/images/orbit-db-demo3.gif" width="66%">
-
-**Eventlog**
-
-See the code in [examples/eventlog.js](https://github.com/orbitdb/orbitdb/blob/master/examples/eventlog.js) and run it with:
-```sh
-node examples/eventlog.js
-```
-
 ## Development
 
 ### Run Tests
@@ -186,14 +126,6 @@ node benchmarks/benchmark-add.js
 ```
 
 See [benchmarks/](https://github.com/orbitdb/orbitdb/tree/master/benchmarks) for more benchmarks.
-
-### Logging
-
-To enable OrbitDB's logging output, set a global ENV variable called `LOG` to `debug`,`warn` or `error`:
-
-```sh
-LOG=debug node <file>
-```
 
 ### API
 
