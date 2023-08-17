@@ -13,19 +13,19 @@ OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [I
 
 OrbitDB provides various types of databases for different data models and use cases:
 
-- **[events](./blob/master/API.md#orbitdblognameaddress)**: an immutable (append-only) log with traversable history. Useful for *"latest N"* use cases or as a message queue.
-- **[documents](./blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
-- **[keyvalue](./blob/master/API.md#orbitdbkeyvaluenameaddress)**: a key-value database just like your favourite key-value database.
-- **[keyvalue-indexed](./blob/master/API.md#orbitdbkeyvaluenameaddress)**: key-value data indexed in a Level key-value database.
+- **[events](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdblognameaddress)**: an immutable (append-only) log with traversable history. Useful for *"latest N"* use cases or as a message queue.
+- **[documents](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdbdocsnameaddress-options)**: a document database to which JSON documents can be stored and indexed by a specified key. Useful for building search indices or version controlling documents and data.
+- **[keyvalue](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdbkeyvaluenameaddress)**: a key-value database just like your favourite key-value database.
+- **[keyvalue-indexed](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdbkeyvaluenameaddress)**: key-value data indexed in a Level key-value database.
 
-All databases are [implemented](./tree/main/src/storage/) on top of OrbitDB's [OpLog](./tree/amin/src/oplog/), an immutable, cryptographically verifiable, operation-based conflict-free replicated data structure ([CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) for distributed systems. OpLog is formalized in the paper [Merkle-CRDTs](https://arxiv.org/abs/2004.00107). You can also easily extend OrbitDB by [implementing and using a custom data model](./blob/main/docs/DATABASES.md#building-a-custom-database) benefitting from the same properties as the default data models provided by the underlying Merkle-CRDTs.
+All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src/storage/) on top of OrbitDB's [OpLog](https://github.com/orbitdb/orbitdb/tree/amin/src/oplog/), an immutable, cryptographically verifiable, operation-based conflict-free replicated data structure ([CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) for distributed systems. OpLog is formalized in the paper [Merkle-CRDTs](https://arxiv.org/abs/2004.00107). You can also easily extend OrbitDB by [implementing and using a custom data model](https://github.com/orbitdb/orbitdb/blob/main/docs/DATABASES.md#building-a-custom-database) benefitting from the same properties as the default data models provided by the underlying Merkle-CRDTs.
 
 #### Project status & support
 
 * Status: **in active development**
 * Compatible with **ipfs-core versions >= 0.18.0**
 
-***NOTE!*** *js-ipfs and related packages are now superseded by IPFS's Helia project and are no longer being maintained. As part of this migration, OrbitDB will be [switching to Helia](./tree/helia).*
+***NOTE!*** *js-ipfs and related packages are now superseded by IPFS's Helia project and are no longer being maintained. As part of this migration, OrbitDB will be [switching to Helia](https://github.com/orbitdb/orbitdb/tree/helia).*
 
 ***NOTE!*** *OrbitDB is **alpha-stage** software. It means OrbitDB hasn't been security audited and programming APIs and data formats can still change. We encourage you to [reach out to the maintainers](https://app.element.io/#/room/#orbit-db:matrix.org) if you plan to use OrbitDB in mission critical systems.*
 
@@ -112,11 +112,11 @@ import { createOrbitDB } from '@orbitdb/core'
 })()
 ```
 
-Use the **[Getting Started](./docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](./docs).
+Use the **[Getting Started](https://github.com/orbitdb/orbitdb/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](https://github.com/orbitdb/orbitdb/docs).
 
 ## API
 
-See [API.md](./blob/master/API.md) for the full documentation.
+See [API.md](https://github.com/orbitdb/orbitdb/blob/master/API.md) for the full documentation.
 
 ## Examples
 
@@ -151,7 +151,7 @@ npm run examples:browser-webpack # if browser isn't opening, open examples/brows
   <img src="https://raw.githubusercontent.com/orbitdb/orbitdb/master/images/example1.png" width="33%">
 </p>
 
-Check the code in [examples/browser/browser.html](./blob/master/examples/browser/browser.html) and try the [live example](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/).
+Check the code in [examples/browser/browser.html](https://github.com/orbitdb/orbitdb/blob/master/examples/browser/browser.html) and try the [live example](https://ipfs.io/ipfs/QmRosp97r8GGUEdj5Wvivrn5nBkuyajhRXFUcWCp5Zubbo/).
 
 ### Node.js example
 
@@ -163,7 +163,7 @@ npm run examples:node
 
 **Eventlog**
 
-See the code in [examples/eventlog.js](./blob/master/examples/eventlog.js) and run it with:
+See the code in [examples/eventlog.js](https://github.com/orbitdb/orbitdb/blob/master/examples/eventlog.js) and run it with:
 ```sh
 node examples/eventlog.js
 ```
@@ -185,7 +185,7 @@ npm run build
 node benchmarks/benchmark-add.js
 ```
 
-See [benchmarks/](./tree/master/benchmarks) for more benchmarks.
+See [benchmarks/](https://github.com/orbitdb/orbitdb/tree/master/benchmarks) for more benchmarks.
 
 ### Logging
 
@@ -222,7 +222,7 @@ The best place to find out what is out there and what is being actively worked o
 
 **Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
 
-If you want to code but don't know where to start, check out the issues labelled ["help wanted"](./issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc).
+If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbitdb/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc).
 
 ## Sponsors
 
