@@ -7,7 +7,7 @@ This guide will help you get up and running with a simple OrbitDB database that 
 Install OrbitDB:
 
 ```sh
-npm i orbit-db
+npm i @orbitdb/core@next
 ```
 
 You will also need IPFS for replication:
@@ -122,7 +122,7 @@ import { create } from 'ipfs-core'
 
 const main = async () => {
   // create a random directory to avoid IPFS and OrbitDB conflicts.
-  let randDir = (Math.random() + 1).toString(36).substring(2);
+  let randDir = (Math.random() + 1).toString(36).substring(2)
 
   const config = {
     Addresses: {
@@ -138,7 +138,7 @@ const main = async () => {
   // This will create all OrbitDB-related databases (keystore, my-db, etc) in 
   // ./[randDir]/ipfs.
   const orbitdb = await createOrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
-  
+
   // Get the IPFS AccessController function. We will need it to ensure everyone 
   // can write to the database.
   const AccessController = getAccessController('ipfs')
@@ -146,7 +146,7 @@ const main = async () => {
   let db
 
   if (process.argv[2]) {
-    db = await orbitdb.open(process.argv[2])      
+    db = await orbitdb.open(process.argv[2])
   } else {
     // When we open a new database, write access is only available to the 
     // db creator. When replicating a database on a remote peer, the remote 
@@ -156,16 +156,16 @@ const main = async () => {
     // revoke. 
     db = await orbitdb.open('my-db', { AccessController: AccessController({ write: ['*']})})
   }
-  
+
   // Copy this output if you want to connect a peer to another.
   console.log('my-db address', db.address)
-  
+
   // Add some records to the db when another peers joins.
   db.events.on('join', async (peerId, heads) => {
     await db.add('hello world 1')
-    await db.add('hello world 2')     
+    await db.add('hello world 2')
   })
-  
+
   db.events.on('update', async (entry) => {
     console.log('entry', entry)
     
@@ -179,8 +179,8 @@ const main = async () => {
       await db.close()
       await orbitdb.stop()
       await ipfs.stop()
-      
-      process.exit()      
+
+      process.exit()
   })
 }
 

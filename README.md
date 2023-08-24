@@ -35,14 +35,14 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 - [Installation](#installation)
   * [Browser <script> tag](#browser-script-tag)
 - [Usage](#usage)
-- [API](#api)
+- [Documentation](#documentation)
+  * [API](#api)
 - [Development](#development)
   * [Run Tests](#run-tests)
   * [Build](#build)
   * [Benchmark](#benchmark)
   * [API](#api)
-- [Frequently Asked Questions](#frequently-asked-questions)
-  * [Are there implementations in other languages?](#are-there-implementations-in-other-languages)
+- [Are there implementations in other languages?](#other-implementations)
 - [Contributing](#contributing)
 - [Sponsors](#sponsors)
 - [License](#license)
@@ -51,8 +51,10 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 
 ## Installation
 
+Note! The upcoming version 1.0.0 is currently in testing and needs to be installed as version "next" as described below.
+
 ```
-npm install @orbitdb/core
+npm install @orbitdb/core@next
 ```
 
 ### Browser <script> tag
@@ -102,11 +104,13 @@ import { createOrbitDB } from '@orbitdb/core'
 })()
 ```
 
+## Documentation
+
 Use the **[Getting Started](https://github.com/orbitdb/orbitdb/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](https://github.com/orbitdb/orbitdb/docs).
 
-## API
+### API
 
-See [API.md](https://github.com/orbitdb/orbitdb/blob/master/API.md) for the full documentation.
+See [api.orbitdb.org](https://api.orbitdb.org) for the full API documentation.
 
 ## Development
 
@@ -137,18 +141,12 @@ npm run build:docs
 
 Documentation is output to ./docs/api.
 
-## Frequently Asked Questions
+## Other implementations
 
-We have an FAQ! [Go take a look at it](FAQ.md). If a question isn't there, open an issue and suggest adding it. We can work on the best answer together.
+- Golang: [berty/go-orbit-db](https://github.com/berty/go-orbit-db)
+- Python: [orbitdb/py-orbit-db-http-client](https://github.com/orbitdb/py-orbit-db-http-client)
 
-### Are there implementations in other languages?
-
-Yes! Take a look at these implementations:
-
-  - Golang: [berty/go-orbit-db](https://github.com/berty/go-orbit-db)
-  - Python: [orbitdb/py-orbit-db-http-client](https://github.com/orbitdb/py-orbit-db-http-client)
-
-The best place to find out what is out there and what is being actively worked on is likely by asking in the [Matrix](https://app.element.io/#/room/#orbit-db:matrix.org). If you know of any other repos that ought to be included in this section, please open a PR and add them.
+If you know of any other repos that ought to be included in this section, please open a PR and add them.
 
 ## Contributing
 
