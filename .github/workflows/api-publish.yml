@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: 'lts/*'
           registry-url: https://registry.npmjs.org/
-      #- run: npm ci
-      #- run: npm run api:docs
+      - run: npm ci
+      - run: npm run api:docs
       - uses: actions/upload-pages-artifact@v2
         with:
           path: ./docs/api/
