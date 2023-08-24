@@ -1,7 +1,5 @@
-import isDefined from './is-defined.js'
-import * as io from 'orbit-db-io'
+import createId from './create-id.js'
 
 export {
-  isDefined,
-  io
+  createId
 }

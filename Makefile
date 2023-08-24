@@ -4,7 +4,7 @@ deps:
 	npm install
 
 test: deps
-	npm run test:all -- --exit
+	npm run test -- --exit
 
 build: test
 	mkdir -p examples/browser/lib/
@@ -18,12 +18,10 @@ build: test
 	@echo "Output: 'dist/', 'examples/browser/'"
 
 clean:
-	rm -rf orbitdb/
 	rm -rf node_modules/
-	rm -f test/browser/identities.js
-	rm -f test/browser/ipfs.js
-	rm -f test/browser/orbitdb.js
-	rm -f test/browser/ipfslog.min.js
+	rm -rf coverage/
+	rm -rf docs/api/
+	rm -f test/browser/bundle.js*
 
 clean-dependencies: clean
 	rm -f package-lock.json

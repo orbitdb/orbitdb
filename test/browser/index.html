@@ -1,77 +1,21 @@
 <html>
-  <head>
-    <title>Break OrbitDB</title>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-    <meta content="utf-8" http-equiv="encoding">
-    <script type="text/javascript" src="orbitdb.js" charset="utf-8"></script>
-    <script type="text/javascript" src="ipfs.js" charset="utf-8"></script>
-    <script type="text/javascript" src="identities.js" charset="utf-8"></script>
-    <script type="text/javascript" src="ipfslog.min.js" charset="utf-8"></script>
-  </head>
-  <body>
-      <div style="padding: 0px 0px 25px 0px;">
-        <p>
-          <span id="waitForOpenDB"></span>
-        </p>
-        <button id="addData" type="button">Add random data</button>
-        <hr />
-        <h3> Log Data </h3>
-        <p>
-          <span id="logData"></span>
-        </p>
-      </div>
-    <!-- </div> -->
-    <script type="text/javascript">
-      document.addEventListener('DOMContentLoaded', async () => {
-        const randStr = () => Math.random().toString(36).substring(6)
-        const ipfs = await Ipfs.create({
-          repo: './odb/'
-        })
+<head>
+    <meta charset="utf-8">
+    <title>Mocha Tests</title>
+    <link href="https://unpkg.com/mocha@10.2.0/mocha.css" rel="stylesheet" />
+    <script src="https://unpkg.com/mocha@10.2.0/mocha.js"></script>
+</head>
+<body>
+<div id="mocha"></div>
 
-        const identity = await Identities.createIdentity({ id: 'A'})
-        const orbitdb = await OrbitDB.createInstance(ipfs, { identity })
-        const consistentLog = await orbitdb.log('concurrent', { syncLocal: true, sortFn: Log.Sorting.SortByEntryHash })
-        const inconsistentLog = await orbitdb.log('concurrent2')
+<script>
+  mocha.setup({ ui: "bdd", globals: ['sprintf', 'vsprintf'] })
+  mocha.checkLeaks()
+</script>
+<script src="./bundle.js"></script>
+<script>
+  mocha.run()
+</script>
 
-        window.consistentLog = consistentLog
-        window.inconsistentLog = inconsistentLog
-
-        waitForOpenDB.innerHTML = consistentLog.address.toString() + ' + ' + inconsistentLog.address.toString()
-
-        addData.addEventListener('click', async event => {
-          const data = randStr()
-          await consistentLog.add(data)
-          await inconsistentLog.add(data)
-        })
-      })
-
-      async function getConsistentLogLength () {
-        return window.consistentLog._oplog.length
-      }
-
-      async function getConsistentLogHash () {
-        return await window.consistentLog._oplog.toMultihash()
-      }
-
-      async function getConsistentEntries () {
-        return window.consistentLog.iterator({ limit: -1 }).collect()
-      }
-
-      async function getInconsistentLogLength () {
-        return window.inconsistentLog._oplog.length
-      }
-
-      async function getInconsistentLogHash () {
-        return await window.inconsistentLog._oplog.toMultihash()
-      }
-
-      async function getInconsistentEntries () {
-        return window.inconsistentLog.iterator({ limit: -1 }).collect()
-      }
-
-      async function loadConsistentLog () {
-        await window.consistentLog.load()
-      }
-    </script>
-  </body>
+</body>
 </html>
