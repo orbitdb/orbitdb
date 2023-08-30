@@ -22,7 +22,7 @@ All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src
 * Status: **in active development**
 * Compatible with **ipfs-core versions >= 0.18.0**
 
-***NOTE!*** *js-ipfs and related packages are now superseded by IPFS's Helia project and are no longer being maintained. As part of this migration, OrbitDB will be [switching to Helia](https://github.com/orbitdb/orbitdb/tree/helia).*
+***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/orbitdb/orbitdb/tree/helia).*
 
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
@@ -51,7 +51,7 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 
 ## Installation
 
-Note! The upcoming version 1.0.0 is currently in testing and needs to be installed as version "next" as described below.
+*Note! The upcoming version 1.0.0 is currently in testing and needs to be installed as version "next" as described below.*
 
 ```
 npm install @orbitdb/core@next
