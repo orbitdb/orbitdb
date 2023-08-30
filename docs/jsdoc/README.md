@@ -4,7 +4,7 @@ as its data storage and Libp2p Pubsub to automatically sync databases with peers
 To install OrbitDB:
 
 ```bash
-npm install orbit-db
+npm install @orbitdb/core@next
 ```
 
 IPFS is also required:
