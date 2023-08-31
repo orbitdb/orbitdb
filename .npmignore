@@ -4,10 +4,6 @@ orbitdb/
 # Don't distribute the dependencies
 node_modules/
 
-# Don't distribute examples with the module
-# See examples at https://github.com/orbitdb/orbit-db
-examples/
-
 # Don't distribute source maps
 dist/*.map
 
