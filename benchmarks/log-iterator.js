@@ -33,7 +33,7 @@ import rmrf from 'rimraf'
 
   const startTime1 = new Date().getTime()
   for (let i = 0; i < entryCount; i++) {
-    await log.append(i.toString(), { pointerCount: 0 })
+    await log.append(i.toString(), { referencesCount: 0 })
   }
   const endTime1 = new Date().getTime()
   const duration1 = endTime1 - startTime1

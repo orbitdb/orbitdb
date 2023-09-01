@@ -1,19 +1,15 @@
-import { OrbitDB } from '../src/index.js'
+import { createOrbitDB } from '../src/index.js'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import connectPeers from '../test/utils/connect-nodes.js'
 import waitFor from '../test/utils/wait-for.js'
 
 import { EventEmitter } from 'events'
-
 EventEmitter.defaultMaxListeners = 10000
 
 const ipfsConfig = {
   preload: {
     enabled: false
-  },
-  EXPERIMENTAL: {
-    pubsub: true
   },
   config: {
     Addresses: {
@@ -46,8 +42,8 @@ const ipfsConfig = {
 
   const ipfs1 = await IPFS.create({ ...ipfsConfig, repo: './ipfs1' })
   const ipfs2 = await IPFS.create({ ...ipfsConfig, repo: './ipfs2' })
-  const orbitdb1 = await OrbitDB({ ipfs: ipfs1, directory: './orbitdb1' })
-  const orbitdb2 = await OrbitDB({ ipfs: ipfs2, directory: './orbitdb2' })
+  const orbitdb1 = await createOrbitDB({ ipfs: ipfs1, directory: './orbitdb1' })
+  const orbitdb2 = await createOrbitDB({ ipfs: ipfs2, directory: './orbitdb2' })
 
   await connectPeers(ipfs1, ipfs2)
 
@@ -77,7 +73,7 @@ const ipfsConfig = {
 
   await waitFor(() => connected, () => true)
 
-  console.log(`Iterate ${entryCount} events`)
+  console.log(`Iterate ${entryCount} events to replicate them`)
   const startTime2 = new Date().getTime()
 
   const all = []
@@ -90,7 +86,7 @@ const ipfsConfig = {
   const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
   const millisecondsPerOp2 = duration2 / entryCount
 
-  console.log(`Iterating ${all.length} events took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+  console.log(`Replicating ${all.length} events took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
 
   await db1.drop()
   await db1.close()

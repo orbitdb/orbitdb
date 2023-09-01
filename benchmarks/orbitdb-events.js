@@ -39,23 +39,23 @@ const ipfsConfig = {
   const ipfs = await IPFS.create({ ...ipfsConfig, repo: './ipfs' })
   const orbitdb = await createOrbitDB({ ipfs })
 
-  console.log(`Set ${entryCount} keys/values`)
+  console.log(`Create ${entryCount} events`)
 
-  const db1 = await orbitdb.open('benchmark-keyvalue', { type: 'keyvalue' })
+  const db1 = await orbitdb.open('benchmark-events')
 
   const startTime1 = new Date().getTime()
 
   for (let i = 0; i < entryCount; i++) {
-    await db1.set(i.toString(), 'hello' + i)
+    await db1.add(i.toString())
   }
 
   const endTime1 = new Date().getTime()
   const duration1 = endTime1 - startTime1
   const operationsPerSecond1 = Math.floor(entryCount / (duration1 / 1000))
   const millisecondsPerOp1 = duration1 / entryCount
-  console.log(`Setting ${entryCount} key/values took ${duration1} ms, ${operationsPerSecond1} ops/s, ${millisecondsPerOp1} ms/op`)
+  console.log(`Creating ${entryCount} events took ${duration1} ms, ${operationsPerSecond1} ops/s, ${millisecondsPerOp1} ms/op`)
 
-  console.log(`Iterate ${entryCount} key/values`)
+  console.log(`Iterate ${entryCount} events`)
   const startTime2 = new Date().getTime()
 
   const all = []
@@ -68,7 +68,7 @@ const ipfsConfig = {
   const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
   const millisecondsPerOp2 = duration2 / entryCount
 
-  console.log(`Iterating ${all.length} key/values took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+  console.log(`Iterating ${all.length} events took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
 
   await db1.drop()
   await db1.close()
