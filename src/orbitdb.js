@@ -131,6 +131,10 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
       address = OrbitDBAddress(m.hash)
       name = manifest.name
       meta = manifest.meta
+      // Check if we already have the database open and return if it is
+      if (databases[address]) {
+        return databases[address]
+      }
     }
 
     Database = Database || getDatabaseType(type)()

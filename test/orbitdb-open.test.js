@@ -527,4 +527,39 @@ describe('Open databases', function () {
       deepStrictEqual(all.map(e => e.value), expected)
     })
   })
+
+  describe('opening same database', () => {
+    let db
+
+    before(async () => {
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
+    })
+
+    after(async () => {
+      if (db) {
+        await db.close()
+      }
+      if (orbitdb1) {
+        await orbitdb1.stop()
+      }
+      await rmrf('./orbitdb')
+    })
+
+    it('returns the database instance when opened with a name multiple times', async () => {
+      let err
+      let db1, db2
+
+      try {
+        db1 = await orbitdb1.open('helloworld1')
+        db2 = await orbitdb1.open('helloworld1')
+      } catch (e) {
+        err = e
+      }
+
+      strictEqual(err, undefined)
+      strictEqual(db1.name, 'helloworld1')
+      strictEqual(db2.name, 'helloworld1')
+      strictEqual(db1.address, db2.address)
+    })
+  })
 })
