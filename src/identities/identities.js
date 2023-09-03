@@ -10,9 +10,8 @@ import { getIdentityProvider } from './providers/index.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
 import { LRUStorage, IPFSBlockStorage, MemoryStorage, ComposedStorage } from '../storage/index.js'
+import * as PublicKeyIdentityProvider from './providers/publickey.js' 
 import pathJoin from '../utils/path-join.js'
-
-const DefaultProviderType = 'publickey'
 
 const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
 
@@ -66,17 +65,16 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   /**
    * Creates an identity, adding it to storage.
    * @param {Object} options Various options for configuring a new identity.
-   * @param {string} [options.type=publickey] The type of provider to use for generating an identity.
+   * @param {Function} [options.type=PublicKey()] The type of provider to use for generating an identity.
    * @return {module:Identities~Identity} An instance of identity.
    * @memberof module:Identities~Identities
    * @instance
    */
   const createIdentity = async (options = {}) => {
     options.keystore = keystore
-
-    const type = options.type || DefaultProviderType
-    const Provider = getIdentityProvider(type).default
-    const identityProvider = Provider(options)
+    const DefaultIdentityProviderType = PublicKeyIdentityProvider.default({ keystore })
+    const IdentityProvider = options.type || DefaultIdentityProviderType
+    const identityProvider = IdentityProvider()
     const id = await identityProvider.getId(options)
     const privateKey = await keystore.getKey(id) || await keystore.createKey(id)
     const publicKey = keystore.getPublic(privateKey)
@@ -87,7 +85,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
       publicKey: publicKeyAndIdSignature
     }
 
-    const identity = await Identity({ id, publicKey, signatures, type, sign, verify })
+    const identity = await Identity({ id, publicKey, signatures, type: identityProvider.type, sign, verify })
 
     await storage.put(identity.hash, identity.bytes)
 

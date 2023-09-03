@@ -28,7 +28,7 @@ const DefaultAccessController = IPFSAccessController
  * @throws "IPFS instance is required argument" if no IPFS instance is provided.
  * @instance
  */
-const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
+const OrbitDB = async ({ ipfs, id, identity, identityProvider, identities, directory } = {}) => {
   /**
    * @namespace module:OrbitDB~OrbitDB
    * @description The instance returned by {@link module:OrbitDB}.
@@ -51,7 +51,14 @@ const OrbitDB = async ({ ipfs, id, identities, directory } = {}) => {
     identities = await Identities({ ipfs, keystore })
   }
 
-  const identity = await identities.createIdentity({ id })
+  // identity takes precedence, then idP, then create from id.
+  if (!identity) {
+    if (identityProvider) {
+      identity = await identities.createIdentity({ type: identityProvider })
+    } else {
+      identity = await identities.createIdentity({ id })
+    }
+  }
 
   const manifestStore = await ManifestStore({ ipfs })
 
