@@ -143,7 +143,7 @@ const verifyIdentity = identity => {
 }
 
 // The identity provider.
-const MyCustomIdentityProvider = ({ keystore }) => {
+const MyCustomIdentityProvider = ({ keystore }) => () => {
   const getId = async ({ id } = {}) => {
     // return the "root" identity managed by the custom identity provider,
     // eg. a public key or a wallet address
@@ -154,6 +154,7 @@ const MyCustomIdentityProvider = ({ keystore }) => {
   }
 
   return {
+    type,
     getId,
     signIdentity
   }
@@ -166,9 +167,9 @@ To use it, add it to the list of known identity providers:
 
 ```js
 import { addIdentityProvider } from '@orbitdb/core'
-import MyCustomIdentityProvider from 'my-custom-identity-provider'
+import * as MyCustomIdentityProvider from 'my-custom-identity-provider'
 addIdentityProvider(MyCustomIdentityProvider)
-const identity = await createIdentity({ id: 'some id', type: 'custom' })
+const identity = await createIdentity({ type: MyCustomIdentityProvider.default(options) })
 ```
 
 where my-custom-identity-provider is the custom module.
