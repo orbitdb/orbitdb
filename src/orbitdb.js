@@ -22,6 +22,9 @@ const DefaultAccessController = IPFSAccessController
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
  * @param {string} [params.id] The id of the user to use for this OrbitDB instance.
+ * @param {module:Identity} [params.identity] An identity instance.
+ * @param {Function} [params.identityProvider] An initialized identity provider. 
+ * @param {module:Identities} [params.identities] An Identities system instance.
  * @param {module:Identities} [params.identities] An Identities system instance.
  * @param {string} [params.directory] A location for storing OrbitDB data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
