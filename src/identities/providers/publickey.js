@@ -85,5 +85,6 @@ const PublicKeyIdentityProvider = ({ keystore }) => () => {
 }
 
 PublicKeyIdentityProvider.verifyIdentity = verifyIdentity
+PublicKeyIdentityProvider.type = type
 
 export default PublicKeyIdentityProvider

@@ -3,10 +3,11 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import { Identities, addIdentityProvider, getIdentityProvider, Identity } from '../../src/identities/index.js'
+import { Identities, addIdentityProvider, getIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
-import { CustomIdentityProvider, FakeIdentityProvider } from '../fixtures/providers.js'
-import * as PublicKeyIdentityProvider from '../../src/identities/providers/publickey.js'
+import { default as CustomIdentityProvider } from '../fixtures/providers/custom.js'
+import { default as FakeIdentityProvider } from '../fixtures/providers/fake.js'
+import { default as BadIdentityProvider } from '../fixtures/providers/bad.js'
 
 const type = 'publickey'
 const keysPath = './testkeys'
@@ -69,7 +70,8 @@ describe('Identities', function () {
     it('Passes in an identity provider', async () => {
       const keystore = await KeyStore({ path: keysPath })
       identities = await Identities({ keystore })
-      identity = await identities.createIdentity({ id, provider: PublicKeyIdentityProvider.default({ keystore }) })
+      const provider = PublicKeyIdentityProvider({ keystore })
+      identity = await identities.createIdentity({ id, provider })
       const result = await identities.getIdentity(identity.hash)
       assert.strictEqual(result.id, identity.id)
       assert.strictEqual(result.hash, identity.hash)
@@ -230,7 +232,7 @@ describe('Identities', function () {
 
     it('false signature doesn\'t verify', async () => {
       addIdentityProvider(FakeIdentityProvider)
-      identity = await identities.createIdentity({ provider: FakeIdentityProvider.default() })
+      identity = await identities.createIdentity({ provider: FakeIdentityProvider() })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
     })
@@ -345,6 +347,18 @@ describe('Identities', function () {
       addIdentityProvider(CustomIdentityProvider)
 
       assert.deepStrictEqual(getIdentityProvider('custom'), CustomIdentityProvider)
+    })
+    
+    it('cannot add an identity provider with missing type', () => {
+      let err
+      
+      try {
+        addIdentityProvider(BadIdentityProvider)      
+      } catch (e) {
+        err = e.toString()
+      }
+    
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'')
     })
   })
 })
