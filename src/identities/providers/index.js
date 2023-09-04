@@ -35,6 +35,10 @@ const addIdentityProvider = (IdentityProvider) => {
      typeof IdentityProvider.type !== 'string') {
     throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
   }
+  
+  if (!IdentityProvider.verifyIdentity) {
+    throw new Error('Given IdentityProvider doesn\'t have a function \'verifyIdentity\'')
+  }
 
   if (identityProviders[IdentityProvider.type]) {
     throw new Error(`Type already added: ${IdentityProvider.type}`)

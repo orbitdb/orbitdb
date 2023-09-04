@@ -7,7 +7,8 @@ import { Identities, addIdentityProvider, getIdentityProvider, Identity, PublicK
 import testKeysPath from '../fixtures/test-keys-path.js'
 import { default as CustomIdentityProvider } from '../fixtures/providers/custom.js'
 import { default as FakeIdentityProvider } from '../fixtures/providers/fake.js'
-import { default as BadIdentityProvider } from '../fixtures/providers/bad.js'
+import { default as NoTypeIdentityProvider } from '../fixtures/providers/no-type.js'
+import { default as NoVerifyIdentityIdentityProvider } from '../fixtures/providers/no-verify-identity.js'
 
 const type = 'publickey'
 const keysPath = './testkeys'
@@ -353,12 +354,24 @@ describe('Identities', function () {
       let err
       
       try {
-        addIdentityProvider(BadIdentityProvider)      
+        addIdentityProvider(NoTypeIdentityProvider)
       } catch (e) {
         err = e.toString()
       }
     
       assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'')
+    })
+    
+    it('cannot add an identity provider with missing verifyIdentity', async() => {
+      let err
+        
+      try {
+        addIdentityProvider(NoVerifyIdentityIdentityProvider)
+      } catch (e) {
+        err = e.toString()
+      }
+      
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a function \'verifyIdentity\'')
     })
   })
 })
