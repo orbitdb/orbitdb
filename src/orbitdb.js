@@ -23,8 +23,8 @@ const DefaultAccessController = IPFSAccessController
  * @param {IPFS} params.ipfs An IPFS instance.
  * @param {string} [params.id] The id of the user to use for this OrbitDB instance.
  * @param {module:Identity|Object} [params.identity] An identity instance or an object containing an id and an Identity Provider instance.
- * @param {String} [params.identity.id] An initialized identity provider. 
- * @param {Function} [params.identity.provider] An initialized identity provider. 
+ * @param {String} [params.identity.id] An initialized identity provider.
+ * @param {Function} [params.identity.provider] An initialized identity provider.
  * @param {module:Identities} [params.identities] An Identities system instance.
  * @param {string} [params.directory] A location for storing OrbitDB data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
@@ -55,8 +55,8 @@ const OrbitDB = async ({ ipfs, id, identity, identityProvider, identities, direc
   }
 
   if (identity) {
-    if (provider) {
-      identity = await identities.createIdentity({ id, provider: identityProvider })
+    if (identity.provider) {
+      identity = await identities.createIdentity({ id, provider: identity.provider })
     }
   } else {
     identity = await identities.createIdentity({ id })
