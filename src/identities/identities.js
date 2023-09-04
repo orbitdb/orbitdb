@@ -10,7 +10,6 @@ import { getIdentityProvider } from './providers/index.js'
 // import EthIdentityProvider from './identity-providers/ethereum.js'
 import KeyStore, { signMessage, verifyMessage } from '../key-store.js'
 import { LRUStorage, IPFSBlockStorage, MemoryStorage, ComposedStorage } from '../storage/index.js'
-import * as PublicKeyIdentityProvider from './providers/publickey.js' 
 import pathJoin from '../utils/path-join.js'
 
 const DefaultIdentityKeysPath = pathJoin('./orbitdb', 'identities')
@@ -65,15 +64,15 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
   /**
    * Creates an identity, adding it to storage.
    * @param {Object} options Various options for configuring a new identity.
-   * @param {Function} [options.type=PublicKey()] The type of provider to use for generating an identity.
+   * @param {Function} [options.provider=PublicKeyIdentityProvider()] An instance of the Provider to use for generating an identity, e.g. PublicKeyIdentityProvider({ keystore })
    * @return {module:Identities~Identity} An instance of identity.
    * @memberof module:Identities~Identities
    * @instance
    */
   const createIdentity = async (options = {}) => {
     options.keystore = keystore
-    const DefaultIdentityProviderType = PublicKeyIdentityProvider.default({ keystore })
-    const IdentityProvider = options.type || DefaultIdentityProviderType
+    const DefaultIdentityProviderType = getIdentityProvider('publickey')
+    const IdentityProvider = options.provider || DefaultIdentityProviderType({ keystore })
     const identityProvider = IdentityProvider()
     const id = await identityProvider.getId(options)
     const privateKey = await keystore.getKey(id) || await keystore.createKey(id)

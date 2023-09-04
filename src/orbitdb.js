@@ -22,9 +22,9 @@ const DefaultAccessController = IPFSAccessController
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
  * @param {string} [params.id] The id of the user to use for this OrbitDB instance.
- * @param {module:Identity} [params.identity] An identity instance.
- * @param {Function} [params.identityProvider] An initialized identity provider. 
- * @param {module:Identities} [params.identities] An Identities system instance.
+ * @param {module:Identity|Object} [params.identity] An identity instance or an object containing an id and an Identity Provider instance.
+ * @param {String} [params.identity.id] An initialized identity provider. 
+ * @param {Function} [params.identity.provider] An initialized identity provider. 
  * @param {module:Identities} [params.identities] An Identities system instance.
  * @param {string} [params.directory] A location for storing OrbitDB data.
  * @return {module:OrbitDB~OrbitDB} An instance of OrbitDB.
@@ -54,13 +54,12 @@ const OrbitDB = async ({ ipfs, id, identity, identityProvider, identities, direc
     identities = await Identities({ ipfs, keystore })
   }
 
-  // identity takes precedence, then idP, then create from id.
-  if (!identity) {
-    if (identityProvider) {
-      identity = await identities.createIdentity({ type: identityProvider })
-    } else {
-      identity = await identities.createIdentity({ id })
+  if (identity) {
+    if (provider) {
+      identity = await identities.createIdentity({ id, provider: identityProvider })
     }
+  } else {
+    identity = await identities.createIdentity({ id })
   }
 
   const manifestStore = await ManifestStore({ ipfs })

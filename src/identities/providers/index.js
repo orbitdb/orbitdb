@@ -1,4 +1,4 @@
-import * as PublicKeyIdentityProvider from './publickey.js'
+import PublicKeyIdentityProvider from './publickey.js'
 
 const identityProviders = {
   publickey: PublicKeyIdentityProvider

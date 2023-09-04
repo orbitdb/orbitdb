@@ -69,7 +69,7 @@ describe('Identities', function () {
     it('Passes in an identity provider', async () => {
       const keystore = await KeyStore({ path: keysPath })
       identities = await Identities({ keystore })
-      identity = await identities.createIdentity({ id, type: PublicKeyIdentityProvider.default({ keystore }) })
+      identity = await identities.createIdentity({ id, provider: PublicKeyIdentityProvider.default({ keystore }) })
       const result = await identities.getIdentity(identity.hash)
       assert.strictEqual(result.id, identity.id)
       assert.strictEqual(result.hash, identity.hash)
@@ -230,7 +230,7 @@ describe('Identities', function () {
 
     it('false signature doesn\'t verify', async () => {
       addIdentityProvider(FakeIdentityProvider)
-      identity = await identities.createIdentity({ type: FakeIdentityProvider.default() })
+      identity = await identities.createIdentity({ provider: FakeIdentityProvider.default() })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
     })
