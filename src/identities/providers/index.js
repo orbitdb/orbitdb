@@ -1,8 +1,6 @@
 import PublicKeyIdentityProvider from './publickey.js'
 
-const identityProviders = {
-  publickey: PublicKeyIdentityProvider
-}
+const identityProviders = {}
 
 const isProviderSupported = (type) => {
   return Object.keys(identityProviders).includes(type)
@@ -46,5 +44,7 @@ const addIdentityProvider = (IdentityProvider) => {
 
   identityProviders[IdentityProvider.type] = IdentityProvider
 }
+
+addIdentityProvider(PublicKeyIdentityProvider)
 
 export { addIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }
