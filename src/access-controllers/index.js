@@ -8,10 +8,7 @@
 import IPFSAccessController from './ipfs.js'
 import OrbitDBAccessController from './orbitdb.js'
 
-const accessControllers = {
-  ipfs: IPFSAccessController,
-  orbitdb: OrbitDBAccessController
-}
+const accessControllers = {}
 
 /**
  * Gets an access controller module specified by type.
@@ -56,6 +53,9 @@ const addAccessController = (accessController) => {
 const removeAccessController = type => {
   delete accessControllers[type]
 }
+
+addAccessController(IPFSAccessController)
+addAccessController(OrbitDBAccessController)
 
 export {
   getAccessController,
