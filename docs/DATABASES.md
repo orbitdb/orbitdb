@@ -210,6 +210,8 @@ To learn more, check out [OrbitDB's sychronization protocol](https://orbitdb.org
 OrbitDB can be extended to use custom data models and database types. To implement a custom database, ensure the Database object is extended and that the OrbitDB database interface is implement. The database will also require a unique type.
 
 ```js
+const type = 'customdb'
+
 const CustomDB = async ({ OpLog, Database, ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically }) => {
   const database = await Database({ OpLog, ipfs, identity, address, name, access, directory, storage, meta, syncAutomatically })
 
@@ -244,13 +246,17 @@ const CustomDB = async ({ OpLog, Database, ipfs, identity, address, name, access
 
   return {
     ...database,
-    type: 'customdb',
+    type,
     put,
     del,
     get,
     iterator
   }
 }
+
+CustomDB.type = type
+
+export default CustomDB
 ```
 
 [Documents](../src/db/documents.js), [Events](../src/db/events.js) and [KeyValue](../src/db/keyvalue.js) provide good examples of how a database is implemented in OrbitDB and how to add the logic for returning records from the database (the state of the database).

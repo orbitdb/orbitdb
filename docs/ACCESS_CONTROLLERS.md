@@ -123,6 +123,8 @@ const CustomAccessController = () => async ({ orbitdb, identities, address }) =>
 }
 
 CustomAccessController.type = type
+
+export default CustomAccessController
 ```
 
 Additional configuration can be passed to the access controller by adding one or more parameters to the `CustomAccessController` function. For example, passing a configurable object parameter with the variable `write`:

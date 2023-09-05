@@ -160,7 +160,10 @@ const MyCustomIdentityProvider = ({ keystore }) => () => {
   }
 }
 
-export { MyCustomIdentityProvider as default, verifyIdentity, type }
+MyCustomIdentityProvider.verifyIdentity = verifyIdentity
+MyCustomIdentityProvider.type = type
+
+export default MyCustomIdentityProvider
 ```
 
 To use it, add it to the list of known identity providers:
