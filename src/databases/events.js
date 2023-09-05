@@ -8,6 +8,8 @@
  */
 import Database from '../database.js'
 
+const type = 'events'
+
 /**
  * Defines an Events database.
  * @return {module:Databases.Databases-Events} A Events function.
@@ -86,12 +88,14 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
 
   return {
     ...database,
-    type: 'events',
+    type,
     add,
     get,
     iterator,
     all
   }
 }
+
+Events.type = type
 
 export default Events

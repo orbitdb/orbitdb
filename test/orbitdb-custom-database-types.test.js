@@ -16,6 +16,8 @@ const CustomStore = () => async ({ ipfs, identity, address, name, access, direct
   }
 }
 
+CustomStore.type = type
+
 describe('Add a custom database type', function () {
   this.timeout(5000)
 
@@ -55,7 +57,7 @@ describe('Add a custom database type', function () {
 
   describe('Custom database type', function () {
     before(() => {
-      addDatabaseType(type, CustomStore)
+      addDatabaseType(CustomStore)
     })
 
     it('create a database with the custom database type', async () => {
@@ -68,13 +70,13 @@ describe('Add a custom database type', function () {
     it('throws and error if custom database type already exists', async () => {
       let err
       try {
-        addDatabaseType(type, CustomStore)
+        addDatabaseType(CustomStore)
         throw new Error('This should not run.')
       } catch (e) {
-        err = e
+        err = e.toString()
       }
-      notStrictEqual(err, undefined)
-      strictEqual(err.message.indexOf('already exists') !== -1, true)
+
+      strictEqual(err, 'Error: Database type \'custom!\' already added.')
     })
 
     it('returns custom database type after adding it', async () => {

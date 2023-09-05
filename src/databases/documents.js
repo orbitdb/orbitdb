@@ -14,6 +14,8 @@
  */
 import Database from '../database.js'
 
+const type = 'documents'
+
 const DefaultOptions = { indexBy: '_id' }
 
 /**
@@ -145,7 +147,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
 
   return {
     ...database,
-    type: 'documents',
+    type,
     put,
     del,
     get,
@@ -155,5 +157,7 @@ const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, add
     all
   }
 }
+
+Documents.type = type
 
 export default Documents
