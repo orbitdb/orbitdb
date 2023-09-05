@@ -359,7 +359,7 @@ describe('Identities', function () {
         err = e.toString()
       }
     
-      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'')
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'.')
     })
     
     it('cannot add an identity provider with missing verifyIdentity', async() => {
@@ -371,7 +371,7 @@ describe('Identities', function () {
         err = e.toString()
       }
       
-      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a function \'verifyIdentity\'')
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
     })
   })
 })

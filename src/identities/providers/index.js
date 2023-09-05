@@ -16,33 +16,28 @@ const getIdentityProvider = (type) => {
 
 /**
   * Adds an identity provider.
-  * @param {IdentityProvider} IdentityProvider The identity provider to add.
-  * @throws IdentityProvider must be given as an argument if no module is
-  * provided.
-  * @throws 'Given IdentityProvider doesn't have a field 'type' if the
-  * IdentityProvider does not include a type property.
+  * @param {IdentityProvider} identityProvider The identity provider to add.
+  * @throws Given IdentityProvider doesn\'t have a field \'type\'.
+  * @throws Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.
+  * @throws IdentityProvider ${IdentityProvider.type} already added.
   * @static
   * @memberof module:Identities
   */
-const addIdentityProvider = (IdentityProvider) => {
-  if (!IdentityProvider) {
-    throw new Error('IdentityProvider must be given as an argument')
-  }
-
-  if (!IdentityProvider.type ||
-     typeof IdentityProvider.type !== 'string') {
-    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
+const addIdentityProvider = (identityProvider) => {
+  if (!identityProvider.type ||
+     typeof identityProvider.type !== 'string') {
+    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'.')
   }
   
-  if (!IdentityProvider.verifyIdentity) {
-    throw new Error('Given IdentityProvider doesn\'t have a function \'verifyIdentity\'')
+  if (!identityProvider.verifyIdentity) {
+    throw new Error('Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
   }
 
-  if (identityProviders[IdentityProvider.type]) {
-    throw new Error(`Type already added: ${IdentityProvider.type}`)
+  if (identityProviders[identityProvider.type]) {
+    throw new Error(`IdentityProvider ${identityProvider.type} already added.`)
   }
 
-  identityProviders[IdentityProvider.type] = IdentityProvider
+  identityProviders[identityProvider.type] = identityProvider
 }
 
 addIdentityProvider(PublicKeyIdentityProvider)

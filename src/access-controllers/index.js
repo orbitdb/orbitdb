@@ -27,19 +27,17 @@ const getAccessController = (type) => {
  * Adds an access controller module to the list of supported access controller.
  * @param {AccessController} accessController A compatible access controller
  * module.
- * @throws Access controller `type` already added if the access controller is
- * already supported.
- * @throws Given AccessController class needs to implement: type if the access
- * controller module does not implement a type property.
+ * @throws AccessController does not contain required field \'type\'.
+ * @throws AccessController '${accessController.type}' already added.
  * @static
  */
 const addAccessController = (accessController) => {
   if (!accessController.type) {
-    throw new Error('Access controller does not contain required field \'type\'')
+    throw new Error('AccessController does not contain required field \'type\'.')
   }
 
   if (accessControllers[accessController.type]) {
-    throw new Error(`Access controller '${accessController.type}' already added.`)
+    throw new Error(`AccessController '${accessController.type}' already added.`)
   }
 
   accessControllers[accessController.type] = accessController

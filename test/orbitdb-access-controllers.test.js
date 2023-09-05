@@ -76,6 +76,20 @@ describe('Add a custom access controller', function () {
       const db = await orbitdb.open(name, { AccessController: CustomAccessController() })
       strictEqual(db.access.address, '/custom!/controller')
     })
+    
+    it('throws and error if custom access controller has no type', async () => {
+      const NoTypeCustomAccessController = () => async () => {
+      }
+
+      let err
+      try {
+        addAccessController(NoTypeCustomAccessController)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      strictEqual(err, 'Error: AccessController does not contain required field \'type\'.')
+    })
 
     it('throws and error if custom access controller already exists', async () => {
       let err
@@ -85,7 +99,7 @@ describe('Add a custom access controller', function () {
         err = e.toString()
       }
 
-      strictEqual(err, 'Error: Access controller \'custom!\' already added.')
+      strictEqual(err, 'Error: AccessController \'custom!\' already added.')
     })
 
     it('returns custom access controller after adding it', async () => {
