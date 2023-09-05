@@ -5,10 +5,10 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
 import { Identities, addIdentityProvider, getIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
-import { default as CustomIdentityProvider } from '../fixtures/providers/custom.js'
-import { default as FakeIdentityProvider } from '../fixtures/providers/fake.js'
-import { default as NoTypeIdentityProvider } from '../fixtures/providers/no-type.js'
-import { default as NoVerifyIdentityIdentityProvider } from '../fixtures/providers/no-verify-identity.js'
+import CustomIdentityProvider from '../fixtures/providers/custom.js'
+import FakeIdentityProvider from '../fixtures/providers/fake.js'
+import NoTypeIdentityProvider from '../fixtures/providers/no-type.js'
+import NoVerifyIdentityIdentityProvider from '../fixtures/providers/no-verify-identity.js'
 
 const type = 'publickey'
 const keysPath = './testkeys'
@@ -349,28 +349,28 @@ describe('Identities', function () {
 
       assert.deepStrictEqual(getIdentityProvider('custom'), CustomIdentityProvider)
     })
-    
+
     it('cannot add an identity provider with missing type', () => {
       let err
-      
+
       try {
         addIdentityProvider(NoTypeIdentityProvider)
       } catch (e) {
         err = e.toString()
       }
-    
+
       assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'.')
     })
-    
-    it('cannot add an identity provider with missing verifyIdentity', async() => {
+
+    it('cannot add an identity provider with missing verifyIdentity', async () => {
       let err
-        
+
       try {
         addIdentityProvider(NoVerifyIdentityIdentityProvider)
       } catch (e) {
         err = e.toString()
       }
-      
+
       assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
     })
   })

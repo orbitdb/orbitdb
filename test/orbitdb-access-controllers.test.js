@@ -76,7 +76,7 @@ describe('Add a custom access controller', function () {
       const db = await orbitdb.open(name, { AccessController: CustomAccessController() })
       strictEqual(db.access.address, '/custom!/controller')
     })
-    
+
     it('throws and error if custom access controller has no type', async () => {
       const NoTypeCustomAccessController = () => async () => {
       }

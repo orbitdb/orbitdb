@@ -36,11 +36,11 @@ const addDatabaseType = (database) => {
   if (!database.type) {
     throw new Error('Database type does not contain required field \'type\'.')
   }
-  
+
   if (databaseTypes[database.type]) {
     throw new Error(`Database type '${database.type}' already added.`)
   }
-  
+
   databaseTypes[database.type] = database
 }
 
