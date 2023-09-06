@@ -73,7 +73,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     options.keystore = keystore
     const DefaultIdentityProviderType = getIdentityProvider('publickey')
     const IdentityProvider = options.provider || DefaultIdentityProviderType({ keystore })
-    const identityProvider = IdentityProvider()
+    const identityProvider = await IdentityProvider()
 
     if (!getIdentityProvider(identityProvider.type)) {
       throw new Error('Identity provider is unknown. Use addIdentityProvider(provider) to register the identity provider')

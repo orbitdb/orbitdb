@@ -27,7 +27,7 @@ const verifyIdentity = identity => {
  * identity provider function.
  * @private
  */
-const PublicKeyIdentityProvider = ({ keystore }) => () => {
+const PublicKeyIdentityProvider = ({ keystore }) => async () => {
   /**
    * @namespace module:IdentityProviders.IdentityProvider-PublicKey
    * @memberof module:IdentityProviders
