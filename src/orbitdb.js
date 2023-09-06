@@ -31,7 +31,7 @@ const DefaultAccessController = IPFSAccessController
  * @throws "IPFS instance is required argument" if no IPFS instance is provided.
  * @instance
  */
-const OrbitDB = async ({ ipfs, id, identity, identityProvider, identities, directory } = {}) => {
+const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
   /**
    * @namespace module:OrbitDB~OrbitDB
    * @description The instance returned by {@link module:OrbitDB}.
