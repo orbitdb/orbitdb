@@ -265,7 +265,7 @@ To use a custom database, add it to the list of supported database types:
 
 ```js
 import { createOrbitDB, useDatabaseType } from '@orbitdb/core'
-import { CustomDB } from './custom-db.js'
+import CustomDB from './custom-db.js'
 
 useDatabaseType(CustomDB)
 const orbitdb = await createOrbitDB()
