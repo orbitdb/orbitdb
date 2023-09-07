@@ -33,10 +33,6 @@ const useIdentityProvider = (identityProvider) => {
     throw new Error('Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
   }
 
-  if (identityProviders[identityProvider.type]) {
-    throw new Error(`IdentityProvider ${identityProvider.type} already added.`)
-  }
-
   identityProviders[identityProvider.type] = identityProvider
 }
 
