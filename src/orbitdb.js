@@ -184,6 +184,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
   }
 
   return {
+    id,
     open,
     stop,
     ipfs,
