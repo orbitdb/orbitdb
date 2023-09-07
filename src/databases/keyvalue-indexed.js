@@ -21,7 +21,6 @@ import KeyValue from './keyvalue.js'
 import LevelStorage from '../storage/level.js'
 import pathJoin from '../utils/path-join.js'
 
-const type = 'keyvalueindexed'
 const valueEncoding = 'json'
 
 /**
@@ -119,7 +118,5 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
     drop
   }
 }
-
-KeyValueIndexed.type = type
 
 export default KeyValueIndexed

@@ -7,7 +7,7 @@ export {
   Events,
   KeyValue,
   KeyValueIndexed,
-  addDatabaseType
+  useDatabaseType
 } from './databases/index.js'
 
 export {

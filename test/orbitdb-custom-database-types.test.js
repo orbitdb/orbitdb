@@ -2,7 +2,7 @@ import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
-import { createOrbitDB, addDatabaseType, Database } from '../src/index.js'
+import { createOrbitDB, useDatabaseType, Database } from '../src/index.js'
 import config from './config.js'
 
 const type = 'custom!'
@@ -57,7 +57,7 @@ describe('Add a custom database type', function () {
 
   describe('Custom database type', function () {
     before(() => {
-      addDatabaseType(CustomStore)
+      useDatabaseType(CustomStore)
     })
 
     it('create a database with the custom database type', async () => {
@@ -65,18 +65,6 @@ describe('Add a custom database type', function () {
       const db = await orbitdb.open(name, { type })
       strictEqual(db.type, type)
       strictEqual(db.name, name)
-    })
-
-    it('throws and error if custom database type already exists', async () => {
-      let err
-      try {
-        addDatabaseType(CustomStore)
-        throw new Error('This should not run.')
-      } catch (e) {
-        err = e.toString()
-      }
-
-      strictEqual(err, 'Error: Database type \'custom!\' already added.')
     })
 
     it('returns custom database type after adding it', async () => {

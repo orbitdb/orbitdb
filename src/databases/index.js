@@ -20,25 +20,21 @@ const databaseTypes = {}
 /**
  * Add a new database type.
  * @example
- * import { addDatabaseType } from 'orbitdb'
+ * import { useDatabaseType } from 'orbitdb'
  * const CustomDBTypeModule = async (params) => {
  *   const database = await Database(...params)
  *   ...
  * }
- * addDatabaseType(CustomDBTypeModule)
- * @function addDatabaseType
+ * useDatabaseType(CustomDBTypeModule)
+ * @function useDatabaseType
  * @param {module:Databases} database A Database-compatible module.
  * @throws Database type does not contain required field \'type\'.
  * @throws Database type '${store.type}' already added.
  * @memberof module:Databases
  */
-const addDatabaseType = (database) => {
+const useDatabaseType = (database) => {
   if (!database.type) {
     throw new Error('Database type does not contain required field \'type\'.')
-  }
-
-  if (databaseTypes[database.type]) {
-    throw new Error(`Database type '${database.type}' already added.`)
   }
 
   databaseTypes[database.type] = database
@@ -56,9 +52,8 @@ const getDatabaseType = (type) => {
   return databaseTypes[type]
 }
 
-addDatabaseType(Events)
-addDatabaseType(Documents)
-addDatabaseType(KeyValue)
-addDatabaseType(KeyValueIndexed)
+useDatabaseType(Events)
+useDatabaseType(Documents)
+useDatabaseType(KeyValue)
 
-export { addDatabaseType, getDatabaseType, Documents, Events, KeyValue, KeyValueIndexed }
+export { useDatabaseType, getDatabaseType, Documents, Events, KeyValue, KeyValueIndexed }
