@@ -22,7 +22,7 @@ export { default as Database } from './database.js'
 export { default as KeyStore } from './key-store.js'
 
 export {
-  addAccessController,
+  useAccessController,
   removeAccessController,
   IPFSAccessController,
   OrbitDBAccessController

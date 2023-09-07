@@ -166,9 +166,9 @@ Before passing the custom access controller to the `open` function, it must be a
 
 ```js
 import { create } from 'ipfs-core'
-import { createOrbitDB, addAccessController } from '@orbitdb/core'
+import { createOrbitDB, useAccessController } from '@orbitdb/core'
 
-addAccessController(CustomAccessController)
+useAccessController(CustomAccessController)
 const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db', { AccessController: CustomAccessController(params) })
 ```

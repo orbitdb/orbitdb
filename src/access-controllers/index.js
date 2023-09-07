@@ -31,13 +31,9 @@ const getAccessController = (type) => {
  * @throws AccessController '${accessController.type}' already added.
  * @static
  */
-const addAccessController = (accessController) => {
+const useAccessController = (accessController) => {
   if (!accessController.type) {
     throw new Error('AccessController does not contain required field \'type\'.')
-  }
-
-  if (accessControllers[accessController.type]) {
-    throw new Error(`AccessController '${accessController.type}' already added.`)
   }
 
   accessControllers[accessController.type] = accessController
@@ -52,12 +48,12 @@ const removeAccessController = type => {
   delete accessControllers[type]
 }
 
-addAccessController(IPFSAccessController)
-addAccessController(OrbitDBAccessController)
+useAccessController(IPFSAccessController)
+useAccessController(OrbitDBAccessController)
 
 export {
   getAccessController,
-  addAccessController,
+  useAccessController,
   removeAccessController,
   IPFSAccessController,
   OrbitDBAccessController
