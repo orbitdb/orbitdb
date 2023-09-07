@@ -1,8 +1,10 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
+import { existsSync } from 'fs'
 import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
-import { createOrbitDB, useDatabaseType, Database } from '../src/index.js'
+import { createOrbitDB, useDatabaseType, Database, KeyValueIndexed } from '../src/index.js'
+import pathJoin from '../src/utils/path-join.js'
 import config from './config.js'
 
 const type = 'custom!'
@@ -52,6 +54,18 @@ describe('Add a custom database type', function () {
       }
       notStrictEqual(err, undefined)
       strictEqual(err.message, 'Unsupported database type: \'custom!\'')
+    })
+  })
+  
+  describe('KeyValue Indexed database type', function () {
+    it('replace keyvalue with keyvalue-indexed', async () => {
+      useDatabaseType(KeyValueIndexed)
+      const name = 'hello keyvalue-indexed database'
+      const db = await orbitdb.open(name, { type: 'keyvalue' })
+      
+      const indexDirectory = pathJoin('./orbitdb', `./${db.address}/_index/`)
+      
+      strictEqual(await existsSync(indexDirectory), true)
     })
   })
 
