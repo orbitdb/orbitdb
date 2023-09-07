@@ -7,7 +7,7 @@ export {
 } from './identity.js'
 
 export {
-  addIdentityProvider,
+  useIdentityProvider,
   getIdentityProvider,
   PublicKeyIdentityProvider
 } from './providers/index.js'

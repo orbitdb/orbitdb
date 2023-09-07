@@ -23,7 +23,7 @@ const getIdentityProvider = (type) => {
   * @static
   * @memberof module:Identities
   */
-const addIdentityProvider = (identityProvider) => {
+const useIdentityProvider = (identityProvider) => {
   if (!identityProvider.type ||
      typeof identityProvider.type !== 'string') {
     throw new Error('Given IdentityProvider doesn\'t have a field \'type\'.')
@@ -40,6 +40,6 @@ const addIdentityProvider = (identityProvider) => {
   identityProviders[identityProvider.type] = identityProvider
 }
 
-addIdentityProvider(PublicKeyIdentityProvider)
+useIdentityProvider(PublicKeyIdentityProvider)
 
-export { addIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }
+export { useIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }

@@ -3,7 +3,7 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import { Identities, addIdentityProvider, getIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
+import { Identities, useIdentityProvider, getIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 import CustomIdentityProvider from '../fixtures/providers/custom.js'
 import FakeIdentityProvider from '../fixtures/providers/fake.js'
@@ -232,7 +232,7 @@ describe('Identities', function () {
     })
 
     it('false signature doesn\'t verify', async () => {
-      addIdentityProvider(FakeIdentityProvider)
+      useIdentityProvider(FakeIdentityProvider)
       identity = await identities.createIdentity({ provider: FakeIdentityProvider() })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
@@ -345,7 +345,7 @@ describe('Identities', function () {
 
   describe('manage identity providers', () => {
     it('can add an identity provider', () => {
-      addIdentityProvider(CustomIdentityProvider)
+      useIdentityProvider(CustomIdentityProvider)
 
       assert.deepStrictEqual(getIdentityProvider('custom'), CustomIdentityProvider)
     })
@@ -354,7 +354,7 @@ describe('Identities', function () {
       let err
 
       try {
-        addIdentityProvider(NoTypeIdentityProvider)
+        useIdentityProvider(NoTypeIdentityProvider)
       } catch (e) {
         err = e.toString()
       }
@@ -366,7 +366,7 @@ describe('Identities', function () {
       let err
 
       try {
-        addIdentityProvider(NoVerifyIdentityIdentityProvider)
+        useIdentityProvider(NoVerifyIdentityIdentityProvider)
       } catch (e) {
         err = e.toString()
       }

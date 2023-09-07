@@ -31,7 +31,7 @@ export {
 export {
   Identities,
   isIdentity,
-  addIdentityProvider,
+  useIdentityProvider,
   PublicKeyIdentityProvider
 } from './identities/index.js'
 
