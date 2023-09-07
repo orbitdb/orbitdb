@@ -73,7 +73,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
     options.keystore = keystore
     const DefaultIdentityProvider = getIdentityProvider('publickey')
     const identityProviderInit = options.provider || DefaultIdentityProvider({ keystore })
-    
+
     const identityProvider = await identityProviderInit()
 
     if (!getIdentityProvider(identityProvider.type)) {
