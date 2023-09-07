@@ -2,7 +2,7 @@ const type = 'custom'
 
 const verifyIdentity = async (data) => { return true }
 
-const CustomIdentityProvider = () => () => {
+const CustomIdentityProvider = () => async () => {
   const getId = () => { return 'custom' }
 
   const signIdentity = (data) => { return `signature '${data}'` }

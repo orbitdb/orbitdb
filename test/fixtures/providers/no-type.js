@@ -1,4 +1,4 @@
-const NoTypeIdentityProvider = () => () => {
+const NoTypeIdentityProvider = () => async () => {
 
 }
 

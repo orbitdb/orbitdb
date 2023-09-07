@@ -23,7 +23,6 @@ export { default as KeyStore } from './key-store.js'
 
 export {
   useAccessController,
-  removeAccessController,
   IPFSAccessController,
   OrbitDBAccessController
 } from './access-controllers/index.js'

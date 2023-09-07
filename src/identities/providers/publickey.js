@@ -16,7 +16,7 @@ const type = 'publickey'
  * @static
  * @private
  */
-const verifyIdentity = identity => {
+const verifyIdentity = async identity => {
   const { id, publicKey, signatures } = identity
   return verifyMessage(signatures.publicKey, id, publicKey + signatures.id)
 }
