@@ -1,8 +1,10 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
+import { existsSync } from 'fs'
 import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
-import { createOrbitDB, addDatabaseType, Database } from '../src/index.js'
+import { createOrbitDB, useDatabaseType, Database, KeyValueIndexed } from '../src/index.js'
+import pathJoin from '../src/utils/path-join.js'
 import config from './config.js'
 
 const type = 'custom!'
@@ -15,6 +17,8 @@ const CustomStore = () => async ({ ipfs, identity, address, name, access, direct
     type
   }
 }
+
+CustomStore.type = type
 
 describe('Add a custom database type', function () {
   this.timeout(5000)
@@ -53,9 +57,21 @@ describe('Add a custom database type', function () {
     })
   })
 
+  describe('KeyValue Indexed database type', function () {
+    it('replace keyvalue with keyvalue-indexed', async () => {
+      useDatabaseType(KeyValueIndexed)
+      const name = 'hello keyvalue-indexed database'
+      const db = await orbitdb.open(name, { type: 'keyvalue' })
+
+      const indexDirectory = pathJoin('./orbitdb', `./${db.address}/_index/`)
+
+      strictEqual(await existsSync(indexDirectory), true)
+    })
+  })
+
   describe('Custom database type', function () {
     before(() => {
-      addDatabaseType(type, CustomStore)
+      useDatabaseType(CustomStore)
     })
 
     it('create a database with the custom database type', async () => {
@@ -63,18 +79,6 @@ describe('Add a custom database type', function () {
       const db = await orbitdb.open(name, { type })
       strictEqual(db.type, type)
       strictEqual(db.name, name)
-    })
-
-    it('throws and error if custom database type already exists', async () => {
-      let err
-      try {
-        addDatabaseType(type, CustomStore)
-        throw new Error('This should not run.')
-      } catch (e) {
-        err = e
-      }
-      notStrictEqual(err, undefined)
-      strictEqual(err.message.indexOf('already exists') !== -1, true)
     })
 
     it('returns custom database type after adding it', async () => {

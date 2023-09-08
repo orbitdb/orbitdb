@@ -16,7 +16,7 @@ const type = 'publickey'
  * @static
  * @private
  */
-const verifyIdentity = identity => {
+const verifyIdentity = async identity => {
   const { id, publicKey, signatures } = identity
   return verifyMessage(signatures.publicKey, id, publicKey + signatures.id)
 }
@@ -27,7 +27,7 @@ const verifyIdentity = identity => {
  * identity provider function.
  * @private
  */
-const PublicKeyIdentityProvider = ({ keystore }) => {
+const PublicKeyIdentityProvider = ({ keystore }) => async () => {
   /**
    * @namespace module:IdentityProviders.IdentityProvider-PublicKey
    * @memberof module:IdentityProviders
@@ -78,9 +78,13 @@ const PublicKeyIdentityProvider = ({ keystore }) => {
   }
 
   return {
+    type,
     getId,
     signIdentity
   }
 }
 
-export { PublicKeyIdentityProvider as default, verifyIdentity, type }
+PublicKeyIdentityProvider.verifyIdentity = verifyIdentity
+PublicKeyIdentityProvider.type = type
+
+export default PublicKeyIdentityProvider

@@ -119,4 +119,6 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
   }
 }
 
+KeyValueIndexed.type = 'keyvalue'
+
 export default KeyValueIndexed

@@ -1,8 +1,6 @@
-import * as PublicKeyIdentityProvider from './publickey.js'
+import PublicKeyIdentityProvider from './publickey.js'
 
-const identityProviders = {
-  publickey: PublicKeyIdentityProvider
-}
+const identityProviders = {}
 
 const isProviderSupported = (type) => {
   return Object.keys(identityProviders).includes(type)
@@ -18,29 +16,26 @@ const getIdentityProvider = (type) => {
 
 /**
   * Adds an identity provider.
-  * @param {IdentityProvider} IdentityProvider The identity provider to add.
-  * @throws IdentityProvider must be given as an argument if no module is
-  * provided.
-  * @throws 'Given IdentityProvider doesn't have a field 'type' if the
-  * IdentityProvider does not include a type property.
+  * @param {IdentityProvider} identityProvider The identity provider to add.
+  * @throws Given IdentityProvider doesn\'t have a field \'type\'.
+  * @throws Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.
+  * @throws IdentityProvider ${IdentityProvider.type} already added.
   * @static
   * @memberof module:Identities
   */
-const addIdentityProvider = (IdentityProvider) => {
-  if (!IdentityProvider) {
-    throw new Error('IdentityProvider must be given as an argument')
+const useIdentityProvider = (identityProvider) => {
+  if (!identityProvider.type ||
+     typeof identityProvider.type !== 'string') {
+    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'.')
   }
 
-  if (!IdentityProvider.type ||
-     typeof IdentityProvider.type !== 'string') {
-    throw new Error('Given IdentityProvider doesn\'t have a field \'type\'')
+  if (!identityProvider.verifyIdentity) {
+    throw new Error('Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
   }
 
-  if (identityProviders[IdentityProvider.type]) {
-    throw new Error(`Type already added: ${IdentityProvider.type}`)
-  }
-
-  identityProviders[IdentityProvider.type] = IdentityProvider
+  identityProviders[identityProvider.type] = identityProvider
 }
 
-export { addIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }
+useIdentityProvider(PublicKeyIdentityProvider)
+
+export { useIdentityProvider, getIdentityProvider, PublicKeyIdentityProvider }

@@ -15,32 +15,29 @@ import KeyValueIndexed from './keyvalue-indexed.js'
  * @return [] An array of database types.
  * @memberof module:Databases
  */
-const databaseTypes = {
-  events: Events,
-  documents: Documents,
-  keyvalue: KeyValue,
-  keyvalueindexed: KeyValueIndexed
-}
+const databaseTypes = {}
 
 /**
  * Add a new database type.
  * @example
- * import { addDatabaseType } from 'orbitdb'
+ * import { useDatabaseType } from 'orbitdb'
  * const CustomDBTypeModule = async (params) => {
  *   const database = await Database(...params)
  *   ...
  * }
- * addDatabaseType('customDBType', CustomDBTypeModule)
- * @function addDatabaseType
- * @param {string} type The database type.
- * @param {module:Databases} store A Database-compatible module.
+ * useDatabaseType(CustomDBTypeModule)
+ * @function useDatabaseType
+ * @param {module:Databases} database A Database-compatible module.
+ * @throws Database type does not contain required field \'type\'.
+ * @throws Database type '${store.type}' already added.
  * @memberof module:Databases
  */
-const addDatabaseType = (type, store) => {
-  if (databaseTypes[type]) {
-    throw new Error(`Type already exists: ${type}`)
+const useDatabaseType = (database) => {
+  if (!database.type) {
+    throw new Error('Database type does not contain required field \'type\'.')
   }
-  databaseTypes[type] = store
+
+  databaseTypes[database.type] = database
 }
 
 const getDatabaseType = (type) => {
@@ -55,4 +52,8 @@ const getDatabaseType = (type) => {
   return databaseTypes[type]
 }
 
-export { addDatabaseType, getDatabaseType, Documents, Events, KeyValue, KeyValueIndexed }
+useDatabaseType(Events)
+useDatabaseType(Documents)
+useDatabaseType(KeyValue)
+
+export { useDatabaseType, getDatabaseType, Documents, Events, KeyValue, KeyValueIndexed }

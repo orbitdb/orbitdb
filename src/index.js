@@ -7,7 +7,7 @@ export {
   Events,
   KeyValue,
   KeyValueIndexed,
-  addDatabaseType
+  useDatabaseType
 } from './databases/index.js'
 
 export {
@@ -22,8 +22,7 @@ export { default as Database } from './database.js'
 export { default as KeyStore } from './key-store.js'
 
 export {
-  addAccessController,
-  removeAccessController,
+  useAccessController,
   IPFSAccessController,
   OrbitDBAccessController
 } from './access-controllers/index.js'
@@ -31,7 +30,7 @@ export {
 export {
   Identities,
   isIdentity,
-  addIdentityProvider,
+  useIdentityProvider,
   PublicKeyIdentityProvider
 } from './identities/index.js'
 

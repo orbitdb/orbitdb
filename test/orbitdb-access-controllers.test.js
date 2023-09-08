@@ -2,7 +2,7 @@ import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import rmrf from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import OrbitDB from '../src/orbitdb.js'
-import { IPFSAccessController, OrbitDBAccessController, addAccessController, getAccessController, removeAccessController } from '../src/access-controllers/index.js'
+import { IPFSAccessController, OrbitDBAccessController, useAccessController, getAccessController, removeAccessController } from '../src/access-controllers/index.js'
 import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 
@@ -68,7 +68,7 @@ describe('Add a custom access controller', function () {
 
   describe('Custom access controller', function () {
     before(() => {
-      addAccessController(CustomAccessController)
+      useAccessController(CustomAccessController)
     })
 
     it('create a database with the custom access controller', async () => {
@@ -77,15 +77,18 @@ describe('Add a custom access controller', function () {
       strictEqual(db.access.address, '/custom!/controller')
     })
 
-    it('throws and error if custom access controller already exists', async () => {
+    it('throws and error if custom access controller has no type', async () => {
+      const NoTypeCustomAccessController = () => async () => {
+      }
+
       let err
       try {
-        addAccessController(CustomAccessController)
+        useAccessController(NoTypeCustomAccessController)
       } catch (e) {
         err = e.toString()
       }
 
-      strictEqual(err, 'Error: Access controller \'custom!\' already added.')
+      strictEqual(err, 'Error: AccessController does not contain required field \'type\'.')
     })
 
     it('returns custom access controller after adding it', async () => {

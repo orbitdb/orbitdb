@@ -188,4 +188,6 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
   }
 }
 
+OrbitDBAccessController.type = type
+
 export default OrbitDBAccessController

@@ -123,6 +123,8 @@ const CustomAccessController = () => async ({ orbitdb, identities, address }) =>
 }
 
 CustomAccessController.type = type
+
+export default CustomAccessController
 ```
 
 Additional configuration can be passed to the access controller by adding one or more parameters to the `CustomAccessController` function. For example, passing a configurable object parameter with the variable `write`:
@@ -164,9 +166,9 @@ Before passing the custom access controller to the `open` function, it must be a
 
 ```js
 import { create } from 'ipfs-core'
-import { createOrbitDB, addAccessController } from '@orbitdb/core'
+import { createOrbitDB, useAccessController } from '@orbitdb/core'
 
-addAccessController(CustomAccessController)
+useAccessController(CustomAccessController)
 const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db', { AccessController: CustomAccessController(params) })
 ```

@@ -1,7 +1,7 @@
 const customIdentityProvider = () => {
   const verifyIdentity = async (data) => { return true }
 
-  const CustomIdentityProvider = () => {
+  const CustomIdentityProvider = () => () => {
     const getId = () => { return 'custom' }
 
     const signIdentity = (data) => { return `signature '${data}'` }
@@ -23,7 +23,7 @@ const customIdentityProvider = () => {
 const fakeIdentityProvider = () => {
   const verifyIdentity = async (data) => { return false }
 
-  const FakeIdentityProvider = () => {
+  const FakeIdentityProvider = () => () => {
     const getId = () => { return 'pubKey' }
 
     const signIdentity = (data) => { return `false signature '${data}'` }

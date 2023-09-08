@@ -3,9 +3,12 @@ import rmrf from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
-import { Identities, addIdentityProvider, getIdentityProvider, Identity } from '../../src/identities/index.js'
+import { Identities, useIdentityProvider, getIdentityProvider, Identity, PublicKeyIdentityProvider } from '../../src/identities/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
-import { CustomIdentityProvider, FakeIdentityProvider } from '../fixtures/providers.js'
+import CustomIdentityProvider from '../fixtures/providers/custom.js'
+import FakeIdentityProvider from '../fixtures/providers/fake.js'
+import NoTypeIdentityProvider from '../fixtures/providers/no-type.js'
+import NoVerifyIdentityIdentityProvider from '../fixtures/providers/no-verify-identity.js'
 
 const type = 'publickey'
 const keysPath = './testkeys'
@@ -55,6 +58,21 @@ describe('Identities', function () {
     it('gets the identity from storage', async () => {
       identities = await Identities({ path: keysPath })
       identity = await identities.createIdentity({ id })
+      const result = await identities.getIdentity(identity.hash)
+      assert.strictEqual(result.id, identity.id)
+      assert.strictEqual(result.hash, identity.hash)
+      assert.strictEqual(result.publicKey, identity.publicKey)
+      assert.strictEqual(result.type, identity.type)
+      assert.deepStrictEqual(result.signatures, identity.signatures)
+      assert.strictEqual(result.sign, undefined)
+      assert.strictEqual(result.verify, undefined)
+    })
+
+    it('Passes in an identity provider', async () => {
+      const keystore = await KeyStore({ path: keysPath })
+      identities = await Identities({ keystore })
+      const provider = PublicKeyIdentityProvider({ keystore })
+      identity = await identities.createIdentity({ id, provider })
       const result = await identities.getIdentity(identity.hash)
       assert.strictEqual(result.id, identity.id)
       assert.strictEqual(result.hash, identity.hash)
@@ -201,21 +219,21 @@ describe('Identities', function () {
 
     it('identity pkSignature verifies', async () => {
       identities = await Identities({ keystore })
-      identity = await identities.createIdentity({ id, type })
+      identity = await identities.createIdentity({ id })
       const verified = await verifyMessage(identity.signatures.id, identity.publicKey, identity.id)
       assert.strictEqual(verified, true)
     })
 
     it('identity signature verifies', async () => {
       identities = await Identities({ keystore })
-      identity = await identities.createIdentity({ id, type })
+      identity = await identities.createIdentity({ id })
       const verified = await verifyMessage(identity.signatures.publicKey, identity.id, identity.publicKey + identity.signatures.id)
       assert.strictEqual(verified, true)
     })
 
     it('false signature doesn\'t verify', async () => {
-      addIdentityProvider(FakeIdentityProvider)
-      identity = await identities.createIdentity({ type: FakeIdentityProvider.type })
+      useIdentityProvider(FakeIdentityProvider)
+      identity = await identities.createIdentity({ provider: FakeIdentityProvider() })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, false)
     })
@@ -240,7 +258,7 @@ describe('Identities', function () {
     })
 
     it('identity verifies', async () => {
-      identity = await identities.createIdentity({ id, type })
+      identity = await identities.createIdentity({ id })
       const verified = await identities.verifyIdentity(identity)
       assert.strictEqual(verified, true)
     })
@@ -310,7 +328,7 @@ describe('Identities', function () {
 
     beforeEach(async () => {
       identities = await Identities({ keystore })
-      identity = await identities.createIdentity({ id, type })
+      identity = await identities.createIdentity({ id })
       signature = await identities.sign(identity, data, keystore)
     })
 
@@ -327,9 +345,33 @@ describe('Identities', function () {
 
   describe('manage identity providers', () => {
     it('can add an identity provider', () => {
-      addIdentityProvider(CustomIdentityProvider)
+      useIdentityProvider(CustomIdentityProvider)
 
       assert.deepStrictEqual(getIdentityProvider('custom'), CustomIdentityProvider)
+    })
+
+    it('cannot add an identity provider with missing type', () => {
+      let err
+
+      try {
+        useIdentityProvider(NoTypeIdentityProvider)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a field \'type\'.')
+    })
+
+    it('cannot add an identity provider with missing verifyIdentity', async () => {
+      let err
+
+      try {
+        useIdentityProvider(NoVerifyIdentityIdentityProvider)
+      } catch (e) {
+        err = e.toString()
+      }
+
+      assert.strictEqual(err, 'Error: Given IdentityProvider doesn\'t have a function \'verifyIdentity\'.')
     })
   })
 })

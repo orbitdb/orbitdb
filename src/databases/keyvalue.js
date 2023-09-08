@@ -8,6 +8,8 @@
  */
 import Database from '../database.js'
 
+const type = 'keyvalue'
+
 /**
  * Defines an KeyValue database.
  * @return {module:Databases.Databases-KeyValue} A KeyValue function.
@@ -107,7 +109,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
 
   return {
     ...database,
-    type: 'keyvalue',
+    type,
     put,
     set: put, // Alias for put()
     del,
@@ -116,5 +118,7 @@ const KeyValue = () => async ({ ipfs, identity, address, name, access, directory
     all
   }
 }
+
+KeyValue.type = type
 
 export default KeyValue

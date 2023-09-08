@@ -97,4 +97,6 @@ const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, iden
   }
 }
 
+IPFSAccessController.type = type
+
 export default IPFSAccessController
