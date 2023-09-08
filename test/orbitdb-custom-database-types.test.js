@@ -56,15 +56,15 @@ describe('Add a custom database type', function () {
       strictEqual(err.message, 'Unsupported database type: \'custom!\'')
     })
   })
-  
+
   describe('KeyValue Indexed database type', function () {
     it('replace keyvalue with keyvalue-indexed', async () => {
       useDatabaseType(KeyValueIndexed)
       const name = 'hello keyvalue-indexed database'
       const db = await orbitdb.open(name, { type: 'keyvalue' })
-      
+
       const indexDirectory = pathJoin('./orbitdb', `./${db.address}/_index/`)
-      
+
       strictEqual(await existsSync(indexDirectory), true)
     })
   })
