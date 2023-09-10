@@ -18,7 +18,7 @@ const CustomAccessController = () => async ({ orbitdb, identities, address }) =>
 
 CustomAccessController.type = type
 
-describe('Add a custom access controller', function () {
+describe('Add a custom access controller', () => {
   this.timeout(5000)
 
   let ipfs
@@ -45,7 +45,7 @@ describe('Add a custom access controller', function () {
     await rmrf('./ipfs1')
   })
 
-  describe('Default supported access controllers', function () {
+  describe('Default supported access controllers', () => {
     it('returns default supported access controllers', async () => {
       deepStrictEqual(getAccessController('ipfs'), IPFSAccessController)
       deepStrictEqual(getAccessController('orbitdb'), OrbitDBAccessController)
@@ -66,7 +66,7 @@ describe('Add a custom access controller', function () {
     })
   })
 
-  describe('Custom access controller', function () {
+  describe('Custom access controller', () => {
     before(() => {
       useAccessController(CustomAccessController)
     })

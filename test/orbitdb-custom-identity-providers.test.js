@@ -6,7 +6,7 @@ import config from './config.js'
 // import pathJoin from '../src/utils/path-join.js'
 import CustomIdentityProvider from './fixtures/providers/custom.js'
 
-describe('Add a custom identity provider', function () {
+describe('Add a custom identity provider', () => {
   this.timeout(5000)
 
   let ipfs

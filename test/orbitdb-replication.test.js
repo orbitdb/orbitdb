@@ -6,7 +6,7 @@ import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 
-describe('Replicating databases', function () {
+describe('Replicating databases', () => {
   this.timeout(30000)
 
   let ipfs1, ipfs2

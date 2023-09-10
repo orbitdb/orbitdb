@@ -11,7 +11,7 @@ import OrbitDBAccessController from '../src/access-controllers/orbitdb.js'
 
 const dbPath = './orbitdb/tests/write-permissions'
 
-describe('Write Permissions', function () {
+describe('Write Permissions', () => {
   this.timeout(20000)
 
   let ipfs1, ipfs2

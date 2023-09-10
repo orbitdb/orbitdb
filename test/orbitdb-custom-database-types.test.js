@@ -20,7 +20,7 @@ const CustomStore = () => async ({ ipfs, identity, address, name, access, direct
 
 CustomStore.type = type
 
-describe('Add a custom database type', function () {
+describe('Add a custom database type', () => {
   this.timeout(5000)
 
   let ipfs
@@ -44,7 +44,7 @@ describe('Add a custom database type', function () {
     await rmrf('./ipfs1')
   })
 
-  describe('Default supported database types', function () {
+  describe('Default supported database types', () => {
     it('throws and error if custom database type hasn\'t been added', async () => {
       let err
       try {
@@ -57,7 +57,7 @@ describe('Add a custom database type', function () {
     })
   })
 
-  describe('KeyValue Indexed database type', function () {
+  describe('KeyValue Indexed database type', () => {
     it('replace keyvalue with keyvalue-indexed', async () => {
       useDatabaseType(KeyValueIndexed)
       const name = 'hello keyvalue-indexed database'
@@ -69,7 +69,7 @@ describe('Add a custom database type', function () {
     })
   })
 
-  describe('Custom database type', function () {
+  describe('Custom database type', () => {
     before(() => {
       useDatabaseType(CustomStore)
     })

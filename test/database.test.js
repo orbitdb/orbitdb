@@ -12,7 +12,7 @@ import testKeysPath from './fixtures/test-keys-path.js'
 
 const keysPath = './testkeys'
 
-describe('Database', function () {
+describe('Database', () => {
   this.timeout(30000)
 
   let ipfs

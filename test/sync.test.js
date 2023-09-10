@@ -14,7 +14,7 @@ import ComposedStorage from '../src/storage/composed.js'
 
 const keysPath = './testkeys'
 
-describe('Sync protocol', function () {
+describe('Sync protocol', () => {
   this.timeout(10000)
 
   let ipfs1, ipfs2

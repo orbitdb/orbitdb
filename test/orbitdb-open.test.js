@@ -9,7 +9,7 @@ import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 
-describe('Open databases', function () {
+describe('Open databases', () => {
   this.timeout(5000)
 
   let ipfs1, ipfs2

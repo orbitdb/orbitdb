@@ -9,7 +9,7 @@ import connectPeers from './utils/connect-nodes.js'
 
 const isBrowser = () => typeof window !== 'undefined'
 
-describe('OrbitDB', function () {
+describe('OrbitDB', () => {
   this.timeout(5000)
 
   let ipfs1, ipfs2
