@@ -85,7 +85,7 @@ const OrbitDBAddress = (address) => {
     protocol,
     hash,
     address,
-    toString,
+    toString
   }
 }
 
