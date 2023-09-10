@@ -3,13 +3,13 @@
 	"bracketSpacing": true,
 	"endOfLine": "auto",
 	"insertPragma": false,
-	"printWidth": 160,
+	"printWidth": 80,
 	"proseWrap": "preserve",
 	"quoteProps": "as-needed",
 	"requirePragma": false,
 	"semi": false,
 	"singleQuote": true,
-	"tabWidth": 4,
+	"tabWidth": 2,
 	"trailingComma": "all",
 	"useTabs": true
 }
