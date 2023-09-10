@@ -1,5 +1,4 @@
 {
-	"arrowParens": "avoid",
 	"bracketSpacing": true,
 	"endOfLine": "auto",
 	"insertPragma": false,

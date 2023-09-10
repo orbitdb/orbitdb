@@ -14,7 +14,7 @@ import { posixJoin } from './utils/path-join.js'
  * false otherwise.
  * @static
  */
-const isValidAddress = address => {
+const isValidAddress = (address) => {
 	address = address.toString()
 
 	if (!address.startsWith('/orbitdb') && !address.startsWith('\\orbitdb')) {
@@ -45,7 +45,7 @@ const isValidAddress = address => {
  * @throws Not a valid OrbitDB address if address is invalid.
  * @static
  */
-const parseAddress = address => {
+const parseAddress = (address) => {
 	if (!address) {
 		throw new Error(`Not a valid OrbitDB address: ${address}`)
 	}
@@ -63,7 +63,7 @@ const parseAddress = address => {
  * @property {string} hash The hash of the database manifest.
  * @property {string} address The full database address.
  */
-const OrbitDBAddress = address => {
+const OrbitDBAddress = (address) => {
 	if (address && address.protocol === 'orbitdb' && address.hash) {
 		return address
 	}
