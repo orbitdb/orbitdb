@@ -106,7 +106,7 @@ import { createOrbitDB } from '@orbitdb/core'
 
 ## Documentation
 
-Use the **[Getting Started](https://github.com/orbitdb/orbitdb/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](https://github.com/orbitdb/orbitdb/docs).
+Use the **[Getting Started](https://github.com/orbitdb/orbitdb/blob/main/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](https://github.com/orbitdb/orbitdb/blob/main/docs).
 
 ### API
 
