@@ -529,15 +529,18 @@ describe('Open databases', function () {
   })
 
   describe('opening same database', () => {
-    let db
+    let db1, db2
 
     before(async () => {
       orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
     })
 
     after(async () => {
-      if (db) {
-        await db.close()
+      if (db1) {
+        await db1.close()
+      }
+      if (db2) {
+        await db2.close()
       }
       if (orbitdb1) {
         await orbitdb1.stop()
@@ -547,7 +550,6 @@ describe('Open databases', function () {
 
     it('returns the database instance when opened with a name multiple times', async () => {
       let err
-      let db1, db2
 
       try {
         db1 = await orbitdb1.open('helloworld1')
@@ -560,6 +562,38 @@ describe('Open databases', function () {
       strictEqual(db1.name, 'helloworld1')
       strictEqual(db2.name, 'helloworld1')
       strictEqual(db1.address, db2.address)
+    })
+  })
+
+  describe('opening same database after stopping OrbitDB', () => {
+    let orbitdb
+    let db
+
+    after(async () => {
+      if (db) {
+        await db.close()
+      }
+      if (orbitdb) {
+        await orbitdb.stop()
+      }
+      await rmrf('./orbitdb')
+    })
+
+    it('returns the database instance', async () => {
+      let err
+
+      try {
+        orbitdb = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
+        db = await orbitdb.open('helloworld1')
+        await orbitdb.stop()
+        orbitdb = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
+        db = await orbitdb.open('helloworld1')
+      } catch (e) {
+        err = e
+      }
+
+      strictEqual(err, undefined)
+      strictEqual(db.name, 'helloworld1')
     })
   })
 })
