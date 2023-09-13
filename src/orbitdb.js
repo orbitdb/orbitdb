@@ -174,6 +174,9 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * @async
    */
   const stop = async () => {
+    for (const db of Object.values(databases)) {
+      await db.close()
+    }
     if (keystore) {
       await keystore.close()
     }
