@@ -18,7 +18,7 @@ const DefaultAccessController = IPFSAccessController
 
 /**
  * Creates an instance of OrbitDB.
- * @function
+ * @function createOrbitDB
  * @param {Object} params One or more parameters for configuring OrbitDB.
  * @param {IPFS} params.ipfs An IPFS instance.
  * @param {string} [params.id] The id of the identity to use for this OrbitDB instance.
