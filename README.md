@@ -22,7 +22,7 @@ All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src
 * Status: **in active development**
 * Compatible with **ipfs-core versions >= 0.18.0**
 
-***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/orbitdb/orbitdb/tree/helia).*
+***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/ipfs/helia).*
 
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
@@ -150,7 +150,7 @@ If you know of any other repos that ought to be included in this section, please
 
 ## Contributing
 
-**Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there. Some questions may be answered in the [FAQ](FAQ.md), as well.
+**Take a look at our organization-wide [Contributing Guide](https://github.com/orbitdb/welcome/blob/master/contributing.md).** You'll find most of your questions answered there.
 
 If you want to code but don't know where to start, check out the issues labelled ["help wanted"](https://github.com/orbitdb/orbitdb/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+sort%3Areactions-%2B1-desc).
 
