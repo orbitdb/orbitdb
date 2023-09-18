@@ -19,9 +19,6 @@ All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src
 
 #### Project status & support
 
-* Status: **in active development**
-* Compatible with **ipfs-core versions >= 0.18.0**
-
 ***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/ipfs/helia).*
 
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
