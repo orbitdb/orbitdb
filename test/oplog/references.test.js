@@ -1,5 +1,5 @@
 import { strictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log } from '../../src/oplog/index.js'
 import { Identities, KeyStore } from '../../src/index.js'
@@ -25,7 +25,7 @@ describe('Log - References', function () {
     if (keystore) {
       await keystore.close()
     }
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   describe('References', async () => {

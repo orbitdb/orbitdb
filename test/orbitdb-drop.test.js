@@ -1,5 +1,5 @@
 import { strictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import { createOrbitDB } from '../src/index.js'
 import config from './config.js'
@@ -19,8 +19,8 @@ describe('Drop databases', function () {
     if (ipfs) {
       await ipfs.stop()
     }
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs')
   })
 
   describe('dropping a database', () => {
@@ -38,7 +38,7 @@ describe('Drop databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns no entries in the database after dropping it', async () => {
@@ -101,7 +101,7 @@ describe('Drop databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
     })
 
     it('doesn\'t error when dropping an empty database', async () => {

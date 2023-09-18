@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { Log, Identities, KeyStore } from '../src/index.js'
@@ -35,8 +35,8 @@ describe('Storages', function () {
       await keystore.close()
     }
 
-    await rmrf('./ipfs1')
-    await rmrf(keysPath)
+    await rimraf('./ipfs1')
+    await rimraf(keysPath)
   })
 
   const runTestWithStorage = async (storage) => {

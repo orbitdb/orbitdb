@@ -8,7 +8,7 @@
 // import testKeysPath from '../fixtures/test-keys-path.js'
 // import { config, testAPIs, startIpfs, stopIpfs } from 'orbit-db-test-utils'
 
-// const { sync: rmrf } = rimraf
+// const { sync: rimraf } = rimraf
 // const { LastWriteWins } = Sorting
 // const { createIdentity } = Identities
 // const { fromJSON, fromEntryHash, fromEntry, fromMultihash: _fromMultihash } = Log
@@ -41,7 +41,7 @@
 //     let keystore
 
 //     before(async () => {
-//       rmrf(identityKeysPath)
+//       rimraf(identityKeysPath)
 
 //       await copy(identityKeyFixtures, identityKeysPath)
 //       await copy(signingKeyFixtures, identityKeysPath)
@@ -59,7 +59,7 @@
 //     after(async () => {
 //       await stopIpfs(ipfsd)
 //       await keystore.close()
-//       rmrf(identityKeysPath)
+//       rimraf(identityKeysPath)
 //     })
 
 //     describe('fromJSON', async () => {

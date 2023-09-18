@@ -1,5 +1,5 @@
 import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
@@ -28,10 +28,10 @@ describe('Open databases', function () {
     if (ipfs2) {
       await ipfs2.stop()
     }
-    await rmrf('./orbitdb1')
-    await rmrf('./orbitdb2')
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./orbitdb1')
+    await rimraf('./orbitdb2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   describe('creating a database instance', () => {
@@ -50,7 +50,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
     })
 
     it('creates a database instance', async () => {
@@ -157,7 +157,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
     })
 
     it('contains the given meta info', async () => {
@@ -188,7 +188,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns all entries in the database', async () => {
@@ -247,7 +247,7 @@ describe('Open databases', function () {
       if (orbitdb2) {
         await orbitdb2.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns all entries in the database', async () => {
@@ -299,8 +299,8 @@ describe('Open databases', function () {
       if (orbitdb2) {
         await orbitdb2.stop()
       }
-      await rmrf('./orbitdb1')
-      await rmrf('./orbitdb2')
+      await rimraf('./orbitdb1')
+      await rimraf('./orbitdb2')
     })
 
     it('replicates the database', async () => {
@@ -397,7 +397,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns all entries in the database', async () => {
@@ -448,8 +448,8 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./index')
-      await rmrf('./orbitdb')
+      await rimraf('./index')
+      await rimraf('./orbitdb')
     })
 
     it('returns all entries in the database and in the index', async () => {
@@ -505,7 +505,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns all entries in the database', async () => {
@@ -545,7 +545,7 @@ describe('Open databases', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns the database instance when opened with a name multiple times', async () => {
@@ -576,7 +576,7 @@ describe('Open databases', function () {
       if (orbitdb) {
         await orbitdb.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('returns the database instance', async () => {

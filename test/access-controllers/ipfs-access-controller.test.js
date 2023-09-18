@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import Keystore from '../../src/key-store.js'
 import Identities from '../../src/identities/identities.js'
@@ -54,9 +54,9 @@ describe('IPFSAccessController', function () {
       await keystore2.close()
     }
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   let accessController

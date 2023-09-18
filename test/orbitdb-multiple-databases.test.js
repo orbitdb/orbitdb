@@ -1,7 +1,7 @@
 import { strictEqual } from 'assert'
 // import mapSeries from 'p-each-series'
 import * as IPFS from 'ipfs-core'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import OrbitDB from '../src/orbitdb.js'
 import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
@@ -66,7 +66,7 @@ describe('orbitdb - Multiple Databases', function () {
       await orbitdb2.stop()
     }
 
-    await rmrf('./orbitdb')
+    await rimraf('./orbitdb')
 
     if (ipfs1) {
       await ipfs1.stop()
@@ -75,8 +75,8 @@ describe('orbitdb - Multiple Databases', function () {
       await ipfs2.stop()
     }
 
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   beforeEach(async () => {

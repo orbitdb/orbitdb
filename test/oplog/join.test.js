@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Identities, KeyStore } from '../../src/index.js'
 import { Clock } from '../../src/oplog/log.js'
@@ -36,7 +36,7 @@ describe('Log - Join', async function () {
     if (keystore) {
       await keystore.close()
     }
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   beforeEach(async () => {

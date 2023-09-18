@@ -1,5 +1,5 @@
 import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import Sync from '../src/sync.js'
@@ -24,8 +24,8 @@ describe('Sync protocol', function () {
   let peerId1, peerId2
 
   before(async () => {
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
 
     ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
@@ -45,12 +45,12 @@ describe('Sync protocol', function () {
   after(async () => {
     await ipfs1.stop()
     await ipfs2.stop()
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
     if (keystore) {
       await keystore.close()
     }
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   describe('Creating an instance', () => {

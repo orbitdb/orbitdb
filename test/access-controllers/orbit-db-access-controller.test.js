@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import OrbitDB from '../../src/orbitdb.js'
 import * as IPFS from 'ipfs-core'
 import Keystore from '../../src/key-store.js'
@@ -53,9 +53,9 @@ describe('OrbitDBAccessController', function () {
       await ipfs2.stop()
     }
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   describe('Default write access', function () {

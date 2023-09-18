@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import ManifestStore from '../src/manifest-store.js'
 import config from './config.js'
@@ -17,7 +17,7 @@ describe('Manifest', () => {
   after(async () => {
     await manifestStore.close()
     await ipfs.stop()
-    await rmrf(repo)
+    await rimraf(repo)
   })
 
   it('creates a manifest', async () => {

@@ -1,5 +1,5 @@
 import { deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import { createOrbitDB } from '../src/index.js'
 import config from './config.js'
@@ -23,12 +23,12 @@ describe('Replicating databases', function () {
   after(async () => {
     await ipfs1.stop()
     await ipfs2.stop()
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
     await orbitdb1.stop()
     await orbitdb2.stop()
-    await rmrf('./orbitdb1')
-    await rmrf('./orbitdb2')
+    await rimraf('./orbitdb1')
+    await rimraf('./orbitdb2')
   })
 
   describe('replicating a database', () => {

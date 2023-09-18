@@ -1,6 +1,6 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import all from 'it-all'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Identities, KeyStore } from '../../src/index.js'
 import LogCreator from './utils/log-creator.js'
@@ -32,7 +32,7 @@ describe('Log - Iterator', function () {
     if (keystore) {
       await keystore.close()
     }
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   describe('Basic iterator functionality', async () => {

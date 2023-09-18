@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import OrbitDB from '../src/orbitdb.js'
 import { IPFSAccessController, OrbitDBAccessController, useAccessController, getAccessController, removeAccessController } from '../src/access-controllers/index.js'
@@ -41,8 +41,8 @@ describe('Add a custom access controller', function () {
     // Remove the added custom database type from OrbitDB import
     removeAccessController(type)
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
   })
 
   describe('Default supported access controllers', function () {

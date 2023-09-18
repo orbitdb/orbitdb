@@ -1,5 +1,5 @@
 import assert from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import KeyStore, { signMessage, verifyMessage } from '../../src/key-store.js'
@@ -19,7 +19,7 @@ describe('Identities', function () {
   })
 
   after(async () => {
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   describe('Creating Identities', () => {

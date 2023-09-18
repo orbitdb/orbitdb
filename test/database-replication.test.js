@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { Database, KeyStore, Identities } from '../src/index.js'
@@ -49,13 +49,13 @@ describe('Database - Replication', function () {
       await db1.drop()
       await db1.close()
 
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
     }
     if (db2) {
       await db2.drop()
       await db2.close()
 
-      await rmrf('./orbitdb2')
+      await rimraf('./orbitdb2')
     }
 
     if (ipfs1) {
@@ -70,9 +70,9 @@ describe('Database - Replication', function () {
       await keystore.close()
     }
 
-    await rmrf(keysPath)
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf(keysPath)
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   describe('Replicate across peers', () => {
@@ -171,7 +171,7 @@ describe('Database - Replication', function () {
       await db2.drop()
       await db2.close()
 
-      await rmrf('./orbitdb2')
+      await rimraf('./orbitdb2')
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
 
