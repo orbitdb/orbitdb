@@ -20,7 +20,7 @@ export default (env, argv) => {
     externals: {
       fs: '{ existsSync: () => true }',
       'fs-extra': '{ copy: () => {} }',
-      rimraf: '() => {}'
+      rimraf: '{ rimraf: () => {} }'
     },
     plugins: [
       new webpack.ProvidePlugin({

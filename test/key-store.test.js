@@ -2,7 +2,7 @@ import { strictEqual, deepStrictEqual, deepEqual } from 'assert'
 import * as crypto from '@libp2p/crypto'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import KeyStore, { signMessage, verifyMessage } from '../src/key-store.js'
 import LevelStorage from '../src/storage/level.js'
@@ -27,7 +27,7 @@ describe('KeyStore', () => {
     afterEach(async () => {
       if (keystore) {
         await keystore.close()
-        await rmrf(defaultPath)
+        await rimraf(defaultPath)
       }
     })
 
@@ -169,7 +169,7 @@ describe('KeyStore', () => {
       afterEach(async () => {
         if (keystore) {
           await keystore.close()
-          await rmrf(defaultPath)
+          await rimraf(defaultPath)
         }
       })
 
@@ -192,7 +192,7 @@ describe('KeyStore', () => {
       afterEach(async () => {
         if (keystore) {
           await keystore.close()
-          await rmrf(path)
+          await rimraf(path)
         }
       })
 
@@ -218,7 +218,7 @@ describe('KeyStore', () => {
           await keystore.close()
         }
 
-        await rmrf(keysPath)
+        await rimraf(keysPath)
       })
 
       it('uses default storage using given path to retrieve a key', async () => {
@@ -244,7 +244,7 @@ describe('KeyStore', () => {
       if (keystore) {
         await keystore.close()
       }
-      await rmrf(keysPath)
+      await rimraf(keysPath)
     })
 
     describe('Signing', () => {

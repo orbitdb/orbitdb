@@ -1,5 +1,5 @@
 import { deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 import { createOrbitDB, Identities, useIdentityProvider } from '../src/index.js'
 import config from './config.js'
@@ -54,7 +54,7 @@ describe('Add a custom identity provider', function () {
       await ipfs.stop()
     }
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
   })
 })

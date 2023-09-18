@@ -1,5 +1,5 @@
 import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities } from '../../src/index.js'
@@ -37,9 +37,9 @@ describe('KeyValue Database', function () {
       await keystore.close()
     }
 
-    await rmrf(keysPath)
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
+    await rimraf(keysPath)
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
   })
 
   describe('Creating a KeyValue database', () => {

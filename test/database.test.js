@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
@@ -48,12 +48,12 @@ describe('Database', function () {
       await keystore.close()
     }
 
-    await rmrf(keysPath)
-    await rmrf('./ipfs1')
+    await rimraf(keysPath)
+    await rimraf('./ipfs1')
   })
 
   afterEach(async () => {
-    await rmrf('./orbitdb')
+    await rimraf('./orbitdb')
   })
 
   it('adds an operation', async () => {
@@ -85,7 +85,7 @@ describe('Database', function () {
 
       await headsStorage.close()
 
-      await rmrf(headsPath)
+      await rimraf(headsPath)
     })
 
     it('uses given directory for headsStorage', async () => {
@@ -105,8 +105,8 @@ describe('Database', function () {
 
       await headsStorage.close()
 
-      await rmrf(headsPath)
-      await rmrf('./custom-directory')
+      await rimraf(headsPath)
+      await rimraf('./custom-directory')
     })
 
     it('uses given MemoryStorage for headsStorage', async () => {

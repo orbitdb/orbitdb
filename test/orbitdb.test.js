@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import fs from 'fs'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
@@ -28,13 +28,13 @@ describe('OrbitDB', function () {
     if (ipfs2) {
       await ipfs2.stop()
     }
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   describe('OrbitDB instance creation - defaults', () => {
     before(async () => {
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
       orbitdb1 = await createOrbitDB({ ipfs: ipfs1 })
     })
 
@@ -42,7 +42,7 @@ describe('OrbitDB', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb')
+      await rimraf('./orbitdb')
     })
 
     it('has an IPFS instance', async () => {
@@ -126,7 +126,7 @@ describe('OrbitDB', function () {
 
   describe('OrbitDB instance creation - user given parameters', () => {
     before(async () => {
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
       orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
     })
 
@@ -134,7 +134,7 @@ describe('OrbitDB', function () {
       if (orbitdb1) {
         await orbitdb1.stop()
       }
-      await rmrf('./orbitdb1')
+      await rimraf('./orbitdb1')
     })
 
     it('has an IPFS instance', async () => {

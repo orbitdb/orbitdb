@@ -1,7 +1,7 @@
 import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import path from 'path'
 import fs from 'fs'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities, MemoryStorage } from '../../src/index.js'
@@ -43,9 +43,9 @@ describe('KeyValueIndexed Database', function () {
       await keystore.close()
     }
 
-    await rmrf(keysPath)
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
+    await rimraf(keysPath)
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
   })
 
   describe('Creating a KeyValueIndexed database', () => {

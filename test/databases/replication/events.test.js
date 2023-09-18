@@ -1,5 +1,5 @@
 import { deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities } from '../../../src/index.js'
@@ -65,11 +65,11 @@ describe('Events Database Replication', function () {
       await keystore.close()
     }
 
-    await rmrf(keysPath)
-    await rmrf('./orbitdb1')
-    await rmrf('./orbitdb2')
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf(keysPath)
+    await rimraf('./orbitdb1')
+    await rimraf('./orbitdb2')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   afterEach(async () => {

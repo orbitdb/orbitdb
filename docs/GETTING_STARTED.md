@@ -7,7 +7,7 @@ This guide will help you get up and running with a simple OrbitDB database that 
 Install OrbitDB:
 
 ```sh
-npm i @orbitdb/core@next
+npm i @orbitdb/core
 ```
 
 You will also need IPFS for replication:

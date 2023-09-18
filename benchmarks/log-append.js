@@ -1,7 +1,7 @@
 import { Identities, Log } from '../src/index.js'
 import { MemoryStorage } from '../src/storage/index.js'
 // import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
-import rmrf from 'rimraf'
+import { rimraf as rmrf } from 'rimraf'
 
 // State
 let log

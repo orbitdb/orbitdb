@@ -1,5 +1,5 @@
 import { strictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import path from 'path'
 import * as IPFS from 'ipfs-core'
 import OrbitDB from '../src/orbitdb.js'
@@ -43,9 +43,9 @@ describe('Write Permissions', function () {
       await ipfs2.stop()
     }
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
-    await rmrf('./ipfs2')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
+    await rimraf('./ipfs2')
   })
 
   it('throws an error if another peer writes to a log with default write access', async () => {

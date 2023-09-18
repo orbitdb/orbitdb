@@ -1,10 +1,12 @@
+## OrbitDB API - v1.0.0
+
 OrbitDB is a serverless, distributed, peer-to-peer database. OrbitDB uses IPFS
 as its data storage and Libp2p Pubsub to automatically sync databases with peers. It's an eventually consistent database that uses Merkle-CRDTs for conflict-free database writes and merges making OrbitDB an excellent choice for p2p and decentralized apps, blockchain applications and local first web applications.
 
 To install OrbitDB:
 
 ```bash
-npm install @orbitdb/core@next
+npm install @orbitdb/core
 ```
 
 IPFS is also required:

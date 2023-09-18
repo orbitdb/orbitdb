@@ -1,5 +1,5 @@
 import { createOrbitDB } from '../src/index.js'
-import rmrf from 'rimraf'
+import { rimraf as rmrf } from 'rimraf'
 import * as IPFS from 'ipfs-core'
 
 import { EventEmitter } from 'events'

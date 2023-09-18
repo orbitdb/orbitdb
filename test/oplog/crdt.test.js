@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Identities, KeyStore } from '../../src/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
@@ -27,7 +27,7 @@ describe('Log - CRDT', function () {
     if (keystore) {
       await keystore.close()
     }
-    await rmrf(keysPath)
+    await rimraf(keysPath)
   })
 
   describe('is a CRDT', async () => {

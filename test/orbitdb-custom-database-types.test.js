@@ -1,5 +1,5 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
-import rmrf from 'rimraf'
+import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
 import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
@@ -40,8 +40,8 @@ describe('Add a custom database type', function () {
       await ipfs.stop()
     }
 
-    await rmrf('./orbitdb')
-    await rmrf('./ipfs1')
+    await rimraf('./orbitdb')
+    await rimraf('./ipfs1')
   })
 
   describe('Default supported database types', function () {
