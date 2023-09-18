@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/orbitdb/orbit-db"
+    "url": "https://github.com/orbitdb/orbitdb"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -48,18 +48,12 @@
     "webpack-cli": "^5.0.1"
   },
   "scripts": {
-    "examples:events": "node examples/events.js",
-    "examples:keyvalue": "node examples/keyvalue.js",
-    "examples:browser": "open-cli examples/browser/browser.html",
-    "examples:browser-webpack": "open-cli examples/browser/browser-webpack-example/index.html",
     "lint:docs": "remark -qf -u validate-links .",
     "test:all": "npm run test:browser-multiple-tabs && npm run test",
     "test": "cross-env mocha --config test/.mocharc.json",
     "test:ci": "cross-env c8 mocha --config test/.mocharc.json",
     "test:browser": "npm run build:tests && mocha-headless-chrome -t 360000 -f ./test/browser/index.html -a no-sandbox",
-    "test:browser-multiple-tabs": "npm run build:dist && cpy dist/orbitdb.min.js ./test/browser/ --rename=orbitdb.js --flat && cpy node_modules/ipfs/dist/index.min.js ./test/browser --rename=ipfs.js --flat && mocha ./test/browser/concurrent.spec.js",
     "build": "npm run build:dist && npm run build:debug",
-    "build:examples": "webpack --config conf/webpack.example.config.js",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
     "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/** -d ./docs/api -R ./docs/jsdoc/README.md",
@@ -76,16 +70,10 @@
     ],
     "ignore": [
       "out/**",
-      "examples/**",
       "test/fixtures/**",
       "test/browser/**"
     ]
   },
-  "localMaintainers": [
-    "haad <haad@haja.io>",
-    "shamb0t <shams@haja.io>",
-    "hajamark <mark@haja.io>"
-  ],
   "keywords": [
     "crdt",
     "merkle-crdt",

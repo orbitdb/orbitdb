@@ -15,13 +15,11 @@ OrbitDB provides various types of databases for different data models and use ca
 - **[keyvalue](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdbkeyvaluenameaddress)**: a key-value database just like your favourite key-value database.
 - **[keyvalue-indexed](https://github.com/orbitdb/orbitdb/blob/master/API.md#orbitdbkeyvaluenameaddress)**: key-value data indexed in a Level key-value database.
 
-All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src/storage/) on top of OrbitDB's [OpLog](https://github.com/orbitdb/orbitdb/tree/amin/src/oplog/), an immutable, cryptographically verifiable, operation-based conflict-free replicated data structure ([CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) for distributed systems. OpLog is formalized in the paper [Merkle-CRDTs](https://arxiv.org/abs/2004.00107). You can also easily extend OrbitDB by [implementing and using a custom data model](https://github.com/orbitdb/orbitdb/blob/main/docs/DATABASES.md#building-a-custom-database) benefitting from the same properties as the default data models provided by the underlying Merkle-CRDTs.
+All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src/databases/) on top of OrbitDB's [OpLog](https://github.com/orbitdb/orbitdb/tree/main/src/oplog/), an immutable, cryptographically verifiable, operation-based conflict-free replicated data structure ([CRDT](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) for distributed systems. OpLog is formalized in the paper [Merkle-CRDTs](https://arxiv.org/abs/2004.00107). You can also easily extend OrbitDB by [implementing and using a custom data model](https://github.com/orbitdb/orbitdb/blob/main/docs/DATABASES.md#building-a-custom-database) benefitting from the same properties as the default data models provided by the underlying Merkle-CRDTs.
 
-#### Project status & support
+This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows.
 
 ***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/ipfs/helia).*
-
-This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows. Node version 16 is supported.
 
 A Go implementation is developed and maintained by the [Berty](https://github.com/berty) project at [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
 
@@ -54,7 +52,7 @@ import { createOrbitDB } from '@orbitdb/core'
   
   const address = db.address
   console.log(address)
-  // "/orbitdb/hash"
+  // "/orbitdb/zdpuAkstgbTVGHQmMi5TC84auhJ8rL5qoaNEtXo2d5PHXs2To"
   // The above address can be used on another peer to open the same database
 
   // Listen for updates from peers
@@ -84,7 +82,7 @@ Use the **[Getting Started](https://github.com/orbitdb/orbitdb/blob/main/docs/GE
 
 ### API
 
-See [api.orbitdb.org](https://api.orbitdb.org) for the full API documentation.
+See [https://api.orbitdb.org](https://api.orbitdb.org) for the full API documentation.
 
 ## Development
 
@@ -137,7 +135,7 @@ The development of OrbitDB has been sponsored by:
 * [Maintainer Mountaineer](https://maintainer.io)
 * [OrbitDB Open Collective](https://opencollective.com/orbitdb)
 
-If you want to sponsor developers to work on OrbitDB, please reach out to [@haadcode](https://github.com/haadcode).
+If you want to sponsor developers to work on OrbitDB, please donate to our [OrbitDB Open Collective](https://opencollective.com/orbitdb) or reach out to [@haadcode](https://github.com/haadcode).
 
 ## License
 
