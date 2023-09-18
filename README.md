@@ -25,27 +25,6 @@ This is the Javascript implementation and it works both in **Browsers** and **No
 
 A Go implementation is developed and maintained by the [Berty](https://github.com/berty) project at [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
 
-## Table of Contents
-
-<!-- toc -->
-
-- [Installation](#installation)
-  * [Browser <script> tag](#browser-script-tag)
-- [Usage](#usage)
-- [Documentation](#documentation)
-  * [API](#api)
-- [Development](#development)
-  * [Run Tests](#run-tests)
-  * [Build](#build)
-  * [Benchmark](#benchmark)
-  * [API](#api)
-- [Are there implementations in other languages?](#other-implementations)
-- [Contributing](#contributing)
-- [Sponsors](#sponsors)
-- [License](#license)
-
-<!-- tocstop -->
-
 ## Installation
 
 ```
