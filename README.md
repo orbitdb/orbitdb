@@ -51,10 +51,8 @@ A Go implementation is developed and maintained by the [Berty](https://github.co
 
 ## Installation
 
-*Note! The upcoming version 1.0.0 is currently in testing and needs to be installed as version "next" as described below.*
-
 ```
-npm install @orbitdb/core@next
+npm install @orbitdb/core
 ```
 
 ### Browser <script> tag
