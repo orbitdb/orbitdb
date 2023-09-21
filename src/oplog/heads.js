@@ -1,9 +1,3 @@
-/**
- * @namespace module:Log~Heads
- * @memberof module:Log
- * @description The log's heads.
- * @private
- */
 import Entry from './entry.js'
 import MemoryStorage from '../storage/memory.js'
 
