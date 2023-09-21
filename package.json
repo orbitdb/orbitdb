@@ -44,6 +44,7 @@
     "path-browserify": "^1.0.1",
     "rimraf": "^5.0.1",
     "standard": "^17.1.0",
+    "typescript": "^5.2.2",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   },
@@ -53,7 +54,8 @@
     "test": "cross-env mocha --config test/.mocharc.json",
     "test:ci": "cross-env c8 mocha --config test/.mocharc.json",
     "test:browser": "npm run build:tests && mocha-headless-chrome -t 360000 -f ./test/browser/index.html -a no-sandbox",
-    "build": "npm run build:dist && npm run build:debug",
+    "build": "npm run build:dist && npm run build:types && npm run build:debug",
+    "build:types": "npm run tsc",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
     "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/** -d ./docs/api -R ./docs/jsdoc/README.md",
