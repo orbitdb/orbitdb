@@ -227,7 +227,10 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         events.emit('error', e)
       }
     }
-    queue.add(task)
+    
+    if (message.detail.topic === address) {
+      queue.add(task)
+    }
   }
 
   /**
