@@ -2,12 +2,11 @@ import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import fs from 'fs'
 import path from 'path'
-import * as IPFS from 'ipfs-core'
 import { createOrbitDB, isValidAddress, LevelStorage } from '../src/index.js'
 import KeyValueIndexed from '../src/databases/keyvalue-indexed.js'
-import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
+import createHelia from './utils/create-helia.js'
 
 describe('Open databases', function () {
   this.timeout(5000)
@@ -16,8 +15,7 @@ describe('Open databases', function () {
   let orbitdb1, orbitdb2
 
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
   })
 

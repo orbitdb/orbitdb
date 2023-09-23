@@ -1,13 +1,12 @@
 import { strictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import { Log, Entry, Identities, KeyStore, IPFSBlockStorage } from '../../src/index.js'
 import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 import connectPeers from '../utils/connect-nodes.js'
-import getIpfsPeerId from '../utils/get-ipfs-peer-id.js'
 import waitForPeers from '../utils/wait-for-peers.js'
+import createHelia from '../utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -22,12 +21,11 @@ describe('Log - Replication', function () {
   let storage1, storage2
 
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
 
-    id1 = await getIpfsPeerId(ipfs1)
-    id2 = await getIpfsPeerId(ipfs2)
+    id1 = ipfs1.libp2p.peerId
+    id2 = ipfs2.libp2p.peerId
 
     await copy(testKeysPath, keysPath)
     keystore = await KeyStore({ path: keysPath })
@@ -69,11 +67,11 @@ describe('Log - Replication', function () {
     let log1, log2, input1, input2
 
     const handleMessage1 = async (message) => {
-      const { id: peerId } = await ipfs1.id()
+      const peerId = ipfs1.libp2p.peerId
       const messageIsFromMe = (message) => String(peerId) === String(message.from)
       try {
         if (!messageIsFromMe(message)) {
-          const entry = await Entry.decode(message.data)
+          const entry = await Entry.decode(message.detail.data)
           await storage1.put(entry.hash, entry.bytes)
           await log1.joinEntry(entry)
         }
@@ -83,11 +81,11 @@ describe('Log - Replication', function () {
     }
 
     const handleMessage2 = async (message) => {
-      const { id: peerId } = await ipfs2.id()
+      const peerId = ipfs2.libp2p.peerId
       const messageIsFromMe = (message) => String(peerId) === String(message.from)
       try {
         if (!messageIsFromMe(message)) {
-          const entry = await Entry.decode(message.data)
+          const entry = await Entry.decode(message.detail.data)
           await storage2.put(entry.hash, entry.bytes)
           await log2.joinEntry(entry)
         }
@@ -101,13 +99,15 @@ describe('Log - Replication', function () {
       log2 = await Log(testIdentity2, { logId, entryStorage: storage2 })
       input1 = await Log(testIdentity1, { logId, entryStorage: storage1 })
       input2 = await Log(testIdentity2, { logId, entryStorage: storage2 })
-      await ipfs1.pubsub.subscribe(logId, handleMessage1)
-      await ipfs2.pubsub.subscribe(logId, handleMessage2)
+      ipfs1.libp2p.services.pubsub.addEventListener('message', handleMessage1)
+      ipfs2.libp2p.services.pubsub.addEventListener('message', handleMessage2)
+      await ipfs1.libp2p.services.pubsub.subscribe(logId)
+      await ipfs2.libp2p.services.pubsub.subscribe(logId)
     })
 
     afterEach(async () => {
-      await ipfs1.pubsub.unsubscribe(logId, handleMessage1)
-      await ipfs2.pubsub.unsubscribe(logId, handleMessage2)
+      await ipfs1.libp2p.services.pubsub.unsubscribe(logId)
+      await ipfs2.libp2p.services.pubsub.unsubscribe(logId)
     })
 
     it('replicates logs', async () => {
@@ -117,8 +117,8 @@ describe('Log - Replication', function () {
       for (let i = 1; i <= amount; i++) {
         const entry1 = await input1.append('A' + i)
         const entry2 = await input2.append('B' + i)
-        await ipfs1.pubsub.publish(logId, entry1.bytes)
-        await ipfs2.pubsub.publish(logId, entry2.bytes)
+        await ipfs1.libp2p.services.pubsub.publish(logId, entry1.bytes)
+        await ipfs2.libp2p.services.pubsub.publish(logId, entry2.bytes)
       }
 
       console.log('Messages sent')

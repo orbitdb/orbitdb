@@ -2,10 +2,9 @@ import { strictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import fs from 'fs'
 import path from 'path'
-import * as IPFS from 'ipfs-core'
 import { createOrbitDB, isIdentity } from '../src/index.js'
-import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
+import createHelia from './utils/create-helia.js'
 
 const isBrowser = () => typeof window !== 'undefined'
 
@@ -16,8 +15,7 @@ describe('OrbitDB', function () {
   let orbitdb1
 
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
   })
 
@@ -51,8 +49,8 @@ describe('OrbitDB', function () {
     })
 
     it('has the IPFS instance given as a parameter', async () => {
-      const { id: expectedId } = await ipfs1.id()
-      const { id: resultId } = await orbitdb1.ipfs.id()
+      const { id: expectedId } = ipfs1.libp2p.peerId
+      const { id: resultId } = ipfs1.libp2p.peerId
       strictEqual(expectedId, resultId)
     })
 
@@ -109,7 +107,7 @@ describe('OrbitDB', function () {
     })
 
     it('has a peerId that matches the IPFS id', async () => {
-      const { id } = await ipfs1.id()
+      const id = ipfs1.libp2p.peerId
       strictEqual(orbitdb1.peerId, id)
     })
 
@@ -143,8 +141,8 @@ describe('OrbitDB', function () {
     })
 
     it('has the IPFS instance given as a parameter', async () => {
-      const { id: expectedId } = await ipfs1.id()
-      const { id: resultId } = await orbitdb1.ipfs.id()
+      const { id: expectedId } = ipfs1.libp2p.peerId
+      const { id: resultId } = orbitdb1.ipfs.libp2p.peerId
       strictEqual(expectedId, resultId)
     })
 
@@ -201,7 +199,7 @@ describe('OrbitDB', function () {
     })
 
     it('has a peerId that matches the IPFS id', async () => {
-      const { id } = await ipfs1.id()
+      const id = ipfs1.libp2p.peerId
       strictEqual(orbitdb1.peerId, id)
     })
 

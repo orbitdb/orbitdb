@@ -1,11 +1,10 @@
 import { strictEqual } from 'assert'
 // import mapSeries from 'p-each-series'
-import * as IPFS from 'ipfs-core'
 import { rimraf } from 'rimraf'
 import OrbitDB from '../src/orbitdb.js'
-import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
+import createHelia from './utils/create-helia.js'
 
 const dbPath1 = './orbitdb/tests/multiple-databases/1'
 const dbPath2 = './orbitdb/tests/multiple-databases/2'
@@ -50,8 +49,7 @@ describe('orbitdb - Multiple Databases', function () {
 
   // Create two IPFS instances and two OrbitDB instances (2 nodes/peers)
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
     console.log('Peers connected')
     orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: dbPath1 })

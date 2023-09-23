@@ -1,15 +1,14 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import { Database, KeyStore, Identities } from '../src/index.js'
-import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import ComposedStorage from '../src/storage/composed.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import MemoryStorage from '../src/storage/memory.js'
+import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -33,8 +32,7 @@ describe('Database - Replication', function () {
   }
 
   beforeEach(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)

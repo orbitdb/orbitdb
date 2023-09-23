@@ -1,11 +1,10 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
-import * as IPFS from 'ipfs-core'
 import { getDatabaseType } from '../src/databases/index.js'
 import { createOrbitDB, useDatabaseType, Database, KeyValueIndexed } from '../src/index.js'
 import pathJoin from '../src/utils/path-join.js'
-import config from './config.js'
+import createHelia from './utils/create-helia.js'
 
 const type = 'custom!'
 
@@ -27,7 +26,8 @@ describe('Add a custom database type', function () {
   let orbitdb
 
   before(async () => {
-    ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs = await createHelia()
     orbitdb = await createOrbitDB({ ipfs })
   })
 

@@ -4,7 +4,7 @@ const waitForPeers = (ipfs, peersToWait, topic) => {
   return new Promise((resolve, reject) => {
     const interval = setInterval(async () => {
       try {
-        const peers = await ipfs.pubsub.peers(topic)
+        const peers = await ipfs.libp2p.services.pubsub.getPeers(topic)
         const peerIds = peers.map(peer => peer.toString())
         const peerIdsToWait = peersToWait.map(peer => peer.toString())
 

@@ -2,13 +2,12 @@ import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import Path from 'path'
 import { Database, Entry, KeyStore, Identities } from '../src/index.js'
 import LevelStorage from '../src/storage/level.js'
 import MemoryStorage from '../src/storage/memory.js'
-import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js'
+import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -31,8 +30,8 @@ describe('Database', function () {
   }
 
   before(async () => {
-    ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-
+    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs = await createHelia()
     await copy(testKeysPath, keysPath)
     keystore = await KeyStore({ path: keysPath })
     identities = await Identities({ keystore })

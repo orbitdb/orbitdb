@@ -1,16 +1,15 @@
 import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import Sync from '../src/sync.js'
 import { Log, Entry, Identities, KeyStore } from '../src/index.js'
-import config from './config.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import LRUStorage from '../src/storage/lru.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import ComposedStorage from '../src/storage/composed.js'
+import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -24,14 +23,10 @@ describe('Sync protocol', function () {
   let peerId1, peerId2
 
   before(async () => {
-    await rimraf('./ipfs1')
-    await rimraf('./ipfs2')
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
 
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
-
-    peerId1 = (await ipfs1.id()).id
-    peerId2 = (await ipfs2.id()).id
+    peerId1 = ipfs1.libp2p.peerId
+    peerId2 = ipfs2.libp2p.peerId
 
     await connectPeers(ipfs1, ipfs2)
 
@@ -554,14 +549,10 @@ describe('Sync protocol', function () {
     let leavingPeerId
 
     before(async () => {
-      await ipfs1.stop()
-      await ipfs2.stop()
+      [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
 
-      ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-      ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
-
-      peerId1 = (await ipfs1.id()).id
-      peerId2 = (await ipfs2.id()).id
+      peerId1 = ipfs1.libp2p.peerId
+      peerId2 = ipfs2.libp2p.peerId
 
       await connectPeers(ipfs1, ipfs2)
 
@@ -600,6 +591,9 @@ describe('Sync protocol', function () {
       if (sync2) {
         await sync2.stop()
       }
+
+      await ipfs1.stop()
+      await ipfs2.stop()
     })
 
     it('emits \'join\' event when a peer starts syncing', () => {
@@ -612,12 +606,12 @@ describe('Sync protocol', function () {
     })
 
     it('the peerId passed by the \'join\' event is the expected peer ID', async () => {
-      const { id } = await ipfs2.id()
+      const id = ipfs2.libp2p.peerId
       strictEqual(String(joiningPeerId), String(id))
     })
 
     it('the peerId passed by the \'leave\' event is the expected peer ID', async () => {
-      const { id } = await ipfs2.id()
+      const id = ipfs2.libp2p.peerId
       strictEqual(String(leavingPeerId), String(id))
     })
   })
@@ -629,14 +623,10 @@ describe('Sync protocol', function () {
     const timeoutTime = 1 // 1 millisecond
 
     before(async () => {
-      await ipfs1.stop()
-      await ipfs2.stop()
+      [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
 
-      ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-      ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
-
-      peerId1 = (await ipfs1.id()).id
-      peerId2 = (await ipfs2.id()).id
+      peerId1 = ipfs1.libp2p.peerId
+      peerId2 = ipfs2.libp2p.peerId
 
       await connectPeers(ipfs1, ipfs2)
 
@@ -651,6 +641,9 @@ describe('Sync protocol', function () {
       if (sync2) {
         await sync2.stop()
       }
+
+      await ipfs1.stop()
+      await ipfs2.stop()
     })
 
     it('emits an error when connecting to peer was cancelled due to timeout', async () => {

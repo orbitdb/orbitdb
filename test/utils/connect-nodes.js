@@ -1,21 +1,22 @@
-'use strict'
+import { multiaddr } from '@multiformats/multiaddr'
 
 const defaultFilter = () => true
+
+const isBrowser = () => typeof window !== 'undefined'
 
 const connectIpfsNodes = async (ipfs1, ipfs2, options = {
   filter: defaultFilter
 }) => {
-  const id1 = await ipfs1.id()
-  const id2 = await ipfs2.id()
+  if (isBrowser()) {
+    ipfs1.libp2p.addEventListener('self:peer:update', async (event) => {
+      await ipfs2.libp2p.peerStore.patch(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
+      await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
+    })
 
-  const addresses1 = id1.addresses.filter(options.filter)
-  const addresses2 = id2.addresses.filter(options.filter)
-
-  for (const a2 of addresses2) {
-    await ipfs1.swarm.connect(a2)
-  }
-  for (const a1 of addresses1) {
-    await ipfs2.swarm.connect(a1)
+    await ipfs1.libp2p.dial(multiaddr('/ip4/127.0.0.1/tcp/43669/ws/p2p/12D3KooWKwtgL5GTathFbTDunVZKPmD1gTwnDCEPRyf7r8hdqwQw'))
+  } else {
+    await ipfs2.libp2p.peerStore.patch(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
+    await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
   }
 }
 
