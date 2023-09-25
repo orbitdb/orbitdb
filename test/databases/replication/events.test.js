@@ -74,10 +74,12 @@ describe('Events Database Replication', function () {
     if (db1) {
       await db1.drop()
       await db1.close()
+      db1 = null
     }
     if (db2) {
       await db2.drop()
       await db2.close()
+      db2 = null
     }
   })
 
@@ -128,9 +130,6 @@ describe('Events Database Replication', function () {
   })
 
   it('loads the database after replication', async () => {
-    db1 = await Events()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    db2 = await Events()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
-
     let replicated = false
     let expectedEntryHash = null
 
@@ -145,6 +144,9 @@ describe('Events Database Replication', function () {
     const onError = (err) => {
       console.error(err)
     }
+
+    db1 = await Events()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    db2 = await Events()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)

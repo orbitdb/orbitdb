@@ -227,7 +227,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         events.emit('error', e)
       }
     }
-    
+
     if (message.detail.topic === address) {
       queue.add(task)
     }
@@ -256,6 +256,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     if (started) {
       await queue.onIdle()
       ipfs.libp2p.services.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
+      ipfs.libp2p.services.pubsub.removeEventListener('message', handleUpdateMessage)
       await ipfs.libp2p.unhandle(headsSyncAddress)
       await ipfs.libp2p.services.pubsub.unsubscribe(address)
       peers.clear()

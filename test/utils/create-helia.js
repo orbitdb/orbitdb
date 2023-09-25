@@ -39,20 +39,8 @@ export default async () => {
       pubsub: gossipsub({ allowPublishToZeroPeers: true })
     }
   }
+
   const libp2p = await createLibp2p(options)
-  /*  const libp2p = await createLibp2p({
-    connectionGater: { denyDialMultiaddr: () => false },
-    transports: [webSockets({ filter: all }), webRTC()],
-    connectionEncryption: [noise()],
-    streamMuxers: [mplex()],
-    services: {
-      identify: identifyService(),
-      pubsub: gossipsub()
-    },
-    addresses: {
-      listen: [isBrowser() ? '/ip4/0.0.0.0/tcp/12345/ws/p2p-webrtc-star' : '/ip4/0.0.0.0/tcp/0/ws']
-    }
-}) */
 
   return await createHelia({ libp2p })
 }
