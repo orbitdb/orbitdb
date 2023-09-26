@@ -41,6 +41,7 @@
     "mocha-headless-chrome": "^4.0.0",
     "open-cli": "^7.2.0",
     "path-browserify": "^1.0.1",
+    "playwright-test": "^12.3.4",
     "rimraf": "^5.0.1",
     "standard": "^17.1.0",
     "webpack": "^5.88.2",

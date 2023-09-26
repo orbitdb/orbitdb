@@ -10,7 +10,7 @@ export default (env, argv) => {
   const __dirname = path.dirname(__filename)
 
   return {
-    entry: glob.sync('./test/**/*.js', { ignore: [] }),
+    entry: glob.sync('./test/**/*.js', { ignore: ['./test/utils/relay.js'] }),
     output: {
       filename: '../test/browser/bundle.js'
     },
