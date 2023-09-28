@@ -42,5 +42,5 @@ export default async () => {
 
   const libp2p = await createLibp2p(options)
 
-  return await createHelia({ libp2p })
+  return createHelia({ libp2p })
 }
