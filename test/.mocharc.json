@@ -5,5 +5,5 @@
   "exit": true,
   "bail": false,
   "slow": 1000,
-  "exclude": ["test/browser/**/*.js"]
+  "exclude": ["test/browser/**/*.js", "test/utils/relay.js"]
 }

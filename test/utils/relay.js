@@ -5,14 +5,14 @@ import { circuitRelayServer } from 'libp2p/circuit-relay'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
 import { identifyService } from 'libp2p/identify'
-import testKeysPath from '../fixtures/test-keys-path.js'
-import { KeyStore } from '../../src/index.js'
+import relayPrivKey from '../fixtures/keys/relay.js'
 import { createFromPrivKey } from '@libp2p/peer-id-factory'
-import * as crypto from '@libp2p/crypto'
+import { unmarshalPrivateKey } from '@libp2p/crypto/keys'
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 
-const keystore = await KeyStore({ path: testKeysPath })
-const keys = await keystore.getKey('userX')
-const peerId = await createFromPrivKey(keys)
+const encoded = uint8ArrayFromString(relayPrivKey, 'base64pad')
+const privateKey = await unmarshalPrivateKey(encoded)
+const peerId = await createFromPrivKey(privateKey)
 
 const server = await createLibp2p({
   peerId,
@@ -30,6 +30,10 @@ const server = await createLibp2p({
     identify: identifyService(),
     relay: circuitRelayServer()
   }
+})
+
+server.addEventListener('peer:connect', async event => {
+  console.log('peer:connect', event.detail)
 })
 
 server.addEventListener('peer:disconnect', async event => {
