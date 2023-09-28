@@ -162,7 +162,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         await onSynced(headBytes)
       }
     }
-    await onPeerJoined(peerId)
+    if (started) {
+      await onPeerJoined(peerId)
+    }
   }
 
   const handleReceiveHeads = async ({ connection, stream }) => {
@@ -195,10 +197,11 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
           const stream = await ipfs.libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
+          console.error(e)
+          peers.delete(peerId)
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
             // Skip peer, they don't have this database currently
           } else {
-            peers.delete(peerId)
             events.emit('error', e)
           }
         } finally {

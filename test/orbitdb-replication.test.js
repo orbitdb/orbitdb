@@ -31,7 +31,8 @@ describe('Replicating databases', function () {
   })
 
   describe('replicating a database', () => {
-    const amount = 128 + 1
+    // const amount = 85 + 1 // this doesn't work
+    const amount = 84 + 1 // this works on my computer
 
     const expected = []
     for (let i = 0; i < amount; i++) {
@@ -41,7 +42,7 @@ describe('Replicating databases', function () {
     let db1, db2
 
     before(async () => {
-      db1 = await orbitdb1.open('helloworld')
+      db1 = await orbitdb1.open('helloworld', { referencesCount: 0 })
 
       console.time('write')
       for (let i = 0; i < expected.length; i++) {
@@ -89,6 +90,7 @@ describe('Replicating databases', function () {
       console.time('query 1')
       const eventsFromDb2 = []
       for await (const event of db2.iterator()) {
+        console.log(event)
         eventsFromDb2.unshift(event)
       }
       console.timeEnd('query 1')

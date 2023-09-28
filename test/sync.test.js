@@ -50,15 +50,19 @@ describe('Sync protocol', function () {
 
   describe('Creating an instance', () => {
     let sync
+    let log
 
     before(async () => {
-      const log = await Log(testIdentity1)
+      log = await Log(testIdentity1)
       sync = await Sync({ ipfs: ipfs1, log })
     })
 
     after(async () => {
       if (sync) {
         await sync.stop()
+      }
+      if (log) {
+        await log.close
       }
     })
 
@@ -132,8 +136,8 @@ describe('Sync protocol', function () {
         await IPFSBlockStorage({ ipfs: ipfs2, pin: true })
       )
 
-      log1 = await Log(testIdentity1, { logId: 'synclog1', entryStorage: entryStorage1 })
-      log2 = await Log(testIdentity2, { logId: 'synclog1', entryStorage: entryStorage2 })
+      log1 = await Log(testIdentity1, { logId: 'synclog111', entryStorage: entryStorage1 })
+      log2 = await Log(testIdentity2, { logId: 'synclog111', entryStorage: entryStorage2 })
 
       const onSynced = async (bytes) => {
         const entry = await Entry.decode(bytes)
@@ -155,8 +159,7 @@ describe('Sync protocol', function () {
       sync1.events.on('join', onJoin)
       sync2.events.on('join', onJoin)
 
-      await waitFor(() => joinEventFired, () => true)
-      await waitFor(() => syncedEventFired, () => true)
+      await waitFor(() => joinEventFired && syncedEventFired, () => true)
     })
 
     after(async () => {
@@ -165,6 +168,12 @@ describe('Sync protocol', function () {
       }
       if (sync2) {
         await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
       }
     })
 
@@ -224,6 +233,12 @@ describe('Sync protocol', function () {
       }
       if (sync2) {
         await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
       }
     })
 
@@ -294,6 +309,12 @@ describe('Sync protocol', function () {
       if (sync2) {
         await sync2.stop()
       }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
+      }
     })
 
     it('starts syncing', async () => {
@@ -358,6 +379,12 @@ describe('Sync protocol', function () {
       }
       if (sync2) {
         await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
       }
     })
 
@@ -449,6 +476,12 @@ describe('Sync protocol', function () {
       if (sync2) {
         await sync2.stop()
       }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
+      }
     })
 
     it('restarts syncing', async () => {
@@ -488,7 +521,7 @@ describe('Sync protocol', function () {
       const onSynced = async (bytes) => {
         syncedHead = await Entry.decode(bytes)
         if (expectedEntry) {
-          syncedEventFired = expectedEntry.hash === syncedHead.hash
+          syncedEventFired = expectedEntry ? expectedEntry.hash === syncedHead.hash : false
         }
       }
 
@@ -514,6 +547,12 @@ describe('Sync protocol', function () {
       }
       if (sync2) {
         await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
       }
 
       await ipfs1.stop()
@@ -542,6 +581,7 @@ describe('Sync protocol', function () {
 
   describe('Events', () => {
     let sync1, sync2
+    let log1, log2
     let joinEventFired = false
     let leaveEventFired = false
     let receivedHeads = []
@@ -556,8 +596,8 @@ describe('Sync protocol', function () {
 
       await connectPeers(ipfs1, ipfs2)
 
-      const log1 = await Log(testIdentity1, { logId: 'synclog3' })
-      const log2 = await Log(testIdentity2, { logId: 'synclog3' })
+      log1 = await Log(testIdentity1, { logId: 'synclog3' })
+      log2 = await Log(testIdentity2, { logId: 'synclog3' })
 
       const onJoin = (peerId, heads) => {
         joinEventFired = true
@@ -591,7 +631,12 @@ describe('Sync protocol', function () {
       if (sync2) {
         await sync2.stop()
       }
-
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
+      }
       await ipfs1.stop()
       await ipfs2.stop()
     })
@@ -640,6 +685,12 @@ describe('Sync protocol', function () {
       }
       if (sync2) {
         await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
       }
 
       await ipfs1.stop()
