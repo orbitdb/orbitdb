@@ -19,8 +19,8 @@ const connectIpfsNodes = async (ipfs1, ipfs2, options = {
     await ipfs2.libp2p.dial(a1)
     await ipfs1.libp2p.dial(a2)
   } else {
-    // await ipfs2.libp2p.peerStore.save(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
-    // await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
+    await ipfs2.libp2p.peerStore.save(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
+    await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
   }
 
   return new Promise((resolve) => {
