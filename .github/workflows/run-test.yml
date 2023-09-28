@@ -30,7 +30,7 @@ jobs:
         run: npm ci
       - name: Run linter
         run: npm run lint
-      - name: Run webrtc-star-signalling-server in the background
+      - name: Run a webrtc relay in the background
         run: npm run webrtc:background
       - name: Run browser tests
         run: npm run test:browser
