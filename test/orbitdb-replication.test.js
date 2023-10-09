@@ -31,8 +31,7 @@ describe('Replicating databases', function () {
   })
 
   describe('replicating a database', () => {
-    // const amount = 85 + 1 // this doesn't work
-    const amount = 84 + 1 // this works on my computer
+    const amount = 128 + 1
 
     const expected = []
     for (let i = 0; i < amount; i++) {

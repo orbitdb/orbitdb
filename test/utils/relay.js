@@ -36,7 +36,8 @@ const server = await createLibp2p({
       reservations: {
         maxReservations: 5000,
         reservationClearInterval: 500,
-        reservationTtl: 1000
+        reservationTtl: 1000,
+        defaultDataLimit: BigInt(1024 * 1024 * 1024)
       }
     })
   }
