@@ -278,10 +278,10 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
-    const db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
-    const db2 = await orbitdb2.open(db1.address)
+    let db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    let db2 = await orbitdb2.open(db1.address)
 
-    // const addr = db1.address
+    const addr = db1.address
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
@@ -297,9 +297,13 @@ describe('Write Permissions', function () {
     await db1.close()
     await db2.close()
 
-    // db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
-    // db2 = await orbitdb2.open(db1.address)
+    await new Promise(resolve => {
+      setTimeout(() => resolve(), 1000)
+    })
 
-    // strictEqual(db1.address, addr)
+    db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    db2 = await orbitdb2.open(db1.address)
+
+    strictEqual(db1.address, addr)
   })
 })
