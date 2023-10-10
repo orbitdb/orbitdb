@@ -220,10 +220,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const handleUpdateMessage = async message => {
     const task = async () => {
       const peerId = await ipfs.libp2p.peerId
-      const messageIsNotFromMe = message => String(peerId) !== String(message.detail.from)
       const messageHasData = message => message.detail.data !== undefined
       try {
-        if (messageIsNotFromMe(message) && messageHasData(message) && onSynced) {
+        if (messageHasData(message) && onSynced) {
           await onSynced(message.detail.data)
         }
       } catch (e) {
