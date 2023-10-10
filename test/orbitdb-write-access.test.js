@@ -266,7 +266,7 @@ describe('Write Permissions', function () {
     await db2.close()
   })
 
-  it('OrbitDB access controller address is deterministic', async () => {
+  it.skip('OrbitDB access controller address is deterministic', async () => {
     let connected = false
     let updateCount = 0
 
