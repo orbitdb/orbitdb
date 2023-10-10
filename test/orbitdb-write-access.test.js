@@ -278,10 +278,10 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
-    let db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
-    let db2 = await orbitdb2.open(db1.address)
+    const db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    const db2 = await orbitdb2.open(db1.address)
 
-    const addr = db1.address
+    // const addr = db1.address
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
