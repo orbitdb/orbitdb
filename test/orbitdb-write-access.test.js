@@ -267,6 +267,8 @@ describe('Write Permissions', function () {
   })
 
   it('OrbitDB access controller address is deterministic', async () => {
+    console.log('ipfs 1', ipfs1.libp2p.peerId.toString())
+    console.log('ipfs 2', ipfs2.libp2p.peerId.toString())
     let connected = false
     let updateCount = 0
 
