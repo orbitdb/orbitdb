@@ -152,13 +152,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
 
   const sendHeads = async (source) => {
     return (async function * () {
-      try {
-        const heads = await log.heads()
-        for await (const { bytes } of heads) {
-          yield bytes
-        }
-      } catch (err) {
-        console.log('onPeerJoined', ipfs.libp2p.peerId.toString())
+      const heads = await log.heads()
+      for await (const { bytes } of heads) {
+        yield bytes
       }
     })()
   }
