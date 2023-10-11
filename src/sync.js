@@ -146,7 +146,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       const heads = await log.heads()
       events.emit('join', peerId, heads)
     } catch (err) {
-      console.log('onPeerJoined', ipfs.libp2p.peerId.toString()) 
+      console.log('onPeerJoined', ipfs.libp2p.peerId.toString())
     }
   }
 
@@ -158,7 +158,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
           yield bytes
         }
       } catch (err) {
-        console.log('onPeerJoined', ipfs.libp2p.peerId.toString()) 
+        console.log('onPeerJoined', ipfs.libp2p.peerId.toString())
       }
     })()
   }
