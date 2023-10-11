@@ -255,13 +255,13 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   const stopSync = async () => {
     if (started) {
+      started = false
       await queue.onIdle()
       ipfs.libp2p.services.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
       ipfs.libp2p.services.pubsub.removeEventListener('message', handleUpdateMessage)
       await ipfs.libp2p.unhandle(headsSyncAddress)
       await ipfs.libp2p.services.pubsub.unsubscribe(address)
       peers.clear()
-      started = false
     }
   }
 

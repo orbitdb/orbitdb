@@ -297,10 +297,6 @@ describe('Write Permissions', function () {
     await db1.close()
     await db2.close()
 
-    await new Promise(resolve => {
-      setTimeout(() => resolve(), 1000)
-    })
-
     db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
     db2 = await orbitdb2.open(db1.address)
 
