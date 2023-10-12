@@ -267,10 +267,9 @@ describe('Write Permissions', function () {
   })
 
   it('OrbitDB access controller address is deterministic', async () => {
-    console.log('ipfs 1', ipfs1.libp2p.peerId.toString())
-    console.log('ipfs 2', ipfs2.libp2p.peerId.toString())
     let connected = false
     let updateCount = 0
+    let closed = false
 
     const onConnected = async (peerId, heads) => {
       connected = true
@@ -280,6 +279,10 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
+    const onClose = async () => {
+      closed = true
+    }
+
     let db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
     let db2 = await orbitdb2.open(db1.address)
 
@@ -287,6 +290,7 @@ describe('Write Permissions', function () {
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)
+    db2.events.on('close', onClose)
 
     await waitFor(() => connected, () => true)
 
@@ -298,6 +302,8 @@ describe('Write Permissions', function () {
 
     await db1.close()
     await db2.close()
+
+    await waitFor(() => closed, () => true)
 
     db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
     db2 = await orbitdb2.open(db1.address)
