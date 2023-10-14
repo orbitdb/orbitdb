@@ -273,7 +273,7 @@ describe('Write Permissions', function () {
     const onClose = async () => {
       closed = true
     }
-    
+
     const dbName = 'write-test-7'
 
     db1 = await orbitdb1.open(dbName, { AccessController: OrbitDBAccessController() })
