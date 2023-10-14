@@ -63,7 +63,7 @@ describe('Write Permissions', function () {
       connected = true
     }
 
-    db1 = await orbitdb1.open('write-test')
+    db1 = await orbitdb1.open('write-test-1')
     db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
@@ -93,7 +93,7 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
-    db1 = await orbitdb1.open('write-test', { AccessController: IPFSAccessController({ write: ['*'] }) })
+    db1 = await orbitdb1.open('write-test-2', { AccessController: IPFSAccessController({ write: ['*'] }) })
     db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
@@ -130,7 +130,7 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
-    db1 = await orbitdb1.open('write-test', options)
+    db1 = await orbitdb1.open('write-test-3', options)
     db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
@@ -162,7 +162,7 @@ describe('Write Permissions', function () {
       connected = true
     }
 
-    db1 = await orbitdb1.open('write-test', options)
+    db1 = await orbitdb1.open('write-test-4', options)
     db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
@@ -192,7 +192,7 @@ describe('Write Permissions', function () {
       ++updateCount
     }
 
-    db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    db1 = await orbitdb1.open('write-test-5', { AccessController: OrbitDBAccessController() })
     db2 = await orbitdb2.open(db1.address)
 
     db2.events.on('join', onConnected)
@@ -273,8 +273,10 @@ describe('Write Permissions', function () {
     const onClose = async () => {
       closed = true
     }
+    
+    const dbName = 'write-test-7'
 
-    db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    db1 = await orbitdb1.open(dbName, { AccessController: OrbitDBAccessController() })
     db2 = await orbitdb2.open(db1.address)
 
     const addr = db1.address
@@ -296,7 +298,7 @@ describe('Write Permissions', function () {
 
     await waitFor(() => closed, () => true)
 
-    db1 = await orbitdb1.open('write-test', { AccessController: OrbitDBAccessController() })
+    db1 = await orbitdb1.open(dbName, { AccessController: OrbitDBAccessController() })
     db2 = await orbitdb2.open(db1.address)
 
     strictEqual(db1.address, addr)
