@@ -56,7 +56,7 @@ import { createOrbitDB } from '@orbitdb/core'
   // The above address can be used on another peer to open the same database
 
   // Listen for updates from peers
-  db.events.on("update", entry => {
+  db.events.on("update", async entry => {
     console.log(entry)
     const all = await db.all()
     console.log(all)
