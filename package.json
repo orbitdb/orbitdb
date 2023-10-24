@@ -17,6 +17,7 @@
   ],
   "type": "module",
   "main": "src/index.js",
+  "types": "dist/types/index.d.ts",
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.5",
     "@libp2p/crypto": "^2.0.4",
@@ -55,7 +56,7 @@
     "test:ci": "cross-env c8 mocha --config test/.mocharc.json",
     "test:browser": "npm run build:tests && mocha-headless-chrome -t 360000 -f ./test/browser/index.html -a no-sandbox",
     "build": "npm run build:dist && npm run build:types && npm run build:debug",
-    "build:types": "npm run tsc",
+    "build:types": "pnpm run tsc -p conf/tsconfig.json",
     "build:dist": "webpack --config conf/webpack.config.js",
     "build:debug": "webpack --config conf/webpack.debug.config.js",
     "build:docs": "jsdoc -c ./conf/jsdoc/jsdoc.json -r src/** -d ./docs/api -R ./docs/jsdoc/README.md",

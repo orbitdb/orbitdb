@@ -14,7 +14,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "outDir": "../dist",
+    "outDir": "../dist/types",
     "sourceMap": true,
     "strict": true,
     "strictPropertyInitialization": true,
