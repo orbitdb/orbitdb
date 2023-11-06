@@ -39,22 +39,12 @@ const useAccessController = (accessController) => {
   accessControllers[accessController.type] = accessController
 }
 
-/**
- * Removes an access controller from the list.
- * @param {string} type A valid access controller type.
- * @static
- */
-const removeAccessController = type => {
-  delete accessControllers[type]
-}
-
 useAccessController(IPFSAccessController)
 useAccessController(OrbitDBAccessController)
 
 export {
   getAccessController,
   useAccessController,
-  removeAccessController,
   IPFSAccessController,
   OrbitDBAccessController
 }
