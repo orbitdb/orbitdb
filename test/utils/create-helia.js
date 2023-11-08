@@ -28,7 +28,11 @@ export default async () => {
       })
     ],
     connectionEncryption: [noise()],
-    streamMuxers: [mplex()],
+    streamMuxers: [
+      mplex({
+        disconnectThreshold: 128
+      })
+    ],
     connectionGater: {
       denyDialMultiaddr: () => {
         return false
