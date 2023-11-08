@@ -117,7 +117,7 @@ npm init
 Create a new file called index.js and paste in the following code:
 
 ```js
-import { OrbitDB, getAccessController } from '@orbitdb/core'
+import { OrbitDB, IPFSAccessController } from '@orbitdb/core'
 import { create } from 'ipfs-core'
 
 const main = async () => {
@@ -139,10 +139,6 @@ const main = async () => {
   // ./[randDir]/ipfs.
   const orbitdb = await createOrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
 
-  // Get the IPFS AccessController function. We will need it to ensure everyone 
-  // can write to the database.
-  const AccessController = getAccessController('ipfs')
-
   let db
 
   if (process.argv[2]) {
@@ -154,7 +150,7 @@ const main = async () => {
     // to write to the database. A more robust solution would use the 
     // OrbitDBAccessController to provide "fine-grain" access using grant and 
     // revoke. 
-    db = await orbitdb.open('my-db', { AccessController: AccessController({ write: ['*']})})
+    db = await orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: ['*']})})
   }
 
   // Copy this output if you want to connect a peer to another.
