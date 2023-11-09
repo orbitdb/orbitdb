@@ -1,7 +1,8 @@
 import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import OrbitDB from '../src/orbitdb.js'
-import { IPFSAccessController, OrbitDBAccessController, useAccessController, getAccessController, removeAccessController } from '../src/access-controllers/index.js'
+import { IPFSAccessController, OrbitDBAccessController, useAccessController, getAccessController } from '../src/access-controllers/index.js'
+import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 import createHelia from './utils/create-helia.js'
 
@@ -93,19 +94,6 @@ describe('Add a custom access controller', function () {
 
     it('returns custom access controller after adding it', async () => {
       deepStrictEqual(getAccessController(type), CustomAccessController)
-    })
-
-    it('can be removed from supported access controllers', async () => {
-      let err
-      removeAccessController(type)
-
-      try {
-        getAccessController(type)
-      } catch (e) {
-        err = e.toString()
-      }
-
-      deepStrictEqual(err, 'Error: AccessController type \'custom!\' is not supported')
     })
   })
 })
