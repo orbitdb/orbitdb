@@ -15,7 +15,7 @@ const connectIpfsNodes = async (ipfs1, ipfs2, options = {
     await ipfs1.libp2p.dial(multiaddr(`/ip4/127.0.0.1/tcp/12345/ws/p2p/${relayId}`))
 
     let a1
-    
+
     await waitFor(() => {
       a1 = ipfs1.libp2p.getMultiaddrs().filter(ma => WebRTC.matches(ma)).pop()
 

@@ -2,7 +2,6 @@ import { strictEqual, deepStrictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import OrbitDB from '../src/orbitdb.js'
 import { IPFSAccessController, OrbitDBAccessController, useAccessController, getAccessController } from '../src/access-controllers/index.js'
-import config from './config.js'
 import pathJoin from '../src/utils/path-join.js'
 import createHelia from './utils/create-helia.js'
 
@@ -25,7 +24,6 @@ describe('Add a custom access controller', function () {
   let orbitdb
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
     orbitdb = await OrbitDB({ ipfs })
   })
@@ -38,9 +36,6 @@ describe('Add a custom access controller', function () {
     if (ipfs) {
       await ipfs.stop()
     }
-
-    // Remove the added custom database type from OrbitDB import
-    removeAccessController(type)
 
     await rimraf('./orbitdb')
     await rimraf('./ipfs1')
