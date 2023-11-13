@@ -40,6 +40,7 @@ describe('Log - Iterator', function () {
     let startHash
     const hashes = []
     const logSize = 100
+    const startIndex = 67
 
     beforeEach(async () => {
       log1 = await Log(testIdentity, { logId: 'X' })
@@ -51,8 +52,8 @@ describe('Log - Iterator', function () {
 
       // entry67
       // startHash = 'zdpuAxCuaH2R7AYKZ6ZBeeA94v3FgmHZ8wCfDy7pLVcoc3zSo'
-      startHash = hashes[67][0]
-      strictEqual(startHash, hashes[67][0])
+      startHash = hashes[startIndex][0]
+      strictEqual(startHash, hashes[startIndex][0])
     })
 
     it('returns length with lte and amount', async () => {
@@ -366,6 +367,40 @@ describe('Log - Iterator', function () {
       }
 
       strictEqual(i, 68)
+    })
+
+    it('returns correct entries with gt when amount is more than total entries', async () => {
+      const amount = logSize - startIndex
+      const expectedAmount = logSize - startIndex - 1
+
+      const it = log1.iterator({
+        gt: startHash,
+        amount
+      })
+
+      let i = 0
+      for await (const entry of it) {
+        strictEqual(entry.payload, 'entry' + (logSize - 1 - i++))
+      }
+
+      strictEqual(i, expectedAmount)
+    })
+
+    it('returns correct entries with gte when amount is more than total entries', async () => {
+      const amount = logSize - startIndex + 1
+      const expectedAmount = amount - 1
+
+      const it = log1.iterator({
+        gte: startHash,
+        amount
+      })
+
+      let i = 0
+      for await (const entry of it) {
+        strictEqual(entry.payload, 'entry' + (logSize - 1 - i++))
+      }
+
+      strictEqual(i, expectedAmount)
     })
 
     it('returns zero entries when amount is 0', async () => {
