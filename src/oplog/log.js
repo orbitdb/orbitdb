@@ -434,7 +434,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
     if (useBuffer) {
       const endIndex = buffer.keys.length
-      const startIndex = endIndex - amount
+      const startIndex = endIndex > amount ? endIndex - amount : 0
       const keys = buffer.keys.slice(startIndex, endIndex)
       for (const key of keys) {
         const hash = buffer.get(key)
