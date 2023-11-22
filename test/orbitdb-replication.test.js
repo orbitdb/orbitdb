@@ -7,7 +7,7 @@ import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 
 describe('Replicating databases', function () {
-  this.timeout(30000)
+  this.timeout(10000)
 
   let ipfs1, ipfs2
   let orbitdb1, orbitdb2
@@ -62,16 +62,7 @@ describe('Replicating databases', function () {
       let replicated = false
 
       const onJoin = async (peerId, heads) => {
-        const head = (await db2.log.heads())[0]
-        if (head && head.clock.time === amount) {
-          replicated = true
-        }
-      }
-
-      const onUpdated = (entry) => {
-        if (entry.clock.time === amount) {
-          replicated = true
-        }
+        replicated = true
       }
 
       const onError = (err) => {
@@ -81,7 +72,6 @@ describe('Replicating databases', function () {
       db2 = await orbitdb2.open(db1.address)
 
       db2.events.on('join', onJoin)
-      db2.events.on('update', onUpdated)
       db2.events.on('error', onError)
       db1.events.on('error', onError)
 

@@ -79,7 +79,7 @@ const create = async (identity, id, payload, clock = null, next = [], refs = [])
   entry.identity = identity.hash
   entry.sig = signature
 
-  return _encodeEntry(entry)
+  return encode(entry)
 }
 
 /**
@@ -148,10 +148,17 @@ const isEqual = (a, b) => {
  */
 const decode = async (bytes) => {
   const { value } = await Block.decode({ bytes, codec, hasher })
-  return _encodeEntry(value)
+  return encode(value)
 }
 
-const _encodeEntry = async (entry) => {
+/**
+ * Encodes an Entry and adds bytes field to it
+ * @param {Entry} entry
+ * @return {module:Log~Entry}
+ * @memberof module:Log~Entry
+ * @private
+ */
+const encode = async (entry) => {
   const { cid, bytes } = await Block.encode({ value: entry, codec, hasher })
   const hash = cid.toString(hashStringEncoding)
   const clock = Clock(entry.clock.id, entry.clock.time)
@@ -167,6 +174,7 @@ export default {
   create,
   verify,
   decode,
+  encode,
   isEntry,
   isEqual
 }
