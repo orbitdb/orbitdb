@@ -4,7 +4,7 @@
   <img src="images/orbit_db_logo_color.png" width="256" />
 </p>
 
-[![Matrix](https://img.shields.io/matrix/orbit-db:matrix.org?label=chat%20on%20matrix)](https://app.element.io/#/room/#orbit-db:matrix.org) [![npm version](https://badge.fury.io/js/orbit-db.svg)](https://www.npmjs.com/package/@orbitdb/core) [![node](https://img.shields.io/node/v/orbit-db.svg)](https://www.npmjs.com/package/@orbitdb/core)
+[![Matrix](https://img.shields.io/matrix/orbit-db%3Amatrix.org)](https://app.element.io/#/room/#orbit-db:matrix.org) [![npm (scoped)](https://img.shields.io/npm/v/%40orbitdb/core)](https://www.npmjs.com/package/@orbitdb/core) [![node-current (scoped)](https://img.shields.io/node/v/%40orbitdb/core)](https://www.npmjs.com/package/@orbitdb/core)
 
 OrbitDB is a **serverless, distributed, peer-to-peer database**. OrbitDB uses [IPFS](https://ipfs.tech) as its data storage and [Libp2p Pubsub](https://docs.libp2p.io/concepts/pubsub/overview/) to automatically sync databases with peers. It's an eventually consistent database that uses [Merkle-CRDTs](https://arxiv.org/abs/2004.00107) for conflict-free database writes and merges making OrbitDB an excellent choice for p2p and decentralized apps, blockchain applications and [local-first](https://www.inkandswitch.com/local-first/) web applications.
 
