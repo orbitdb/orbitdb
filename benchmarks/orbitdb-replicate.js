@@ -65,6 +65,8 @@ const ipfsConfig = {
 
   const db2 = await orbitdb2.open(db1.address)
 
+  const startTime2 = new Date().getTime()
+
   let connected = false
 
   const onJoin = async (peerId) => (connected = true)
@@ -74,7 +76,6 @@ const ipfsConfig = {
   await waitFor(() => connected, () => true)
 
   console.log(`Iterate ${entryCount} events to replicate them`)
-  const startTime2 = new Date().getTime()
 
   const all = []
   for await (const { value } of db2.iterator()) {
