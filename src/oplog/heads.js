@@ -35,6 +35,12 @@ const Heads = async ({ storage, heads }) => {
     return newHeads
   }
 
+  const remove = async (hash) => {
+    const currentHeads = await all()
+    const newHeads = currentHeads.filter(e => e.hash !== hash)
+    await set(newHeads)
+  }
+
   const iterator = async function * () {
     const it = storage.iterator()
     for await (const [, bytes] of it) {
@@ -66,6 +72,7 @@ const Heads = async ({ storage, heads }) => {
     put,
     set,
     add,
+    remove,
     iterator,
     all,
     clear,

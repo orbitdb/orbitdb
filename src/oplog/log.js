@@ -128,7 +128,6 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const bytes = await _entries.get(hash)
     if (bytes) {
       const entry = await Entry.decode(bytes)
-      await _index.put(hash, true)
       return entry
     }
   }
@@ -206,12 +205,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (!isLog(log)) {
       throw new Error('Given argument is not an instance of Log')
     }
+    if (_entries.merge) {
+      await _entries.merge(log.storage)
+    }
     const heads = await log.heads()
     for (const entry of heads) {
       await joinEntry(entry)
-    }
-    if (_entries.merge) {
-      await _entries.merge(log.storage)
     }
   }
 
@@ -222,54 +221,86 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    *
    * @example
    *
-   * await log.join(entry)
+   * await log.joinEntry(entry)
    *
    * @memberof module:Log~Log
    * @instance
    */
   const joinEntry = async (entry) => {
-    const { hash } = entry
-    // Check if the entry is already in the log and return early if it is
-    const isAlreadyInTheLog = await has(hash)
+    /* 1. Check if the entry is already in the log and return early if it is */
+    const isAlreadyInTheLog = await has(entry.hash)
     if (isAlreadyInTheLog) {
       return false
-    } else {
-      // Check that the entry is not an entry that hasn't been indexed
-      const it = traverse(await heads(), (e) => e.next.includes(hash) || entry.next.includes(e.hash))
-      for await (const e of it) {
-        if (e.next.includes(hash)) {
-          await _index.put(hash, true)
-          return false
-        }
+    }
+
+    const verifyEntry = async (entry) => {
+      // Check that the Entry belongs to this Log
+      if (entry.id !== id) {
+        throw new Error(`Entry's id (${entry.id}) doesn't match the log's id (${id}).`)
+      }
+      // Verify if entry is allowed to be added to the log
+      const canAppend = await access.canAppend(entry)
+      if (!canAppend) {
+        throw new Error(`Could not append entry:\nKey "${entry.identity}" is not allowed to write to the log`)
+      }
+      // Verify signature for the entry
+      const isValid = await Entry.verify(identity, entry)
+      if (!isValid) {
+        throw new Error(`Could not validate signature for entry "${entry.hash}"`)
       }
     }
-    // Check that the Entry belongs to this Log
-    if (entry.id !== id) {
-      throw new Error(`Entry's id (${entry.id}) doesn't match the log's id (${id}).`)
-    }
-    // Verify if entry is allowed to be added to the log
-    const canAppend = await access.canAppend(entry)
-    if (!canAppend) {
-      throw new Error(`Could not append entry:\nKey "${entry.identity}" is not allowed to write to the log`)
-    }
-    // Verify signature for the entry
-    const isValid = await Entry.verify(identity, entry)
-    if (!isValid) {
-      throw new Error(`Could not validate signature for entry "${hash}"`)
+
+    /* 2. Verify the entry */
+    await verifyEntry(entry)
+
+    /* 3. Find missing entries and connections (=path in the DAG) to the current heads */
+    const headsHashes = (await heads()).map(e => e.hash)
+    const hashesToAdd = new Set([entry.hash])
+    const hashesToGet = new Set([...entry.next, ...entry.refs])
+    const connectedHeads = new Set()
+
+    const traverseAndVerify = async () => {
+      const getEntries = Array.from(hashesToGet.values()).filter(has).map(get)
+      const entries = await Promise.all(getEntries)
+
+      for (const e of entries) {
+        hashesToGet.delete(e.hash)
+
+        await verifyEntry(e)
+
+        hashesToAdd.add(e.hash)
+
+        for (const hash of [...e.next, ...e.refs]) {
+          const isInTheLog = await has(hash)
+
+          if (!isInTheLog && !hashesToAdd.has(hash)) {
+            hashesToGet.add(hash)
+          } else if (headsHashes.includes(hash)) {
+            connectedHeads.add(hash)
+          }
+        }
+      }
+
+      if (hashesToGet.size > 0) {
+        await traverseAndVerify()
+      }
     }
 
-    // Add the new entry to heads (union with current heads)
-    const newHeads = await _heads.add(entry)
+    await traverseAndVerify()
 
-    if (!newHeads) {
-      return false
+    /* 4. Add missing entries to the index (=to the log) */
+    for (const hash of hashesToAdd.values()) {
+      await _index.put(hash, true)
     }
 
-    // Add the new entry to the entry storage
-    await _entries.put(hash, entry.bytes)
-    // Add the new entry to the entry index
-    await _index.put(hash, true)
-    // We've added the entry to the log
+    /* 5. Remove heads which new entries are connect to */
+    for (const hash of connectedHeads.values()) {
+      await _heads.remove(hash)
+    }
+
+    /* 6. Add the new entry to heads (=union with current heads) */
+    await _heads.add(entry)
+
     return true
   }
 
@@ -330,7 +361,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
           // Add the next and refs fields from the fetched entries to the next round
           toFetch = nexts
-            .filter(e => e != null)
+            .filter(e => e !== null && e !== undefined)
             .reduce((res, acc) => Array.from(new Set([...res, ...acc.next, ...(useRefs ? acc.refs : [])])), [])
             .filter(notIndexed)
           // Add the fetched entries to the stack to be processed
