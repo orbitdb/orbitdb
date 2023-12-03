@@ -1,6 +1,6 @@
 {
   "name": "@orbitdb/core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
