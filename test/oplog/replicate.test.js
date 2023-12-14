@@ -2,7 +2,6 @@ import { strictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry, Identities, KeyStore, IPFSBlockStorage } from '../../src/index.js'
-import config from '../config.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
 import connectPeers from '../utils/connect-nodes.js'
 import waitForPeers from '../utils/wait-for-peers.js'
@@ -11,8 +10,6 @@ import createHelia from '../utils/create-helia.js'
 const keysPath = './testkeys'
 
 describe('Log - Replication', function () {
-  this.timeout(60000)
-
   let ipfs1, ipfs2
   let id1, id2
   let keystore
@@ -139,7 +136,7 @@ describe('Log - Replication', function () {
         })
       }
 
-      await whileProcessingMessages(config.timeout)
+      await whileProcessingMessages(this.timeout())
 
       const result = await Log(testIdentity1, { logId, entryStorage: storage1 })
       await result.join(log1)

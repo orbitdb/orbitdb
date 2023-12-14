@@ -4,7 +4,6 @@ import OrbitDB from '../../src/orbitdb.js'
 import Keystore from '../../src/key-store.js'
 import Identities from '../../src/identities/identities.js'
 import OrbitDBAccessController from '../../src/access-controllers/orbitdb.js'
-import config from '../config.js'
 import connectPeers from '../utils/connect-nodes.js'
 import createHelia from '../utils/create-helia.js'
 
@@ -12,8 +11,6 @@ const dbPath1 = './orbitdb/tests/orbitdb-access-controller/1'
 const dbPath2 = './orbitdb/tests/orbitdb-access-controller/2'
 
 describe('OrbitDBAccessController', function () {
-  this.timeout(config.timeout)
-
   let ipfs1, ipfs2
   let orbitdb1, orbitdb2
   let identities1, identities2, testIdentity1, testIdentity2

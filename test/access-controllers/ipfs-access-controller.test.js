@@ -3,15 +3,12 @@ import { rimraf } from 'rimraf'
 import Keystore from '../../src/key-store.js'
 import Identities from '../../src/identities/identities.js'
 import IPFSAccessController from '../../src/access-controllers/ipfs.js'
-import config from '../config.js'
 import connectPeers from '../utils/connect-nodes.js'
 import createHelia from '../utils/create-helia.js'
 
 describe('IPFSAccessController', function () {
   const dbPath1 = './orbitdb/tests/ipfs-access-controller/1'
   const dbPath2 = './orbitdb/tests/ipfs-access-controller/2'
-
-  this.timeout(config.timeout)
 
   let ipfs1, ipfs2
   let keystore1, keystore2
