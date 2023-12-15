@@ -19,7 +19,6 @@ describe('KeyValue Database', function () {
   const databaseId = 'keyvalue-AAA'
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
 
     await copy(testKeysPath, keysPath)

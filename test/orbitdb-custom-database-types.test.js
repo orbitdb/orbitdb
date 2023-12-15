@@ -26,7 +26,6 @@ describe('Add a custom database type', function () {
   let orbitdb
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
     orbitdb = await createOrbitDB({ ipfs })
   })

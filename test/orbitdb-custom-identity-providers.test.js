@@ -11,7 +11,6 @@ describe('Add a custom identity provider', function () {
   let ipfs
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
   })
 
