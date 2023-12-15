@@ -1,9 +1,6 @@
 # Don't distribute the dependencies
 node_modules/
 
-# Don't track code coverage reports
-coverage/
-
 #Don't track ipfs files
 test/ipfs/
 test/browser/ipfs/
