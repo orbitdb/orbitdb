@@ -323,4 +323,77 @@ describe('Documents Database', function () {
       strictEqual(all.length, amount)
     })
   })
+
+  describe('Supported data types', () => {
+    const data = {
+      booleans: { _id: 'booleans', value: true },
+      integers: { _id: 'integers', value: 123 },
+      floats: { _id: 'floats', value: 3.14 },
+      arrays: { _id: 'arrays', value: [1, 2, 3] },
+      maps: { _id: 'maps', value: new Map([['a', 1], ['b', 2]]) },
+      uint8: { _id: 'uint8', value: new Uint8Array([1, 2, 3]) }
+    }
+
+    beforeEach(async () => {
+      db = await Documents()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
+      for (const doc of Object.values(data)) {
+        await db.put(doc)
+      }
+      await db.close()
+      db = await Documents()({ ipfs, identity: testIdentity1, address: databaseId, accessController })
+    })
+
+    afterEach(async () => {
+      if (db) {
+        await db.drop()
+        await db.close()
+      }
+    })
+
+    it('supports booleans', async () => {
+      const { value } = await db.get('booleans')
+      deepStrictEqual(value, data.booleans)
+    })
+
+    it('supports integers', async () => {
+      const { value } = await db.get('integers')
+      deepStrictEqual(value, data.integers)
+    })
+
+    it('supports floats', async () => {
+      const { value } = await db.get('floats')
+      deepStrictEqual(value, data.floats)
+    })
+
+    it('supports Arrays', async () => {
+      const { value } = await db.get('arrays')
+      deepStrictEqual(value, data.arrays)
+    })
+
+    it('supports Maps', async () => {
+      const { value } = await db.get('maps')
+      deepStrictEqual(value, { _id: 'maps', value: Object.fromEntries(data.maps.value) })
+    })
+
+    it('supports Uint8Arrays', async () => {
+      const { value } = await db.get('uint8')
+      deepStrictEqual(value, data.uint8)
+    })
+
+    it('doesn\'t support Sets', async () => {
+      const _id = 'test'
+      const value = new Set([1, 2, 3, 4])
+
+      let err
+
+      try {
+        await db.put({ _id, value })
+      } catch (e) {
+        err = e
+      }
+
+      notStrictEqual(err, undefined)
+      strictEqual(err.message, 'CBOR encode error: unsupported type: Set')
+    })
+  })
 })
