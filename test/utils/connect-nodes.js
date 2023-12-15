@@ -14,29 +14,18 @@ const connectIpfsNodes = async (ipfs1, ipfs2, options = {
 
     await ipfs1.libp2p.dial(multiaddr(`/ip4/127.0.0.1/tcp/12345/ws/p2p/${relayId}`))
 
-    let a1
+    let address1
 
     await waitFor(() => {
-      a1 = ipfs1.libp2p.getMultiaddrs().filter(ma => WebRTC.matches(ma)).pop()
-
-      if (a1 != null) {
-        return true
-      } else {
-        return false
-      }
+      address1 = ipfs1.libp2p.getMultiaddrs().filter(ma => WebRTC.matches(ma)).pop()
+      return address1 != null
     }, () => true)
 
-    await ipfs2.libp2p.dial(a1)
+    await ipfs2.libp2p.dial(address1)
   } else {
     await ipfs2.libp2p.peerStore.save(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
     await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
   }
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve()
-    }, 1000)
-  })
 }
 
 export default connectIpfsNodes
