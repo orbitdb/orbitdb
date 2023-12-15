@@ -1,4 +1,5 @@
 import { createHelia } from 'helia'
+import { bitswap } from 'helia/block-brokers'
 import { createLibp2p } from 'libp2p'
 import { DefaultLibp2pOptions, DefaultLibp2pBrowserOptions } from '../../src/index.js'
 
@@ -9,5 +10,10 @@ export default async () => {
 
   const libp2p = await createLibp2p({ ...options })
 
-  return createHelia({ libp2p })
+  const heliaOptions = {
+    libp2p,
+    blockBrokers: [bitswap()]
+  }
+
+  return createHelia({ ...heliaOptions })
 }
