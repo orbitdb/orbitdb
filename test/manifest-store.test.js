@@ -9,7 +9,6 @@ describe('Manifest', () => {
   let manifestStore
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo })
     ipfs = await createHelia()
     manifestStore = await ManifestStore({ ipfs })
   })

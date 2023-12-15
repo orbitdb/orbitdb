@@ -19,7 +19,6 @@ describe('Documents Database', function () {
   const databaseId = 'documents-AAA'
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
 
     await copy(testKeysPath, keysPath)

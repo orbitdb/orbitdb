@@ -16,7 +16,6 @@ describe('Storages', function () {
   let testIdentity
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
     ipfs = await createHelia()
     await copy(testKeysPath, keysPath)
     keystore = await KeyStore({ path: keysPath })

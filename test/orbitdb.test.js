@@ -50,7 +50,7 @@ describe('OrbitDB', function () {
 
     it('has the IPFS instance given as a parameter', async () => {
       const { id: expectedId } = ipfs1.libp2p.peerId
-      const { id: resultId } = ipfs1.libp2p.peerId
+      const { id: resultId } = orbitdb1.ipfs.libp2p.peerId
       strictEqual(expectedId, resultId)
     })
 

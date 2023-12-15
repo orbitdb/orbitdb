@@ -8,7 +8,7 @@ import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { circuitRelayTransport } from 'libp2p/circuit-relay'
 
 /**
- * A basic Libp2p configuration for node servers.
+ * A basic Libp2p configuration for Node.js nodes.
  */
 export const DefaultLibp2pOptions = {
   addresses: {
@@ -24,13 +24,9 @@ export const DefaultLibp2pOptions = {
     })
   ],
   connectionEncryption: [noise()],
-  streamMuxers: [
-    yamux()
-  ],
+  streamMuxers: [yamux()],
   connectionGater: {
-    denyDialMultiaddr: () => {
-      return false
-    }
+    denyDialMultiaddr: () => false
   },
   services: {
     identify: identifyService(),
@@ -55,13 +51,9 @@ export const DefaultLibp2pBrowserOptions = {
     })
   ],
   connectionEncryption: [noise()],
-  streamMuxers: [
-    yamux()
-  ],
+  streamMuxers: [yamux()],
   connectionGater: {
-    denyDialMultiaddr: () => {
-      return false
-    }
+    denyDialMultiaddr: () => false
   },
   services: {
     identify: identifyService(),
