@@ -23,7 +23,7 @@ const DefaultTimeout = 30000 // 30 seconds
  *
  * Once the initial sync has completed, peers notify one another of updates to
  * the log, ie. updates to the database, using the initially opened pubsub
- * topic subscription. A peer with new heads broadcasts changes to other peers 
+ * topic subscription. A peer with new heads broadcasts changes to other peers
  * by publishing the updated heads to the pubsub topic. Peers subscribed to the
  * same topic will then receive the update and will update their log's state,
  * the heads, accordingly.
