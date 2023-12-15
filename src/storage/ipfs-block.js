@@ -7,15 +7,12 @@
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 
-const defaultTimeout = 30000
-
 /**
  * Creates an instance of IPFSBlockStorage.
  * @function
  * @param {Object} params One or more parameters for configuring
  * IPFSBlockStorage.
  * @param {IPFS} params.ipfs An IPFS instance.
- * @param {number} [params.timeout=defaultTimeout] A timeout in ms.
  * @param {boolean} [params.pin=false] True, if the block should be pinned,
  * false otherwise.
  * @return {module:Storage.Storage-IPFS} An instance of IPFSBlockStorage.
@@ -23,10 +20,8 @@ const defaultTimeout = 30000
  * @throw An instance of ipfs is required if params.ipfs is not specified.
  * @instance
  */
-const IPFSBlockStorage = async ({ ipfs, timeout, pin } = {}) => {
+const IPFSBlockStorage = async ({ ipfs, pin } = {}) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
-
-  timeout = timeout || defaultTimeout
 
   /**
    * Puts data to an IPFS block.
