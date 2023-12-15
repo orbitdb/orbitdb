@@ -23,24 +23,16 @@ const DefaultTimeout = 30000 // 30 seconds
  *
  * Once the initial sync has completed, peers notify one another of updates to
  * the log, ie. updates to the database, using the initially opened pubsub
- * topic subscription.
- * A peer with new heads broadcasts changes to other peers by publishing the
- * updated heads
- * to the pubsub topic. Peers subscribed to the same topic will then receive
- * the update and
- * will update their log's state, the heads, accordingly.
+ * topic subscription. A peer with new heads broadcasts changes to other peers 
+ * by publishing the updated heads to the pubsub topic. Peers subscribed to the
+ * same topic will then receive the update and will update their log's state,
+ * the heads, accordingly.
  *
  * The Sync Protocol is eventually consistent. It guarantees that once all
  * messages have been sent and received, peers will observe the same log state
  * and values. The Sync Protocol does not guarantee the order in which messages
  * are received or even that a message is recieved at all, nor any timing on
  * when messages are received.
- *
- * Note that the Sync Protocol does not retrieve the full log when
- * synchronizing the heads. Rather only the "latest entries" in the log, the
- * heads, are exchanged. In order to retrieve the full log and each entry, the
- * user would call the log.traverse() or log.iterator() functions, which go
- * through the log and retrieve each missing log entry from IPFS.
  *
  * @example
  * // Using defaults

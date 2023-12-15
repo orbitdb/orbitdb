@@ -88,15 +88,17 @@ const identities = await Identities({ path })
 The identity object is stored like any other [IPLD data structure](https://ipld.io/docs/) and can therefore be retrieved from IPFS using the identity's hash:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia' from 'ipfs-core'
 import * as Block from 'multiformats/block'
-import { Identities } from '@orbitdb/core'
+import { Identities, DefaultLibp2pOptions } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 
-const ipfs = await create()
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const identities = await Identities({ ipfs })
 const identity = await identities.createIdentity({ id: 'me' })

@@ -7,11 +7,13 @@ An access controller is passed when a database is opened for the first time. Onc
 Different access controllers can be assigned to the database using the `AccessController` param and passing it to OrbitDB's `open` function.
 
 ```js
-import { create } from 'ipfs-core'
-import { createOrbitDB } from '@orbitdb/core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
+import { createOrbitDB, DefaultLibp2pOptions } from '@orbitdb/core'
 import * as SomeAccessController from 'some-access-controller.js'
 
-const ipfs = create({ options })
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -34,10 +36,12 @@ await db.add('hello world') // only orbitdb.identity.id can write to the db.
 To change write access, pass the IPFSAccessController with the `write` parameter and an array of one or more Identity ids:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
 
-const ipfs = create({ options })
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const identities = await Identities()
 const anotherIdentity = identities.createIdentity('userB')
@@ -52,10 +56,12 @@ const db = orbitdb.open('my-db', { AccessController: IPFSAccessController({ writ
 To allow anyone to write to the database, specify the wildcard '*':
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
 
-const ipfs = create({ options })
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -69,10 +75,12 @@ const db = orbitdb.open('my-db', { AccessController: IPFSAccessController({ writ
 The OrbitDB access controller provides configurable write access using grant and revoke.
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB, Identities, OrbitDBAccessController } from '@orbitdb/core'
 
-const ipfs = create({ options })
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -155,8 +163,12 @@ In the above example, the `entry.identity` will be the hash of the identity. Usi
 Before passing the custom access controller to the `open` function, it must be added to OrbitDB's AccessControllers:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB, useAccessController } from '@orbitdb/core'
+
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 useAccessController(CustomAccessController)
 const orbitdb = await createOrbitDB({ ipfs })

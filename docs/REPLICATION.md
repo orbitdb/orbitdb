@@ -3,49 +3,27 @@
 Below is a simple replication example. Both peers run within the same Nodejs process.
 
 ```js
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
-import { create } from 'ipfs-core'
 
-// The config will set up a TCP connection when dialling other node.js peers.
-// You can find out more about peer connectivity at https://connectivity.libp2p.io/. 
-const config1 = {
-  Addresses: {
-    API: '/ip4/127.0.0.1/tcp/0',
-    Swarm: ['/ip4/0.0.0.0/tcp/0'],
-    Gateway: '/ip4/0.0.0.0/tcp/0'
-  },
-  Bootstrap: [],
-  Discovery: {
-    MDNS: {
-      Enabled: true,
-      Interval: 0
-    }
-  }
+// Our ipfs instances will be connecting over websockets. However, you could achieve the same here using tcp. You can find out more about peer connectivity at https://connectivity.libp2p.io/.
+
+const initIPFSInstance = () => {
+  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  return createHelia({ libp2p })
 }
 
-const config2 = {
-  Addresses: {
-    API: '/ip4/127.0.0.1/tcp/0',
-    Swarm: ['/ip4/0.0.0.0/tcp/0'],
-    Gateway: '/ip4/0.0.0.0/tcp/0'
-  },
-  Bootstrap: [],
-  Discovery: {
-    MDNS: {
-      Enabled: true,
-      Interval: 0
-    }
-  }
-}
-
-const ipfs1 = await create({ config: config1, repo: './ipfs/1' })
-const ipfs2 = await create({ config: config2, repo: './ipfs/2' })
+const ipfs1 = await initIPFSInstance()
+const ipfs2 = await initIPFSInstance()
 
 // The decentralized nature if IPFS can make it slow for peers to find one 
 // another. You can speed up a connection between two peers by "dialling-in"
 // to one peer from another.
-// const ipfs1PeerId = await ipfs1.id()
-// await ipfs2.swarm.connect(ipfs1PeerId.id)
+/* 
+await ipfs2.libp2p.save(ipfs1.libp2p.peerId, { multiaddr: ipfs1.libp2p.getMultiaddrs() })
+await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
+*/
 
 const orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'userA', directory: './orbitdb/1' })
 const orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'userB', directory: './orbitdb/2' })
@@ -79,7 +57,6 @@ db2.events.on('join', async (peerId, heads) => {
 // new heads that are available on db1.
 // If we want to listen for new data on db2, add an "update" listener to db1.
 db2.events.on('update', async (entry) => {
-  // Full replication is achieved by explicitly retrieving all records from db1.
   console.log(await db2.all())
   db2Updated = true
 })

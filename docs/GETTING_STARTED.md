@@ -10,10 +10,10 @@ Install OrbitDB:
 npm i @orbitdb/core
 ```
 
-You will also need IPFS for replication:
+You will also need Helia for replication:
 
 ```sh
-npm i ipfs-core
+npm i helia
 ```
 
 ## Creating a standalone database
@@ -31,11 +31,13 @@ npm init
 Create a file in your project called index.js and add the following code to it:
 
 ```js
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
-import { create } from 'ipfs-core'
 
 // Create an IPFS instance with defaults.
-const ipfs = await create()
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -117,27 +119,18 @@ npm init
 Create a new file called index.js and paste in the following code:
 
 ```js
-import { OrbitDB, IPFSAccessController } from '@orbitdb/core'
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
+import { OrbitDB, IPFSAccessController, DefaultLibp2pBrowserOptions } from '@orbitdb/core'
 
-const main = async () => {
-  // create a random directory to avoid IPFS and OrbitDB conflicts.
+const main = async () => {  
+  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  const ipfs = await createHelia({ libp2p })
+
+  // create a random directory to avoid OrbitDB conflicts.
   let randDir = (Math.random() + 1).toString(36).substring(2)
 
-  const config = {
-    Addresses: {
-      API: '/ip4/127.0.0.1/tcp/0',
-      Swarm: ['/ip4/0.0.0.0/tcp/0'],
-      Gateway: '/ip4/0.0.0.0/tcp/0'
-    }
-  }
-  
-  // This will create an IPFS repo in ./[randDir]/ipfs.
-  const ipfs = await create({ config, repo: './' + randDir + '/ipfs'})
-
-  // This will create all OrbitDB-related databases (keystore, my-db, etc) in 
-  // ./[randDir]/ipfs.
-  const orbitdb = await createOrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
+  const orbitdb = await createOrbitDB({ ipfs, directory: `./${randDir}/orbitdb` })
 
   let db
 

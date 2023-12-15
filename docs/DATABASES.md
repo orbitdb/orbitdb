@@ -35,10 +35,13 @@ The second part, an IPFS multihash `zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6m
 In order to replicate the database with peers, the address is what you need to give to other peers in order for them to start replicating the database.
 
 ```js
-import IPFS from 'ipfs-core'
-import { createOrbitDB } from '@orbitdb/core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
+import { createOrbitDB, DefaultLibp2pOptions } from '@orbitdb/core'
 
-const ipfs = await IPFS.create()
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
+
 const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db')
 console.log(db.address)
@@ -62,15 +65,17 @@ An example of a manifest is given below:
 The manifest is an [IPLD data structure](https://ipld.io/docs/) which can be retrived from IPFS using the manifest's hash:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import * as Block from 'multiformats/block'
-import { createOrbitDB, OrbitDBAddress } from '@orbitdb/core'
+import { createOrbitDB, OrbitDBAddress, DefaultLibp2pOptions } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 
-const ipfs = await create()
+const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const ipfs = await createHelia({ libp2p })
 
 // Create the db then close.
 const orbitdb = await createOrbitDB({ ipfs })
@@ -172,11 +177,17 @@ The power of OrbitDB lies in its ability to replicate databases across distribut
 A simple way to replicate a database between peers can be accomplished by opening a database, listening for updates and iterating over the records as those updates occur.
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
 
-const ipfs1 = await create({ config1, repo: './ipfs1' })
-const ipfs2 = await create({ config2, repo: './ipfs2' })
+const initIPFSInstance = () => {
+  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  return createHelia({ libp2p })
+}
+
+const ipfs1 = await initIPFSInstance()
+const ipfs2 = await initIPFSInstance()
 
 orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
 orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
