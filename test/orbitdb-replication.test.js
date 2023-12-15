@@ -79,7 +79,6 @@ describe('Replicating databases', function () {
       console.time('query 1')
       const eventsFromDb2 = []
       for await (const event of db2.iterator()) {
-        console.log(event)
         eventsFromDb2.unshift(event)
       }
       console.timeEnd('query 1')
