@@ -62,7 +62,7 @@ describe('Sync protocol', function () {
         await sync.stop()
       }
       if (log) {
-        await log.close
+        await log.close()
       }
     })
 

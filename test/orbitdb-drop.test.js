@@ -11,7 +11,6 @@ describe('Drop databases', function () {
   let db
 
   before(async () => {
-    // ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs' })
     ipfs = await createHelia()
   })
 
