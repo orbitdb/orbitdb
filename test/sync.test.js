@@ -701,7 +701,7 @@ describe('Sync protocol', function () {
       let err = null
 
       const onError = (error) => {
-        err = error
+        (!err) && (err = error)
       }
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
