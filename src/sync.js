@@ -141,7 +141,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     events.emit('join', peerId, heads)
   }
 
-  const sendHeads = async (source) => {
+  const sendHeads = (source) => {
     return (async function * () {
       const heads = await log.heads()
       for await (const { bytes } of heads) {

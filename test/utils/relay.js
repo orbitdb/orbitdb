@@ -1,10 +1,10 @@
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { createLibp2p } from 'libp2p'
 import { noise } from '@chainsafe/libp2p-noise'
-import { circuitRelayServer } from 'libp2p/circuit-relay'
+import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { createFromPrivKey } from '@libp2p/peer-id-factory'
 import { unmarshalPrivateKey } from '@libp2p/crypto/keys'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
@@ -31,7 +31,7 @@ const server = await createLibp2p({
   connectionEncryption: [noise()],
   streamMuxers: [yamux()],
   services: {
-    identify: identifyService(),
+    identify: identify(),
     relay: circuitRelayServer({
       reservations: {
         maxReservations: 5000,

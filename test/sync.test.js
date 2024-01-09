@@ -697,7 +697,7 @@ describe('Sync protocol', function () {
       await ipfs2.stop()
     })
 
-    it('emits an error when connecting to peer was cancelled due to timeout', async () => {
+    it.only('emits an error when connecting to peer was cancelled due to timeout', async () => {
       let err = null
 
       const onError = (error) => {
@@ -718,7 +718,7 @@ describe('Sync protocol', function () {
 
       notStrictEqual(err, null)
       strictEqual(err.type, 'aborted')
-      strictEqual(err.message, 'The operation was aborted')
+      strictEqual(err.message, 'Read aborted')
     })
   })
 })

@@ -29,10 +29,12 @@
     "uint8arrays": "^5.0.0"
   },
   "devDependencies": {
+    "@chainsafe/libp2p-yamux": "^6.0.1",
+    "@libp2p/circuit-relay-v2": "^1.0.10",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "fs-extra": "^11.2.0",
-    "helia": "^2.1.0",
+    "helia": "^3.0.0",
     "it-all": "^3.0.4",
     "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",

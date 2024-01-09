@@ -1,11 +1,11 @@
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
 import { all } from '@libp2p/websockets/filters'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
-import { circuitRelayTransport } from 'libp2p/circuit-relay'
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 
 /**
  * A basic Libp2p configuration for Node.js nodes.
@@ -29,7 +29,7 @@ export const DefaultLibp2pOptions = {
     denyDialMultiaddr: () => false
   },
   services: {
-    identify: identifyService(),
+    identify: identify(),
     pubsub: gossipsub({ allowPublishToZeroPeers: true })
   }
 }
@@ -56,7 +56,7 @@ export const DefaultLibp2pBrowserOptions = {
     denyDialMultiaddr: () => false
   },
   services: {
-    identify: identifyService(),
+    identify: identify(),
     pubsub: gossipsub({ allowPublishToZeroPeers: true })
   }
 }
