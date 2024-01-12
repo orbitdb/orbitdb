@@ -38,7 +38,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    */
   const put = async (hash, data) => {
     const cid = CID.parse(hash, base58btc)
-    await ipfs.blockstore.put(cid, data)
+    await ipfs.blockstore.put(cid, data, { signal: AbortSignal.timeout(timeout) })
 
     if (pin && !(await ipfs.pins.isPinned(cid))) {
       await ipfs.pins.add(cid)
