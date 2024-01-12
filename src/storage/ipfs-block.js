@@ -6,6 +6,7 @@
  */
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
+import { TimeoutController } from 'timeout-abort-controller'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -26,7 +27,7 @@ const DefaultTimeout = 30000 // 30 seconds
 const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
 
-  timeout = timeout || DefaultTimeout
+  const { signal } = new TimeoutController(timeout || DefaultTimeout)
 
   /**
    * Puts data to an IPFS block.
@@ -38,7 +39,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    */
   const put = async (hash, data) => {
     const cid = CID.parse(hash, base58btc)
-    await ipfs.blockstore.put(cid, data, { signal: AbortSignal.timeout(timeout) })
+    await ipfs.blockstore.put(cid, data, { signal })
 
     if (pin && !(await ipfs.pins.isPinned(cid))) {
       await ipfs.pins.add(cid)
@@ -57,7 +58,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    */
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
-    const block = await ipfs.blockstore.get(cid, { signal: AbortSignal.timeout(timeout) })
+    const block = await ipfs.blockstore.get(cid, { signal })
     if (block) {
       return block
     }
