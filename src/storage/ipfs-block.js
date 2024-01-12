@@ -7,6 +7,8 @@
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 
+const DefaultTimeout = 5000 // 5 seconds
+
 /**
  * Creates an instance of IPFSBlockStorage.
  * @function
@@ -46,12 +48,13 @@ const IPFSBlockStorage = async ({ ipfs, pin } = {}) => {
    * Gets data from an IPFS block.
    * @function
    * @param {string} hash The hash of the block to get.
+   * @return {Uint8Array} The block.
    * @memberof module:Storage.Storage-IPFS
    * @instance
    */
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
-    const block = await ipfs.blockstore.get(cid)
+    const block = await ipfs.blockstore.get(cid, { signal: AbortSignal.timeout(DefaultTimeout) })
     if (block) {
       return block
     }
