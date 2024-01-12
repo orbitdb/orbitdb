@@ -41,10 +41,15 @@ const DefaultAccessController = async () => {
  * @param {Object} identity Identity.
  * @param {Object} options
  * @param {string} options.logId ID of the log
+ * @param {Array<Entry>} options.logHeads Set the heads of the log
  * @param {Object} options.access AccessController (./default-access-controller)
  * @param {Array<Entry>} options.entries An Array of Entries from which to create the log
- * @param {Array<Entry>} options.heads Set the heads of the log
- * @param {module:Clock} options.clock Set the clock of the log
+ * @param {module:Storage} [options.entryStorage] A compatible storage instance
+ * for storing log entries. Defaults to MemoryStorage.
+ * @param {module:Storage} [options.headsStorage] A compatible storage
+ * instance for storing log heads. Defaults to MemoryStorage.
+ * @param {module:Storage} [options.indexStorage] A compatible storage
+ * instance for storing an index of log entries. Defaults to MemoryStorage.
  * @param {Function} options.sortFn The sort function - by default LastWriteWins
  * @return {module:Log~Log} sync An instance of Log
  * @memberof module:Log
