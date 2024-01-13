@@ -12,7 +12,7 @@ const defaultSize = 1000000
  * Creates an instance of LRUStorage.
  * @function
  * @param {Object} [params={}] One or more parameters for configuring
- * IPFSBlockStorage.
+ * LRUStorage.
  * @param {string} [params.size=defaultSize] The number of elements to store.
  * @return {module:Storage.Storage-LRU} An instance of LRUStorage.
  * @memberof module:Storage

@@ -31,6 +31,7 @@
   "devDependencies": {
     "@chainsafe/libp2p-yamux": "^6.0.1",
     "@libp2p/circuit-relay-v2": "^1.0.10",
+    "blockstore-level": "^1.1.7",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "fs-extra": "^11.2.0",
