@@ -74,7 +74,6 @@ describe('Database - Replication', function () {
   describe('Replicate across peers', () => {
     beforeEach(async () => {
       db1 = await Database({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
     })
 
     it('replicates databases across two peers', async () => {
@@ -88,6 +87,8 @@ describe('Database - Replication', function () {
       const onUpdate = (entry) => {
         replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
       }
+
+      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
       db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
@@ -123,6 +124,8 @@ describe('Database - Replication', function () {
       const onUpdate = (entry) => {
         replicated = expectedEntryHash && entry.hash === expectedEntryHash
       }
+
+      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
       db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
@@ -163,11 +166,6 @@ describe('Database - Replication', function () {
       const onConnected = (peerId, heads) => {
         connected = true
       }
-
-      await db2.drop()
-      await db2.close()
-
-      await rimraf('./orbitdb2')
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
 
