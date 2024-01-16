@@ -1,5 +1,5 @@
 import { createHelia } from 'helia'
-import { bitswap } from 'helia/block-brokers'
+import { bitswap } from '@helia/block-brokers'
 import { createLibp2p } from 'libp2p'
 import { MemoryBlockstore } from 'blockstore-core'
 // import { LevelBlockstore } from 'blockstore-level'
