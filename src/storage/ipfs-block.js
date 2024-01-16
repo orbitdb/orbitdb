@@ -27,8 +27,6 @@ const DefaultTimeout = 30000 // 30 seconds
 const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
 
-  const { signal } = new TimeoutController(timeout || DefaultTimeout)
-
   /**
    * Puts data to an IPFS block.
    * @function
@@ -39,6 +37,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    */
   const put = async (hash, data) => {
     const cid = CID.parse(hash, base58btc)
+    const { signal } = new TimeoutController(timeout || DefaultTimeout)
     await ipfs.blockstore.put(cid, data, { signal })
 
     if (pin && !(await ipfs.pins.isPinned(cid))) {
@@ -58,6 +57,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    */
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
+    const { signal } = new TimeoutController(timeout || DefaultTimeout)
     const block = await ipfs.blockstore.get(cid, { signal })
     if (block) {
       return block
