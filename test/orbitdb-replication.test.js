@@ -4,20 +4,16 @@ import { createOrbitDB } from '../src/index.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import createHelia from './utils/create-helia.js'
-import { LevelBlockstore } from 'blockstore-level'
 
 describe('Replicating databases', function () {
   this.timeout(10000)
 
-  let blockstore1, blockstore2
   let ipfs1, ipfs2
   let orbitdb1, orbitdb2
 
   before(async () => {
-    blockstore1 = new LevelBlockstore('./ipfs1')
-    blockstore2 = new LevelBlockstore('./ipfs2')
-    ipfs1 = await createHelia({ blockstore: blockstore1 })
-    ipfs2 = await createHelia({ blockstore: blockstore2 })
+    ipfs1 = await createHelia({ directory: './ipfs1' })
+    ipfs2 = await createHelia({ directory: './ipfs2' })
     await connectPeers(ipfs1, ipfs2)
 
     orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
@@ -27,8 +23,8 @@ describe('Replicating databases', function () {
   after(async () => {
     await orbitdb1.stop()
     await orbitdb2.stop()
-    await blockstore1.close()
-    await blockstore2.close()
+    await ipfs1.blockstore.child.child.close()
+    await ipfs2.blockstore.child.child.close()
     await ipfs1.stop()
     await ipfs2.stop()
 
@@ -140,11 +136,13 @@ describe('Replicating databases', function () {
 
       await orbitdb1.stop()
       await orbitdb2.stop()
+      await ipfs1.blockstore.child.child.close()
+      await ipfs2.blockstore.child.child.close()
       await ipfs1.stop()
       await ipfs2.stop()
 
-      ipfs1 = await createHelia({ blockstore: blockstore1 })
-      ipfs2 = await createHelia({ blockstore: blockstore2 })
+      ipfs1 = await createHelia({ directory: './ipfs1' })
+      ipfs2 = await createHelia({ directory: './ipfs2' })
 
       await connectPeers(ipfs1, ipfs2)
 
