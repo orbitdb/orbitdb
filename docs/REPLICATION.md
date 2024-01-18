@@ -6,11 +6,12 @@ Below is a simple replication example. Both peers run within the same Nodejs pro
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
 // Our ipfs instances will be connecting over websockets. However, you could achieve the same here using tcp. You can find out more about peer connectivity at https://connectivity.libp2p.io/.
 
 const initIPFSInstance = () => {
-  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  const libp2p = await createLibp2p(Libp2pOptions)
   return createHelia({ libp2p })
 }
 
@@ -53,11 +54,9 @@ db2.events.on('join', async (peerId, heads) => {
   console.log(peerId, (await ipfs1.id()).id)
 })
 
-// Listen for any updates to db2. This is especially useful when listening for 
-// new heads that are available on db1.
+// Listen for any updates to db2.
 // If we want to listen for new data on db2, add an "update" listener to db1.
 db2.events.on('update', async (entry) => {
-  console.log(await db2.all())
   db2Updated = true
 })
 

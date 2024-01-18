@@ -9,10 +9,11 @@ Different access controllers can be assigned to the database using the `AccessCo
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
-import { createOrbitDB, DefaultLibp2pOptions } from '@orbitdb/core'
+import { createOrbitDB } from '@orbitdb/core'
 import * as SomeAccessController from 'some-access-controller.js'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
@@ -39,8 +40,9 @@ To change write access, pass the IPFSAccessController with the `write` parameter
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 const identities = await Identities()
@@ -59,8 +61,9 @@ To allow anyone to write to the database, specify the wildcard '*':
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
@@ -78,8 +81,9 @@ The OrbitDB access controller provides configurable write access using grant and
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, Identities, OrbitDBAccessController } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
@@ -166,8 +170,9 @@ Before passing the custom access controller to the `open` function, it must be a
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, useAccessController } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 useAccessController(CustomAccessController)

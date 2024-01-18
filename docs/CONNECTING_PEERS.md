@@ -9,9 +9,10 @@ Node.js allows libp2p to open connections with other Node.js daemons.
 ```javascript
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { Libp2pOptions } from './config/libp2p.js'
 
 const initIPFSInstance = () => {
-  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  const libp2p = await createLibp2p(Libp2pOptions)
   return createHelia({ libp2p })
 }
 
@@ -29,9 +30,10 @@ In remote networks, retrieval of content across peers may take significantly lon
 ```javascript
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { Libp2pOptions } from './config/libp2p.js'
 
 const initIPFSInstance = () => {
-  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  const libp2p = await createLibp2p(Libp2pOptions)
   return createHelia({ libp2p })
 }
 
@@ -56,8 +58,8 @@ import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { noise } from '@chainsafe/libp2p-noise'
-import { identifyService } from 'libp2p/identify'
-import { circuitRelayServer} from 'libp2p/circuit-relay'
+import { identify } from '@libp2p/identify'
+import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
 import { webSockets } from '@libp2p/websockets'
 import * as filters from '@libp2p/websockets/filters'
 
@@ -73,7 +75,7 @@ const options = {
   connectionEncryption: [noise()],
   streamMuxers: [yamux()],
   services: {
-    identify: identifyService(),
+    identify: identify(),
     relay: circuitRelayServer()
   }
 }
@@ -89,11 +91,11 @@ Within the browser, dial into the server using the server's exposed web socket:
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
 import { noise } from '@chainsafe/libp2p-noise'
-import { circuitRelayTransport } from 'libp2p/circuit-relay'
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 
 const ws = new webSockets()
 
@@ -120,7 +122,7 @@ const options = {
     }
   },
   services: {
-    identify: identifyService()
+    identify: identify()
   }
 }
 
@@ -153,11 +155,11 @@ In the first browser peer, dial the relay to discover the browser peer's address
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
 import { noise } from '@chainsafe/libp2p-noise'
-import { circuitRelayTransport } from 'libp2p/circuit-relay'
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { multiaddr } from '@multiformats/multiaddr'
 import { WebRTC as WebRTCMatcher } from '@multiformats/multiaddr-matcher'
 import pRetry from 'p-retry'
@@ -186,7 +188,7 @@ const options = {
     }
   },
   services: {
-    identify: identifyService()
+    identify: identify()
   }
 }
 
@@ -220,11 +222,11 @@ Configure the second browser node in the same way as the first, then dial in to 
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { identifyService } from 'libp2p/identify'
+import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
 import { noise } from '@chainsafe/libp2p-noise'
-import { circuitRelayTransport } from 'libp2p/circuit-relay'
+import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { multiaddr } from '@multiformats/multiaddr'
 import { WebRTC as WebRTCMatcher } from '@multiformats/multiaddr-matcher'
 import pRetry from 'p-retry'
@@ -253,7 +255,7 @@ const options = {
     }
   },
   services: {
-    identify: identifyService()
+    identify: identify()
   }
 }
 

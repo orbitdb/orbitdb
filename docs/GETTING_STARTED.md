@@ -16,6 +16,95 @@ You will also need Helia for replication:
 npm i helia
 ```
 
+## Prerequisites: Helia and Libp2p
+
+OrbitDB uses Helia for block storage and Libp2p for database synchronization. However, you need to configure Helia and pass it to OrbitDB when creating a peer.
+
+### Block Storage
+
+Helia uses memory block storage by default. This means that storage is destroyed every time your application ends and OrbitDB will no longer be able to retrieve blocks from Helia. Therefore, it is necessary to configure Helia with permanent block storage. Helia comes with [a variety of storage solutions](https://github.com/ipfs-examples/helia-101#blockstore) including filesystem storage, IndexDB and Level. To add one of these storage mechanisms to Helia, install the relevant package:
+
+```
+npm i blockstore-level
+```
+
+then instantiate and pass to Helia:
+
+```
+import { LevelBlockstore } from 'blockstore-level'
+
+const blockstore = new LevelBlockstore('./ipfs')
+const ipfs = createHelia({ blockstore })
+```
+
+### Libp2p
+
+OrbitDB synchronizes databases between peers using a p2p networking stack called [Libp2p](https://github.com/libp2p/js-libp2p/).
+
+An instance of Libp2p is required by Helia which is then used by OrbitDB to synchronize database data across various networks.
+
+A simple Node.js example might look something like:
+
+```json
+{
+  addresses: {
+    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+  },
+  transports: [
+    webSockets({
+      filter: all
+    }),
+    webRTC(),
+    circuitRelayTransport({
+      discoverRelays: 1
+    })
+  ],
+  connectionEncryption: [noise()],
+  streamMuxers: [yamux()],
+  connectionGater: {
+    denyDialMultiaddr: () => false
+  },
+  services: {
+    identify: identify(),
+    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+  }
+}
+```
+
+You can export the above configuration from a file:
+
+```js
+export const Libp2pOptions = {
+  addresses: {
+    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+  },
+  transports: [
+    webSockets({
+      filter: all
+    }),
+    webRTC(),
+    circuitRelayTransport({
+      discoverRelays: 1
+    })
+  ],
+  connectionEncryption: [noise()],
+  streamMuxers: [yamux()],
+  connectionGater: {
+    denyDialMultiaddr: () => false
+  },
+  services: {
+    identify: identify(),
+    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+  }
+} 
+```
+
+Throughout this documentation, you will see the above Libp2p configuration imported from a file called **./config/libp2p.js**, for example:
+
+```js
+import { Libp2pOptions } from './config/libp2p.js'
+```
+
 ## Creating a standalone database
 
 To create a database on a single machine, launch an instance of OrbitDB. Once launched, you can open a new database.
@@ -34,9 +123,10 @@ Create a file in your project called index.js and add the following code to it:
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-// Create an IPFS instance with defaults.
-const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+// Create an IPFS instance.
+const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
@@ -121,10 +211,11 @@ Create a new file called index.js and paste in the following code:
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
-import { OrbitDB, IPFSAccessController, DefaultLibp2pBrowserOptions } from '@orbitdb/core'
+import { OrbitDB, IPFSAccessController } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
 const main = async () => {  
-  const libp2p = await createLibp2p({ ...DefaultLibp2pOptions })
+  const libp2p = await createLibp2p(Libp2pOptions)
   const ipfs = await createHelia({ libp2p })
 
   // create a random directory to avoid OrbitDB conflicts.
