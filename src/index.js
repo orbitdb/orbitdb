@@ -41,10 +41,3 @@ export {
   MemoryStorage,
   ComposedStorage
 } from './storage/index.js'
-
-export {
-  DefaultLibp2pOptions,
-  DefaultLibp2pBrowserOptions
-} from './config/libp2p/index.js'
-
-export { startOrbitDB } from './utils/index.js'
