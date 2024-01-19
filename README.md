@@ -19,14 +19,13 @@ All databases are [implemented](https://github.com/orbitdb/orbitdb/tree/main/src
 
 This is the Javascript implementation and it works both in **Browsers** and **Node.js** with support for Linux, OS X, and Windows.
 
-***NOTE!*** *[js-ipfs](https://github.com/ipfs/js-ipfs) and related packages are now superseded by IPFS's [Helia](https://github.com/ipfs/helia) project and are no longer being maintained. As part of this migration, OrbitDB will be soon [switching to Helia](https://github.com/ipfs/helia).*
-
 A Go implementation is developed and maintained by the [Berty](https://github.com/berty) project at [berty/go-orbit-db](https://github.com/berty/go-orbit-db).
 
 ## Installation
 
+Install OrbitDB and its dependencies:
 ```
-npm install @orbitdb/core
+npm install @orbitdb/core helia
 ```
 
 ### Browser <script> tag
@@ -35,16 +34,20 @@ OrbitDB can be loaded in the browser using the distributed js file with the `<sc
 
 `<script>/path/to/orbitdb.min.js</script>`
 
+## Quick Start
+
+If you want to get up and running with OrbitDB quickly, install and follow the instructions in the [@orbitdb/quickstart](https://github.com/orbitdb/quickstart) module.
+
 ## Usage
 
 If you're using `@orbitdb/core` to develop **browser** or **Node.js** applications, use it as a module with the javascript instance of IPFS.
 
 ```javascript
-import IPFS from 'ipfs-core'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
 
 ;(async function () {
-  const ipfs = await IPFS.create()
+  const ipfs = await createHelia()
   const orbitdb = await createOrbitDB({ ipfs })
 
   // Create / Open a database. Defaults to db type "events".
@@ -73,12 +76,24 @@ import { createOrbitDB } from '@orbitdb/core'
   
   await db.close()
   await orbitdb.stop()
+  await ipfs.stop()
 })()
 ```
 
+To configure your [IPFS instance](https://github.com/ipfs/helia) for persistency and [Libp2p](https://github.com/libp2p/js-libp2p) to connect to peers, see [Creating a Helia instance](https://github.com/orbitdb/quickstart/blob/main/src/index.js) and the [Default Libp2p Configurations](https://github.com/orbitdb/quickstart/blob/main/src/config/libp2p/index.js) in [@orbitdb/quickstart](https://github.com/orbitdb/quickstart/blob/main/src/config/libp2p/index.js) for examples.
+
 ## Documentation
 
-Use the **[Getting Started](https://github.com/orbitdb/orbitdb/blob/main/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB and you can find more advanced topics covered in our [docs](https://github.com/orbitdb/orbitdb/blob/main/docs).
+Use the **[Getting Started](https://github.com/orbitdb/orbitdb/blob/main/docs/GETTING_STARTED.md)** guide for an initial introduction to OrbitDB.
+
+You can find more advanced topics in our [docs](https://github.com/orbitdb/orbitdb/blob/main/docs) covering:
+- [Databases](https://github.com/orbitdb/orbitdb/blob/main/docs/DATABASES.md)
+- [Storage](https://github.com/orbitdb/orbitdb/blob/main/docs/STORAGE.md)
+- [Identities](https://github.com/orbitdb/orbitdb/blob/main/docs/IDENTITIES.md)
+- [Access Controllers](https://github.com/orbitdb/orbitdb/blob/main/docs/ACCESS_CONTROLLERS.md)
+- [Connecting Peers](https://github.com/orbitdb/orbitdb/blob/main/docs/CONNECTING_PEERS.md)
+- [Replication](https://github.com/orbitdb/orbitdb/blob/main/docs/REPLICATION.md)
+- [Oplog](https://github.com/orbitdb/orbitdb/blob/main/docs/OPLOG.md)
 
 ### API
 
@@ -98,7 +113,7 @@ npm run build
 
 ### Benchmark
 ```sh
-node benchmarks/benchmark-add.js
+node benchmarks/orbitdb-events.js
 ```
 
 See [benchmarks/](https://github.com/orbitdb/orbitdb/tree/master/benchmarks) for more benchmarks.
