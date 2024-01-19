@@ -41,7 +41,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
   }
 
   id = id || await createId()
-  const { id: peerId } = await ipfs.id()
+  const peerId = ipfs.libp2p.peerId
   directory = directory || './orbitdb'
 
   let keystore

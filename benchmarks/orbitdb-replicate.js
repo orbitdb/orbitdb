@@ -1,47 +1,22 @@
 import { createOrbitDB } from '../src/index.js'
 import { rimraf as rmrf } from 'rimraf'
-import * as IPFS from 'ipfs-core'
+import createHelia from '../test/utils/create-helia.js'
 import connectPeers from '../test/utils/connect-nodes.js'
 import waitFor from '../test/utils/wait-for.js'
 
 import { EventEmitter } from 'events'
 EventEmitter.defaultMaxListeners = 10000
 
-const ipfsConfig = {
-  preload: {
-    enabled: false
-  },
-  config: {
-    Addresses: {
-      API: '/ip4/127.0.0.1/tcp/0',
-      Swarm: ['/ip4/0.0.0.0/tcp/0'],
-      Gateway: '/ip4/0.0.0.0/tcp/0'
-    },
-    Bootstrap: [],
-    Discovery: {
-      MDNS: {
-        Enabled: true,
-        Interval: 0
-      },
-      webRTCStar: {
-        Enabled: false
-      }
-    }
-  }
-}
-
 ;(async () => {
   console.log('Starting benchmark...')
 
   const entryCount = 1000
 
-  await rmrf('./ipfs1')
-  await rmrf('./ipfs2')
   await rmrf('./orbitdb1')
   await rmrf('./orbitdb2')
 
-  const ipfs1 = await IPFS.create({ ...ipfsConfig, repo: './ipfs1' })
-  const ipfs2 = await IPFS.create({ ...ipfsConfig, repo: './ipfs2' })
+  const [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
+
   const orbitdb1 = await createOrbitDB({ ipfs: ipfs1, directory: './orbitdb1' })
   const orbitdb2 = await createOrbitDB({ ipfs: ipfs2, directory: './orbitdb2' })
 
@@ -75,19 +50,12 @@ const ipfsConfig = {
 
   await waitFor(() => connected, () => true)
 
-  console.log(`Iterate ${entryCount} events to replicate them`)
-
-  const all = []
-  for await (const { value } of db2.iterator()) {
-    all.unshift(value)
-  }
-
   const endTime2 = new Date().getTime()
   const duration2 = endTime2 - startTime2
   const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
   const millisecondsPerOp2 = duration2 / entryCount
 
-  console.log(`Replicating ${all.length} events took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+  console.log(`Replicating ${entryCount} events took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
 
   await db1.drop()
   await db1.close()
@@ -99,8 +67,6 @@ const ipfsConfig = {
   await ipfs1.stop()
   await ipfs2.stop()
 
-  await rmrf('./ipfs1')
-  await rmrf('./ipfs2')
   await rmrf('./orbitdb1')
   await rmrf('./orbitdb2')
 

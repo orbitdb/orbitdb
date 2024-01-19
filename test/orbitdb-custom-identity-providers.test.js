@@ -1,10 +1,9 @@
 import { deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
-import * as IPFS from 'ipfs-core'
 import { createOrbitDB, Identities, useIdentityProvider } from '../src/index.js'
-import config from './config.js'
 // import pathJoin from '../src/utils/path-join.js'
 import CustomIdentityProvider from './fixtures/providers/custom.js'
+import createHelia from './utils/create-helia.js'
 
 describe('Add a custom identity provider', function () {
   this.timeout(5000)
@@ -12,7 +11,7 @@ describe('Add a custom identity provider', function () {
   let ipfs
 
   before(async () => {
-    ipfs = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
+    ipfs = await createHelia()
   })
 
   it('creates an identity using an id and default pubkey provider', async () => {

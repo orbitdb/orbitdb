@@ -1,13 +1,12 @@
 import { deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities } from '../../../src/index.js'
 import Events from '../../../src/databases/events.js'
-import config from '../../config.js'
 import testKeysPath from '../../fixtures/test-keys-path.js'
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
+import createHelia from '../../utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -41,8 +40,7 @@ describe('Events Database Replication', function () {
   ]
 
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)
@@ -76,10 +74,12 @@ describe('Events Database Replication', function () {
     if (db1) {
       await db1.drop()
       await db1.close()
+      db1 = null
     }
     if (db2) {
       await db2.drop()
       await db2.close()
+      db2 = null
     }
   })
 
@@ -130,9 +130,6 @@ describe('Events Database Replication', function () {
   })
 
   it('loads the database after replication', async () => {
-    db1 = await Events()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-    db2 = await Events()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
-
     let replicated = false
     let expectedEntryHash = null
 
@@ -147,6 +144,9 @@ describe('Events Database Replication', function () {
     const onError = (err) => {
       console.error(err)
     }
+
+    db1 = await Events()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
+    db2 = await Events()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
     db2.events.on('join', onConnected)
     db2.events.on('update', onUpdate)

@@ -10,7 +10,7 @@ export default (env, argv) => {
   const __dirname = path.dirname(__filename)
 
   return {
-    entry: glob.sync('./test/**/*.js', { ignore: [] }),
+    entry: glob.sync('./test/**/*.js', { ignore: ['./test/utils/relay.js'] }),
     output: {
       filename: '../test/browser/bundle.js'
     },
@@ -26,6 +26,9 @@ export default (env, argv) => {
       new webpack.ProvidePlugin({
         process: 'process/browser',
         Buffer: ['buffer', 'Buffer']
+      }),
+      new webpack.DefinePlugin({
+        'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG)
       })
     ],
     resolve: {

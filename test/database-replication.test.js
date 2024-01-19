@@ -1,21 +1,18 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import { Database, KeyStore, Identities } from '../src/index.js'
-import config from './config.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import ComposedStorage from '../src/storage/composed.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import MemoryStorage from '../src/storage/memory.js'
+import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
 describe('Database - Replication', function () {
-  this.timeout(60000)
-
   let ipfs1, ipfs2
   let keystore
   let identities
@@ -33,8 +30,7 @@ describe('Database - Replication', function () {
   }
 
   beforeEach(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)
@@ -78,7 +74,6 @@ describe('Database - Replication', function () {
   describe('Replicate across peers', () => {
     beforeEach(async () => {
       db1 = await Database({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1' })
-      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
     })
 
     it('replicates databases across two peers', async () => {
@@ -92,6 +87,8 @@ describe('Database - Replication', function () {
       const onUpdate = (entry) => {
         replicated = expectedEntryHash !== null && entry.hash === expectedEntryHash
       }
+
+      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
       db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
@@ -127,6 +124,8 @@ describe('Database - Replication', function () {
       const onUpdate = (entry) => {
         replicated = expectedEntryHash && entry.hash === expectedEntryHash
       }
+
+      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
 
       db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
@@ -167,11 +166,6 @@ describe('Database - Replication', function () {
       const onConnected = (peerId, heads) => {
         connected = true
       }
-
-      await db2.drop()
-      await db2.close()
-
-      await rimraf('./orbitdb2')
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
 

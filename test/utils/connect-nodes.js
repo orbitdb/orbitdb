@@ -1,21 +1,30 @@
-'use strict'
+import { multiaddr } from '@multiformats/multiaddr'
+import { WebRTC } from '@multiformats/multiaddr-matcher'
+import waitFor from './wait-for.js'
 
 const defaultFilter = () => true
+
+const isBrowser = () => typeof window !== 'undefined'
 
 const connectIpfsNodes = async (ipfs1, ipfs2, options = {
   filter: defaultFilter
 }) => {
-  const id1 = await ipfs1.id()
-  const id2 = await ipfs2.id()
+  if (isBrowser()) {
+    const relayId = '12D3KooWAJjbRkp8FPF5MKgMU53aUTxWkqvDrs4zc1VMbwRwfsbE'
 
-  const addresses1 = id1.addresses.filter(options.filter)
-  const addresses2 = id2.addresses.filter(options.filter)
+    await ipfs1.libp2p.dial(multiaddr(`/ip4/127.0.0.1/tcp/12345/ws/p2p/${relayId}`))
 
-  for (const a2 of addresses2) {
-    await ipfs1.swarm.connect(a2)
-  }
-  for (const a1 of addresses1) {
-    await ipfs2.swarm.connect(a1)
+    let address1
+
+    await waitFor(() => {
+      address1 = ipfs1.libp2p.getMultiaddrs().filter(ma => WebRTC.matches(ma)).pop()
+      return address1 != null
+    }, () => true)
+
+    await ipfs2.libp2p.dial(address1)
+  } else {
+    await ipfs2.libp2p.peerStore.save(ipfs1.libp2p.peerId, { multiaddrs: ipfs1.libp2p.getMultiaddrs().filter(options.filter) })
+    await ipfs2.libp2p.dial(ipfs1.libp2p.peerId)
   }
 }
 

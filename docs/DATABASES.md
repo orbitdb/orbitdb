@@ -35,10 +35,14 @@ The second part, an IPFS multihash `zdpuAmrcSRUhkQcnRQ6p4bphs7DJWGBkqczSGFYynX6m
 In order to replicate the database with peers, the address is what you need to give to other peers in order for them to start replicating the database.
 
 ```js
-import IPFS from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const ipfs = await IPFS.create()
+const libp2p = await createLibp2p(Libp2pOptions)
+const ipfs = await createHelia({ libp2p })
+
 const orbitdb = await createOrbitDB({ ipfs })
 const db = await orbitdb.open('my-db')
 console.log(db.address)
@@ -62,15 +66,18 @@ An example of a manifest is given below:
 The manifest is an [IPLD data structure](https://ipld.io/docs/) which can be retrived from IPFS using the manifest's hash:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import * as Block from 'multiformats/block'
 import { createOrbitDB, OrbitDBAddress } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const ipfs = await create()
+const libp2p = await createLibp2p(Libp2pOptions)
+const ipfs = await createHelia({ libp2p })
 
 // Create the db then close.
 const orbitdb = await createOrbitDB({ ipfs })
@@ -169,14 +176,21 @@ await db.del(hash)
 
 The power of OrbitDB lies in its ability to replicate databases across distributed systems that may not always be connected.
 
-A simple way to replicate a database between peers can be accomplished by opening a database, listening for updates and iterating over the records as those updates occur.
+A simple way to replicate a database between peers can be accomplished by connecting one peer to another and then opening the database by its address:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const ipfs1 = await create({ config1, repo: './ipfs1' })
-const ipfs2 = await create({ config2, repo: './ipfs2' })
+const initIPFSInstance = () => {
+  const libp2p = await createLibp2p(Libp2pOptions)
+  return createHelia({ libp2p })
+}
+
+const ipfs1 = await initIPFSInstance()
+const ipfs2 = await initIPFSInstance()
 
 orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
 orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
@@ -189,18 +203,9 @@ await db1.add('hello world')
 // database heads will be synchronized.
 const db2 = await orbitdb2.open(db1.address)
 
-// We only have the latest record of db1. To replicate all of db1's records, we will 
-// need to iterate over db1's entire record set.
-// We can determine when heads have been synchronized from db1 to db2 by 
-// listening for the "update" event and iterating over the record set.
-db2.events.on('update', async (entry) => {
-  for await (const record of db2.iterator()) {
-    console.log(record)
-  }
-  // we can use the convenience function db.all() instead of iterating over 
-  // db2's records.
-  // await db2.all()
-})
+for await (const record of db2.iterator()) {
+  console.log(record)
+}
 ```
 
 To learn more, check out [OrbitDB's sychronization protocol](https://orbitdb.org/api/module-Sync.html) and the [OrbitDB replication documentation](./REPLICATION.md).

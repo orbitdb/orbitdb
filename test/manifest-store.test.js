@@ -1,8 +1,7 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
-import * as IPFS from 'ipfs-core'
 import ManifestStore from '../src/manifest-store.js'
-import config from './config.js'
+import createHelia from './utils/create-helia.js'
 
 describe('Manifest', () => {
   const repo = './ipfs'
@@ -10,7 +9,7 @@ describe('Manifest', () => {
   let manifestStore
 
   before(async () => {
-    ipfs = await IPFS.create({ ...config.daemon1, repo })
+    ipfs = await createHelia()
     manifestStore = await ManifestStore({ ipfs })
   })
 

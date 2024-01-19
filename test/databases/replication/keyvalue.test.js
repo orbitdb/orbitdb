@@ -1,13 +1,12 @@
 import { deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import * as IPFS from 'ipfs-core'
 import { KeyStore, Identities } from '../../../src/index.js'
 import KeyValue from '../../../src/databases/keyvalue.js'
-import config from '../../config.js'
 import testKeysPath from '../../fixtures/test-keys-path.js'
 import connectPeers from '../../utils/connect-nodes.js'
 import waitFor from '../../utils/wait-for.js'
+import createHelia from '../../utils/create-helia.js'
 
 const keysPath = './testkeys'
 
@@ -30,8 +29,7 @@ describe('KeyValue Database Replication', function () {
   }
 
   before(async () => {
-    ipfs1 = await IPFS.create({ ...config.daemon1, repo: './ipfs1' })
-    ipfs2 = await IPFS.create({ ...config.daemon2, repo: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)

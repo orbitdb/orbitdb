@@ -10,10 +10,99 @@ Install OrbitDB:
 npm i @orbitdb/core
 ```
 
-You will also need IPFS for replication:
+You will also need Helia for replication:
 
 ```sh
-npm i ipfs-core
+npm i helia
+```
+
+## Prerequisites: Helia and Libp2p
+
+OrbitDB uses Helia for block storage and Libp2p for database synchronization. However, you need to configure Helia and pass it to OrbitDB when creating a peer.
+
+### Block Storage
+
+Helia uses memory block storage by default. This means that storage is destroyed every time your application ends and OrbitDB will no longer be able to retrieve blocks from Helia. Therefore, it is necessary to configure Helia with permanent block storage. Helia comes with [a variety of storage solutions](https://github.com/ipfs-examples/helia-101#blockstore) including filesystem storage, IndexDB and Level. To add one of these storage mechanisms to Helia, install the relevant package:
+
+```
+npm i blockstore-level
+```
+
+then instantiate and pass to Helia:
+
+```
+import { LevelBlockstore } from 'blockstore-level'
+
+const blockstore = new LevelBlockstore('./ipfs')
+const ipfs = createHelia({ blockstore })
+```
+
+### Libp2p
+
+OrbitDB synchronizes databases between peers using a p2p networking stack called [Libp2p](https://github.com/libp2p/js-libp2p/).
+
+An instance of Libp2p is required by Helia which is then used by OrbitDB to synchronize database data across various networks.
+
+A simple Node.js example might look something like:
+
+```json
+{
+  addresses: {
+    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+  },
+  transports: [
+    webSockets({
+      filter: all
+    }),
+    webRTC(),
+    circuitRelayTransport({
+      discoverRelays: 1
+    })
+  ],
+  connectionEncryption: [noise()],
+  streamMuxers: [yamux()],
+  connectionGater: {
+    denyDialMultiaddr: () => false
+  },
+  services: {
+    identify: identify(),
+    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+  }
+}
+```
+
+You can export the above configuration from a file:
+
+```js
+export const Libp2pOptions = {
+  addresses: {
+    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+  },
+  transports: [
+    webSockets({
+      filter: all
+    }),
+    webRTC(),
+    circuitRelayTransport({
+      discoverRelays: 1
+    })
+  ],
+  connectionEncryption: [noise()],
+  streamMuxers: [yamux()],
+  connectionGater: {
+    denyDialMultiaddr: () => false
+  },
+  services: {
+    identify: identify(),
+    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+  }
+} 
+```
+
+Throughout this documentation, you will see the above Libp2p configuration imported from a file called **./config/libp2p.js**, for example:
+
+```js
+import { Libp2pOptions } from './config/libp2p.js'
 ```
 
 ## Creating a standalone database
@@ -31,11 +120,14 @@ npm init
 Create a file in your project called index.js and add the following code to it:
 
 ```js
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
-import { create } from 'ipfs-core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-// Create an IPFS instance with defaults.
-const ipfs = await create()
+// Create an IPFS instance.
+const libp2p = await createLibp2p(Libp2pOptions)
+const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -117,27 +209,19 @@ npm init
 Create a new file called index.js and paste in the following code:
 
 ```js
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { OrbitDB, IPFSAccessController } from '@orbitdb/core'
-import { create } from 'ipfs-core'
+import { Libp2pOptions } from './config/libp2p.js'
 
-const main = async () => {
-  // create a random directory to avoid IPFS and OrbitDB conflicts.
+const main = async () => {  
+  const libp2p = await createLibp2p(Libp2pOptions)
+  const ipfs = await createHelia({ libp2p })
+
+  // create a random directory to avoid OrbitDB conflicts.
   let randDir = (Math.random() + 1).toString(36).substring(2)
 
-  const config = {
-    Addresses: {
-      API: '/ip4/127.0.0.1/tcp/0',
-      Swarm: ['/ip4/0.0.0.0/tcp/0'],
-      Gateway: '/ip4/0.0.0.0/tcp/0'
-    }
-  }
-  
-  // This will create an IPFS repo in ./[randDir]/ipfs.
-  const ipfs = await create({ config, repo: './' + randDir + '/ipfs'})
-
-  // This will create all OrbitDB-related databases (keystore, my-db, etc) in 
-  // ./[randDir]/ipfs.
-  const orbitdb = await createOrbitDB({ ipfs, directory: './' + randDir + '/orbitdb' })
+  const orbitdb = await createOrbitDB({ ipfs, directory: `./${randDir}/orbitdb` })
 
   let db
 

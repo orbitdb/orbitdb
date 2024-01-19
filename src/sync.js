@@ -23,24 +23,16 @@ const DefaultTimeout = 30000 // 30 seconds
  *
  * Once the initial sync has completed, peers notify one another of updates to
  * the log, ie. updates to the database, using the initially opened pubsub
- * topic subscription.
- * A peer with new heads broadcasts changes to other peers by publishing the
- * updated heads
- * to the pubsub topic. Peers subscribed to the same topic will then receive
- * the update and
- * will update their log's state, the heads, accordingly.
+ * topic subscription. A peer with new heads broadcasts changes to other peers
+ * by publishing the updated heads to the pubsub topic. Peers subscribed to the
+ * same topic will then receive the update and will update their log's state,
+ * the heads, accordingly.
  *
  * The Sync Protocol is eventually consistent. It guarantees that once all
  * messages have been sent and received, peers will observe the same log state
  * and values. The Sync Protocol does not guarantee the order in which messages
  * are received or even that a message is recieved at all, nor any timing on
  * when messages are received.
- *
- * Note that the Sync Protocol does not retrieve the full log when
- * synchronizing the heads. Rather only the "latest entries" in the log, the
- * heads, are exchanged. In order to retrieve the full log and each entry, the
- * user would call the log.traverse() or log.iterator() functions, which go
- * through the log and retrieve each missing log entry from IPFS.
  *
  * @example
  * // Using defaults
@@ -115,6 +107,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
   if (!log) throw new Error('An instance of log is required.')
 
+  const libp2p = ipfs.libp2p
+  const pubsub = ipfs.libp2p.services.pubsub
+
   const address = log.id
   const headsSyncAddress = pathJoin('/orbitdb/heads/', address)
 
@@ -146,7 +141,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     events.emit('join', peerId, heads)
   }
 
-  const sendHeads = async (source) => {
+  const sendHeads = (source) => {
     return (async function * () {
       const heads = await log.heads()
       for await (const { bytes } of heads) {
@@ -162,7 +157,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         await onSynced(headBytes)
       }
     }
-    await onPeerJoined(peerId)
+    if (started) {
+      await onPeerJoined(peerId)
+    }
   }
 
   const handleReceiveHeads = async ({ connection, stream }) => {
@@ -192,13 +189,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         const { signal } = timeoutController
         try {
           peers.add(peerId)
-          const stream = await ipfs.libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
+          const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
+          console.error(e)
+          peers.delete(peerId)
           if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
             // Skip peer, they don't have this database currently
           } else {
-            peers.delete(peerId)
             events.emit('error', e)
           }
         } finally {
@@ -214,20 +212,22 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     queue.add(task)
   }
 
-  const handleUpdateMessage = async (message) => {
+  const handleUpdateMessage = async message => {
+    const { topic, data } = message.detail
+
     const task = async () => {
-      const { id: peerId } = await ipfs.id()
-      const messageIsNotFromMe = (message) => String(peerId) !== String(message.from)
-      const messageHasData = (message) => message.data !== undefined
       try {
-        if (messageIsNotFromMe(message) && messageHasData(message) && onSynced) {
-          await onSynced(message.data)
+        if (data && onSynced) {
+          await onSynced(data)
         }
       } catch (e) {
         events.emit('error', e)
       }
     }
-    queue.add(task)
+
+    if (topic === address) {
+      queue.add(task)
+    }
   }
 
   /**
@@ -239,7 +239,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   const add = async (entry) => {
     if (started) {
-      await ipfs.pubsub.publish(address, entry.bytes)
+      await pubsub.publish(address, entry.bytes)
     }
   }
 
@@ -251,12 +251,13 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   const stopSync = async () => {
     if (started) {
-      await queue.onIdle()
-      ipfs.libp2p.pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
-      await ipfs.libp2p.unhandle(headsSyncAddress)
-      await ipfs.pubsub.unsubscribe(address, handleUpdateMessage)
-      peers.clear()
       started = false
+      await queue.onIdle()
+      pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
+      pubsub.removeEventListener('message', handleUpdateMessage)
+      await libp2p.unhandle(headsSyncAddress)
+      await pubsub.unsubscribe(address)
+      peers.clear()
     }
   }
 
@@ -269,10 +270,11 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const startSync = async () => {
     if (!started) {
       // Exchange head entries with peers when connected
-      await ipfs.libp2p.handle(headsSyncAddress, handleReceiveHeads)
-      ipfs.libp2p.pubsub.addEventListener('subscription-change', handlePeerSubscribed)
+      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
+      pubsub.addEventListener('subscription-change', handlePeerSubscribed)
+      pubsub.addEventListener('message', handleUpdateMessage)
       // Subscribe to the pubsub channel for this database through which updates are sent
-      await ipfs.pubsub.subscribe(address, handleUpdateMessage)
+      await pubsub.subscribe(address)
       started = true
     }
   }

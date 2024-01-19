@@ -10,19 +10,10 @@ dist/*.map
 # Don't distribute the debug build
 dist/orbitdb.js
 
-# Don't distribute screenshot
-# See examples at https://github.com/orbitdb/orbit-db
-images/
-
 .git
-.circleci
 benchmarks
 test
-ipfs
-docker
 conf
 Makefile
-API.md
-CHANGELOG.md
-FAQ.md
-GUIDE.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
