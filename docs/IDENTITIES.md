@@ -89,7 +89,7 @@ The identity object is stored like any other [IPLD data structure](https://ipld.
 
 ```js
 import { createLibp2p } from 'libp2p'
-import { createHelia } from 'helia' from 'ipfs-core'
+import { createHelia } from 'helia'
 import * as Block from 'multiformats/block'
 import { Identities } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'

@@ -9,19 +9,21 @@ To install OrbitDB:
 npm install @orbitdb/core
 ```
 
-IPFS is also required:
+Helia, the Javascript version of IPFS, is also required:
 
 ```bash
-npm install ipfs-core
+npm install helia
 ```
 
 Instantiate OrbitDB and create a database:
 
 ```js
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
 
-const ipfs = await create() // IPFS is required for storage and network communication
+const libp2p = await createLibp2p({ /* Libp2p options */ })
+const ipfs = await createHelia({ libp2p }) // Helia is required for storage and network communication
 const orbitdb = await createOrbitDB({ ipfs })
 const mydb = await orbitdb.open('mydb')
 console.log(mydb.address) // /orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13
@@ -32,10 +34,12 @@ Open and replicate an existing database:
 
 ```js
 // In another process
-import { create } from 'ipfs-core'
+import { createLibp2p } from 'libp2p'
+import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
 
-const ipfs = await create()
+const libp2p = await createLibp2p({ /* Libp2p options */ })
+const ipfs = await createHelia({ libp2p }) // Helia is required for storage and network
 const orbitdb = await createOrbitDB({ ipfs })
 const theirdb = await orbitdb.open('/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13')
 for await (let record of theirdb.iterator()) {
