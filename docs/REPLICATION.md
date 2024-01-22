@@ -36,9 +36,7 @@ const db1 = await orbitdb1.open('my-db')
 // synchronization of the heads between db1 and db2.
 const db2 = await orbitdb2.open(db1.address)
 
-// We write some data to db1. This will not be replicated on db2 until we 
-// explicitly request these records using db2's iterator or all() convenience 
-// function.
+// We write some data to db1. This will automatically replicated on db2
 await db1.add('hello world 1')
 await db1.add('hello world 2')
 await db1.add('hello world 3')
