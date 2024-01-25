@@ -88,7 +88,7 @@ const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
-const identities = await Identities()
+const identities = await Identities({ ipfs })
 const anotherIdentity = identities.createIdentity('userB')
 
 const db = orbitdb.open('my-db', { AccessController: OrbitDBAccessController({ write: [orbitdb.identity.id, anotherIdentity.id]) })
@@ -102,6 +102,8 @@ When granting or revoking access, a capability and the identity's id must be def
 Grant and revoke are not limited to 'write' access only. A custom access capability can be specified, for example, `db.access.grant('custom-access', identity1.id)`.
 
 The OrbitDBAccessController is a mutable access controller. Granting and revoking access does not change the address of the database.
+
+The identities are synced using IPFS, hence also the IPFS instance must passed as in `Identities({ ipfs })`.
 
 ## Custom Access Controller
 
