@@ -4,21 +4,15 @@ This guide will help you get up and running with a simple OrbitDB database that 
 
 ## install
 
-Install OrbitDB:
+Install OrbitDB and Helia:
 
 ```sh
-npm i @orbitdb/core
-```
-
-You will also need Helia for replication:
-
-```sh
-npm i helia
+npm i helia @orbitdb/core
 ```
 
 ## Prerequisites: Helia and Libp2p
 
-OrbitDB uses Helia for block storage and Libp2p for database synchronization. However, you need to configure Helia and pass it to OrbitDB when creating a peer.
+OrbitDB uses Helia for block storage and Libp2p for database synchronization. You will need to configure Helia and pass it to OrbitDB when creating a peer.
 
 ### Block Storage
 
@@ -45,25 +39,19 @@ An instance of Libp2p is required by Helia which is then used by OrbitDB to sync
 
 A simple Node.js example might look something like:
 
-```json
+```js
 {
+  peerDiscovery: [
+    mdns()
+  ],
   addresses: {
-    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+    listen: ['/ip4/0.0.0.0/tcp/0']
   },
   transports: [
-    webSockets({
-      filter: all
-    }),
-    webRTC(),
-    circuitRelayTransport({
-      discoverRelays: 1
-    })
+    tcp()
   ],
   connectionEncryption: [noise()],
   streamMuxers: [yamux()],
-  connectionGater: {
-    denyDialMultiaddr: () => false
-  },
   services: {
     identify: identify(),
     pubsub: gossipsub({ allowPublishToZeroPeers: true })
@@ -71,32 +59,33 @@ A simple Node.js example might look something like:
 }
 ```
 
-You can export the above configuration from a file:
+You can export the above configuration from an ES module:
 
 ```js
+import { tcp } from '@libp2p/tcp'
+import { identify } from '@libp2p/identify'
+import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import { noise } from '@chainsafe/libp2p-noise'
+import { yamux } from '@chainsafe/libp2p-yamux'
+import { mdns } from '@libp2p/mdns'
+
 export const Libp2pOptions = {
+  peerDiscovery: [
+    mdns()
+  ],
   addresses: {
-    listen: ['/ip4/0.0.0.0/tcp/0/ws']
+    listen: ['/ip4/0.0.0.0/tcp/0']
   },
   transports: [
-    webSockets({
-      filter: all
-    }),
-    webRTC(),
-    circuitRelayTransport({
-      discoverRelays: 1
-    })
+    tcp()
   ],
   connectionEncryption: [noise()],
   streamMuxers: [yamux()],
-  connectionGater: {
-    denyDialMultiaddr: () => false
-  },
   services: {
     identify: identify(),
     pubsub: gossipsub({ allowPublishToZeroPeers: true })
   }
-} 
+}
 ```
 
 Throughout this documentation, you will see the above Libp2p configuration imported from a file called **./config/libp2p.js**, for example:
@@ -115,6 +104,7 @@ Assuming you have a Node.js development environment installed, create a new proj
 mkdir orbitdb-app
 cd orbitdb-app
 npm init
+npm i helia orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
 ```
 
 Create a file in your project called index.js and add the following code to it:
@@ -123,11 +113,14 @@ Create a file in your project called index.js and add the following code to it:
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
+
+const blockstore = new LevelBlockstore('./ipfs')
 
 // Create an IPFS instance.
 const libp2p = await createLibp2p(Libp2pOptions)
-const ipfs = await createHelia({ libp2p })
+const ipfs = await createHelia({ libp2p, blockstore })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -154,18 +147,17 @@ Run index.js to create your new OrbitDB database:
 node index.js
 ```
 
-You should see the address of your new database and the records you have added
-to it.
+You should see the address of your new database and the records you have added to it.
 
 Without a type, OrbitDB defaults to a database type of 'events'. To change the database type, pass the `type` parameter with a valid database type.
 
-Update:
+Change:
 
 ```js
 const db = await orbitdb.open('my-db')
 ```
 
-to read:
+to:
 
 ```js
 const db = await orbitdb.open('my-documents-db', { 'documents '})
@@ -204,6 +196,7 @@ To create an OrbitDB database peer, create a new project called `orbitdb-peer`:
 mkdir orbitdb-peer
 cd orbitdb-peer
 npm init
+npm i helia orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
 ```
 
 Create a new file called index.js and paste in the following code:
@@ -211,7 +204,8 @@ Create a new file called index.js and paste in the following code:
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
-import { OrbitDB, IPFSAccessController } from '@orbitdb/core'
+import { createOrbitDB, IPFSAccessController } from '@orbitdb/core'
+import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
 
 const main = async () => {  
@@ -229,32 +223,34 @@ const main = async () => {
     db = await orbitdb.open(process.argv[2])
   } else {
     // When we open a new database, write access is only available to the 
-    // db creator. When replicating a database on a remote peer, the remote 
-    // peer must also have write access. Here, we are simply allowing anyone 
-    // to write to the database. A more robust solution would use the 
-    // OrbitDBAccessController to provide "fine-grain" access using grant and 
-    // revoke. 
-    db = await orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: ['*']})})
+    // db creator. If we want to allow other peers to write to the database,
+    // they must be specified in IPFSAccessController write array param. Here,
+    // we simply allow anyone to write to the database. A more robust solution
+    // would use the OrbitDBAccessController to provide mutable, "fine-grain"
+    // access using grant and revoke.
+    db = await orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: ['*']}) })
+    
+    // Copy this output if you want to connect a peer to another.
+    console.log('my-db address', '(copy my db address and use when launching peer 2)', db.address)
   }
 
-  // Copy this output if you want to connect a peer to another.
-  console.log('my-db address', db.address)
-
-  // Add some records to the db when another peers joins.
-  db.events.on('join', async (peerId, heads) => {
-    await db.add('hello world 1')
-    await db.add('hello world 2')
-  })
-
   db.events.on('update', async (entry) => {
-    console.log('entry', entry)
-    
-    // To complete full replication, fetch all the records from the other peer.
-    await db.all()
+    // what has been updated.
+    console.log('update', entry.payload.value)
   })
-
+  
+  if (process.argv[2]) {
+    await db.add('hello from second peer')
+    await db.add('hello again from second peer')
+  } else {
+    // write some records
+    await db.add('hello from first peer')
+    await db.add('hello again from first peer')    
+  }
   // Clean up when stopping this app using ctrl+c
   process.on('SIGINT', async () => {
+      // print the final state of the db.
+      console.log((await db.all()).map(e => e.value))
       // Close your db and stop OrbitDB and IPFS.
       await db.close()
       await orbitdb.stop()
@@ -278,7 +274,7 @@ node index.js
 When running, you should see the address of the database, for example:
 
 ```sh
-my-db address /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj
+my-db address (copy my db address and use when launching peer 2) /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj
 ```
 
 Copy the database's address from terminal 1 and, in terminal 2, run:
@@ -287,7 +283,13 @@ Copy the database's address from terminal 1 and, in terminal 2, run:
 node index.js /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj
 ```
 
-Upon connection, you should see the records being created in terminal 1's database received by the database running in terminal 2.
+Both peers will print new records to the terminal as the log is updated. When you stop each peer using ctrl+c, the final state of the database will be printed to the terminal. They should match.
+
+**PLEASE NOTE:** 
+
+This example is using mDNS to find peers on a local network. This example will not work if each peer is on a different network and you will need to implement an alternative peer discovery mechanism to achieve connectivity. Alternatively, if the address of one of the peers is known and is accessible, the other peer can dial it manually. 
+
+These kinds of connectivity configurations are beyond the scope of OrbitDB.
 
 ## Further Reading
 
