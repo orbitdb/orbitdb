@@ -206,11 +206,13 @@ import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, IPFSAccessController } from '@orbitdb/core'
 import { LevelBlockstore } from 'blockstore-level'
+import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
 
 const main = async () => {  
+  const blockstore = new LevelBlockstore('./ipfs')
   const libp2p = await createLibp2p(Libp2pOptions)
-  const ipfs = await createHelia({ libp2p })
+  const ipfs = await createHelia({ libp2p, blockstore })
 
   // create a random directory to avoid OrbitDB conflicts.
   let randDir = (Math.random() + 1).toString(36).substring(2)
