@@ -88,7 +88,7 @@ const ipfs = await createHelia({ libp2p })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
-const identities = await Identities()
+const identities = await Identities({ ipfs })
 const anotherIdentity = identities.createIdentity('userB')
 
 const db = orbitdb.open('my-db', { AccessController: OrbitDBAccessController({ write: [orbitdb.identity.id, anotherIdentity.id]) })
@@ -161,6 +161,21 @@ const canAppend = async (entry) => {
 ```
 
 In the above example, the `entry.identity` will be the hash of the identity. Using this hash, the entire identity can be retrieved and the identity's id is used to verify write access. `write.includes('*')` is wildcard write and would allow any identity to write to the operations log.
+
+The Identities getIdentity function will fetch the identity from the Identities storage, requesting it from the remote peer if it is not available locally. To synchronize identities across peers, IPFSStorage must be used. To enable IPFSStorage for Identities, pass either an instance of IPFS or an IPFS-enabled storage to the Identities function.
+
+To pass IPFS to Identities:
+
+```
+const identities = await Identities({ ipfs })
+```
+
+To pass IPFS-enabled storage:
+
+```
+const storage = await IPFSStorage({ ipfs })
+const identities = await Identities{{ storage })
+```
 
 ### Using a custom access controller with OrbitDB
 
