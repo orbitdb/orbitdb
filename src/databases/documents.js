@@ -3,11 +3,11 @@
  * @memberof module:Databases
  * @description Documents database.
  * @example <caption>Create documents db with custom index</caption>
- * import { create } from 'IPFS'
- * import { OrbitDB, Documents } from 'orbitdb'
+ * import { createHelia } from 'helia'
+ * import { createOrbitDB, Documents } from 'orbitdb'
  *
- * const ipfs = create()
- * const orbitdb = await OrbitDB({ ipfs })
+ * const ipfs = createHelia()
+ * const orbitdb = await createOrbitDB({ ipfs })
  * const db = await orbitdb.open('my-docs', { Database: Documents({ indexBy: 'myCustomId'} ) }
  *
  * @augments module:Databases~Database
