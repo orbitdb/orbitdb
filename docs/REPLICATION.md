@@ -5,14 +5,16 @@ Below is a simple replication example. Both peers run within the same Nodejs pro
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import { createOrbitDB } from '@orbitdb/core'
 import { Libp2pOptions } from './config/libp2p.js'
 
-// Our ipfs instances will be connecting over websockets. However, you could achieve the same here using tcp. You can find out more about peer connectivity at https://connectivity.libp2p.io/.
+// Our ipfs instances will be connecting over tcp. You can find out more about peer connectivity at https://connectivity.libp2p.io/.
 
 const initIPFSInstance = () => {
+  const blockstore = new LevelBlockstore('./ipfs')
   const libp2p = await createLibp2p(Libp2pOptions)
-  return createHelia({ libp2p })
+  return createHelia({ libp2p, blockstore })
 }
 
 const ipfs1 = await initIPFSInstance()

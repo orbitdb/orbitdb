@@ -116,9 +116,8 @@ import { createOrbitDB } from '@orbitdb/core'
 import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
 
-const blockstore = new LevelBlockstore('./ipfs')
-
 // Create an IPFS instance.
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p, blockstore })
 

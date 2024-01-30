@@ -90,6 +90,7 @@ The identity object is stored like any other [IPLD data structure](https://ipld.
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import * as Block from 'multiformats/block'
 import { Identities } from '@orbitdb/core'
 import * as dagCbor from '@ipld/dag-cbor'
@@ -98,8 +99,9 @@ import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 import { Libp2pOptions } from './config/libp2p.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
-const ipfs = await createHelia({ libp2p })
+const ipfs = await createHelia({ libp2p, blockstore })
 
 const identities = await Identities({ ipfs })
 const identity = await identities.createIdentity({ id: 'me' })

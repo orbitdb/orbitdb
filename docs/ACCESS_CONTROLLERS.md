@@ -10,11 +10,13 @@ Different access controllers can be assigned to the database using the `AccessCo
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
-import * as SomeAccessController from 'some-access-controller.js'
+import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
+import * as SomeAccessController from 'some-access-controller.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
-const ipfs = await createHelia({ libp2p })
+const ipfs = await createHelia({ libp2p, blockstore })
 
 const orbitdb = await createOrbitDB({ ipfs })
 
@@ -39,11 +41,13 @@ To change write access, pass the IPFSAccessController with the `write` parameter
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
 import { Libp2pOptions } from './config/libp2p.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
-const ipfs = await createHelia({ libp2p })
+const ipfs = await createHelia({ libp2p, blockstore })
 
 const identities = await Identities()
 const anotherIdentity = identities.createIdentity('userB')
@@ -60,9 +64,11 @@ To allow anyone to write to the database, specify the wildcard '*':
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import { createOrbitDB, Identities, IPFSAccessController } from '@orbitdb/core'
 import { Libp2pOptions } from './config/libp2p.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
@@ -80,9 +86,11 @@ The OrbitDB access controller provides configurable write access using grant and
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import { createOrbitDB, Identities, OrbitDBAccessController } from '@orbitdb/core'
 import { Libp2pOptions } from './config/libp2p.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
 const ipfs = await createHelia({ libp2p })
 
@@ -184,11 +192,13 @@ Before passing the custom access controller to the `open` function, it must be a
 ```js
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
+import { LevelBlockstore } from 'blockstore-level'
 import { createOrbitDB, useAccessController } from '@orbitdb/core'
 import { Libp2pOptions } from './config/libp2p.js'
 
+const blockstore = new LevelBlockstore('./ipfs')
 const libp2p = await createLibp2p(Libp2pOptions)
-const ipfs = await createHelia({ libp2p })
+const ipfs = await createHelia({ libp2p, blockstore })
 
 useAccessController(CustomAccessController)
 const orbitdb = await createOrbitDB({ ipfs })
