@@ -45,9 +45,23 @@ If you're using `@orbitdb/core` to develop **browser** or **Node.js** applicatio
 ```javascript
 import { createHelia } from 'helia'
 import { createOrbitDB } from '@orbitdb/core'
+import { gossipsub } from "@chainsafe/libp2p-gossipsub";
+import { identify } from "@libp2p/identify";
+import { createLibp2p } from 'libp2p'
+
+const Libp2pOptions = {
+  services: {
+    pubsub: gossipsub({
+      // neccessary to run a single peer
+      allowPublishToZeroPeers: true
+    }),
+    identify: identify()
+  }
+}
 
 ;(async function () {
-  const ipfs = await createHelia()
+  const libp2p = await createLibp2p({ ...Libp2pOptions })
+  const ipfs = await createHelia({libp2p})
   const orbitdb = await createOrbitDB({ ipfs })
 
   // Create / Open a database. Defaults to db type "events".
@@ -78,6 +92,7 @@ import { createOrbitDB } from '@orbitdb/core'
   await orbitdb.stop()
   await ipfs.stop()
 })()
+
 ```
 
 To configure your [IPFS instance](https://github.com/ipfs/helia) for persistency and [Libp2p](https://github.com/libp2p/js-libp2p) to connect to peers, see [Creating a Helia instance](https://github.com/orbitdb/quickstart/blob/main/src/index.js) and the [Default Libp2p Configurations](https://github.com/orbitdb/quickstart/blob/main/src/config/libp2p/index.js) in [@orbitdb/quickstart](https://github.com/orbitdb/quickstart/blob/main/src/config/libp2p/index.js) for examples.
