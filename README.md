@@ -50,13 +50,13 @@ import { identify } from "@libp2p/identify";
 import { createLibp2p } from 'libp2p'
 
 const Libp2pOptions = {
-      services: {
-        pubsub: gossipsub({
-          // neccessary to run a single peer
-          allowPublishToZeroPeers: true
-        }),
-        identify: identify()
-      }
+        services: {
+          pubsub: gossipsub({
+            // neccessary to run a single peer
+            allowPublishToZeroPeers: true
+          }),
+          identify: identify()
+        }
     }
 
 ;(async function () {
