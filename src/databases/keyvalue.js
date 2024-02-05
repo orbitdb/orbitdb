@@ -11,7 +11,7 @@ import Database from '../database.js'
 const type = 'keyvalue'
 
 /**
- * Defines an KeyValue database.
+ * Defines a KeyValue database.
  * @return {module:Databases.Databases-KeyValue} A KeyValue function.
  * @memberof module:Databases
  */
