@@ -159,7 +159,7 @@ const db = await orbitdb.open('my-db')
 to:
 
 ```js
-const db = await orbitdb.open('my-documents-db', { 'documents '})
+const db = await orbitdb.open('my-documents-db', { type: 'documents '})
 ```
 
 Also replace:
@@ -204,7 +204,6 @@ Create a new file called index.js and paste in the following code:
 import { createLibp2p } from 'libp2p'
 import { createHelia } from 'helia'
 import { createOrbitDB, IPFSAccessController } from '@orbitdb/core'
-import { LevelBlockstore } from 'blockstore-level'
 import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
 
@@ -290,7 +289,7 @@ Both peers will print new records to the terminal as the log is updated. When yo
 
 This example is using mDNS to find peers on a local network. This example will not work if each peer is on a different network and you will need to implement an alternative peer discovery mechanism to achieve connectivity. Alternatively, if the address of one of the peers is known and is accessible, the other peer can dial it manually. 
 
-These kinds of connectivity configurations are beyond the scope of OrbitDB.
+These kinds of connectivity configurations are beyond the scope of OrbitDB. To find out more about connectivity in Libp2p, check out https://connectivity.libp2p.io/.
 
 ## Further Reading
 
