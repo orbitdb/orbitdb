@@ -58,6 +58,18 @@ const ComposedStorage = async (storage1, storage2) => {
   }
 
   /**
+   * Deletes a value from storage.
+   * @function
+   * @param {string} hash The hash of the value to delete.
+   * @memberof module:Storage.Storage-Composed
+   * @instance
+   */
+  const del = async (hash) => {
+    await storage1.del(hash)
+    await storage2.del(hash)
+  }
+
+  /**
    * Iterates over records stored in both storages.
    * @function
    * @yields [string, string] The next key/value pair from all storages.
@@ -115,6 +127,7 @@ const ComposedStorage = async (storage1, storage2) => {
   return {
     put,
     get,
+    del,
     iterator,
     merge,
     clear,
