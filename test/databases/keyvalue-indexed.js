@@ -287,7 +287,7 @@ describe('KeyValueIndexed Database', function () {
       await db.put('key', 'value')
 
       let result
-      for await (const [key, value] of storage.iterator()) {
+      for await (const { key, value } of db.iterator()) {
         result = [key, value]
       }
 

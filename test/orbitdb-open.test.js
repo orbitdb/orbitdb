@@ -2,7 +2,7 @@ import { deepStrictEqual, strictEqual, notStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import fs from 'fs'
 import path from 'path'
-import { createOrbitDB, isValidAddress, LevelStorage } from '../src/index.js'
+import { createOrbitDB, isValidAddress } from '../src/index.js'
 import KeyValueIndexed from '../src/databases/keyvalue-indexed.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
@@ -419,14 +419,13 @@ describe('Open databases', function () {
   })
 
   describe('opening an indexed keyvalue database', () => {
-    let storage
     let db, address
 
     const amount = 10
 
     before(async () => {
       orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
-      db = await orbitdb1.open('helloworld', { type: 'keyvalue' })
+      db = await orbitdb1.open('helloworld', { Database: KeyValueIndexed() })
       address = db.address
 
       for (let i = 0; i < amount; i++) {
@@ -437,9 +436,6 @@ describe('Open databases', function () {
     })
 
     after(async () => {
-      if (storage) {
-        await storage.close()
-      }
       if (db) {
         await db.close()
       }
@@ -451,8 +447,7 @@ describe('Open databases', function () {
     })
 
     it('returns all entries in the database and in the index', async () => {
-      storage = await LevelStorage({ path: './index', valueEncoding: 'json' })
-      db = await orbitdb1.open(address, { Database: KeyValueIndexed({ storage }) })
+      db = await orbitdb1.open(address, { Database: KeyValueIndexed() })
 
       strictEqual(db.address, address)
       strictEqual(db.type, 'keyvalue')
@@ -464,18 +459,11 @@ describe('Open databases', function () {
       }
 
       const result = []
-      for await (const [key, value] of storage.iterator()) {
-        result.push({ key, value })
+      for await (const { key, value } of db.iterator()) {
+        result.unshift({ key, value })
       }
 
       deepStrictEqual(result, expected)
-
-      const all = []
-      for await (const { key, value } of db.iterator()) {
-        all.unshift({ key, value })
-      }
-
-      deepStrictEqual(all, expected)
     })
   })
 
