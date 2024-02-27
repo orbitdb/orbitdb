@@ -7,6 +7,7 @@
 import { CID } from 'multiformats/cid'
 import { base58btc } from 'multiformats/bases/base58'
 import { TimeoutController } from 'timeout-abort-controller'
+import drain from 'it-drain'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -41,7 +42,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     await ipfs.blockstore.put(cid, data, { signal })
 
     if (pin && !(await ipfs.pins.isPinned(cid))) {
-      await ipfs.pins.add(cid)
+      await drain(ipfs.pins.add(cid))
     }
   }
 
