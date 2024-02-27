@@ -38,7 +38,7 @@ describe('IPFSBlockStorage', function () {
 
     strictEqual(actual, expected)
   })
-  
+
   it('checks that a block is pinned', async () => {
     const expected = 'hello world'
     const block = await Block.encode({ value: expected, codec, hasher })
@@ -48,7 +48,7 @@ describe('IPFSBlockStorage', function () {
 
     strictEqual(await ipfs.pins.isPinned(block.cid), true)
   })
-    
+
   it('throws an error if a block does not exist', async () => {
     const value = 'i don\'t exist'
     const block = await Block.encode({ value, codec, hasher })
