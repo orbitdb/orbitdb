@@ -26,13 +26,27 @@ describe('IPFSBlockStorage', function () {
 
   it('gets a block', async () => {
     const expected = 'hello world'
+    const { cid, bytes } = await Block.encode({ value: expected, codec, hasher })
+
+    const hash = cid.toString(base58btc)
+
+    await storage.put(hash, bytes)
+
+    const data = await storage.get(hash)
+    const block = await Block.decode({ bytes: data, codec, hasher })
+    const actual = block.value
+
+    strictEqual(actual, expected)
+  })
+
+  it('checks that a block is pinned', async () => {
+    const expected = 'hello world'
     const block = await Block.encode({ value: expected, codec, hasher })
     const cid = block.cid.toString(base58btc)
 
-    await storage.put(cid, 'hello world')
-    const actual = await storage.get(cid)
+    await storage.put(cid, block.bytes)
 
-    strictEqual(actual, expected)
+    strictEqual(await ipfs.pins.isPinned(block.cid), true)
   })
 
   it('throws an error if a block does not exist', async () => {
