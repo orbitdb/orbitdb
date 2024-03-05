@@ -78,8 +78,9 @@ const LevelStorage = async ({ path, valueEncoding } = {}) => {
    * @memberof module:Storage.Storage-Level
    * @instance
    */
-  const iterator = async function * () {
-    for await (const [key, value] of db.iterator()) {
+  const iterator = async function * ({ amount, reverse } = {}) {
+    const iteratorOptions = { limit: amount || -1, reverse: reverse || false }
+    for await (const [key, value] of db.iterator(iteratorOptions)) {
       yield [key, value]
     }
   }

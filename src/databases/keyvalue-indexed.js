@@ -34,33 +34,54 @@ const valueEncoding = 'json'
 const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const indexDirectory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
   const index = storage || await LevelStorage({ path: indexDirectory, valueEncoding })
-
-  let latestOplogHash
+  const indexedEntries = await LevelStorage({ path: pathJoin(indexDirectory, '/_indexedEntries/'), valueEncoding })
 
   const _updateIndex = async (log, entry) => {
     const keys = {}
-    const it = await log.iterator({ gt: latestOplogHash })
+    const toBeIndexed = {}
+    const latest = entry.hash
 
-    for await (const entry of it) {
-      const { op, key, value } = entry.payload
+    // Function to check if a hash is in the entry index
+    const isIndexed = async (hash) => (await indexedEntries.get(hash)) === true
 
-      if (op === 'PUT' && !keys[key]) {
-        keys[key] = true
-        await index.put(key, value)
-      } else if (op === 'DEL' && !keys[key]) {
-        keys[key] = true
-        await index.del(key)
+    // Function to decide when the log traversal should be stopped
+    const shoudStopTraverse = async (entry) => {
+      // Go through the nexts of an entry and if any is not yet
+      // indexed, add it to the list of entries-to-be-indexed
+      for await (const hash of entry.next) {
+        if (!(await isIndexed(hash))) {
+          toBeIndexed[hash] = true
+        }
       }
+      // If the to-be-indexed list is empty, we don't have nexts anymore to process
+      const nextsAreIndexed = Object.keys(toBeIndexed).length === 0
+      // If the latest entry and all its nexts are indexed, we're done
+      return await isIndexed(latest) && nextsAreIndexed
     }
 
-    latestOplogHash = entry ? entry.hash : null
+    // Traverse the log and stop when everything has been processed
+    for await (const entry of log.traverse(null, shoudStopTraverse)) {
+      const { hash, payload } = entry
+      // If an entry is not yet indexed, process it
+      if (!(await isIndexed(hash))) {
+        const { op, key } = payload
+        if (op === 'PUT' && !keys[key]) {
+          keys[key] = true
+          await index.put(key, entry)
+          await indexedEntries.put(hash, true)
+        } else if (op === 'DEL') {
+          keys[key] = true
+          await index.del(key)
+          await indexedEntries.put(hash, true)
+        }
+        // Remove the entry (hash) from the list of to-be-indexed entries
+        delete toBeIndexed[hash]
+      }
+    }
   }
 
   // Create the underlying KeyValue database
   const keyValueStore = await KeyValue()({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate: _updateIndex })
-
-  // Compute the index
-  await _updateIndex(keyValueStore.log)
 
   /**
    * Gets a value from the store by key.
@@ -71,11 +92,10 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    * @instance
    */
   const get = async (key) => {
-    const value = await index.get(key)
-    if (value) {
-      return value
+    const entry = await index.get(key)
+    if (entry) {
+      return entry.payload.value
     }
-    return keyValueStore.get(key)
   }
 
   /**
@@ -88,8 +108,12 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    * @instance
    */
   const iterator = async function * ({ amount } = {}) {
-    const it = keyValueStore.iterator({ amount })
-    for await (const { key, value, hash } of it) {
+    const it = index.iterator({ amount, reverse: true })
+    for await (const record of it) {
+      // 'index' is a LevelStorage that returns a [key, value] pair
+      const entry = record[1]
+      const { key, value } = entry.payload
+      const hash = entry.hash
       yield { key, value, hash }
     }
   }
@@ -99,6 +123,7 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    */
   const close = async () => {
     await index.close()
+    await indexedEntries.close()
     await keyValueStore.close()
   }
 
@@ -107,6 +132,7 @@ const KeyValueIndexed = ({ storage } = {}) => async ({ ipfs, identity, address, 
    */
   const drop = async () => {
     await index.clear()
+    await indexedEntries.clear()
     await keyValueStore.drop()
   }
 
