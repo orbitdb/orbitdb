@@ -76,10 +76,11 @@ const ComposedStorage = async (storage1, storage2) => {
    * @memberof module:Storage.Storage-Composed
    * @instance
    */
-  const iterator = async function * () {
+  const iterator = async function * ({ amount, reverse } = {}) {
     const keys = []
+    const iteratorOptions = { amount: amount || -1, reverse: reverse || false }
     for (const storage of [storage1, storage2]) {
-      for await (const [key, value] of storage.iterator()) {
+      for await (const [key, value] of storage.iterator(iteratorOptions)) {
         if (!keys[key]) {
           keys[key] = true
           yield [key, value]
