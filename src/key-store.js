@@ -123,7 +123,12 @@ const KeyStore = async ({ storage, path } = {}) => {
    * @namespace module:KeyStore~KeyStore
    * @description The instance returned by {@link module:KeyStore}.
    */
+
+  // Persistent storage for keys
   storage = storage || await ComposedStorage(await LRUStorage({ size: 1000 }), await LevelStorage({ path: path || defaultPath }))
+
+  // Cache for deserialized/unmarshaled keys
+  const keyCache = await LRUStorage({ size: 1000 })
 
   /**
    * Closes the KeyStore's underlying storage.
@@ -133,6 +138,7 @@ const KeyStore = async ({ storage, path } = {}) => {
    */
   const close = async () => {
     await storage.close()
+    await keyCache.close()
   }
 
   /**
@@ -143,6 +149,7 @@ const KeyStore = async ({ storage, path } = {}) => {
    */
   const clear = async () => {
     await storage.clear()
+    await keyCache.clear()
   }
 
   /**
@@ -160,12 +167,17 @@ const KeyStore = async ({ storage, path } = {}) => {
     }
 
     let hasKey = false
-    try {
-      const storedKey = await storage.get('private_' + id)
-      hasKey = storedKey !== undefined && storedKey !== null
-    } catch (e) {
-      // Catches 'Error: ENOENT: no such file or directory, open <path>'
-      console.error('Error: ENOENT: no such file or directory')
+    let key = await keyCache.get(id)
+    if (key) {
+      hasKey = true
+    } else {
+      try {
+        key = await storage.get('private_' + id)
+        hasKey = key !== undefined && key !== null
+      } catch (e) {
+        // Catches 'Error: ENOENT: no such file or directory, open <path>'
+        console.error('Error: ENOENT: no such file or directory')
+      }
     }
 
     return hasKey
@@ -180,7 +192,11 @@ const KeyStore = async ({ storage, path } = {}) => {
    * @instance
    */
   const addKey = async (id, key) => {
-    await storage.put('private_' + id, key.privateKey)
+    const { privateKey } = key
+    await storage.put('private_' + id, privateKey)
+    // Unmarshal the key and add it to the cache
+    const unmarshaledPrivateKey = unmarshal(privateKey)
+    await keyCache.put(id, unmarshaledPrivateKey)
   }
 
   /**
@@ -197,12 +213,11 @@ const KeyStore = async ({ storage, path } = {}) => {
     }
 
     // Generate a private key
-    const pair = await crypto.keys.generateKeyPair('secp256k1')
-    const keys = await crypto.keys.unmarshalPrivateKey(pair.bytes)
-    const pubKey = keys.public.marshal()
+    const keyPair = await crypto.keys.generateKeyPair('secp256k1')
+    const keys = await crypto.keys.unmarshalPrivateKey(keyPair.bytes)
 
     const key = {
-      publicKey: pubKey,
+      publicKey: keys.public.marshal(),
       privateKey: keys.marshal()
     }
 
@@ -225,18 +240,25 @@ const KeyStore = async ({ storage, path } = {}) => {
       throw new Error('id needed to get a key')
     }
 
-    let storedKey
-    try {
-      storedKey = await storage.get('private_' + id)
-    } catch (e) {
-      // ignore ENOENT error
+    let key = await keyCache.get(id)
+
+    if (!key) {
+      let storedKey
+      try {
+        storedKey = await storage.get('private_' + id)
+      } catch (e) {
+        // ignore ENOENT error
+      }
+
+      if (!storedKey) {
+        return
+      }
+
+      key = unmarshal(storedKey)
+      await keyCache.put(id, key)
     }
 
-    if (!storedKey) {
-      return
-    }
-
-    return unmarshal(storedKey)
+    return key
   }
 
   /**
