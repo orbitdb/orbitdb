@@ -326,7 +326,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @memberof module:Log~Log
    * @instance
    */
-  const traverse = async function * (rootEntries, shouldStopFn, useRefs = true) {
+  const traverse = async function * (rootEntries, shouldStopFn) {
     // By default, we don't stop traversal and traverse
     // until the end of the log
     const defaultStopFn = () => false
@@ -350,7 +350,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // Get the next entry from the stack
       entry = stack.pop()
       if (entry) {
-        const { hash, next, refs } = entry
+        const { hash, next } = entry
         // If we have an entry that we haven't traversed yet, process it
         if (!traversed[hash]) {
           // Yield the current entry
@@ -365,7 +365,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
           fetched[hash] = true
           // Add the next and refs hashes to the list of hashes to fetch next,
           // filter out traversed and fetched hashes
-          toFetch = [...toFetch, ...next, ...(useRefs ? refs : [])].filter(notIndexed)
+          toFetch = [...toFetch, ...next].filter(notIndexed)
           // Function to fetch an entry and making sure it's not a duplicate (check the hash indices)
           const fetchEntries = (hash) => {
             if (!traversed[hash] && !fetched[hash]) {
@@ -379,7 +379,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
           // Add the next and refs fields from the fetched entries to the next round
           toFetch = nexts
             .filter(e => e !== null && e !== undefined)
-            .reduce((res, acc) => Array.from(new Set([...res, ...acc.next, ...(useRefs ? acc.refs : [])])), [])
+            .reduce((res, acc) => Array.from(new Set([...res, ...acc.next])), [])
             .filter(notIndexed)
           // Add the fetched entries to the stack to be processed
           stack = [...nexts, ...stack]
@@ -543,7 +543,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const shouldStopTraversal = async (entry) => {
       return refs.length >= amount && amount !== -1
     }
-    for await (const { hash } of traverse(heads, shouldStopTraversal, false)) {
+    for await (const { hash } of traverse(heads, shouldStopTraversal)) {
       refs.push(hash)
     }
     refs = refs.slice(heads.length + 1, amount)
