@@ -147,8 +147,13 @@ const isEqual = (a, b) => {
  * @private
  */
 const decode = async (bytes) => {
-  const { value } = await Block.decode({ bytes, codec, hasher })
-  return encode(value)
+  const { cid, value } = await Block.decode({ bytes, codec, hasher })
+  const hash = cid.toString(hashStringEncoding)
+  return {
+    ...value,
+    hash,
+    bytes
+  }
 }
 
 /**
