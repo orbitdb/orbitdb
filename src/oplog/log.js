@@ -79,7 +79,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   // Heads storage
   headsStorage = headsStorage || await DefaultStorage()
   // Add heads to the state storage, ie. init the log state
-  const _heads = await Heads({ storage: headsStorage, heads: logHeads })
+  const _heads = await Heads({ storage: headsStorage, heads: logHeads, entryStorage: _entries })
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
   // Internal queues for processing appends and joins in their call-order
@@ -184,10 +184,10 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
         throw new Error(`Could not append entry:\nKey "${identity.hash}" is not allowed to write to the log`)
       }
 
-      // The appended entry is now the latest head
-      await _heads.set([entry])
       // Add entry to the entry storage
       await _entries.put(entry.hash, entry.bytes)
+      // The appended entry is now the latest head
+      await _heads.set([entry])
       // Add entry to the entry index
       await _index.put(entry.hash, true)
       // Return the appended entry
@@ -315,7 +315,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       /* 6. Add new entry to entries (for pinning) */
       await _entries.put(entry.hash, entry.bytes)
 
-      /* 6. Add the new entry to heads (=union with current heads) */
+      /* 7. Add the new entry to heads (=union with current heads) */
       await _heads.add(entry)
 
       return true

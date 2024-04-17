@@ -9,7 +9,7 @@ import { base58btc } from 'multiformats/bases/base58'
 import { TimeoutController } from 'timeout-abort-controller'
 import drain from 'it-drain'
 
-const DefaultTimeout = 30000 // 30 seconds
+const DefaultTimeout = 10000 // 30 seconds
 
 /**
  * Creates an instance of IPFSBlockStorage.
@@ -27,6 +27,8 @@ const DefaultTimeout = 30000 // 30 seconds
  */
 const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
   if (!ipfs) throw new Error('An instance of ipfs is required.')
+
+  const signals = new Set()
 
   /**
    * Puts data to an IPFS block.
@@ -59,7 +61,9 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
   const get = async (hash) => {
     const cid = CID.parse(hash, base58btc)
     const { signal } = new TimeoutController(timeout || DefaultTimeout)
+    signals.add(signal)
     const block = await ipfs.blockstore.get(cid, { signal })
+    signals.delete(signal)
     if (block) {
       return block
     }
@@ -71,7 +75,12 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
 
   const clear = async () => {}
 
-  const close = async () => {}
+  const close = async () => {
+    for (const s in signals) {
+      s.abort()
+    }
+    signals.clear()
+  }
 
   return {
     put,

@@ -29,7 +29,7 @@ describe('KeyValue Database Replication', function () {
   }
 
   before(async () => {
-    [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
+    [ipfs1, ipfs2] = await Promise.all([createHelia({ directory: './ipfs1' }), createHelia({ directory: './ipfs2' })])
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)
@@ -41,10 +41,12 @@ describe('KeyValue Database Replication', function () {
 
   after(async () => {
     if (ipfs1) {
+      await ipfs1.blockstore.child.child.child.close()
       await ipfs1.stop()
     }
 
     if (ipfs2) {
+      await ipfs2.blockstore.child.child.child.close()
       await ipfs2.stop()
     }
 

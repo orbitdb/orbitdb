@@ -77,9 +77,9 @@ describe('Database', function () {
 
       await db.close()
 
-      const headsStorage = await LevelStorage({ path: headsPath })
+      const headsStorage = await LevelStorage({ path: headsPath, valueEncoding: 'json' })
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      deepStrictEqual(await headsStorage.get('heads'), [hash])
 
       await headsStorage.close()
 
@@ -97,9 +97,9 @@ describe('Database', function () {
 
       await db.close()
 
-      const headsStorage = await LevelStorage({ path: headsPath })
+      const headsStorage = await LevelStorage({ path: headsPath, valueEncoding: 'json' })
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      deepStrictEqual(await headsStorage.get('heads'), [hash])
 
       await headsStorage.close()
 
@@ -113,7 +113,7 @@ describe('Database', function () {
       const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
       const hash = await db.addOperation(op)
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      deepStrictEqual(JSON.parse(await headsStorage.get('heads')), [hash])
 
       await db.close()
     })

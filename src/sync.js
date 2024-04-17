@@ -228,7 +228,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     }
 
     if (topic === address) {
-      queue.add(task)
+      await queue.add(task)
     }
   }
 

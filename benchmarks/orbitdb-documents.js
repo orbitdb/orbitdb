@@ -1,68 +1,86 @@
 import { createOrbitDB } from '../src/index.js'
-// import { createOrbitDB, MemoryStorage } from '../src/index.js'
-import { rimraf as rmrf } from 'rimraf'
 import createHelia from '../test/utils/create-helia.js'
+// import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
+import { rimraf as rmrf } from 'rimraf'
 
-import { EventEmitter } from 'events'
-EventEmitter.defaultMaxListeners = 10000
+let db
+let interval
+
+// Metrics
+let totalQueries = 0
+let seconds = 0
+let queriesPerSecond = 0
+let lastTenSeconds = 0
+
+// Settings
+const benchmarkDuration = 20 // seconds
+
+const queryLoop = async () => {
+  const doc = { _id: 'id-' + totalQueries, content: 'hello ' + totalQueries }
+  // await db.put(totalQueries.toString(), { referencesCount: 0 })
+  await db.put(doc)
+  totalQueries++
+  lastTenSeconds++
+  queriesPerSecond++
+  if (interval) {
+    setImmediate(queryLoop)
+  }
+}
 
 ;(async () => {
   console.log('Starting benchmark...')
 
-  const entryCount = 1000
+  console.log('Benchmark duration is ' + benchmarkDuration + ' seconds')
 
-  await rmrf('./ipfs')
   await rmrf('./orbitdb')
+
+  // const identities = await Identities()
+  // const testIdentity = await identities.createIdentity({ id: 'userA' })
 
   const ipfs = await createHelia()
   const orbitdb = await createOrbitDB({ ipfs })
 
-  console.log(`Insert ${entryCount} documents`)
-
+  // MemoryStorage is the default storage for Log but defining them here
+  // in case we want to benchmark different storage modules
   // const entryStorage = await MemoryStorage()
   // const headsStorage = await MemoryStorage()
   // const indexStorage = await MemoryStorage()
+  // Test LRUStorage
+  // const entryStorage = await LRUStorage()
+  // const headsStorage = await LRUStorage()
+  // const indexStorage = await LRUStorage()
+  // Test LevelStorage
+  // const entryStorage = await LevelStorage({ path: './logA/entries' })
+  // const headsStorage = await LevelStorage({ path: './orbitdb/benchmark-documents-2/heads', valueEncoding: 'json' })
+  // const headsStorage = await LevelStorage({ path: './orbitdb/benchmark-documents-2/heads' })
+  // const indexStorage = await LevelStorage({ path: './logA/index' })
 
-  // const db1 = await orbitdb.open('benchmark-documents', { type: 'documents', referencesCount: 16, entryStorage, headsStorage, indexStorage })
+  // db = await orbitdb.open('benchmark-documents-2', { type: 'documents', entryStorage, headsStorage, indexStorage })
+  db = await orbitdb.open('benchmark-documents-2', { type: 'documents' })
 
-  const db1 = await orbitdb.open('benchmark-documents', { type: 'documents' })
+  // Output metrics at 1 second interval
+  interval = setInterval(async () => {
+    seconds++
+    console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
+    queriesPerSecond = 0
 
-  const startTime1 = new Date().getTime()
+    if (seconds % 10 === 0) {
+      console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
+      if (lastTenSeconds === 0) throw new Error('Problems!')
+      lastTenSeconds = 0
+    }
 
-  for (let i = 0; i < entryCount; i++) {
-    const doc = { _id: i.toString(), message: 'hello ' + i }
-    await db1.put(doc)
-  }
+    if (seconds >= benchmarkDuration) {
+      clearInterval(interval)
+      interval = null
+      process.nextTick(async () => {
+        await db.close()
+        await orbitdb.stop()
+        await rmrf('./orbitdb')
+        process.exit(0)
+      }, 1000)
+    }
+  }, 1000)
 
-  const endTime1 = new Date().getTime()
-  const duration1 = endTime1 - startTime1
-  const operationsPerSecond1 = Math.floor(entryCount / (duration1 / 1000))
-  const millisecondsPerOp1 = duration1 / entryCount
-  console.log(`Inserting ${entryCount} documents took ${duration1} ms, ${operationsPerSecond1} ops/s, ${millisecondsPerOp1} ms/op`)
-
-  console.log(`Query ${entryCount} documents`)
-  const startTime2 = new Date().getTime()
-
-  const all = []
-  for await (const { key, value } of db1.iterator()) {
-    all.unshift({ key, value })
-  }
-
-  const endTime2 = new Date().getTime()
-  const duration2 = endTime2 - startTime2
-  const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
-  const millisecondsPerOp2 = duration2 / entryCount
-
-  console.log(`Querying ${all.length} documents took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
-
-  await db1.drop()
-  await db1.close()
-
-  await orbitdb.stop()
-  await ipfs.stop()
-
-  await rmrf('./ipfs')
-  await rmrf('./orbitdb')
-
-  process.exit(0)
+  setImmediate(queryLoop)
 })()

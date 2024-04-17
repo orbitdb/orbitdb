@@ -14,8 +14,7 @@ describe('Replicating databases', function () {
   let orbitdb1, orbitdb2
 
   before(async () => {
-    ipfs1 = await createHelia({ directory: './ipfs1' })
-    ipfs2 = await createHelia({ directory: './ipfs2' })
+    [ipfs1, ipfs2] = await Promise.all([createHelia({ directory: './ipfs1' }), createHelia({ directory: './ipfs2' })])
     await connectPeers(ipfs1, ipfs2)
 
     orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
@@ -138,10 +137,6 @@ describe('Replicating databases', function () {
 
       await orbitdb1.stop()
       await orbitdb2.stop()
-      // TODO: Strange issue with ClassicLevel. Causes subsequent Helia
-      // instantiations to error with db closed. Explicitly closing the
-      // nested ClassicLevel db seems to resolve the issue. Requires further
-      // investigation.
       await ipfs1.blockstore.child.child.child.close()
       await ipfs2.blockstore.child.child.child.close()
       await ipfs1.stop()
@@ -153,10 +148,8 @@ describe('Replicating databases', function () {
       await connectPeers(ipfs1, ipfs2)
 
       orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: './orbitdb1' })
-      orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
 
       db1 = await orbitdb1.open('helloworld', { referencesCount: 0 })
-      db2 = await orbitdb2.open(db1.address)
 
       console.time('query 2')
       const eventsFromDb1 = []
@@ -179,6 +172,8 @@ describe('Replicating databases', function () {
       const onJoin = async (peerId, heads) => {
         replicated = true
       }
+
+      orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: './orbitdb2' })
 
       const db2 = await orbitdb2.open(db1.address)
 
