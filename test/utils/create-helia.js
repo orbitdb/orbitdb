@@ -34,7 +34,7 @@ const Libp2pOptions = {
   },
   services: {
     identify: identify(),
-    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+    pubsub: gossipsub({ allowPublishToZeroTopicPeers: true })
   }
 }
 
@@ -61,7 +61,7 @@ const Libp2pBrowserOptions = {
   },
   services: {
     identify: identify(),
-    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+    pubsub: gossipsub({ allowPublishToZeroTopicPeers: true })
   }
 }
 
