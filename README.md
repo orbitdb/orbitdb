@@ -53,7 +53,7 @@ const Libp2pOptions = {
   services: {
     pubsub: gossipsub({
       // neccessary to run a single peer
-      allowPublishToZeroPeers: true
+      allowPublishToZeroTopicPeers: true
     }),
     identify: identify()
   }

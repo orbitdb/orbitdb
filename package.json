@@ -29,7 +29,7 @@
     "uint8arrays": "^5.0.0"
   },
   "devDependencies": {
-    "@chainsafe/libp2p-gossipsub": "^12.0.0",
+    "@chainsafe/libp2p-gossipsub": "^13.0.0",
     "@chainsafe/libp2p-yamux": "^6.0.1",
     "@helia/block-brokers": "^1.0.0",
     "@libp2p/circuit-relay-v2": "^1.0.10",
