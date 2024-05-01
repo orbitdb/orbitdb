@@ -56,7 +56,7 @@ const DefaultAccessController = async () => {
  * @memberof module:Log
  * @instance
  */
-const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn } = {}) => {
+const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn, encryptFn, decryptFn } = {}) => {
   /**
    * @namespace Log
    * @description The instance returned by {@link module:Log}
@@ -82,6 +82,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   const _heads = await Heads({ storage: headsStorage, heads: logHeads })
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
+
   // Internal queues for processing appends and joins in their call-order
   const appendQueue = new PQueue({ concurrency: 1 })
   const joinQueue = new PQueue({ concurrency: 1 })
@@ -137,6 +138,11 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     const bytes = await _entries.get(hash)
     if (bytes) {
       const entry = await Entry.decode(bytes)
+
+      if (decryptFn) {
+        entry.payload = await decryptFn(entry.payload)
+      }
+
       return entry
     }
   }
@@ -169,6 +175,11 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // Get references (pointers) to multiple entries in the past
       // (skips the heads which are covered by the next field)
       const refs = await getReferences(heads_, options.referencesCount + heads_.length)
+
+      if (encryptFn) {
+        data = await encryptFn(data)
+      }
+
       // Create the entry
       const entry = await Entry.create(
         identity,

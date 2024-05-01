@@ -3,6 +3,7 @@ import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry, Identities, KeyStore, MemoryStorage } from '../../src/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
+import { encrypt, decrypt } from '../utils/encrypt.js'
 
 const { create } = Entry
 
@@ -141,6 +142,15 @@ describe('Log', function () {
       strictEqual(values[0].payload, 'hello1')
       strictEqual(values[1].payload, 'hello2')
       strictEqual(values[2].payload, 'hello3')
+    })
+
+    it('encrypts the value of an entry in the log', async () => {
+      const encryptFn = encrypt({ identity: testIdentity })
+      const decryptFn = decrypt({ identities, identity: testIdentity })
+      const log = await Log(testIdentity, { encryptFn, decryptFn })
+      const entry = await log.append('hello1')
+      const value = await log.get(entry.hash)
+      strictEqual(value.payload, 'hello1')
     })
   })
 })
