@@ -54,7 +54,7 @@ A simple Node.js example might look something like:
   streamMuxers: [yamux()],
   services: {
     identify: identify(),
-    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+    pubsub: gossipsub({ allowPublishToZeroTopicPeers: true })
   }
 }
 ```
@@ -83,7 +83,7 @@ export const Libp2pOptions = {
   streamMuxers: [yamux()],
   services: {
     identify: identify(),
-    pubsub: gossipsub({ allowPublishToZeroPeers: true })
+    pubsub: gossipsub({ allowPublishToZeroTopicPeers: true })
   }
 }
 ```
