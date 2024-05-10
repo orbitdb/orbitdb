@@ -19,7 +19,9 @@ const DefaultTimeout = 30000 // 30 seconds
  * Upon subscribing to the topic, peers already connected to the topic receive
  * the subscription message and "dial" the subscribing peer using a libp2p
  * custom protocol. Once connected to the subscribing peer on a direct
- * peer-to-peer connection, the dialing peer and the subscribing peer exchange * the heads of the Log each peer currently has. Once completed, the peers have * the same "local state".
+ * peer-to-peer connection, the dialing peer and the subscribing peer exchange
+ * the heads of the Log each peer currently has. Once completed, the peers have
+ * the same "local state".
  *
  * Once the initial sync has completed, peers notify one another of updates to
  * the log, ie. updates to the database, using the initially opened pubsub
