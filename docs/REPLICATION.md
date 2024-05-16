@@ -80,4 +80,4 @@ await orbitdb2.stop()
 await ipfs2.stop()
 ```
 
-Refer to the API for more information about [OrbitDB's synchronization protocol](https://orbitdb.org/api/module-Sync.html).
+Refer to the API for more information about [OrbitDB's synchronization protocol](https://api.orbitdb.org/module-Sync.html).
