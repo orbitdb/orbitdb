@@ -146,10 +146,10 @@ describe('Log', function () {
 
     it('encrypts the value of an entry in the log', async () => {
       const keys = await keystore.createKey('hello1')
-      
+
       const privateKey = await keystore.getKey('hello1')
       const publicKey = await keystore.getPublic(keys)
-      
+
       const encryptFn = encrypt({ publicKey })
       const decryptFn = decrypt({ privateKey })
       const log = await Log(testIdentity, { encryptFn, decryptFn })
