@@ -208,7 +208,7 @@ for await (const record of db2.iterator()) {
 }
 ```
 
-To learn more, check out [OrbitDB's sychronization protocol](https://orbitdb.org/api/module-Sync.html) and the [OrbitDB replication documentation](./REPLICATION.md).
+To learn more, check out [OrbitDB's sychronization protocol](https://api.orbitdb.org/module-Sync.html) and the [OrbitDB replication documentation](./REPLICATION.md).
 
 ## Custom databases
 
