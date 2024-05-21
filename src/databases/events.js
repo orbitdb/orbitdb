@@ -7,6 +7,8 @@
  * @augments module:Databases~Database
  */
 import Database from '../database.js'
+import { Operation } from './utils/operation.js'
+import { Payload } from './utils/payload.js'
 
 const type = 'events'
 
@@ -15,8 +17,8 @@ const type = 'events'
  * @return {module:Databases.Databases-Events} A Events function.
  * @memberof module:Databases
  */
-const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
-  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
+const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryptFn, decryptFn }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryptFn, decryptFn })
 
   const { addOperation, log } = database
 
@@ -29,7 +31,8 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @instance
    */
   const add = async (value) => {
-    return addOperation({ op: 'ADD', key: null, value })
+    const op = await Operation('ADD', null, value, { encryptFn, encryptValue: true, encryptOp: false })
+    return addOperation(op)
   }
 
   /**
@@ -42,7 +45,9 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    */
   const get = async (hash) => {
     const entry = await log.get(hash)
-    return entry.payload.value
+    const { value } = await Payload(entry.payload, { decryptFn, decryptValue: true, decryptOp: false })
+
+    return value
   }
 
   /**

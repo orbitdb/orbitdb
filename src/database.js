@@ -39,10 +39,12 @@ const defaultCacheSize = 1000
  * automatically. Otherwise, false.
  * @param {function} [params.onUpdate] A function callback. Fired when an
  * entry is added to the oplog.
+ * @param {Function} options.encryptFn An encryption function.
+ * @param {Function} options.decryptFn A decryption function.
  * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
-const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryptFn, decryptFn }) => {
   /**
    * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
@@ -108,7 +110,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
-  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
+  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryptFn, decryptFn })
 
   const events = new EventEmitter()
 

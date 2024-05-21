@@ -112,7 +112,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * @instance
    * @async
    */
-  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount } = {}) => {
+  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount, encryptFn, decryptFn } = {}) => {
     let name, manifest, accessController
 
     if (databases[address]) {
@@ -153,7 +153,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
 
     address = address.toString()
 
-    const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount })
+    const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount, encryptFn, decryptFn })
 
     db.events.on('close', onDatabaseClosed(address))
 

@@ -56,7 +56,7 @@ const DefaultAccessController = async () => {
  * @memberof module:Log
  * @instance
  */
-const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn, encryptFn, decryptFn } = {}) => {
+const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn } = {}) => {
   /**
    * @namespace Log
    * @description The instance returned by {@link module:Log}
@@ -139,10 +139,6 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (bytes) {
       const entry = await Entry.decode(bytes)
 
-      if (decryptFn) {
-        entry.payload = await decryptFn(entry.payload)
-      }
-
       return entry
     }
   }
@@ -175,10 +171,6 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // Get references (pointers) to multiple entries in the past
       // (skips the heads which are covered by the next field)
       const refs = await getReferences(heads_, options.referencesCount + heads_.length)
-
-      if (encryptFn) {
-        data = await encryptFn(data)
-      }
 
       // Create the entry
       const entry = await Entry.create(
