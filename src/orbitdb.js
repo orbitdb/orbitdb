@@ -104,6 +104,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * @param {module:Storage} [params.indexStorage=[ComposedStorage]{@link module:Storage.Storage-Composed}] A compatible storage instance for storing an " index of log entries. Defaults to ComposedStorage(LRUStorage, LevelStorage).
    * @param {number} [params.referencesCount] The number of references to
    * use for [Log]{@link module:Log} entries.
+   * @param {number} [params.encrypt] Options for encrypting database operations and entries. If provided, the encrypt object must take the form { data: { encryptFn, decryptFn }, op: { encryptFn, decryptFn } }. To encrypt the operation data value only, pass the "data" option. To encrypt the op, pass the "op" option. To encrypt "data" and "op", pass both options.
    * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
    * @throws "Unsupported database type" if the type specified is not in the list
@@ -112,7 +113,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * @instance
    * @async
    */
-  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount, encryptFn, decryptFn } = {}) => {
+  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount, encrypt } = {}) => {
     let name, manifest, accessController
 
     if (databases[address]) {
@@ -153,7 +154,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
 
     address = address.toString()
 
-    const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount, encryptFn, decryptFn })
+    const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount, encrypt })
 
     db.events.on('close', onDatabaseClosed(address))
 

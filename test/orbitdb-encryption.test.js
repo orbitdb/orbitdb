@@ -56,7 +56,7 @@ describe('Encryption/Decryption', function () {
     // await db2.close()
   })
 
-  it('can encrypt/decrypt data', async () => {
+  it('encrypts/decrypts data', async () => {
     const keystore = orbitdb1.keystore
     const keys = await keystore.createKey('encryption-test')
 
@@ -65,7 +65,22 @@ describe('Encryption/Decryption', function () {
 
     const encryptFn = encrypt({ publicKey })
     const decryptFn = decrypt({ privateKey })
-    db1 = await orbitdb1.open('encryption-test-1', { encryptFn, decryptFn })
+    db1 = await orbitdb1.open('encryption-test-1', { encrypt: { data: { encryptFn, decryptFn } } })
+
+    const hash = await db1.add('record 1')
+    strictEqual(await db1.get(hash), 'record 1')
+  })
+
+  it('encrypts/decrypts op', async () => {
+    const keystore = orbitdb1.keystore
+    const keys = await keystore.createKey('encryption-test')
+
+    const privateKey = await keystore.getKey('encryption-test')
+    const publicKey = await keystore.getPublic(keys)
+
+    const encryptFn = encrypt({ publicKey })
+    const decryptFn = decrypt({ privateKey })
+    db1 = await orbitdb1.open('encryption-test-1', { encrypt: { op: { encryptFn, decryptFn } } })
 
     const hash = await db1.add('record 1')
     strictEqual(await db1.get(hash), 'record 1')

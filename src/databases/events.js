@@ -7,8 +7,7 @@
  * @augments module:Databases~Database
  */
 import Database from '../database.js'
-import { Operation } from './utils/operation.js'
-import { Payload } from './utils/payload.js'
+import { toPayload, fromPayload } from './utils/payload.js'
 
 const type = 'events'
 
@@ -17,8 +16,8 @@ const type = 'events'
  * @return {module:Databases.Databases-Events} A Events function.
  * @memberof module:Databases
  */
-const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryptFn, decryptFn }) => {
-  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryptFn, decryptFn })
+const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encrypt }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
 
   const { addOperation, log } = database
 
@@ -31,8 +30,8 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @instance
    */
   const add = async (value) => {
-    const op = await Operation('ADD', null, value, { encryptFn, encryptValue: true, encryptOp: false })
-    return addOperation(op)
+    const payload = await toPayload('ADD', null, value, { encrypt })
+    return addOperation(payload)
   }
 
   /**
@@ -45,7 +44,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    */
   const get = async (hash) => {
     const entry = await log.get(hash)
-    const { value } = await Payload(entry.payload, { decryptFn, decryptValue: true, decryptOp: false })
+    const { value } = await fromPayload(entry.payload, { encrypt })
 
     return value
   }
@@ -71,7 +70,8 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
     const it = log.iterator({ gt, gte, lt, lte, amount })
     for await (const event of it) {
       const hash = event.hash
-      const value = event.payload.value
+      const payload = await fromPayload(event.payload, { encrypt })
+      const value = payload.value
       yield { hash, value }
     }
   }
