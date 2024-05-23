@@ -7,7 +7,6 @@
  * @augments module:Databases~Database
  */
 import Database from '../database.js'
-import { toPayload, fromPayload } from './utils/payload.js'
 
 const type = 'events'
 
@@ -16,7 +15,7 @@ const type = 'events'
  * @return {module:Databases.Databases-Events} A Events function.
  * @memberof module:Databases
  */
-const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encrypt }) => {
+const Events = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
   const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate })
 
   const { addOperation, log } = database
@@ -30,8 +29,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    * @instance
    */
   const add = async (value) => {
-    const payload = await toPayload('ADD', null, value, { encrypt })
-    return addOperation(payload)
+    return addOperation({ op: 'ADD', key: null, value })
   }
 
   /**
@@ -44,9 +42,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
    */
   const get = async (hash) => {
     const entry = await log.get(hash)
-    const { value } = await fromPayload(entry.payload, { encrypt })
-
-    return value
+    return entry.payload.value
   }
 
   /**
@@ -70,8 +66,7 @@ const Events = () => async ({ ipfs, identity, address, name, access, directory, 
     const it = log.iterator({ gt, gte, lt, lte, amount })
     for await (const event of it) {
       const hash = event.hash
-      const payload = await fromPayload(event.payload, { encrypt })
-      const value = payload.value
+      const value = event.payload.value
       yield { hash, value }
     }
   }
