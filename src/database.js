@@ -44,7 +44,7 @@ const defaultCacheSize = 1000
  * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
-const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption }) => {
   /**
    * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
@@ -110,7 +110,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
-  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
+  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryption })
 
   const events = new EventEmitter()
 

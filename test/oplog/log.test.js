@@ -157,7 +157,7 @@ describe('Log', function () {
       const value = await log.get(entry.hash)
       strictEqual(value.payload, 'hello1')
     })
-    
+
     it('encrypts a log entry when the payload is an object', async () => {
       const keys = await keystore.createKey('hello1')
 
@@ -171,6 +171,6 @@ describe('Log', function () {
       const value = await log.get(entry.hash)
 
       deepStrictEqual(value.payload, { test: 'hello1' })
-    })    
+    })
   })
 })
