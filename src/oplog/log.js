@@ -70,6 +70,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   }
   // Set Log's id
   const id = logId || randomId()
+  // Encryption of entries and payloads
+  encryption = encryption || {}
+  const { encryptPayloadFn, decryptPayloadFn, encryptEntryFn, decryptEntryFn } = encryption
   // Access Controller
   access = access || await DefaultAccessController()
   // Oplog entry storage
@@ -79,12 +82,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   // Heads storage
   headsStorage = headsStorage || await DefaultStorage()
   // Add heads to the state storage, ie. init the log state
-  const _heads = await Heads({ storage: headsStorage, heads: logHeads })
+  const _heads = await Heads({ storage: headsStorage, heads: logHeads, decryptPayloadFn, decryptEntryFn })
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
-
-  encryption = encryption || {}
-  const { encryptPayloadFn, decryptPayloadFn } = encryption
 
   // Internal queues for processing appends and joins in their call-order
   const appendQueue = new PQueue({ concurrency: 1 })
@@ -138,14 +138,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const get = async (hash) => {
+    if (!hash) {
+      throw new Error('hash is required')
+    }
     const bytes = await _entries.get(hash)
     if (bytes) {
-      const entry = await Entry.decode(bytes)
-
-      if (decryptPayloadFn) {
-        entry.payload = JSON.parse(await decryptPayloadFn(entry.payload))
-      }
-
+      const entry = await Entry.decode(bytes, decryptPayloadFn, decryptEntryFn)
       return entry
     }
   }
@@ -179,15 +177,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // (skips the heads which are covered by the next field)
       const refs = await getReferences(heads_, options.referencesCount + heads_.length)
 
-      if (encryptPayloadFn) {
-        data = await encryptPayloadFn(JSON.stringify(data))
-      }
-
       // Create the entry
       const entry = await Entry.create(
         identity,
         id,
         data,
+        encryptPayloadFn,
         tickClock(await clock()),
         nexts,
         refs
@@ -198,14 +193,15 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
         throw new Error(`Could not append entry:\nKey "${identity.hash}" is not allowed to write to the log`)
       }
 
+      const { hash, bytes } = await Entry.encode(entry, encryptEntryFn, encryptPayloadFn)
       // The appended entry is now the latest head
-      await _heads.set([entry])
+      await _heads.set([{ hash, bytes, next: entry.next }])
       // Add entry to the entry storage
-      await _entries.put(entry.hash, entry.bytes)
+      await _entries.put(hash, bytes)
       // Add entry to the entry index
-      await _index.put(entry.hash, true)
+      await _index.put(hash, true)
       // Return the appended entry
-      return entry
+      return { ...entry, hash }
     }
 
     return appendQueue.add(task)
@@ -272,7 +268,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
           throw new Error(`Could not append entry:\nKey "${entry.identity}" is not allowed to write to the log`)
         }
         // Verify signature for the entry
-        const isValid = await Entry.verify(identity, entry)
+        const isValid = await Entry.verify(identity, entry, encryptPayloadFn)
         if (!isValid) {
           throw new Error(`Could not validate signature for entry "${entry.hash}"`)
         }
@@ -325,9 +321,11 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       for (const hash of connectedHeads.values()) {
         await _heads.remove(hash)
       }
-
       /* 6. Add the new entry to heads (=union with current heads) */
-      await _heads.add(entry)
+      const { hash, next } = entry
+      const bytes = await _entries.get(hash)
+      await _heads.add({ hash, bytes, next })
+      // await _heads.add(entry)
 
       return true
     }
@@ -581,7 +579,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     close,
     access,
     identity,
-    storage: _entries
+    storage: _entries,
+    encryption
   }
 }
 

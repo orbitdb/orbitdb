@@ -3,6 +3,7 @@ import PQueue from 'p-queue'
 import { EventEmitter } from 'events'
 import { TimeoutController } from 'timeout-abort-controller'
 import pathJoin from './utils/path-join.js'
+import { Entry } from './oplog/index.js'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -220,7 +221,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     const task = async () => {
       try {
         if (data && onSynced) {
-          await onSynced(data)
+          const entry = await Entry.decode(data, log.encryption.decryptPayloadFn, log.encryption.decryptEntryFn)
+          await onSynced(entry)
         }
       } catch (e) {
         events.emit('error', e)
@@ -240,8 +242,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    * @instance
    */
   const add = async (entry) => {
-    if (started) {
-      await pubsub.publish(address, entry.bytes)
+    if (started && entry && entry.hash) {
+      const bytes = await log.storage.get(entry.hash)
+      await pubsub.publish(address, bytes)
     }
   }
 
