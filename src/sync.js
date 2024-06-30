@@ -147,7 +147,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const sendHeads = (source) => {
     return (async function * () {
       const heads = await log.heads()
-      for await (const { bytes } of heads) {
+      for await (const { hash } of heads) {
+        const bytes = await log.storage.get(hash)
         yield bytes
       }
     })()
@@ -157,7 +158,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     for await (const value of source) {
       const headBytes = value.subarray()
       if (headBytes && onSynced) {
-        await onSynced(headBytes)
+        const entry = await Entry.decode(headBytes, log.encryption.decryptEntryFn, log.encryption.decryptPayloadFn)
+        await onSynced(entry)
       }
     }
     if (started) {
@@ -221,7 +223,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     const task = async () => {
       try {
         if (data && onSynced) {
-          const entry = await Entry.decode(data, log.encryption.decryptPayloadFn, log.encryption.decryptEntryFn)
+          const entry = await Entry.decode(data, log.encryption.decryptEntryFn, log.encryption.decryptPayloadFn)
           await onSynced(entry)
         }
       } catch (e) {

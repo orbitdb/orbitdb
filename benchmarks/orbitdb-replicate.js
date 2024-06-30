@@ -45,8 +45,10 @@ EventEmitter.defaultMaxListeners = 10000
   let connected = false
 
   const onJoin = async (peerId) => (connected = true)
+  const onError = async (err) => console.error(err)
 
   db2.events.on('join', onJoin)
+  db2.events.on('error', onError)
 
   await waitFor(() => connected, () => true)
 

@@ -86,7 +86,7 @@ const create = async (identity, id, payload, encryptPayloadFn, clock = null, nex
   entry.identity = identity.hash
   entry.sig = signature
   entry.payload = payload
-  entry.encryptedPayload = encryptedPayload
+  entry._payload = encryptedPayload
 
   return entry
 }
@@ -100,7 +100,7 @@ const create = async (identity, id, payload, encryptPayloadFn, clock = null, nex
  * @memberof module:Log~Entry
  * @private
  */
-const verify = async (identities, entry, encryptPayloadFn) => {
+const verify = async (identities, entry) => {
   if (!identities) throw new Error('Identities is required, cannot verify entry')
   if (!isEntry(entry)) throw new Error('Invalid Log entry')
   if (!entry.key) throw new Error("Entry doesn't have a key")
@@ -110,7 +110,7 @@ const verify = async (identities, entry, encryptPayloadFn) => {
 
   const value = {
     id: e.id,
-    payload: e.encryptedPayload || e.payload,
+    payload: e._payload || e.payload,
     next: e.next,
     refs: e.refs,
     clock: e.clock,
@@ -147,7 +147,7 @@ const isEntry = (obj) => {
  * @private
  */
 const isEqual = (a, b) => {
-  return a && b && a.hash === b.hash
+  return a && b && a.hash && a.hash === b.hash
 }
 
 /**
@@ -157,31 +157,35 @@ const isEqual = (a, b) => {
  * @memberof module:Log~Entry
  * @private
  */
-const decode = async (bytes, decryptPayloadFn, decryptEntryFn) => {
+const decode = async (bytes, decryptEntryFn, decryptPayloadFn) => {
   let cid
 
   if (decryptEntryFn) {
-    const encryptedEntry = await Block.decode({ bytes, codec, hasher })
-    bytes = await decryptEntryFn(encryptedEntry.value)
-    cid = encryptedEntry.cid
+    try {
+      const encryptedEntry = await Block.decode({ bytes, codec, hasher })
+      bytes = await decryptEntryFn(encryptedEntry.value)
+      cid = encryptedEntry.cid
+    } catch (e) {
+      throw new Error('Could not decrypt entry')
+    }
   }
 
   const decodedEntry = await Block.decode({ bytes, codec, hasher })
   const entry = decodedEntry.value
-  cid = cid || decodedEntry.cid
-
-  const hash = cid.toString(hashStringEncoding)
 
   if (decryptPayloadFn) {
     try {
       const decryptedPayloadBytes = await decryptPayloadFn(entry.payload)
       const { value: decryptedPayload } = await Block.decode({ bytes: decryptedPayloadBytes, codec, hasher })
-      entry.encryptedPayload = entry.payload
+      entry._payload = entry.payload
       entry.payload = decryptedPayload
     } catch (e) {
-      throw new Error('Could not decrypt entry')
+      throw new Error('Could not decrypt payload')
     }
   }
+
+  cid = cid || decodedEntry.cid
+  const hash = cid.toString(hashStringEncoding)
 
   return {
     ...entry,
@@ -200,10 +204,10 @@ const encode = async (entry, encryptEntryFn, encryptPayloadFn) => {
   const e = Object.assign({}, entry)
 
   if (encryptPayloadFn) {
-    e.payload = e.encryptedPayload
+    e.payload = e._payload
   }
 
-  delete e.encryptedPayload
+  delete e._payload
   delete e.hash
 
   let { cid, bytes } = await Block.encode({ value: e, codec, hasher })

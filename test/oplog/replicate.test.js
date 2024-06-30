@@ -9,7 +9,7 @@ import createHelia from '../utils/create-helia.js'
 
 const keysPath = './testkeys'
 
-describe('Log - Replication', function () {
+describe.only('Log - Replication', function () {
   let ipfs1, ipfs2
   let id1, id2
   let keystore
@@ -69,7 +69,7 @@ describe('Log - Replication', function () {
       try {
         if (!messageIsFromMe(message)) {
           const entry = await Entry.decode(message.detail.data)
-          await storage1.put(entry.hash, entry.bytes)
+          await storage1.put(entry.hash, message.detail.data)
           await log1.joinEntry(entry)
         }
       } catch (e) {
@@ -83,7 +83,7 @@ describe('Log - Replication', function () {
       try {
         if (!messageIsFromMe(message)) {
           const entry = await Entry.decode(message.detail.data)
-          await storage2.put(entry.hash, entry.bytes)
+          await storage2.put(entry.hash, message.detail.data)
           await log2.joinEntry(entry)
         }
       } catch (e) {
@@ -114,8 +114,10 @@ describe('Log - Replication', function () {
       for (let i = 1; i <= amount; i++) {
         const entry1 = await input1.append('A' + i)
         const entry2 = await input2.append('B' + i)
-        await ipfs1.libp2p.services.pubsub.publish(logId, entry1.bytes)
-        await ipfs2.libp2p.services.pubsub.publish(logId, entry2.bytes)
+        const bytes1 = await input1.storage.get(entry1.hash)
+        const bytes2 = await input1.storage.get(entry2.hash)
+        await ipfs1.libp2p.services.pubsub.publish(logId, bytes1)
+        await ipfs2.libp2p.services.pubsub.publish(logId, bytes2)
       }
 
       console.log('Messages sent')

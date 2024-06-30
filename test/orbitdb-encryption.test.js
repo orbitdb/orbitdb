@@ -76,7 +76,7 @@ describe.only('Encryption/Decryption', function () {
     strictEqual(await db1.get(hash), 'record 1')
   })
 
-  it.only('encrypts/decrypts entry', async () => {
+  it('encrypts/decrypts entry', async () => {
     let connected = false
     let updated = false
     let error = false

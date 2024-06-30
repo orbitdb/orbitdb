@@ -15,11 +15,13 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
   const put = async (heads) => {
     heads = findHeads(heads)
     for (const head of heads) {
-      await storage.put(head.hash, head.bytes)
+      // Store the entry's hash and nexts
+      await storage.put(head.hash, head.next)
     }
   }
 
   const set = async (heads) => {
+    // TODO: fix storage write fluctuation
     await storage.clear()
     await put(heads)
   }
@@ -42,9 +44,8 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
 
   const iterator = async function * () {
     const it = storage.iterator()
-    for await (const [, bytes] of it) {
-      const head = await Entry.decode(bytes, decryptPayloadFn, decryptEntryFn)
-      yield head
+    for await (const [hash, next] of it) {
+      yield { hash, next }
     }
   }
 
