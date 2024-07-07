@@ -104,7 +104,7 @@ Assuming you have a Node.js development environment installed, create a new proj
 mkdir orbitdb-app
 cd orbitdb-app
 npm init
-npm i helia orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
+npm i helia @orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
 ```
 
 Create a file in your project called index.js and add the following code to it:
