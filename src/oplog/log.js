@@ -70,7 +70,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
   // Encryption of entries and payloads
   encryption = encryption || {}
-  const { encryptPayloadFn } = encryption
+  const encryptPayloadFn = encryption.data?.encrypt
 
   // Access Controller
   access = access || await DefaultAccessController()

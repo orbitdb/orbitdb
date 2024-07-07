@@ -86,7 +86,10 @@ const create = async (identity, id, payload, encryptPayloadFn, clock = null, nex
   entry.identity = identity.hash
   entry.sig = signature
   entry.payload = payload
-  entry._payload = encryptedPayload
+
+  if (encryptPayloadFn) {
+    entry._payload = encryptedPayload
+  }
 
   return entry
 }

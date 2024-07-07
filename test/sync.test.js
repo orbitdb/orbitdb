@@ -139,8 +139,7 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog111', entryStorage: entryStorage1 })
       log2 = await Log(testIdentity2, { logId: 'synclog111', entryStorage: entryStorage2 })
 
-      const onSynced = async (bytes) => {
-        const entry = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
         if (await log2.joinEntry(entry)) {
           syncedHead = entry
           syncedEventFired = true
@@ -207,8 +206,7 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog7', entryStorage: entryStorage1 })
       log2 = await Log(testIdentity2, { logId: 'synclog7', entryStorage: entryStorage2 })
 
-      const onSynced = async (bytes) => {
-        const entry = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
         if (await log2.joinEntry(entry)) {
           syncedHead = entry
         }
@@ -291,8 +289,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         syncedEventFired = expectedEntry.hash === syncedHead.hash
       }
 
@@ -348,8 +346,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         if (expectedEntry) {
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
@@ -434,9 +432,9 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
+      const onSynced = async (entry) => {
         if (expectedEntry && !syncedEventFired) {
-          syncedHead = await Entry.decode(bytes)
+          syncedHead = entry
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
       }
@@ -518,8 +516,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog2' })
       log2 = await Log(testIdentity2, { logId: 'synclog2' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         if (expectedEntry) {
           syncedEventFired = expectedEntry ? expectedEntry.hash === syncedHead.hash : false
         }

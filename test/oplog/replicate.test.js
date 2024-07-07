@@ -9,7 +9,7 @@ import createHelia from '../utils/create-helia.js'
 
 const keysPath = './testkeys'
 
-describe.only('Log - Replication', function () {
+describe('Log - Replication', function () {
   let ipfs1, ipfs2
   let id1, id2
   let keystore

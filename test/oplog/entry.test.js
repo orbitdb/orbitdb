@@ -33,7 +33,8 @@ describe('Entry', function () {
     it('creates a an empty entry', async () => {
       const expectedHash = 'zdpuAsKzwUEa8cz9pkJxxFMxLuP3cutA9PDGoLZytrg4RSVEa'
       const entry = await create(testIdentity, 'A', 'hello')
-      strictEqual(entry.hash, expectedHash)
+      const { hash } = await Entry.encode(entry)
+      strictEqual(hash, expectedHash)
       strictEqual(entry.id, 'A')
       strictEqual(entry.clock.id, testIdentity.publicKey)
       strictEqual(entry.clock.time, 0)
@@ -47,7 +48,8 @@ describe('Entry', function () {
       const expectedHash = 'zdpuAmthfqpHRQjdSpKN5etr1GrreJb7QcU1Hshm6pERnzsxi'
       const payload = 'hello world'
       const entry = await create(testIdentity, 'A', payload)
-      strictEqual(entry.hash, expectedHash)
+      const { hash } = await Entry.encode(entry)
+      strictEqual(hash, expectedHash)
       strictEqual(entry.payload, payload)
       strictEqual(entry.id, 'A')
       strictEqual(entry.clock.id, testIdentity.publicKey)
@@ -81,7 +83,7 @@ describe('Entry', function () {
       const payload2 = 'hello again'
       const entry1 = await create(testIdentity, 'A', payload1)
       entry1.clock = tickClock(entry1.clock)
-      const entry2 = await create(testIdentity, 'A', payload2, entry1.clock, [entry1])
+      const entry2 = await create(testIdentity, 'A', payload2, null, entry1.clock, [entry1])
       strictEqual(entry2.payload, payload2)
       strictEqual(entry2.next.length, 1)
       // strictEqual(entry2.hash, expectedHash)
@@ -91,7 +93,8 @@ describe('Entry', function () {
 
     it('`next` parameter can be an array of strings', async () => {
       const entry1 = await create(testIdentity, 'A', 'hello1')
-      const entry2 = await create(testIdentity, 'A', 'hello2', null, [entry1.hash])
+      const { hash } = await Entry.encode(entry1)
+      const entry2 = await create(testIdentity, 'A', 'hello2', null, null, [hash])
       strictEqual(typeof entry2.next[0] === 'string', true)
     })
 
@@ -138,7 +141,7 @@ describe('Entry', function () {
     it('throws an error if next is not an array', async () => {
       let err
       try {
-        await create(testIdentity, 'A', 'hello', null, {})
+        await create(testIdentity, 'A', 'hello', null, null, {})
       } catch (e) {
         err = e
       }

@@ -6,9 +6,11 @@ import MemoryStorage from '../storage/memory.js'
 const DefaultStorage = MemoryStorage
 
 const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, encryption }) => {
-  encryption = encryption || {}
-  const { encryptPayloadFn, decryptPayloadFn, encryptEntryFn, decryptEntryFn } = encryption
-
+  // Setup encryption and decryption functions
+  const encryptEntryFn = encryption?.replication?.encrypt
+  const decryptEntryFn = encryption?.replication?.decrypt
+  const encryptPayloadFn = encryption?.data?.encrypt
+  const decryptPayloadFn = encryption?.data?.decrypt
   // Oplog entry storage
   const _entries = entryStorage || await DefaultStorage()
   // Entry index for keeping track which entries are already in the log

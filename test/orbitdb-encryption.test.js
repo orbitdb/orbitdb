@@ -1,24 +1,30 @@
-import { strictEqual } from 'assert'
+import { strictEqual, notEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import path from 'path'
-import OrbitDB from '../src/orbitdb.js'
-// import waitFor from './utils/wait-for.js'
+import { createOrbitDB, PasswordEncryption } from '../src/index.js'
+// import { encrypt, decrypt, generatePassword } from './utils/encrypt.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
-// import IPFSAccessController from '../src/access-controllers/ipfs.js'
-// import OrbitDBAccessController from '../src/access-controllers/orbitdb.js'
 import createHelia from './utils/create-helia.js'
-import { encrypt, decrypt, generatePassword } from './utils/encrypt.js'
+
+import * as Block from 'multiformats/block'
+import * as dagCbor from '@ipld/dag-cbor'
+import { sha256 } from 'multiformats/hashes/sha2'
+
+const codec = dagCbor
+const hasher = sha256
 
 const dbPath = './orbitdb/tests/write-permissions'
 
-describe.only('Encryption/Decryption', function () {
+describe('Encryption', function () {
   this.timeout(5000)
 
   let ipfs1, ipfs2
   let orbitdb1, orbitdb2
   let db1, db2
-  let encryptionPassword
+
+  let replicationEncryption
+  let dataEncryption
 
   before(async () => {
     [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
@@ -26,10 +32,11 @@ describe.only('Encryption/Decryption', function () {
 
     await rimraf('./orbitdb')
 
-    orbitdb1 = await OrbitDB({ ipfs: ipfs1, id: 'user1', directory: path.join(dbPath, '1') })
-    orbitdb2 = await OrbitDB({ ipfs: ipfs2, id: 'user2', directory: path.join(dbPath, '2') })
+    orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: path.join(dbPath, '1') })
+    orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: path.join(dbPath, '2') })
 
-    encryptionPassword = await generatePassword()
+    replicationEncryption = await PasswordEncryption({ password: 'hello' })
+    dataEncryption = await PasswordEncryption({ password: 'world' })
   })
 
   after(async () => {
@@ -54,90 +61,315 @@ describe.only('Encryption/Decryption', function () {
     await rimraf('./ipfs2')
   })
 
-  afterEach(async () => {
-    await db1.drop()
-    await db1.close()
-    await db2.drop()
-    await db2.close()
+  describe('Data is encrypted when replicated to peers', async () => {
+    afterEach(async () => {
+      if (db1) {
+        await db1.drop()
+        await db1.close()
+      }
+      if (db2) {
+        await db2.drop()
+        await db2.close()
+      }
+    })
+
+    it('encrypts/decrypts data', async () => {
+      let connected = false
+      let updated = false
+      let error = false
+
+      const encryption = {
+        data: dataEncryption
+      }
+
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
+      db2 = await orbitdb2.open(db1.address, { encryption })
+
+      const onJoin = async (peerId, heads) => {
+        connected = true
+      }
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => connected, () => true)
+
+      const onUpdate = async (peerId, heads) => {
+        updated = true
+      }
+      db2.events.on('update', onUpdate)
+
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        console.log(err)
+        error = true
+      }
+      db2.events.on('error', onError)
+
+      const hash1 = await db1.add('record 1')
+      const hash2 = await db1.add('record 2')
+
+      strictEqual(await db1.get(hash1), 'record 1')
+      strictEqual(await db1.get(hash2), 'record 2')
+
+      await waitFor(() => updated || error, () => true)
+
+      const all = await db2.all()
+
+      strictEqual(all.length, 2)
+      strictEqual(all[0].value, 'record 1')
+      strictEqual(all[1].value, 'record 2')
+    })
+
+    it('encrypts/decrypts log', async () => {
+      let connected = false
+      let updated = false
+      let error = false
+
+      const encryption = {
+        replication: replicationEncryption
+      }
+
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
+      db2 = await orbitdb2.open(db1.address, { encryption })
+
+      const onJoin = async (peerId, heads) => {
+        connected = true
+      }
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => connected, () => true)
+
+      const onUpdate = async (peerId, heads) => {
+        updated = true
+      }
+      db2.events.on('update', onUpdate)
+
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        console.log(err)
+        error = true
+      }
+      db2.events.on('error', onError)
+
+      const hash1 = await db1.add('record 1')
+      const hash2 = await db1.add('record 2')
+
+      strictEqual(await db1.get(hash1), 'record 1')
+      strictEqual(await db1.get(hash2), 'record 2')
+
+      await waitFor(() => updated || error, () => true)
+
+      const all = await db2.all()
+
+      strictEqual(all.length, 2)
+      strictEqual(all[0].value, 'record 1')
+      strictEqual(all[1].value, 'record 2')
+    })
+
+    it('encrypts/decrypts log and data', async () => {
+      let connected = false
+      let updated = false
+      let error = false
+
+      const encryption = {
+        replication: replicationEncryption,
+        data: dataEncryption
+      }
+
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
+      db2 = await orbitdb2.open(db1.address, { encryption })
+
+      const onJoin = async (peerId, heads) => {
+        connected = true
+      }
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => connected, () => true)
+
+      const onUpdate = async (peerId, heads) => {
+        updated = true
+      }
+      db2.events.on('update', onUpdate)
+
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        console.log(err)
+        error = true
+      }
+      db2.events.on('error', onError)
+
+      const hash1 = await db1.add('record 1')
+      const hash2 = await db1.add('record 2')
+
+      strictEqual(await db1.get(hash1), 'record 1')
+      strictEqual(await db1.get(hash2), 'record 2')
+
+      await waitFor(() => updated || error, () => true)
+
+      const all = await db2.all()
+
+      strictEqual(all.length, 2)
+      strictEqual(all[0].value, 'record 1')
+      strictEqual(all[1].value, 'record 2')
+    })
+
+    it('throws an error if log can\'t be decrypted', async () => {
+      let connected = false
+      let hasError = false
+      let error
+
+      const replicationEncryptionWithWrongPassword = await PasswordEncryption({ password: 'olleh' })
+
+      const encryption = {
+        replication: replicationEncryption
+      }
+
+      const encryptionWithWrongPassword = {
+        replication: replicationEncryptionWithWrongPassword
+      }
+
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
+      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithWrongPassword })
+
+      const onJoin = async (peerId, heads) => {
+        connected = true
+      }
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => connected, () => true)
+
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        error = err
+        hasError = true
+      }
+      db2.events.on('error', onError)
+
+      await db1.add('record 1')
+
+      await waitFor(() => hasError, () => true)
+
+      strictEqual(error.message, 'Could not decrypt entry')
+
+      const all = await db2.all()
+
+      strictEqual(all.length, 0)
+    })
+
+    it('throws an error if data can\'t be decrypted', async () => {
+      let connected = false
+      let hasError = false
+      let error
+
+      const dataEncryptionWithWrongPassword = await PasswordEncryption({ password: 'olleh' })
+
+      const encryption = {
+        data: dataEncryption
+      }
+
+      const encryptionWithWrongPassword = {
+        data: dataEncryptionWithWrongPassword
+      }
+
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
+      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithWrongPassword })
+
+      const onJoin = async (peerId, heads) => {
+        connected = true
+      }
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => connected, () => true)
+
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        error = err
+        hasError = true
+      }
+      db2.events.on('error', onError)
+
+      await db1.add('record 1')
+
+      await waitFor(() => hasError, () => true)
+
+      strictEqual(error.message, 'Could not decrypt payload')
+
+      const all = await db2.all()
+
+      strictEqual(all.length, 0)
+    })
   })
 
-  it.skip('encrypts/decrypts payload', async () => {
-    const encryptPayloadFn = encrypt({ password: encryptionPassword })
-    const decryptPayloadFn = decrypt({ password: encryptionPassword })
+  describe('Data is encrypted in storage', async () => {
+    afterEach(async () => {
+      if (db1) {
+        await db1.drop()
+        await db1.close()
+      }
+    })
 
-    db1 = await orbitdb1.open('encryption-test-1', { encryption: { encryptPayloadFn, decryptPayloadFn } })
+    it('payload bytes are encrypted in storage', async () => {
+      let error
 
-    const hash = await db1.add('record 1')
+      const encryption = {
+        data: dataEncryption
+      }
 
-    for await (const e of db1.log.iterator()) {
-      console.log('>', e)
-    }
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
 
-    strictEqual(await db1.get(hash), 'record 1')
-  })
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        console.log(err)
+        error = true
+      }
+      db1.events.on('error', onError)
 
-  it('encrypts/decrypts entry', async () => {
-    let connected = false
-    let updated = false
-    let error = false
+      const hash1 = await db1.add('record 1')
 
-    const encryptPayloadFn = encrypt({ password: encryptionPassword })
-    const decryptPayloadFn = decrypt({ password: encryptionPassword })
+      const bytes = await db1.log.storage.get(hash1)
+      const { value } = await Block.decode({ bytes, codec, hasher })
+      const payload = value.payload
 
-    const encryptEntryFn = encrypt({ password: encryptionPassword })
-    const decryptEntryFn = decrypt({ password: encryptionPassword })
+      strictEqual(payload.constructor, Uint8Array)
 
-    // const decryptPayloadFn2 = encrypt({ password: encryptionPassword + '1' })
-    // const decryptEntryFn2 = decrypt({ password: encryptionPassword + '2' })
+      try {
+        await Block.decode({ bytes: payload, codec, hasher })
+      } catch (e) {
+        error = e
+      }
 
-    db1 = await orbitdb1.open('encryption-test-1', { encryption: { encryptEntryFn, decryptEntryFn, encryptPayloadFn, decryptPayloadFn } })
-    db2 = await orbitdb2.open(db1.address, { encryption: { encryptEntryFn, decryptEntryFn, encryptPayloadFn, decryptPayloadFn } })
-    // db1 = await orbitdb1.open('encryption-test-1', { encryption: { encryptEntryFn, decryptEntryFn } })
-    // db2 = await orbitdb2.open(db1.address, { encryption: { encryptEntryFn, decryptEntryFn } })
-    // db1 = await orbitdb1.open('encryption-test-1', { encryption: { encryptPayloadFn, decryptPayloadFn } })
-    // db2 = await orbitdb2.open(db1.address, { encryption: { encryptPayloadFn, decryptPayloadFn } })
-    // db1 = await orbitdb1.open('encryption-test-1')
-    // db2 = await orbitdb2.open(db1.address)
+      strictEqual(error.message.startsWith('CBOR decode error'), true)
+    })
 
-    console.log('connect')
+    it('entry bytes are encrypted in storage', async () => {
+      let error
 
-    const onJoin = async (peerId, heads) => {
-      console.log('connected')
-      connected = true
-    }
-    db2.events.on('join', onJoin)
+      const encryption = {
+        replication: replicationEncryption
+      }
 
-    await waitFor(() => connected, () => true)
+      db1 = await orbitdb1.open('encryption-test-1', { encryption })
 
-    const onUpdate = async (peerId, heads) => {
-      console.log('updated')
-      updated = true
-    }
-    db2.events.on('update', onUpdate)
+      const onError = async (err) => {
+        // Catch "Could not decrypt entry" errors
+        console.log(err)
+        error = true
+      }
+      db1.events.on('error', onError)
 
-    const onError = async (err) => {
-      // Catch "Could not decrypt entry" errors
-      console.log(err)
-      error = true
-    }
-    db2.events.on('error', onError)
+      const hash1 = await db1.add('record 1')
+      let decodedBytes
 
-    console.log('write')
-    const hash1 = await db1.add('record 1')
-    console.log('hash1', hash1)
-    const hash2 = await db1.add('record 2')
-    console.log('hash2', hash2)
+      try {
+        const bytes = await db1.log.storage.get(hash1)
+        decodedBytes = await Block.decode({ bytes, codec, hasher })
+        await Block.decode({ bytes: decodedBytes, codec, hasher })
+      } catch (e) {
+        error = e
+      }
 
-    strictEqual(await db1.get(hash1), 'record 1')
-    strictEqual(await db1.get(hash2), 'record 2')
-
-    await waitFor(() => updated || error, () => true)
-
-    const all = await db2.all()
-    console.log('all', all)
-
-    strictEqual(all.length, 2)
-    strictEqual(all[0].value, 'record 1')
-    strictEqual(all[1].value, 'record 2')
+      notEqual(error, undefined)
+      strictEqual(error.message.startsWith('CBOR decode error'), true)
+      strictEqual(decodedBytes.value.constructor, Uint8Array)
+    })
   })
 })

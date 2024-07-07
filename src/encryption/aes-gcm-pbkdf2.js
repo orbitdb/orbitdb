@@ -1,40 +1,21 @@
-import crypto from 'crypto'
-
-// From:
-// https://github.com/libp2p/js-libp2p/blob/0b55625d146940994a306101650a55ee58e32f6c/packages/crypto/src/ciphers/aes-gcm.browser.ts
-
-import { concat } from 'uint8arrays/concat'
-import { fromString } from 'uint8arrays/from-string'
-// import { create } from '@libp2p/crypto/ciphers/aes-gcm'
-
 /*
-  Sources:
+  Source:
+  https://github.com/libp2p/js-libp2p/blob/0b55625d146940994a306101650a55ee58e32f6c/packages/crypto/src/ciphers/aes-gcm.browser.ts
+
+  More information:
   - https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto
   - https://github.com/bradyjoslin/webcrypto-example/blob/master/script.js
   - https://github.com/mdn/dom-examples/blob/main/web-crypto/encrypt-decrypt/aes-gcm.js
-  - https://github.com/libp2p/js-libp2p/blob/0b55625d146940994a306101650a55ee58e32f6c/packages/crypto/src/ciphers/aes-gcm.browser.ts
 */
 
-const cipher = createAes()
+// import crypto from 'crypto'
+import { concat } from 'uint8arrays/concat'
+import { fromString } from 'uint8arrays/from-string'
 
-const encrypt = ({ password }) => async (value) => {
-  return cipher.encrypt(value, password)
+// Polyfill fix for browsers
+const getCrypto = () => {
+  return global.crypto
 }
-
-const decrypt = ({ password }) => async (value) => {
-  return cipher.decrypt(value, password)
-}
-
-const generatePassword = async (length = 256) => {
-  return crypto.getRandomValues(new Uint8Array(length))
-}
-
-export {
-  encrypt,
-  decrypt,
-  generatePassword
-}
-// import webcrypto from '../webcrypto.js';
 
 // WebKit on Linux does not support deriving a key from an empty PBKDF2 key.
 // So, as a workaround, we provide the generated key as a constant. We test that
@@ -50,7 +31,7 @@ export const derivedEmptyPasswordKey = { alg: 'A128GCM', ext: true, k: 'scm9jmO_
 
 // Based off of code from https://github.com/luke-park/SecureCompatibleEncryptionExamples
 
-export function createAes (opts) {
+export function AES (opts) {
   const algorithm = opts?.algorithm ?? 'AES-GCM'
   let keyLength = opts?.keyLength ?? 16
   const nonceLength = opts?.nonceLength ?? 12
@@ -58,6 +39,7 @@ export function createAes (opts) {
   const saltLength = opts?.saltLength ?? 16
   const iterations = opts?.iterations ?? 32767
   // const crypto = webcrypto.get();
+  const crypto = getCrypto()
   keyLength *= 8 // Browser crypto uses bits instead of bytes
   /**
      * Uses the provided password to derive a pbkdf2 key. The key
