@@ -8,13 +8,17 @@
   - https://github.com/mdn/dom-examples/blob/main/web-crypto/encrypt-decrypt/aes-gcm.js
 */
 
-// import crypto from 'crypto'
+import crypto from 'crypto'
 import { concat } from 'uint8arrays/concat'
 import { fromString } from 'uint8arrays/from-string'
 
 // Polyfill fix for browsers
 const getCrypto = () => {
-  return global.crypto
+  if (typeof global.crypto !== 'undefined') {
+    return global.crypto
+  } else {
+    return crypto
+  }
 }
 
 // WebKit on Linux does not support deriving a key from an empty PBKDF2 key.
