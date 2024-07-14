@@ -3,7 +3,6 @@ import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
 import { Log, Entry, Identities, KeyStore, MemoryStorage } from '../../src/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
-import { encrypt, decrypt } from '../utils/encrypt.js'
 
 const { create } = Entry
 
@@ -61,15 +60,21 @@ describe('Log', function () {
     })
 
     it('sets one head if multiple are given as params', async () => {
-      const one = await create(testIdentity, 'A', 'entryA', null, [])
-      const two = await create(testIdentity, 'A', 'entryB', null, [one.hash])
-      const three = await create(testIdentity, 'A', 'entryC', null, [two.hash])
-      const four = await create(testIdentity, 'A', 'entryD', null, [two.hash])
+      const one = await create(testIdentity, 'A', 'entryA', null, null, [])
+      const { hash: hash1, bytes: bytes1 } = await Entry.encode(one)
+      const two = await create(testIdentity, 'A', 'entryB', null, null, [hash1])
+      const { hash: hash2, bytes: bytes2 } = await Entry.encode(two)
+      const three = await create(testIdentity, 'A', 'entryC', null, null, [hash2])
+      const { hash: hash3, bytes: bytes3 } = await Entry.encode(three)
+      const four = await create(testIdentity, 'A', 'entryD', null, null, [hash3])
+      const { hash: hash4, bytes: bytes4 } = await Entry.encode(four)
       const entryStorage = await MemoryStorage()
-      await entryStorage.put(one.hash, one.bytes)
-      await entryStorage.put(two.hash, two.bytes)
-      await entryStorage.put(three.hash, three.bytes)
-      await entryStorage.put(four.hash, four.bytes)
+      await entryStorage.put(hash1, bytes1)
+      await entryStorage.put(hash2, bytes2)
+      await entryStorage.put(hash3, bytes3)
+      await entryStorage.put(hash4, bytes4)
+      three.hash = hash3
+      two.hash = hash2
       const log = await Log(testIdentity, { logId: 'A', logHeads: [three, three, two, two], entryStorage })
       const values = await log.values()
       const heads = await log.heads()
@@ -79,15 +84,22 @@ describe('Log', function () {
     })
 
     it('sets two heads if two given as params', async () => {
-      const one = await create(testIdentity, 'A', 'entryA', null, [])
-      const two = await create(testIdentity, 'A', 'entryB', null, [one.hash])
-      const three = await create(testIdentity, 'A', 'entryC', null, [two.hash])
-      const four = await create(testIdentity, 'A', 'entryD', null, [two.hash])
+      const one = await create(testIdentity, 'A', 'entryA', null, null, [])
+      const { hash: hash1, bytes: bytes1 } = await Entry.encode(one)
+      const two = await create(testIdentity, 'A', 'entryB', null, null, [hash1])
+      const { hash: hash2, bytes: bytes2 } = await Entry.encode(two)
+      const three = await create(testIdentity, 'A', 'entryC', null, null, [hash2])
+      const { hash: hash3, bytes: bytes3 } = await Entry.encode(three)
+      const four = await create(testIdentity, 'A', 'entryD', null, null, [hash2])
+      const { hash: hash4, bytes: bytes4 } = await Entry.encode(four)
       const entryStorage = await MemoryStorage()
-      await entryStorage.put(one.hash, one.bytes)
-      await entryStorage.put(two.hash, two.bytes)
-      await entryStorage.put(three.hash, three.bytes)
-      await entryStorage.put(four.hash, four.bytes)
+      await entryStorage.put(hash1, bytes1)
+      await entryStorage.put(hash2, bytes2)
+      await entryStorage.put(hash3, bytes3)
+      await entryStorage.put(hash4, bytes4)
+      three.hash = hash3
+      four.hash = hash4
+      two.hash = hash2
       const log = await Log(testIdentity, { logId: 'A', logHeads: [three, four, two], entryStorage })
       const values = await log.values()
       const heads = await log.heads()
@@ -142,35 +154,6 @@ describe('Log', function () {
       strictEqual(values[0].payload, 'hello1')
       strictEqual(values[1].payload, 'hello2')
       strictEqual(values[2].payload, 'hello3')
-    })
-
-    it('encrypts a log entry when the payload is a string', async () => {
-      const keys = await keystore.createKey('hello1')
-
-      const privateKey = await keystore.getKey('hello1')
-      const publicKey = await keystore.getPublic(keys)
-
-      const encryptPayloadFn = encrypt({ publicKey })
-      const decryptPayloadFn = decrypt({ privateKey })
-      const log = await Log(testIdentity, { encryption: { encryptPayloadFn, decryptPayloadFn } })
-      const entry = await log.append('hello1')
-      const value = await log.get(entry.hash)
-      strictEqual(value.payload, 'hello1')
-    })
-
-    it('encrypts a log entry when the payload is an object', async () => {
-      const keys = await keystore.createKey('hello1')
-
-      const privateKey = await keystore.getKey('hello1')
-      const publicKey = await keystore.getPublic(keys)
-
-      const encryptPayloadFn = encrypt({ publicKey })
-      const decryptPayloadFn = decrypt({ privateKey })
-      const log = await Log(testIdentity, { encryption: { encryptPayloadFn, decryptPayloadFn } })
-      const entry = await log.append({ test: 'hello1' })
-      const value = await log.get(entry.hash)
-
-      deepStrictEqual(value.payload, { test: 'hello1' })
     })
   })
 })

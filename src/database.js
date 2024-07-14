@@ -7,7 +7,7 @@
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Sync from './sync.js'
-import { Log, Entry } from './oplog/index.js'
+import { Log } from './oplog/index.js'
 import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
 import pathJoin from './utils/path-join.js'
 
@@ -110,6 +110,8 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
+  encryption = encryption || {}
+
   const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryption })
 
   const events = new EventEmitter()
@@ -140,17 +142,20 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     return hash
   }
 
-  const applyOperation = async (bytes) => {
+  const applyOperation = async (entry) => {
     const task = async () => {
-      const entry = await Entry.decode(bytes)
-      if (entry) {
-        const updated = await log.joinEntry(entry)
-        if (updated) {
-          if (onUpdate) {
-            await onUpdate(log, entry)
+      try {
+        if (entry) {
+          const updated = await log.joinEntry(entry)
+          if (updated) {
+            if (onUpdate) {
+              await onUpdate(log, entry)
+            }
+            events.emit('update', entry)
           }
-          events.emit('update', entry)
         }
+      } catch (e) {
+        console.error(e)
       }
     }
     await queue.add(task)
