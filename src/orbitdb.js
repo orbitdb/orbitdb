@@ -193,6 +193,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
     ipfs,
     directory,
     keystore,
+    identities,
     identity,
     peerId
   }
