@@ -28,7 +28,7 @@ Install OrbitDB and its dependencies:
 npm install @orbitdb/core helia
 ```
 
-### Browser <script> tag
+### Browser `<script>` tag
 
 OrbitDB can be loaded in the browser using the distributed js file with the `<script/>` tag. OrbitDB is the global namespace and all external functions are available via this namespace:
 
