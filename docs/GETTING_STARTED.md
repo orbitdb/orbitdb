@@ -159,7 +159,7 @@ const db = await orbitdb.open('my-db')
 to:
 
 ```js
-const db = await orbitdb.open('my-documents-db', { type: 'documents '})
+const db = await orbitdb.open('my-documents-db', { type: 'documents'})
 ```
 
 Also replace:
@@ -172,8 +172,8 @@ await db.add('hello world 2')
 with:
 
 ```js
-await db.put('doc1', { hello: "world 1", hits: 5 })
-await db.put('doc2', { hello: "world 2", hits: 2 })
+await db.put({ _id: "doc1", hello: "world 1", hits: 5 })
+await db.put({ _id: "doc2", hello: "world 2", hits: 2 })
 ```
 
 Run index.js again:
