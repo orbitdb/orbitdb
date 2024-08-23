@@ -84,7 +84,7 @@ const IPFSAccessController = ({ write, storage } = {}) => async ({ orbitdb, iden
     // Allow if the write access list contain the writer's id or is '*'
     if (write.includes(id) || write.includes('*')) {
       // Check that the identity is valid
-      return identities.verifyIdentity(writerIdentity)
+      return await identities.verifyIdentity(writerIdentity)
     }
     return false
   }
