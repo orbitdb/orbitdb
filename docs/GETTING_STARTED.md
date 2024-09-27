@@ -195,7 +195,7 @@ To create an OrbitDB database peer, create a new project called `orbitdb-peer`:
 mkdir orbitdb-peer
 cd orbitdb-peer
 npm init
-npm i helia orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
+npm i helia @orbitdb/core blockstore-level @chainsafe/libp2p-gossipsub
 ```
 
 Create a new file called index.js and paste in the following code:
