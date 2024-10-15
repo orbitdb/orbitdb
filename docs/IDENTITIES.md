@@ -109,7 +109,7 @@ const identity = await identities.createIdentity({ id: 'me' })
 const cid = CID.parse(identity.hash, base58btc)
 
 // Extract the hash from the full db path.
-const bytes = await ipfs.block.get(cid)
+const bytes = await ipfs.blockstore.get(cid)
 
 // Defines how we serialize/hash the data.
 const codec = dagCbor
