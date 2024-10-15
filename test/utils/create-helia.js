@@ -54,7 +54,7 @@ const Libp2pBrowserOptions = {
       discoverRelays: 1
     })
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   connectionGater: {
     denyDialMultiaddr: () => false

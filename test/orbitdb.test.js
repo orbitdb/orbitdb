@@ -72,8 +72,8 @@ describe('OrbitDB', function () {
       const privateKey = await orbitdb1.keystore.getKey(orbitdb1.identity.id)
       notStrictEqual(privateKey, undefined)
       strictEqual(privateKey.constructor.name, 'Secp256k1PrivateKey')
-      notStrictEqual(privateKey._key, undefined)
-      notStrictEqual(privateKey._publicKey, undefined)
+      notStrictEqual(privateKey.raw, undefined)
+      notStrictEqual(privateKey.publicKey, undefined)
     })
 
     it('has a keystore that contains a public key that matches the identity\'s public key', async () => {
@@ -164,8 +164,8 @@ describe('OrbitDB', function () {
       const privateKey = await orbitdb1.keystore.getKey(orbitdb1.identity.id)
       notStrictEqual(privateKey, undefined)
       strictEqual(privateKey.constructor.name, 'Secp256k1PrivateKey')
-      notStrictEqual(privateKey._key, undefined)
-      notStrictEqual(privateKey._publicKey, undefined)
+      notStrictEqual(privateKey.raw, undefined)
+      notStrictEqual(privateKey.publicKey, undefined)
     })
 
     it('has a keystore that contains a public key that matches the identity\'s public key', async () => {

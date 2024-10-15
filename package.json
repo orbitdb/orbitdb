@@ -19,7 +19,7 @@
   "main": "src/index.js",
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.6",
-    "@libp2p/crypto": "^3.0.2",
+    "@libp2p/crypto": "^5.0.5",
     "it-pipe": "^3.0.1",
     "level": "^8.0.0",
     "lru": "^3.1.0",

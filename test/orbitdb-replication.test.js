@@ -23,6 +23,8 @@ describe('Replicating databases', function () {
   after(async () => {
     await orbitdb1.stop()
     await orbitdb2.stop()
+    await ipfs1.blockstore.child.child.child.close()
+    await ipfs2.blockstore.child.child.child.close()
     await ipfs1.stop()
     await ipfs2.stop()
 
