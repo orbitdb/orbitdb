@@ -31,18 +31,18 @@ describe('Documents Database Replication', function () {
 
   before(async () => {
     [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
-    
-    ipfs1.libp2p.addEventListener("peer:connect", (event) => {
-        console.log(event.detail.toString())
+
+    ipfs1.libp2p.addEventListener('peer:connect', (event) => {
+      console.log(event.detail.toString())
     })
-    
-    ipfs2.libp2p.addEventListener("peer:connect", (event) => {
-        console.log(event.detail.toString())
+
+    ipfs2.libp2p.addEventListener('peer:connect', (event) => {
+      console.log(event.detail.toString())
     })
-    
+
     console.log(ipfs1.libp2p.peerId.toString())
     console.log(ipfs2.libp2p.peerId.toString())
-    
+
     await connectPeers(ipfs1, ipfs2)
 
     await copy(testKeysPath, keysPath)

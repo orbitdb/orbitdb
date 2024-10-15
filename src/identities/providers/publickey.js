@@ -6,7 +6,6 @@
  */
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { signMessage, verifyMessage } from '../../key-store.js'
-import { publicKeyFromRaw } from '@libp2p/crypto/keys'
 
 const type = 'publickey'
 

@@ -193,7 +193,7 @@ describe('OrbitDB', function () {
     it('has a peerId', async () => {
       notStrictEqual(orbitdb1.peerId, undefined)
     })
-    
+
     it('has a peerId of type Ed25519', async () => {
       strictEqual(orbitdb1.peerId.type, 'Ed25519')
     })
