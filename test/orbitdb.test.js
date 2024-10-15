@@ -102,8 +102,8 @@ describe('OrbitDB', function () {
       notStrictEqual(orbitdb1.peerId, undefined)
     })
 
-    it('has a peerId of type Ed25519PeerIdImpl', async () => {
-      strictEqual(orbitdb1.peerId.constructor.name, 'Ed25519PeerIdImpl')
+    it('has a peerId of type Ed25519', async () => {
+      strictEqual(orbitdb1.peerId.type, 'Ed25519')
     })
 
     it('has a peerId that matches the IPFS id', async () => {
@@ -193,9 +193,9 @@ describe('OrbitDB', function () {
     it('has a peerId', async () => {
       notStrictEqual(orbitdb1.peerId, undefined)
     })
-
-    it('has a peerId of type Ed25519PeerIdImpl', async () => {
-      strictEqual(orbitdb1.peerId.constructor.name, 'Ed25519PeerIdImpl')
+    
+    it('has a peerId of type Ed25519', async () => {
+      strictEqual(orbitdb1.peerId.type, 'Ed25519')
     })
 
     it('has a peerId that matches the IPFS id', async () => {
