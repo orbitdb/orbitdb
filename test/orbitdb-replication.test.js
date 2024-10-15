@@ -23,8 +23,6 @@ describe('Replicating databases', function () {
   after(async () => {
     await orbitdb1.stop()
     await orbitdb2.stop()
-    await ipfs1.blockstore.child.child.close()
-    await ipfs2.blockstore.child.child.close()
     await ipfs1.stop()
     await ipfs2.stop()
 
@@ -136,8 +134,12 @@ describe('Replicating databases', function () {
 
       await orbitdb1.stop()
       await orbitdb2.stop()
-      await ipfs1.blockstore.child.child.close()
-      await ipfs2.blockstore.child.child.close()
+      // TODO: Strange issue with ClassicLevel. Causes subsequent Helia 
+      // instantiations to error with db closed. Explicitly closing the
+      // nested ClassicLevel db seems to resolve the issue. Requires further 
+      // investigation.   
+      await ipfs1.blockstore.child.child.child.close()
+      await ipfs2.blockstore.child.child.child.close()
       await ipfs1.stop()
       await ipfs2.stop()
 
