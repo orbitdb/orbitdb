@@ -38,7 +38,7 @@ describe('Identities', function () {
       identities = await Identities({ path: keysPath })
       identity = await identities.createIdentity({ id })
       const key = await identities.keystore.getKey(id)
-      const externalId = uint8ArrayToString(key.public.marshal(), 'base16')
+      const externalId = uint8ArrayToString(key.publicKey.raw, 'base16')
       assert.strictEqual(identity.id, externalId)
     })
   })
@@ -106,7 +106,7 @@ describe('Identities', function () {
       identity = await identities.createIdentity({ id })
       keystore = identities.keystore
       const key = await keystore.getKey(id)
-      const externalId = uint8ArrayToString(key.public.marshal(), 'base16')
+      const externalId = uint8ArrayToString(key.publicKey.raw, 'base16')
       assert.strictEqual(identity.id, externalId)
     })
 
@@ -117,7 +117,7 @@ describe('Identities', function () {
 
     it('has the correct public key', async () => {
       const key = await keystore.getKey(id)
-      const externalId = uint8ArrayToString(key.public.marshal(), 'base16')
+      const externalId = uint8ArrayToString(key.publicKey.raw, 'base16')
       const signingKey = await keystore.getKey(externalId)
       assert.notStrictEqual(signingKey, undefined)
       assert.strictEqual(identity.publicKey, keystore.getPublic(signingKey))
@@ -125,10 +125,10 @@ describe('Identities', function () {
 
     it('has a signature for the id', async () => {
       const key = await keystore.getKey(id)
-      const externalId = uint8ArrayToString(key.public.marshal(), 'base16')
+      const externalId = uint8ArrayToString(key.publicKey.raw, 'base16')
       const signingKey = await keystore.getKey(externalId)
       const idSignature = await signMessage(signingKey, externalId)
-      const publicKey = uint8ArrayToString(signingKey.public.marshal(), 'base16')
+      const publicKey = uint8ArrayToString(signingKey.publicKey.raw, 'base16')
       const verifies = await verifyMessage(idSignature, publicKey, externalId)
       assert.strictEqual(verifies, true)
       assert.strictEqual(identity.signatures.id, idSignature)
@@ -136,7 +136,7 @@ describe('Identities', function () {
 
     it('has a signature for the publicKey', async () => {
       const key = await keystore.getKey(id)
-      const externalId = uint8ArrayToString(key.public.marshal(), 'base16')
+      const externalId = uint8ArrayToString(key.publicKey.raw, 'base16')
       const signingKey = await keystore.getKey(externalId)
       const idSignature = await signMessage(signingKey, externalId)
       const externalKey = await keystore.getKey(id)
@@ -171,7 +171,7 @@ describe('Identities', function () {
 
     it('has the correct id', async () => {
       const key = await savedKeysKeyStore.getKey(id)
-      assert.strictEqual(identity.id, uint8ArrayToString(key.public.marshal(), 'base16'))
+      assert.strictEqual(identity.id, uint8ArrayToString(key.publicKey.raw, 'base16'))
     })
 
     it('has the correct public key', async () => {

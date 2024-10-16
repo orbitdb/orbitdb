@@ -1,9 +1,6 @@
-import * as crypto from '@libp2p/crypto'
+import { privateKeyFromRaw } from '@libp2p/crypto/keys'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { Identities, KeyStore } from '../../src/index.js'
-
-const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
-const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
 
 const keysPath = './testkeys'
 
@@ -52,10 +49,10 @@ before(async () => {
     ]
 
     for (let user of users) {
-      const privateKey1 = unmarshal(uint8ArrayFromString(user.privateKey, 'base16'))
-      const privateKey2 = unmarshal(uint8ArrayFromString(user.identity.privateKey, 'base16'))
-      await keystore.addKey(user.id, { privateKey: privateKey1.marshal() })
-      await keystore.addKey(user.identity.id, { privateKey: privateKey2.marshal() })
+      const privateKey1 = privateKeyFromRaw(uint8ArrayFromString(user.privateKey, 'base16'))
+      const privateKey2 = privateKeyFromRaw(uint8ArrayFromString(user.identity.privateKey, 'base16'))
+      await keystore.addKey(user.id, { privateKey: privateKey1.raw })
+      await keystore.addKey(user.identity.id, { privateKey: privateKey2.raw })
     }
 
     await keystore.close()

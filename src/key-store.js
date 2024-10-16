@@ -8,16 +8,13 @@
 * const storage = await MemoryStorage()
 * const keystore = await KeyStore({ storage })
 */
-import * as crypto from '@libp2p/crypto'
+import { privateKeyFromRaw, publicKeyFromRaw, generateKeyPair } from '@libp2p/crypto/keys'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { compare as uint8ArrayCompare } from 'uint8arrays/compare'
 import ComposedStorage from './storage/composed.js'
 import LevelStorage from './storage/level.js'
 import LRUStorage from './storage/lru.js'
-
-const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
-const unmarshalPubKey = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PublicKey
 
 const verifySignature = async (signature, publicKey, data) => {
   if (!signature) {
@@ -38,7 +35,7 @@ const verifySignature = async (signature, publicKey, data) => {
 
   let res = false
   try {
-    const pubKey = unmarshalPubKey(uint8ArrayFromString(publicKey, 'base16'))
+    const pubKey = publicKeyFromRaw(uint8ArrayFromString(publicKey, 'base16'))
     res = await isValid(pubKey, data, uint8ArrayFromString(signature, 'base16'))
   } catch (e) {
     // Catch error: sig length wrong
@@ -195,7 +192,7 @@ const KeyStore = async ({ storage, path } = {}) => {
     const { privateKey } = key
     await storage.put('private_' + id, privateKey)
     // Unmarshal the key and add it to the cache
-    const unmarshaledPrivateKey = unmarshal(privateKey)
+    const unmarshaledPrivateKey = privateKeyFromRaw(privateKey)
     await keyCache.put(id, unmarshaledPrivateKey)
   }
 
@@ -213,17 +210,16 @@ const KeyStore = async ({ storage, path } = {}) => {
     }
 
     // Generate a private key
-    const keyPair = await crypto.keys.generateKeyPair('secp256k1')
-    const keys = await crypto.keys.unmarshalPrivateKey(keyPair.bytes)
+    const keyPair = await generateKeyPair('secp256k1')
 
     const key = {
-      publicKey: keys.public.marshal(),
-      privateKey: keys.marshal()
+      publicKey: keyPair.publicKey.raw,
+      privateKey: keyPair.raw
     }
 
     await addKey(id, key)
 
-    return keys
+    return keyPair
   }
 
   /**
@@ -254,7 +250,8 @@ const KeyStore = async ({ storage, path } = {}) => {
         return
       }
 
-      key = unmarshal(storedKey)
+      key = privateKeyFromRaw(storedKey)
+
       await keyCache.put(id, key)
     }
 
@@ -281,7 +278,7 @@ const KeyStore = async ({ storage, path } = {}) => {
       throw new Error('Supported formats are `hex` and `buffer`')
     }
 
-    const pubKey = keys.public.marshal()
+    const pubKey = keys.publicKey.raw
 
     return format === 'buffer' ? pubKey : uint8ArrayToString(pubKey, 'base16')
   }

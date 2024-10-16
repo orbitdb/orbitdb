@@ -11,7 +11,7 @@ import createHelia from '../../utils/create-helia.js'
 const keysPath = './testkeys'
 
 describe('Documents Database Replication', function () {
-  this.timeout(30000)
+  this.timeout(10000)
 
   let ipfs1, ipfs2
   let keystore

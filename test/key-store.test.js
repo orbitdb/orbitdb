@@ -145,7 +145,7 @@ describe('KeyStore', () => {
   })
 
   describe('Options', () => {
-    const unmarshal = crypto.keys.supportedKeys.secp256k1.unmarshalSecp256k1PrivateKey
+    const unmarshal = crypto.keys.privateKeyFromRaw
     const privateKey = '198594a8de39fd97017d11996d619b3746211605a9d290964badf58bc79bdb33'
     const publicKey = '0260baeaffa1de1e4135e5b395e0380563a622b9599d1b8e012a0f7603f516bdaa'
     let privateKeyBuffer, publicKeyBuffer, unmarshalledPrivateKey
