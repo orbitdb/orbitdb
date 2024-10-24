@@ -1,6 +1,6 @@
 {
   "name": "@orbitdb/core",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Distributed p2p database on IPFS",
   "author": "Haad",
   "license": "MIT",
@@ -19,7 +19,7 @@
   "main": "src/index.js",
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.6",
-    "@libp2p/crypto": "^3.0.2",
+    "@libp2p/crypto": "^5.0.5",
     "it-pipe": "^3.0.1",
     "level": "^8.0.0",
     "lru": "^3.1.0",
@@ -29,15 +29,15 @@
     "uint8arrays": "^5.0.0"
   },
   "devDependencies": {
-    "@chainsafe/libp2p-gossipsub": "^13.0.0",
-    "@chainsafe/libp2p-yamux": "^6.0.1",
-    "@helia/block-brokers": "^1.0.0",
-    "@libp2p/circuit-relay-v2": "^1.0.10",
-    "blockstore-level": "^1.1.7",
+    "@chainsafe/libp2p-gossipsub": "^14.1.0",
+    "@chainsafe/libp2p-yamux": "^7.0.1",
+    "@helia/block-brokers": "^4.0.0",
+    "@libp2p/circuit-relay-v2": "^2.1.5",
+    "blockstore-level": "^2.0.1",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "fs-extra": "^11.2.0",
-    "helia": "^4.0.1",
+    "helia": "^5.0.0",
     "it-all": "^3.0.4",
     "jsdoc": "^4.0.2",
     "mocha": "^10.2.0",

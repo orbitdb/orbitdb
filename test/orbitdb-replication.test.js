@@ -1,9 +1,11 @@
-import { deepStrictEqual } from 'assert'
+import { deepStrictEqual, strictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { createOrbitDB } from '../src/index.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import createHelia from './utils/create-helia.js'
+import { CID } from 'multiformats/cid'
+import { base58btc } from 'multiformats/bases/base58'
 
 describe('Replicating databases', function () {
   this.timeout(10000)
@@ -23,8 +25,8 @@ describe('Replicating databases', function () {
   after(async () => {
     await orbitdb1.stop()
     await orbitdb2.stop()
-    await ipfs1.blockstore.child.child.close()
-    await ipfs2.blockstore.child.child.close()
+    await ipfs1.blockstore.child.child.child.close()
+    await ipfs2.blockstore.child.child.child.close()
     await ipfs1.stop()
     await ipfs2.stop()
 
@@ -136,8 +138,12 @@ describe('Replicating databases', function () {
 
       await orbitdb1.stop()
       await orbitdb2.stop()
-      await ipfs1.blockstore.child.child.close()
-      await ipfs2.blockstore.child.child.close()
+      // TODO: Strange issue with ClassicLevel. Causes subsequent Helia
+      // instantiations to error with db closed. Explicitly closing the
+      // nested ClassicLevel db seems to resolve the issue. Requires further
+      // investigation.
+      await ipfs1.blockstore.child.child.child.close()
+      await ipfs2.blockstore.child.child.child.close()
       await ipfs1.stop()
       await ipfs2.stop()
 
@@ -162,6 +168,27 @@ describe('Replicating databases', function () {
       deepStrictEqual(eventsFromDb1.map(e => e.value), expected)
 
       console.log('events:', amount)
+    })
+
+    it('pins all entries in the replicated database', async () => {
+      const db1 = await orbitdb1.open('helloworld', { referencesCount: 0 })
+      const hash = await db1.add('hello world')
+
+      let replicated = false
+
+      const onJoin = async (peerId, heads) => {
+        replicated = true
+      }
+
+      const db2 = await orbitdb2.open(db1.address)
+
+      db2.events.on('join', onJoin)
+
+      await waitFor(() => replicated, () => true)
+
+      const cid = CID.parse(hash, base58btc)
+      strictEqual(await ipfs1.pins.isPinned(cid), true)
+      strictEqual(await ipfs2.pins.isPinned(cid), true)
     })
   })
 })

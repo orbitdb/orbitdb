@@ -50,7 +50,7 @@ A simple Node.js example might look something like:
   transports: [
     tcp()
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   services: {
     identify: identify(),
@@ -79,7 +79,7 @@ export const Libp2pOptions = {
   transports: [
     tcp()
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   services: {
     identify: identify(),

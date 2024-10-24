@@ -52,7 +52,7 @@ const PublicKeyIdentityProvider = ({ keystore }) => async () => {
     }
 
     const key = await keystore.getKey(id) || await keystore.createKey(id)
-    return uint8ArrayToString(key.public.marshal(), 'base16')
+    return uint8ArrayToString(key.publicKey.raw, 'base16')
   }
 
   /**
