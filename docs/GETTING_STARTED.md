@@ -159,7 +159,7 @@ const db = await orbitdb.open('my-db')
 to:
 
 ```js
-const db = await orbitdb.open('my-documents-db', { type: 'documents'})
+const db = await orbitdb.open('my-documents-db', { type: 'documents' })
 ```
 
 Also replace:
