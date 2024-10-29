@@ -21,10 +21,6 @@ const Libp2pOptions = {
   transports: [
     webSockets({
       filter: all
-    }),
-    webRTC(),
-    circuitRelayTransport({
-      discoverRelays: 1
     })
   ],
   connectionEncrypters: [noise()],
@@ -43,16 +39,14 @@ const Libp2pOptions = {
  */
 const Libp2pBrowserOptions = {
   addresses: {
-    listen: ['/webrtc']
+    listen: ['/webrtc', '/p2p-circuit']
   },
   transports: [
     webSockets({
       filter: all
     }),
     webRTC(),
-    circuitRelayTransport({
-      discoverRelays: 1
-    })
+    circuitRelayTransport()
   ],
   connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
