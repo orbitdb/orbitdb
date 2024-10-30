@@ -122,13 +122,16 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
+      console.log(1)
       manifest = await manifestStore.get(addr.hash)
       const acType = manifest.accessController.split('/', 2).pop()
       AccessController = getAccessController(acType)()
+      console.log(2)
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: manifest.accessController })
       name = manifest.name
       type = type || manifest.type
       meta = manifest.meta
+      console.log(3)
     } else {
       // If the address given was not valid, eg. just the name of the database
       type = type || DefaultDatabaseType
@@ -153,12 +156,14 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
 
     address = address.toString()
 
+    console.log(4)
     const db = await Database({ ipfs, identity, address, name, access: accessController, directory, meta, syncAutomatically: sync, headsStorage, entryStorage, indexStorage, referencesCount })
 
     db.events.on('close', onDatabaseClosed(address))
 
     databases[address] = db
 
+    console.log(5)
     return db
   }
 
