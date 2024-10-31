@@ -312,6 +312,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
         await _heads.remove(hash)
       }
 
+      /* 6. Add new entry to entries (for pinning) */
+      await _entries.put(entry.hash, entry.bytes)
+
       /* 6. Add the new entry to heads (=union with current heads) */
       await _heads.add(entry)
 
