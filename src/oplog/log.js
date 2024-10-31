@@ -318,6 +318,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       /* 6. Add the new entry to heads (=union with current heads) */
       await _heads.add(entry)
 
+      await _entries.put(entry.hash, entry.bytes)
+
       return true
     }
 
