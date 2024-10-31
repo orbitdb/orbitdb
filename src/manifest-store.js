@@ -16,13 +16,17 @@ const ManifestStore = async ({ ipfs, storage } = {}) => {
    */
 
   storage = storage || await ComposedStorage(
-    await LRUStorage({ size: 1000 }),
+    await LRUStorage({ size: 100000 }),
     await IPFSBlockStorage({ ipfs, pin: true })
   )
 
   const get = async (address) => {
     const bytes = await storage.get(address)
     const { value } = await Block.decode({ bytes, codec, hasher })
+    if (value) {
+      // Write to storage to make sure it gets pinned on IPFS
+      await storage.put(address, bytes)
+    }
     return value
   }
 
