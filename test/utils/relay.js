@@ -29,13 +29,7 @@ const server = await createLibp2p({
   streamMuxers: [yamux()],
   services: {
     identify: identify(),
-    relay: circuitRelayServer({
-      reservations: {
-        maxReservations: 5000,
-        reservationTtl: 1000,
-        defaultDataLimit: BigInt(1024 * 1024 * 1024)
-      }
-    })
+    relay: circuitRelayServer()
   }
 })
 
