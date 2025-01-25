@@ -206,6 +206,7 @@ import { createHelia } from 'helia'
 import { createOrbitDB, IPFSAccessController } from '@orbitdb/core'
 import { LevelBlockstore } from 'blockstore-level'
 import { Libp2pOptions } from './config/libp2p.js'
+import { multiaddr } from '@multiformats/multiaddr'
 
 const main = async () => {
   // create a random directory to avoid OrbitDB conflicts.
@@ -219,7 +220,9 @@ const main = async () => {
 
   let db
 
-  if (process.argv[2]) {
+  if (process.argv[2] && process.argv[3]) {
+    await orbitdb.ipfs.libp2p.dial(multiaddr(process.argv[3]))
+    console.log('opening db', process.argv[2])
     db = await orbitdb.open(process.argv[2])
   } else {
     // When we open a new database, write access is only available to the 
@@ -229,6 +232,8 @@ const main = async () => {
     // would use the OrbitDBAccessController to provide mutable, "fine-grain"
     // access using grant and revoke.
     db = await orbitdb.open('my-db', { AccessController: IPFSAccessController({ write: ['*']}) })
+    
+    console.log('libp2p address', '(copy one of these addresses then dial into this node from the second node)', orbitdb.ipfs.libp2p.getMultiaddrs())
     
     // Copy this output if you want to connect a peer to another.
     console.log('my-db address', '(copy my db address and use when launching peer 2)', db.address)
@@ -263,27 +268,33 @@ const main = async () => {
 main()
 ```
 
-Open two consoles in your command line terminal.
+Launch peer 1 from the terminal:
 
-In terminal 1, run the first peer:
-
-```sh
-node index.js
+```bash
+node test.js
 ```
 
-When running, you should see the address of the database, for example:
+Once launched you will see some output which may look something like this:
 
-```sh
+```
+libp2p address (copy one of these addresses then dial into this node from the second node) [
+  Multiaddr(/ip4/127.0.0.1/tcp/36161/p2p/12D3KooWKFWB78Hka2uPVNYYoXfucWp6rDLsQzr5CFiP67NAo7YF),
+  Multiaddr(/ip4/192.168.1.22/tcp/36161/p2p/12D3KooWKFWB78Hka2uPVNYYoXfucWp6rDLsQzr5CFiP67NAo7YF),
+  Multiaddr(/ip4/100.64.100.6/tcp/36161/p2p/12D3KooWKFWB78Hka2uPVNYYoXfucWp6rDLsQzr5CFiP67NAo7YF)
+]
 my-db address (copy my db address and use when launching peer 2) /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj
 ```
 
-Copy the database's address from terminal 1 and, in terminal 2, run:
+It contains the libp2p address and db address. You will need both of these when connecting from peer 2.
 
-```sh
-node index.js /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj
+Open another terminal and launch peer 2. The command takes the form `node test.js <orbitdb-address> <libp2p-address>`
+
+```bash
+node test.js /orbitdb/zdpuB2aYUCnZ7YUBrDkCWpRLQ8ieUbqJEVRZEd5aDhJBDpBqj /ip4/127.0.0.1/tcp/36161/p2p/12D3KooWKFWB78Hka2uPVNYYoXfucWp6rDLsQzr5CFiP67NAo7YF
 ```
 
-Both peers will print new records to the terminal as the log is updated. When you stop each peer using ctrl+c, the final state of the database will be printed to the terminal. They should match.
+What is happening is the second peer is dialing the first peer on the /ip4/ address then opens the database.
+
 
 **PLEASE NOTE:** 
 
