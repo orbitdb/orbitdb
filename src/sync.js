@@ -194,9 +194,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
           const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
-          console.error(e)
           peers.delete(peerId)
-          if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
+          if (e.name === 'UnsupportedProtocolError') {
             // Skip peer, they don't have this database currently
           } else {
             events.emit('error', e)
