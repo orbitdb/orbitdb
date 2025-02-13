@@ -1,0 +1,2 @@
+[submodule "3rd-party/orbitdb"]
+	branch = main
