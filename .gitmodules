@@ -1,2 +1,2 @@
 [submodule "3rd-party/orbitdb"]
-	branch = feat/error-handling-improvements
+	branch = main
