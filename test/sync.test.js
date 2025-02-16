@@ -704,6 +704,7 @@ describe('Sync protocol', function () {
       await log1.append('hello1')
 
       await sync2.start()
+      await new Promise(resolve => setTimeout(resolve, timeoutTime * 3))
     })
   })
 
