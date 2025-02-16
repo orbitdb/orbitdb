@@ -700,7 +700,7 @@ describe('Sync protocol', function () {
     it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
-      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, onSynced, timeout: timeoutTime })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
 
       await log1.append('hello1')
 
