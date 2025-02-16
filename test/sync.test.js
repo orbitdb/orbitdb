@@ -701,11 +701,11 @@ describe('Sync protocol', function () {
       let synced = null
 
       const onSynced = (data) => {
-        synced = data;
+        synced = data
       }
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
-      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, onSynced: onSynced, timeout: timeoutTime })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, onSynced, timeout: timeoutTime })
 
       await log1.append('hello1')
 
@@ -713,7 +713,7 @@ describe('Sync protocol', function () {
 
       await waitFor(() => !!synced, () => true)
 
-      notStrictEqual(err, null)
+      notStrictEqual(synced, null)
     })
   })
 
