@@ -720,5 +720,29 @@ describe('Sync protocol', function () {
       strictEqual(err.type, 'aborted')
       strictEqual(err.message, 'Read aborted')
     })
+
+    it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
+      let err = null
+
+      const onError = (error) => {
+        (!err) && (err = error)
+      }
+
+      sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
+
+      // `sync1.events` has no listener on `error`
+      sync2.events.on('error', onError)
+
+      await log1.append('hello1')
+
+      await sync2.start()
+
+      await waitFor(() => err !== null, () => true)
+
+      notStrictEqual(err, null)
+      strictEqual(err.type, 'aborted')
+      strictEqual(err.message, 'Read aborted')
+    })
   })
 })
