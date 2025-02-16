@@ -133,7 +133,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    * @instance
    */
   events = events || new EventEmitter()
-  events.on("error", console.log)
+  events.on('error', console.log)
 
   timeout = timeout || DefaultTimeout
 
