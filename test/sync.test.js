@@ -661,6 +661,67 @@ describe('Sync protocol', function () {
     })
   })
 
+  describe('Events - error listener', () => {
+    let sync1, sync2
+    let log1, log2
+
+    const timeoutTime = 1 // 1 millisecond
+
+    before(async () => {
+      [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
+
+      peerId1 = ipfs1.libp2p.peerId
+      peerId2 = ipfs2.libp2p.peerId
+
+      await connectPeers(ipfs1, ipfs2)
+
+      log1 = await Log(testIdentity1, { logId: 'synclog6' })
+      log2 = await Log(testIdentity2, { logId: 'synclog6' })
+    })
+
+    after(async () => {
+      if (sync1) {
+        await sync1.stop()
+      }
+      if (sync2) {
+        await sync2.stop()
+      }
+      if (log1) {
+        await log1.close()
+      }
+      if (log2) {
+        await log2.close()
+      }
+
+      await ipfs1.stop()
+      await ipfs2.stop()
+    })
+
+    it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
+      let err = null
+
+      const onError = (error) => {
+        (!err) && (err = error)
+      }
+
+      sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
+
+      // `sync1.events` has no listener on `error`
+      sync2.events.on('error', onError)
+
+      await log1.append('hello1')
+
+      await sync2.start()
+
+      await waitFor(() => err !== null, () => true)
+
+      notStrictEqual(err, null)
+      strictEqual(err.type, 'aborted')
+      strictEqual(err.message, 'Read aborted')
+    })
+  })
+
   describe('Timeouts', () => {
     let sync1, sync2
     let log1, log2
@@ -708,30 +769,6 @@ describe('Sync protocol', function () {
       sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
 
       sync1.events.on('error', onError)
-      sync2.events.on('error', onError)
-
-      await log1.append('hello1')
-
-      await sync2.start()
-
-      await waitFor(() => err !== null, () => true)
-
-      notStrictEqual(err, null)
-      strictEqual(err.type, 'aborted')
-      strictEqual(err.message, 'Read aborted')
-    })
-
-    it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
-      let err = null
-
-      const onError = (error) => {
-        (!err) && (err = error)
-      }
-
-      sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
-      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
-
-      // `sync1.events` has no listener on `error`
       sync2.events.on('error', onError)
 
       await log1.append('hello1')
