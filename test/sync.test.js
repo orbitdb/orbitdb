@@ -661,7 +661,7 @@ describe('Sync protocol', function () {
     })
   })
 
-  describe.only('Events - error listener', () => {
+  describe('Events - error listener', () => {
     let sync1, sync2
     let log1, log2
 
