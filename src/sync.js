@@ -3,6 +3,7 @@ import PQueue from 'p-queue'
 import { EventEmitter } from 'events'
 import { TimeoutController } from 'timeout-abort-controller'
 import pathJoin from './utils/path-join.js'
+import { messageLog } from './logger.js'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -133,6 +134,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    * @instance
    */
   events = events || new EventEmitter()
+  events.on('error', messageLog)
 
   timeout = timeout || DefaultTimeout
 
