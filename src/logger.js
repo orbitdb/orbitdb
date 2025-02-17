@@ -1,3 +1,3 @@
-import { logger } from "@libp2p/logger"
+import { logger } from '@libp2p/logger'
 
-export const messageLog = logger("orbitdb")
+export const messageLog = logger('orbitdb')
