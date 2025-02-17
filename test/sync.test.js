@@ -13,7 +13,7 @@ import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
-describe.only('Sync protocol', function () {
+describe('Sync protocol', function () {
   this.timeout(10000)
 
   let ipfs1, ipfs2
