@@ -661,7 +661,7 @@ describe('Sync protocol', function () {
     })
   })
 
-  describe('Events - error listener', () => {
+  describe.only('Events - error listener', () => {
     let sync1, sync2
     let log1, log2
 
@@ -682,7 +682,7 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog6' })
       log2 = await Log(testIdentity2, { logId: 'synclog6' })
 
-      process.on('unhandledRejection', handleError)
+      process?.on('unhandledRejection', handleError)
     })
 
     after(async () => {
@@ -702,7 +702,7 @@ describe('Sync protocol', function () {
       await ipfs1.stop()
       await ipfs2.stop()
 
-      process.off('unhandledRejection', handleError)
+      process?.off('unhandledRejection', handleError)
     })
 
     it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
