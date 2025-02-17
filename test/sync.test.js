@@ -682,7 +682,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog6' })
       log2 = await Log(testIdentity2, { logId: 'synclog6' })
 
-      process?.on('unhandledRejection', handleError)
+      if (typeof process !== "undefined" )
+        process.on('unhandledRejection', handleError)
     })
 
     after(async () => {
@@ -702,7 +703,8 @@ describe('Sync protocol', function () {
       await ipfs1.stop()
       await ipfs2.stop()
 
-      process?.off('unhandledRejection', handleError)
+      if (typeof process !== "undefined" )
+        process.off('unhandledRejection', handleError)
     })
 
     it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
