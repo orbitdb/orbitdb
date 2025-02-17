@@ -717,7 +717,7 @@ describe.only('Sync protocol', function () {
       await new Promise(resolve => setTimeout(resolve, timeoutTime + 10))
 
       // Test that no unhandled abort error has been thrown
-      const err = unhandledErrors.find(e=>e.code === 'ABORT_ERR')
+      const err = unhandledErrors.find(e => e.code === 'ABORT_ERR')
       strictEqual(err, undefined)
     })
   })
