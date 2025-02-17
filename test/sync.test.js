@@ -13,7 +13,7 @@ import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
 
-describe('Sync protocol', function () {
+describe.only('Sync protocol', function () {
   this.timeout(10000)
 
   let ipfs1, ipfs2
@@ -661,11 +661,15 @@ describe('Sync protocol', function () {
     })
   })
 
-  describe('Events - error listener', () => {
+  describe.only('Events - error listener', () => {
     let sync1, sync2
     let log1, log2
 
     const timeoutTime = 1 // 1 millisecond
+    const unhandledErrors = []
+    const handleError = (err) => {
+      unhandledErrors.push(err)
+    }
 
     before(async () => {
       [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
@@ -677,6 +681,8 @@ describe('Sync protocol', function () {
 
       log1 = await Log(testIdentity1, { logId: 'synclog6' })
       log2 = await Log(testIdentity2, { logId: 'synclog6' })
+
+      process.on('unhandledRejection', handleError)
     })
 
     after(async () => {
@@ -695,6 +701,8 @@ describe('Sync protocol', function () {
 
       await ipfs1.stop()
       await ipfs2.stop()
+
+      process.off('unhandledRejection', handleError)
     })
 
     it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
@@ -704,7 +712,13 @@ describe('Sync protocol', function () {
       await log1.append('hello1')
 
       await sync2.start()
-      await new Promise(resolve => setTimeout(resolve, timeoutTime * 3))
+
+      // Be sure to wait long enough for the timeout to cancel the operation with an error
+      await new Promise(resolve => setTimeout(resolve, timeoutTime + 10))
+
+      // Test that no unhandled abort error has been thrown
+      const err = unhandledErrors.find(e=>e.code === 'ABORT_ERR')
+      strictEqual(err, undefined)
     })
   })
 
