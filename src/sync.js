@@ -262,7 +262,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       pubsub.removeEventListener('message', handleUpdateMessage)
       await libp2p.unhandle(headsSyncAddress)
       await pubsub.unsubscribe(address)
-      libp2p.removeEventListener('peer:disconnect', handlePeerDisconnected);
+      libp2p.removeEventListener('peer:disconnect', handlePeerDisconnected)
       peers.clear()
     }
   }
@@ -282,7 +282,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       // Subscribe to the pubsub channel for this database through which updates are sent
       await pubsub.subscribe(address)
       // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
-      libp2p.addEventListener('peer:disconnect', handlePeerDisconnected);
+      libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
       started = true
     }
   }
