@@ -72,7 +72,7 @@ const options = {
       filter: filters.all
     })
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   services: {
     identify: identify(),
@@ -114,7 +114,7 @@ const options = {
       discoverRelays: 1
     })
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   connectionGater: {
     denyDialMultiaddr: () => {
@@ -180,7 +180,7 @@ const options = {
       discoverRelays: 1
     })
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   connectionGater: {
     denyDialMultiaddr: () => {
@@ -247,7 +247,7 @@ const options = {
       discoverRelays: 1
     })
   ],
-  connectionEncryption: [noise()],
+  connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
   connectionGater: {
     denyDialMultiaddr: () => {

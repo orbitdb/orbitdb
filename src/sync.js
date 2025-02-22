@@ -197,9 +197,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
           const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
-          console.error(e)
           peers.delete(peerId)
-          if (e.code === 'ERR_UNSUPPORTED_PROTOCOL') {
+          if (e.name === 'UnsupportedProtocolError') {
             // Skip peer, they don't have this database currently
           } else {
             events.emit('error', e)
@@ -236,6 +235,10 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     }
   }
 
+  const handlePeerDisconnected = async event => {
+    peers.delete(event.detail.toString())
+  }
+
   /**
    * Add a log entry to the Sync Protocol to be sent to peers.
    * @function add
@@ -264,6 +267,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       pubsub.removeEventListener('message', handleUpdateMessage)
       await libp2p.unhandle(headsSyncAddress)
       await pubsub.unsubscribe(address)
+      libp2p.removeEventListener('peer:disconnect', handlePeerDisconnected)
       peers.clear()
     }
   }
@@ -282,6 +286,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       pubsub.addEventListener('message', handleUpdateMessage)
       // Subscribe to the pubsub channel for this database through which updates are sent
       await pubsub.subscribe(address)
+      // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
+      libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
       started = true
     }
   }

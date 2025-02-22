@@ -264,7 +264,7 @@ CustomDB.type = type
 export default CustomDB
 ```
 
-[Documents](../src/db/documents.js), [Events](../src/db/events.js) and [KeyValue](../src/db/keyvalue.js) provide good examples of how a database is implemented in OrbitDB and how to add the logic for returning records from the database (the state of the database).
+[Documents](../src/databases/documents.js), [Events](../src/databases/events.js) and [KeyValue](../src/databases/keyvalue.js) provide good examples of how a database is implemented in OrbitDB and how to add the logic for returning records from the database (the state of the database).
 
 To use a custom database, add it to the list of supported database types:
 

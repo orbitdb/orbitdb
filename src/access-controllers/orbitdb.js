@@ -58,7 +58,7 @@ const OrbitDBAccessController = ({ write } = {}) => async ({ orbitdb, identities
     // If the ACL contains the writer's public key or it contains '*'
     const hasWriteAccess = await hasCapability('write', id) || await hasCapability('admin', id)
     if (hasWriteAccess) {
-      return identities.verifyIdentity(writerIdentity)
+      return await identities.verifyIdentity(writerIdentity)
     }
 
     return false
