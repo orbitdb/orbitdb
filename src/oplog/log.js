@@ -302,7 +302,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       await index.addVerified(hashesToAdd.values())
       /* 5. Remove heads which new entries are connect to */
       await index.removeHeads(connectedHeads.values())
-      /* 6. Add the new entry to heads (=union with current heads) */
+      /* 6. Add new entry to entries (for pinning) */
+      await index.pinEntry(entry)
+      /* 7. Add the new entry to heads (=union with current heads) */
       await index.addHead(entry)
 
       return true

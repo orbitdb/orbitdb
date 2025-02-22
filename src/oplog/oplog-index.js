@@ -58,8 +58,15 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     return hash
   }
 
+  const pinEntry = async (entry) => {
+    /* 6. Add new entry to entries (for pinning) */
+    const { hash, bytes } = await Entry.encode(entry, encryptEntryFn, encryptPayloadFn)
+
+    await _entries.put(hash, bytes)
+  }
+
   const addHead = async (entry) => {
-    /* 6. Add the new entry to heads (=union with current heads) */
+    /* 7. Add the new entry to heads (=union with current heads) */
     await _heads.add(entry)
     return entry.hash
   }
@@ -97,6 +104,7 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     heads,
     setHead,
     addHead,
+    pinEntry,
     removeHeads,
     addVerified,
     storage: _entries,
