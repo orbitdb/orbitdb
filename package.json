@@ -20,6 +20,8 @@
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.6",
     "@libp2p/crypto": "^5.0.5",
+    "@libp2p/logger": "^5.1.8",
+    "it-drain": "^3.0.7",
     "it-pipe": "^3.0.1",
     "level": "^8.0.0",
     "lru": "^3.1.0",
@@ -30,21 +32,33 @@
   },
   "devDependencies": {
     "@chainsafe/libp2p-gossipsub": "^14.1.0",
-    "@libp2p/circuit-relay-v2": "^3.1.0",
+    "@chainsafe/libp2p-noise": "^16.0.1",
+    "@chainsafe/libp2p-yamux": "^7.0.1",
+    "@helia/block-brokers": "^4.0.4",
+    "@libp2p/circuit-relay-v2": "^3.1.12",
+    "@libp2p/identify": "^3.0.18",
+    "@libp2p/webrtc": "^5.1.0",
+    "@libp2p/websockets": "^9.1.5",
+    "@multiformats/multiaddr": "^12.3.5",
+    "@multiformats/multiaddr-matcher": "^1.6.0",
+    "blockstore-core": "^5.0.2",
     "blockstore-level": "^2.0.1",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "fs-extra": "^11.2.0",
+    "glob": "^7.1.1",
     "helia": "^5.1.0",
     "it-all": "^3.0.4",
     "jsdoc": "^4.0.2",
+    "libp2p": "^2.6.2",
     "mocha": "^10.2.0",
     "path-browserify": "^1.0.1",
     "playwright-test": "^14.1.6",
     "rimraf": "^5.0.5",
     "standard": "^17.1.0",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "webpack": "^5.98.0",
+    "webpack-cli": "^5.1.4",
+    "wherearewe": "^2.0.1"
   },
   "scripts": {
     "test": "cross-env mocha --config test/.mocharc.json",
@@ -82,5 +96,12 @@
     "libp2p",
     "p2p",
     "peer-to-peer"
-  ]
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@ipshipyard/node-datachannel",
+      "classic-level",
+      "esbuild"
+    ]
+  }
 }

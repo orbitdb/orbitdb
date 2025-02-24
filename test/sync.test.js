@@ -10,6 +10,7 @@ import LRUStorage from '../src/storage/lru.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import ComposedStorage from '../src/storage/composed.js'
 import createHelia from './utils/create-helia.js'
+import { isBrowser } from 'wherearewe'
 
 const keysPath = './testkeys'
 
@@ -660,6 +661,69 @@ describe('Sync protocol', function () {
       strictEqual(String(leavingPeerId), String(id))
     })
   })
+
+  if (!isBrowser) {
+    describe('Events - error listener', () => {
+      let sync1, sync2
+      let log1, log2
+
+      const timeoutTime = 1 // 1 millisecond
+      const unhandledErrors = []
+      const handleError = (err) => {
+        unhandledErrors.push(err)
+      }
+
+      before(async () => {
+        [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
+
+        peerId1 = ipfs1.libp2p.peerId
+        peerId2 = ipfs2.libp2p.peerId
+
+        await connectPeers(ipfs1, ipfs2)
+
+        log1 = await Log(testIdentity1, { logId: 'synclog6' })
+        log2 = await Log(testIdentity2, { logId: 'synclog6' })
+
+        process.on('unhandledRejection', handleError)
+      })
+
+      after(async () => {
+        if (sync1) {
+          await sync1.stop()
+        }
+        if (sync2) {
+          await sync2.stop()
+        }
+        if (log1) {
+          await log1.close()
+        }
+        if (log2) {
+          await log2.close()
+        }
+
+        await ipfs1.stop()
+        await ipfs2.stop()
+
+        process.off('unhandledRejection', handleError)
+      })
+
+      it('does not crash when no listeners are attached to the `error` event on `Sync.events`', async () => {
+        sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
+        sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
+
+        await log1.append('hello1')
+
+        await sync2.start()
+
+        // Be sure to wait long enough for the timeout to cancel the operation with an error
+        await new Promise(resolve => setTimeout(resolve, timeoutTime + 10))
+
+        // Test that no unhandled abort error has been thrown
+        const err = unhandledErrors.find(e => e.code === 'ABORT_ERR')
+        strictEqual(err, undefined)
+      })
+    })
+  }
 
   describe('Timeouts', () => {
     let sync1, sync2
