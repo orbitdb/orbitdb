@@ -58,13 +58,6 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     return hash
   }
 
-  const pinEntry = async (entry) => {
-    /* 6. Add new entry to entries (for pinning) */
-    const { hash, bytes } = await Entry.encode(entry, encryptEntryFn, encryptPayloadFn)
-
-    await _entries.put(hash, bytes)
-  }
-
   const addHead = async (entry) => {
     /* 7. Add the new entry to heads (=union with current heads) */
     await _heads.add(entry)
@@ -82,6 +75,9 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     /* 4. Add missing entries to the index (=to the log) */
     for (const hash of hashes) {
       await _index.put(hash, true)
+      const bytes = await getBytes(hash)
+      /* 5. Add new entry to entries (for pinning) */
+      await _entries.put(hash, bytes)
     }
   }
 
@@ -104,7 +100,6 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     heads,
     setHead,
     addHead,
-    pinEntry,
     removeHeads,
     addVerified,
     storage: _entries,
