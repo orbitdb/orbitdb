@@ -191,7 +191,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         const { signal } = timeoutController
         try {
           peers.add(peerId)
-          const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
+          const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal, runOnLimitedConnection: true })
           await pipe(sendHeads, stream, receiveHeads(peerId))
         } catch (e) {
           peers.delete(peerId)
@@ -276,7 +276,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const startSync = async () => {
     if (!started) {
       // Exchange head entries with peers when connected
-      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
+      await libp2p.handle(headsSyncAddress, handleReceiveHeads, { runOnLimitedConnection: true })
       pubsub.addEventListener('subscription-change', handlePeerSubscribed)
       pubsub.addEventListener('message', handleUpdateMessage)
       // Subscribe to the pubsub channel for this database through which updates are sent
