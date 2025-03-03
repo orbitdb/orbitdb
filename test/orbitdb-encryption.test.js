@@ -1,8 +1,7 @@
 import { strictEqual, notEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import path from 'path'
-import { createOrbitDB, PasswordEncryption } from '../src/index.js'
-// import { encrypt, decrypt, generatePassword } from './utils/encrypt.js'
+import { createOrbitDB } from '../src/index.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import createHelia from './utils/create-helia.js'
@@ -10,6 +9,8 @@ import createHelia from './utils/create-helia.js'
 import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
+
+import CustomEncryption from './fixtures/encryption/custom.js'
 
 const codec = dagCbor
 const hasher = sha256
@@ -35,8 +36,8 @@ describe('Encryption', function () {
     orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: path.join(dbPath, '1') })
     orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: path.join(dbPath, '2') })
 
-    replicationEncryption = await PasswordEncryption({ password: 'hello' })
-    dataEncryption = await PasswordEncryption({ password: 'world' })
+    replicationEncryption = await CustomEncryption()
+    dataEncryption = await CustomEncryption()
   })
 
   after(async () => {
@@ -217,18 +218,18 @@ describe('Encryption', function () {
       let hasError = false
       let error
 
-      const replicationEncryptionWithWrongPassword = await PasswordEncryption({ password: 'olleh' })
+      const replicationEncryptionWithFailure = await CustomEncryption({ fail: true })
 
       const encryption = {
         replication: replicationEncryption
       }
 
-      const encryptionWithWrongPassword = {
-        replication: replicationEncryptionWithWrongPassword
+      const encryptionWithFailure = {
+        replication: replicationEncryptionWithFailure
       }
 
       db1 = await orbitdb1.open('encryption-test-1', { encryption })
-      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithWrongPassword })
+      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithFailure })
 
       const onJoin = async (peerId, heads) => {
         connected = true
@@ -260,18 +261,18 @@ describe('Encryption', function () {
       let hasError = false
       let error
 
-      const dataEncryptionWithWrongPassword = await PasswordEncryption({ password: 'olleh' })
+      const dataEncryptionWithFailure = await CustomEncryption({ fail: true })
 
       const encryption = {
         data: dataEncryption
       }
 
-      const encryptionWithWrongPassword = {
-        data: dataEncryptionWithWrongPassword
+      const encryptionWithFailure = {
+        data: dataEncryptionWithFailure
       }
 
       db1 = await orbitdb1.open('encryption-test-1', { encryption })
-      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithWrongPassword })
+      db2 = await orbitdb2.open(db1.address, { encryption: encryptionWithFailure })
 
       const onJoin = async (peerId, heads) => {
         connected = true

@@ -41,7 +41,3 @@ export {
   MemoryStorage,
   ComposedStorage
 } from './storage/index.js'
-
-export {
-  PasswordEncryption
-} from './encryption/index.js'
