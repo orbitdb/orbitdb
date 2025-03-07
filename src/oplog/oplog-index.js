@@ -75,9 +75,10 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     /* 4. Add missing entries to the index (=to the log) */
     for (const hash of hashes) {
       await _index.put(hash, true)
-      const bytes = await getBytes(hash)
       /* 5. Add new entry to entries (for pinning) */
-      await _entries.put(hash, bytes)
+      if (_entries.persist) {
+        await _entries.persist(hash)
+      }
     }
   }
 
