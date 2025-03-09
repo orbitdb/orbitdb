@@ -307,3 +307,5 @@ These kinds of connectivity configurations are beyond the scope of OrbitDB. To f
 [Databases](./DATABASES.md) covers database management and data entry in more detail.
 
 [Replication](./REPLICATION.md) provides a comprehensive overview of how to perform data replication across multiple peers.
+
+[Replication](./ENCRYPTION.md) discusses database encryption using OrbitDB's modular architecture.
