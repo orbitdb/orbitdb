@@ -4,7 +4,7 @@
  * Database is the base class for OrbitDB data stores and handles all lower
  * level add operations and database sync-ing using IPFS.
  */
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter3'
 import PQueue from 'p-queue'
 import Sync from './sync.js'
 import { Log, Entry } from './oplog/index.js'
