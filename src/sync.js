@@ -1,6 +1,6 @@
 import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
-import { EventEmitter } from 'events'
+import EventEmitter from 'eventemitter3'
 import { TimeoutController } from 'timeout-abort-controller'
 import pathJoin from './utils/path-join.js'
 
