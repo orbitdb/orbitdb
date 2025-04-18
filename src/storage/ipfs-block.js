@@ -41,9 +41,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     const { signal } = new TimeoutController(timeout || DefaultTimeout)
     await ipfs.blockstore.put(cid, data, { signal })
 
-    if (pin && !(await ipfs.pins.isPinned(cid))) {
-      await drain(ipfs.pins.add(cid))
-    }
+    await persist(hash)
   }
 
   const del = async (hash) => {}
@@ -65,6 +63,13 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     }
   }
 
+  const persist = async (hash) => {
+    const cid = CID.parse(hash, base58btc)
+    if (pin && !(await ipfs.pins.isPinned(cid))) {
+      await drain(ipfs.pins.add(cid))
+    }
+  }
+
   const iterator = async function * () {}
 
   const merge = async (other) => {}
@@ -77,6 +82,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     put,
     del,
     get,
+    persist,
     iterator,
     merge,
     clear,
