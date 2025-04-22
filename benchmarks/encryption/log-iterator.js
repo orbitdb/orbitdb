@@ -4,30 +4,8 @@ import CustomEncryption from '../../test/fixtures/encryption/custom.js'
 // import { MemoryStorage, LevelStorage, LRUStorage } from '../src/storage/index.js'
 import { rimraf as rmrf } from 'rimraf'
 
-// State
-let log
-
-// Metrics
-let totalQueries = 0
-let seconds = 0
-let queriesPerSecond = 0
-let lastTenSeconds = 0
-
-// Settings
-const benchmarkDuration = 20 // seconds
-
-const queryLoop = async () => {
-  await log.append(totalQueries.toString(), { referencesCount: 0 })
-  totalQueries++
-  lastTenSeconds++
-  queriesPerSecond++
-  setImmediate(queryLoop)
-}
-
 ;(async () => {
   console.log('Starting benchmark...')
-
-  console.log('Benchmark duration is ' + benchmarkDuration + ' seconds')
 
   await rmrf('./orbitdb')
 
@@ -51,24 +29,37 @@ const queryLoop = async () => {
   const replicationEncryption = await CustomEncryption()
   const dataEncryption = await CustomEncryption()
 
-  log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage, indexStorage, encryption: { replicationEncryption, dataEncryption } })
+  const log = await Log(testIdentity, { logId: 'A', entryStorage, headsStorage, indexStorage, encryption: { replicationEncryption, dataEncryption } })
 
-  // Output metrics at 1 second interval
-  const interval = setInterval(async () => {
-    seconds++
-    if (seconds % 10 === 0) {
-      console.log(`--> Average of ${lastTenSeconds / 10} q/s in the last 10 seconds`)
-      if (lastTenSeconds === 0) throw new Error('Problems!')
-      lastTenSeconds = 0
-    }
-    if (seconds >= benchmarkDuration) {
-      clearInterval(interval)
-      await rmrf('./orbitdb')
-      process.exit(0)
-    }
-    console.log(`${queriesPerSecond} queries per second, ${totalQueries} queries in ${seconds} seconds`)
-    queriesPerSecond = 0
-  }, 1000)
+  const entryCount = 10000
 
-  setImmediate(queryLoop)
+  console.log(`Append ${entryCount} entries`)
+
+  const startTime1 = new Date().getTime()
+  for (let i = 0; i < entryCount; i++) {
+    await log.append(i.toString(), { referencesCount: 0 })
+  }
+  const endTime1 = new Date().getTime()
+  const duration1 = endTime1 - startTime1
+  const operationsPerSecond1 = Math.floor(entryCount / (duration1 / 1000))
+  const millisecondsPerOp1 = duration1 / entryCount
+
+  console.log(`Appending ${entryCount} entries took ${duration1} ms, ${operationsPerSecond1} ops/s, ${millisecondsPerOp1} ms/op`)
+
+  console.log(`Iterate ${entryCount} entries`)
+  const startTime2 = new Date().getTime()
+  const all = []
+  for await (const entry of log.iterator()) {
+    all.unshift(entry)
+  }
+  const endTime2 = new Date().getTime()
+  const duration2 = endTime2 - startTime2
+  const operationsPerSecond2 = Math.floor(entryCount / (duration2 / 1000))
+  const millisecondsPerOp2 = duration2 / entryCount
+
+  console.log(`Iterating ${all.length} entries took ${duration2} ms, ${operationsPerSecond2} ops/s, ${millisecondsPerOp2} ms/op`)
+
+  await rmrf('./orbitdb')
+
+  process.exit(0)
 })()
