@@ -75,3 +75,9 @@ const CustomEncryption = async () => {
 
 export default CustomEncryption
 ```
+
+## Benchmarking
+
+The performance of your encryption module can be measured by comparing your benchmarks against those of OrbitDB.
+
+See [SimpleEncryption](https://github.com/orbitdb/simple-encryption) for a set of [re-usable benchmarks](https://github.com/orbitdb/simple-encryption/tree/main/benchmarks).
