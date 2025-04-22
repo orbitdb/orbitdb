@@ -109,6 +109,7 @@ You can find more advanced topics in our [docs](https://github.com/orbitdb/orbit
 - [Connecting Peers](https://github.com/orbitdb/orbitdb/blob/main/docs/CONNECTING_PEERS.md)
 - [Replication](https://github.com/orbitdb/orbitdb/blob/main/docs/REPLICATION.md)
 - [Oplog](https://github.com/orbitdb/orbitdb/blob/main/docs/OPLOG.md)
+- [Encryption](https://github.com/orbitdb/orbitdb/blob/main/docs/ENCRYPTION.md)
 
 ### API
 
