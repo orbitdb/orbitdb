@@ -28,7 +28,9 @@ const encryption = { replication }
 
 ## Encrypting Databases
 
-OrbitDB provides an simple password-based encryption module called SimpleEncryption.
+OrbitDB provides simple password-based encryption via an external module called [SimpleEncryption](https://github.com/orbitdb/simple-encryption).
+
+**WARNING:** This is an unaudited encryption module. Use at your own risk.
 
 To install SimpleEncryption:
 
