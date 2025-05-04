@@ -2,28 +2,45 @@
 
 OrbitDB features a modular architecture for database encryption. By passing a  module to an OrbitDB database, different encryption methods can be employed.
 
+OrbitDB project currently maintains a [SimpleEncryption](https://github.com/orbitdb/simple-encryption) module that can be used to get started with encrypted databases.
+
+**WARNING:** SimpleEncryption is an unaudited encryption module. Use at your own risk.
+
 ## How it works
 
-OrbitDB encrypts records two ways; encrypting the payload and encrypting the log entry.
+OrbitDB encrypts databases in two layers: encrypting the payload and encrypting the log entry.
 
-Log entry encryption only encrypts the value of the payload. Payload encryption encrypts the entire payload, which includes the value, codec and hasher.
+Log entry encryption encrypts each log entry fully. Payload encryption encrypts just the value.
+
+This makes it possible to separate users of a database and replicators of a database, ie. an orbitdb peer can replicate a database without being able to decrypt the payloads (=data) of the database.
 
 ## Configuring encryption
 
-You can configure OrbitDB to encrypt either the entry being stored or the entire block being replicated.
+You can configure OrbitDB to encrypt either the payload data being stored or the entire database.
 
-To encrypt data only, specify an encryption module and pass it to the encryption object using the `data` variable:
+To ***encrypt payload data only***, specify an encryption module and pass it to OtbiDB via the encryption object using the `data` property:
 
 ```
 const data = await EncryptionModule()
 const encryption = { data }
+const db = await orbitdb.open(dbNameOrAddress, { encryption })
 ```
 
-To encrypt data only, specify an encryption module and pass it to the encryption object using the `replication` variable:
+To ***encrypt the database log entries***, specify an encryption module and pass it to OrbitDB via the encryption object using the `replication` property:
 
 ```
 const replication = await EncryptionModule()
 const encryption = { replication }
+const db = await orbitdb.open(dbNameOrAddress, { encryption })
+```
+
+To ***encrypt the whole database***, payload data and oplog entries separately, specify an encryption module and pass it to OrbitDB via the encryption object using both the `replication` and `data` properties:
+
+```
+const replication = await EncryptionModule()
+const data = await EncryptionModule()
+const encryption = { replication, data }
+const db = await orbitdb.open(dbNameOrAddress, { encryption })
 ```
 
 ## Encrypting Databases
@@ -38,7 +55,7 @@ To install SimpleEncryption:
 npm i @orbitdb/simple-encryption
 ```
 
-To implement encryption, initiate SimpleEncryption and pass it when opening your database:
+To use encryption, initiate SimpleEncryption with a password and pass it to OrbitDB when opening your database:
 
 ```js
 import { SimpleEncryption } from '@orbitdb/simple-encryption'
@@ -75,9 +92,3 @@ const CustomEncryption = async () => {
 
 export default CustomEncryption
 ```
-
-## Benchmarking
-
-The performance of your encryption module can be measured by comparing your benchmarks against those of OrbitDB.
-
-See [SimpleEncryption](https://github.com/orbitdb/simple-encryption) for a set of [re-usable benchmarks](https://github.com/orbitdb/simple-encryption/tree/main/benchmarks).
