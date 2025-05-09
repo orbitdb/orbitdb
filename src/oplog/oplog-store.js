@@ -5,7 +5,7 @@ import MemoryStorage from '../storage/memory.js'
 // Default storage for storing the Log and its entries. Default: Memory. Options: Memory, LRU, IPFS.
 const DefaultStorage = MemoryStorage
 
-const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, encryption }) => {
+const OplogStore = async ({ logHeads, entryStorage, headsStorage, indexStorage, encryption }) => {
   // Setup encryption and decryption functions
   const encryptEntryFn = encryption?.replication?.encrypt
   const decryptEntryFn = encryption?.replication?.decrypt
@@ -49,7 +49,7 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
   const setHead = async (entry) => {
     const { hash, bytes } = await Entry.encode(entry, encryptEntryFn, encryptPayloadFn)
     // The appended entry is now the latest head
-    await _heads.set([{ hash, ...entry }])
+    await _heads.set([{ hash, next: entry.next }])
     // Add entry to the entry storage
     await _entries.put(hash, bytes)
     // Add entry to the entry index
@@ -109,4 +109,4 @@ const OplogIndex = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
   }
 }
 
-export default OplogIndex
+export default OplogStore

@@ -11,7 +11,7 @@ import PQueue from 'p-queue'
 import Entry from './entry.js'
 import Clock, { tickClock } from './clock.js'
 import ConflictResolution from './conflict-resolution.js'
-import OplogIndex from './oplog-index.js'
+import OplogStore from './oplog-store.js'
 
 const { LastWriteWins, NoZeroes } = ConflictResolution
 
@@ -76,7 +76,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   access = access || await DefaultAccessController()
 
   // Index and storage of entries for this Log
-  const index = await OplogIndex({ logHeads, entryStorage, indexStorage, headsStorage, encryption })
+  const oplogStore = await OplogStore({ logHeads, entryStorage, indexStorage, headsStorage, encryption })
 
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
@@ -105,7 +105,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const heads = async () => {
-    const heads_ = await index.heads()
+    const heads_ = await oplogStore.heads()
     return heads_.sort(sortFn).reverse()
   }
 
@@ -136,11 +136,11 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (!hash) {
       throw new Error('hash is required')
     }
-    return index.get(hash)
+    return oplogStore.get(hash)
   }
 
   const has = async (hash) => {
-    return index.has(hash)
+    return oplogStore.has(hash)
   }
 
   /**
@@ -185,8 +185,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
         throw new Error(`Could not append entry:\nKey "${identity.hash}" is not allowed to write to the log`)
       }
 
-      // Add the entry to the index (=store and index it)
-      const hash = await index.setHead(entry)
+      // Add the entry to the oplog store (=store and index it)
+      const hash = await oplogStore.setHead(entry)
 
       // Return the appended entry
       return { ...entry, hash }
@@ -216,7 +216,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (!isLog(log)) {
       throw new Error('Given argument is not an instance of Log')
     }
-    await index.storage.merge(log.storage)
+    await oplogStore.storage.merge(log.storage)
     const heads = await log.heads()
     for (const entry of heads) {
       await joinEntry(entry)
@@ -298,13 +298,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
       await traverseAndVerify()
 
-      /* 4. Add missing entries to the index (=to the log) */
-      /* 5. Add new entry to entries (for pinning) */
-      await index.addVerified(hashesToAdd.values())
+      /* 4. Add missing entries to the oplog store (=to the log) */
+      await oplogStore.addVerified(hashesToAdd.values())
       /* 6. Remove heads which new entries are connect to */
-      await index.removeHeads(connectedHeads.values())
+      await oplogStore.removeHeads(connectedHeads.values())
       /* 7. Add the new entry to heads (=union with current heads) */
-      await index.addHead(entry)
+      await oplogStore.addHead(entry)
 
       return true
     }
@@ -489,7 +488,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const clear = async () => {
-    await index.clear()
+    await oplogStore.clear()
   }
 
   /**
@@ -498,7 +497,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const close = async () => {
-    await index.close()
+    await oplogStore.close()
   }
 
   /**
@@ -554,7 +553,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     close,
     access,
     identity,
-    storage: index.storage,
+    storage: oplogStore.storage,
     encryption
   }
 }
