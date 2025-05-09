@@ -14,16 +14,8 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
 
   const put = async (heads) => {
     heads = findHeads(heads)
-    for (const head of heads) {
-      // Store the entry's hash and nexts
-      await storage.put(head.hash, head.next)
-    }
-  }
-
-  const set = async (heads) => {
-    // TODO: fix storage write fluctuation
-    await storage.clear()
-    await put(heads)
+    const newHeads = heads.map(e => ({ hash: e.hash, next: e.next }))
+    await storage.put('heads', JSON.stringify(newHeads))
   }
 
   const add = async (head) => {
@@ -32,20 +24,21 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
       return
     }
     const newHeads = findHeads([...currentHeads, head])
-    await set(newHeads)
+    await put(newHeads)
     return newHeads
   }
 
   const remove = async (hash) => {
     const currentHeads = await all()
     const newHeads = currentHeads.filter(e => e.hash !== hash)
-    await set(newHeads)
+    await put(newHeads)
   }
 
   const iterator = async function * () {
-    const it = storage.iterator()
-    for await (const [hash, next] of it) {
-      yield { hash, next }
+    const e = await storage.get('heads')
+    const headHashes = e ? JSON.parse(e) : []
+    for (const hash of headHashes) {
+      yield hash
     }
   }
 
@@ -66,11 +59,13 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
   }
 
   // Initialize the heads if given as parameter
-  await put(heads || [])
+  if (heads) {
+    await put(heads)
+  }
 
   return {
     put,
-    set,
+    set: put,
     add,
     remove,
     iterator,
