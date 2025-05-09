@@ -138,7 +138,6 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
       return entry.hash
     }
     const hash = await queue.add(task)
-    await queue.onIdle()
     return hash
   }
 

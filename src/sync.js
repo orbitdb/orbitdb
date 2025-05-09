@@ -262,7 +262,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const stopSync = async () => {
     if (started) {
       started = false
-      await queue.onIdle()
+      await queue.clear()
       pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
       pubsub.removeEventListener('message', handleUpdateMessage)
       await libp2p.unhandle(headsSyncAddress)

@@ -1,4 +1,4 @@
-import { strictEqual, deepStrictEqual, notEqual } from 'assert'
+import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
 import { copy } from 'fs-extra'
@@ -74,6 +74,7 @@ describe('Database', function () {
 
       await db.addOperation(op1)
       const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
       const headsPath = Path.join('./orbitdb/', `${databaseId}/`, '/log/_heads/')
 
@@ -82,10 +83,13 @@ describe('Database', function () {
       await db.close()
 
       const headsStorage = await LevelStorage({ path: headsPath })
+      const e = await headsStorage.get('heads')
+      const heads = e ? JSON.parse(e) : []
 
-      const bytes = Uint8Array.from(await headsStorage.get(hash))
-
-      notEqual(bytes.length, 0)
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await headsStorage.close()
 
@@ -99,6 +103,7 @@ describe('Database', function () {
 
       await db.addOperation(op1)
       const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
       const headsPath = Path.join('./custom-directory/', `${databaseId}/`, '/log/_heads/')
 
@@ -108,9 +113,13 @@ describe('Database', function () {
 
       const headsStorage = await LevelStorage({ path: headsPath })
 
-      const bytes = Uint8Array.from(await headsStorage.get(hash))
+      const e = await headsStorage.get('heads')
+      const heads = e ? JSON.parse(e) : []
 
-      notEqual(bytes.length, 0)
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await headsStorage.close()
 
@@ -126,10 +135,15 @@ describe('Database', function () {
 
       await db.addOperation(op1)
       const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
-      const bytes = Uint8Array.from(await headsStorage.get(hash))
+      const e = await headsStorage.get('heads')
+      const heads = e ? JSON.parse(e) : []
 
-      notEqual(bytes.length, 0)
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await db.close()
 
@@ -146,10 +160,15 @@ describe('Database', function () {
 
       await db.addOperation(op1)
       const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
-      const e = await entryStorage.get(hash)
-      const bytes = Uint8Array.from(e)
-      notEqual(bytes.length, 0)
+      const e = await headsStorage.get('heads')
+      const heads = e ? JSON.parse(e) : []
+
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await db.close()
 
