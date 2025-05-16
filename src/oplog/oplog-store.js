@@ -48,12 +48,12 @@ const OplogStore = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
 
   const setHead = async (entry) => {
     const { hash, bytes } = await Entry.encode(entry, encryptEntryFn, encryptPayloadFn)
-    // The appended entry is now the latest head
-    await _heads.set([{ hash, next: entry.next }])
     // Add entry to the entry storage
     await _entries.put(hash, bytes)
     // Add entry to the entry index
     await _index.put(hash, true)
+    // The appended entry is now the latest head
+    await _heads.set([{ hash, next: entry.next }])
 
     return hash
   }
