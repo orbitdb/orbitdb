@@ -488,6 +488,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const clear = async () => {
+    await appendQueue.clear()
+    await joinQueue.clear()
     await oplogStore.clear()
   }
 
@@ -497,6 +499,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const close = async () => {
+    await appendQueue.onIdle()
+    await joinQueue.onIdle()
     await oplogStore.close()
   }
 

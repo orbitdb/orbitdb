@@ -183,7 +183,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
    * @async
    */
   const drop = async () => {
-    await queue.onIdle()
+    await queue.clear()
     await log.clear()
     if (access && access.drop) {
       await access.drop()

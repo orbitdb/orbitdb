@@ -319,7 +319,8 @@ describe('KeyValueIndexed Database Replication', function () {
     ])
   })
 
-  it.only('indexes deletes correctly', async () => {
+  it('indexes deletes correctly', async () => {
+    const databaseId = 'kv-CCC'
     let replicated = false
     let err
 
