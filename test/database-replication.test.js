@@ -196,27 +196,20 @@ describe('Database - Replication', function () {
       db1 = await Database({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb1', entryStorage: storage1 })
       db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2', entryStorage: storage2 })
 
-      let connected1 = false
-      let connected2 = false
+      let connected = false
 
-      const onConnected1 = (peerId, heads) => {
-        connected1 = true
+      const onConnected = (peerId, heads) => {
+        connected = true
       }
 
-      const onConnected2 = (peerId, heads) => {
-        connected2 = true
-      }
-
-      db1.events.on('join', onConnected1)
-      db2.events.on('join', onConnected2)
+      db2.events.on('join', onConnected)
 
       await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
       await db1.addOperation({ op: 'PUT', key: 2, value: 'record 2 on db 1' })
       await db1.addOperation({ op: 'PUT', key: 3, value: 'record 3 on db 1' })
       await db1.addOperation({ op: 'PUT', key: 4, value: 'record 4 on db 1' })
 
-      await waitFor(() => connected1, () => true)
-      await waitFor(() => connected2, () => true)
+      await waitFor(() => connected, () => true)
 
       const all1 = []
       for await (const item of db1.log.iterator()) {

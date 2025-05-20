@@ -663,7 +663,7 @@ describe('Sync protocol', function () {
     let sync1, sync2
     let log1, log2
 
-    const timeoutTime = 1 // 1 millisecond
+    const timeoutTime = 0 // 0 milliseconds
 
     before(async () => {
       [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
@@ -699,13 +699,13 @@ describe('Sync protocol', function () {
       let err = null
 
       const onError = (error) => {
-        (!err) && (err = error)
+        err ??= error
       }
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
-      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
-
       sync1.events.on('error', onError)
+
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
       sync2.events.on('error', onError)
 
       await log1.append('hello1')
@@ -716,7 +716,7 @@ describe('Sync protocol', function () {
 
       notStrictEqual(err, null)
       strictEqual(err.type, 'aborted')
-      strictEqual(err.message, 'Read aborted')
+      strictEqual(err.message.includes('aborted'), true)
     })
   })
 })

@@ -135,7 +135,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   events = events || new EventEmitter()
 
-  timeout = timeout || DefaultTimeout
+  timeout ??= DefaultTimeout
 
   let started = false
 
@@ -280,12 +280,12 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   const startSync = async () => {
     if (!started) {
-      // Exchange head entries with peers when connected
-      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       pubsub.addEventListener('subscription-change', handlePeerSubscribed)
       pubsub.addEventListener('message', handleUpdateMessage)
       // Subscribe to the pubsub channel for this database through which updates are sent
       await pubsub.subscribe(address)
+      // Exchange head entries with peers when connected
+      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
       libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
       started = true
