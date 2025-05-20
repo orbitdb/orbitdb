@@ -12,10 +12,14 @@ const DefaultStorage = MemoryStorage
 const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
   storage = storage || await DefaultStorage()
 
+  const encoder = new TextEncoder()
+  const decoder = new TextDecoder()
+
   const put = async (heads) => {
     heads = findHeads(heads)
     const newHeads = heads.map(e => ({ hash: e.hash, next: e.next }))
-    await storage.put('heads', JSON.stringify(newHeads))
+    const bytes = encoder.encode(JSON.stringify(newHeads))
+    await storage.put('heads', bytes)
   }
 
   const add = async (head) => {
@@ -35,8 +39,8 @@ const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
   }
 
   const iterator = async function * () {
-    const e = await storage.get('heads')
-    const headHashes = e ? JSON.parse(e) : []
+    const bytes = await storage.get('heads')
+    const headHashes = bytes ? JSON.parse(decoder.decode(bytes)) : []
     for (const hash of headHashes) {
       yield hash
     }

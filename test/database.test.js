@@ -83,8 +83,8 @@ describe('Database', function () {
       await db.close()
 
       const headsStorage = await LevelStorage({ path: headsPath })
-      const e = await headsStorage.get('heads')
-      const heads = e ? JSON.parse(e) : []
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
 
       strictEqual(heads.length, 1)
       strictEqual(heads.at(0).hash, hash)
@@ -113,8 +113,8 @@ describe('Database', function () {
 
       const headsStorage = await LevelStorage({ path: headsPath })
 
-      const e = await headsStorage.get('heads')
-      const heads = e ? JSON.parse(e) : []
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
 
       strictEqual(heads.length, 1)
       strictEqual(heads.at(0).hash, hash)
@@ -137,8 +137,8 @@ describe('Database', function () {
       const hash = await db.addOperation(op2)
       const entry = await db.log.get(hash)
 
-      const e = await headsStorage.get('heads')
-      const heads = e ? JSON.parse(e) : []
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
 
       strictEqual(heads.length, 1)
       strictEqual(heads.at(0).hash, hash)
@@ -162,8 +162,8 @@ describe('Database', function () {
       const hash = await db.addOperation(op2)
       const entry = await db.log.get(hash)
 
-      const e = await headsStorage.get('heads')
-      const heads = e ? JSON.parse(e) : []
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
 
       strictEqual(heads.length, 1)
       strictEqual(heads.at(0).hash, hash)

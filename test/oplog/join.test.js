@@ -760,7 +760,7 @@ describe('Log - Join', async function () {
 
       await log1.storage.merge(log0.storage)
 
-      await headsStorage1.put('heads', JSON.stringify([{ hash: e0.hash, next: e0.next }]))
+      await headsStorage1.put('heads', new TextEncoder().encode(JSON.stringify([{ hash: e0.hash, next: e0.next }])))
 
       await log1.append('hello1')
       await log1.append('hello2')
