@@ -10,7 +10,7 @@ import * as Block from 'multiformats/block'
 import * as dagCbor from '@ipld/dag-cbor'
 import { sha256 } from 'multiformats/hashes/sha2'
 
-import CustomEncryption from './fixtures/encryption/custom.js'
+import SimpleEncryption from '@orbitdb/simple-encryption'
 
 const codec = dagCbor
 const hasher = sha256
@@ -36,8 +36,8 @@ describe('Encryption', function () {
     orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1', directory: path.join(dbPath, '1') })
     orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'user2', directory: path.join(dbPath, '2') })
 
-    replicationEncryption = await CustomEncryption()
-    dataEncryption = await CustomEncryption()
+    replicationEncryption = await SimpleEncryption({ password: 'hello' })
+    dataEncryption = await SimpleEncryption({ password: 'world' })
   })
 
   after(async () => {
@@ -218,7 +218,7 @@ describe('Encryption', function () {
       let hasError = false
       let error
 
-      const replicationEncryptionWithFailure = await CustomEncryption({ fail: true })
+      const replicationEncryptionWithFailure = await SimpleEncryption({ password: 'goodbye' })
 
       const encryption = {
         replication: replicationEncryption
@@ -261,7 +261,7 @@ describe('Encryption', function () {
       let hasError = false
       let error
 
-      const dataEncryptionWithFailure = await CustomEncryption({ fail: true })
+      const dataEncryptionWithFailure = await SimpleEncryption({ password: 'goodbye' })
 
       const encryption = {
         data: dataEncryption
