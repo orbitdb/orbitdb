@@ -31,7 +31,7 @@
   "devDependencies": {
     "@chainsafe/libp2p-gossipsub": "^14.1.0",
     "@libp2p/circuit-relay-v2": "^3.1.0",
-    "@orbitdb/simple-encryption": "github:orbitdb/simple-encryption",
+    "@orbitdb/simple-encryption": "^0.0.1",
     "blockstore-level": "^2.0.1",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
