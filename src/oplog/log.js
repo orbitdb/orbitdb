@@ -10,17 +10,13 @@ import LRU from 'lru'
 import PQueue from 'p-queue'
 import Entry from './entry.js'
 import Clock, { tickClock } from './clock.js'
-import Heads from './heads.js'
 import ConflictResolution from './conflict-resolution.js'
-import MemoryStorage from '../storage/memory.js'
+import OplogStore from './oplog-store.js'
 
 const { LastWriteWins, NoZeroes } = ConflictResolution
 
 const randomId = () => new Date().getTime().toString()
 const maxClockTimeReducer = (res, acc) => Math.max(res, acc.clock.time)
-
-// Default storage for storing the Log and its entries. Default: Memory. Options: Memory, LRU, IPFS.
-const DefaultStorage = MemoryStorage
 
 // Default AccessController for the Log.
 // Default policy is that anyone can write to the Log.
@@ -56,7 +52,7 @@ const DefaultAccessController = async () => {
  * @memberof module:Log
  * @instance
  */
-const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn } = {}) => {
+const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn, encryption } = {}) => {
   /**
    * @namespace Log
    * @description The instance returned by {@link module:Log}
@@ -68,20 +64,23 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   if (logHeads != null && !Array.isArray(logHeads)) {
     throw new Error('\'logHeads\' argument must be an array')
   }
+
   // Set Log's id
   const id = logId || randomId()
+
+  // Encryption of entries and payloads
+  encryption = encryption || {}
+  const encryptPayloadFn = encryption.data?.encrypt
+
   // Access Controller
   access = access || await DefaultAccessController()
-  // Oplog entry storage
-  const _entries = entryStorage || await DefaultStorage()
-  // Entry index for keeping track which entries are already in the log
-  const _index = indexStorage || await DefaultStorage()
-  // Heads storage
-  headsStorage = headsStorage || await DefaultStorage()
-  // Add heads to the state storage, ie. init the log state
-  const _heads = await Heads({ storage: headsStorage, heads: logHeads })
+
+  // Index and storage of entries for this Log
+  const oplogStore = await OplogStore({ logHeads, entryStorage, indexStorage, headsStorage, encryption })
+
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
+
   // Internal queues for processing appends and joins in their call-order
   const appendQueue = new PQueue({ concurrency: 1 })
   const joinQueue = new PQueue({ concurrency: 1 })
@@ -106,8 +105,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const heads = async () => {
-    const res = await _heads.all()
-    return res.sort(sortFn).reverse()
+    const heads_ = await oplogStore.heads()
+    return heads_.sort(sortFn).reverse()
   }
 
   /**
@@ -134,16 +133,14 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const get = async (hash) => {
-    const bytes = await _entries.get(hash)
-    if (bytes) {
-      const entry = await Entry.decode(bytes)
-      return entry
+    if (!hash) {
+      throw new Error('hash is required')
     }
+    return oplogStore.get(hash)
   }
 
   const has = async (hash) => {
-    const entry = await _index.get(hash)
-    return entry != null
+    return oplogStore.has(hash)
   }
 
   /**
@@ -162,6 +159,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // 2. Authorize entry
       // 3. Store entry
       // 4. return Entry
+
       // Get current heads of the log
       const heads_ = await heads()
       // Create the next pointers from heads
@@ -169,29 +167,29 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
       // Get references (pointers) to multiple entries in the past
       // (skips the heads which are covered by the next field)
       const refs = await getReferences(heads_, options.referencesCount + heads_.length)
+
       // Create the entry
       const entry = await Entry.create(
         identity,
         id,
         data,
+        encryptPayloadFn,
         tickClock(await clock()),
         nexts,
         refs
       )
+
       // Authorize the entry
       const canAppend = await access.canAppend(entry)
       if (!canAppend) {
         throw new Error(`Could not append entry:\nKey "${identity.hash}" is not allowed to write to the log`)
       }
 
-      // The appended entry is now the latest head
-      await _heads.set([entry])
-      // Add entry to the entry storage
-      await _entries.put(entry.hash, entry.bytes)
-      // Add entry to the entry index
-      await _index.put(entry.hash, true)
+      // Add the entry to the oplog store (=store and index it)
+      const hash = await oplogStore.setHead(entry)
+
       // Return the appended entry
-      return entry
+      return { ...entry, hash }
     }
 
     return appendQueue.add(task)
@@ -218,9 +216,7 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     if (!isLog(log)) {
       throw new Error('Given argument is not an instance of Log')
     }
-    if (_entries.merge) {
-      await _entries.merge(log.storage)
-    }
+    await oplogStore.storage.merge(log.storage)
     const heads = await log.heads()
     for (const entry of heads) {
       await joinEntry(entry)
@@ -302,21 +298,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
       await traverseAndVerify()
 
-      /* 4. Add missing entries to the index (=to the log) */
-      for (const hash of hashesToAdd.values()) {
-        await _index.put(hash, true)
-      }
-
-      /* 5. Remove heads which new entries are connect to */
-      for (const hash of connectedHeads.values()) {
-        await _heads.remove(hash)
-      }
-
-      /* 6. Add new entry to entries (for pinning) */
-      await _entries.put(entry.hash, entry.bytes)
-
-      /* 6. Add the new entry to heads (=union with current heads) */
-      await _heads.add(entry)
+      /* 4. Add missing entries to the oplog store (=to the log) */
+      await oplogStore.addVerified(hashesToAdd.values())
+      /* 6. Remove heads which new entries are connect to */
+      await oplogStore.removeHeads(connectedHeads.values())
+      /* 7. Add the new entry to heads (=union with current heads) */
+      await oplogStore.addHead(entry)
 
       return true
     }
@@ -501,9 +488,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const clear = async () => {
-    await _index.clear()
-    await _heads.clear()
-    await _entries.clear()
+    await appendQueue.clear()
+    await joinQueue.clear()
+    await oplogStore.clear()
   }
 
   /**
@@ -512,9 +499,9 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
    * @instance
    */
   const close = async () => {
-    await _index.close()
-    await _heads.close()
-    await _entries.close()
+    await appendQueue.onIdle()
+    await joinQueue.onIdle()
+    await oplogStore.close()
   }
 
   /**
@@ -570,7 +557,8 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     close,
     access,
     identity,
-    storage: _entries
+    storage: oplogStore.storage,
+    encryption
   }
 }
 

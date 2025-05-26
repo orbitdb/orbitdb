@@ -139,8 +139,7 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog111', entryStorage: entryStorage1 })
       log2 = await Log(testIdentity2, { logId: 'synclog111', entryStorage: entryStorage2 })
 
-      const onSynced = async (bytes) => {
-        const entry = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
         if (await log2.joinEntry(entry)) {
           syncedHead = entry
           syncedEventFired = true
@@ -207,8 +206,7 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog7', entryStorage: entryStorage1 })
       log2 = await Log(testIdentity2, { logId: 'synclog7', entryStorage: entryStorage2 })
 
-      const onSynced = async (bytes) => {
-        const entry = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
         if (await log2.joinEntry(entry)) {
           syncedHead = entry
         }
@@ -291,8 +289,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         syncedEventFired = expectedEntry.hash === syncedHead.hash
       }
 
@@ -348,8 +346,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         if (expectedEntry) {
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
@@ -434,9 +432,9 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
-      const onSynced = async (bytes) => {
+      const onSynced = async (entry) => {
         if (expectedEntry && !syncedEventFired) {
-          syncedHead = await Entry.decode(bytes)
+          syncedHead = entry
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
       }
@@ -518,8 +516,8 @@ describe('Sync protocol', function () {
       log1 = await Log(testIdentity1, { logId: 'synclog2' })
       log2 = await Log(testIdentity2, { logId: 'synclog2' })
 
-      const onSynced = async (bytes) => {
-        syncedHead = await Entry.decode(bytes)
+      const onSynced = async (entry) => {
+        syncedHead = entry
         if (expectedEntry) {
           syncedEventFired = expectedEntry ? expectedEntry.hash === syncedHead.hash : false
         }
@@ -665,7 +663,7 @@ describe('Sync protocol', function () {
     let sync1, sync2
     let log1, log2
 
-    const timeoutTime = 1 // 1 millisecond
+    const timeoutTime = 0 // 0 milliseconds
 
     before(async () => {
       [ipfs1, ipfs2] = await Promise.all([createHelia(), createHelia()])
@@ -701,13 +699,13 @@ describe('Sync protocol', function () {
       let err = null
 
       const onError = (error) => {
-        (!err) && (err = error)
+        err ??= error
       }
 
       sync1 = await Sync({ ipfs: ipfs1, log: log1, timeout: timeoutTime })
-      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
-
       sync1.events.on('error', onError)
+
+      sync2 = await Sync({ ipfs: ipfs2, log: log2, start: false, timeout: timeoutTime })
       sync2.events.on('error', onError)
 
       await log1.append('hello1')
@@ -718,7 +716,7 @@ describe('Sync protocol', function () {
 
       notStrictEqual(err, null)
       strictEqual(err.type, 'aborted')
-      strictEqual(err.message, 'Read aborted')
+      strictEqual(err.message.includes('aborted'), true)
     })
   })
 })

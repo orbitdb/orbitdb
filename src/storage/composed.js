@@ -114,6 +114,16 @@ const ComposedStorage = async (storage1, storage2) => {
     await storage2.clear()
   }
 
+  const persist = async (hash) => {
+    if (storage1.persist) {
+      await storage1.persist(hash)
+    }
+
+    if (storage2.persist) {
+      await storage2.persist(hash)
+    }
+  }
+
   /**
    * Calls close on each of the composed storages.
    * @function
@@ -129,6 +139,7 @@ const ComposedStorage = async (storage1, storage2) => {
     put,
     get,
     del,
+    persist,
     iterator,
     merge,
     clear,

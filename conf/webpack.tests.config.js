@@ -38,6 +38,8 @@ export default (env, argv) => {
       ],
       fallback: {
         path: require.resolve('path-browserify'),
+        crypto: false,
+        stream: require.resolve('stream-browserify'),
         process: false
       }
     },

@@ -1,7 +1,7 @@
 import { strictEqual, notStrictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import { Log, Entry, Identities, KeyStore } from '../../src/index.js'
+import { Log, Identities, KeyStore } from '../../src/index.js'
 import { Clock } from '../../src/oplog/log.js'
 import { MemoryStorage } from '../../src/storage/index.js'
 import testKeysPath from '../fixtures/test-keys-path.js'
@@ -760,7 +760,7 @@ describe('Log - Join', async function () {
 
       await log1.storage.merge(log0.storage)
 
-      await headsStorage1.put(e0.hash, e0.bytes)
+      await headsStorage1.put('heads', new TextEncoder().encode(JSON.stringify([{ hash: e0.hash, next: e0.next }])))
 
       await log1.append('hello1')
       await log1.append('hello2')
@@ -863,7 +863,7 @@ describe('Log - Join', async function () {
   })
 
   describe('throws an error if verification of an entry in given entry\'s history fails', async () => {
-    let e1, e3
+    let e1
     let headsStorage1, headsStorage2
 
     before(async () => {
@@ -875,23 +875,19 @@ describe('Log - Join', async function () {
 
       e1 = await log1.append('hello1')
       await log1.append('hello2')
-      e3 = await log1.append('hello3')
+      await log1.append('hello3')
     })
 
     it('throws an error if an entry doesn\'t have a payload field', async () => {
       const e = Object.assign({}, e1)
       delete e.payload
 
-      delete e.bytes
-      delete e.hash
-      const ee = await Entry.encode(e)
-
-      await headsStorage1.put(e1.hash, ee.bytes)
+      await headsStorage1.put('heads', JSON.stringify([{ hash: e1.hash, next: e1.next }]))
       await log2.storage.merge(headsStorage1)
 
       let err
       try {
-        await log2.joinEntry(e3)
+        await log2.joinEntry(e)
       } catch (e) {
         err = e
       }
@@ -906,16 +902,12 @@ describe('Log - Join', async function () {
       const e = Object.assign({}, e1)
       delete e.key
 
-      delete e.bytes
-      delete e.hash
-      const ee = await Entry.encode(e)
-
-      await headsStorage1.put(e1.hash, ee.bytes)
+      await headsStorage1.put('heads', JSON.stringify([{ hash: e1.hash, next: e1.next }]))
       await log2.storage.merge(headsStorage1)
 
       let err
       try {
-        await log2.joinEntry(e3)
+        await log2.joinEntry(e)
       } catch (e) {
         err = e
       }
@@ -930,16 +922,12 @@ describe('Log - Join', async function () {
       const e = Object.assign({}, e1)
       delete e.sig
 
-      delete e.bytes
-      delete e.hash
-      const ee = await Entry.encode(e)
-
-      await headsStorage1.put(e1.hash, ee.bytes)
+      await headsStorage1.put('heads', JSON.stringify([{ hash: e1.hash, next: e1.next }]))
       await log2.storage.merge(headsStorage1)
 
       let err
       try {
-        await log2.joinEntry(e3)
+        await log2.joinEntry(e)
       } catch (e) {
         err = e
       }
@@ -953,22 +941,19 @@ describe('Log - Join', async function () {
     it('throws an error if an entry signature doesn\'t verify', async () => {
       const e = Object.assign({}, e1)
       e.sig = '1234567890'
-      delete e.bytes
-      delete e.hash
-      const ee = await Entry.encode(e)
 
-      await headsStorage1.put(e1.hash, ee.bytes)
+      await headsStorage1.put('heads', JSON.stringify([{ hash: e1.hash, next: e1.next }]))
       await log2.storage.merge(headsStorage1)
 
       let err
       try {
-        await log2.joinEntry(e3)
+        await log2.joinEntry(e)
       } catch (e) {
         err = e
       }
 
       notStrictEqual(err, undefined)
-      strictEqual(err.message, 'Could not validate signature for entry "zdpuAvkAJ8C46cnGdtFpcBratA5MqK7CcjqCJjjmuKuFvZir3"')
+      strictEqual(err.message, 'Could not validate signature for entry "zdpuAxyE4ScWLf4X6VvkhMrpDQvwdvQno1DhzY5p1U3GPHrBT"')
       deepStrictEqual(await log2.all(), [])
       deepStrictEqual(await log2.heads(), [])
     })

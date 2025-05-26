@@ -3,6 +3,7 @@ import PQueue from 'p-queue'
 import { EventEmitter } from 'events'
 import { TimeoutController } from 'timeout-abort-controller'
 import pathJoin from './utils/path-join.js'
+import { Entry } from './oplog/index.js'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -134,7 +135,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   events = events || new EventEmitter()
 
-  timeout = timeout || DefaultTimeout
+  timeout ??= DefaultTimeout
 
   let started = false
 
@@ -146,7 +147,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const sendHeads = (source) => {
     return (async function * () {
       const heads = await log.heads()
-      for await (const { bytes } of heads) {
+      for await (const { hash } of heads) {
+        const bytes = await log.storage.get(hash)
         yield bytes
       }
     })()
@@ -156,7 +158,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     for await (const value of source) {
       const headBytes = value.subarray()
       if (headBytes && onSynced) {
-        await onSynced(headBytes)
+        const entry = await Entry.decode(headBytes, log.encryption.replication?.decrypt, log.encryption.data?.decrypt)
+        await onSynced(entry)
       }
     }
     if (started) {
@@ -219,7 +222,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     const task = async () => {
       try {
         if (data && onSynced) {
-          await onSynced(data)
+          const entry = await Entry.decode(data, log.encryption.replication?.decrypt, log.encryption.data?.decrypt)
+          await onSynced(entry)
         }
       } catch (e) {
         events.emit('error', e)
@@ -243,8 +247,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    * @instance
    */
   const add = async (entry) => {
-    if (started) {
-      await pubsub.publish(address, entry.bytes)
+    if (started && entry && entry.hash) {
+      const bytes = await log.storage.get(entry.hash)
+      await pubsub.publish(address, bytes)
     }
   }
 
@@ -257,7 +262,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const stopSync = async () => {
     if (started) {
       started = false
-      await queue.onIdle()
+      await queue.clear()
       pubsub.removeEventListener('subscription-change', handlePeerSubscribed)
       pubsub.removeEventListener('message', handleUpdateMessage)
       await libp2p.unhandle(headsSyncAddress)
@@ -275,12 +280,12 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
    */
   const startSync = async () => {
     if (!started) {
-      // Exchange head entries with peers when connected
-      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       pubsub.addEventListener('subscription-change', handlePeerSubscribed)
       pubsub.addEventListener('message', handleUpdateMessage)
       // Subscribe to the pubsub channel for this database through which updates are sent
       await pubsub.subscribe(address)
+      // Exchange head entries with peers when connected
+      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
       libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
       started = true

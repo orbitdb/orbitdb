@@ -9,19 +9,17 @@ import MemoryStorage from '../storage/memory.js'
 
 const DefaultStorage = MemoryStorage
 
-const Heads = async ({ storage, heads }) => {
+const Heads = async ({ storage, heads, decryptPayloadFn, decryptEntryFn }) => {
   storage = storage || await DefaultStorage()
+
+  const encoder = new TextEncoder()
+  const decoder = new TextDecoder()
 
   const put = async (heads) => {
     heads = findHeads(heads)
-    for (const head of heads) {
-      await storage.put(head.hash, head.bytes)
-    }
-  }
-
-  const set = async (heads) => {
-    await storage.clear()
-    await put(heads)
+    const newHeads = heads.map(e => ({ hash: e.hash, next: e.next }))
+    const bytes = encoder.encode(JSON.stringify(newHeads))
+    await storage.put('heads', bytes)
   }
 
   const add = async (head) => {
@@ -30,22 +28,21 @@ const Heads = async ({ storage, heads }) => {
       return
     }
     const newHeads = findHeads([...currentHeads, head])
-    await set(newHeads)
-
+    await put(newHeads)
     return newHeads
   }
 
   const remove = async (hash) => {
     const currentHeads = await all()
     const newHeads = currentHeads.filter(e => e.hash !== hash)
-    await set(newHeads)
+    await put(newHeads)
   }
 
   const iterator = async function * () {
-    const it = storage.iterator()
-    for await (const [, bytes] of it) {
-      const head = await Entry.decode(bytes)
-      yield head
+    const bytes = await storage.get('heads')
+    const headHashes = bytes ? JSON.parse(decoder.decode(bytes)) : []
+    for (const hash of headHashes) {
+      yield hash
     }
   }
 
@@ -66,11 +63,13 @@ const Heads = async ({ storage, heads }) => {
   }
 
   // Initialize the heads if given as parameter
-  await put(heads || [])
+  if (heads) {
+    await put(heads)
+  }
 
   return {
     put,
-    set,
+    set: put,
     add,
     remove,
     iterator,

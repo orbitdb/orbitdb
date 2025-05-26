@@ -25,8 +25,8 @@ const DefaultOptions = { indexBy: '_id' }
  * @return {module:Databases.Databases-Documents} A Documents function.
  * @memberof module:Databases
  */
-const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
-  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically })
+const Documents = ({ indexBy } = DefaultOptions) => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encrypt }) => {
+  const database = await Database({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, encrypt })
 
   const { addOperation, log } = database
 

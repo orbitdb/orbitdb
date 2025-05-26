@@ -320,11 +320,12 @@ describe('KeyValueIndexed Database Replication', function () {
   })
 
   it('indexes deletes correctly', async () => {
+    const databaseId = 'kv-CCC'
     let replicated = false
+    let err
 
-    const onError = (err) => {
-      console.error(err)
-      deepStrictEqual(err, undefined)
+    const onError = (error) => {
+      err = error
     }
 
     kv1 = await KeyValueIndexed()({ ipfs: ipfs1, identity: testIdentity1, address: databaseId, accessController, directory: './orbitdb11' })
@@ -339,11 +340,11 @@ describe('KeyValueIndexed Database Replication', function () {
 
     kv2 = await KeyValueIndexed()({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb22' })
 
-    const onUpdate = (entry) => {
+    const onConnected = (entry) => {
       replicated = true
     }
 
-    kv2.events.on('update', onUpdate)
+    kv2.events.on('join', onConnected)
     kv2.events.on('error', onError)
 
     await waitFor(() => replicated, () => true)
@@ -357,6 +358,8 @@ describe('KeyValueIndexed Database Replication', function () {
     for await (const keyValue of kv2.iterator()) {
       all2.push(keyValue)
     }
+
+    deepStrictEqual(err, undefined)
 
     deepStrictEqual(all2.map(e => { return { key: e.key, value: e.value } }), [
       { key: 'init', value: true },

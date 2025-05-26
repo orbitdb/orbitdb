@@ -7,7 +7,7 @@
 import { EventEmitter } from 'events'
 import PQueue from 'p-queue'
 import Sync from './sync.js'
-import { Log, Entry } from './oplog/index.js'
+import { Log } from './oplog/index.js'
 import { ComposedStorage, LRUStorage, IPFSBlockStorage, LevelStorage } from './storage/index.js'
 import pathJoin from './utils/path-join.js'
 
@@ -39,10 +39,12 @@ const defaultCacheSize = 1000
  * automatically. Otherwise, false.
  * @param {function} [params.onUpdate] A function callback. Fired when an
  * entry is added to the oplog.
+ * @param {Function} options.encryptFn An encryption function.
+ * @param {Function} options.decryptFn A decryption function.
  * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
-const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate }) => {
+const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption }) => {
   /**
    * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
@@ -108,7 +110,9 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     await LevelStorage({ path: pathJoin(directory, '/log/_index/') })
   )
 
-  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage })
+  encryption = encryption || {}
+
+  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryption })
 
   const events = new EventEmitter()
 
@@ -134,21 +138,23 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
       return entry.hash
     }
     const hash = await queue.add(task)
-    await queue.onIdle()
     return hash
   }
 
-  const applyOperation = async (bytes) => {
+  const applyOperation = async (entry) => {
     const task = async () => {
-      const entry = await Entry.decode(bytes)
-      if (entry) {
-        const updated = await log.joinEntry(entry)
-        if (updated) {
-          if (onUpdate) {
-            await onUpdate(log, entry)
+      try {
+        if (entry) {
+          const updated = await log.joinEntry(entry)
+          if (updated) {
+            if (onUpdate) {
+              await onUpdate(log, entry)
+            }
+            events.emit('update', entry)
           }
-          events.emit('update', entry)
         }
+      } catch (e) {
+        console.error(e)
       }
     }
     await queue.add(task)
@@ -177,7 +183,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
    * @async
    */
   const drop = async () => {
-    await queue.onIdle()
+    await queue.clear()
     await log.clear()
     if (access && access.drop) {
       await access.drop()

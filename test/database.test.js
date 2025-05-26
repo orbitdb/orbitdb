@@ -3,7 +3,7 @@ import { rimraf } from 'rimraf'
 import { existsSync } from 'fs'
 import { copy } from 'fs-extra'
 import Path from 'path'
-import { Database, Entry, KeyStore, Identities } from '../src/index.js'
+import { Database, KeyStore, Identities } from '../src/index.js'
 import LevelStorage from '../src/storage/level.js'
 import MemoryStorage from '../src/storage/memory.js'
 import testKeysPath from './fixtures/test-keys-path.js'
@@ -68,8 +68,13 @@ describe('Database', function () {
   describe('Options', () => {
     it('uses default directory for headsStorage', async () => {
       db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController })
-      const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
-      const hash = await db.addOperation(op)
+
+      const op1 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 1' }
+      const op2 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 2' }
+
+      await db.addOperation(op1)
+      const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
       const headsPath = Path.join('./orbitdb/', `${databaseId}/`, '/log/_heads/')
 
@@ -78,8 +83,13 @@ describe('Database', function () {
       await db.close()
 
       const headsStorage = await LevelStorage({ path: headsPath })
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await headsStorage.close()
 
@@ -88,8 +98,12 @@ describe('Database', function () {
 
     it('uses given directory for headsStorage', async () => {
       db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './custom-directory' })
-      const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
-      const hash = await db.addOperation(op)
+      const op1 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 1' }
+      const op2 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 2' }
+
+      await db.addOperation(op1)
+      const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
 
       const headsPath = Path.join('./custom-directory/', `${databaseId}/`, '/log/_heads/')
 
@@ -99,7 +113,13 @@ describe('Database', function () {
 
       const headsStorage = await LevelStorage({ path: headsPath })
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
+
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await headsStorage.close()
 
@@ -110,23 +130,51 @@ describe('Database', function () {
     it('uses given MemoryStorage for headsStorage', async () => {
       const headsStorage = await MemoryStorage()
       db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', headsStorage })
-      const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
-      const hash = await db.addOperation(op)
+      const op1 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 1' }
+      const op2 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 2' }
 
-      deepStrictEqual((await Entry.decode(await headsStorage.get(hash))).payload, op)
+      await db.addOperation(op1)
+      const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
+
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
+
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await db.close()
+
+      await headsStorage.close()
+      await rimraf('./orbitdb')
     })
 
     it('uses given MemoryStorage for entryStorage', async () => {
       const entryStorage = await MemoryStorage()
-      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', entryStorage })
-      const op = { op: 'PUT', key: 1, value: 'record 1 on db 1' }
-      const hash = await db.addOperation(op)
+      const headsStorage = await MemoryStorage()
+      db = await Database({ ipfs, identity: testIdentity, address: databaseId, accessController, directory: './orbitdb', headsStorage, entryStorage })
+      const op1 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 1' }
+      const op2 = { op: 'PUT', key: 1, value: 'record 1 on db 1 version 2' }
 
-      deepStrictEqual((await Entry.decode(await entryStorage.get(hash))).payload, op)
+      await db.addOperation(op1)
+      const hash = await db.addOperation(op2)
+      const entry = await db.log.get(hash)
+
+      const bytes = await headsStorage.get('heads')
+      const heads = JSON.parse(new TextDecoder().decode(bytes))
+
+      strictEqual(heads.length, 1)
+      strictEqual(heads.at(0).hash, hash)
+      strictEqual(heads.at(0).next.length, 1)
+      strictEqual(heads.at(0).next.at(0), entry.next.at(0))
 
       await db.close()
+
+      await entryStorage.close()
+      await headsStorage.close()
+      await rimraf('./orbitdb')
     })
   })
 
