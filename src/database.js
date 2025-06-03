@@ -207,6 +207,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     close,
     drop,
     addOperation,
+    applyOperation,
     /**
      * The underlying [operations log]{@link module:Log~Log} of the database.
      * @†ype {module:Log~Log}
@@ -240,7 +241,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
      * @memberof module:Databases~Database
      * @instance
      */
-    access
+    access,
   }
 }
 
