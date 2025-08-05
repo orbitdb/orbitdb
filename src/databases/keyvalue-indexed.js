@@ -42,7 +42,7 @@ const Index = ({ directory } = {}) => async () => {
     const isNotIndexed = async (hash) => !(await isIndexed(hash))
 
     // Function to decide when the log traversal should be stopped
-    const shoudStopTraverse = async (entry) => {
+    const shouldStopTraverse = async (entry) => {
       // Go through the nexts of an entry and if any is not yet
       // indexed, add it to the list of entries-to-be-indexed
       for await (const hash of entry.next) {
@@ -56,7 +56,7 @@ const Index = ({ directory } = {}) => async () => {
     }
 
     // Traverse the log and stop when everything has been processed
-    for await (const entry of log.traverse(null, shoudStopTraverse)) {
+    for await (const entry of log.traverse(null, shouldStopTraverse)) {
       const { hash, payload } = entry
       // If an entry is not yet indexed, process it
       if (await isNotIndexed(hash)) {
