@@ -202,7 +202,6 @@ describe('Database - Replication', function () {
         const peerId = ipfs2.libp2p.peerId
         try {
           const entry = await Entry.decode(message.detail.data)
-          console.log(entry)
           if (entry.hash === expectedEntryHash) {
             entryReceived = true
             await ipfs1.libp2p.hangUp(peerId)
