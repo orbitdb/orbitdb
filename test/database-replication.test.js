@@ -1,14 +1,13 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import { Database, KeyStore, Identities } from '../src/index.js'
+import { Database, KeyStore, Identities, Entry } from '../src/index.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
 import ComposedStorage from '../src/storage/composed.js'
 import IPFSBlockStorage from '../src/storage/ipfs-block.js'
 import MemoryStorage from '../src/storage/memory.js'
-import { Entry } from '../src/index.js'
 import createHelia from './utils/create-helia.js'
 
 const keysPath = './testkeys'
@@ -192,13 +191,8 @@ describe('Database - Replication', function () {
     it('sync works even if disconnected between reception of head and persistence of entry', async () => {
       let expectedEntryHash = null
 
-      let connected  = false
       let entryReceived = false
       let updated = false
-
-      const onConnected = () => {
-        connected = true
-      }
 
       const onUpdate = (entry) => {
         updated = expectedEntryHash && entry.hash === expectedEntryHash
@@ -221,21 +215,15 @@ describe('Database - Replication', function () {
 
       ipfs2.libp2p.services.pubsub.addEventListener('message', handleMessage)
       await ipfs2.libp2p.services.pubsub.subscribe(databaseId)
-      console.log("subscribed")
+
       db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
-      console.log("db 2 opened")
       db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
-      
-      // await waitFor(() => connected, () => true)
-      // console.log("connected")
 
       expectedEntryHash = await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
 
       await waitFor(() => entryReceived, () => true)
-      console.log("entry received")
       await waitFor(() => updated, () => true)
-      console.log("db updated")
 
       const all1 = []
       for await (const item of db1.log.iterator()) {
