@@ -217,7 +217,6 @@ describe('Database - Replication', function () {
       await ipfs2.libp2p.services.pubsub.subscribe(databaseId)
 
       db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
-      db2.events.on('join', onConnected)
       db2.events.on('update', onUpdate)
 
       expectedEntryHash = await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
