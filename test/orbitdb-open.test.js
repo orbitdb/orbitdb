@@ -603,14 +603,14 @@ describe('Open databases', function () {
     it('aborts immediately without hanging', async () => {
       const unavailableAddress = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw14'
       const controller = new AbortController()
-      
+
       const dbPromise = orbitdb1.open(unavailableAddress, { type: 'keyvalue', signal: controller.signal })
-      
-      controller.abort();
+
+      controller.abort()
       try {
         await dbPromise
       } catch (e) {
-        if (!e.toString().includes("AbortError: This operation was aborted")) throw e
+        if (!e.toString().includes('AbortError: This operation was aborted')) throw e
       }
     })
   })
