@@ -20,6 +20,7 @@
   "dependencies": {
     "@ipld/dag-cbor": "^9.0.6",
     "@libp2p/crypto": "^5.0.5",
+    "any-signal": "^4.1.1",
     "it-pipe": "^3.0.1",
     "level": "^8.0.0",
     "lru": "^3.1.0",
