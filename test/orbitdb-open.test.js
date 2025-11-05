@@ -606,7 +606,7 @@ describe('Open databases', function () {
 
       const dbPromise = orbitdb1.open(unavailableAddress, { type: 'keyvalue', signal: controller.signal })
 
-      controller.abort("Timeout")
+      controller.abort('Timeout')
       try {
         await dbPromise
       } catch (e) {
