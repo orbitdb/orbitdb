@@ -36,6 +36,29 @@ describe('KeyStore', () => {
       strictEqual(hasKey, true)
     })
 
+    it('creates a key with a specified type', async () => {
+      const typeId = 'key-ed25519'
+      const keyPair = await keystore.createKey(typeId, 'Ed25519')
+      const hasKey = await keystore.hasKey(typeId)
+
+      strictEqual(hasKey, true)
+      if (keyPair && keyPair.type) {
+        strictEqual(keyPair.type, 'Ed25519')
+      }
+    })
+
+    it('throws an error when creating a key with an invalid type', async () => {
+      let err
+
+      try {
+        await keystore.createKey('key-bad-type', 'nope')
+      } catch (e) {
+        err = e.toString()
+      }
+
+      strictEqual(err, 'Error: Invalid key type: nope. Supported types: Ed25519, secp256k1, RSA, ECDSA')
+    })
+
     it('throws an error when creating a key without an id', async () => {
       let err
 
