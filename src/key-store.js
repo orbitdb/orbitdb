@@ -199,18 +199,26 @@ const KeyStore = async ({ storage, path } = {}) => {
   /**
    * Creates a key pair and stores it to the keystore.
    * @param {string} id An id of the [Identity]{@link module:Identities~Identity} to generate the key pair for.
+   * @param {string} [type='secp256k1'] The type of key to generate. Supported types: 'Ed25519', 'secp256k1', 'RSA', 'ECDSA'
    * @throws id needed to create a key if no id is specified.
+   * @throws Invalid key type if an unsupported type is specified.
    * @memberof module:KeyStore~KeyStore
    * @async
    * @instance
    */
-  const createKey = async (id) => {
+  const createKey = async (id, type = 'secp256k1') => {
     if (!id) {
       throw new Error('id needed to create a key')
     }
 
+    // Validate key type
+    const validTypes = ['Ed25519', 'secp256k1', 'RSA', 'ECDSA']
+    if (!validTypes.includes(type)) {
+      throw new Error(`Invalid key type: ${type}. Supported types: ${validTypes.join(', ')}`)
+    }
+
     // Generate a private key
-    const keyPair = await generateKeyPair('secp256k1')
+    const keyPair = await generateKeyPair(type)
 
     const key = {
       publicKey: keyPair.publicKey.raw,
