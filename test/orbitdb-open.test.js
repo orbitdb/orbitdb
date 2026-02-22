@@ -582,4 +582,36 @@ describe('Open databases', function () {
       strictEqual(db.name, 'helloworld1')
     })
   })
+
+  describe('aborting database open', () => {
+    let db
+
+    before(async () => {
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'user1' })
+    })
+
+    after(async () => {
+      if (db) {
+        await db.close()
+      }
+      if (orbitdb1) {
+        await orbitdb1.stop()
+      }
+      await rimraf('./orbitdb')
+    })
+
+    it('aborts immediately without hanging', async () => {
+      const unavailableAddress = '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw14'
+      const controller = new AbortController()
+
+      const dbPromise = orbitdb1.open(unavailableAddress, { type: 'keyvalue', signal: controller.signal })
+
+      controller.abort()
+      try {
+        await dbPromise
+      } catch (e) {
+        if (!e.toString().includes('AbortError')) throw e
+      }
+    })
+  })
 })

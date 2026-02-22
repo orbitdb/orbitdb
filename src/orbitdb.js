@@ -106,6 +106,8 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * use for [Log]{@link module:Log} entries.
    * @param {number} [params.encryption] Encryption module to encrypt/decrypt database payloads and entries. If provided, the encryption object must take the form { replication: { encrypt, decrypt }, data: { encrypt, decrypt } }.
    * @memberof module:OrbitDB
+   * @param {AbortSignal} [params.signal] Optional abort signal.
+   * @memberof module:OrbitDB
    * @return {module:Database} A database instance.
    * @throws "Unsupported database type" if the type specified is not in the list
    * of known databaseTypes.
@@ -113,7 +115,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
    * @instance
    * @async
    */
-  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount, encryption } = {}) => {
+  const open = async (address, { type, meta, sync, Database, AccessController, headsStorage, entryStorage, indexStorage, referencesCount, encryption, signal } = {}) => {
     let name, manifest, accessController
 
     if (databases[address]) {
@@ -123,7 +125,7 @@ const OrbitDB = async ({ ipfs, id, identity, identities, directory } = {}) => {
     if (isValidAddress(address)) {
       // If the address given was a valid OrbitDB address, eg. '/orbitdb/zdpuAuK3BHpS7NvMBivynypqciYCuy2UW77XYBPUYRnLjnw13'
       const addr = OrbitDBAddress(address)
-      manifest = await manifestStore.get(addr.hash)
+      manifest = await manifestStore.get(addr.hash, signal)
       const acType = manifest.accessController.split('/', 2).pop()
       AccessController = getAccessController(acType)()
       accessController = await AccessController({ orbitdb: { open, identity, ipfs }, identities, address: manifest.accessController })
