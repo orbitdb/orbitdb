@@ -29,7 +29,8 @@ export default (env, argv) => {
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG)
-      })
+      }),
+      new webpack.NormalModuleReplacementPlugin(/^node:stream$/, require.resolve('stream-browserify'))
     ],
     resolve: {
       modules: [
