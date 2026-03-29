@@ -1,7 +1,7 @@
 import { strictEqual, deepStrictEqual } from 'assert'
 import { rimraf } from 'rimraf'
 import { copy } from 'fs-extra'
-import { Database, KeyStore, Identities } from '../src/index.js'
+import { Database, KeyStore, Identities, Entry } from '../src/index.js'
 import testKeysPath from './fixtures/test-keys-path.js'
 import connectPeers from './utils/connect-nodes.js'
 import waitFor from './utils/wait-for.js'
@@ -174,6 +174,54 @@ describe('Database - Replication', function () {
       db2.events.on('join', onConnected)
 
       await waitFor(() => connected, () => true)
+
+      const all1 = []
+      for await (const item of db1.log.iterator()) {
+        all1.unshift(item)
+      }
+
+      const all2 = []
+      for await (const item of db2.log.iterator()) {
+        all2.unshift(item)
+      }
+
+      deepStrictEqual(all1, all2)
+    })
+
+    it('sync works even if disconnected between reception of head and persistence of entry', async () => {
+      let expectedEntryHash = null
+
+      let entryReceived = false
+      let updated = false
+
+      const onUpdate = (entry) => {
+        updated = expectedEntryHash && entry.hash === expectedEntryHash
+      }
+
+      const handleMessage = async (message) => {
+        const peerId = ipfs2.libp2p.peerId
+        try {
+          const entry = await Entry.decode(message.detail.data)
+          if (entry.hash === expectedEntryHash) {
+            entryReceived = true
+            await ipfs1.libp2p.hangUp(peerId)
+            await ipfs2.libp2p.services.pubsub.unsubscribe(databaseId)
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      }
+
+      ipfs2.libp2p.services.pubsub.addEventListener('message', handleMessage)
+      await ipfs2.libp2p.services.pubsub.subscribe(databaseId)
+
+      db2 = await Database({ ipfs: ipfs2, identity: testIdentity2, address: databaseId, accessController, directory: './orbitdb2' })
+      db2.events.on('update', onUpdate)
+
+      expectedEntryHash = await db1.addOperation({ op: 'PUT', key: 1, value: 'record 1 on db 1' })
+
+      await waitFor(() => entryReceived, () => true)
+      await waitFor(() => updated, () => true)
 
       const all1 = []
       for await (const item of db1.log.iterator()) {

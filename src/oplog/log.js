@@ -298,12 +298,12 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
       await traverseAndVerify()
 
-      /* 4. Add missing entries to the oplog store (=to the log) */
+      /* 4. Add the new entry to heads (=union with current heads) */
+      await oplogStore.addHead(entry)
+      /* 5. Add missing entries to the oplog store (=to the log) */
       await oplogStore.addVerified(hashesToAdd.values())
       /* 6. Remove heads which new entries are connect to */
       await oplogStore.removeHeads(connectedHeads.values())
-      /* 7. Add the new entry to heads (=union with current heads) */
-      await oplogStore.addHead(entry)
 
       return true
     }

@@ -9,6 +9,7 @@ import { base58btc } from 'multiformats/bases/base58'
 import { TimeoutController } from 'timeout-abort-controller'
 import drain from 'it-drain'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
+import { anySignal } from 'any-signal'
 
 const DefaultTimeout = 30000 // 30 seconds
 
@@ -39,10 +40,15 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    * @memberof module:Storage.Storage-IPFS
    * @instance
    */
-  const put = async (hash, data) => {
+  const put = async (hash, data, signal) => {
     const cid = CID.parse(hash, base58btc)
-    const { signal } = new TimeoutController(timeout || DefaultTimeout)
-    await ipfs.blockstore.put(cid, data, { signal })
+    const { signal: timeoutSignal } = new TimeoutController(timeout || DefaultTimeout)
+    const combinedSignal = anySignal([
+      timeoutSignal,
+      ...(signal ? [signal] : [])
+    ])
+    timeoutControllers.add(combinedSignal)
+    await ipfs.blockstore.put(cid, data, { signal: combinedSignal })
 
     await persist(hash)
   }
@@ -57,15 +63,25 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
    * @memberof module:Storage.Storage-IPFS
    * @instance
    */
-  const get = async (hash) => {
+  const get = async (hash, signal) => {
     const cid = CID.parse(hash, base58btc)
     const controller = new TimeoutController(timeout || DefaultTimeout)
     timeoutControllers.add(controller)
+
+    const combinedSignal = anySignal([
+      controller.signal,
+      ...(signal ? [signal] : [])
+    ])
+    timeoutControllers.add(combinedSignal)
+
     const chunks = []
     for await (const chunk of ipfs.blockstore.get(cid, { signal: controller.signal })) {
       chunks.push(chunk)
     }
+
     timeoutControllers.delete(controller)
+    timeoutControllers.delete(combinedSignal)
+
     if (chunks.length > 0) {
       return uint8ArrayConcat(chunks)
     }

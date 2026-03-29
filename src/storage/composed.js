@@ -30,9 +30,9 @@ const ComposedStorage = async (storage1, storage2) => {
    * @memberof module:Storage.Storage-Composed
    * @instance
    */
-  const put = async (hash, data) => {
-    await storage1.put(hash, data)
-    await storage2.put(hash, data)
+  const put = async (hash, data, signal) => {
+    await storage1.put(hash, data, signal)
+    await storage2.put(hash, data, signal)
   }
 
   /**
@@ -46,12 +46,12 @@ const ComposedStorage = async (storage1, storage2) => {
    * @memberof module:Storage.Storage-Composed
    * @instance
    */
-  const get = async (hash) => {
-    let value = await storage1.get(hash)
+  const get = async (hash, signal) => {
+    let value = await storage1.get(hash, signal)
     if (!value) {
-      value = await storage2.get(hash)
+      value = await storage2.get(hash, signal)
       if (value) {
-        await storage1.put(hash, value)
+        await storage1.put(hash, value, signal)
       }
     }
     return value
