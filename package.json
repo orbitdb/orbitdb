@@ -9,7 +9,7 @@
     "url": "https://github.com/orbitdb/orbitdb"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "files": [
     "src",
