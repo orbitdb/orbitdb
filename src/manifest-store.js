@@ -20,12 +20,12 @@ const ManifestStore = async ({ ipfs, storage } = {}) => {
     await IPFSBlockStorage({ ipfs, pin: true })
   )
 
-  const get = async (address) => {
-    const bytes = await storage.get(address)
+  const get = async (address, signal) => {
+    const bytes = await storage.get(address, signal)
     const { value } = await Block.decode({ bytes, codec, hasher })
     if (value) {
       // Write to storage to make sure it gets pinned on IPFS
-      await storage.put(address, bytes)
+      await storage.put(address, bytes, signal)
     }
     return value
   }

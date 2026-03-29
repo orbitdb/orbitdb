@@ -20,6 +20,7 @@
   "dependencies": {
     "@ipld/dag-cbor": "^9.2.5",
     "@libp2p/crypto": "^5.1.14",
+    "any-signal": "^4.1.1",
     "it-pipe": "^3.0.1",
     "level": "^10.0.0",
     "lru": "^3.1.0",
@@ -48,7 +49,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "test": "DEBUG=libp2p.* cross-env mocha --config test/.mocharc.json test/access-controllers/ipfs-access-controller.test.js",
+    "test": "cross-env mocha --config test/.mocharc.json",
     "test:ci": "cross-env c8 mocha --config test/.mocharc.json",
     "test:browser": "npm run build:tests && ./node_modules/.bin/playwright-test test/browser/bundle.js --runner mocha",
     "build": "npm run build:docs && npm run build:dist && npm run build:debug",

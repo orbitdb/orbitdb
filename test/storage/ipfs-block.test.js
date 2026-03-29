@@ -63,6 +63,6 @@ describe('IPFSBlockStorage', function () {
     }
 
     notStrictEqual(err, null)
-    strictEqual(err.message, 'All promises were rejected')
+    strictEqual(err.message.startsWith('Failed to load block'), true)
   })
 })
