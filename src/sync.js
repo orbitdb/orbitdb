@@ -206,6 +206,9 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
           if (e.name === 'UnsupportedProtocolError') {
             // Skip peer, they don't have this database currently
           } else {
+            if (e.name === 'AbortError' && e.type == null) {
+              e.type = 'aborted'
+            }
             events.emit('error', e)
           }
         } finally {
