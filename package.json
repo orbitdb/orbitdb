@@ -29,8 +29,8 @@
     "uint8arrays": "^5.0.0"
   },
   "devDependencies": {
-    "@chainsafe/libp2p-gossipsub": "^14.1.2",
     "@libp2p/circuit-relay-v2": "^4.1.7",
+    "@libp2p/gossipsub": "^15.0.16",
     "@orbitdb/simple-encryption": "^0.0.2",
     "blockstore-level": "^3.0.2",
     "c8": "^8.0.1",
@@ -48,7 +48,7 @@
     "webpack-cli": "^5.1.4"
   },
   "scripts": {
-    "test": "cross-env mocha --config test/.mocharc.json",
+    "test": "DEBUG=libp2p.* cross-env mocha --config test/.mocharc.json test/access-controllers/ipfs-access-controller.test.js",
     "test:ci": "cross-env c8 mocha --config test/.mocharc.json",
     "test:browser": "npm run build:tests && ./node_modules/.bin/playwright-test test/browser/bundle.js --runner mocha",
     "build": "npm run build:docs && npm run build:dist && npm run build:debug",

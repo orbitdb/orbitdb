@@ -8,7 +8,7 @@ import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
-import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import { gossipsub } from '@libp2p/gossipsub'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 
 const isBrowser = () => typeof window !== 'undefined'
