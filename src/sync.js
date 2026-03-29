@@ -1,4 +1,3 @@
-import { pipe } from 'it-pipe'
 import PQueue from 'p-queue'
 import { EventEmitter } from 'events'
 import { TimeoutController } from 'timeout-abort-controller'
@@ -144,18 +143,18 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     events.emit('join', peerId, heads)
   }
 
-  const sendHeads = (source) => {
-    return (async function * () {
-      const heads = await log.heads()
-      for await (const { hash } of heads) {
-        const bytes = await log.storage.get(hash)
-        yield bytes
+  const sendHeads = async (stream) => {
+    const heads = await log.heads()
+    for (const { hash } of heads) {
+      const bytes = await log.storage.get(hash)
+      if (bytes) {
+        stream.send(bytes)
       }
-    })()
+    }
   }
 
-  const receiveHeads = (peerId) => async (source) => {
-    for await (const value of source) {
+  const receiveHeads = async (peerId, stream) => {
+    for await (const value of stream) {
       const headBytes = value.subarray()
       if (headBytes && onSynced) {
         const entry = await Entry.decode(headBytes, log.encryption.replication?.decrypt, log.encryption.data?.decrypt)
@@ -167,11 +166,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     }
   }
 
-  const handleReceiveHeads = async ({ connection, stream }) => {
+  const handleReceiveHeads = async (stream, connection) => {
     const peerId = String(connection.remotePeer)
     try {
       peers.add(peerId)
-      await pipe(stream, receiveHeads(peerId), sendHeads, stream)
+      await Promise.all([
+        receiveHeads(peerId, stream),
+        sendHeads(stream).then(() => stream.close())
+      ])
     } catch (e) {
       peers.delete(peerId)
       events.emit('error', e)
@@ -195,7 +197,10 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         try {
           peers.add(peerId)
           const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
-          await pipe(sendHeads, stream, receiveHeads(peerId))
+          await Promise.all([
+            receiveHeads(peerId, stream),
+            sendHeads(stream).then(() => stream.close())
+          ])
         } catch (e) {
           peers.delete(peerId)
           if (e.name === 'UnsupportedProtocolError') {
