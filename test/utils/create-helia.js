@@ -6,7 +6,6 @@ import { LevelBlockstore } from 'blockstore-level'
 import { identify } from '@libp2p/identify'
 import { webSockets } from '@libp2p/websockets'
 import { webRTC } from '@libp2p/webrtc'
-import { all } from '@libp2p/websockets/filters'
 import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from '@chainsafe/libp2p-yamux'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
@@ -19,9 +18,7 @@ const Libp2pOptions = {
     listen: ['/ip4/0.0.0.0/tcp/0/ws']
   },
   transports: [
-    webSockets({
-      filter: all
-    })
+    webSockets()
   ],
   connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
@@ -42,9 +39,7 @@ const Libp2pBrowserOptions = {
     listen: ['/webrtc', '/p2p-circuit']
   },
   transports: [
-    webSockets({
-      filter: all
-    }),
+    webSockets(),
     webRTC(),
     circuitRelayTransport()
   ],

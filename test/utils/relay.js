@@ -3,7 +3,6 @@ import { createLibp2p } from 'libp2p'
 import { noise } from '@chainsafe/libp2p-noise'
 import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
 import { webSockets } from '@libp2p/websockets'
-import * as filters from '@libp2p/websockets/filters'
 import { identify } from '@libp2p/identify'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { privateKeyFromProtobuf } from '@libp2p/crypto/keys'
@@ -21,9 +20,7 @@ const server = await createLibp2p({
     listen: ['/ip4/0.0.0.0/tcp/12345/ws']
   },
   transports: [
-    webSockets({
-      filter: filters.all
-    })
+    webSockets()
   ],
   connectionEncrypters: [noise()],
   streamMuxers: [yamux()],
