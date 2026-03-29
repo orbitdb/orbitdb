@@ -16,3 +16,10 @@ dist/
 # JSDoc output folder
 docs/api/*
 !docs/api/README.md
+
+# Don't track test coverage
+coverage
+
+# Don't track test output
+orbitdb
+testkeys
