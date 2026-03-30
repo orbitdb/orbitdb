@@ -75,7 +75,7 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     timeoutControllers.add(combinedSignal)
 
     const chunks = []
-    for await (const chunk of ipfs.blockstore.get(cid, { signal: controller.signal })) {
+    for await (const chunk of ipfs.blockstore.get(cid, { signal: combinedSignal })) {
       chunks.push(chunk)
     }
 
