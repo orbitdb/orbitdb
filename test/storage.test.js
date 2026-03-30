@@ -130,6 +130,7 @@ describe('Storages', function () {
     it('has correct interface', async () => {
       const storage = await LevelStorage()
       testInterface(storage)
+      await storage.close()
     })
   })
 
