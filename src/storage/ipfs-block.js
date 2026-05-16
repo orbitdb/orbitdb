@@ -74,13 +74,26 @@ const IPFSBlockStorage = async ({ ipfs, pin, timeout } = {}) => {
     ])
 
     try {
-      const chunks = []
-      for await (const chunk of ipfs.blockstore.get(cid, { signal: combinedSignal })) {
-        chunks.push(chunk)
-      }
+      const result = ipfs.blockstore.get(cid, { signal: combinedSignal })
 
-      if (chunks.length > 0) {
-        return uint8ArrayConcat(chunks)
+      // Handle both streaming (async iterable) and non-streaming (Promise<Uint8Array>)
+      // blockstore implementations. Helia v6 returns an async iterable; wrapped or
+      // older implementations may return a plain Uint8Array via Promise.
+      if (result && typeof result[Symbol.asyncIterator] === 'function') {
+        // Streaming blockstore — collect chunks
+        const chunks = []
+        for await (const chunk of result) {
+          chunks.push(chunk)
+        }
+        if (chunks.length > 0) {
+          return uint8ArrayConcat(chunks)
+        }
+      } else {
+        // Non-streaming blockstore — await the Promise<Uint8Array>
+        const bytes = await result
+        if (bytes) {
+          return bytes
+        }
       }
     } finally {
       combinedSignal.clear()

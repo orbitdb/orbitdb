@@ -86,6 +86,11 @@ const OplogStore = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     }
   }
 
+  const remove = async (hash) => {
+    await _entries.del(hash)
+    await _index.del(hash)
+  }
+
   const clear = async () => {
     await _index.clear()
     await _heads.clear()
@@ -107,6 +112,7 @@ const OplogStore = async ({ logHeads, entryStorage, headsStorage, indexStorage, 
     addHead,
     removeHeads,
     addVerified,
+    remove,
     storage: _entries,
     clear,
     close

@@ -44,7 +44,7 @@ const defaultCacheSize = 1000
  * @return {module:Databases~Database} An instance of Database.
  * @instance
  */
-const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption }) => {
+const Database = async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption, ttl }) => {
   /**
    * @namespace module:Databases~Database
    * @description The instance returned by {@link module:Database~Database}.
@@ -112,7 +112,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
 
   encryption = encryption || {}
 
-  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryption })
+  const log = await Log(identity, { logId: address, access, entryStorage, headsStorage, indexStorage, encryption, ttl })
 
   const events = new EventEmitter()
 
@@ -191,7 +191,7 @@ const Database = async ({ ipfs, identity, address, name, access, directory, meta
     events.emit('drop')
   }
 
-  const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically })
+  const sync = await Sync({ ipfs, log, events, onSynced: applyOperation, start: syncAutomatically, ttl })
 
   return {
     /**

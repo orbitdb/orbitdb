@@ -52,7 +52,7 @@ const DefaultAccessController = async () => {
  * @memberof module:Log
  * @instance
  */
-const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn, encryption } = {}) => {
+const Log = async (identity, { logId, logHeads, access, entryStorage, headsStorage, indexStorage, sortFn, encryption, ttl } = {}) => {
   /**
    * @namespace Log
    * @description The instance returned by {@link module:Log}
@@ -80,6 +80,19 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
 
   // Conflict-resolution sorting function
   sortFn = NoZeroes(sortFn || LastWriteWins)
+
+  /**
+   * Checks whether an entry has expired based on the log's TTL.
+   * Entries without a timestamp field are never considered expired.
+   * @param {module:Log~Entry} entry
+   * @return {boolean}
+   * @private
+   */
+  const isExpired = (entry) => {
+    if (ttl == null) return false
+    if (entry.timestamp == null) return false
+    return Date.now() - entry.timestamp > ttl
+  }
 
   // Internal queues for processing appends and joins in their call-order
   const appendQueue = new PQueue({ concurrency: 1 })
@@ -343,6 +356,25 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
         const { hash, next } = entry
         // If we have an entry that we haven't traversed yet, process it
         if (!traversed[hash]) {
+          // Skip expired entries but continue traversal
+          if (isExpired(entry)) {
+            traversed[hash] = true
+            fetched[hash] = true
+            toFetch = [...toFetch, ...next].filter(notIndexed)
+            const fetchEntries = (hash) => {
+              if (!traversed[hash] && !fetched[hash]) {
+                fetched[hash] = true
+                return get(hash)
+              }
+            }
+            const nexts = await Promise.all(toFetch.map(fetchEntries))
+            toFetch = nexts
+              .filter(e => e !== null && e !== undefined)
+              .reduce((res, acc) => Array.from(new Set([...res, ...acc.next])), [])
+              .filter(notIndexed)
+            stack = [...nexts, ...stack]
+            continue
+          }
           // Yield the current entry
           yield entry
           // If we should stop traversing, stop here
@@ -483,6 +515,39 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
   }
 
   /**
+   * Remove expired entries from storage. Only operates when TTL is set.
+   * This is an explicit operation -- the caller decides when to run it.
+   * Head entries are never removed by compact.
+   * @return {number} The number of entries removed.
+   * @memberof module:Log~Log
+   * @instance
+   */
+  const compact = async () => {
+    if (ttl == null) return 0
+
+    let removed = 0
+    const now = Date.now()
+    const currentHeads = new Set((await heads()).map(h => h.hash))
+    const allHashes = []
+
+    // Collect all entry hashes from storage
+    for await (const [hash] of oplogStore.storage.iterator()) {
+      allHashes.push(hash)
+    }
+
+    for (const hash of allHashes) {
+      if (currentHeads.has(hash)) continue
+      const entry = await oplogStore.get(hash)
+      if (entry && entry.timestamp != null && now - entry.timestamp > ttl) {
+        await oplogStore.remove(hash)
+        removed++
+      }
+    }
+
+    return removed
+  }
+
+  /**
    * Clear all entries from the log and the underlying storages
    * @memberof module:Log~Log
    * @instance
@@ -553,12 +618,14 @@ const Log = async (identity, { logId, logHeads, access, entryStorage, headsStora
     joinEntry,
     traverse,
     iterator,
+    compact,
     clear,
     close,
     access,
     identity,
     storage: oplogStore.storage,
-    encryption
+    encryption,
+    ttl
   }
 }
 

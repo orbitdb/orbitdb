@@ -76,7 +76,7 @@ describe('Log - CRDT', function () {
       // associativity: a + (b + c) == (a + b) + c
       strictEqual(res1.length, expectedElementsCount)
       strictEqual(res2.length, expectedElementsCount)
-      deepStrictEqual(res1.map(e => e.hash), res2.map(e => e.hash))
+      deepStrictEqual(res1.map(e => e.payload), res2.map(e => e.payload))
     })
 
     it('join is commutative', async () => {
@@ -105,7 +105,7 @@ describe('Log - CRDT', function () {
       // commutativity: a + b == b + a
       strictEqual(res1.length, expectedElementsCount)
       strictEqual(res2.length, expectedElementsCount)
-      deepStrictEqual(res1.map(e => e.hash), res2.map(e => e.hash))
+      deepStrictEqual(res1.map(e => e.payload), res2.map(e => e.payload))
     })
 
     it('multiple joins are commutative', async () => {
@@ -128,7 +128,7 @@ describe('Log - CRDT', function () {
       await log1.join(log2)
       const resA2 = await log1.values()
 
-      deepStrictEqual(resA1.map(e => e.hash), resA2.map(e => e.hash))
+      deepStrictEqual(resA1.map(e => e.payload), resA2.map(e => e.payload))
 
       // a + b == b + a
       log1 = await Log(testIdentity, { logId })
@@ -149,7 +149,7 @@ describe('Log - CRDT', function () {
       await log2.join(log1)
       const resB2 = await log2.values()
 
-      deepStrictEqual(resB1.map(e => e.hash), resB2.map(e => e.hash))
+      deepStrictEqual(resB1.map(e => e.payload), resB2.map(e => e.payload))
 
       // a + c == c + a
       log1 = await Log(testIdentity, { logId })
@@ -170,7 +170,7 @@ describe('Log - CRDT', function () {
       await log1.join(log3)
       const resC2 = await log1.values()
 
-      deepStrictEqual(resC1.map(e => e.hash), resC2.map(e => e.hash))
+      deepStrictEqual(resC1.map(e => e.payload), resC2.map(e => e.payload))
 
       // c + b == b + c
       log2 = await Log(testIdentity2, { logId })
@@ -192,7 +192,7 @@ describe('Log - CRDT', function () {
       await log2.join(log3)
       const resD2 = await log2.values()
 
-      deepStrictEqual(resD1.map(e => e.hash), resD2.map(e => e.hash))
+      deepStrictEqual(resD1.map(e => e.payload), resD2.map(e => e.payload))
 
       // a + b + c == c + b + a
       log1 = await Log(testIdentity, { logId })
@@ -221,7 +221,7 @@ describe('Log - CRDT', function () {
       await log3.join(log1)
       const logRight = await log3.values()
 
-      deepStrictEqual(logLeft.map(e => e.hash), logRight.map(e => e.hash))
+      deepStrictEqual(logLeft.map(e => e.payload), logRight.map(e => e.payload))
     })
 
     it('join is idempotent', async () => {

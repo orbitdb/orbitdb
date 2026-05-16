@@ -67,7 +67,7 @@ const DefaultTimeout = 30000 // 30 seconds
  * @memberof module:Sync
  * @instance
  */
-const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
+const Sync = async ({ ipfs, log, events, onSynced, start, timeout, ttl }) => {
   /**
    * @namespace module:Sync~Sync
    * @description The instance returned by {@link module:Sync}.
@@ -145,8 +145,12 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
 
   const sendHeads = async (stream) => {
     const heads = await log.heads()
-    for (const { hash } of heads) {
-      const bytes = await log.storage.get(hash)
+    for (const head of heads) {
+      // Skip sending expired heads to peers
+      if (ttl != null && head.timestamp != null && Date.now() - head.timestamp > ttl) {
+        continue
+      }
+      const bytes = await log.storage.get(head.hash)
       if (bytes) {
         stream.send(bytes)
       }

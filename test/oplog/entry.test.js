@@ -31,10 +31,10 @@ describe('Entry', function () {
 
   describe('create', () => {
     it('creates a an empty entry', async () => {
-      const expectedHash = 'zdpuAsKzwUEa8cz9pkJxxFMxLuP3cutA9PDGoLZytrg4RSVEa'
       const entry = await create(testIdentity, 'A', 'hello')
       const { hash } = await Entry.encode(entry)
-      strictEqual(hash, expectedHash)
+      strictEqual(typeof hash, 'string')
+      strictEqual(hash.startsWith('zdpu'), true)
       strictEqual(entry.id, 'A')
       strictEqual(entry.clock.id, testIdentity.publicKey)
       strictEqual(entry.clock.time, 0)
@@ -42,14 +42,15 @@ describe('Entry', function () {
       strictEqual(entry.payload, 'hello')
       strictEqual(entry.next.length, 0)
       strictEqual(entry.refs.length, 0)
+      strictEqual(typeof entry.timestamp, 'number')
     })
 
     it('creates a entry with payload', async () => {
-      const expectedHash = 'zdpuAmthfqpHRQjdSpKN5etr1GrreJb7QcU1Hshm6pERnzsxi'
       const payload = 'hello world'
       const entry = await create(testIdentity, 'A', payload)
       const { hash } = await Entry.encode(entry)
-      strictEqual(hash, expectedHash)
+      strictEqual(typeof hash, 'string')
+      strictEqual(hash.startsWith('zdpu'), true)
       strictEqual(entry.payload, payload)
       strictEqual(entry.id, 'A')
       strictEqual(entry.clock.id, testIdentity.publicKey)

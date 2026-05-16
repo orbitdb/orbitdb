@@ -38,11 +38,12 @@ describe('Log - Iterator', function () {
   describe('Basic iterator functionality', async () => {
     let log1
     let startHash
-    const hashes = []
+    let hashes
     const logSize = 100
     const startIndex = 67
 
     beforeEach(async () => {
+      hashes = []
       log1 = await Log(testIdentity, { logId: 'X' })
 
       for (let i = 0; i < logSize; i++) {

@@ -76,7 +76,8 @@ const create = async (identity, id, payload, encryptPayloadFn, clock = null, nex
     next, // Array of strings of CIDs
     refs, // Array of strings of CIDs
     clock, // Clock
-    v: 2 // To tag the version of this data structure
+    v: 2, // To tag the version of this data structure
+    timestamp: Date.now() // Wall-clock time for TTL expiry
   }
 
   const { bytes } = await Block.encode({ value: entry, codec, hasher })
@@ -118,6 +119,10 @@ const verify = async (identities, entry) => {
     refs: e.refs,
     clock: e.clock,
     v: e.v
+  }
+
+  if (e.timestamp != null) {
+    value.timestamp = e.timestamp
   }
 
   const { bytes } = await Block.encode({ value, codec, hasher })

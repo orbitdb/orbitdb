@@ -81,17 +81,15 @@ describe('KeyValue Database', function () {
     })
 
     it('sets a key/value pair', async () => {
-      const expected = 'zdpuAwr2JfE9TNMoXwupvsssCzemc3g8MTKRfVTG7ZS5gH6md'
-
       const actual = await db.set('key1', 'value1')
-      strictEqual(actual, expected)
+      strictEqual(typeof actual, 'string')
+      strictEqual(actual.startsWith('zdpu'), true)
     })
 
     it('puts a key/value pair', async () => {
-      const expected = 'zdpuAwr2JfE9TNMoXwupvsssCzemc3g8MTKRfVTG7ZS5gH6md'
-
       const actual = await db.put('key1', 'value1')
-      strictEqual(actual, expected)
+      strictEqual(typeof actual, 'string')
+      strictEqual(actual.startsWith('zdpu'), true)
     })
 
     it('gets a key/value pair\'s value', async () => {
@@ -163,13 +161,13 @@ describe('KeyValue Database', function () {
 
     it('returns all key/value pairs', async () => {
       const keyvalue = [
-        { hash: 'zdpuAnpWUWQFo7E7Q4fredrBdHWHTtSzMmo8CG7HRkWCu8Pbq', key: 'key1', value: 'init' },
-        { hash: 'zdpuAwTM75uy1xbBJzHRHUeYTJR67rhHND1w6EpHVH6ThHdos', key: 'key2', value: true },
-        { hash: 'zdpuAvYtscmvsQT7sgsJVsK7Gf7S3HweRJzs2D5TWBqz8wPGq', key: 'key3', value: 'hello' },
-        { hash: 'zdpuAqAGnfa8eryZZm4z4UHcGQKZe4ACwoe1bwfq1AnJRwcPC', key: 'key4', value: 'friend' },
-        { hash: 'zdpuAxHZs93Ys31jktM28GCwzrGP2vwuotr7MrSzLacGAS3dS', key: 'key5', value: '12345' },
-        { hash: 'zdpuAuGJ6UoncMuTjkknG4ySjxvAgkdMiRNecR6nDbLoPFDXX', key: 'key6', value: 'empty' },
-        { hash: 'zdpuAyi1oGLiYbH2UmRvXdGGC7z1vQYGE8oCvrfUvR5bGx6PN', key: 'key7', value: 'friend33' }
+        { key: 'key1', value: 'init' },
+        { key: 'key2', value: true },
+        { key: 'key3', value: 'hello' },
+        { key: 'key4', value: 'friend' },
+        { key: 'key5', value: '12345' },
+        { key: 'key6', value: 'empty' },
+        { key: 'key7', value: 'friend33' }
       ]
 
       for (const { key, value } of Object.values(keyvalue)) {
@@ -181,7 +179,12 @@ describe('KeyValue Database', function () {
         all.unshift(pair)
       }
 
-      deepStrictEqual(all, keyvalue)
+      strictEqual(all.length, keyvalue.length)
+      for (let i = 0; i < keyvalue.length; i++) {
+        strictEqual(all[i].key, keyvalue[i].key)
+        deepStrictEqual(all[i].value, keyvalue[i].value)
+        strictEqual(typeof all[i].hash, 'string')
+      }
     })
   })
 

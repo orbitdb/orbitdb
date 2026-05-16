@@ -109,7 +109,7 @@ const Index = ({ directory } = {}) => async () => {
  * function.
  * @memberof module:Databases
  */
-const KeyValueIndexed = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption }) => {
+const KeyValueIndexed = () => async ({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate, encryption, ttl }) => {
   // Set up the directory for an index
   directory = pathJoin(directory || './orbitdb', `./${address}/_index/`)
 
@@ -117,7 +117,7 @@ const KeyValueIndexed = () => async ({ ipfs, identity, address, name, access, di
   const index = await Index({ directory })()
 
   // Set up the underlying KeyValue database
-  const keyValueStore = await KeyValue()({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate: index.update, encryption })
+  const keyValueStore = await KeyValue()({ ipfs, identity, address, name, access, directory, meta, headsStorage, entryStorage, indexStorage, referencesCount, syncAutomatically, onUpdate: index.update, encryption, ttl })
 
   /**
    * Gets a value from the store by key.

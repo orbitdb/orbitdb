@@ -953,7 +953,7 @@ describe('Log - Join', async function () {
       }
 
       notStrictEqual(err, undefined)
-      strictEqual(err.message, 'Could not validate signature for entry "zdpuAxyE4ScWLf4X6VvkhMrpDQvwdvQno1DhzY5p1U3GPHrBT"')
+      strictEqual(err.message.startsWith('Could not validate signature for entry'), true)
       deepStrictEqual(await log2.all(), [])
       deepStrictEqual(await log2.heads(), [])
     })
