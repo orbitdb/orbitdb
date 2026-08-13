@@ -52,7 +52,7 @@ import { createLibp2p } from 'libp2p'
 const Libp2pOptions = {
   services: {
     pubsub: gossipsub({
-      // neccessary to run a single peer
+      // necessary to run a single peer
       allowPublishToZeroTopicPeers: true
     }),
     identify: identify()
