@@ -373,4 +373,77 @@ describe('Encryption', function () {
       strictEqual(decodedBytes.value.constructor, Uint8Array)
     })
   })
+
+  describe('Documents database is encrypted in storage', async () => {
+    const marker = 'plaintext-marker-3f9c1e'
+
+    afterEach(async () => {
+      if (db1) {
+        await db1.drop()
+        await db1.close()
+      }
+    })
+
+    it('payload bytes are encrypted in storage', async () => {
+      let error
+
+      const encryption = {
+        data: dataEncryption
+      }
+
+      db1 = await orbitdb1.open('encryption-test-documents-1', { type: 'documents', encryption })
+
+      const hash1 = await db1.put({ _id: 'doc1', secret: marker })
+
+      const bytes = await db1.log.storage.get(hash1)
+      strictEqual(new TextDecoder().decode(bytes).includes(marker), false)
+
+      const { value } = await Block.decode({ bytes, codec, hasher })
+      const payload = value.payload
+
+      strictEqual(payload.constructor, Uint8Array)
+
+      try {
+        await Block.decode({ bytes: payload, codec, hasher })
+      } catch (e) {
+        error = e
+      }
+
+      notEqual(error, undefined)
+      strictEqual(error.message.startsWith('CBOR decode error'), true)
+
+      const doc = await db1.get('doc1')
+      strictEqual(doc.value.secret, marker)
+    })
+
+    it('entry bytes are encrypted in storage', async () => {
+      let error
+
+      const encryption = {
+        replication: replicationEncryption
+      }
+
+      db1 = await orbitdb1.open('encryption-test-documents-2', { type: 'documents', encryption })
+
+      const hash1 = await db1.put({ _id: 'doc1', secret: marker })
+      let decodedBytes
+
+      const bytes = await db1.log.storage.get(hash1)
+      strictEqual(new TextDecoder().decode(bytes).includes(marker), false)
+
+      try {
+        decodedBytes = await Block.decode({ bytes, codec, hasher })
+        await Block.decode({ bytes: decodedBytes, codec, hasher })
+      } catch (e) {
+        error = e
+      }
+
+      notEqual(error, undefined)
+      strictEqual(error.message.startsWith('CBOR decode error'), true)
+      strictEqual(decodedBytes.value.constructor, Uint8Array)
+
+      const doc = await db1.get('doc1')
+      strictEqual(doc.value.secret, marker)
+    })
+  })
 })
