@@ -264,6 +264,57 @@ describe('Identities', function () {
     })
   })
 
+  describe('verify two identities with the same id signature', () => {
+    // A provider whose proof changes per document while the id signature does
+    // not: the same key signs the same id deterministically, so two identity
+    // documents of one key share `signatures.id` and differ in
+    // `signatures.publicKey`. A cache keyed by `signatures.id` let the first
+    // of them verified make the second fail the comparison (#1258).
+    const id = 'QmSameKeyTwoDocuments'
+
+    let identities
+    let keystore
+    let first
+    let second
+
+    before(async () => {
+      keystore = await KeyStore({ path: keysPath })
+      identities = await Identities({ keystore })
+      useIdentityProvider(CustomIdentityProvider)
+      const key = await keystore.createKey(id)
+      const publicKey = uint8ArrayToString(key.publicKey.raw, 'base16')
+      const idSignature = await signMessage(key, id)
+      const document = async (proof) => Identity({
+        id,
+        publicKey,
+        signatures: { id: idSignature, publicKey: proof },
+        type: CustomIdentityProvider.type,
+        sign: async () => {},
+        verify: async () => true
+      })
+      first = await document('proof-of-the-first-session')
+      second = await document('proof-of-the-second-session')
+    })
+
+    after(async () => {
+      if (keystore) {
+        await keystore.close()
+      }
+    })
+
+    it('the two documents share the id signature and differ in the proof', () => {
+      assert.strictEqual(second.signatures.id, first.signatures.id)
+      assert.notStrictEqual(second.signatures.publicKey, first.signatures.publicKey)
+      assert.notStrictEqual(second.hash, first.hash)
+    })
+
+    it('verifies both, whichever was verified first', async () => {
+      assert.strictEqual(await identities.verifyIdentity(first), true)
+      assert.strictEqual(await identities.verifyIdentity(second), true)
+      assert.strictEqual(await identities.verifyIdentity(first), true)
+    })
+  })
+
   describe('sign data with an identity', () => {
     const id = '0x01234567890abcdefghijklmnopqrstuvwxyz'
     const data = 'hello friend'
