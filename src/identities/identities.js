@@ -115,7 +115,13 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
       return false
     }
 
-    const verifiedIdentity = await verifiedIdentitiesCache.get(signatures.id)
+    // Cached by the identity's hash, not by signatures.id: two identity
+    // documents can carry the same id signature — the same key signing the
+    // same id, deterministically — and still differ in the provider's proof
+    // (signatures.publicKey). Keyed by signatures.id, the first of them to be
+    // verified made every other one fail the comparison below, although the
+    // provider would have verified it (#1258). The hash names one document.
+    const verifiedIdentity = await verifiedIdentitiesCache.get(identity.hash)
     if (verifiedIdentity) {
       return isEqual(identity, verifiedIdentity)
     }
@@ -124,7 +130,7 @@ const Identities = async ({ keystore, path, storage, ipfs } = {}) => {
 
     const identityVerified = await Provider.verifyIdentity(identity)
     if (identityVerified) {
-      await verifiedIdentitiesCache.put(signatures.id, identity)
+      await verifiedIdentitiesCache.put(identity.hash, identity)
     }
 
     return identityVerified
