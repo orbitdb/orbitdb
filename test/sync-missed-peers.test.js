@@ -137,4 +137,79 @@ describe('Sync with peers it would otherwise miss', function () {
       strictEqual(Boolean(joinerHasIt), true, 'the joiner never received the existing entry')
     })
   })
+
+  describe('a slow dial to one peer', () => {
+    let ipfs1, ipfs2, ipfs3
+    let orbitdb1, orbitdb2, orbitdb3
+    const restore = []
+
+    before(async () => {
+      [ipfs1, ipfs2, ipfs3] = await Promise.all([createHelia(), createHelia(), createHelia()])
+      await connectPeers(ipfs1, ipfs2)
+      await connectPeers(ipfs1, ipfs3)
+      orbitdb1 = await createOrbitDB({ ipfs: ipfs1, id: 'owner-slow', directory: './orbitdb-missed-s1' })
+      orbitdb2 = await createOrbitDB({ ipfs: ipfs2, id: 'joiner-slow', directory: './orbitdb-missed-s2' })
+      orbitdb3 = await createOrbitDB({ ipfs: ipfs3, id: 'stalled-slow', directory: './orbitdb-missed-s3' })
+    })
+
+    after(async () => {
+      for (const undo of restore) undo()
+      await Promise.allSettled([orbitdb1, orbitdb2, orbitdb3].map((o) => o?.stop()))
+      await Promise.allSettled([ipfs1, ipfs2, ipfs3].map((i) => i?.stop()))
+      await rimraf('./orbitdb-missed-s1')
+      await rimraf('./orbitdb-missed-s2')
+      await rimraf('./orbitdb-missed-s3')
+    })
+
+    /**
+     * Replace a node's heads dials. `decide(peer)` returns 'hang' (wait until
+     * aborted, like a peer reachable only over a relayed connection), 'refuse'
+     * or nothing for a normal dial.
+     */
+    const interceptHeadsDials = (ipfs, decide) => {
+      const original = ipfs.libp2p.dialProtocol.bind(ipfs.libp2p)
+      ipfs.libp2p.dialProtocol = async (peer, protocols, options) => {
+        const list = Array.isArray(protocols) ? protocols : [protocols]
+        if (list.some((p) => String(p).startsWith('/orbitdb/heads/'))) {
+          const verdict = decide(peer)
+          if (verdict === 'hang') {
+            await new Promise((resolve, reject) => {
+              options?.signal?.addEventListener('abort', () => reject(new Error('aborted')))
+            })
+          }
+          if (verdict === 'refuse') throw new Error('heads dial refused by the test')
+        }
+        return original(peer, protocols, options)
+      }
+      restore.push(() => { ipfs.libp2p.dialProtocol = original })
+    }
+
+    it('does not hold up the exchange with another peer', async () => {
+      const db1 = await orbitdb1.open('sync-missed-slow-dial', { type: 'keyvalue' })
+      db1.events.on('error', () => {})
+      await db1.put('k', 'written-before-anyone-arrived')
+      const address = db1.address.toString()
+
+      // Peer 1 cannot reach peer 3 for heads: its dial hangs until the timeout.
+      let stalled = false
+      interceptHeadsDials(ipfs1, (peer) => {
+        if (peer.equals?.(ipfs3.libp2p.peerId)) {
+          stalled = true
+          return 'hang'
+        }
+      })
+      const db3 = await orbitdb3.open(address)
+      db3.events.on('error', () => {})
+      strictEqual(Boolean(await waitUntil(() => stalled)), true, 'peer 1 never dialled peer 3')
+
+      // The joiner cannot start the exchange itself, so peer 1 has to -- while
+      // its dial to peer 3 still hangs.
+      interceptHeadsDials(ipfs2, () => 'refuse')
+      const db2 = await orbitdb2.open(address)
+      db2.events.on('error', () => {})
+
+      const joinerHasIt = await waitUntil(async () => (await db2.all()).length === 1, 8000)
+      strictEqual(Boolean(joinerHasIt), true, 'the hanging dial held up the exchange with the joiner')
+    })
+  })
 })
