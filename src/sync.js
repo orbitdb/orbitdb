@@ -138,9 +138,26 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
 
   let started = false
 
+  /**
+   * Peers a 'join' was emitted for since they last left or disconnected.
+   * Both ends may start an exchange at the same moment -- one on seeing the
+   * other subscribe, the other on finding it already subscribed at start --
+   * and that is still one peer joining, not two.
+   */
+  const joined = new Set()
+
   const onPeerJoined = async (peerId) => {
+    if (joined.has(peerId)) {
+      return
+    }
+    joined.add(peerId)
     const heads = await log.heads()
     events.emit('join', peerId, heads)
+  }
+
+  const forgetPeer = (peerId) => {
+    peers.delete(peerId)
+    joined.delete(peerId)
   }
 
   const sendHeads = async (stream) => {
@@ -153,16 +170,48 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     }
   }
 
+  /**
+   * Publish heads on the topic that this peer received through the heads
+   * exchange rather than through pubsub.
+   *
+   * Without this, a peer in the middle -- typically a relay that pins -- learns
+   * an entry from one peer and keeps it to itself: the exchange is one-shot per
+   * peer, so a reader that exchanged with it earlier, while it was still empty,
+   * never hears of the entry. Only heads that were new here are published, and
+   * only from the exchange path, so pubsub deliveries are never re-published
+   * and nothing loops. Receivers de-duplicate through the log.
+   *
+   * See https://github.com/orbitdb/orbitdb/issues/1255
+   */
+  const announce = async (heads) => {
+    for (const bytes of heads) {
+      try {
+        await pubsub.publish(address, bytes)
+      } catch (e) {
+        // Nobody else is subscribed: nobody to tell.
+        if (!/NoPeersSubscribedToTopic/i.test(String(e?.message ?? e))) {
+          events.emit('error', e)
+        }
+      }
+    }
+  }
+
   const receiveHeads = async (peerId, stream) => {
+    const learnt = []
     for await (const value of stream) {
       const headBytes = value.subarray()
       if (headBytes && onSynced) {
         const entry = await Entry.decode(headBytes, log.encryption.replication?.decrypt, log.encryption.data?.decrypt)
+        const known = await log.has(entry.hash)
         await onSynced(entry)
+        if (!known) {
+          learnt.push(headBytes)
+        }
       }
     }
     if (started) {
       await onPeerJoined(peerId)
+      await announce(learnt)
     }
   }
 
@@ -175,53 +224,141 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         sendHeads(stream).then(() => stream.close())
       ])
     } catch (e) {
-      peers.delete(peerId)
+      forgetPeer(peerId)
       events.emit('error', e)
     }
   }
 
-  const handlePeerSubscribed = async (event) => {
-    const task = async () => {
-      const { peerId: remotePeer, subscriptions } = event.detail
-      const peerId = String(remotePeer)
-      const subscription = subscriptions.find(e => e.topic === address)
-      if (!subscription) {
-        return
-      }
-      if (subscription.subscribe) {
-        if (peers.has(peerId)) {
-          return
-        }
-        const timeoutController = new TimeoutController(timeout)
-        const { signal } = timeoutController
-        try {
-          peers.add(peerId)
-          const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
-          await Promise.all([
-            receiveHeads(peerId, stream),
-            sendHeads(stream).then(() => stream.close())
-          ])
-        } catch (e) {
-          peers.delete(peerId)
-          if (e.name === 'UnsupportedProtocolError') {
-            // Skip peer, they don't have this database currently
-          } else {
-            if (e.name === 'AbortError' && e.type == null) {
-              e.type = 'aborted'
-            }
-            events.emit('error', e)
-          }
-        } finally {
-          if (timeoutController) {
-            timeoutController.clear()
-          }
-        }
+  /**
+   * Exchanges this side started and has not finished, by peer, so that one can
+   * be called off when its peer leaves or Sync stops.
+   */
+  const dialing = new Map()
+
+  /**
+   * Peers whose exchange was still in flight when an unlimited connection to
+   * them opened. Should that exchange fail, it is started once more: it may
+   * have been failing on the limited connection the new one replaces.
+   */
+  const retryAfterFailure = new Set()
+
+  /**
+   * Dial a peer and exchange heads with it, once per peer until it leaves or
+   * disconnects.
+   */
+  const exchangeHeads = async (remotePeer) => {
+    const peerId = String(remotePeer)
+    if (peers.has(peerId)) {
+      return
+    }
+    const timeoutController = new TimeoutController(timeout)
+    const { signal } = timeoutController
+    dialing.set(peerId, timeoutController)
+    let retry = false
+    try {
+      peers.add(peerId)
+      const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
+      await Promise.all([
+        receiveHeads(peerId, stream),
+        sendHeads(stream).then(() => stream.close())
+      ])
+    } catch (e) {
+      retry = started && retryAfterFailure.has(peerId) && e.name !== 'UnsupportedProtocolError'
+      forgetPeer(peerId)
+      if (!started) {
+        // Called off by stop(): not an error of this peer's.
+      } else if (e.name === 'UnsupportedProtocolError') {
+        // Skip peer, they don't have this database currently
       } else {
-        peers.delete(peerId)
-        events.emit('leave', peerId)
+        if (e.name === 'AbortError' && e.type == null) {
+          e.type = 'aborted'
+        }
+        events.emit('error', e)
+      }
+    } finally {
+      if (dialing.get(peerId) === timeoutController) {
+        dialing.delete(peerId)
+        retryAfterFailure.delete(peerId)
+      }
+      if (timeoutController) {
+        timeoutController.clear()
       }
     }
-    queue.add(task)
+    if (retry) {
+      startExchange(remotePeer)
+    }
+  }
+
+  /**
+   * Start an exchange with a peer without waiting for it.
+   *
+   * Not through `queue`: that queue is shared by every peer of this database
+   * and by pubsub updates, one task at a time, and a dial can take the whole
+   * `timeout` -- a peer reachable only over a limited (relayed) connection is
+   * not refused at once, libp2p first tries to reach it some other way. Queued,
+   * one such peer held up the exchange with every other peer for that long, a
+   * relay included, and a reader behind the relay missed the entry for good.
+   */
+  const startExchange = (remotePeer) => {
+    // exchangeHeads catches and reports its own failures.
+    exchangeHeads(remotePeer).catch(() => {})
+  }
+
+  const callOff = (peerId) => {
+    const controller = dialing.get(peerId)
+    if (controller) {
+      dialing.delete(peerId)
+      retryAfterFailure.delete(peerId)
+      controller.abort()
+    }
+  }
+
+  /**
+   * Start an exchange with a subscriber of this database when an unlimited
+   * connection to it opens.
+   *
+   * Two peers that a relay introduces meet over a limited connection first --
+   * a circuit the relay carries -- and that is usually where they see each
+   * other subscribe. The exchange started then cannot succeed: libp2p does not
+   * open a protocol stream on a limited connection unless the protocol allows
+   * it, and the heads protocol does not, since the entries the heads point to
+   * would have to follow by bitswap, which refuses that connection too. So the
+   * exchange fails, and the direct connection that typically follows a moment
+   * later (a WebRTC upgrade) brought no new `subscription-change` -- the
+   * subscription was known already -- and nothing tried again. Entries written
+   * before the two met were then never exchanged.
+   */
+  const handleConnectionOpen = (event) => {
+    const connection = event.detail
+    if (!started || connection?.limits != null) {
+      return
+    }
+    const remotePeer = connection.remotePeer
+    if (!pubsub.getSubscribers(address).some((p) => p.equals(remotePeer))) {
+      return
+    }
+    const peerId = String(remotePeer)
+    if (dialing.has(peerId)) {
+      retryAfterFailure.add(peerId)
+      return
+    }
+    startExchange(remotePeer)
+  }
+
+  const handlePeerSubscribed = async (event) => {
+    const { peerId: remotePeer, subscriptions } = event.detail
+    const peerId = String(remotePeer)
+    const subscription = subscriptions.find(e => e.topic === address)
+    if (!subscription) {
+      return
+    }
+    if (subscription.subscribe) {
+      startExchange(remotePeer)
+    } else {
+      callOff(peerId)
+      forgetPeer(peerId)
+      events.emit('leave', peerId)
+    }
   }
 
   const handleUpdateMessage = async message => {
@@ -244,7 +381,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   }
 
   const handlePeerDisconnected = async event => {
-    peers.delete(event.detail.toString())
+    callOff(event.detail.toString())
+    forgetPeer(event.detail.toString())
   }
 
   /**
@@ -276,7 +414,12 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       await libp2p.unhandle(headsSyncAddress)
       await pubsub.unsubscribe(address)
       libp2p.removeEventListener('peer:disconnect', handlePeerDisconnected)
+      libp2p.removeEventListener('connection:open', handleConnectionOpen)
+      for (const peerId of [...dialing.keys()]) {
+        callOff(peerId)
+      }
       peers.clear()
+      joined.clear()
     }
   }
 
@@ -290,13 +433,26 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     if (!started) {
       pubsub.addEventListener('subscription-change', handlePeerSubscribed)
       pubsub.addEventListener('message', handleUpdateMessage)
+      // Exchange head entries with peers when connected. Registered before
+      // subscribing: a peer that sees the subscription dials at once, and a
+      // dial that meets no handler is dropped as "does not have this database"
+      // and never retried.
+      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       // Subscribe to the pubsub channel for this database through which updates are sent
       await pubsub.subscribe(address)
-      // Exchange head entries with peers when connected
-      await libp2p.handle(headsSyncAddress, handleReceiveHeads)
       // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
       libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
+      // Try a subscriber again once a connection the exchange can use opens.
+      libp2p.addEventListener('connection:open', handleConnectionOpen)
       started = true
+      // Peers that were subscribed before this start bring no
+      // `subscription-change`, so nothing would start an exchange with them
+      // from this side. Start it now. A peer that dials us at the same time is
+      // harmless: whichever exchange runs second finds it in `peers` and stops.
+      // See https://github.com/orbitdb/orbitdb/issues/1255
+      for (const remotePeer of pubsub.getSubscribers(address)) {
+        startExchange(remotePeer)
+      }
     }
   }
 

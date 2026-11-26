@@ -341,14 +341,24 @@ describe('Sync protocol', function () {
     let syncedHead
     let expectedEntry
     let leavingPeerId
+    let sync2Stopped = false
+    const syncedAfterStop = []
 
     before(async () => {
       log1 = await Log(testIdentity1, { logId: 'synclog1' })
       log2 = await Log(testIdentity2, { logId: 'synclog1' })
 
+      // Heads reach sync2 both by pubsub and by the heads exchange, and the
+      // exchange no longer waits in the queue behind updates (#1255), so an
+      // exchange carrying an earlier head may land after a newer update. What
+      // is tested is that the expected entry arrives, and that nothing written
+      // after stop() does.
       const onSynced = async (entry) => {
-        syncedHead = entry
-        if (expectedEntry) {
+        if (sync2Stopped) {
+          syncedAfterStop.push(entry.payload)
+        }
+        if (expectedEntry && !syncedEventFired) {
+          syncedHead = entry
           syncedEventFired = expectedEntry.hash === syncedHead.hash
         }
       }
@@ -398,6 +408,7 @@ describe('Sync protocol', function () {
 
     it('stops syncing', async () => {
       await sync2.stop()
+      sync2Stopped = true
 
       await sync1.add(await log1.append('hello6'))
       await sync1.add(await log1.append('hello7'))
@@ -408,6 +419,8 @@ describe('Sync protocol', function () {
       await waitFor(() => leaveEventFired, () => true)
 
       deepStrictEqual(syncedHead, expectedEntry)
+      const writtenAfterStop = ['hello6', 'hello7', 'hello8', 'hello9', 'hello10']
+      deepStrictEqual(syncedAfterStop.filter((payload) => writtenAfterStop.includes(payload)), [])
     })
 
     it('the peerId passed by the \'leave\' event is the expected peer ID', () => {
