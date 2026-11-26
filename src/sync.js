@@ -236,6 +236,13 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
   const dialing = new Map()
 
   /**
+   * Peers whose exchange was still in flight when an unlimited connection to
+   * them opened. Should that exchange fail, it is started once more: it may
+   * have been failing on the limited connection the new one replaces.
+   */
+  const retryAfterFailure = new Set()
+
+  /**
    * Dial a peer and exchange heads with it, once per peer until it leaves or
    * disconnects.
    */
@@ -247,6 +254,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     const timeoutController = new TimeoutController(timeout)
     const { signal } = timeoutController
     dialing.set(peerId, timeoutController)
+    let retry = false
     try {
       peers.add(peerId)
       const stream = await libp2p.dialProtocol(remotePeer, headsSyncAddress, { signal })
@@ -255,6 +263,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
         sendHeads(stream).then(() => stream.close())
       ])
     } catch (e) {
+      retry = started && retryAfterFailure.has(peerId) && e.name !== 'UnsupportedProtocolError'
       forgetPeer(peerId)
       if (!started) {
         // Called off by stop(): not an error of this peer's.
@@ -269,10 +278,14 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     } finally {
       if (dialing.get(peerId) === timeoutController) {
         dialing.delete(peerId)
+        retryAfterFailure.delete(peerId)
       }
       if (timeoutController) {
         timeoutController.clear()
       }
+    }
+    if (retry) {
+      startExchange(remotePeer)
     }
   }
 
@@ -295,8 +308,41 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
     const controller = dialing.get(peerId)
     if (controller) {
       dialing.delete(peerId)
+      retryAfterFailure.delete(peerId)
       controller.abort()
     }
+  }
+
+  /**
+   * Start an exchange with a subscriber of this database when an unlimited
+   * connection to it opens.
+   *
+   * Two peers that a relay introduces meet over a limited connection first --
+   * a circuit the relay carries -- and that is usually where they see each
+   * other subscribe. The exchange started then cannot succeed: libp2p does not
+   * open a protocol stream on a limited connection unless the protocol allows
+   * it, and the heads protocol does not, since the entries the heads point to
+   * would have to follow by bitswap, which refuses that connection too. So the
+   * exchange fails, and the direct connection that typically follows a moment
+   * later (a WebRTC upgrade) brought no new `subscription-change` -- the
+   * subscription was known already -- and nothing tried again. Entries written
+   * before the two met were then never exchanged.
+   */
+  const handleConnectionOpen = (event) => {
+    const connection = event.detail
+    if (!started || connection?.limits != null) {
+      return
+    }
+    const remotePeer = connection.remotePeer
+    if (!pubsub.getSubscribers(address).some((p) => p.equals(remotePeer))) {
+      return
+    }
+    const peerId = String(remotePeer)
+    if (dialing.has(peerId)) {
+      retryAfterFailure.add(peerId)
+      return
+    }
+    startExchange(remotePeer)
   }
 
   const handlePeerSubscribed = async (event) => {
@@ -368,6 +414,7 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       await libp2p.unhandle(headsSyncAddress)
       await pubsub.unsubscribe(address)
       libp2p.removeEventListener('peer:disconnect', handlePeerDisconnected)
+      libp2p.removeEventListener('connection:open', handleConnectionOpen)
       for (const peerId of [...dialing.keys()]) {
         callOff(peerId)
       }
@@ -395,6 +442,8 @@ const Sync = async ({ ipfs, log, events, onSynced, start, timeout }) => {
       await pubsub.subscribe(address)
       // Remove disconnected peers from `peers`, as otherwise they will not resync heads on reconnection
       libp2p.addEventListener('peer:disconnect', handlePeerDisconnected)
+      // Try a subscriber again once a connection the exchange can use opens.
+      libp2p.addEventListener('connection:open', handleConnectionOpen)
       started = true
       // Peers that were subscribed before this start bring no
       // `subscription-change`, so nothing would start an exchange with them
